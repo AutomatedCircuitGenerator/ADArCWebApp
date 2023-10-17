@@ -1,0 +1,60 @@
+﻿@page "/"
+@inject IJSRuntime JsRuntime
+
+<PageTitle>Index</PageTitle>
+
+<body>
+	<script>
+		window.triggerClick = (elt) => elt.click();
+	</script>
+	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
+
+	<RazorLED value="@value"></RazorLED>
+	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+</body>
+
+
+@code{
+
+
+	public Index()
+	{
+		app = this;
+	}
+
+	public void StateChanged()
+	{
+		StateHasChanged();	
+	}
+
+	async Task triggerRender()
+	{
+		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
+	}
+
+	public static bool value;
+	public static Index? app;
+
+	public static ElementReference? refresh;
+
+	[JSInvokable]
+	public static async void updVal(bool nVal)
+	{
+
+
+		Index.value = nVal;
+		await app.triggerRender();
+	}
+
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
+			await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
+
+			
+		}
+	}
+
+}

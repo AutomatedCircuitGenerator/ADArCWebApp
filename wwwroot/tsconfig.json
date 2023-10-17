@@ -1,0 +1,17 @@
+﻿{
+    "compileOnSave": true,
+    "compilerOptions": {
+        "module": "amd",
+        "target": "es6",
+        "sourceMap": true,
+        "lib": [ "es2021", "dom" ],
+        "esModuleInterop": true,
+        "removeComments": true,
+        "outFile": "./build/build.js"
+    },
+    "include": [ "lib/**/*.ts", "." ],
+    "exclude": [
+        "node_modules",
+        "lib/**/*.spec.ts"
+    ]
+}
