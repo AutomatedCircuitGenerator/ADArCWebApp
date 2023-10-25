@@ -31,6 +31,21 @@
         {"purple", "#ff80ff"},
     };
 
+
+
+    ElementPin[] pinInfo { 
+        get
+        {
+            int anodeX = flip ? 15 : 25;
+            int cathodeX = flip ? 25 : 15;
+
+            return new ElementPin[] {
+                new ElementPin(name: "A", x: anodeX, y: 42, signals: new PinSignalInfo[]{}, description: "Anode"),
+                new ElementPin(name: "C", x: cathodeX, y: 42, signals: new PinSignalInfo[]{ }, description: "Cathode")
+            };
+        } 
+    }
+
 }
 
 <div class="led-container">
