@@ -1,9 +1,7 @@
 ﻿.code-container {
-    margin-top: 4px;
-    height:700px;
+    height: 100%;
     border: 1px solid #ccc;
-    width: 25%;
-    float: right;
+    width: 100%;
     display: flex;
     flex-direction: column;
 }

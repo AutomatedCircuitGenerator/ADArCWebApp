@@ -9,7 +9,9 @@
 <div id="monaco-editor-container" style="height:650px; width: 100%; border: 1px solid #ccc;"></div>
 
 <!-- Create a container for the console output -->
-<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll;"></div>
+<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll;">
+    @text
+</div>
 
 <!-- Include Monaco Editor scripts -->
 <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
@@ -30,18 +32,18 @@
             ].join('\n'),
             language: 'cpp'
         });
-        // Create a function to update the console output
-        function updateConsoleOutput(text) {
-            var consoleContainer = document.getElementById('console-container');
-            consoleContainer.textContent = text;
-        }
-        // Example: Update console output with a message
-        updateConsoleOutput("Hello, world!");
+        
     });
 </script>
 
 </div>
 
 @code {
-
+    string? text="Hello World";
+    // Create a function to update the console output
+    public void updateConsoleOutput(string text)
+    {
+        this.text = text;
+    }
+  
 }
