@@ -1,0 +1,27 @@
+﻿<div class="card-container">
+	<div class="altContainer">
+
+	</div>
+	<div class="card-img-container">
+		<svg></svg>
+	</div>
+	<div class="card-name">
+		@name
+	</div>
+</div>
+
+@code {
+
+	//int id;
+	[Parameter]
+	public string name { get; set; }
+
+	public ComponentCard(string name)
+	{
+		this.name = name;
+	}
+
+	public ComponentCard(){}
+
+
+}
