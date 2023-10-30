@@ -1,0 +1,47 @@
+﻿
+<div class="code-container">
+
+
+<!-- Include Monaco Editor styles -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
+
+<!-- Create a container for the Monaco Editor -->
+<div id="monaco-editor-container" style="height:650px; width: 100%; border: 1px solid #ccc;"></div>
+
+<!-- Create a container for the console output -->
+<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll;"></div>
+
+<!-- Include Monaco Editor scripts -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
+<script>
+    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
+    require(['vs/editor/editor.main'], function() {
+        var editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
+            value: [
+                'void setup() {',
+                '// put your setup code here, to run once:',
+                ,
+                '}',
+                ,
+                'void loop() {',
+                '// put your main code here, to run repeatedly:',
+                ,
+                '}'
+            ].join('\n'),
+            language: 'cpp'
+        });
+        // Create a function to update the console output
+        function updateConsoleOutput(text) {
+            var consoleContainer = document.getElementById('console-container');
+            consoleContainer.textContent = text;
+        }
+        // Example: Update console output with a message
+        updateConsoleOutput("Hello, world!");
+    });
+</script>
+
+</div>
+
+@code {
+
+}

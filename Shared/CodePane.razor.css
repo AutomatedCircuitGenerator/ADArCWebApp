@@ -1,0 +1,9 @@
+﻿.code-container {
+    margin-top: 4px;
+    height:700px;
+    border: 1px solid #ccc;
+    width: 25%;
+    float: right;
+    display: flex;
+    flex-direction: column;
+}
