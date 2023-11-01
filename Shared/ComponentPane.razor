@@ -93,11 +93,11 @@
 
 		foreach (ComponentData data in ComponentDeclarations.components.Values)
 		{
-			string path = data.properties["directoryPath"].ToString();
+			string path = data.directoryPath;
 
-			if (path == null)   //throw them out if they don't have a path
+			if (path == null || path == "")   //throw them out if they don't have a path
 			{
-				throw new Exception("Badly formed component in namespace: " + data.properties["name"]);
+				throw new Exception("Badly formed component in namespace: " + data.name);
 			}
 
 			string[] pathSplit = path.Split("/");   //split the path into folder names
@@ -128,7 +128,7 @@
 
 			}
 			//at this point, we are at the deepest position, add the content.
-			add.contents.Add(new ComponentCard(data.properties["name"].ToString()));
+			add.contents.Add(new ComponentCard(data.name));
 
 		}
 
