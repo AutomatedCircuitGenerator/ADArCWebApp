@@ -13,11 +13,12 @@ const cpu = new avr8js.CPU(program);
 const timer0 = new avr8js.AVRTimer(cpu, avr8js.timer0Config);
 const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
 
-window.interopManager = interopManager;
+(<any>window).interopManager = interopManager;
 
 
 portB.addListener(async () => {
-    await DotNet.invokeMethodAsync("MinAVR", "updVal", portB.pinState(5) === avr8js.PinState.High);
+    await DotNet.invokeMethodAsync("MinAVR", "sendVal", 0, portB.pinState(5) === avr8js.PinState.High);
+    await DotNet.invokeMethodAsync("MinAVR", "sendVal", 1, portB.pinState(5) !== avr8js.PinState.High);
 });
 
 export function runCode() {

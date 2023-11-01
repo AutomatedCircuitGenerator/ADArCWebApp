@@ -1,0 +1,36 @@
+﻿@switch(objId){
+	case 31:
+		<RazorLED value=@(boolValue())></RazorLED>
+		break;
+	case 41:
+		<RazorLCD1602 text=@individualData["mainValue"].ToString()></RazorLCD1602>
+		break;
+	default:
+		<div>does not match any ID: @objId</div>
+		break;
+}
+
+@code {
+	[Parameter]
+	public int objId { get; set; }
+
+
+	[Parameter]
+	public Dictionary<string, object> individualData { get; set; }
+
+
+
+	public bool boolValue()
+	{
+		if (individualData["mainValue"] is JsonElement value)
+		{
+			bool a = value.GetBoolean();
+			return a;
+		}
+		else
+		{
+			return false;
+		}
+
+	}
+}

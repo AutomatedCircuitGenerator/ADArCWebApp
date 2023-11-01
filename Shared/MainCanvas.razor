@@ -1,0 +1,10 @@
+﻿<div class="canvas-container">
+	@foreach (var c in comps) {
+		<VaryingComponent objId=@((int)c.Value["globalId"]) individualData=@c.Value></VaryingComponent>
+	}
+</div>
+
+@code {
+	[Parameter]
+	public Dictionary<int, Dictionary<string, object>> comps { get; set; }
+}

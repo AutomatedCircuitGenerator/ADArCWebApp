@@ -8,14 +8,8 @@
 		window.triggerClick = (elt) => elt.click();
 	</script>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
-
-	<RazorLED value="@value"></RazorLED>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-	<!--
-	<div style="width:20%;height:100%;">
-		<ComponentPane></ComponentPane>
-	</div>
-	-->
+	<MainCanvas comps=@(comps)></MainCanvas>
 </body>
 
 
@@ -37,17 +31,19 @@
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
 	}
 
-	public static bool value;
+	public static Dictionary<int , Dictionary<string, object>> comps = new() {
+		{ 0, new() { { "globalId", 31 }, { "mainValue", false } } },
+		{ 1, new() { { "globalId", 31 }, { "mainValue", false } } } 
+	};
+
 	public static Index? app;
 
 	public static ElementReference? refresh;
 
 	[JSInvokable]
-	public static async void updVal(bool nVal)
+	public static async void sendVal(int localId, object data)
 	{
-
-
-		Index.value = nVal;
+		Index.comps[localId]["mainValue"] = data;
 		await app.triggerRender();
 	}
 
