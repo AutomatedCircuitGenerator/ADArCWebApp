@@ -1,7 +1,7 @@
 ﻿<div class="comp-container">
 	<InputText @bind-Value="searchText" contenteditable="false"></InputText>
 	<div class="card-wrapper">
-		@foreach(Directory d1 in dir.subDirectories)
+		@foreach (Directory d1 in dir.subDirectories)
 		{
 			<button class="directory-button level-1" @onclick="@(e => d1.isHidden = !d1.isHidden)">
 				<svg transform="rotate(@(d1.isHidden ? -90 : 0))" focusable="false" width="1em" height="1em" fill="black" style="pointer-events: none;" xmlns="http://www.w3.org/2000/svg" class="icon" viewBox="0 0 1024 1024"><path d="M690 405h-46.9c-10.2 0-19.9 4.9-25.9 13.2L512 563.6 406.8 418.2c-6-8.3-15.6-13.2-25.9-13.2H334c-6.5 0-10.3 7.4-6.5 12.7l178 246c3.2 4.4 9.7 4.4 12.9 0l178-246c3.9-5.3.1-12.7-6.4-12.7z"></path><path d="M512 64C264.6 64 64 264.6 64 512s200.6 448 448 448 448-200.6 448-448S759.4 64 512 64zm0 820c-205.4 0-372-166.6-372-372s166.6-372 372-372 372 166.6 372 372-166.6 372-372 372z"></path></svg>
@@ -64,145 +64,77 @@
 @code {
 	string? searchText;
 
-	//most likely this should eventually be connected to the repository, but I'm not doing the repo right now.
-	Directory dir = new Directory("main", new List<Directory>()
+	private Directory _dir = new Directory("notready", new List<Directory>());
+
+	Directory dir
 	{
-		new Directory("Input", new List<Directory>()
+		get
 		{
-			new Directory("Buttons and Switches", new List<ComponentCard>()
+			if (_dir.name == "notready")
 			{
-				new ComponentCard("Pushbutton"),
-				new ComponentCard("Switch")
-			}),
-			new Directory("Acceleration Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("ADXL345"),
-				new ComponentCard("MPU6050"),
-				new ComponentCard("BNO-055")
-			}),
-			new Directory("Distance Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("TF-Luna LIDAR (I2C)"),
-				new ComponentCard("TF-Luna LIDAR (Serial)"),
-				new ComponentCard("RPLIDAR-A1 LIDAR"),
-				new ComponentCard("HC-SRO4 Ultrasonic"),
-				new ComponentCard("IR Distance Sensor")
-			}),
-			new Directory("Gas Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("MQ-3"),
-				new ComponentCard("SGP41")
-			}),
-			new Directory("Light Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("KY-018 LDR Sensor"),
-				new ComponentCard("BH1750 Ambient Light Sensor"),
-				new ComponentCard("TSL2561 Luminosity Sensor"),
-				new ComponentCard("TEMT6000 Ambient Light Sensor")
-			}),
-			new Directory("Temperature / Humidity Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("DHT11 / DHT22"),
-				new ComponentCard("SHT31 Temp & Humidity"),
-				new ComponentCard("DS18B20")
-			}),
-			new Directory("Other Sensors", new List<ComponentCard>()
-			{
-				new ComponentCard("Hall Effect - KY-024"),
-				new ComponentCard("Hall Effect - KY-003"),
-				new ComponentCard("Hall Effect - KY-004"),
-				new ComponentCard("K-Thermocouple - MAX6675"),
-				new ComponentCard("PIR Motion - HC-SR501"),
-				new ComponentCard("IR Receiver - KY-022"),
-				new ComponentCard("SD Card Reader"),
-				new ComponentCard("Load Cell - TAL221")
-			})
+				_dir = getDirectory();
+			}
+			return _dir;
+		}
+	}
 
-		}),
-		new Directory("Output", new List<Directory>()
+
+
+	/*
+		* Create the directory structure of the component pane based off the directory information in the components.
+		* May not be performant.
+		*
+		*/
+	private Directory getDirectory()
+	{
+		Console.WriteLine("refresh Directories");       //make sure this doesn't happen too often.
+
+		Directory ret = new("main", new List<Directory>());
+
+		foreach (ComponentData data in ComponentDeclarations.components.Values)
 		{
-			new Directory("LEDs", new List<ComponentCard>()
-			{
-				new ComponentCard("LED"),
-				new ComponentCard("7-Segment"),
-				new ComponentCard("LED Bar"),
-				new ComponentCard("LED Matrix - MAX7219/7221"),
-				new ComponentCard("LED Matrix - HT16K33"),
-				new ComponentCard("RGB LED"),
-				new ComponentCard("RGB LED - KY-009"),
-				new ComponentCard("Laser LED")
-			}),
-			new Directory("Displays", new List<Directory>()
-			{
-				new Directory("LCD", new List<ComponentCard>()
-				{
-					new ComponentCard("LCD2004"),
-					new ComponentCard("LCD2004 - I2C"),
-					new ComponentCard("LCD1602"),
-					new ComponentCard("LCD1602 - I2C")
-				}),
-				new Directory("OLED", new List<ComponentCard>()
-				{
-					new ComponentCard("SH1106 OLED - SPI"),
-					new ComponentCard("SH1106 OLED - I2C")
-				})
-			}),
-			new Directory("Motors", new List<Directory>()
-			{
-				new Directory("Servo Motor", new List<ComponentCard>()
-				{
-					new ComponentCard("SG90"),
-					new ComponentCard("DS-7001HV"),
-					new ComponentCard("Direct"),
-					new ComponentCard("PCA9685")
-				}),
-				new Directory("DC Motor", new List<ComponentCard>()
-				{
-					new ComponentCard("Direct"),
-					new ComponentCard("DRV8833"),
-					new ComponentCard("L293D"),
-					new ComponentCard("L298N"),
-					new ComponentCard("Brushless ESC")
+			string path = data.directoryPath;
 
-				}),
-				new Directory("Stepper Motor", new List<ComponentCard>()
-				{
-					new ComponentCard("28BYJ-48"),
-					new ComponentCard("Nema-17"),
-					new ComponentCard("A4988"),
-					new ComponentCard("DRV8825"),
-					new ComponentCard("DRV8833"),
-					new ComponentCard("L293D"),
-					new ComponentCard("L298N"),
-					new ComponentCard("L9910"),
-					new ComponentCard("TB6600"),
-					new ComponentCard("TB6612"),
-					new ComponentCard("TMC2208"),
-					new ComponentCard("ULN2003")
-				})
-			}),
-			new Directory("Others", new List<ComponentCard>()
+			if (path == null || path == "")   //throw them out if they don't have a path
 			{
-				new ComponentCard("Speaker - LM386"),
-				new ComponentCard("Buzzer")
-			})
+				throw new Exception("Badly formed component in namespace: " + data.name);
+			}
 
-		}),
-		new Directory("Others", new List<ComponentCard>()
-		{
-			new ComponentCard("Encoder"),
-			new ComponentCard("Voltage Regulator"),
-			new ComponentCard("Bluetooth Module")
-		}),
-		new Directory("Arduino", new List<ComponentCard>()
-		{
-			new ComponentCard("Arduino Uno Rev3"),
-			new ComponentCard("Arduino Uno Wifi Rev2"),
-			new ComponentCard("Arduino Mega 2560")
-		})
-	});
+			string[] pathSplit = path.Split("/");   //split the path into folder names
+
+			Directory add = ret;
+
+			for (int i = 0; i < pathSplit.Length; i++)  //navigate through the path, adding new folders as necessary
+			{
+				string dir = pathSplit[i];
+				if (!add.subDirectories.Any(d => d.name == dir))
+				{
+					if (i == pathSplit.Length - 1)
+					{
+						add.subDirectories.Add(new Directory(dir, new List<ComponentCard>()));
+						add = add.subDirectories.Last();
+					}
+					else
+					{
+						add.subDirectories.Add(new Directory(dir, new List<Directory>()));
+						add = add.subDirectories.Last();
+					}
+
+				}
+				else
+				{
+					add = add.subDirectories.Find(d => d.name == dir);
+				}
+
+			}
+			//at this point, we are at the deepest position, add the content.
+			add.contents.Add(new ComponentCard(data.name));
+
+		}
 
 
-	
+		return ret;
+	}
+
 
 }
