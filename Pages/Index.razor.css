@@ -1,0 +1,97 @@
+.page {
+    display: flex;
+    height: 100vh;
+}
+
+.sidebar {
+    width: 0;
+    height: 100%;
+    background-color: #f0f0f0 !important;
+    padding: 10px;
+    transition: width 0.3s;
+    overflow: hidden;
+    position: absolute;
+    left: 0;
+    top: 0;
+}
+
+.sidebar-right {
+    width: 0;
+    height: 100%;
+    background-color: #f0f0f0 !important;
+    padding: 10px;
+    transition: width 0.3s;
+    overflow: hidden;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background-color: #949494;
+    color: #fff;
+    height: 50px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    padding: 0 20px;
+}
+
+.center-toolbar {
+    display: flex;
+    align-items: center;
+}
+
+.toolbar-button {
+    background-color: #333;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin: 0 10px;
+}
+
+.toolbar-button img {
+    margin-right: 10px;
+}
+
+.expand-button {
+    cursor: pointer;
+    display: block;
+    position: absolute;
+    top: 50%;
+    width: 20px;
+    height: 20px;
+    background-color: #333;
+    transform: rotate(90deg);
+    clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+    transition: transform 0.3s, left 0.3s; /* Add transition for transform and left properties */
+}
+
+.expand-button-left {
+    left: 0;
+    transform: translate(0, -50%) rotate(90deg);
+}
+
+.expand-button-right {
+    right: 0;
+    transform: translate(0, -50%) rotate(-90deg);
+}
+
+.adarc-text {
+    margin-right: auto;
+    font-size: 24px;
+}

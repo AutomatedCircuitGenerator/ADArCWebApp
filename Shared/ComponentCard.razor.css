@@ -1,0 +1,54 @@
+﻿.card-container {
+    background-color: blue;
+
+    width: 95%;
+
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-evenly;
+
+    margin-bottom: 1%;
+    aspect-ratio: 4/5;
+    position: relative;
+}
+
+.card-img-container {
+    width: 75%;
+    height: 65%;
+
+    background-color: red;
+    margin-top: 5%;
+}
+
+    .card-img-container svg {
+        width: 100%;
+        height: 100%;
+    }
+
+
+.card-name {
+    text-align: center;
+    color: snow;
+    padding: 1%;
+    line-height: 1.1;
+    height: fit-content;
+}
+
+
+
+.altContainer {
+
+    visibility: hidden;
+    height: 100%;
+    width: 100%;
+
+    background-color: forestgreen;
+
+    position: absolute;
+}
+
+
+.card-container:hover > .altContainer {
+    visibility: visible;
+}
