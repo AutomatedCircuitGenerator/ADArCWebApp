@@ -1,10 +1,37 @@
-﻿<div class="canvas-container">
+﻿<div class="canvas-container" @onmousemove="dragMiddle">
 	@foreach (var c in comps) {
-		<VaryingComponent objId=@((int)c.Value["globalId"]) individualData=@c.Value></VaryingComponent>
+		<VaryingComponent objId=@((int)c.Value["globalId"]) individualData=@c.Value DragStart="e=>dragStart(e, c)" DragEnd="dragEnd"></VaryingComponent>
 	}
 </div>
 
 @code {
 	[Parameter]
 	public Dictionary<int, Dictionary<string, object>> comps { get; set; }
+
+	private bool dragging = false;
+	private KeyValuePair<int, Dictionary<string, object>> target;
+
+	private void dragStart(MouseEventArgs e, KeyValuePair<int, Dictionary<string, object>> target)
+	{
+
+		if (e.Button == 0)
+		{
+			dragging = true;
+			this.target = target;
+		}
+	}
+
+	private void dragMiddle(MouseEventArgs e)
+	{
+		if (dragging)
+		{
+			target.Value["x"] = (double)target.Value["x"] + e.MovementY;
+			target.Value["y"] = (double)target.Value["y"] + e.MovementX;
+		}
+	}
+
+	private void dragEnd(MouseEventArgs e)
+	{
+		dragging = false;
+	}
 }

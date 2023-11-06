@@ -1,24 +1,34 @@
-﻿@switch(objId){
-	case 31:
-		<RazorLED value=@(boolValue())></RazorLED>
-		break;
-	case 41:
-		<RazorLCD1602 text=@individualData["mainValue"].ToString()></RazorLCD1602>
-		break;
-	default:
-		<div>does not match any ID: @objId</div>
-		break;
-}
+﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@((double)individualData["x"])px; left:@((double)individualData["y"])px; position:absolute;">
+	@switch(objId){
+		case 31:
+			<RazorLED value=@(boolValue())></RazorLED>
+			break;
+		case 41:
+			<RazorLCD1602 text=@individualData["mainValue"].ToString()></RazorLCD1602>
+			break;
+		default:
+			<div>does not match any ID: @objId</div>
+			break;
+	}
+</div>
+
 
 @code {
 	[Parameter]
 	public int objId { get; set; }
 
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragStart { get; set; }
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragProgress { get; set; }
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragEnd { get; set; }
+
 
 	[Parameter]
 	public Dictionary<string, object> individualData { get; set; }
-
-
 
 	public bool boolValue()
 	{
@@ -33,4 +43,5 @@
 		}
 
 	}
+
 }
