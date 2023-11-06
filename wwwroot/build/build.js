@@ -1549,7 +1549,6 @@ define("lib/avr8js/peripherals/adc", ["require", "exports"], function (require, 
                     channel &= config.muxInputMask;
                     const muxInput = (_a = config.muxChannels[channel]) !== null && _a !== void 0 ? _a : fallbackMuxInput;
                     this.converting = true;
-                    this.onADCRead(muxInput);
                     return true;
                 }
             };
@@ -4033,7 +4032,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "interopManager"], function (require, exports, arduino_blink_1, avr8js, interopManager_1) {
+define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index"], function (require, exports, arduino_blink_1, avr8js) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.runCode = void 0;
@@ -4043,7 +4042,6 @@ define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "
     const cpu = new avr8js.CPU(program);
     const timer0 = new avr8js.AVRTimer(cpu, avr8js.timer0Config);
     const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
-    window.interopManager = interopManager_1.interopManager;
     portB.addListener(() => __awaiter(void 0, void 0, void 0, function* () {
         yield DotNet.invokeMethodAsync("MinAVR", "updVal", portB.pinState(5) === avr8js.PinState.High);
     }));

@@ -3,58 +3,160 @@
 
 <PageTitle>Index</PageTitle>
 
-<body>
-	<script>
-		window.triggerClick = (elt) => elt.click();
-	</script>
-	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
+<style>
+    .page {
+        display: flex;
+        height: 100vh;
+    }
 
-	<RazorLED value="@value"></RazorLED>
-	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-</body>
+    .sidebar {
+        width: 0;
+        height: 100%;
+        background-color: #f0f0f0 !important;
+        padding: 10px;
+        transition: width 0.3s;
+        overflow: hidden;
+        position: absolute;
+        left: 0;
+        top: 0;
+    }
 
+    .sidebar-right {
+        width: 0;
+        height: 100%;
+        background-color: #f0f0f0 !important;
+        padding: 10px;
+        transition: width 0.3s;
+        overflow: hidden;
+        position: absolute;
+        right: 0;
+        top: 0;
+    }
 
-@code{
+    .main-content {
+        flex-grow: 1;
+        padding: 20px;
+    }
 
+    .toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        background-color: #949494;
+        color: #fff;
+        height: 50px;
+        width: 100%;
+        position: fixed;
+        top: 0;
+        left: 0;
+        z-index: 1;
+        padding: 0 20px;
+    }
 
-	public Index()
-	{
-		app = this;
-	}
+    .center-toolbar {
+        display: flex;
+        align-items: center;
+    }
 
-	public void StateChanged()
-	{
-		StateHasChanged();	
-	}
+    .toolbar-button {
+        background-color: #333;
+        color: #fff;
+        border: none;
+        padding: 10px 20px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin: 0 10px;
+    }
 
-	async Task triggerRender()
-	{
-		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
-	}
+    .toolbar-button img {
+        margin-right: 10px;
+    }
 
-	public static bool value;
-	public static Index? app;
+    .expand-button {
+        cursor: pointer;
+        display: block;
+        position: absolute;
+        top: 50%;
+        width: 20px;
+        height: 20px;
+        background-color: #333;
+        transform: rotate(90deg);
+        clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
+        transition: transform 0.3s, left 0.3s; /* Add transition for transform and left properties */
+    }
 
-	public static ElementReference? refresh;
+    .expand-button-left {
+        left: 0;
+        transform: translate(0, -50%) rotate(90deg);
+    }
 
-	[JSInvokable]
-	public static async void updVal(bool nVal)
-	{
+    .expand-button-right {
+        right: 0;
+        transform: translate(0, -50%) rotate(-90deg);
+    }
 
+    .adarc-text {
+        margin-right: auto;
+        font-size: 24px;
+    }
 
-		Index.value = nVal;
-		await app.triggerRender();
-	}
+</style>
 
-	protected async override Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
-			await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
+<div class="page">
+    <div class="sidebar" style="width: @leftSidebarWidth">
+        <!-- Left Sidebar Content -->
+    </div>
+    <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left: @leftButtonLeft"></div>
+    <div class="sidebar-right" style="width: @rightSidebarWidth">
+        <!-- Right Sidebar Content -->
+    </div>
+    <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right: @rightButtonRight"></div>
+    <div class="toolbar">
+        <span class="adarc-text">ADArC</span>
+        <div class="center-toolbar">
+            <button class="toolbar-button">
+                <img src="save-icon.png" alt="Save Icon">
+                <span>Save</span>
+            </button>
+            <button class="toolbar-button">
+                <img src="help-icon.png" alt="Help Icon">
+                <span>Help</span>
+            </button>
+            <button class="toolbar-button" @onclick="ToggleRunStop">
+                <img src="@runStopIcon" alt="@runStopText">
+                <span>@runStopText</span>
+            </button>
+        </div>
+    </div>
+</div>
 
-			
-		}
-	}
+@code {
+    bool isLeftExpanded = true;
+    bool isRightExpanded = false;
+    string leftSidebarWidth => isLeftExpanded ? "300px" : "0";
+    string rightSidebarWidth => isRightExpanded ? "300px" : "0";
+    string leftButtonLeft => isLeftExpanded ? "300px" : "20px";
+    string rightButtonRight => isRightExpanded ? "300px" : "20px";
+    string runStopIcon => isRunning ? "stop-icon.png" : "run-icon.png";
+    string runStopText => isRunning ? "Stop" : "Run";
+    bool isRunning = false;
 
+    void ToggleLeftSidebar()
+    {
+        isLeftExpanded = !isLeftExpanded;
+        isRightExpanded = false;
+    }
+
+    void ToggleRightSidebar()
+    {
+        isRightExpanded = !isRightExpanded;
+        isLeftExpanded = false;
+    }
+
+    void ToggleRunStop()
+    {
+        isRunning = !isRunning;
+    }
 }

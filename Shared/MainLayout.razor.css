@@ -1,81 +1,85 @@
 .page {
-    position: relative;
     display: flex;
     flex-direction: column;
 }
 
-main {
-    flex: 1;
-}
-
 .sidebar {
-    background-image: linear-gradient(180deg, rgb(5, 39, 103) 0%, #3a0647 70%);
+    width: 300px;
+    background-color: #f0f0f0 !important;
+    padding: 10px;
+    transition: width 0.3s;
+    position: relative;
 }
 
-.top-row {
-    background-color: #f7f7f7;
-    border-bottom: 1px solid #d6d5d5;
-    justify-content: flex-end;
-    height: 3.5rem;
+.sidebar-right {
+    width: 450px;
+    background-color: #f0f0f0 !important;
+    padding: 10px;
+    transition: width 0.3s;
+    position: relative;
+}
+
+.main-content {
+    flex-grow: 1;
+    padding: 20px;
+}
+
+.toolbar {
     display: flex;
     align-items: center;
+    background-color: #333;
+    color: #fff;
+    height: 50px;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 1;
+    justify-content: space-between;
+    padding: 0 20px;
 }
 
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        white-space: nowrap;
-        margin-left: 1.5rem;
-        text-decoration: none;
-    }
-
-    .top-row ::deep a:hover, .top-row ::deep .btn-link:hover {
-        text-decoration: underline;
-    }
-
-    .top-row ::deep a:first-child {
-        overflow: hidden;
-        text-overflow: ellipsis;
-    }
-
-@media (max-width: 640.98px) {
-    .top-row:not(.auth) {
-        display: none;
-    }
-
-    .top-row.auth {
-        justify-content: space-between;
-    }
-
-    .top-row ::deep a, .top-row ::deep .btn-link {
-        margin-left: 0;
-    }
+.toolbar-button {
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    padding: 10px 20px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
 }
 
-@media (min-width: 641px) {
-    .page {
-        flex-direction: row;
-    }
+.toolbar-button img {
+    margin-right: 10px; /* Space to the right of the icon */
+}
 
-    .sidebar {
-        width: 250px;
-        height: 100vh;
-        position: sticky;
-        top: 0;
-    }
+.expand-button {
+    cursor: pointer;
+    display: block;
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background-color: #007bff;
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
 
-    .top-row {
-        position: sticky;
-        top: 0;
-        z-index: 1;
-    }
+.expand-button-right {
+    right: 0;
+    transform: translateX(50%);
+}
 
-    .top-row.auth ::deep a:first-child {
-        flex: 1;
-        text-align: right;
-        width: 0;
-    }
+.expand-button-left {
+    left: 0;
+    transform: translateX(-50%);
+}
 
-    .top-row, article {
-        padding-left: 2rem !important;
-        padding-right: 1.5rem !important;
-    }
+.adarc-text {
+    margin-left: 20px;
 }
