@@ -1,6 +1,11 @@
+body {
+    overflow: hidden;
+}
+
 
 article {
     height:100%;
+    overflow:hidden;
 }
 
 .sidebar {

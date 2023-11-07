@@ -1,30 +1,30 @@
 .page {
-    display: flex;
+    width: 100vw;
     height: 100vh;
+    overflow: hidden;
+
+    display:grid;
+    grid-template-rows: 50px auto;
+}
+
+.page-content {
+    grid-row: 2;
 }
 
 .sidebar {
-    width: 0;
     height: 100%;
     background-color: #f0f0f0 !important;
-    padding: 10px;
-    transition: width 0.3s;
-    overflow: hidden;
+    transition: left 0.3s;
     position: absolute;
     left: 0;
-    top: 0;
 }
 
 .sidebar-right {
-    width: 0;
     height: 100%;
     background-color: #f0f0f0 !important;
-    padding: 10px;
-    transition: width 0.3s;
-    overflow: hidden;
+    transition: right 0.3s;
     position: absolute;
     right: 0;
-    top: 0;
 }
 
 .main-content {
@@ -45,6 +45,7 @@
     left: 0;
     z-index: 1;
     padding: 0 20px;
+    grid-row: 1;
 }
 
 .center-toolbar {
@@ -72,13 +73,13 @@
     cursor: pointer;
     display: block;
     position: absolute;
-    top: 50%;
+    top: 45%;
     width: 20px;
     height: 20px;
     background-color: #333;
     transform: rotate(90deg);
     clip-path: polygon(50% 0%, 0% 100%, 100% 100%);
-    transition: transform 0.3s, left 0.3s; /* Add transition for transform and left properties */
+    transition: transform 0.3s, left 0.3s, right 0.3s; /* Add transition for transform and left properties */
 }
 
 .expand-button-left {

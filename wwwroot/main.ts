@@ -13,7 +13,7 @@ const cpu = new avr8js.CPU(program);
 const timer0 = new avr8js.AVRTimer(cpu, avr8js.timer0Config);
 const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
 
-window.interopManager = interopManager;
+(<any>window).interopManager = interopManager;
 
 
 portB.addListener(async () => {

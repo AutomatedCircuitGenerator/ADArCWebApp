@@ -10,50 +10,47 @@
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 
 	<RazorLED value="@value"></RazorLED>
-<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 
-<div class="page">
-    <div class="sidebar" style="width: @leftSidebarWidth">
-        <!-- Left Sidebar Content -->
-    </div>
-	<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left: @leftButtonLeft"></div>
-    <div class="sidebar-right" style="width: @rightSidebarWidth">
-        <!-- Right Sidebar Content -->
-    </div>
-    <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right: @rightButtonRight"></div>
-    <div class="toolbar">
-        <span class="adarc-text">ADArC</span>
-        <div class="center-toolbar">
-            <button class="toolbar-button">
-                <img src="save-icon.png" alt="Save Icon">
-                <span>Save</span>
-            </button>
-            <button class="toolbar-button">
-                <img src="help-icon.png" alt="Help Icon">
-                <span>Help</span>
-            </button>
-            <button class="toolbar-button" @onclick="ToggleRunStop">
-                <img src="@runStopIcon" alt="@runStopText">
-                <span>@runStopText</span>
-            </button>
-        </div>
-    </div>
-</div>
-<!--
-	<div style="width:20%;height:100%;">
-		<ComponentPane></ComponentPane>
+	<div class="page">
+		<div class="toolbar">
+			<span class="adarc-text">ADArC</span>
+			<div class="center-toolbar">
+				<button class="toolbar-button">
+					<img src="save-icon.png" alt="Save Icon">
+					<span>Save</span>
+				</button>
+				<button class="toolbar-button">
+					<img src="help-icon.png" alt="Help Icon">
+					<span>Help</span>
+				</button>
+				<button class="toolbar-button" @onclick="ToggleRunStop">
+					<img src="@runStopIcon" alt="@runStopText">
+					<span>@runStopText</span>
+				</button>
+			</div>
+		</div>
+
+		<div class="page-content">
+			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
+				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;"></div>
+				<ComponentPane></ComponentPane>
+			</div>
+
+			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
+				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;"></div>
+				<CodePane></CodePane>
+			</div>
+		</div>
 	</div>
-	-->
 </body>
 
 
 @code{
 	bool isLeftExpanded = true;
 	bool isRightExpanded = false;
-	string leftSidebarWidth => isLeftExpanded ? "300px" : "0";
-	string rightSidebarWidth => isRightExpanded ? "300px" : "0";
-	string leftButtonLeft => isLeftExpanded ? "300px" : "20px";
-	string rightButtonRight => isRightExpanded ? "300px" : "20px";
+	int leftPaneAlign => isLeftExpanded ? 0 : -23;
+	int rightPaneAlign => isRightExpanded ? 0 : -37;
 	string runStopIcon => isRunning ? "stop-icon.png" : "run-icon.png";
 	string runStopText => isRunning ? "Stop" : "Run";
 	bool isRunning = false;
