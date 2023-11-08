@@ -31,9 +31,9 @@
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
 	}
 
-	public static Dictionary<int , Dictionary<string, object>> comps = new() {
-		{ 0, new() { { "globalId", 31 }, { "mainValue", false }, { "x", 10.0 }, { "y", 70.0 } } },
-		{ 1, new() { { "globalId", 31 }, { "mainValue", false }, { "x", 30.0 }, { "y", 100.0 } } }
+	public static Dictionary<int , ComponentInstance> comps = new() {
+		{ 0, new(31, false, 10, 70) },
+		{ 1, new(31, false, 30, 100) }
 	};
 
 	public static Index? app;
@@ -43,7 +43,7 @@
 	[JSInvokable]
 	public static async void sendVal(int localId, object data)
 	{
-		Index.comps[localId]["mainValue"] = data;
+		Index.comps[localId].mainValue = data;
 		await app.triggerRender();
 	}
 

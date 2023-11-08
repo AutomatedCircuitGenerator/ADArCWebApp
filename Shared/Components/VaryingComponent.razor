@@ -1,10 +1,10 @@
-﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@((double)individualData["x"])px; left:@((double)individualData["y"])px; position:absolute;">
+﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.x)px; left:@(individualData.y)px; position:absolute;">
 	@switch(objId){
 		case 31:
 			<RazorLED value=@(boolValue())></RazorLED>
 			break;
 		case 41:
-			<RazorLCD1602 text=@individualData["mainValue"].ToString()></RazorLCD1602>
+			<RazorLCD1602 text=@individualData.mainValue.ToString()></RazorLCD1602>
 			break;
 		default:
 			<div>does not match any ID: @objId</div>
@@ -28,17 +28,17 @@
 
 
 	[Parameter]
-	public Dictionary<string, object> individualData { get; set; }
+	public ComponentInstance individualData { get; set; }
 
 	public bool boolValue()
 	{
-		if (individualData["mainValue"] is JsonElement value)
+		if (individualData.mainValue is bool value)
 		{
-			bool a = value.GetBoolean();
-			return a;
+			return value;
 		}
 		else
 		{
+			Console.WriteLine("Component using bool value got non-bool value!");
 			return false;
 		}
 

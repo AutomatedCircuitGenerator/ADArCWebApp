@@ -1,17 +1,17 @@
 ﻿<div class="canvas-container" @onmousemove="dragMiddle">
 	@foreach (var c in comps) {
-		<VaryingComponent objId=@((int)c.Value["globalId"]) individualData=@c.Value DragStart="e=>dragStart(e, c)" DragEnd="dragEnd"></VaryingComponent>
+		<VaryingComponent objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragStart(e, c)" DragEnd="dragEnd"></VaryingComponent>
 	}
 </div>
 
 @code {
 	[Parameter]
-	public Dictionary<int, Dictionary<string, object>> comps { get; set; }
+	public Dictionary<int, ComponentInstance> comps { get; set; }
 
 	private bool dragging = false;
-	private KeyValuePair<int, Dictionary<string, object>> target;
+	private KeyValuePair<int, ComponentInstance> target;
 
-	private void dragStart(MouseEventArgs e, KeyValuePair<int, Dictionary<string, object>> target)
+	private void dragStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
 	{
 
 		if (e.Button == 0)
@@ -25,8 +25,9 @@
 	{
 		if (dragging)
 		{
-			target.Value["x"] = (double)target.Value["x"] + e.MovementY;
-			target.Value["y"] = (double)target.Value["y"] + e.MovementX;
+			//this is correct. I have chosen Y as vertical, which is opposite of the event in my testing.
+			target.Value.x += e.MovementY;
+			target.Value.y += e.MovementX;
 		}
 	}
 
