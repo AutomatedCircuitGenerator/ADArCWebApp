@@ -1,6 +1,6 @@
-﻿<div class="canvas-container" @onmousemove="dragMiddle">
+﻿<div class="canvas-container" @onmousemove="dragMiddle" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom">
 	@foreach (var c in comps) {
-		<VaryingComponent objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragStart(e, c)" DragEnd="dragEnd"></VaryingComponent>
+		<VaryingComponent objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
 </div>
 
@@ -9,25 +9,59 @@
 	public Dictionary<int, ComponentInstance> comps { get; set; }
 
 	private bool dragging = false;
+	private bool hasTarget = false;
 	private KeyValuePair<int, ComponentInstance> target;
 
-	private void dragStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
+	private double zoomFactor = 1;
+
+	private void updZoom(WheelEventArgs e)
+	{
+
+		zoomFactor += e.DeltaY / -1000;
+
+		zoomFactor = Math.Clamp(zoomFactor, .4, 3);
+	}
+
+	private void dragComponentStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
 	{
 
 		if (e.Button == 0)
 		{
 			dragging = true;
+			hasTarget = true;
 			this.target = target;
 		}
 	}
 
 	private void dragMiddle(MouseEventArgs e)
 	{
-		if (dragging)
+		if (dragging && hasTarget)
 		{
-			//this is correct. I have chosen Y as vertical, which is opposite of the event in my testing.
-			target.Value.x += e.MovementY;
-			target.Value.y += e.MovementX;
+			target.Value.x += e.MovementX;
+			target.Value.y += e.MovementY;
+		}
+		else if (dragging)
+		{
+			foreach (var t in comps)
+			{
+				t.Value.x += e.MovementX;
+				t.Value.y += e.MovementY;
+			}	
+		}
+	}
+
+	private void dragComponentEnd(MouseEventArgs e)
+	{
+		dragging = false;
+		hasTarget = false;
+	}
+
+
+	private void dragStart(MouseEventArgs e)
+	{
+		if (e.Button == 0)
+		{
+			dragging = true;	
 		}
 	}
 

@@ -29,7 +29,7 @@
 										<div class="col-layout">
 											@foreach (ComponentCard card in d3.contents)
 											{
-												<ComponentCard name="@card.name"></ComponentCard>
+												<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
 											}
 										</div>
 									</div>
@@ -40,7 +40,7 @@
 								<div class="col-layout">
 									@foreach (ComponentCard card in d2.contents)
 									{
-										<ComponentCard name="@card.name"></ComponentCard>
+										<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
 									}
 								</div>
 							}
@@ -52,7 +52,7 @@
 					<div class="col-layout">
 						@foreach (ComponentCard card in d1.contents)
 						{
-							<ComponentCard name="@card.name"></ComponentCard>
+							<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
 						}
 					</div>
 				}
@@ -78,21 +78,24 @@
 		}
 	}
 
-
+	[Parameter]
+	public ADArCWebApp.Pages.Index host { get; set; }
 
 	/*
-		* Create the directory structure of the component pane based off the directory information in the components.
-		* May not be performant.
-		*
-		*/
+	* Create the directory structure of the component pane based off the directory information in the components.
+	* May not be performant.
+	*
+	*/
 	private Directory getDirectory()
 	{
 		Console.WriteLine("refresh Directories");       //make sure this doesn't happen too often.
 
 		Directory ret = new("main", new List<Directory>());
 
-		foreach (ComponentData data in ComponentDeclarations.components.Values)
+		foreach (var pair in ComponentDeclarations.components)
 		{
+			ComponentData data = pair.Value;
+
 			string path = data.directoryPath;
 
 			if (path == null || path == "")   //throw them out if they don't have a path
@@ -128,7 +131,7 @@
 
 			}
 			//at this point, we are at the deepest position, add the content.
-			add.contents.Add(new ComponentCard(data.name));
+			add.contents.Add(new ComponentCard(pair.Key));
 
 		}
 
@@ -137,4 +140,9 @@
 	}
 
 
+
+	private void setHostTargetId(int id)
+	{
+		host.setTargetID(id);
+	}
 }

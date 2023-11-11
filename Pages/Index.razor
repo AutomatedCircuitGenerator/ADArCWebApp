@@ -28,12 +28,15 @@
 			</div>
 		</div>
 
-		<div class="page-content">
+		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+			<div class="main-canvas">
+				<MainCanvas comps=@(comps)></MainCanvas>
+			</div>
 			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
 				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;"></div>
-				<ComponentPane></ComponentPane>
+				<ComponentPane host="@this"></ComponentPane>
 			</div>
-			<MainCanvas comps=@(comps)></MainCanvas>
+			<div id="temp-dummy-moveable" style="position:absolute; top:@(moverOffsetTop+"px"); left:@(moverOffsetLeft+"px"); transform:translate(-50%, -50%); background-color:rgba(255,0,0,128); visibility:@isVisible; width:75px; height:75px;"></div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
 				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;"></div>
 				<CodePane></CodePane>
@@ -75,6 +78,7 @@
 
 	public void StateChanged()
 	{
+		Console.WriteLine("targetcardId " + app.targetCardComponentId);
 		StateHasChanged();	
 	}
 
@@ -83,9 +87,9 @@
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
 	}
 
+	private int localIds = 0;
+
 	public static Dictionary<int , ComponentInstance> comps = new() {
-		{ 0, new(31, false, 10, 70) },
-		{ 1, new(31, false, 30, 100) }
 	};
 
 	public static Index? app;
@@ -104,10 +108,57 @@
 		if (firstRender)
 		{
 			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
-			await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
+			//await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
 
-			
+
 		}
 	}
+
+
+	#region component pane integration
+	private int targetCardComponentId = -1;
+	private string isVisible = "hidden";
+
+	private double moverOffsetTop = 0;
+	private double moverOffsetLeft = 0;
+
+	public void setTargetID(int id)
+	{
+		targetCardComponentId = id;
+	}
+
+
+	private void checkForCardDrag(MouseEventArgs e)
+	{
+		if (e.Button == 0 && targetCardComponentId != -1)
+		{
+			isVisible = "visible";
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
+
+	private void dragCardIfPossible(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
+
+	private void addToCanvasIfNecessary(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			isVisible = "hidden";
+			//TODO: add default value to component data declarations
+			comps.Add(++localIds, new(targetCardComponentId, false, e.ClientX - 10, e.ClientY - 50));
+			moverOffsetLeft = 0;
+			moverOffsetTop = 0;
+			targetCardComponentId = -1;
+		}
+	}
+	#endregion
 
 }

@@ -1,4 +1,4 @@
-﻿<div class="card-container">
+﻿<div class="card-container" @onmousedown="handleClick">
 	<div class="altContainer">
 
 	</div>
@@ -16,12 +16,17 @@
 	[Parameter]
 	public string name { get; set; }
 
-	public ComponentCard(string name)
+	[Parameter]
+	public int globalId { get; set; }
+
+	public ComponentCard(int id)
 	{
-		this.name = name;
+		this.globalId = id;
+		this.name = ComponentDeclarations.components[id].name;
 	}
 
 	public ComponentCard(){}
 
-
+	[Parameter]
+	public EventCallback<MouseEventArgs> handleClick { get; set; }
 }

@@ -1,6 +1,6 @@
-﻿using MinAVR.ComponentNamespace;
+﻿using ADArCWebApp.ComponentNamespace;
 
-namespace MinAVR.Shared
+namespace ADArCWebApp.Shared
 {
 	public class ComponentInstance
 	{

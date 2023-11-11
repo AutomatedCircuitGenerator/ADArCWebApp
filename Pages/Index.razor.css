@@ -27,6 +27,13 @@
     right: 0;
 }
 
+.main-canvas {
+    height: 100%;
+    position: absolute;
+    width: 100%;
+    z-index: 0;
+}
+
 .main-content {
     flex-grow: 1;
     padding: 20px;
@@ -95,4 +102,10 @@
 .adarc-text {
     margin-right: auto;
     font-size: 24px;
+}
+
+
+
+div, span {
+    user-select: none;
 }

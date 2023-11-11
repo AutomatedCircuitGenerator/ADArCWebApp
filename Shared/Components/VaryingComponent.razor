@@ -1,4 +1,4 @@
-﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.x)px; left:@(individualData.y)px; position:absolute;">
+﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.y)px; left:@(individualData.x)px; position:absolute; transform: scale(@(zoomFactor))">
 	@switch(objId){
 		case 31:
 			<RazorLED value=@(boolValue())></RazorLED>
@@ -29,6 +29,10 @@
 
 	[Parameter]
 	public ComponentInstance individualData { get; set; }
+
+
+	[Parameter]
+	public double zoomFactor { get; set; } = 1;
 
 	public bool boolValue()
 	{
