@@ -89,17 +89,23 @@
 
 	private int localIds = 0;
 
-	public static Dictionary<int , ComponentInstance> comps = new() {
+	public static Dictionary<int, ComponentInstance> comps = new() {
 	};
 
 	public static Index? app;
 
+	public static readonly int defaultScreenWidth = 1920;
+	public static double currentRatio = 1;
+
 	public static ElementReference? refresh;
 
 	[JSInvokable]
-	public static async void sendVal(int localId, object data)
+	public static async void sendVal(int localId, int data)
 	{
-		Index.comps[localId].mainValue = data;
+		var comp = Index.comps[localId];
+
+		ComponentDeclarations.components[comp.globalId].translate?.Invoke(comp, data);
+
 		await app.triggerRender();
 	}
 
@@ -111,9 +117,17 @@
 			//await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
 
 
+			updateScreenWidthRatio(await module.InvokeAsync<int>("getWindowWidth"));
 		}
 	}
 
+	[JSInvokable]
+	public static void updateScreenWidthRatio(int screenWidth)
+	{
+		currentRatio = ((double)screenWidth) / defaultScreenWidth;
+
+		Console.WriteLine("screen resized! new ratio: " + currentRatio);
+	}
 
 	#region component pane integration
 	private int targetCardComponentId = -1;

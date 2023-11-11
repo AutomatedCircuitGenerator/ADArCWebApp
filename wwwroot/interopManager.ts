@@ -8,7 +8,9 @@ export namespace interopManager {
             runCode();
         }
 
-
+        getWindowWidth(): number {
+            return window.innerWidth;
+        }
 
 
 

@@ -1,5 +1,8 @@
-﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.y)px; left:@(individualData.x)px; position:absolute; transform: scale(@(zoomFactor))">
+﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.y)px; left:@(individualData.x)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
 	@switch(objId){
+		case 1:
+			<RazorArduinoUno></RazorArduinoUno>
+			break;
 		case 31:
 			<RazorLED value=@(boolValue())></RazorLED>
 			break;
@@ -16,6 +19,9 @@
 @code {
 	[Parameter]
 	public int objId { get; set; }
+
+	[Parameter]
+	public bool posAbolute { get; set; } = true;
 
 	[Parameter]
 	public EventCallback<MouseEventArgs> DragStart { get; set; }

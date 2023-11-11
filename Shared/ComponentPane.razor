@@ -100,7 +100,7 @@
 
 			if (path == null || path == "")   //throw them out if they don't have a path
 			{
-				throw new Exception("Badly formed component in namespace: " + data.name);
+				continue;
 			}
 
 			string[] pathSplit = path.Split("/");   //split the path into folder names

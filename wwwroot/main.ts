@@ -17,8 +17,8 @@ const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
 
 
 portB.addListener(async () => {
-    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5) === avr8js.PinState.High);
-    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5) !== avr8js.PinState.High);
+    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5));
+    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5));
 });
 
 export function runCode() {
@@ -30,3 +30,5 @@ export function runCode() {
 }
 
 
+
+(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()) });
