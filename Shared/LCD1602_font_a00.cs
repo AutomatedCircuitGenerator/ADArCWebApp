@@ -1,4 +1,4 @@
-﻿namespace MinAVR {
+﻿namespace ADArCWebApp {
     public static class LCDFontA00
     {
         public static byte[] Font { get; set; } = {

@@ -4045,8 +4045,7 @@ define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "
     const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
     window.interopManager = interopManager_1.interopManager;
     portB.addListener(() => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("MinAVR", "sendVal", 0, portB.pinState(5) === avr8js.PinState.High);
-        yield DotNet.invokeMethodAsync("MinAVR", "sendVal", 1, portB.pinState(5) !== avr8js.PinState.High);
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "updVal", portB.pinState(5) === avr8js.PinState.High);
     }));
     function runCode() {
         for (let i = 0; i < 50000; i++) {

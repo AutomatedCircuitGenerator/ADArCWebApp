@@ -1,6 +1,6 @@
-﻿using MinAVR.Shared;
+﻿using ADArCWebApp.Shared;
 
-namespace MinAVR
+namespace ADArCWebApp
 {
 	public class Directory
 	{

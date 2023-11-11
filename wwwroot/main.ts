@@ -17,8 +17,8 @@ const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
 
 
 portB.addListener(async () => {
-    await DotNet.invokeMethodAsync("MinAVR", "sendVal", 0, portB.pinState(5) === avr8js.PinState.High);
-    await DotNet.invokeMethodAsync("MinAVR", "sendVal", 1, portB.pinState(5) !== avr8js.PinState.High);
+    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5) === avr8js.PinState.High);
+    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5) !== avr8js.PinState.High);
 });
 
 export function runCode() {

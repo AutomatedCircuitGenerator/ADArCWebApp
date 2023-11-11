@@ -1,7 +1,7 @@
-﻿using MinAVR.Shared.Components;
+﻿using ADArCWebApp.Shared.Components;
 using System.Reflection;
 
-namespace MinAVR.Shared
+namespace ADArCWebApp.Shared
 {
 	public class ComponentData
 	{
