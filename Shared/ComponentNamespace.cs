@@ -1,7 +1,7 @@
-﻿using MinAVR.Shared;
-using MinAVR.Shared.Components;
+﻿using ADArCWebApp.Shared;
+using ADArCWebApp.Shared.Components;
 
-namespace MinAVR.ComponentNamespace
+namespace ADArCWebApp.ComponentNamespace
 {
 
 
