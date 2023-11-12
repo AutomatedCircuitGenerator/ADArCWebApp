@@ -11,6 +11,9 @@ namespace ADArCWebApp.Shared
 
 		public double y;
 
+		public double zoomedX;
+		public double zoomedY;
+
 		public object mainValue;
 
 		public ComponentInstance(int globalId, object mainValueInitial, double x = 10.0, double y = 10.0) {
@@ -18,6 +21,8 @@ namespace ADArCWebApp.Shared
 			data = ComponentDeclarations.components[globalId];
 			this.x = x;
 			this.y = y;
+			zoomedX = x;
+			zoomedY = y;
 			mainValue = mainValueInitial;
 
 		}

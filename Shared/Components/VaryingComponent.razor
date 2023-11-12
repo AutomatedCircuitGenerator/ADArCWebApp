@@ -1,13 +1,22 @@
-﻿<div class="comp-wrapper" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.y)px; left:@(individualData.x)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+﻿<div class="comp-wrapper @(enableBorder ? "a-border": "")" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
 	@switch(objId){
 		case 1:
 			<RazorArduinoUno></RazorArduinoUno>
 			break;
+		case 20:
+			<RazorDHT22></RazorDHT22>
+			break;
 		case 31:
 			<RazorLED value=@(boolValue())></RazorLED>
 			break;
+		case 32:
+			<RazorSevenSeg></RazorSevenSeg>
+			break;
 		case 41:
 			<RazorLCD1602 text=@individualData.mainValue.ToString()></RazorLCD1602>
+			break;
+		case 59:
+			<RazorResistor value=@((int)individualData.mainValue)></RazorResistor>
 			break;
 		default:
 			<div>does not match any ID: @objId</div>
@@ -39,6 +48,8 @@
 
 	[Parameter]
 	public double zoomFactor { get; set; } = 1;
+
+	private bool enableBorder = false;
 
 	public bool boolValue()
 	{
