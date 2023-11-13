@@ -37,7 +37,7 @@
 				<ComponentPane host="@this"></ComponentPane>
 			</div>
 			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-				<VaryingComponent posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
 			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
 				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;"></div>
@@ -94,6 +94,9 @@
 	public static Dictionary<int, ComponentInstance> comps = new()
 	{
 	};
+
+
+	public int selectedComponent = -1;
 
 	public static Index? app;
 	public static MainCanvas? buildCanvas;
@@ -174,7 +177,7 @@
 			if (allowDrop)
 			{
 				var d = ComponentDeclarations.components[targetCardComponentId];
-				comps.Add(++localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset))));
+				comps.Add(++localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
@@ -182,5 +185,8 @@
 		}
 	}
 	#endregion
+
+
+
 
 }

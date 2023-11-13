@@ -1,6 +1,6 @@
-﻿<div class="canvas-container" @onmousemove="dragMiddle" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
-		<VaryingComponent objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+		<VaryingComponent forceBorder="c.Key==selection" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
 </div>
 
@@ -130,5 +130,39 @@
 	private void dragEnd(MouseEventArgs e)
 	{
 		dragging = false;
+	}
+
+	int selection = -1;
+	bool targetFound = false;
+
+	public void componentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
+	{
+		targetFound = true;
+		if (selection > 0)
+		{
+			selection = -1;
+		}
+		else
+		{
+			selection = c.Key;
+		}
+	}
+
+
+	private void canvasClick()
+	{
+		bool disable = false;
+		if (targetFound)
+		{
+			disable = true;
+		}
+		else
+		{
+			if (!disable)
+			{
+				selection = -2;	
+			}	
+		}
+		targetFound = false;
 	}
 }

@@ -1,4 +1,4 @@
-﻿<div class="comp-wrapper @(enableBorder ? "a-border": "")" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+﻿<div class="comp-wrapper @(borderClasses())" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
 	@switch(objId){
 		case 1:
 			<RazorArduinoUno></RazorArduinoUno>
@@ -43,6 +43,9 @@
 
 
 	[Parameter]
+	public EventCallback<MouseEventArgs> handleClick { get; set; }
+
+	[Parameter]
 	public ComponentInstance individualData { get; set; }
 
 
@@ -50,6 +53,12 @@
 	public double zoomFactor { get; set; } = 1;
 
 	private bool enableBorder = false;
+
+	[Parameter]
+	public bool disableBorder { get; set; } = false;
+
+	[Parameter]
+	public bool forceBorder { get; set; } = false;
 
 	public bool boolValue()
 	{
@@ -65,4 +74,27 @@
 
 	}
 
+
+	private string borderClasses()
+	{
+		if (!disableBorder)
+		{
+			if (forceBorder)
+			{
+				return "a-border";
+			}
+			else if (enableBorder)
+			{
+				return "b-border";
+			}
+			else
+			{
+				return "";	
+			}
+		}
+		else
+		{
+			return "";	
+		}
+	}
 }
