@@ -1,4 +1,5 @@
-﻿using GraphSynth.Representation;
+﻿using ADArCWebApp;
+using GraphSynth.Representation;
 using GraphSynth.Search;
 using Microsoft.AspNetCore.Components;
 
@@ -8,11 +9,12 @@ namespace MinAVR
     {
 
 
-        Dictionary<string, ruleSet> rulesets = new() {
-            {"add", null },
-            {"connect1", null}
-        };
-        
+        //Dictionary<string, ruleSet> rulesets = new() {
+        //    {"add", null },
+        //    {"connect1", null}
+        //};
+        Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
+
         //inputs from user selecting components
         List<string> inputs;
 
