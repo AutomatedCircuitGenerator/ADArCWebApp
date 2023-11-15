@@ -1549,7 +1549,6 @@ define("lib/avr8js/peripherals/adc", ["require", "exports"], function (require, 
                     channel &= config.muxInputMask;
                     const muxInput = (_a = config.muxChannels[channel]) !== null && _a !== void 0 ? _a : fallbackMuxInput;
                     this.converting = true;
-                    this.onADCRead(muxInput);
                     return true;
                 }
             };

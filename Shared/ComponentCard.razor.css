@@ -1,51 +1,55 @@
 ﻿.card-container {
-    background-color: blue;
+    background-color: white;
+    border-radius: 4.5px;
 
     width: 95%;
 
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: space-evenly;
+    justify-content: left;
 
     margin-bottom: 1%;
     aspect-ratio: 4/5;
     position: relative;
+
+    -webkit-user-drag: element;
 }
 
 .card-img-container {
     width: 75%;
     height: 65%;
 
-    background-color: red;
+    background-color: lightgray;
     margin-top: 5%;
+    margin-left: 5%;
+    margin-right: 5%;
 }
 
-    .card-img-container svg {
-        width: 100%;
-        height: 100%;
-    }
+.card-img-container svg {
+    width: 100%;
+    height: 100%;
+}
 
 
 .card-name {
     text-align: center;
-    color: snow;
+    overflow-wrap: anywhere;
+    color: black;
     padding: 1%;
     line-height: 1.1;
     height: fit-content;
 }
 
 
-
 .altContainer {
-
     visibility: hidden;
     height: 100%;
     width: 100%;
-
-    background-color: forestgreen;
-
+    background-color: lightblue;
+    opacity: 45%;
     position: absolute;
+
 }
 
 

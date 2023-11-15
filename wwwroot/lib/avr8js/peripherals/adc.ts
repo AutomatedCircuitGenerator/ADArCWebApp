@@ -183,7 +183,7 @@ export class AVRADC {
         channel &= config.muxInputMask;
         const muxInput = config.muxChannels[channel] ?? fallbackMuxInput;
         this.converting = true;
-        this.onADCRead(muxInput);
+        //this.onADCRead(muxInput);
         return true; // don't update
       }
     };
