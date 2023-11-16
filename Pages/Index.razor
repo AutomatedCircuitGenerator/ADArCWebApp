@@ -11,40 +11,48 @@
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 	<div class="page">
 		<div class="toolbar">
+			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
 			<span class="adarc-text">ADArC</span>
 			<div class="center-toolbar">
 				<button class="toolbar-button">
-					<img src="save-icon.png" alt="Save Icon">
-					<span>Save</span>
+					<span>📂 Save</span>
 				</button>
 				<button class="toolbar-button">
-					<img src="help-icon.png" alt="Help Icon">
-					<span>Help</span>
+					<span>❓Help</span>
 				</button>
 				<button class="toolbar-button" @onclick="ToggleRunStop">
-					<img src="@runStopIcon" alt="@runStopText">
 					<span>@runStopText</span>
 				</button>
 			</div>
 		</div>
+		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
 			<div class="main-canvas">
 				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
 			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
-				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;"></div>
+				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+					<span>◀</span>
+				</div>
 				<ComponentPane host="@this"></ComponentPane>
 			</div>
 			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
 				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
 			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
-				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;"></div>
+				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+					<span>◀</span>
+				</div>
 				<CodePane></CodePane>
 			</div>
 		</div>
 	</div>
+<!--
+	<div style="width:20%;height:100%;">
+		<ComponentPane></ComponentPane>
+	</div>
+	-->
 </body>
 
 
@@ -53,8 +61,7 @@
 	bool isRightExpanded = false;
 	int leftPaneAlign => isLeftExpanded ? 0 : -23;
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
-	string runStopIcon => isRunning ? "stop-icon.png" : "run-icon.png";
-	string runStopText => isRunning ? "Stop" : "Run";
+	string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
 	bool isRunning = false;
 
 	void ToggleLeftSidebar()
