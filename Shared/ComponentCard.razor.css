@@ -5,7 +5,7 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: left;
+    justify-content: space-evenly;
     margin-bottom: 1%;
     aspect-ratio: 4/5;
     position: relative;
