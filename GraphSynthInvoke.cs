@@ -3,7 +3,7 @@ using GraphSynth.Representation;
 using GraphSynth.Search;
 using Microsoft.AspNetCore.Components;
 
-namespace MinAVR
+namespace ADArCWebApp
 {
     public class GraphSynthInvoke
     {
