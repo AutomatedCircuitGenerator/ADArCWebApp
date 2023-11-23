@@ -1,0 +1,45 @@
+﻿svg {
+    user-select: none;
+}
+
+.arrow-container {
+    cursor: pointer;
+}
+
+svg:hover .arrow {
+    fill: #666;
+    stroke: #666;
+    stroke-width: 1.5px;
+    transition: stroke-width 0.3s;
+}
+
+.arrow-container:hover .arrow {
+    fill: white;
+}
+
+svg:hover .handle:hover {
+    stroke: #ccc;
+    stroke-width: 1.5px;
+    transition: stroke-width 0.3s;
+}
+
+svg:hover .handle.active {
+    fill: white;
+    stroke: white;
+    stroke-width: 1.5px;
+    transition: stroke-width 0.3s;
+}
+
+.handle {
+    cursor: pointer;
+}
+
+g[tabindex]:focus {
+    outline: none;
+}
+
+    g[tabindex]:focus + .focus-indicator {
+        opacity: 1;
+    }
+
+`;
