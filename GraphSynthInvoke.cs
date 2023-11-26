@@ -35,35 +35,35 @@ namespace ADArCWebApp
             return Graph;
         }
         //
-        void recg_apply()
+        public void recg_apply()
         {
             seed = makeSeed(inputs);
 
 
-            List<option> options = rulesets["add"].recognize(seed, true);
+            List<option> options = rulesets["INVDMarkerRules"].recognize(seed, true);
             
 
             while (options.Count > 0)
             {
                 options[0].apply(seed, null);
-                options = rulesets["add"].recognize(seed, true);
+                options = rulesets["INVDMarkerRules"].recognize(seed, true);
 
             }
-            options = rulesets["connect1"].recognize(seed, true);
-            while (options.Count > 0)
-            {
-                options[0].apply(seed, null);
-                options = rulesets["connect1"].recognize(seed, true);
+            //options = rulesets["connect1"].recognize(seed, true);
+            //while (options.Count > 0)
+            //{
+            //    options[0].apply(seed, null);
+            //    options = rulesets["connect1"].recognize(seed, true);
 
-            }
+            //}
         }
 
-        List<arc> GetArcs()
+        public List<arc> GetArcs()
         {
             return seed.arcs;
         }
 
-        List<node> GetNodes()
+        public List<node> GetNodes()
         {
             return seed.nodes;
         }

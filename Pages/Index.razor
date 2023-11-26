@@ -1,8 +1,8 @@
 ﻿@page "/"
+@using GraphSynth.Representation
 @inject IJSRuntime JsRuntime
 
 <PageTitle>Index</PageTitle>
-
 <body>
 	<script>
 		window.triggerClick = (elt) => elt.click();
@@ -21,7 +21,7 @@
 					<img src="help-icon.png" alt="Help Icon">
 					<span>Help</span>
 				</button>
-				<button class="toolbar-button" @onclick="ToggleRunStop">
+				<button class="toolbar-button" @onclick="test">
 					<img src="@runStopIcon" alt="@runStopText">
 					<span>@runStopText</span>
 				</button>
@@ -216,16 +216,32 @@
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
 		await RuleSetMap.getInstance().loadRuleSet("INVDMarkerRules");
 		// foreach (string str in ruleNames)
-			// {
-			// 	await RuleSetMap.getInstance().loadRuleSet(str);
-			// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-			// 	base.StateHasChanged();
-			// }
+		// {
+		// 	await RuleSetMap.getInstance().loadRuleSet(str);
+		// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
+		// 	base.StateHasChanged();
+		// }
 
-			// // allRulesLoaded = true;
-			// base.StateHasChanged();
+		// // allRulesLoaded = true;
+		base.StateHasChanged();
+		Console.WriteLine(RuleSetMap.getInstance().getRuleSet("INVDMarkerRules").rules.Count);
 	}
 
-
-
+	List<String> inputs = new List<string> { "1", "0" };
+	public void test()
+	{
+		GraphSynthInvoke a = new GraphSynthInvoke(inputs);
+		a.recg_apply();
+		List<node> b = a.GetNodes();
+		if (b.Count > 0)
+		{
+			Console.WriteLine("the number of nodes is " + b.Count);
+			Console.WriteLine(a.GetNodes()[0].localLabels[0]);
+			Console.WriteLine(a.GetNodes()[1].localLabels[0]);
+		}
+		else
+		{
+			Console.WriteLine(a.GetNodes()[0]);
+		}
+	}
 }

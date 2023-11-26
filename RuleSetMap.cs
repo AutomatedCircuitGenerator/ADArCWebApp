@@ -5,7 +5,7 @@ using System.Xml.Serialization;
 
 namespace ADArCWebApp
 {
-    public class RuleSetMap
+    public sealed class RuleSetMap
     {
 		//Singleton Setup
 		private static RuleSetMap? instance;
