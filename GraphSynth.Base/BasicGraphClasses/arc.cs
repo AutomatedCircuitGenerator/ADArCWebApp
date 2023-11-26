@@ -27,16 +27,14 @@
 using System;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /// <summary>
     ///   One of the two basic classes for a graph is the arc or edge that connects
     ///   two and only two elements of the node class.
     /// </summary>
     [XmlInclude(typeof(edge))]
     [XmlInclude(typeof(ruleArc))]
-    public class arc : graphElement
-    {
+    public class arc : graphElement {
         #region Fields & Properties
 
         #region to and from node connections
@@ -62,17 +60,18 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>the node the arc is coming from.</value>
         [XmlIgnore]
-        public node From
-        {
-            get { return from; }
-            set
-            {
-                if (from == value) return;
+        public node From {
+            get {
+                return from;
+            }
+            set {
+                if (from == value)
+                    return;
                 /* if you are disconnecting an arc... */
-                if ((from != null) && (from != to))
+                if (from != null && from != to)
                     from.arcs.Remove(this);
                 /* if you are connecting an arc to a new node...*/
-                if ((value != null) && (!value.arcs.Contains(this)))
+                if (value != null && !value.arcs.Contains(this))
                     value.arcs.Add(this);
                 from = value;
             }
@@ -83,17 +82,18 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>the node the arc is going to.</value>
         [XmlIgnore]
-        public node To
-        {
-            get { return to; }
-            set
-            {
-                if (to == value) return;
+        public node To {
+            get {
+                return to;
+            }
+            set {
+                if (to == value)
+                    return;
                 /* if you are disconnecting an arc... */
-                if ((to != null) && (to != from))
+                if (to != null && to != from)
                     to.arcs.Remove(this);
                 /* if you are connecting an arc to a new node...*/
-                if ((value != null) && (!value.arcs.Contains(this)))
+                if (value != null && !value.arcs.Contains(this))
                     value.arcs.Add(this);
                 to = value;
             }
@@ -106,16 +106,13 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>The XML from.</value>
         [XmlElement("From")]
-        public string XmlFrom
-        {
-            get
-            {
+        public string XmlFrom {
+            get {
                 if (from != null)
                     return from.name;
                 return null;
             }
-            set
-            {
+            set {
                 if (from == null)
                     from = new node();
                 from.name = value;
@@ -127,16 +124,13 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>The XML to.</value>
         [XmlElement("To")]
-        public string XmlTo
-        {
-            get
-            {
+        public string XmlTo {
+            get {
                 if (to != null)
                     return to.name;
                 return null;
             }
-            set
-            {
+            set {
                 if (to == null)
                     to = new node();
                 to.name = value;
@@ -149,8 +143,8 @@ namespace GraphSynth.Representation
 
         /* arc can have a meaningful direction or be labelled doubly-directed. These
          * protected fields are controlled by the similarly named properties below. */
-        private Boolean _directed;
-        private Boolean _doublyDirected;
+        private bool _directed;
+        private bool _doublyDirected;
         /* these Boolean properties manage the protected elements. The trick here
          * is that an arc cannot be doubly-directed and not directed, but it is
          * possible to be directed and not doubly-directed. */
@@ -159,17 +153,16 @@ namespace GraphSynth.Representation
         ///   Gets or sets a value indicating whether this <see cref = "arc" /> is directed.
         /// </summary>
         /// <value><c>true</c> if directed; otherwise, <c>false</c>.</value>
-        public Boolean directed
-        {
-            get { return _directed; }
-            set
-            {
-                if ((!value) && _doublyDirected)
-                {
+        public bool directed {
+            get {
+                return _directed;
+            }
+            set {
+                if (!value && _doublyDirected) {
                     _directed = false;
                     _doublyDirected = false;
-                }
-                else _directed = value;
+                } else
+                    _directed = value;
             }
         }
 
@@ -177,17 +170,16 @@ namespace GraphSynth.Representation
         ///   Gets or sets a value indicating whether [doubly directed].
         /// </summary>
         /// <value><c>true</c> if [doubly directed]; otherwise, <c>false</c>.</value>
-        public Boolean doublyDirected
-        {
-            get { return _doublyDirected; }
-            set
-            {
-                if ((value) && (_directed == false))
-                {
+        public bool doublyDirected {
+            get {
+                return _doublyDirected;
+            }
+            set {
+                if (value && _directed == false) {
                     _doublyDirected = true;
                     _directed = true;
-                }
-                else _doublyDirected = value;
+                } else
+                    _doublyDirected = value;
             }
         }
 
@@ -198,19 +190,14 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>The length.</value>
         [XmlIgnore]
-        public double length
-        {
-            get
-            {
+        public double length {
+            get {
                 try /* this is in case the connecting nodes are not vertices */
                 {
                     var v1 = From;
                     var v2 = To;
-                    return Math.Sqrt((v1.X - v2.X) * (v1.X - v2.X) + (v1.Y - v2.Y) * (v1.Y - v2.Y)
-                        + (v1.Z - v2.Z) * (v1.Z - v2.Z));
-                }
-                catch
-                {
+                    return Math.Sqrt((v1.X - v2.X) * (v1.X - v2.X) + (v1.Y - v2.Y) * (v1.Y - v2.Y));
+                } catch {
                     return 0.0;
                 }
             }
@@ -230,8 +217,10 @@ namespace GraphSynth.Representation
  * here, we know one of the nodes that the arc is connected to, but not
  * the other. So, we are simply asking for the node other than the one we know.*/
         {
-            if (from == node1) return to;
-            if (to == node1) return from;
+            if (from == node1)
+                return to;
+            if (to == node1)
+                return from;
             return null;
         }
 
@@ -246,8 +235,7 @@ namespace GraphSynth.Representation
         /// Initializes a new instance of the <see cref="arc"/> class.
         /// </summary>
         /// <param name="newName">The new name.</param>
-        public arc(string newName)
-        {
+        public arc(string newName) {
             name = newName;
         }
 
@@ -259,8 +247,7 @@ namespace GraphSynth.Representation
         ///   Copies this instance of an arc and returns the copy.
         /// </summary>
         /// <returns>the copy of the arc.</returns>
-        public virtual arc copy()
-        {
+        public virtual arc copy() {
             var copyOfArc = new arc();
             copy(copyOfArc);
             return copyOfArc;
@@ -270,8 +257,7 @@ namespace GraphSynth.Representation
         ///   Copies this.arc into the argument copyOfArc.
         /// </summary>
         /// <param name = "copyOfArc">The copy of arc.</param>
-        public virtual void copy(arc copyOfArc)
-        {
+        public virtual void copy(arc copyOfArc) {
             base.copy(copyOfArc);
 
             copyOfArc.directed = directed;
@@ -286,12 +272,11 @@ namespace GraphSynth.Representation
     ///   Originally, I created a separate edge and vertex class to allow for the future expansion
     ///   of GraphSynth into shape grammars. I now have decided that the division is not useful, 
     ///   since it simply deprived nodes of X,Y,Z positions. Many consider edge and arc, and vertex
-    ///   and node to be synonymous anyway but I prefer to think of edges and vertices as arcs and 
+    ///   and node to be synonymous anyway but I prefer to think of edgesBySource and vertices as arcs and 
     ///   nodes with spatial information. At any rate there is no need to have these inherited 
     ///   classes, but I keep them for backwards-compatible purposes.
     /// </summary>
-    public class edge : arc
-    {
+    public class edge : arc {
         /// <summary>
         /// Initializes a new instance of the <see cref="edge"/> class.
         /// </summary>
@@ -300,13 +285,13 @@ namespace GraphSynth.Representation
         /// <summary>
         /// Initializes a new instance of the <see cref="edge"/> class.
         /// </summary>
-        public edge() { }
+        public edge() {
+        }
         /// <summary>
         ///   Copies this instance of an arc and returns the copy.
         /// </summary>
         /// <returns>the copy of the arc.</returns>
-        public override arc copy()
-        {
+        public override arc copy() {
             var copyOfEdge = new edge();
             base.copy(copyOfEdge);
 

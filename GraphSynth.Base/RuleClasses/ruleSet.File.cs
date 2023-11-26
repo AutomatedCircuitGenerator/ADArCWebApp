@@ -35,8 +35,7 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /// <summary>
     ///   The ruleset class represents one of the three main file types of GraphSynth. A ruleset is saved as a .rsxml. It represents a
     ///   language of rules that operate in concert. The included rules are all loaded at once, and used to populate a list of
@@ -44,8 +43,10 @@ namespace GraphSynth.Representation
     /// </summary>
     public partial class ruleSet
     {
-#region Fields
+        #region Fields
 
+        private Boolean FileChangedBypass;
+        //private FileSystemWatcher watch;
 
         /// <summary>
         ///   Gets or sets the filer.
@@ -111,9 +112,9 @@ namespace GraphSynth.Representation
             set { nextGenerationStep[4] = value; }
         }
 
-#endregion
+        #endregion
 
-#region Load and compile Source Files
+        #region Load and compile Source Files
 
         /// <summary>
         ///   Loads and compiles the source files.
@@ -122,84 +123,7 @@ namespace GraphSynth.Representation
         /// <param name = "recompileRules">if set to <c>true</c> [recompile rules].</param>
         /// <param name = "compiledparamRules">The compiledparam rules.</param>
         /// <param name = "execDir">The exec dir.</param>
-        public static void loadAndCompileSourceFiles(ruleSet[] rulesets, Boolean recompileRules,
-                                                     string compiledparamRules, string execDir)
-        {
-#if NETSTANDARD2_0
-            throw new NotImplementedException("There is currently no way to compile parametric rules in this version of GraphSynth.");
-#else
-            if (rulesets.GetLength(0) == 0) return;
-            Assembly assem = null;
-            var allSourceFiles = new List<string>();
-            var rulesDirectory = rulesets[0].rulesDir;
-
-            if (!recompileRules && (compiledFunctionsAlreadyLoaded(rulesets))) return;
-            if (recompileRules && FindSourceFiles(rulesets, allSourceFiles, rulesDirectory))
-            {
-                if (allSourceFiles.Count == 0)
-                    SearchIO.output("No additional code files to compile.", 4);
-                else
-                {
-                    CompilerResults cr;
-                    if (CompileSourceFiles(rulesets, allSourceFiles, out cr,
-                                           rulesDirectory, execDir, compiledparamRules))
-                        assem = cr.CompiledAssembly;
-                }
-            }
-            var filenames = new string[] { };
-            if (assem == null)
-            {
-                /* load .dll since compilation crashed */
-                filenames = Directory.GetFiles(rulesDirectory, "*" + compiledparamRules + "*");
-                if (filenames.GetLength(0) > 1)
-                    SearchIO.MessageBoxShow("More than one compiled library (*.dll) similar to "
-                                        + compiledparamRules + "in" + rulesDirectory);
-                if (filenames.GetLength(0) == 0)
-                {
-                    SearchIO.MessageBoxShow("Compiled library: "+ compiledparamRules + " not found in\n" 
-                        + rulesDirectory + ".\n Attempting to recompile.");
-                    CompilerResults cr;
-                    if (CompileSourceFiles(rulesets, allSourceFiles, out cr,
-                                           rulesDirectory, execDir, compiledparamRules))
-                        assem = cr.CompiledAssembly;
-                }
-                else assem = Assembly.LoadFrom(filenames[0]);
-            }
-            try
-            {
-                if (assem != null)
-                {
-                    var compiledFunctions = assem.CreateInstance("GraphSynth.ParamRules.ParamRules");
-                    foreach (var rule in rulesets.SelectMany(set => set.rules))
-                    {
-                        rule.DLLofFunctions = compiledFunctions;
-                        rule.recognizeFuncs.Clear();
-                        foreach (var functionName in rule.recognizeFunctions)
-                        {
-                            var func = compiledFunctions.GetType().GetMethod(functionName);
-                            if (func != null) rule.recognizeFuncs.Add(func);
-                            else
-                                SearchIO.MessageBoxShow("Unable to locate function, " + functionName + ", in assembly, " + filenames[0] + ".");
-                        }
-                        rule.applyFuncs.Clear();
-                        foreach (var functionName in rule.applyFunctions)
-                        {
-                            var func = compiledFunctions.GetType().GetMethod(functionName);
-                            if (func != null) rule.applyFuncs.Add(func);
-                            else
-                                SearchIO.MessageBoxShow("Unable to locate function, " + functionName + ", in assembly, " + filenames[0] + ".");
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                SearchIO.MessageBoxShow("Compilation Error :" + ErrorLogger.MakeErrorString(e, false),
-                                        "Error Compiling Additional Rule Functions", "Error");
-            }
-#endif
-        }
-
+     
         /// <summary>
         ///   Finds the source files.
         /// </summary>
@@ -207,53 +131,7 @@ namespace GraphSynth.Representation
         /// <param name = "allSourceFiles">All source files.</param>
         /// <param name = "rulesDirectory">The rules directory.</param>
         /// <returns></returns>
-        public static Boolean FindSourceFiles(ruleSet[] rulesets, List<string> allSourceFiles,
-                                              string rulesDirectory)
-        {
-            var filesFound = true;
-
-            foreach (var a in rulesets.Where(a => a != null))
-            {
-                foreach (var file in a.recognizeSourceFiles)
-                {
-                    var fileLower = file.ToLower();
-                    if (File.Exists(rulesDirectory + fileLower))
-                    {
-                        if (!allSourceFiles.Contains(rulesDirectory + fileLower))
-                            allSourceFiles.Add(rulesDirectory + fileLower);
-                    }
-                    else
-                    {
-                        SearchIO.MessageBoxShow("Missing source file: " + fileLower +
-                                                ". Cancelling compilation of C# recognize source file.",
-                                                "Missing File", "Error");
-                        filesFound = false;
-                        break;
-                    }
-                }
-                foreach (var file in a.applySourceFiles)
-                {
-                    var fileLower = file.ToLower();
-                    if (File.Exists(rulesDirectory + fileLower))
-                    {
-                        if (!allSourceFiles.Contains(rulesDirectory + fileLower))
-                            allSourceFiles.Add(rulesDirectory + fileLower);
-                    }
-                    else
-                    {
-                        SearchIO.MessageBoxShow("Missing source file: " + fileLower +
-                                                ". Cancelling compilation of C# apply source file.",
-                                                "Missing File", "Error");
-                        filesFound = false;
-                        break;
-                    }
-                }
-            }
-            return filesFound;
-        }
-
-#if NETSTANDARD2_0
-#else
+       
         /// <summary>
         ///   Compiles the source files.
         /// </summary>
@@ -264,46 +142,7 @@ namespace GraphSynth.Representation
         /// <param name = "execDir">The exec dir.</param>
         /// <param name = "compiledparamRules">The compiledparam rules.</param>
         /// <returns></returns>
-        public static Boolean CompileSourceFiles(ruleSet[] rulesets, List<string> allSourceFiles,
-                                                 out CompilerResults cr, string rulesDir, string execDir,
-                                                 string compiledparamRules)
-        {
-            cr = null;
-            try
-            {
-                var c = new CSharpCodeProvider();
-                // c.CreateCompiler();
-                //                ICodeCompiler icc = c.CreateCompiler();
-                var cp = new CompilerParameters();
-
-                cp.ReferencedAssemblies.Add("system.dll");
-                cp.ReferencedAssemblies.Add("system.xml.dll");
-                cp.ReferencedAssemblies.Add("system.data.dll");
-                cp.ReferencedAssemblies.Add("system.windows.forms.dll");
-                //cp.ReferencedAssemblies.Add(execDir + "GraphSynth.exe");
-                cp.ReferencedAssemblies.Add(execDir + "GraphSynth.BaseClasses.dll");
-
-                cp.CompilerOptions = "/t:library";
-                cp.GenerateInMemory = true;
-                cp.OutputAssembly = rulesDir + compiledparamRules;
-                var allSourceFilesArray = allSourceFiles.ToArray();
-
-                cr = c.CompileAssemblyFromFile(cp, allSourceFilesArray);
-
-                //cr = icc.CompileAssemblyFromFileBatch(cp, allSourceFilesArray);
-                if (cr.Errors.HasErrors) throw new Exception();
-                return true;
-            }
-            catch
-            {
-                SearchIO.MessageBoxShow("Error Compiling C# recognize and apply source files.",
-                                        "Compilation Error", "Error");
-                foreach (CompilerError e in cr.Errors)
-                    SearchIO.output(e.ToString());
-                return false;
-            }
-        }
-#endif
+       
         private static Boolean compiledFunctionsAlreadyLoaded(IEnumerable<ruleSet> rulesets)
         {
             return rulesets
@@ -313,8 +152,8 @@ namespace GraphSynth.Representation
                         != rule.recognizeFunctions.Count + rule.applyFunctions.Count)));
         }
 
-#endregion
+        #endregion
 
-
+   
     }
 }

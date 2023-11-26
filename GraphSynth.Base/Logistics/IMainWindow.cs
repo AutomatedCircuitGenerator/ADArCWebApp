@@ -26,29 +26,31 @@
  *************************************************************************/
 using System;
 
-namespace GraphSynth
-{
+namespace GraphSynth {
     /// <summary>
     /// Interface for the main window of GraphSynth.
     /// </summary>
-    public interface IMainWindow
-    {
+    public interface IMainWindow {
         /// <summary>
         /// Gets the selected add item.
         /// </summary>
         /// <value>The selected add item.</value>
-        string SelectedAddItem { get; }
+        string SelectedAddItem {
+            get;
+        }
         /// <summary>
         /// Sets the selected add item.
         /// </summary>
         /// <param name="i">The i.</param>
         /// <returns></returns>
-        Boolean SetSelectedAddItem(int i);
+        bool SetSelectedAddItem(int i);
         /// <summary>
         /// Gets a value indicating whether the selected item should [stay on].
         /// </summary>
         /// <value><c>true</c> if [stay on]; otherwise, <c>false</c>.</value>
-        Boolean stayOn { get; }
+        bool stayOn {
+            get;
+        }
 
         /// <summary>
         /// Focuses on the label field for easy entry.
@@ -69,7 +71,7 @@ namespace GraphSynth
         /// </summary>
         /// <param name="scale">The scale.</param>
         /// <param name="zoomToFit">The zoom to fit.</param>
-        void SetCanvasPropertyScaleFactor(double scale, Boolean? zoomToFit);
+        void SetCanvasPropertyScaleFactor(double scale, bool? zoomToFit);
         /// <summary>
         /// Adds and shows a graph window.
         /// </summary>
@@ -89,11 +91,20 @@ namespace GraphSynth
         /// <param name="title">The title.</param>
         void addAndShowRuleSetWindow(object obj, string title);
 
+#if WPF
+        /********************* WPF Specific References *********************/
+        /// <summary>
+        /// Gets the dispatcher.
+        /// </summary>
+        /// <value>The dispatcher.</value>
+        System.Windows.Threading.Dispatcher Dispatcher { get; }
         /// <summary>
         /// Gets the short cut keys.
         /// </summary>
         /// <value>The short cut keys.</value>
-        string[] shortCutKeys { get; }
+        System.Windows.Input.Key[] shortCutKeys { get; }
+        /*********************************************************************************/
+#endif
     }
 
 }

@@ -187,6 +187,45 @@
 	#endregion
 
 
+	private readonly List<string> ruleNames = new();
+	private readonly double totalRules = 19.0;
+	private string fileToLoad = "";
+	private double loadPercent = 0;
+	protected override async Task OnInitializedAsync()
+	{
+		// loads rulesets
+		// allRulesLoaded = false;
+		// ruleNames.Add("BondGraphRuleset"); //58
+		// ruleNames.Add("SimplificationRuleset"); //28
+		// ruleNames.Add("DirRuleset"); //5
+		// ruleNames.Add("newDirectionRuleSet_2"); //17
+		// ruleNames.Add("DirRuleset3"); //4
+		// ruleNames.Add("Simplification2"); //32
+		// ruleNames.Add("NewCausalityMethodRuleset"); //6
+		// ruleNames.Add("NewCausalityMethodRuleset_2"); //4
+		// ruleNames.Add("NewCausalityMethodRuleset_3"); //2
+		// ruleNames.Add("INVDMarkerRules"); //6
+		// ruleNames.Add("INVDMarkerRules_2"); //0?
+		// ruleNames.Add("CalibrationNewRuleset"); //12
+		// ruleNames.Add("CalibrationNewRuleset_2"); //0?
+		// ruleNames.Add("RFlagCleanRuleset"); //1
+		// ruleNames.Add("ICFixTotalRuleset"); //12
+		// ruleNames.Add("TransformerFlipRuleset"); //1
+		// ruleNames.Add("TransformerFlipRuleset2"); //1
+		// ruleNames.Add("Clean23Ruleset"); //4
+		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
+		await RuleSetMap.getInstance().loadRuleSet("INVDMarkerRules");
+		// foreach (string str in ruleNames)
+			// {
+			// 	await RuleSetMap.getInstance().loadRuleSet(str);
+			// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
+			// 	base.StateHasChanged();
+			// }
+
+			// // allRulesLoaded = true;
+			// base.StateHasChanged();
+	}
+
 
 
 }

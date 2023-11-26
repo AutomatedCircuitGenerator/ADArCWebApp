@@ -33,38 +33,54 @@ using System.Linq;
 using System.Reflection;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /// <summary>
     /// </summary>
     public partial class grammarRule
     {
+
+        /// <summary>
+        /// the host graph is stored as an internal (private) field to a rule during recognition. 
+        /// Since recognition just reads from it, this simplifies the need to pass it along to every
+        /// recognition function. 
+        /// </summary>
+        private designGraph host;
+     
         /// <summary>
         ///   any mathematical operations are fair game for the recognize and apply local variables.
         ///   At the end of a graph recognition, we check all the recognize functions, if any yield a 
         ///   positive number than the rule is infeasible. This is done in case1LocationFound.
         /// </summary>
-        [XmlIgnore]
-        public object DLLofFunctions;
+        [XmlIgnore] public object DLLofFunctions;
 
-        [XmlIgnore]
-        private List<string> _applyFunctions;
+        [XmlIgnore] private List<string> _applyFunctions;
         private List<embeddingRule> _embeddingRules;
-        [XmlIgnore]
-        private List<string> _recognizeFunctions;
+        [XmlIgnore] private List<string> _recognizeFunctions;
 
         /// <summary>
         ///   a list of MethodInfo's corresponding to the strings in applyFunctions
         /// </summary>
-        [XmlIgnore]
-        public List<MethodInfo> applyFuncs = new List<MethodInfo>();
+        [XmlIgnore] public List<MethodInfo> applyFuncs = new List<MethodInfo>();
 
+        /// <summary>
+        ///   These are place holders when the user has clicked OrderedGlobalLabels. There may, in fact,
+        ///   be multiple locations for the globalLabels to be recognized. The are determined in the 
+        ///   OrderLabelsMatch function.
+        /// </summary>
+        protected List<int> globalLabelStartLocs = new List<int>();
+
+        /// <summary>
+        ///   this is where we store the subgraphs or locations of where the
+        ///   rule can be applied. It's global to a particular L but it is invoked
+        ///   only at the very bottom of the recursion tree - see the end of
+        ///   recognizeRecursion().
+        /// </summary>
+        protected List<option> options = new List<option>();
 
         /// <summary>
         ///   a list of MethodInfo's corresponding to the strings in recognizeFunctions
         /// </summary>
-        [XmlIgnore]
-        public List<MethodInfo> recognizeFuncs = new List<MethodInfo>();
+        [XmlIgnore] public List<MethodInfo> recognizeFuncs = new List<MethodInfo>();
 
         /// <summary>
         ///   Gets or sets the name of the rule.
@@ -204,8 +220,8 @@ namespace GraphSynth.Representation
         {
             stub = stub.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
             var i = 0;
-            while ((L.nodes.Exists(b => b.name.Equals(stub + i)))
-                   || (R.nodes.Exists(b => b.name.Equals(stub + i))))
+            while ((L.nodes.Any(b => b.name.Equals(stub + i)))
+                   || (R.nodes.Any(b => b.name.Equals(stub + i))))
                 i++;
             return stub + i;
         }
@@ -218,8 +234,8 @@ namespace GraphSynth.Representation
         {
             stub = stub.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
             var i = 0;
-            while ((L.arcs.Exists(b => b.name.Equals(stub + i)))
-                   || (R.arcs.Exists(b => b.name.Equals(stub + i))))
+            while ((L.arcs.Any(b => b.name.Equals(stub + i)))
+                   || (R.arcs.Any(b => b.name.Equals(stub + i))))
                 i++;
             return stub + i;
         }
@@ -232,8 +248,8 @@ namespace GraphSynth.Representation
         {
             stub = stub.TrimEnd('0', '1', '2', '3', '4', '5', '6', '7', '8', '9');
             var i = 0;
-            while ((L.hyperarcs.Exists(b => b.name.Equals(stub + i)))
-                   || (R.hyperarcs.Exists(b => b.name.Equals(stub + i))))
+            while ((L.hyperarcs.Any(b => b.name.Equals(stub + i)))
+                   || (R.hyperarcs.Any(b => b.name.Equals(stub + i))))
                 i++;
             return stub + i;
         }
@@ -242,30 +258,20 @@ namespace GraphSynth.Representation
         {
             get
             {
-                var degrees = new List<int>();
-                foreach (var n in L.nodes)
-                {
-                    if (((ruleNode)n).MustExist)
-                        degrees.Add(((ruleNode)n).degree);
-                }
-                degrees.Sort();
-                degrees.Reverse();
-                return degrees;
+                return new List<int>(from n in L.nodes
+                                     where !((ruleNode)n).NotExist
+                                     orderby n.degree descending
+                                     select n.degree);
             }
         }
         IList<int> LHyperArcDegreeSequence
         {
             get
             {
-                var degrees = new List<int>();
-                foreach (var ha in L.hyperarcs)
-                {
-                    if (((ruleHyperarc)ha).MustExist)
-                        degrees.Add(((ruleHyperarc)ha).degree);
-                }
-                degrees.Sort();
-                degrees.Reverse();
-                return degrees;
+                return new List<int>(from ha in L.hyperarcs
+                                     where !((ruleHyperarc)ha).NotExist
+                                     orderby ha.degree descending
+                                     select ha.degree);
             }
         }
         //private grammarRule copy()

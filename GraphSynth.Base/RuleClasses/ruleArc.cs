@@ -27,8 +27,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /* here we define additional qualities used only by arcs in the grammar rules. */
 
     /// <summary>
@@ -36,8 +35,7 @@ namespace GraphSynth.Representation
     ///   necessary to correctly perform recognition. This mostly hinges on the "subset or equal"
     ///   Booleans.
     /// </summary>
-    public class ruleArc : arc
-    {
+    public class ruleArc : arc {
         #region Constructors
 
         /// <summary>
@@ -45,15 +43,13 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <param name = "newName">The new name.</param>
         public ruleArc(string newName)
-            : base(newName)
-        {
+            : base(newName) {
         }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref = "ruleArc" /> class.
         /// </summary>
-        public ruleArc()
-        {
+        public ruleArc() {
         }
 
         /// <summary>
@@ -63,8 +59,7 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <param name="a">A.</param>
         public ruleArc(arc a)
-            : this(a.name)
-        {
+            : this(a.name) {
             TargetType = a.GetType().ToString();
             directed = a.directed;
             DisplayShape = a.DisplayShape;
@@ -79,8 +74,7 @@ namespace GraphSynth.Representation
         ///   Returns a copy of this instance.
         /// </summary>
         /// <returns>the copy of the arc.</returns>
-        public override arc copy()
-        {
+        public override arc copy() {
             var copyOfArc = new ruleArc();
             copy(copyOfArc);
             return copyOfArc;
@@ -90,12 +84,10 @@ namespace GraphSynth.Representation
         ///   Copies this instance into the (already intialized) copyOfArc.
         /// </summary>
         /// <param name = "copyOfArc">A new copy of arc.</param>
-        public override void copy(arc copyOfArc)
-        {
+        public override void copy(arc copyOfArc) {
             base.copy(copyOfArc);
-            if (copyOfArc is ruleArc)
-            {
-                var rcopy = (ruleArc)copyOfArc;
+            if (copyOfArc is ruleArc) {
+                var rcopy = (ruleArc) copyOfArc;
                 rcopy.containsAllLocalLabels = containsAllLocalLabels;
                 rcopy.directionIsEqual = directionIsEqual;
                 rcopy.nullMeansNull = nullMeansNull;
@@ -111,9 +103,10 @@ namespace GraphSynth.Representation
         ///   Gets the negating labels. The labels that must not exist for correct recognition.
         /// </summary>
         /// <value>The negate labels.</value>
-        public List<string> negateLabels
-        {
-            get { return _negateLabels ?? (_negateLabels = new List<string>()); }
+        public List<string> negateLabels {
+            get {
+                return _negateLabels ?? (_negateLabels = new List<string>());
+            }
         }
         private List<string> _negateLabels;
 
@@ -122,15 +115,8 @@ namespace GraphSynth.Representation
         /// host graph.
         /// </summary>
         /// <value><c>true</c> if [not exist]; otherwise, <c>false</c>.</value>
-        public Boolean NotExist { get; set; }
-
-        /// <summary>
-        /// Gets the value indicating whether the element SHOULD exist in the
-        /// host graph. It is just the opposite (true/false) or NotExist.
-        /// </summary>
-        /// <value><c>true</c> if [not exist]; otherwise, <c>false</c>.</value>
-        public Boolean MustExist {
-            get { return !NotExist; }
+        public bool NotExist {
+            get; set;
         }
 
         /// <summary>
@@ -139,7 +125,9 @@ namespace GraphSynth.Representation
         /// <value>
         ///   <c>true</c> if [contains all local labels]; otherwise, <c>false</c>.
         /// </value>
-        public Boolean containsAllLocalLabels { get; set; }
+        public bool containsAllLocalLabels {
+            get; set;
+        }
         /* if true then all the localLabels in the rule element much match with those in the host 
          * element, if false then the rule element labels only need to be a subset on host elt. localLabels. */
 
@@ -147,13 +135,14 @@ namespace GraphSynth.Representation
         ///   Gets or sets the type (as a string) for the matching graph element.
         /// </summary>
         /// <value>The string describing the type of graph element.</value>
-        public string TargetType
-        {
-            get { return _targetType; }
-            set
-            {
+        public string TargetType {
+            get {
+                return _targetType;
+            }
+            set {
                 Type t = null;
-                if (value != null) t = Type.GetType(value);
+                if (value != null)
+                    t = Type.GetType(value);
                 /* if the user typed a Type but we can't find it, it is likely that
                  * * it is being compiled within GraphSynth, so prepend with various
                  * * namespaces. */
@@ -163,7 +152,8 @@ namespace GraphSynth.Representation
                     t = Type.GetType("GraphSynth.Representation." + value);
                 if (t != null)
                     _targetType = t.ToString();
-                else _targetType = value;
+                else
+                    _targetType = value;
                 //    throw new Exception("The Type: "+value+ " is not known.");
             }
         }
@@ -186,7 +176,9 @@ namespace GraphSynth.Representation
         ///   actual direction must match too), and doubly-directed only with doubly-directed.
         /// </summary>
         /// <value><c>true</c> if [direction is equal]; otherwise, <c>false</c>.</value>
-        public Boolean directionIsEqual { get; set; }
+        public bool directionIsEqual {
+            get; set;
+        }
 
         /// <summary>
         ///   Gets or sets a value indicating whether dangling (the null reference to node) arc are only
@@ -200,7 +192,9 @@ namespace GraphSynth.Representation
         ///   the rule.
         /// </summary>
         /// <value><c>true</c> if [null means null]; otherwise, <c>false</c>.</value>
-        public Boolean nullMeansNull { get; set; }
+        public bool nullMeansNull {
+            get; set;
+        }
         #endregion
     }
 }

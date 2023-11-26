@@ -7,36 +7,52 @@ namespace ADArCWebApp
 {
     public class RuleSetMap
     {
-        public static Dictionary<string, ruleSet> rulesets;
-        //private readonly ImmutableHashSet<string> modifiedRules;
+		//Singleton Setup
+		private static RuleSetMap? instance;
+		private static readonly object padlock = new();
+
+		public static Dictionary<string, ruleSet> rulesets;
+        private readonly ImmutableHashSet<string> modifiedRules;
         int numLoaded;
 
         RuleSetMap()
         {
             rulesets = new Dictionary<string, ruleSet>();
-            ////Setup set of rules which need to be modified
-            //this.modifiedRules = ImmutableHashSet.Create("BondGraphRuleset",
-            //    "SimplificationRuleset",
-            //    "DirRuleset",
-            //    "newDirectionRuleSet_2",
-            //    "DirRuleset3",
-            //    "Simplification2",
-            //    "NewCausalityMethodRuleset",
-            //    "NewCausalityMethodRuleset_2",
-            //    "NewCausalityMethodRuleset_3",
-            //    "INVDMarkerRules",
-            //    "INVDMarkerRules_2",
-            //    "CalibrationNewRuleset",
-            //    "CalibrationNewRuleset_2",
-            //    "RFlagCleanRuleset",
-            //    "ICFixTotalRuleset",
-            //    "TransformerFlipRuleset",
-            //    "TransformerFlipRuleset2",
-            //    "Clean23Ruleset",
-            //    "BeforeBG-VerifyDirRuleSet");
+            //Setup set of rules which need to be modified
+            this.modifiedRules = ImmutableHashSet.Create("BondGraphRuleset",
+                "SimplificationRuleset",
+                "DirRuleset",
+                "newDirectionRuleSet_2",
+                "DirRuleset3",
+                "Simplification2",
+                "NewCausalityMethodRuleset",
+                "NewCausalityMethodRuleset_2",
+                "NewCausalityMethodRuleset_3",
+                "INVDMarkerRules",
+                "INVDMarkerRules_2",
+                "CalibrationNewRuleset",
+                "CalibrationNewRuleset_2",
+                "RFlagCleanRuleset",
+                "ICFixTotalRuleset",
+                "TransformerFlipRuleset",
+                "TransformerFlipRuleset2",
+                "Clean23Ruleset",
+                "BeforeBG-VerifyDirRuleSet");
             this.numLoaded = 0;
         }
-        public async Task loadRuleSet(string name)
+
+		/// <summary>
+		/// Returns the singleton instance of the RuleSetMap
+		/// </summary>
+		/// <returns>An instance of RuleSetMap</returns>
+		public static RuleSetMap getInstance()
+		{
+			lock (padlock)
+			{
+				return instance ??= new RuleSetMap();
+			}
+		}
+		public async Task loadRuleSet(string name)
         {
             //Ensure that we only load each rule once
             if (rulesets.ContainsKey(name))
@@ -118,15 +134,15 @@ namespace ADArCWebApp
         /// <returns>A ruleset</returns>
         public ruleSet getRuleSet(string name)
         {
-            //if (!this.modifiedRules.Contains(name))
-            //{
-            //    return this.ruleSetMap[name];
-            //}
+            if (!this.modifiedRules.Contains(name))
+            {
+                return rulesets[name];
+            }
 
             foreach (grammarRule rule in rulesets[name].rules)
             {
                 rule.TransformNodePositions = false;
-                rule.Rotate = GraphSynth.transfromType.Prohibited;
+                rule.Rotate = false;
             }
             return rulesets[name];
         }
@@ -143,7 +159,7 @@ namespace ADArCWebApp
             }
             else
             {
-                newGrammarRule.L.RepairGraphConnections();
+                newGrammarRule.L.internallyConnectGraph();
             }
 
             if (newGrammarRule.R == null)
@@ -152,7 +168,7 @@ namespace ADArCWebApp
             }
             else
             {
-                newGrammarRule.R.RepairGraphConnections();
+                newGrammarRule.R.internallyConnectGraph();
             }
 
             return newGrammarRule;

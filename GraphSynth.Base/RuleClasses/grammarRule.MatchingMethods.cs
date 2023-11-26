@@ -32,8 +32,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /// <summary>
     /// All of these functions are static Booleans functions that match the graph or graph elements between host and rule.
     /// </summary>
@@ -45,15 +44,15 @@ namespace GraphSynth.Representation
             if (string.IsNullOrWhiteSpace(TargetType) || Type.GetType(TargetType) == null)
                 return true;
             var t = Type.GetType(TargetType);
-            return (hostElt.GetType().Equals(t) || hostElt.GetType().IsSubclassOf(t));
+            return (hostElt.GetType().IsInstanceOfType(t));
         }
 
-        internal static Boolean LabelsMatch(IEnumerable<string> hostLabels, IEnumerable<string> positiveLabels, IEnumerable<string> negateLabels,
+        private static Boolean LabelsMatch(IEnumerable<string> hostLabels, IEnumerable<string> positiveLabels, IEnumerable<string> negateLabels,
             Boolean containsAllLocalLabels)
         {
             /* first an easy check to see if any negating labels exist
              * in the hostLabels. If so, immediately return false. */
-            if (negateLabels != null && negateLabels.Any() && negateLabels.Intersect(hostLabels).Any())
+            if (negateLabels.Any() && negateLabels.Intersect(hostLabels).Any())
                 return false;
             /* next, set up a tempLabels so that we don't change the 
              * host's actual labels. We delete an instance of the label. 
@@ -77,15 +76,15 @@ namespace GraphSynth.Representation
 
         #region Node Matching
 
-        private Boolean nodeMatches(designGraph host, ruleNode LNode, node hostNode, option location)
+        private Boolean nodeMatches(ruleNode LNode, node hostNode, option location)
         {
             return (!LNode.strictDegreeMatch || LNode.degree == hostNode.degree)
                    && LNode.degree <= hostNode.degree
                    && LabelsMatch(hostNode.localLabels, LNode.localLabels, LNode.negateLabels, LNode.containsAllLocalLabels)
                    && IntendedTypesMatch(LNode.TargetType, hostNode)
-                   && HyperArcPreclusionCheckForSingleNode(host, LNode, hostNode, location.hyperarcs);
+                   && HyperArcPreclusionCheckForSingleNode(LNode, hostNode, location.hyperarcs);
         }
-        private Boolean nodeMatchRelaxed(designGraph host, ruleNode LNode, node hostNode, option location)
+        private Boolean nodeMatchRelaxed(ruleNode LNode, node hostNode, option location)
         {
             if (location.Relaxations.NumberAllowable == 0) return false;
             var localNumAllowable = location.Relaxations.NumberAllowable;
@@ -112,7 +111,7 @@ namespace GraphSynth.Representation
                 usedRelaxItems.Add(rType);
                 usedFulfilledRelaxItems.Add(new RelaxItem(Relaxations.Target_Type_Revoked, 1, LNode, hostNode.GetType().ToString()));
             }
-            if (!HyperArcPreclusionCheckForSingleNode(host,LNode, hostNode, location.hyperarcs))
+            if (!HyperArcPreclusionCheckForSingleNode(LNode, hostNode, location.hyperarcs))
             {
                 var rHyperArcPreclusion =
                        location.Relaxations.FirstOrDefault(r => r.Matches(Relaxations.HyperArc_Preclusion_Revoked, LNode)
@@ -180,7 +179,7 @@ namespace GraphSynth.Representation
         //    location.Relaxations.NumberAllowable--;
         //    location.Relaxations.FulfilledItems.Add(new RelaxItem(Relaxations.Element_Made_Negative, 1, LNode));
         //    node standinNode;
-        //    Type nodeType = Type.GetType(LNode.TargetType, false);
+        //    Type nodeType = Type.GetChangeType(LNode.TargetType, false);
         //    if (nodeType == null || nodeType == typeof(node))
         //        standinNode = new node();
         //    else
@@ -292,7 +291,7 @@ namespace GraphSynth.Representation
         //    location.Relaxations.NumberAllowable--;
         //    location.Relaxations.FulfilledItems.Add(new RelaxItem(Relaxations.Element_Made_Negative, 1, LHyper));
         //    hyperarc standinNode;
-        //    Type hyperarcType = Type.GetType(LHyper.TargetType, false);
+        //    Type hyperarcType = Type.GetChangeType(LHyper.TargetType, false);
         //    if (hyperarcType == null || hyperarcType == typeof(hyperarc))
         //        standinNode = new hyperarc();
         //    else
@@ -435,23 +434,18 @@ namespace GraphSynth.Representation
         #endregion
 
         #region Initial Rule Check (global labels, spanning)
-        private Boolean InitialRuleCheck(designGraph host, out List<int> globalLabelStartLocs)
+        private Boolean InitialRuleCheck()
         {
-            //   These are place holders when the user has clicked OrderedGlobalLabels. There may, in fact,
-            //   be multiple locations for the globalLabels to be recognized. The are determined in the 
-            //   OrderLabelsMatch function.
-            globalLabelStartLocs = null;
-            return (!spanning || (L.nodes.Count(rn => ((ruleNode)rn).MustExist) == host.nodes.Count))
-                   && ((OrderedGlobalLabels && OrderLabelsMatch(host.globalLabels, out globalLabelStartLocs))
+            return (!spanning || (L.nodes.Count == host.nodes.Count))
+                   && ((OrderedGlobalLabels && OrderLabelsMatch(host.globalLabels))
                        || (!OrderedGlobalLabels && LabelsMatch(host.globalLabels, L.globalLabels, negateLabels, containsAllGlobalLabels)))
                    && hasLargerOrEqualDegreeSeqence(host.DegreeSequence, LDegreeSequence)
                    && hasLargerOrEqualDegreeSeqence(host.HyperArcDegreeSequence, LHyperArcDegreeSequence)
-                   && (host.arcs.Count >= L.arcs.Count(a => ((ruleArc)a).MustExist));
+                   && (host.arcs.Count >= L.arcs.Count);
         }
 
-        private Boolean InitialRuleCheckRelaxed(designGraph host, option location, out List<int> globalLabelStartLocs)
+        private Boolean InitialRuleCheckRelaxed(option location)
         {
-            globalLabelStartLocs = null;
             if (location.Relaxations.NumberAllowable == 0) return false;
             var localNumAllowable = location.Relaxations.NumberAllowable;
             var usedRelaxItems = new List<RelaxItem>();
@@ -479,7 +473,7 @@ namespace GraphSynth.Representation
                     usedFulfilledRelaxItems.Add(new RelaxItem(Relaxations.Negate_Global_Label_Revoked, 1, null, nl));
                 }
             }
-            if (!OrderedGlobalLabels || !OrderLabelsMatch(host.globalLabels, out globalLabelStartLocs))
+            if (!OrderedGlobalLabels || !OrderLabelsMatch(host.globalLabels))
             {
                 var tempLabels = new List<string>(host.globalLabels);
                 foreach (var label in L.globalLabels)
@@ -533,9 +527,8 @@ namespace GraphSynth.Representation
             return true;
         }
 
-        private Boolean OrderLabelsMatch(ICollection<string> hostLabels, out List<int> globalLabelStartLocs)
+        private Boolean OrderLabelsMatch(ICollection<string> hostLabels)
         {
-            globalLabelStartLocs = new List<int>();
             /* first an easy check to see if any negating labels exist
              * in the hostLabels. If so, immediately return false. */
             if (negateLabels.Any() && negateLabels.Intersect(hostLabels).Any())
@@ -579,10 +572,10 @@ namespace GraphSynth.Representation
         #endregion
 
         #region Final Rule Check (induced, hyperarc preclusion, shape restriction, additional functions)
-        private Boolean FinalRuleChecks(designGraph host, option location)
+        private Boolean FinalRuleChecks(option location)
         {
             if (L.nodes.Where((t, i) => location.nodes[i] != null
-                                        && !HyperArcPreclusionCheckForSingleNode(host, (ruleNode)L.nodes[i],
+                                        && !HyperArcPreclusionCheckForSingleNode((ruleNode)L.nodes[i],
                                          location.nodes[i], location.hyperarcs)).Any())
                 return false; // not a valid option
 
@@ -592,24 +585,25 @@ namespace GraphSynth.Representation
                 return false; // not a valid option
             /* The induced boolean indicates that if there are any arcs in the host between the 
             * nodes of the subgraph that are not in L then this is not a valid location.  */
-
-            var firstNotExistIndex = L.nodes.FindIndex(n => ((ruleNode)n).NotExist);
+            int ij = 0;
+            foreach (var no in L.nodes)
+                if (((ruleNode)no).NotExist)
+                {
+                    ij++;
+                    break;
+                }
+            var firstNotExistIndex = ij;
             double[,] T;
-            Boolean validTransform;
-            if (firstNotExistIndex < 0)
-            {
-                validTransform = findTransform(location.nodes, out T);
-                if (UseShapeRestrictions && (!validTransform || !otherNodesComply(T, location.nodes)))
-                    return false; // not a valid option - the transform does not have a correct transformation
-            }
+            if (firstNotExistIndex < 0) T = findTransform(location.nodes);
             else
             {
                 var positiveNodes = new List<node>(location.nodes);
                 positiveNodes.RemoveRange(firstNotExistIndex, (positiveNodes.Count - firstNotExistIndex));
-                validTransform = findTransform(positiveNodes, out T);
-                if (UseShapeRestrictions && (!validTransform || !otherNodesComply(T, positiveNodes)))
-                    return false; // not a valid option
+                T = findTransform(positiveNodes);
             }
+            if (UseShapeRestrictions && (!validTransform(T) || !otherNodesComply(T, location.nodes)))
+                return false; // not a valid option
+            /* the transform does not have a correct transformation */
 
             foreach (var recognizeFunction in recognizeFuncs)
             {
@@ -644,12 +638,7 @@ namespace GraphSynth.Representation
                 }
                 catch (Exception e)
                 {
-                    SearchIO.MessageBoxShow("Error in additional recognize function: " + recognizeFunction.Name +
-                                            ".\nSee output bar for details.", "Error in  " + recognizeFunction.Name, "Error");
-                    SearchIO.output("Error in function: " + recognizeFunction.Name);
-                    SearchIO.output("Exception in : " + e.InnerException.TargetSite.Name);
-                    SearchIO.output("Error              : " + e.InnerException.Message);
-                    SearchIO.output("Stack Trace     	: " + e.InnerException.StackTrace);
+                    
                     return false;
                 }
             }
@@ -657,7 +646,7 @@ namespace GraphSynth.Representation
             return true;
         }
 
-        private Boolean FinalRuleCheckRelaxed(designGraph host, option location)
+        private Boolean FinalRuleCheckRelaxed(option location)
         {
             if (location.Relaxations.NumberAllowable == 0) return false;
             var localNumAllowable = location.Relaxations.NumberAllowable;
@@ -676,7 +665,7 @@ namespace GraphSynth.Representation
             var numNodes = L.nodes.Count;
             for (var i = 0; i < numNodes; i++)
                 if (location.nodes[i] != null
-                    && !HyperArcPreclusionCheckForSingleNode(host, (ruleNode)L.nodes[i], location.nodes[i], location.hyperarcs))
+                    && !HyperArcPreclusionCheckForSingleNode((ruleNode)L.nodes[i], location.nodes[i], location.hyperarcs))
                 {
                     var rHyperArcPreclusion =
                            location.Relaxations.FirstOrDefault(r => r.Matches(Relaxations.HyperArc_Preclusion_Revoked, location.nodes[i])
@@ -686,18 +675,24 @@ namespace GraphSynth.Representation
                     usedRelaxItems.Add(rHyperArcPreclusion);
                     usedFulfilledRelaxItems.Add(new RelaxItem(Relaxations.HyperArc_Preclusion_Revoked, 1, location.nodes[i]));
                 }
-
-            var firstNotExistIndex = L.nodes.FindIndex(n => ((ruleNode)n).NotExist);
+            int ij = 0;
+            foreach (var no in L.nodes)
+                if (((ruleNode)no).NotExist)
+                {
+                    ij++;
+                    break;
+                }
+            var firstNotExistIndex = ij;
+            
             double[,] T;
-            Boolean validTransform;
-            if (firstNotExistIndex < 0) validTransform = findTransform(location.nodes, out T);
+            if (firstNotExistIndex < 0) T = findTransform(location.nodes);
             else
             {
                 var positiveNodes = new List<node>(location.nodes);
                 positiveNodes.RemoveRange(firstNotExistIndex, (positiveNodes.Count - firstNotExistIndex));
-                validTransform = findTransform(positiveNodes, out T);
+                T = findTransform(positiveNodes);
             }
-            if (UseShapeRestrictions && (!validTransform || !otherNodesComply(T, location.nodes)))
+            if (UseShapeRestrictions && (!validTransform(T) || !otherNodesComply(T, location.nodes)))
             {
                 var rShape =
                       location.Relaxations.FirstOrDefault(r => r.Matches(Relaxations.Shape_Restriction_Revoked)
@@ -747,12 +742,7 @@ namespace GraphSynth.Representation
                 }
                 catch (Exception e)
                 {
-                    SearchIO.MessageBoxShow("Error in additional recognize function: " + recognizeFunction.Name +
-                                            ".\nSee output bar for details.", "Error in  " + recognizeFunction.Name, "Error");
-                    SearchIO.output("Error in function: " + recognizeFunction.Name);
-                    SearchIO.output("Exception in : " + e.InnerException.TargetSite.Name);
-                    SearchIO.output("Error              : " + e.InnerException.Message);
-                    SearchIO.output("Stack Trace     	: " + e.InnerException.StackTrace);
+                    
                     var rAddnlFunction =
                           location.Relaxations.FirstOrDefault(r => r.Matches(Relaxations.Additional_Functions_Revoked, null, recognizeFunction.Name)
                                                                      && usedRelaxItems.Count(ur => ur == r) < r.NumberAllowed);
@@ -790,8 +780,7 @@ namespace GraphSynth.Representation
             if (host.arcs.Any(a =>
                               !location.arcs.Contains(a)
                               && location.nodes.Contains(a.From)
-                              && location.nodes.Contains(a.To)))
-                return true;
+                              && location.nodes.Contains(a.To))) return true;
 
             return host.hyperarcs.Any(a =>
                                       !location.hyperarcs.Contains(a)
@@ -811,7 +800,7 @@ namespace GraphSynth.Representation
         /// true if preclusions are correct for this node (it is not included
         /// in hyperarcs it was intentionally precluded from.
         /// </returns>
-        private Boolean HyperArcPreclusionCheckForSingleNode(designGraph host, ruleNode LNode, node hostNode, IList<hyperarc> hostHyperarcs)
+        private Boolean HyperArcPreclusionCheckForSingleNode(ruleNode LNode, node hostNode, IList<hyperarc> hostHyperarcs)
         {
             /* after two other versions - which were correct but hard to follow - I settled on this one, which is both
              * the easiest to understand and the fastest (for loop finds both hyperarcs without extra lookup function. */
@@ -824,7 +813,7 @@ namespace GraphSynth.Representation
                      * in nodeMatches) it's possible that there are yet-to-be-found hyperarcs, 
                      * which we need to skip at this point, or the hostHyperarc was a "stand-in" if
                      * the problem was relaxed s.t. the hyperarc doesn't really exist in the host. */
-                    && (LNode.NotExist || ruleHyperarc.MustExist)
+                    && (LNode.NotExist || !ruleHyperarc.NotExist)
                     /* this one is tricky. Basically, we don't want to check preclusion/inclusion between LNodes that
                      * are supposed to exist and hyperarcs that are not (supposed to exist). The converse of this is
                      * check if it is a NotExist L-node (regardless of the hyperarc) or if the hyperarc is to exist. */

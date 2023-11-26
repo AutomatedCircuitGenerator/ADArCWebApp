@@ -35,8 +35,7 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading.Tasks;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /* Get ready, this file is complicated. All the recognize and apply functions are found
      * here. There is a recognize function in ruleSet, and an apply in option but those are simply 
      * macros for the functions found here within grammarRule. */
@@ -48,6 +47,7 @@ namespace GraphSynth.Representation
     /// </summary>
     public partial class grammarRule
     {
+        private Boolean _in_parallel_;
         #region Recognize Methods
         // The next 300 lines define the recognize functions.
 
@@ -70,22 +70,24 @@ namespace GraphSynth.Representation
         /// <param name="InParallel">if set to <c>true</c> [in parallel].</param>
         /// <param name="RelaxationTemplate">The relaxation template.</param>
         /// <returns></returns>
-        public List<option> recognize(designGraph host, Boolean inParallel = true, Relaxation RelaxationTemplate = null)
+        public List<option> recognize(designGraph host, Boolean InParallel = true, Relaxation RelaxationTemplate = null)
         {
-            var options = new ConcurrentBag<option>();
+            this.host = host;
+            _in_parallel_ = InParallel;
             var location = new option(this);
             if (RelaxationTemplate != null) location.Relaxations = RelaxationTemplate.copy();
+            options.Clear();
 
-            if (!InitialRuleCheck(host, out var globalLabelStartLocs) && !InitialRuleCheckRelaxed(host, location, out globalLabelStartLocs)) return new List<option>();
+            if (!InitialRuleCheck() && !InitialRuleCheckRelaxed(location)) return new List<option>();
 
-            if (ContainsNegativeElements) FindPositiveStartElementAvoidNegatives(host, location, options, inParallel);
-            else findNewStartElement(host, location, options, inParallel);
+            if (ContainsNegativeElements) FindPositiveStartElementAvoidNegatives(location);
+            else findNewStartElement(location);
             /* if OrderedGlobalLabels is checked and there are multiple locations in the 
              * string of labels then we need to convolve the two set of locations together. */
             if (OrderedGlobalLabels)
             {
-                var origLocs = options.ToList();
-                var duplicatedOptionList = new List<option>();
+                var origLocs = new List<option>(options);
+                options.Clear();
                 for (var i = globalLabelStartLocs.Count - 1; i >= 0; i--)
                 {
                     foreach (var opt in origLocs)
@@ -93,14 +95,13 @@ namespace GraphSynth.Representation
                         var localOption = opt;
                         if (i > 0) localOption = opt.copy();
                         localOption.globalLabelStartLoc = globalLabelStartLocs[i];
-                        duplicatedOptionList.Add(localOption);
+                        lock (options) { options.Add(localOption); }
                     }
                 }
-                return duplicatedOptionList;
             }
-            return options.ToList();
+            return options;
         }
-        private void findNewStartElement(designGraph host, option location, ConcurrentBag<option> options, bool inParallel)
+        public void findNewStartElement(option location)
         {
             #region Case #1: Location found! No empty slots left in the location
             /* this is the only way to properly exit the recursive loop. */
@@ -109,8 +110,14 @@ namespace GraphSynth.Representation
                 /* as a recursive function, we first check how the recognition process terminates. If all nodes,
                  * hyperarcs and arcs within location have been filled with references to elements in the host, 
                  * then we've found a location...well maybe. More details are described in the LocationFound function. */
-                if (FinalRuleChecks(host,location) || FinalRuleCheckRelaxed(host,location))
-                    options.Add(location.copy());
+                if (FinalRuleChecks(location) || FinalRuleCheckRelaxed(location))
+                {
+                    var locCopy = location.copy();
+                    lock (options)
+                    {
+                        options.Add(locCopy);
+                    }
+                }
                 return;
             }
             #endregion
@@ -120,6 +127,8 @@ namespace GraphSynth.Representation
              * host (as is the case in the last three cases below). In this case we start with any hyperarcs
              * that have already been matched to one in the host, and see if it connects to any nodes that
              * have yet to be matched. */
+            //ruleHyperarc startHyperArc = null;
+            //if(L.hyperarcs.Count>0)
             var startHyperArc = (ruleHyperarc)L.hyperarcs.FirstOrDefault(ha => ((location.findLMappedHyperarc(ha) != null)
                 && (ha.nodes.Any(n => (location.findLMappedNode(n) == null)))));
             if (startHyperArc != null)
@@ -127,7 +136,7 @@ namespace GraphSynth.Representation
                 var hostHyperArc = location.findLMappedHyperarc(startHyperArc);
                 var newLNode = (ruleNode)startHyperArc.nodes.FirstOrDefault(n => (location.findLMappedNode(n) == null));
                 foreach (var n in hostHyperArc.nodes.Where(n => !location.nodes.Contains(n)))
-                    checkNode(host, location.copy(), options, newLNode, n, inParallel);
+                    checkNode(location.copy(), newLNode, n);
                 return;
             }
             #endregion
@@ -145,9 +154,9 @@ namespace GraphSynth.Representation
             {
                 var newLArc = startNode.arcs.FirstOrDefault(a => (location.findLMappedElement(a) == null));
                 if (newLArc is ruleHyperarc)
-                    checkHyperArc(host, location, options, startNode, location.findLMappedNode(startNode), (ruleHyperarc)newLArc, inParallel);
+                    checkHyperArc(location, startNode, location.findLMappedNode(startNode), (ruleHyperarc)newLArc);
                 else if (newLArc is ruleArc)
-                    checkArc(host, location, options, startNode, location.findLMappedNode(startNode), (ruleArc)newLArc, inParallel);
+                    checkArc(location, startNode, location.findLMappedNode(startNode), (ruleArc)newLArc);
                 return;
             }
             #endregion
@@ -159,17 +168,11 @@ namespace GraphSynth.Representation
             startHyperArc = (ruleHyperarc)L.hyperarcs.FirstOrDefault(ha => (location.findLMappedHyperarc(ha) == null));
             if (startHyperArc != null)
             {
-                if (inParallel)
-                    Parallel.ForEach(host.hyperarcs, hostHyperArc =>
-                    {
-                        if (!location.hyperarcs.Contains(hostHyperArc))
-                            checkHyperArc(host, location.copy(), options, startHyperArc, hostHyperArc, inParallel);
-                    });
-                else
+                
                     foreach (var hostHyperArc in
                         host.hyperarcs.Where(hostHyperArc => !location.hyperarcs.Contains(hostHyperArc)))
                     {
-                        checkHyperArc(host, location.copy(), options, startHyperArc, hostHyperArc, inParallel);
+                        checkHyperArc(location.copy(), startHyperArc, hostHyperArc);
                     }
                 return;
             }
@@ -182,16 +185,10 @@ namespace GraphSynth.Representation
             startNode = (ruleNode)L.nodes.FirstOrDefault(n => (location.findLMappedNode(n) == null));
             if (startNode != null)
             {
-                if (inParallel)
-                    Parallel.ForEach(host.nodes, hostNode =>
-                        {
-                            if (!location.nodes.Contains(hostNode))
-                                checkNode(host, location.copy(), options, startNode, hostNode, inParallel);
-                        });
-                else foreach (var hostNode in
+                foreach (var hostNode in
                     host.nodes.Where(hostNode => !location.nodes.Contains(hostNode)))
                     {
-                        checkNode(host, location.copy(), options, startNode, hostNode, inParallel);
+                        checkNode(location.copy(), startNode, hostNode);
                     }
                 return;
             }
@@ -201,19 +198,7 @@ namespace GraphSynth.Representation
             /* the only way one can get here is if there are one or more arcs NOT connected to any nodes
              * in L - a floating arc, dangling on both sides, like an eyelash. */
             if (looseArc != null)
-                if (inParallel)
-                    Parallel.ForEach(host.arcs, hostArc =>
-                                     {
-                                         if ((!location.arcs.Contains(hostArc)) && (!location.nodes.Contains(hostArc.From))
-                                             && (!location.nodes.Contains(hostArc.To))
-                                             && (arcMatches(looseArc, hostArc) || arcMatchRelaxed(looseArc, hostArc, location)))
-                                         { //relaxelt
-                                             var newLocation = location.copy();
-                                             newLocation.arcs[L.arcs.IndexOf(looseArc)] = hostArc;
-                                             findNewStartElement(host, newLocation, options, inParallel);
-                                         }
-                                     });
-                else
+               
                     foreach (var hostArc in host.arcs)
                         if ((!location.arcs.Contains(hostArc)) && (!location.nodes.Contains(hostArc.From))
                                  && (!location.nodes.Contains(hostArc.To))
@@ -221,37 +206,36 @@ namespace GraphSynth.Representation
                         { //relaxelt
                             var newLocation = location.copy();
                             newLocation.arcs[L.arcs.IndexOf(looseArc)] = hostArc;
-                            findNewStartElement(host, newLocation, options, inParallel);
+                            findNewStartElement(newLocation);
                         }
             #endregion
         }
-        private void checkNode(designGraph host, option location, ConcurrentBag<option> options, ruleNode LNode, node hostNode, bool inParallel)
+        public void checkNode(option location, ruleNode LNode, node hostNode)
         {
-            if (!nodeMatches(host, LNode, hostNode, location) && !nodeMatchRelaxed(host, LNode, hostNode, location))
+            if (!nodeMatches(LNode, hostNode, location) && !nodeMatchRelaxed(LNode, hostNode, location))
                 return;
             location.nodes[L.nodes.IndexOf(LNode)] = hostNode;
             var newLArc = LNode.arcs.FirstOrDefault(a => (location.findLMappedElement(a) == null));
-            if (newLArc == null) findNewStartElement(host, location, options, inParallel);
+            if (newLArc == null) findNewStartElement(location);
             else if (newLArc is ruleHyperarc)
-                checkHyperArc(host, location, options, LNode, hostNode, (ruleHyperarc)newLArc, inParallel);
+                checkHyperArc(location, LNode, hostNode, (ruleHyperarc)newLArc);
             else if (newLArc is ruleArc)
-                checkArc(host, location, options, LNode, hostNode, (ruleArc)newLArc, inParallel);
+                checkArc(location, LNode, hostNode, (ruleArc)newLArc);
         }
-        private void checkHyperArc(designGraph host, option location, ConcurrentBag<option> options,
-            ruleHyperarc LHyperArc, hyperarc hostHyperArc, bool inParallel)
+        public void checkHyperArc(option location, ruleHyperarc LHyperArc, hyperarc hostHyperArc)
         {
             if (!hyperArcMatches(LHyperArc, hostHyperArc) && !hyperArcMatchRelaxed(LHyperArc, hostHyperArc, location))
                 return;
             location.hyperarcs[L.hyperarcs.IndexOf(LHyperArc)] = hostHyperArc;
             var newLNode = (ruleNode)LHyperArc.nodes.FirstOrDefault(n => (location.findLMappedNode(n) == null));
-            if (newLNode == null) findNewStartElement(host, location, options, inParallel);
+            if (newLNode == null) findNewStartElement(location);
             else
                 foreach (var n in hostHyperArc.nodes.Where(n => !location.nodes.Contains(n)))
-                    checkNode(host, location.copy(), options, newLNode, n, inParallel);
+                    checkNode(location.copy(), newLNode, n);
         }
 
-        private void checkHyperArc(designGraph host, option location, ConcurrentBag<option> options, ruleNode fromLNode, node fromHostNode,
-            ruleHyperarc newLHyperArc, bool inParallel)
+        public void checkHyperArc(option location, ruleNode fromLNode, node fromHostNode,
+            ruleHyperarc newLHyperArc)
         {
             var otherConnectedNodes = (from n in newLHyperArc.nodes
                                        where ((n != fromLNode) && (location.findLMappedNode(n) != null))
@@ -268,12 +252,12 @@ namespace GraphSynth.Representation
              * connected to newLHyperArc that have already been recognized. We need to remove any instances
              * from hostHyperArcs which don't connect to mappings of these already recognized nodes. */
             foreach (var hostHyperArc in hostHyperArcs)
-                checkHyperArc(host, location.copy(), options, newLHyperArc, hostHyperArc, inParallel);
+                checkHyperArc(location.copy(), newLHyperArc, hostHyperArc);
         }
 
 
-        private void checkArc(designGraph host, option location, ConcurrentBag<option> options, node fromLNode, node fromHostNode,
-            ruleArc newLArc, bool inParallel)
+        public void checkArc(option location, node fromLNode, node fromHostNode,
+            ruleArc newLArc)
         {
             var currentLArcIndex = L.arcs.IndexOf(newLArc);
             /* so, currentLArcIndex now, points to a LArc that has yet to be recognized. What we do from
@@ -283,17 +267,25 @@ namespace GraphSynth.Representation
             /* first we must match the arc to a possible arc leaving the fromHostNode .*/
             node nextHostNode = (nextLNode == null) ? null : location.findLMappedNode(nextLNode);
 
-            var neighborHostArcs = fromHostNode.arcs.FindAll(a =>
+            List<arc> neighborHostArcs = new List<arc>();
+            foreach (var arca in fromHostNode.arcs)
+            {
+                if (!location.arcs.Contains(arca) && (arcMatches(newLArc, (arc)arca, fromHostNode, nextHostNode, (newLArc.From == fromLNode))
+                || arcMatchRelaxed(newLArc, (arc)arca, location, fromHostNode, nextHostNode, (newLArc.From == fromLNode))))
+                    neighborHostArcs.Add((arc)arca);
+
+            }
+          /*  var neighborHostArcs = fromHostNode.arcs.FindAll(a =>
                 (a is arc && !location.arcs.Contains(a))
                 && (arcMatches(newLArc, (arc)a, fromHostNode, nextHostNode, (newLArc.From == fromLNode))
-                || arcMatchRelaxed(newLArc, (arc)a, location, fromHostNode, nextHostNode, (newLArc.From == fromLNode)))).Cast<arc>();
+                || arcMatchRelaxed(newLArc, (arc)a, location, fromHostNode, nextHostNode, (newLArc.From == fromLNode)))).Cast<arc>(); */
             //relaxelt
-            if ((nextHostNode != null) || nextLNode == null)
+            if ((nextHostNode != null) || newLArc.nullMeansNull)
                 foreach (var HostArc in neighborHostArcs)
                 {
                     var newLocation = location.copy();
                     newLocation.arcs[currentLArcIndex] = HostArc;
-                    findNewStartElement(host, newLocation, options, inParallel);
+                    findNewStartElement(newLocation);
                 }
             else
                 foreach (var HostArc in neighborHostArcs)
@@ -303,8 +295,8 @@ namespace GraphSynth.Representation
                     {
                         var newLocation = location.copy();
                         newLocation.arcs[currentLArcIndex] = HostArc;
-                        if (nextLNode == null) findNewStartElement(host, newLocation, options, inParallel);
-                        else checkNode(host, newLocation, options, nextLNode, nextHostNode, inParallel);
+                        if (nextLNode == null) findNewStartElement(newLocation);
+                        else checkNode(newLocation, nextLNode, nextHostNode);
                     }
                 }
         }
@@ -312,7 +304,7 @@ namespace GraphSynth.Representation
         #endregion
 
         #region Find Mapped Elements
-        private graphElement findRMappedElement(designGraph RMapping, string GraphElementName)
+        public graphElement findRMappedElement(designGraph RMapping, string GraphElementName)
         {
             var elt = R[GraphElementName];
             if (elt is hyperarc) return RMapping.hyperarcs[R.hyperarcs.IndexOf((hyperarc)elt)];
@@ -321,7 +313,7 @@ namespace GraphSynth.Representation
             throw new Exception("Graph element not found in rule's right-hand-side (GrammarRule.findMappedElement)");
         }
 
-        private node findRMappedNode(designGraph location, node n)
+        public node findRMappedNode(designGraph location, node n)
         {
             return location.nodes[R.nodes.IndexOf(n)];
         }
@@ -382,22 +374,22 @@ namespace GraphSynth.Representation
                     elt.name = host.makeUniqueHyperArcName(elt.name);
         }
 
-        private static void updateOrderedGlobalLabels(int stringStart, ICollection LLabels,
+        public static void updateOrderedGlobalLabels(int stringStart, ICollection LLabels,
                                                       IEnumerable<string> RLabels, List<string> hostLabels)
         {
             hostLabels.RemoveRange(stringStart, LLabels.Count);
             hostLabels.InsertRange(stringStart, RLabels);
         }
 
-        private static void updateVariables(IEnumerable<double> Lvariables, IEnumerable<double> Rvariables,
-                                            List<double> hostvariables)
+        public static void updateVariables(IEnumerable<string> Lvariables, IEnumerable<string> Rvariables,
+                                            List<string> hostvariables)
         {
             foreach (var a in Lvariables) /* do the same now, for the variables. */
                 hostvariables.Remove(a); /* removing the labels in L but not in R...*/
             hostvariables.AddRange(Rvariables);
         }
 
-        private static void updateLabels(IEnumerable<string> Llabels, IEnumerable<string> Rlabels,
+        public static void updateLabels(IEnumerable<string> Llabels, IEnumerable<string> Rlabels,
                                          List<string> hostlabels)
         {
             foreach (var a in Llabels)
@@ -405,7 +397,7 @@ namespace GraphSynth.Representation
             hostlabels.AddRange(Rlabels);
         }
 
-        private void removeLdiffKfromHost(option Lmapping, designGraph host, out List<graphElement> danglingNeighbors)
+        public void removeLdiffKfromHost(option Lmapping, designGraph host, out List<graphElement> danglingNeighbors)
         {
             /* foreach node in L - see if it "is" also in R - if it is in R than it "is" part of the 
              * commonality subgraph K, and thus should not be deleted as it is part of the connectivity
@@ -415,12 +407,38 @@ namespace GraphSynth.Representation
              * this is different than the local lables which are used for recognition and the storage
              * any important design information. */
             danglingNeighbors = new List<graphElement>();
-            foreach (var n in L.nodes.Where(n => ((ruleNode)n).MustExist && (!R.nodes.Exists(b => (b.name == n.name)))))
+            foreach (var n in L.nodes.Where(n => !((ruleNode)n).NotExist && (!R.nodes.Any(b => (b.name == n.name)))))
             {
                 var nodeToRemove = Lmapping.findLMappedNode(n);
                 danglingNeighbors = danglingNeighbors.Union(nodeToRemove.arcs).ToList();
                 host.removeNode(nodeToRemove, false);
+
+
             }
+            /*foreach (var n in L.nodes.Where(n => !((ruleNode)n).NotExist))
+            {
+                foreach(var n1 in R.nodes.Where(n1=> (n1.name==n.name)))
+                
+                {
+                    var nodeToRemove = Lmapping.findLMappedNode(n);
+                    danglingNeighbors = danglingNeighbors.Union(nodeToRemove.arcs).ToList();
+                    host.removeNode(nodeToRemove, false);
+
+
+                }
+                
+                
+
+            } */
+
+           
+            
+         /*   foreach (var n in L.nodes.Where(n => !((ruleNode)n).NotExist && (!R.nodes.Exists(b => (b.name == n.name)))))
+            {
+                var nodeToRemove = Lmapping.findLMappedNode(n);
+                danglingNeighbors = danglingNeighbors.Union(nodeToRemove.arcs).ToList();
+                host.removeNode(nodeToRemove, false);
+            } */
 
             /* if a node with the same name does not exist in R, then it is safe to remove it.
              * The removeNode should is invoked with the "false false" switches of this function. 
@@ -430,10 +448,46 @@ namespace GraphSynth.Representation
              * a node was connected to. */
 
             /* arcs and hyperarcs are removed in a similar way. */
-            foreach (var a in L.arcs.Where(a => ((ruleArc)a).MustExist && (!R.arcs.Exists(b => (b.name == a.name)))))
+
+            foreach (var a in L.arcs.Where(a => !((ruleArc)a).NotExist && (!R.arcs.Any(b => (b.name == a.name)))))
                 host.removeArc(Lmapping.findLMappedArc(a));
-            foreach (var h in L.hyperarcs.Where(h => ((ruleHyperarc)h).MustExist && (!R.hyperarcs.Exists(b => (b.name == h.name)))))
+            foreach (var h in L.hyperarcs.Where(h => !((ruleHyperarc)h).NotExist && (!R.hyperarcs.Any(b => (b.name == h.name)))))
                 host.removeHyperArc(Lmapping.findLMappedHyperarc(h));
+          /*  foreach (var n in L.arcs.Where(n => !((ruleArc)n).NotExist))
+            {
+                foreach (var n1 in R.arcs)
+                {
+                    if (n1.name != n.name)
+                    {
+                        
+                        host.removeArc(Lmapping.findLMappedArc(n));
+
+                    }
+
+
+                }
+
+            }
+            foreach (var n in L.hyperarcs.Where(n => !((ruleHyperarc)n).NotExist))
+            {
+                foreach (var n1 in R.hyperarcs)
+                {
+                    if (n1.name != n.name)
+                    {
+
+                        host.removeHyperArc(Lmapping.findLMappedHyperarc(n));
+
+                    }
+
+
+                }
+
+            } */
+
+       /*     foreach (var a in L.arcs.Where(a => !((ruleArc)a).NotExist && (!R.arcs.Exists(b => (b.name == a.name)))))
+                host.removeArc(Lmapping.findLMappedArc(a));
+            foreach (var h in L.hyperarcs.Where(h => !((ruleHyperarc)h).NotExist && (!R.hyperarcs.Exists(b => (b.name == h.name)))))
+                host.removeHyperArc(Lmapping.findLMappedHyperarc(h)); */
         }
 
         private List<graphElement> addRdiffKtoD(option Lmapping, designGraph D, designGraph Rmapping,
@@ -459,19 +513,19 @@ namespace GraphSynth.Representation
             {
                 var rNode = (ruleNode)R.nodes[i];
                 #region Step 1. add new nodes to D
-                if (!L.nodes.Exists(b => (b.name == rNode.name)))
+                if (!L.nodes.Any(b => (b.name == rNode.name)))
                 {
-                    var newNode = D.addNode(null, Type.GetType(rNode.TargetType, false)); /* create a new node. */
-                    Rmapping.nodes[i] = newNode; /* make sure it's referenced in Rmapping. */
+                    D.addNode(null, Type.GetType(rNode.TargetType, false)); /* create a new node. */
+                    Rmapping.nodes[i] = D.nodes.Last(); /* make sure it's referenced in Rmapping. */
                     /* labels cannot be set equal, since that merely sets the reference of this list
                      * to the same value. So, we need to make a complete copy. */
-                    rNode.copy(newNode);
+                    rNode.copy(D.nodes.Last());
                     /* give that new node a name and labels to match with the R. */
-                    newElements.Add(newNode);
-                    /* add the new node to the list of newElements that is returned by this function.*/
-                    TransformPositionOfNode(newNode, positionT, rNode);
-                    if (TransformNodeShapes && newNode.DisplayShape != null)
-                        TransfromShapeOfNode(newNode, positionT);
+                    newElements.Add(D.nodes.Last());
+                    /* add the new node to the list of elements that is returned by this function.*/
+                    TransformPositionOfNode(D.nodes.Last(), positionT, rNode);
+                    if (TransformNodeShapes)
+                        TransfromShapeOfNode(D.nodes.Last(), positionT);
                 }
                 #endregion
                 #region Step 2. update K nodes
@@ -484,7 +538,7 @@ namespace GraphSynth.Representation
                      * are no longer in R and delete them, and we need to add the new labels
                      * that are in R but not already in L. The ones common to both are left
                      * alone. */
-                    var LNode = L.nodes.FirstOrDefault(n => (rNode.name.Equals(n.name)));
+                    var LNode = L.nodes.First(n => (rNode.name.Equals(n.name)));
                     /* find index of the common node in L...*/
                     var KNode = Lmapping.findLMappedNode(LNode); /*...and then set Knode to the actual node in D.*/
                     Rmapping.nodes[i] = KNode; /*also, make sure that the Rmapping is to this same node.*/
@@ -493,10 +547,9 @@ namespace GraphSynth.Representation
                                     KNode.localVariables);
                     if (TransformNodePositions)
                         TransformPositionOfNode(KNode, positionT, rNode);
-                    if (rNode.DisplayShape != null && TransformNodeShapes)
+                    if (TransformNodeShapes)
                     {
-                        if (KNode.DisplayShape == null
-                            || rNode.DisplayShape.GetType() == KNode.DisplayShape.GetType())
+                        if (rNode.DisplayShape != null)
                             KNode.DisplayShape = rNode.DisplayShape.Copy(KNode);
                         TransfromShapeOfNode(KNode, positionT);
                     }
@@ -512,18 +565,18 @@ namespace GraphSynth.Representation
 
                 #region Step 3. add new arcs to D
 
-                if (!L.arcs.Exists(b => (b.name == rArc.name)))
+                if (!L.arcs.Any(b => (b.name == rArc.name)))
                 {
                     #region setting up where arc comes from
 
                     node from;
                     if (rArc.From == null)
                         from = null;
-                    else if (L.nodes.Exists(b => (b.name == rArc.From.name)))
+                    else if (L.nodes.Any(b => (b.name == rArc.From.name)))
                     /* if the arc is coming from a node that is in K, then it must've been
              * part of the location (or Lmapping) that was originally recognized.*/
                     {
-                        var LNode = L.nodes.FirstOrDefault(b => (rArc.From.name == b.name));
+                        var LNode = L.nodes.First(b => (rArc.From.name == b.name));
                         /* therefore we need to find the position/index of that node in L. */
 
                         from = Lmapping.findLMappedNode(LNode);
@@ -535,7 +588,7 @@ namespace GraphSynth.Representation
              * created at the beginning of this function (see step 1) and is now
              * one of the references in Rmapping. */
                     {
-                        var RNode = R.nodes.FirstOrDefault(b => (rArc.From.name == b.name));
+                        var RNode = R.nodes.First(b => (rArc.From.name == b.name));
                         from = findRMappedNode(Rmapping, RNode);
                     }
 
@@ -548,24 +601,24 @@ namespace GraphSynth.Representation
                     node to;
                     if (rArc.To == null)
                         to = null;
-                    else if (L.nodes.Exists(b => (b.name == rArc.To.name)))
+                    else if (L.nodes.Any(b => (b.name == rArc.To.name)))
                     {
-                        var LNode = L.nodes.FirstOrDefault(b => (rArc.To.name == b.name));
+                        var LNode = L.nodes.First(b => (rArc.To.name == b.name));
                         to = Lmapping.findLMappedNode(LNode);
                     }
                     else
                     {
-                        var RNode = R.nodes.FirstOrDefault(b => (rArc.To.name == b.name));
+                        var RNode = R.nodes.First(b => (rArc.To.name == b.name));
                         to = findRMappedNode(Rmapping, RNode);
                     }
 
                     #endregion
 
-                    var newArc = D.addArc(from, to, rArc.name, Type.GetType(rArc.TargetType, false));
-                    Rmapping.arcs[i] = newArc;
-                    rArc.copy(newArc);
-                    newElements.Add(newArc);
-                    /* add the new arc to the list of newElements that is returned by this function.*/
+                    D.addArc(from, to, rArc.name, Type.GetType(rArc.TargetType, false));
+                    Rmapping.arcs[i] = D.arcs.Last();
+                    rArc.copy(D.arcs.Last());
+                    newElements.Add(D.arcs.Last());
+                    /* add the new arc to the list of elements that is returned by this function.*/
                 }
                 #endregion
                 #region Step 4. update K arcs
@@ -573,7 +626,7 @@ namespace GraphSynth.Representation
                 else
                 {
                     /* first find the position of the same arc in L. */
-                    var currentLArc = (ruleArc)L.arcs.FirstOrDefault(b => (rArc.name == b.name));
+                    var currentLArc = (ruleArc)L.arcs.First(b => (rArc.name == b.name));
                     var mappedArc = Lmapping.findLMappedArc(currentLArc);
                     /* then find the actual arc in D that is to be changed.*/
                     /* one very subtle thing just happend here! (07/06/06) if the direction is reversed, then
@@ -596,7 +649,7 @@ namespace GraphSynth.Representation
                     }
                     else if (rArc.From != null)
                     {
-                        var RNode = R.nodes.FirstOrDefault(b => (rArc.From.name == b.name));
+                        var RNode = R.nodes.First(b => (rArc.From.name == b.name));
                         /* find the position of node that this arc is supposed to connect to in R */
                         if (KArcIsReversed) mappedArc.To = findRMappedNode(Rmapping, RNode);
                         else mappedArc.From = findRMappedNode(Rmapping, RNode);
@@ -609,7 +662,7 @@ namespace GraphSynth.Representation
                     }
                     else if (rArc.To != null)
                     {
-                        var RNode = R.nodes.FirstOrDefault(b => (rArc.To.name == b.name));
+                        var RNode = R.nodes.First(b => (rArc.To.name == b.name));
                         if (KArcIsReversed) mappedArc.From = findRMappedNode(Rmapping, RNode);
                         else mappedArc.To = findRMappedNode(Rmapping, RNode);
                     }
@@ -642,11 +695,11 @@ namespace GraphSynth.Representation
                     var mappedNodes =
                         rHyperarc.nodes.Select(a => findRMappedElement(Rmapping, a.name)).Cast<node>().ToList();
 
-                    var newHa = D.addHyperArc(mappedNodes, rHyperarc.name, Type.GetType(rHyperarc.TargetType, false));
-                    Rmapping.hyperarcs[i] = newHa;
-                    rHyperarc.copy(newHa);
-                    newElements.Add(newHa);
-                    /* add the new hyperarc to the list of newElements that is returned by this function.*/
+                    D.addHyperArc(mappedNodes, rHyperarc.name, Type.GetType(rHyperarc.TargetType, false));
+                    Rmapping.hyperarcs[i] = D.hyperarcs.Last();
+                    rHyperarc.copy(D.hyperarcs.Last());
+                    newElements.Add(D.hyperarcs.Last());
+                    /* add the new hyperarc to the list of elements that is returned by this function.*/
                 }
                 #endregion
                 #region Step 6. update K hyperarcs
@@ -676,8 +729,7 @@ namespace GraphSynth.Representation
             }
             return newElements;
         }
-
-        private IEnumerable<graphElement> freeArcEmbedding(option Lmapping, designGraph host, designGraph Rmapping, IEnumerable<hyperarc> danglingNeighbors)
+        public IEnumerable<graphElement> freeArcEmbedding(option Lmapping, designGraph host, designGraph Rmapping, IEnumerable<hyperarc> danglingNeighbors)
         {
             var newElements = new List<graphElement>();
             foreach (var dangleHyperArc in danglingNeighbors)
@@ -701,10 +753,9 @@ namespace GraphSynth.Representation
                             {
                                 var newNeighborNodes = new List<node>(neighborNodes);
                                 newNeighborNodes.Add(newNodeToConnect);
-                                var newHa = dangleHyperArc.copy();
-                                host.addHyperArc(newHa, newNeighborNodes);
-                                newElements.Add(newHa);
-                                /* add the new hyperarc to the list of newElements that is returned by this function.*/
+                                host.addHyperArc(dangleHyperArc.copy(), newNeighborNodes);
+                                newElements.Add(host.hyperarcs.Last());
+                                /* add the new hyperarc to the list of elements that is returned by this function.*/
                             }
                             else
                             {
@@ -729,7 +780,7 @@ namespace GraphSynth.Representation
             return newElements;
         }
 
-        private IEnumerable<graphElement> freeArcEmbedding(option Lmapping, designGraph host, designGraph Rmapping, IEnumerable<arc> danglingNeighbors)
+        public IEnumerable<graphElement> freeArcEmbedding(option Lmapping, designGraph host, designGraph Rmapping, IEnumerable<arc> danglingNeighbors)
         {
             /* There are nodes in host which may have been left dangling due to the fact that their 
              * connected nodes were part of the L-R deletion. These now need to be either 1) connected
@@ -815,10 +866,9 @@ namespace GraphSynth.Representation
                                  * bad copy. However, at the end of this function, we go through the arcs again
                                  * and remove any arcs that still appear free. This also serves the purpose to 
                                  * delete any dangling nodes that were not recognized in any rules. */
-                                var newArc = dangleArc.copy();
-                                host.addArc(newArc, fromNode, toNode);
-                                newElements.Add(newArc);
-                                /* add the new arc to the list of newElements that is returned by this function.*/
+                                host.addArc(dangleArc.copy(), fromNode, toNode);
+                                newElements.Add(host.arcs.Last());
+                                /* add the new arc to the list of elements that is returned by this function.*/
                             }
                             #endregion
 
@@ -860,7 +910,7 @@ namespace GraphSynth.Representation
         /// <param name = "host">The host.</param>
         /// <param name = "Rmapping">The rmapping.</param>
         /// <param name = "parameters">The parameters.</param>
-        private void updateAdditionalFunctions(option Lmapping, designGraph host,
+        public void updateAdditionalFunctions(option Lmapping, designGraph host,
                                                designGraph Rmapping, IEnumerable parameters)
         {
             /* If you get an error in this function, it is most likely due to 
@@ -881,16 +931,10 @@ namespace GraphSynth.Representation
                 }
                 catch (Exception e)
                 {
-                    SearchIO.MessageBoxShow("Error in additional apply function: " + applyFunction.Name +
-                                            ".\nSee output bar for details.", "Error in  " + applyFunction.Name, "Error");
-                    SearchIO.output("Error in function: " + applyFunction.Name);
-                    //+ "\n" +ErrorLogger.MakeErrorString(e, false));
-                    SearchIO.output("Exception in : " + e.InnerException.TargetSite.Name);
-                    SearchIO.output("Error              : " + e.InnerException.Message);
-                    SearchIO.output("Stack Trace     	: " + e.InnerException.StackTrace);
+                    
                 }
 
-            #endregion
+        #endregion
         }
 
     }

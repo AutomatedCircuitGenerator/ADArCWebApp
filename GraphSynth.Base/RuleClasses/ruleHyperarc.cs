@@ -28,8 +28,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GraphSynth.Representation
-{
+namespace GraphSynth.Representation {
     /* here we define additional qualities used only by hyperarcs in the grammar rules. */
 
     /// <summary>
@@ -37,8 +36,7 @@ namespace GraphSynth.Representation
     ///   necessary to correctly perform recognition. This mostly hinges on the "subset or equal"
     ///   Booleans.
     /// </summary>
-    public class ruleHyperarc : hyperarc
-    {
+    public class ruleHyperarc : hyperarc {
         #region Constructors & Copy
 
         /// <summary>
@@ -46,15 +44,13 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <param name = "newName">The new name.</param>
         public ruleHyperarc(string newName)
-            : base(newName)
-        {
+            : base(newName) {
         }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref = "ruleHyperarc" /> class.
         /// </summary>
-        public ruleHyperarc()
-        {
+        public ruleHyperarc() {
         }
 
         /// <summary>
@@ -65,8 +61,7 @@ namespace GraphSynth.Representation
         /// <param name="ha">The hyperarc, ha.</param>
         /// <returns></returns>
         public ruleHyperarc(hyperarc ha)
-            : this(ha.name)
-        {
+            : this(ha.name) {
             DisplayShape = ha.DisplayShape;
             TargetType = ha.GetType().ToString();
             localLabels.AddRange(ha.localLabels);
@@ -77,8 +72,7 @@ namespace GraphSynth.Representation
         ///   Returns a copy of this instance.
         /// </summary>
         /// <returns>the copy of the arc.</returns>
-        public override hyperarc copy()
-        {
+        public override hyperarc copy() {
             var copyOfNode = new ruleHyperarc();
             copy(copyOfNode);
             return copyOfNode;
@@ -88,12 +82,10 @@ namespace GraphSynth.Representation
         ///   Copies this instance into the (already intialized) copyOfHyperArc.
         /// </summary>
         /// <param name = "copyOfHyperArc">The copy of node.</param>
-        public override void copy(hyperarc copyOfHyperArc)
-        {
+        public override void copy(hyperarc copyOfHyperArc) {
             base.copy(copyOfHyperArc);
-            if (copyOfHyperArc is ruleHyperarc)
-            {
-                var rcopy = (ruleHyperarc)copyOfHyperArc;
+            if (copyOfHyperArc is ruleHyperarc) {
+                var rcopy = (ruleHyperarc) copyOfHyperArc;
                 rcopy.containsAllLocalLabels = containsAllLocalLabels;
                 rcopy.strictNodeCountMatch = strictNodeCountMatch;
                 foreach (var label in negateLabels)
@@ -108,9 +100,10 @@ namespace GraphSynth.Representation
         ///   Gets the negating labels. The labels that must not exist for correct recognition.
         /// </summary>
         /// <value>The negate labels.</value>
-        public List<string> negateLabels
-        {
-            get { return _negateLabels ?? (_negateLabels = new List<string>()); }
+        public List<string> negateLabels {
+            get {
+                return _negateLabels ?? (_negateLabels = new List<string>());
+            }
         }
         private List<string> _negateLabels;
 
@@ -119,17 +112,8 @@ namespace GraphSynth.Representation
         /// host graph.
         /// </summary>
         /// <value><c>true</c> if [not exist]; otherwise, <c>false</c>.</value>
-        public Boolean NotExist { get; set; }
-
-
-        /// <summary>
-        /// Gets the value indicating whether the element SHOULD exist in the
-        /// host graph. It is just the opposite (true/false) or NotExist.
-        /// </summary>
-        /// <value><c>true</c> if [not exist]; otherwise, <c>false</c>.</value>
-        public Boolean MustExist
-        {
-            get { return !NotExist; }
+        public bool NotExist {
+            get; set;
         }
 
         /// <summary>
@@ -138,7 +122,9 @@ namespace GraphSynth.Representation
         /// <value>
         ///   <c>true</c> if [contains all local labels]; otherwise, <c>false</c>.
         /// </value>
-        public Boolean containsAllLocalLabels { get; set; }
+        public bool containsAllLocalLabels {
+            get; set;
+        }
         /* if true then all the localLabels in the rule element much match with those in the host 
          * element, if false then the rule element labels only need to be a subset on host elt. localLabels. */
 
@@ -146,13 +132,14 @@ namespace GraphSynth.Representation
         ///   Gets or sets the type (as a string) for the matching graph element.
         /// </summary>
         /// <value>The string describing the type of graph element.</value>
-        public string TargetType
-        {
-            get { return _targetType; }
-            set
-            {
+        public string TargetType {
+            get {
+                return _targetType;
+            }
+            set {
                 Type t = null;
-                if (value != null) t = Type.GetType(value);
+                if (value != null)
+                    t = Type.GetType(value);
                 /* if the user typed a Type but we can't find it, it is likely that
                  * * it is being compiled within GraphSynth, so prepend with various
                  * * namespaces. */
@@ -162,7 +149,8 @@ namespace GraphSynth.Representation
                     t = Type.GetType("GraphSynth.Representation." + value);
                 if (t != null)
                     _targetType = t.ToString();
-                else _targetType = value;
+                else
+                    _targetType = value;
                 //    throw new Exception("The Type: "+value+ " is not known.");
             }
         }
@@ -175,7 +163,9 @@ namespace GraphSynth.Representation
         /// <value>
         /// 	<c>true</c> if [strict node count match]; otherwise, <c>false</c>.
         /// </value>
-        public Boolean strictNodeCountMatch { get; set; }
+        public bool strictNodeCountMatch {
+            get; set;
+        }
 
         /* this boolean is to distinguish that a particular hyperarc
          * of L has all of the nodes of the host hyperarc. Again,
@@ -186,11 +176,9 @@ namespace GraphSynth.Representation
         ///  A slight difference exists for ruleNode since we don't want to count "NotExist" arcs.
         /// </summary>
         /// <value>The degree.</value>
-        public new int degree
-        {
-            get
-            {
-                return nodes.Count(n => ((ruleNode)n).MustExist);
+        public new int degree {
+            get {
+                return nodes.Count(n => !((ruleNode) n).NotExist);
             }
         }
         #endregion
