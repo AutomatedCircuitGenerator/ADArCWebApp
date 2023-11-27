@@ -2,6 +2,9 @@
 using System.Collections.Immutable;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Windows;
+using System.Resources;
+using static System.Net.WebRequestMethods;
 
 namespace ADArCWebApp
 {
@@ -37,7 +40,8 @@ namespace ADArCWebApp
                 "TransformerFlipRuleset",
                 "TransformerFlipRuleset2",
                 "Clean23Ruleset",
-                "BeforeBG-VerifyDirRuleSet");
+                "BeforeBG-VerifyDirRuleSet",
+                "BIG1");
             this.numLoaded = 0;
         }
 
@@ -61,18 +65,28 @@ namespace ADArCWebApp
                 return;
             }
 
-            //Setup HTTP client that we will use to load the file
-            HttpClient client = new HttpClient();
-
-            //Load the file as plain text from GitHub
+			////Setup HTTP client that we will use to load the file
+			HttpClient client = new HttpClient();
+            client.BaseAddress = new("https://localhost:7182/rules/");
+            ////Load the file as plain text from GitHub
             HttpResponseMessage ruleSetResponse =
-                await client.GetAsync("https://boglweb.github.io/rules-and-examples/Rules/" + name + ".rsxml");
+                await client.GetAsync("BIG1.rsxml");
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
 
-            //Deserialize the ruleset
-            rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleSetFileContent));
 
+            //var filename = "rules/BIG1.rsxml";
+            //var filename = new Uri("pack://application:,,,/Rules/BondGraphRuleset.rsxml");
+            //var filename = FileStore.Resource1.BondGraphRuleset.ToString();
+            //System.Windows.Resources.StreamResourceInfo info = Application.GetResourceStream(filename);
+            //var filename = extractPath1 + "\\BondGraphRuleset.rsxml";
+            //var filename = Encoding.ASCII.GetString(FileStore.Resource1.BondGraphRuleset);
+            //Stream stream = new FileStream(filename,FileMode.Open);
+            var ruleReader = new StreamReader(ruleSetFileContent);
+
+            //Deserialize the ruleset
+            rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
+            Console.WriteLine("1");
             //Load rules for the ruleset
             List<string> ruleFileNames = rulesets[name].ruleFileNames;
 
@@ -81,12 +95,15 @@ namespace ADArCWebApp
             this.numLoaded = 0;
             while (this.numLoaded < ruleFileNames.Count)
             {
-                string rulePath = "/Rules/" + ruleFileNames[this.numLoaded];
-
+                string rulePath = ruleFileNames[this.numLoaded];
+                Console.WriteLine(rulePath.Substring(rulePath.LastIndexOf("\\")));
                 //Get the rule files from GitHub 
                 HttpResponseMessage ruleResponse =
-                    await client.GetAsync("https://boglweb.github.io/rules-and-examples/" + rulePath);
-                string ruleText = await ruleResponse.Content.ReadAsStringAsync();
+                    await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\")+1));
+
+				string ruleText = await ruleResponse.Content.ReadAsStringAsync();
+                //var f = File.OpenText(rulePath);
+                //string ruleText = f.ReadToEnd();
 
                 XElement xeRule = XElement.Parse(ruleText);
                 XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
@@ -150,7 +167,9 @@ namespace ADArCWebApp
         //Helper methods from BoGL Desktop
         private grammarRule DeSerializeRuleFromXML(string xmlString)
         {
-            StringReader stringReader = new StringReader(xmlString);
+            //xmlString = xmlString.Replace("XYZIndependent", "BothIndependent");
+			//xmlString = xmlString.Replace("OnlyZ", "false");
+			StringReader stringReader = new StringReader(xmlString);
             XmlSerializer ruleDeserializer = new XmlSerializer(typeof(grammarRule));
             grammarRule? newGrammarRule = (grammarRule)ruleDeserializer.Deserialize(stringReader);
             if (newGrammarRule.L == null)

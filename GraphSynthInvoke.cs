@@ -40,13 +40,13 @@ namespace ADArCWebApp
             seed = makeSeed(inputs);
 
 
-            List<option> options = rulesets["INVDMarkerRules"].recognize(seed, true);
+            List<option> options = rulesets["BIG1"].recognize(seed, true);
             
 
             while (options.Count > 0)
             {
                 options[0].apply(seed, null);
-                options = rulesets["INVDMarkerRules"].recognize(seed, true);
+                options = rulesets["BIG1"].recognize(seed, true);
 
             }
             //options = rulesets["connect1"].recognize(seed, true);
