@@ -159,7 +159,7 @@ namespace ADArCWebApp
             foreach (grammarRule rule in rulesets[name].rules)
             {
                 rule.TransformNodePositions = false;
-                rule.Rotate = false;
+                rule.Rotate = GraphSynth.transfromType.Prohibited;
             }
             return rulesets[name];
         }
@@ -178,7 +178,7 @@ namespace ADArCWebApp
             }
             else
             {
-                newGrammarRule.L.internallyConnectGraph();
+                newGrammarRule.L.RepairGraphConnections();
             }
 
             if (newGrammarRule.R == null)
@@ -187,7 +187,7 @@ namespace ADArCWebApp
             }
             else
             {
-                newGrammarRule.R.internallyConnectGraph();
+                newGrammarRule.R.RepairGraphConnections();
             }
 
             return newGrammarRule;
