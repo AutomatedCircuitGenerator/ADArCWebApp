@@ -13,10 +13,10 @@ namespace ADArCWebApp.Shared
         public double rightOffset;
         public double cardScaleFactor;
         public double bottomOffset;
-
+		public Dictionary<string, int> pins;
         public object? defaultVal;
 
-        public Action<object, int>? translate;
+        public Action<ComponentInstance>? translate;
 
         public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
 
@@ -33,6 +33,7 @@ namespace ADArCWebApp.Shared
 			bottomOffset = builder.bottomOffset;
 			defaultVal = builder.defaultVal;
 			translate = builder.translate;
+			pins = builder.pins;
 		}
 
     }
@@ -51,10 +52,11 @@ namespace ADArCWebApp.Shared
 
 		public object? defaultVal;
 
-		public Action<object, int>? translate;
+		public Action<ComponentInstance>? translate;
+		public Dictionary<string, int> pins = new();
 
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<object, int>? translate = null, string paneHoverText = "", string codeForGen = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", string codeForGen = "", Dictionary<string,int>? pins = null) {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -65,6 +67,10 @@ namespace ADArCWebApp.Shared
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;
+			if (pins != null)
+			{
+				this.pins = pins;
+			}
 
 		}
 

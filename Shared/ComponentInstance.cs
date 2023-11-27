@@ -16,6 +16,8 @@ namespace ADArCWebApp.Shared
 
 		public object mainValue;
 
+		public Dictionary<int, int> connMap = new Dictionary<int, int>(); //comp->arduino
+
 		public ComponentInstance(int globalId, object mainValueInitial, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];

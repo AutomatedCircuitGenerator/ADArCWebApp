@@ -105,35 +105,22 @@
 
 	public static ElementReference? refresh;
 
-	[JSInvokable]
-	public static async void sendVal(int localId, int data)
-	{
-		var comp = Index.comps[localId];
 
-		ComponentDeclarations.components[comp.globalId].translate?.Invoke(comp, data);
-
-		await app.triggerRender();
-	}
 
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
-			//await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
 
-
-			updateScreenWidthRatio(await module.InvokeAsync<int>("getWindowWidth"));
+			AppInterop.runtime = JsRuntime;
+			AppInterop.jsModule = await AppInterop.getModuleWrapper();
+			
+			AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
+			AppInterop.startSimWrapper();
 		}
 	}
 
-	[JSInvokable]
-	public static void updateScreenWidthRatio(int screenWidth)
-	{
-		currentRatio = ((double)screenWidth) / defaultScreenWidth;
 
-		Console.WriteLine("screen resized! new ratio: " + currentRatio);
-	}
 
 	#region component pane integration
 	private int targetCardComponentId = -1;
