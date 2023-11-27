@@ -28,12 +28,14 @@
 using System.Globalization;
 using System.IO;
 
-namespace GraphSynth {
+namespace GraphSynth
+{
     /// <summary>
     ///   A simple static class created within a single function - to create relative paths.
     /// </summary>
-    public static class MyIOPath {
-        private static readonly char DS = Path.DirectorySeparatorChar;
+    public static class MyIOPath
+    {
+        private static readonly char DS =System.IO.Path.DirectorySeparatorChar;
         private static readonly string DSStr = DS.ToString(CultureInfo.InvariantCulture);
         /// <summary>
         ///   Gets the relative path to the target path starting at the "with Respect to" directory.
@@ -42,18 +44,18 @@ namespace GraphSynth {
         /// <param name = "target">The target path.</param>
         /// <param name = "withRespectTo">The "with respect to" directory.</param>
         /// <returns></returns>
-        public static string GetRelativePath(string target, string withRespectTo) {
+        public static string GetRelativePath(string target, string withRespectTo)
+        {
+            if (string.IsNullOrWhiteSpace(target)) target = "";
             var i = 0;
             var lastSlash = 0;
-            if (string.IsNullOrWhiteSpace(withRespectTo))
-                withRespectTo = DSStr;
-            if (!withRespectTo.EndsWith(DSStr))
-                withRespectTo += DS;
+            if (string.IsNullOrWhiteSpace(withRespectTo)) withRespectTo = DSStr;
+            if (!withRespectTo.EndsWith(DSStr)) withRespectTo += DS;
             /* this while loop is used to find the position of the last backslash that the two 
                  * directories have in common. */
-            while (i < target.Length && i < withRespectTo.Length && target[i].Equals(withRespectTo[i])) {
-                if (target[i].Equals(DS))
-                    lastSlash = i + 1;
+            while ((i < target.Length) && (i < withRespectTo.Length) && (target[i].Equals(withRespectTo[i])))
+            {
+                if (target[i].Equals(DS)) lastSlash = i + 1;
                 i++;
             }
 

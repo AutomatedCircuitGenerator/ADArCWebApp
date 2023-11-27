@@ -26,59 +26,53 @@
  *************************************************************************/
 using System;
 using System.Collections;
-using System.Threading;
 using System.Collections.Generic;
+using System.Threading;
 #if WPF
 using System.Windows;
 #endif
 
-namespace GraphSynth {
+namespace GraphSynth
+{
     /// <summary>
     ///   The static class that handles input and output statements from a
     ///   Search Process.
     /// </summary>
-    public static class SearchIO {
-        /// <summary>
-        ///   Gets the process number.
-        /// </summary>
-        /// <value>The process number.</value>
-        public static int processNum {
-            get {
-                var namelength = Thread.CurrentThread.Name.Length;
-                return int.Parse(Thread.CurrentThread.Name.Substring(1, namelength - 3));
-            }
-        }
-
+    public static class SearchIO
+    {
         #region Iteration Handling
 
         private const int defaultIteration = 0;
-        private static readonly Hashtable iterations = new Hashtable();
+        private static readonly Dictionary<int, int> iterations = new Dictionary<int, int>();
 
         /// <summary>
         ///   Gets or sets the iteration.
         /// </summary>
         /// <value>The iteration.</value>
-        public static int iteration {
-            set {
-                var searchThreadName = Thread.CurrentThread.Name ?? "";
+        public static int iteration
+        {
+            set
+            {
+                var searchThreadName = Thread.CurrentThread.ManagedThreadId;
                 if (iterations.ContainsKey(searchThreadName))
                     iterations[searchThreadName] = value;
-                else
-                    iterations.Add(searchThreadName, value);
+                else iterations.Add(searchThreadName, value);
             }
-            get {
-                return getIteration(Thread.CurrentThread.Name);
+            get
+            {
+                return getIteration(Thread.CurrentThread.ManagedThreadId);
             }
         }
 
         /// <summary>
-        ///   Gets the iteration.
+        /// Gets the iteration.
         /// </summary>
-        /// <param name = "threadName">Name of the thread.</param>
+        /// <param name="threadID">The thread identifier.</param>
         /// <returns></returns>
-        public static int getIteration(string threadName) {
-            if (!string.IsNullOrWhiteSpace(threadName) && iterations.ContainsKey(threadName))
-                return (int) iterations[threadName];
+        public static int getIteration(int threadID)
+        {
+            if (iterations.ContainsKey(threadID))
+                return (int)iterations[threadID];
             return defaultIteration;
         }
 
@@ -86,23 +80,25 @@ namespace GraphSynth {
 
         #region miscObject Handling
 
-        private const string defaultMiscObject = "misc";
-        private static readonly Hashtable miscHash = new Hashtable();
+        private const string defaultMiscObject = "misc";    
+        private static readonly Dictionary<int, object> miscHash = new Dictionary<int, object>();
 
         /// <summary>
         ///   Gets or sets the misc object.
         /// </summary>
         /// <value>The misc object.</value>
-        public static object miscObject {
-            set {
-                var searchThreadName = Thread.CurrentThread.Name ?? "";
+        public static object miscObject
+        {
+            set
+            {
+                var searchThreadName = Thread.CurrentThread.ManagedThreadId;
                 if (miscHash.ContainsKey(searchThreadName))
                     miscHash[searchThreadName] = value;
-                else
-                    miscHash.Add(searchThreadName, value);
+                else miscHash.Add(searchThreadName, value);
             }
-            get {
-                return getMiscObject(Thread.CurrentThread.Name);
+            get
+            {
+                return getMiscObject(Thread.CurrentThread.ManagedThreadId);
             }
         }
 
@@ -111,8 +107,9 @@ namespace GraphSynth {
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
         /// <returns></returns>
-        public static string getMiscObject(string threadName) {
-            if (!string.IsNullOrWhiteSpace(threadName) && miscHash.ContainsKey(threadName))
+        public static string getMiscObject(int threadName)
+        {
+            if (miscHash.ContainsKey(threadName))
                 return miscHash[threadName].ToString();
             return defaultMiscObject;
         }
@@ -121,16 +118,15 @@ namespace GraphSynth {
 
         #region Termination Request Handling
 
-        private static readonly Hashtable termRequests = new Hashtable();
+        private static readonly Dictionary<int, Boolean> termRequests = new Dictionary<int, Boolean>();
 
         /// <summary>
         ///   Gets a value indicating whether [terminate request].
         /// </summary>
         /// <value><c>true</c> if [terminate request]; otherwise, <c>false</c>.</value>
-        public static bool terminateRequest {
-            get {
-                return GetTerminateRequest(Thread.CurrentThread.Name);
-            }
+        public static Boolean terminateRequest
+        {
+            get { return GetTerminateRequest(Thread.CurrentThread.ManagedThreadId); }
         }
 
         /// <summary>
@@ -138,11 +134,10 @@ namespace GraphSynth {
         /// </summary>
         /// <param name="searchThreadName">Name of the search thread.</param>
         /// <returns></returns>
-        public static bool GetTerminateRequest(string searchThreadName = null) {
-            if (!string.IsNullOrWhiteSpace(searchThreadName))
-                searchThreadName = Thread.CurrentThread.Name;
-            if (!string.IsNullOrWhiteSpace(searchThreadName) && termRequests.ContainsKey(searchThreadName))
-                return (bool) termRequests[searchThreadName];
+        public static Boolean GetTerminateRequest(int searchThreadName)
+        {
+            if (termRequests.ContainsKey(searchThreadName))
+                return (Boolean)termRequests[searchThreadName];
             return false;
         }
 
@@ -150,29 +145,29 @@ namespace GraphSynth {
         ///   Sets the termination request.
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
-        public static void setTerminationRequest(string threadName) {
-            if (threadName == null)
-                throw new Exception("The theadname was null in setTerminationRequest");
-            if (!string.IsNullOrWhiteSpace(threadName) && termRequests.ContainsKey(threadName))
+        public static void setTerminationRequest(int threadName)
+        {
+            if (termRequests.ContainsKey(threadName))
                 termRequests[threadName] = true;
-            else
-                termRequests.Add(threadName, true);
+            else termRequests.Add(threadName, true);
         }
 
         #endregion
 
         #region Time Interval Handling
 
-        private static readonly Hashtable timeIntervals = new Hashtable();
+        private static readonly Dictionary<int, TimeSpan> timeIntervals = new Dictionary<int, TimeSpan>();
         private static readonly TimeSpan zeroTimeInterval = new TimeSpan(0);
 
         /// <summary>
         ///   Gets the time interval.
         /// </summary>
         /// <value>The time interval.</value>
-        public static TimeSpan timeInterval {
-            get {
-                return getTimeInterval(Thread.CurrentThread.Name);
+        public static TimeSpan timeInterval
+        {
+            get
+            {
+                return getTimeInterval(Thread.CurrentThread.ManagedThreadId);
             }
         }
 
@@ -181,11 +176,11 @@ namespace GraphSynth {
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
         /// <param name = "value">The value.</param>
-        public static void setTimeInterval(string threadName, TimeSpan value) {
+        public static void setTimeInterval(int threadName, TimeSpan value)
+        {
             if (timeIntervals.ContainsKey(threadName))
                 timeIntervals[threadName] = value;
-            else
-                timeIntervals.Add(threadName, value);
+            else timeIntervals.Add(threadName, value);
         }
 
         /// <summary>
@@ -193,9 +188,10 @@ namespace GraphSynth {
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
         /// <returns></returns>
-        public static TimeSpan getTimeInterval(string threadName) {
-            if (!string.IsNullOrWhiteSpace(threadName) && timeIntervals.ContainsKey(threadName))
-                return (TimeSpan) timeIntervals[threadName];
+        public static TimeSpan getTimeInterval(int threadName)
+        {
+            if ( timeIntervals.ContainsKey(threadName))
+                return (TimeSpan)timeIntervals[threadName];
             return zeroTimeInterval;
         }
 
@@ -209,15 +205,17 @@ namespace GraphSynth {
         public static int defaultVerbosity;
 
 
-        private static readonly Hashtable verbosities = new Hashtable();
+        private static readonly Dictionary<int, int> verbosities = new Dictionary<int, int>();
 
         /// <summary>
         ///   Gets the verbosity.
         /// </summary>
         /// <value>The verbosity.</value>
-        private static int verbosity {
-            get {
-                return getVerbosity(Thread.CurrentThread.Name);
+        private static int verbosity
+        {
+            get
+            {
+                return getVerbosity(Thread.CurrentThread.ManagedThreadId);
             }
         }
 
@@ -226,11 +224,11 @@ namespace GraphSynth {
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
         /// <param name = "value">The value.</param>
-        public static void setVerbosity(string threadName, int value) {
+        public static void setVerbosity(int threadName, int value)
+        {
             if (verbosities.ContainsKey(threadName))
                 verbosities[threadName] = value;
-            else
-                verbosities.Add(threadName, value);
+            else verbosities.Add(threadName, value);
         }
 
         /// <summary>
@@ -238,9 +236,10 @@ namespace GraphSynth {
         /// </summary>
         /// <param name = "threadName">Name of the thread.</param>
         /// <returns></returns>
-        public static int getVerbosity(string threadName) {
-            if (!string.IsNullOrWhiteSpace(threadName) && verbosities.ContainsKey(threadName))
-                return (int) verbosities[threadName];
+        public static int getVerbosity(int threadName)
+        {
+            if ( verbosities.ContainsKey(threadName))
+                return (int)verbosities[threadName];
             return defaultVerbosity;
         }
 
@@ -272,9 +271,10 @@ namespace GraphSynth {
         /// </summary>
         /// <param name="message">The message.</param>
         /// <param name="verbosityLimit">The verbosity limit.</param>
-        public static bool output(object message, int verbosityLimit = 0) {
-            if (verbosityLimit > verbosity
-                || string.IsNullOrWhiteSpace(message.ToString()))
+        public static Boolean output(object message, int verbosityLimit = 0)
+        {
+            if ((verbosityLimit > verbosity)
+                || (string.IsNullOrWhiteSpace(message.ToString())))
                 return false;
             Console.WriteLine(message);
             return true;
@@ -284,9 +284,10 @@ namespace GraphSynth {
         /// </summary>
         /// <param name="list">The list.</param>
         /// <returns></returns>
-        public static bool output(params object[] list) {
-            if (verbosity >= list.Length
-                || string.IsNullOrWhiteSpace(list[verbosity].ToString()))
+        public static Boolean output(params object[] list)
+        {
+            if ((verbosity >= list.Length)
+                || (string.IsNullOrWhiteSpace(list[verbosity].ToString())))
                 return false;
             Console.WriteLine(list[verbosity]);
             return true;
@@ -336,7 +337,7 @@ namespace GraphSynth {
         //}
         #endregion
 
-#if WPF
+
         #region Showing Message Boxes, Dialogs
 
         /// <summary>
@@ -350,38 +351,18 @@ namespace GraphSynth {
         /// <param name="optionsStr">The options STR.</param>
         /// <returns></returns>
         public static bool MessageBoxShow(string messageBoxText, string caption = "Message", string iconStr = "Information", string buttonStr = "OK", string defaultResultStr = "OK", string optionsStr = "None")
-        {
-            MessageBoxButton button;
-            if (!Enum.TryParse(buttonStr, true, out button)) button = MessageBoxButton.OK;
-            MessageBoxImage icon;
-            if (!Enum.TryParse(iconStr, true, out icon)) icon = MessageBoxImage.Information;
-            MessageBoxResult defaultResult;
-            if (!Enum.TryParse(defaultResultStr, true, out defaultResult)) defaultResult = MessageBoxResult.OK;
-            MessageBoxOptions options;
-            if (!Enum.TryParse(optionsStr, true, out options)) options = MessageBoxOptions.None;
-
-            var result = MessageBoxResult.None;
-            if ((main == null) || main.Dispatcher.CheckAccess())
-                result = MessageBox.Show(messageBoxText, caption, button, icon, defaultResult, options);
-            else
-                main.Dispatcher.Invoke(
-                    (ThreadStart)
-                    delegate { result = MessageBox.Show(messageBoxText, caption, button, icon, defaultResult, options); }
-                    );
-            return ((result == MessageBoxResult.OK)
-                    || (result == MessageBoxResult.Yes));
-            /*********************************************************************************/
-        }
+        { return popUpDialogger.MessageBoxShow(messageBoxText, caption, iconStr, buttonStr, defaultResultStr, optionsStr); }
 
         #endregion
 
-        #region Showing the Graph in Main
+            #region Showing the Graph in Main
 
-        /// <summary>
-        ///   A reference to the main window
-        /// </summary>
+            /// <summary>
+            ///   A reference to the main window
+            /// </summary>
         public static IMainWindow main;
-
+             public static IPopUpDialogger popUpDialogger { get; set; }
+             public static IGraphPresenter graphPresenter { get; set; }
         /// <summary>
         ///   Adds and shows a graph window.
         /// </summary>
@@ -389,12 +370,7 @@ namespace GraphSynth {
         /// <param name = "title">The title.</param>
         public static void addAndShowGraphWindow(object graphObjects, string title = "")
         {
-            if (main.Dispatcher.CheckAccess())
-                main.addAndShowGraphWindow(graphObjects, title);
-            else
-                main.Dispatcher.Invoke(
-                    (ThreadStart)(() => main.addAndShowGraphWindow(graphObjects, title))
-                    );
+            graphPresenter?.addAndShowGraphWindow(graphObjects, title);
         }
 
         /// <summary>
@@ -404,12 +380,8 @@ namespace GraphSynth {
         /// <param name = "title">The title.</param>
         public static void addAndShowRuleWindow(object ruleObjects, string title)
         {
-            if (main.Dispatcher.CheckAccess())
-                main.addAndShowRuleWindow(ruleObjects, title);
-            else
-                main.Dispatcher.Invoke(
-                    (ThreadStart)(() => main.addAndShowRuleWindow(ruleObjects, title))
-                    );
+            graphPresenter?.addAndShowRuleWindow(ruleObjects, title);
+
         }
 
 
@@ -420,74 +392,31 @@ namespace GraphSynth {
         /// <param name="title">The title.</param>
         public static void addAndShowRuleSetWindow(object ruleSetObjects, string title)
         {
-            if (main.Dispatcher.CheckAccess())
-                main.addAndShowRuleSetWindow(ruleSetObjects, title);
-            else
-                main.Dispatcher.Invoke(
-                    (ThreadStart)(() => main.addAndShowRuleSetWindow(ruleSetObjects, title))
-                    );
+            graphPresenter?.addAndShowRuleSetWindow(ruleSetObjects, title);
+
         }
 
         #endregion
-#else
-        /// <summary>
-        /// Messages the box show.
-        /// </summary>
-        /// <param name="messageBoxText">The message box text.</param>
-        /// <param name="caption">The caption.</param>
-        /// <param name="iconStr">The icon string.</param>
-        /// <param name="buttonStr">The button string.</param>
-        /// <param name="defaultResultStr">The default result string.</param>
-        /// <param name="optionsStr">The options string.</param>
-        /// <returns></returns>
-        public static bool MessageBoxShow(string messageBoxText, string caption = "", string iconStr = "", string buttonStr = "OK", string defaultResultStr = "", string optionsStr = "") {
-            if (!string.IsNullOrWhiteSpace(iconStr))
-                iconStr = " " + iconStr + ":";
-            if (!string.IsNullOrWhiteSpace(caption))
-                caption = " " + caption.Trim() + " ";
-            else
-                iconStr.Replace(':', ' ');
+    }
+    public interface IPopUpDialogger
+    {
+        bool MessageBoxShow(string messageBoxText, string caption = "Message",
+            string iconStr = "Information", string buttonStr = "OK", string defaultResultStr = "OK", string optionsStr = "None");
 
-            output("**" + iconStr + caption + "**\n" + messageBoxText + "\n");
-            if (buttonStr.StartsWith("OK")) {
-                output("Hit any key to continue.");
-                Console.ReadKey();
-                return true;
-            }
-            ConsoleKey response;
-            do {
-                output("Please Respond Y/N:");
-                response = Console.ReadKey().Key;
-            } while (response != ConsoleKey.N && response != ConsoleKey.Y);
-            return response == ConsoleKey.Y;
-        }
+        bool? Query(string message, string title, string trueBtnText = "Ok",
+              PopUpIconType popUpIconType = PopUpIconType.None,
+              string falseBtnText = "", string nullBtnText = "");
 
-        /// <summary>
-        /// Adds the and show graph window.
-        /// </summary>
-        /// <param name="graphObjects">The graph objects.</param>
-        /// <param name="title">The title.</param>
-        public static void addAndShowGraphWindow(object graphObjects, string title = "") {
-            //throw new NotImplementedException();
-        }
+        bool? Query(string commonMessageKey);
+    }
 
-        /// <summary>
-        /// Adds the and show rule window.
-        /// </summary>
-        /// <param name="ruleObjects">The rule objects.</param>
-        /// <param name="title">The title.</param>
-        public static void addAndShowRuleWindow(object ruleObjects, string title) {
-            //throw new NotImplementedException();
-        }
-        /// <summary>
-        /// Adds the and show rule set window.
-        /// </summary>
-        /// <param name="ruleObjects">The rule objects.</param>
-        /// <param name="title">The title.</param>
-        public static void addAndShowRuleSetWindow(object ruleObjects, string title) {
-            //throw new NotImplementedException();
-        }
-#endif
+    public enum PopUpIconType { None, Query, Warning, Information, Error }
+
+    public interface IGraphPresenter
+    {
+        void addAndShowGraphWindow(object graphObjects, string title);
+        void addAndShowRuleWindow(object ruleObjects, string title);
+        void addAndShowRuleSetWindow(object ruleSetObjects, string title);
 
     }
 }

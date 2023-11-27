@@ -29,13 +29,15 @@
 using System.Collections.Generic;
 
 
-namespace GraphSynth {
+namespace GraphSynth
+{
     /// <summary>
     /// Defines whether the choice method of a particular ruleset is done
     /// by some design agent (human or computer) or is automatic - meaning 
     /// once a rule is found to be recognized on a host, it is invoked.
     /// </summary>
-    public enum choiceMethods {
+    public enum choiceMethods
+    {
         /// <summary>
         /// A set of options are first defined by an exhaustive recognition
         /// of all rules in the ruleset. The decision of which option to 
@@ -54,7 +56,8 @@ namespace GraphSynth {
     /// are feasible candidates and hence ready for evaluation, or
     /// developing candidates which are yet to completed.
     /// </summary>
-    public enum feasibilityState {
+    public enum feasibilityState
+    {
         /// <summary/>
         Unspecified,
         /// <summary>
@@ -71,7 +74,8 @@ namespace GraphSynth {
     /// <summary>
     /// Defines how the generation process is to continue.
     /// </summary>
-    public enum nextGenerationSteps {
+    public enum nextGenerationSteps
+    {
         /// <summary />
         Unspecified = -5,
         /// <summary>
@@ -139,7 +143,8 @@ namespace GraphSynth {
     /// <summary>
     /// Enumerator Declaration for How Generation Ended, GenerationStatus 
     /// </summary>
-    public enum GenerationStatuses {
+    public enum GenerationStatuses
+    {
         /// <summary />
         Unspecified = -1,
         /// <summary>
@@ -168,7 +173,8 @@ namespace GraphSynth {
     /// Enumerator for Search functions that have generality
     /// to either minimize or maximize (e.g. PNPPS, stochasticChoose). */
     ///</summary>
-    public enum optimize {
+    public enum optimize
+    {
         /// <summary>
         /// Minimize in the search - smaller is better.
         /// </summary>
@@ -185,7 +191,8 @@ namespace GraphSynth {
     /// unintended amount of time to determine. In order to control this three possible
     /// analyses are defined. 
     /// </summary>
-    public enum ConfluenceAnalysis {
+    public enum ConfluenceAnalysis
+    {        
         /// <summary>
         /// A simple analysis that may produce a number of "unknown" states. Any unknown
         /// states are regarded as NOT confluent, even though they may be.
@@ -208,9 +215,10 @@ namespace GraphSynth {
     /// A comparer for optimization that can be used for either 
     /// minimization or maximization.
     /// </summary>
-    public class OptimizeSort : IComparer<double> {
+    public class OptimizeSort : IComparer<double>
+    {
         /* an integer equal to the required sort direction. */
-        private readonly bool AllowEqualInSort;
+        private readonly Boolean AllowEqualInSort;
         private readonly int direction;
         /* if using with SortedList, set AllowEqualInSorting to false, otherwise
          * it will crash when equal values are encountered. If using in Linq's 
@@ -222,8 +230,9 @@ namespace GraphSynth {
         /// </summary>
         /// <param name="direction">The direction.</param>
         /// <param name="AllowEqualInSort">The allow equal in sort.</param>
-        public OptimizeSort(optimize direction, bool AllowEqualInSort = false) {
-            this.direction = (int) direction;
+        public OptimizeSort(optimize direction, Boolean AllowEqualInSort = false)
+        {
+            this.direction = (int)direction;
             this.AllowEqualInSort = AllowEqualInSort;
         }
 
@@ -244,17 +253,16 @@ namespace GraphSynth {
         /// Greater than zero | <paramref name="x"/> is greater than <paramref name="y"/>.
         /// </returns>
         /// <param name="x">The first object to compare.</param><param name="y">The second object to compare.</param>
-        public int Compare(double x, double y) {
-            if (AllowEqualInSort && x == y)
-                return 0;
+        public int Compare(double x, double y)
+        {
+            if (AllowEqualInSort && (x == y)) return 0;
             /* in order to avoid the collections from throwing an error, we make sure
              * that only -1 or 1 is returned. If they are equal, we return +1 (when
              * minimizing). This makes newer items to the list appear before older items.
              * It is slightly more efficient than returning -1 and conforms with the 
              * philosophy of always exploring/preferring new concepts. See: SA's Metropolis Criteria. */
 
-            if (x < y)
-                return direction;
+            if (x < y) return direction;
             return -1 * direction;
         }
         #endregion
@@ -264,8 +272,9 @@ namespace GraphSynth {
         /// <param name="x">The x.</param>
         /// <param name="y">The y.</param>
         /// <returns></returns>
-        public bool BetterThan(double x, double y) {
-            return -1 == Compare(x, y);
+        public Boolean BetterThan(double x, double y)
+        {
+            return (-1 == Compare(x, y));
         }
     }
 
@@ -273,26 +282,39 @@ namespace GraphSynth {
     /// <summary>
     /// Defines the constraint on how shapes/coordinates are transformed. 
     /// </summary>
-    public enum transfromType {
+    public enum transfromType
+    {
         /// <summary>
         /// This type of transform is not recognized/performed.
         /// </summary>
-        Prohibited,
+        Prohibited=0,
         /// <summary>
         /// This type of transform is recognized/performed only in the X-direction.
         /// </summary>
-        OnlyX,
+        OnlyX = 1,
         /// <summary>
         /// This type of transform is recognized/performed only in the Y-direction.
         /// </summary>
-        OnlyY,
+        OnlyY = 2,
         /// <summary>
-        /// This type of transform is recognized/performed uniformly in both X and Y.
+        /// This type of transform is recognized/performed only in the Z-direction.
         /// </summary>
-        BothUniform,
+        OnlyZ = 3,
         /// <summary>
-        /// This type of transform is recognized/performed in both X and Y independently.
+        /// This type of transform is recognized/performed uniformly in X, Y, and Z.
+        /// </summary>  
+        XYZUniform = 4,
+        /// <summary>        
+        /// Deprecated. The type of transform is recognized/performed uniformly in BOTH X and Y (should use XYZUniform).
         /// </summary>
-        BothIndependent
+        BothUniform = 4,
+        /// <summary>
+        /// This type of transform is recognized/performed independently in X, Y, and Z.
+        /// </summary>    
+        XYZIndependent = 5,
+        /// <summary>        
+        /// Deprecated. The type of transform is recognized/performed independently in BOTH X and Y (should use XYZIndependent).
+        /// </summary>
+        BothIndependent = 5,
     };
 }

@@ -29,7 +29,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation {
+namespace GraphSynth.Representation
+{
     /// <summary>
     ///   The candidate class is a wrapper to designGraph. While the graph is
     ///   essentially what we are interested in, the candidate also includes
@@ -37,7 +38,8 @@ namespace GraphSynth.Representation {
     ///   of the graph (performance parameters), and what is the recipe, or
     ///   list of options that were called to create the graph (recipe).
     /// </summary>
-    public class candidate {
+    public class candidate
+    {
         #region Constructor
 
         /* a candidate can be made with nothing or by passing the graph that will be set
@@ -46,7 +48,8 @@ namespace GraphSynth.Representation {
         /// <summary>
         ///   Initializes a new instance of the <see cref = "candidate" /> class.
         /// </summary>
-        public candidate() {
+        public candidate()
+        {
         }
 
         /// <summary>
@@ -54,7 +57,8 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <param name = "_graph">The _graph.</param>
         /// <param name = "numRuleSets">The num rule sets.</param>
-        public candidate(designGraph _graph, int numRuleSets) {
+        public candidate(designGraph _graph, int numRuleSets)
+        {
             graph = _graph;
             for (var i = 0; i != numRuleSets; i++)
                 GenerationStatus.Add(GenerationStatuses.Unspecified);
@@ -99,18 +103,14 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The graph.</value>
         [XmlIgnore]
-        public designGraph graph {
-            get; set;
-        }
+        public designGraph graph { get; set; }
 
         /// <summary>
         ///   Gets or sets the name of the graph file.
         /// </summary>
         /// <value>The name of the graph file.</value>
         [XmlElement("graph")]
-        public string graphFileName {
-            get; set;
-        }
+        public string graphFileName { get; set; }
 
         /// <summary>
         ///   Gets or sets the index of the active rule set. the activeRuleSetIndex is set during 
@@ -120,18 +120,14 @@ namespace GraphSynth.Representation {
         ///   max number of calls is reached, if choice is STOP, or no rules are recognized.
         /// </summary>
         /// <value>The index of the active rule set.</value>
-        public int activeRuleSetIndex {
-            get; set;
-        }
+        public int activeRuleSetIndex { get; set; }
 
         /// <summary>
         ///   Gets or sets the age. This is an arbitrary value set by the search process. 
         ///   Likely it will be set to the # of iterations the candidate has existed in.
         /// </summary>
         /// <value>The age.</value>
-        public int age {
-            get; set;
-        }
+        public int age { get; set; }
 
 
         /// <summary>
@@ -139,10 +135,9 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The num rules called.</value>
         [XmlIgnore]
-        public int numRulesCalled {
-            get {
-                return recipe.Count;
-            }
+        public int numRulesCalled
+        {
+            get { return recipe.Count; }
         }
 
         /// <summary>
@@ -150,10 +145,11 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The last index of the rule set.</value>
         [XmlIgnore]
-        public int lastRuleSetIndex {
-            get {
-                if (recipe.Count == 0)
-                    return -1;
+        public int lastRuleSetIndex
+        {
+            get
+            {
+                if (recipe.Count == 0) return -1;
                 return recipe.Last().ruleSetIndex;
             }
         }
@@ -169,17 +165,19 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The f0.</value>
         [XmlIgnore]
-        public double f0 {
-            get {
+        public double f0
+        {
+            get
+            {
                 if (performanceParams.Count < 1)
-                    return double.NaN;
+                    return Double.NaN;
                 return performanceParams[0];
             }
-            set {
+            set
+            {
                 if (performanceParams.Count < 1)
                     performanceParams.Add(value);
-                else
-                    performanceParams[0] = value;
+                else performanceParams[0] = value;
             }
         }
 
@@ -188,18 +186,22 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The f1.</value>
         [XmlIgnore]
-        public double f1 {
-            get {
+        public double f1
+        {
+            get
+            {
                 if (performanceParams.Count < 2)
-                    return double.NaN;
+                    return Double.NaN;
                 return performanceParams[1];
             }
-            set {
-                if (performanceParams.Count < 2) {
+            set
+            {
+                if (performanceParams.Count < 2)
+                {
                     f0 = f0;
                     performanceParams.Add(value);
-                } else
-                    performanceParams[1] = value;
+                }
+                else performanceParams[1] = value;
             }
         }
 
@@ -208,19 +210,23 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The f2.</value>
         [XmlIgnore]
-        public double f2 {
-            get {
+        public double f2
+        {
+            get
+            {
                 if (performanceParams.Count < 3)
-                    return double.NaN;
+                    return Double.NaN;
                 return performanceParams[2];
             }
-            set {
-                if (performanceParams.Count < 3) {
+            set
+            {
+                if (performanceParams.Count < 3)
+                {
                     f0 = f0;
                     f1 = f1;
                     performanceParams.Add(value);
-                } else
-                    performanceParams[2] = value;
+                }
+                else performanceParams[2] = value;
             }
         }
 
@@ -229,20 +235,24 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The f3.</value>
         [XmlIgnore]
-        public double f3 {
-            get {
+        public double f3
+        {
+            get
+            {
                 if (performanceParams.Count < 4)
-                    return double.NaN;
+                    return Double.NaN;
                 return performanceParams[3];
             }
-            set {
-                if (performanceParams.Count < 4) {
+            set
+            {
+                if (performanceParams.Count < 4)
+                {
                     f0 = f0;
                     f1 = f1;
                     f2 = f2;
                     performanceParams.Add(value);
-                } else
-                    performanceParams[3] = value;
+                }
+                else performanceParams[3] = value;
             }
         }
 
@@ -251,21 +261,25 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The f4.</value>
         [XmlIgnore]
-        public double f4 {
-            get {
+        public double f4
+        {
+            get
+            {
                 if (performanceParams.Count < 5)
-                    return double.NaN;
+                    return Double.NaN;
                 return performanceParams[4];
             }
-            set {
-                if (performanceParams.Count < 5) {
+            set
+            {
+                if (performanceParams.Count < 5)
+                {
                     f0 = f0;
                     f1 = f1;
                     f2 = f2;
                     f3 = f3;
                     performanceParams.Add(value);
-                } else
-                    performanceParams[4] = value;
+                }
+                else performanceParams[4] = value;
             }
         }
 
@@ -275,8 +289,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The rule numbers in recipe.</value>
         [XmlIgnore]
-        public int[] ruleNumbersInRecipe {
-            get {
+        public int[] ruleNumbersInRecipe
+        {
+            get
+            {
                 var rNIR = new int[recipe.Count];
                 for (var i = 0; i != recipe.Count; i++)
                     rNIR[i] = recipe[i].ruleNumber;
@@ -289,8 +305,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The rule set indices in recipe.</value>
         [XmlIgnore]
-        public int[] ruleSetIndicesInRecipe {
-            get {
+        public int[] ruleSetIndicesInRecipe
+        {
+            get
+            {
                 var rSIIR = new int[recipe.Count];
                 for (var i = 0; i != recipe.Count; i++)
                     rSIIR[i] = recipe[i].ruleSetIndex;
@@ -303,8 +321,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The option numbers in recipe.</value>
         [XmlIgnore]
-        public int[] optionNumbersInRecipe {
-            get {
+        public int[] optionNumbersInRecipe
+        {
+            get
+            {
                 var oNIR = new int[recipe.Count];
                 for (var i = 0; i != recipe.Count; i++)
                     oNIR[i] = recipe[i].optionNumber;
@@ -318,8 +338,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The parameters in recipe.</value>
         [XmlIgnore]
-        public List<double>[] parametersInRecipe {
-            get {
+        public List<double>[] parametersInRecipe
+        {
+            get
+            {
                 var pIR = new List<double>[recipe.Count];
                 for (var i = 0; i != recipe.Count; i++)
                     if (recipe[i].parameters.Count > 0)
@@ -341,9 +363,9 @@ namespace GraphSynth.Representation {
         /// <summary>
         ///   Saves a copy of the current state to the list of previous states.
         /// </summary>
-        public virtual void saveCurrent() {
-            if (graph != null)
-                prevStates.Add(graph.copy());
+        public virtual void saveCurrent()
+        {
+            if (graph != null) prevStates.Add(graph.copy());
         }
 
         /// <summary>
@@ -352,7 +374,8 @@ namespace GraphSynth.Representation {
         ///   the currentstate, so this correspondingly adds the option to the recipe.
         /// </summary>
         /// <param name = "currentOpt">The currentrule.</param>
-        public virtual void addToRecipe(option currentOpt) {
+        public virtual void addToRecipe(option currentOpt)
+        {
             recipe.Add(currentOpt.copy());
         }
 
@@ -363,9 +386,9 @@ namespace GraphSynth.Representation {
         ///   forward, so this simply resets the candidate to how it looked
         ///   prior to calling the last rule.
         /// </summary>
-        public virtual void undoLastRule() {
-            if (prevStates.Count <= 0)
-                return;
+        public virtual void undoLastRule()
+        {
+            if (prevStates.Count <= 0) return;
             activeRuleSetIndex = lastRuleSetIndex;
             graph = prevStates.Last();
             prevStates.RemoveAt(prevStates.Count - 1);
@@ -382,15 +405,17 @@ namespace GraphSynth.Representation {
         ///   how each candidate may be changed in the future.
         /// </summary>
         /// <returns></returns>
-        public virtual candidate copy() {
-            var copyOfCand = new candidate {
-                activeRuleSetIndex = activeRuleSetIndex,
-                graph = graph.copy()
-            };
+        public virtual candidate copy()
+        {
+            var copyOfCand = new candidate
+                                 {
+                                     activeRuleSetIndex = activeRuleSetIndex,
+                                     graph = graph.copy()
+                                 };
 
             foreach (var d in prevStates)
                 copyOfCand.prevStates.Add(d.copy());
-            foreach (var opt in recipe)
+            foreach (var opt in recipe) 
                 copyOfCand.recipe.Add(opt.copy());
             foreach (var f in performanceParams)
                 copyOfCand.performanceParams.Add(f);

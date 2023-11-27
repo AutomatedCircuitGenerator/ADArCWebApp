@@ -1,4 +1,3 @@
-
 /*************************************************************************
  *     This embeddingRule file & class is part of the GraphSynth.BaseClasses 
  *     Project which is the foundation of the GraphSynth Application.
@@ -32,12 +31,14 @@ using System.Xml;
 using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation {
+namespace GraphSynth.Representation
+{
     /// <summary>
     ///   The embedding rule defines what to do with arcs that are freed (one or both of its connecting
     ///   nodes is deleted) by the enclosing grammar rule.
     /// </summary>
-    public class embeddingRule {
+    public class embeddingRule
+    {
         #region Properties and Fields
 
         /// <summary>
@@ -66,8 +67,8 @@ namespace GraphSynth.Representation {
         ///   In order to be backwards compatible, this field captures the old fields and converts them
         ///   to proper places. See use in BasicFiler.cs
         /// </summary>
-        [XmlIgnore]
-        public XmlElement[] oldLabels;
+        [XmlAnyElement]
+        public XElement[] oldLabels;
 
         /// <summary>
         ///   Gets or sets the name of the L node that was attached to the 
@@ -75,9 +76,7 @@ namespace GraphSynth.Representation {
         ///   but in the L of the rule.
         /// </summary>
         /// <value>The name of the L node.</value>
-        public string LNodeName {
-            get; set;
-        }
+        public string LNodeName { get; set; }
 
         /// <summary>
         ///   Gets or sets the name of the R node to connect this arc to. There is no need to include 
@@ -87,9 +86,7 @@ namespace GraphSynth.Representation {
         ///   daughter graph in the NCE lingo) as opposed to simply a label based method.
         /// </summary>
         /// <value>The name of the R node.</value>
-        public string RNodeName {
-            get; set;
-        }
+        public string RNodeName { get; set; }
 
         /// <summary>
         ///   Gets or sets the original direction that must be free for this embedding rule to be recognized.
@@ -101,25 +98,19 @@ namespace GraphSynth.Representation {
         ///   to change the direction of the arc, or keep it as is.
         /// </summary>
         /// <value>The original direction.</value>
-        public sbyte originalDirection {
-            get; set;
-        }
+        public sbyte originalDirection { get; set; }
 
         /// <summary>
         ///   Gets or sets the new direction of the arc. Yes, the arc can actually be flipped by the embedding rule.
         /// </summary>
         /// <value>The new direction.</value>
-        public sbyte newDirection {
-            get; set;
-        }
+        public sbyte newDirection { get; set; }
 
         /// <summary>
         ///   Gets or sets a value indicating whether [allow arc duplication].
         /// </summary>
         /// <value><c>true</c> if [allow arc duplication]; otherwise, <c>false</c>.</value>
-        public bool allowArcDuplication {
-            get; set;
-        }
+        public Boolean allowArcDuplication { get; set; }
 
         /* if allowArcDuplication is true then for each rule that matches with the arc the arc will be 
          * duplicated. */
@@ -128,9 +119,10 @@ namespace GraphSynth.Representation {
 
         #region Methods
 
-        internal static bool hyperArcIsFree(hyperarc dangleHyperArc, designGraph host, out List<node> neighborNodes) {
+        internal static Boolean hyperArcIsFree(hyperarc dangleHyperArc, designGraph host, out List<node> neighborNodes)
+        {
             neighborNodes = dangleHyperArc.nodes.Where(n => !host.nodes.Contains(n)).ToList();
-            return neighborNodes.Count > 0;
+            return (neighborNodes.Count > 0);
         }
         /// <summary>
         ///   Is the arc a free arc from this grammar rule?
@@ -140,9 +132,11 @@ namespace GraphSynth.Representation {
         /// <param name = "freeEndIdentifier">The free end identifier.</param>
         /// <param name = "neighborNode">The neighbor node.</param>
         /// <returns></returns>
-        public static bool arcIsFree(arc a, designGraph host, out sbyte freeEndIdentifier, out node neighborNode) {
+        public static Boolean arcIsFree(arc a, designGraph host, out sbyte freeEndIdentifier, out node neighborNode)
+        {
             if (a.From != null && a.To != null &&
-                !host.nodes.Contains(a.From) && !host.nodes.Contains(a.To)) {
+                !host.nodes.Contains(a.From) && !host.nodes.Contains(a.To))
+            {
                 freeEndIdentifier = 0;
                 /* if the nodes on either end of the freeArc are pointing to previous nodes 
                  * that were deleted in the first pushout then neighborNode is null (and as
@@ -151,13 +145,15 @@ namespace GraphSynth.Representation {
                 neighborNode = null;
                 return true;
             }
-            if (a.From != null && !host.nodes.Contains(a.From)) {
+            if (a.From != null && !host.nodes.Contains(a.From))
+            {
                 freeEndIdentifier = -1;
                 /* freeEndIdentifier set to -1 means that the From end of the arc must be the free end.*/
                 neighborNode = a.To;
                 return true;
             }
-            if (a.To != null && !host.nodes.Contains(a.To)) {
+            if (a.To != null && !host.nodes.Contains(a.To))
+            {
                 freeEndIdentifier = +1;
                 /* freeEndIdentifier set to +1 means that the To end of the arc must be the free end.*/
                 neighborNode = a.From;
@@ -179,40 +175,39 @@ namespace GraphSynth.Representation {
         /// <param name = "neighborNode">The neighbor node.</param>
         /// <param name = "nodeRemoved">The node removed.</param>
         /// <returns></returns>
-        internal bool ruleIsRecognized(sbyte freeEndIdentifier, arc freeArc,
-                                        node neighborNode, node nodeRemoved) {
-            if (freeEndIdentifier * originalDirection < 0)
-                return false;
+        internal Boolean ruleIsRecognized(sbyte freeEndIdentifier, arc freeArc,
+                                        node neighborNode, node nodeRemoved)
+        {
+            if (freeEndIdentifier * originalDirection < 0) return false;
             /* this one is a little bit of enigmatic but clever coding if I do say so myself. Both
                 * of these variables can be either +1, 0, -1. If in multiplying the two together you 
                 * get -1 then this is the only incompability. Combinations of +1&+1, or +1&0, or 
                 * -1&-1 all mean that the arc has a free end on the requested side (From or To). */
 
             List<string> neighborlabels = null;
-            if (neighborNode != null)
-                neighborlabels = neighborNode.localLabels;
-            return labelsMatch(freeArc.localLabels, neighborlabels)
+            if (neighborNode != null) neighborlabels = neighborNode.localLabels;
+            return ((labelsMatch(freeArc.localLabels, neighborlabels))
                     &&
-                    (nodeRemoved == null ||
-                     freeArc.To == nodeRemoved && freeEndIdentifier >= 0 ||
-                     freeArc.From == nodeRemoved && freeEndIdentifier <= 0);
+                    ((nodeRemoved == null) ||
+                     ((freeArc.To == nodeRemoved) && (freeEndIdentifier >= 0)) ||
+                     ((freeArc.From == nodeRemoved) && (freeEndIdentifier <= 0))));
         }
 
 
 
 
-        internal bool ruleIsRecognized(hyperarc dangleHyperArc, List<node> neighborNodes, node nodeRemoved) {
-            IEnumerable<string> neighborlabels = null;
+        internal Boolean ruleIsRecognized(hyperarc dangleHyperArc, List<node> neighborNodes, node nodeRemoved)
+        {
+            IEnumerable<string> neighborlabels = null ;
             neighborlabels = neighborNodes.Aggregate(neighborlabels, (current, n) => current.Union(n.localLabels));
-            return labelsMatch(dangleHyperArc.localLabels, neighborlabels.ToList())
-                   && (nodeRemoved == null || dangleHyperArc.nodes.Contains(nodeRemoved));
+            return ((labelsMatch(dangleHyperArc.localLabels, neighborlabels.ToList()))
+                   && ((nodeRemoved == null) || (dangleHyperArc.nodes.Contains(nodeRemoved))));
         }
 
-        private bool labelsMatch(List<string> hostFreeArcLabels, List<string> hostNeighborLabels) {
-            if (hostFreeArcLabels == null)
-                hostFreeArcLabels = new List<string>();
-            if (hostNeighborLabels == null)
-                hostNeighborLabels = new List<string>();
+        private Boolean labelsMatch(List<string> hostFreeArcLabels, List<string> hostNeighborLabels)
+        {
+            if (hostFreeArcLabels == null) hostFreeArcLabels = new List<string>();
+            if (hostNeighborLabels == null) hostNeighborLabels = new List<string>();
             if (freeArcNegabels.Any(label => !label.Equals("<none>") && hostFreeArcLabels.Contains(label)))
                 return false;
 
@@ -224,26 +219,26 @@ namespace GraphSynth.Representation {
              * this is new in version 1.8. It's important since one may
              * have multiple identical labels. */
             var tempLabels = new List<string>();
-            if (!freeArcLabels.Contains("<any>")) {
+            if (!freeArcLabels.Contains("<any>"))
+            {
                 tempLabels.AddRange(hostFreeArcLabels);
 
-                foreach (var label in freeArcLabels) {
-                    if (tempLabels.Contains(label))
-                        tempLabels.Remove(label);
-                    else
-                        return false;
+                foreach (var label in freeArcLabels)
+                {
+                    if (tempLabels.Contains(label)) tempLabels.Remove(label);
+                    else return false;
                 }
             }
 
             tempLabels.Clear();
-            if (!neighborNodeLabels.Contains("<any>")) {
+            if (!neighborNodeLabels.Contains("<any>"))
+            {
                 tempLabels.AddRange(hostNeighborLabels);
 
-                foreach (var label in neighborNodeLabels) {
-                    if (tempLabels.Contains(label))
-                        tempLabels.Remove(label);
-                    else
-                        return false;
+                foreach (var label in neighborNodeLabels)
+                {
+                    if (tempLabels.Contains(label)) tempLabels.Remove(label);
+                    else return false;
                 }
             }
 

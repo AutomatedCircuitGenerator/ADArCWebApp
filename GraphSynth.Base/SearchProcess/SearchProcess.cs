@@ -29,7 +29,8 @@ using System.Collections;
 using System.Collections.Generic;
 using GraphSynth.Representation;
 
-namespace GraphSynth.Search {
+namespace GraphSynth.Search
+{
     /// <summary>
     ///   The abstract class that must be inherited in the Search plugins.
     /// </summary>
@@ -144,7 +145,8 @@ namespace GraphSynth.Search {
                 rulesets = new ruleSet[settings.numOfRuleSets];
                 for (var i = 0; i < settings.numOfRuleSets; i++)
                     rulesets[i] = settings.rulesets[i];
-              
+                ruleSet.loadAndCompileSourceFiles(rulesets, settings.RecompileRuleConditions,
+                                                  settings.CompiledRuleFunctions, GlobalSettings.ExecDir);
             }
             Run();
             rulesets = null;
@@ -359,7 +361,10 @@ namespace GraphSynth.Search {
         /// <param name="filename">The filename.</param>
         /// <param name="o">The o.</param>
         /// <param name="SuppressWarnings">if set to <c>true</c> [suppress warnings].</param>
-       
+        public void Save(string filename, object o, bool SuppressWarnings = false)
+        {
+            settings.filer.Save(filename, o, SuppressWarnings);
+        }
 
         /// <summary>
         /// Saves the candidates.
@@ -369,7 +374,10 @@ namespace GraphSynth.Search {
         /// <param name="candidates">The candidates.</param>
         /// <param name="SaveToOutputDir">if set to <c>true</c> [save to output dir].</param>
         /// <param name="timeStamp">if set to <c>true</c> [time stamp].</param>
-       
+        public void SaveCandidates(string filename, IList candidates, bool SaveToOutputDir, bool timeStamp)
+        {
+            settings.filer.SaveCandidates(filename, candidates, SaveToOutputDir, timeStamp);
+        }
 
         /// <summary>
         /// Opens the specified filename.
@@ -377,6 +385,9 @@ namespace GraphSynth.Search {
         /// <param name="filename">The filename.</param>
         /// <param name="SuppressWarnings">if set to <c>true</c> [suppress warnings].</param>
         /// <returns></returns>
-       
+        public object[] Open(string filename, bool SuppressWarnings = false)
+        {
+            return settings.filer.Open(filename, SuppressWarnings);
+        }
     }
 }

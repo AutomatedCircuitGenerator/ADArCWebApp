@@ -28,11 +28,13 @@ using System;
 using System.IO;
 using System.Net;
 
-namespace GraphSynth {
+namespace GraphSynth
+{
     /// <summary>
     ///   A class that allows us to dump errors to a txt file in the executable directory.
     /// </summary>
-    public static class ErrorLogger {
+    public static class ErrorLogger
+    {
         /// <summary>
         ///   The contents of the Error log
         /// </summary>
@@ -55,9 +57,12 @@ namespace GraphSynth {
         ///   Catches the specified exception.
         /// </summary>
         /// <param name = "Exc">The exc.</param>
-        public static void Catch(Exception Exc) {
-            try {
-                if (!File.Exists(ErrorLogFile)) {
+        public static void Catch(Exception Exc)
+        {
+            try
+            {
+                if (!File.Exists(ErrorLogFile))
+                {
                     var fs = new FileStream(ErrorLogFile, FileMode.OpenOrCreate, FileAccess.ReadWrite);
                     fs.Close();
                 }
@@ -66,12 +71,16 @@ namespace GraphSynth {
                 sw.Flush();
                 sw.Close();
                 var r = new Random();
-                string erCaption = counter == ErrorWelcomeCaptions.GetLength(0)
-                                       ? ErrorWelcomeCaptions[r.Next(ErrorWelcomeCaptions.GetLength(0))]
+                string erCaption = counter == ErrorWelcomeCaptions.GetLength(0) 
+                                       ? ErrorWelcomeCaptions[r.Next(ErrorWelcomeCaptions.GetLength(0))] 
                                        : ErrorWelcomeCaptions[counter++];
-
-            } catch (Exception e) {
-
+                SearchIO.MessageBoxShow("Error found in " + Exc.Source +
+                                        "\nError contents can be found in " + ErrorLogFile, erCaption, "Error");
+            }
+            catch (Exception e)
+            {
+                SearchIO.output("Error in ErrorLogger (how did this happen?!)"
+                                + e);
             }
         }
 
@@ -82,12 +91,15 @@ namespace GraphSynth {
         /// <param name = "Exc">The exc.</param>
         /// <param name = "includeComputerData">if set to <c>true</c> [include computer data].</param>
         /// <returns></returns>
-        public static string MakeErrorString(Exception Exc, bool includeComputerData) {
+        public static string MakeErrorString(Exception Exc, Boolean includeComputerData)
+        {
             var sw = new StringWriter();
-            try {
+            try
+            {
                 sw.WriteLine("Source    : " + Exc.Source.Trim());
                 sw.WriteLine("Method	: " + Exc.TargetSite.Name);
-                if (includeComputerData) {
+                if (includeComputerData)
+                {
                     sw.WriteLine("Date		: " + DateTime.Now.ToLongTimeString());
                     sw.WriteLine("Time		: " + DateTime.Now.ToShortDateString());
                     sw.WriteLine("Computer	: " + Dns.GetHostName());
@@ -95,7 +107,8 @@ namespace GraphSynth {
                 sw.WriteLine("Error		: " + Exc.Message.Trim());
                 sw.WriteLine("Stack Trace	: " + Exc.StackTrace.Trim());
                 var tabString = "";
-                while (Exc.InnerException != null) {
+                while (Exc.InnerException != null)
+                {
                     tabString += "\t";
                     Exc = Exc.InnerException;
                     sw.WriteLine("\n" + tabString + "Inner Exception in : " + Exc.TargetSite.Name);
@@ -103,8 +116,11 @@ namespace GraphSynth {
                     sw.WriteLine(tabString + "Stack Trace     	: " + Exc.StackTrace.Trim());
                 }
                 sw.WriteLine("-------------------------------------------------------------------");
-            } catch (Exception e) {
-
+            }
+            catch (Exception e)
+            {
+                SearchIO.output("Error in ErrorLogger (how did this happen?!)"
+                                + e);
             }
             return sw.ToString();
         }

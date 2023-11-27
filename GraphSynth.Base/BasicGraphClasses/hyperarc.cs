@@ -29,7 +29,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation {
+namespace GraphSynth.Representation
+{
     /// <summary>
     ///   In the spring of 2010, it was decided to introduce a third basic element
     ///   to the graph: a hyperarc. A hyperarc is an arc that connects an arbitrary
@@ -39,7 +40,8 @@ namespace GraphSynth.Representation {
     ///   than the arc - as such it was decided not to override the arc class.
     /// </summary>
     [XmlInclude(typeof(ruleHyperarc))]
-    public class hyperarc : graphElement {
+    public class hyperarc : graphElement
+    {
         #region Fields & Properties
 
         #region List of nodes connected to the hyperarc
@@ -54,10 +56,9 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The nodes.</value>
         [XmlIgnore]
-        public List<node> nodes {
-            get {
-                return _nodes ?? (_nodes = new List<node>());
-            }
+        public List<node> nodes
+        {
+            get { return _nodes ?? (_nodes = new List<node>()); }
         }
 
         /// <summary>
@@ -67,13 +68,15 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The XML from.</value>
         [XmlElement("node")]
-        public string[] XmlNodes {
-            get {
+        public string[] XmlNodes
+        {
+            get
+            {
                 return nodes.Select(n => n.name).ToArray();
             }
-            set {
-                if (value == null)
-                    return;
+            set
+            {
+                if (value == null) return;
                 var names = value;
                 _nodes = new List<node>();
                 foreach (var a in names)
@@ -91,24 +94,25 @@ namespace GraphSynth.Representation {
         ///   Gets the degree of the hyperarcs - the number of nodes that it connects to.
         /// </summary>
         /// <value>The degree.</value>
-        public int degree {
-            get {
-                return nodes.Count;
-            }
+        public int degree
+        {
+            get { return nodes.Count; }
         }
         /// <summary>
         /// Gets the arcs that connect to and from nodes within this hyperarc.
         /// </summary>
         /// <value>The intra-connected arcs.</value>
         [XmlIgnore]
-        public List<arc> IntraArcs {
-            get {
+        public List<arc> IntraArcs
+        {
+            get
+            {
                 var pathArcsEnumerable = nodes.SelectMany(n => n.arcsFrom);
                 pathArcsEnumerable = pathArcsEnumerable.Intersect(nodes.SelectMany(n => n.arcsTo));
                 return pathArcsEnumerable.ToList();
             }
         }
-
+        
         #endregion
 
         #region Property-like Functions
@@ -116,8 +120,10 @@ namespace GraphSynth.Representation {
         /// Connects the hyperarc to a new node.
         /// </summary>
         /// <param name="newNode">The new node.</param>
-        public void ConnectTo(node newNode) {
-            if (!nodes.Contains(newNode)) {
+        public void ConnectTo(node newNode)
+        {
+            if (!nodes.Contains(newNode))
+            {
                 nodes.Add(newNode);
                 newNode.arcs.Add(this);
             }
@@ -126,8 +132,10 @@ namespace GraphSynth.Representation {
         /// Disconnects the hyperarc from a node.
         /// </summary>
         /// <param name="removeNode">The remove node.</param>
-        public void DisconnectFrom(node removeNode) {
-            if (nodes.Contains(removeNode)) {
+        public void DisconnectFrom(node removeNode)
+        {
+            if (nodes.Contains(removeNode))
+            {
                 nodes.Remove(removeNode);
                 removeNode.arcs.Remove(this);
             }
@@ -141,10 +149,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <param name = "newName">The new name.</param>
         /// <param name = "attachedNodes">The attached nodes.</param>
-        public hyperarc(string newName, IEnumerable<node> attachedNodes) {
+        public hyperarc(string newName, IEnumerable<node> attachedNodes)
+        {
             name = newName;
-            if (attachedNodes == null)
-                return;
+            if (attachedNodes == null) return;
             _nodes = new List<node>();
             foreach (var n in attachedNodes)
                 ConnectTo(n);
@@ -155,14 +163,16 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <param name = "newName">The new name.</param>
         public hyperarc(string newName)
-            : this(newName, null) {
+            : this(newName, null)
+        {
         }
 
         /// <summary>
         ///   Initializes a new instance of the <see cref = "hyperarc" /> class.
         /// </summary>
         public hyperarc()
-            : this("_", null) {
+            : this("_", null)
+        {
         }
 
         #endregion
@@ -173,7 +183,8 @@ namespace GraphSynth.Representation {
         ///   Copies this instance of an arc and returns the copy.
         /// </summary>
         /// <returns>the copy of the arc.</returns>
-        public virtual hyperarc copy() {
+        public virtual hyperarc copy()
+        {
             var copyOfArc = new hyperarc();
             copy(copyOfArc);
             return copyOfArc;
@@ -183,7 +194,8 @@ namespace GraphSynth.Representation {
         ///   Copies this.arc into the argument copyOfArc.
         /// </summary>
         /// <param name = "copyOfArc">The copy of arc.</param>
-        public virtual void copy(hyperarc copyOfArc) {
+        public virtual void copy(hyperarc copyOfArc)
+        {
             base.copy(copyOfArc);
         }
 

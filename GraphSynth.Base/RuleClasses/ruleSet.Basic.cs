@@ -31,7 +31,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation {
+namespace GraphSynth.Representation
+{
     /* As far as I can tell, this is the first time the idea of a rule set
      * has been developed to this degree. In many applications we find that 
      * different sets of rules are needed. Many of these characteristics
@@ -60,7 +61,8 @@ namespace GraphSynth.Representation {
         ///   Normal, Choice, CycleLimit, NoRules, TriggerRule. So, following normal operation 
         ///   of RCA (normal), we perform the first operation stated below, nextGenerationStep[0]
         ///   this will likely be to LOOP and contine apply rules. Defaults for these are
-        ///   specified in App.gsconfig.
+        ///   specified in App.gsconfig.           
+        [XmlIgnore]
         /// </summary>
         public nextGenerationSteps[] nextGenerationStep;
 
@@ -245,10 +247,13 @@ namespace GraphSynth.Representation {
                     }
                 }
             }
-            
-            else /* do in series */
+            else if (InParallel)/* new parallel rule check */
                 options = rules.SelectMany((rule, ruleIndex) =>
                                                rule.recognize(host, true, (generationAfterNoRules == nextGenerationSteps.Stop) ? RelaxationTemplate : null)
+                                               .Select(o => o.assignRuleInfo(ruleIndex + 1, RuleSetIndex))).AsParallel().ToList();
+            else /* do in series */
+                options = rules.SelectMany((rule, ruleIndex) =>
+                                               rule.recognize(host, false, (generationAfterNoRules == nextGenerationSteps.Stop) ? RelaxationTemplate : null)
                                                .Select(o => o.assignRuleInfo(ruleIndex + 1, RuleSetIndex))).ToList();
             for (var i = 0; i < options.Count; i++)
                 options[i].optionNumber = i;
@@ -306,5 +311,6 @@ namespace GraphSynth.Representation {
         }
 
         #endregion
+
     }
 }

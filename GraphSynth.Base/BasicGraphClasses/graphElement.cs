@@ -25,19 +25,21 @@
  *     at http://www.GraphSynth.com.
  *************************************************************************/
 
-
-using System.Xml.Linq;
 using System;
 using System.Collections.Generic;
 using System.Xml;
+using System.Xml.Linq;
 using System.Xml.Serialization;
 
-namespace GraphSynth.Representation {
+
+namespace GraphSynth.Representation
+{
     /// <summary>
     ///   The base class of node, arc, and hyperarc. It simply captures the basic
     ///   qualities that all includes - mainly a list of labels.
     /// </summary>
-    public abstract class graphElement {
+    public abstract class graphElement
+    {
         #region Fields & Properties
 
         /// <summary>
@@ -46,9 +48,7 @@ namespace GraphSynth.Representation {
         ///   serialize the graph from the XML (*.gxml) file.
         /// </summary>
         /// <value>The name string.</value>
-        public string name {
-            get; set;
-        }
+        public string name { get; set; }
 
         /// <summary>
         ///   Gets or sets the old data. In order to be compatible with previous versions,
@@ -56,10 +56,8 @@ namespace GraphSynth.Representation {
         ///   screenY instead of the new format.
         /// </summary>
         /// <value>The old data.</value>
-        [XmlIgnore]
-        public XmlElement[] extraData {
-            get; set;
-        }
+        [XmlAnyElement]
+        public XElement[] extraData { get; set; }
 
         //private Shape _displayShape;
         /// <summary>
@@ -67,9 +65,7 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <value>The display shape.</value>
         [XmlIgnore]
-        public ShapeData DisplayShape {
-            get; set;
-        }
+        public ShapeData DisplayShape { get; set; }
 
 
 
@@ -82,26 +78,24 @@ namespace GraphSynth.Representation {
         protected List<string> _localLabels;
 
         /// <summary />
-        protected List<string> _localVariables;
+        protected List<double> _localVariables;
 
         /// <summary>
         ///   Gets the local labels.
         /// </summary>
         /// <value>The local labels.</value>
-        public List<string> localLabels {
-            get {
-                return _localLabels ?? (_localLabels = new List<string>());
-            }
+        public List<string> localLabels
+        {
+            get { return _localLabels ?? (_localLabels = new List<string>()); }
         }
 
         /// <summary>
         ///   Gets the local variables.
         /// </summary>
         /// <value>The local variables.</value>
-        public List<string> localVariables {
-            get {
-                return _localVariables ?? (_localVariables = new List<string>());
-            }
+        public List<double> localVariables
+        {
+            get { return _localVariables ?? (_localVariables = new List<double>()); }
         }
 
         #endregion
@@ -112,7 +106,8 @@ namespace GraphSynth.Representation {
         ///   Copies this graphElement data into the copyOfElt.
         /// </summary>
         /// <param name = "copyOfElt">The copy of elt.</param>
-        protected virtual void copy(graphElement copyOfElt) {
+        protected virtual void copy(graphElement copyOfElt)
+        {
             copyOfElt.name = name;
             foreach (var label in localLabels)
                 copyOfElt.localLabels.Add(label);
@@ -137,7 +132,8 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <param name = "index">The index.</param>
         /// <param name = "label">The label.</param>
-        public void setLabel(int index, string label) {
+        public void setLabel(int index, string label)
+        {
             while (localLabels.Count <= index)
                 localLabels.Add("");
             localLabels[index] = label;
@@ -150,9 +146,10 @@ namespace GraphSynth.Representation {
         /// </summary>
         /// <param name = "index">The index.</param>
         /// <param name = "var">The var.</param>
-        public void setVariable(int index, string var) {
+        public void setVariable(int index, double var)
+        {
             while (localVariables.Count <= index)
-                localVariables.Add("0.0");
+                localVariables.Add(0.0);
             localVariables[index] = var;
         }
 

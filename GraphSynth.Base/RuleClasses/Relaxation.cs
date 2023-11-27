@@ -29,32 +29,35 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GraphSynth.Representation {
+namespace GraphSynth.Representation
+{
     /// <summary>
     /// 
     /// </summary>
-    public class Relaxation : IEnumerable<RelaxItem> {
+    public class Relaxation : IEnumerable<RelaxItem>
+    {
         #region Constructor
         /// <summary>
         /// Initializes a new instance of the <see cref="Relaxation"/> class.
         /// </summary>
         /// <param name="prescribedItems">The prescribed items.</param>
         /// <param name="NumberAllowable">The number allowable.</param>
-        public Relaxation(List<RelaxItem> prescribedItems, int NumberAllowable = 0) {
+        public Relaxation(List<RelaxItem> prescribedItems, int NumberAllowable = 0)
+        {
             items = prescribedItems;
             InitialAllowableRelaxes = prescribedItems.Select(r => r.NumberAllowed).ToArray();
-            if (NumberAllowable >= 0)
-                this.NumberAllowable = NumberAllowable;
-            else
-                this.NumberAllowable = initialNumberAllowable = InitialAllowableRelaxes.Sum();
+            if (NumberAllowable >= 0) this.NumberAllowable = NumberAllowable;
+            else this.NumberAllowable = initialNumberAllowable = InitialAllowableRelaxes.Sum();
         }
         /// <summary>
         /// Initializes a new instance of the <see cref="Relaxation"/> class.
         /// </summary>
         /// <param name="NumberAllowable">The number allowable.</param>
-        public Relaxation(int NumberAllowable = 0) {
+        public Relaxation(int NumberAllowable = 0)
+        {
             this.NumberAllowable = initialNumberAllowable = NumberAllowable;
-            if (NumberAllowable > 0) {
+            if (NumberAllowable > 0)
+            {
                 items = new List<RelaxItem> { new RelaxItem(Relaxations.Any, NumberAllowable) };
             }
         }
@@ -63,16 +66,12 @@ namespace GraphSynth.Representation {
         /// <summary>
         /// Gets the allowable relaxes.
         /// </summary>
-        public int[] InitialAllowableRelaxes {
-            get; private set;
-        }
+        public int[] InitialAllowableRelaxes { get; private set; }
 
         /// <summary>
         /// Gets the number allowable relaxations that are left (not initially prescribed).
         /// </summary>
-        public int NumberAllowable {
-            get; internal set;
-        }
+        public int NumberAllowable { get; internal set; }
 
         private int initialNumberAllowable;
 
@@ -83,10 +82,9 @@ namespace GraphSynth.Representation {
         /// <summary>
         /// Gets the fulfilled items.
         /// </summary>
-        public List<RelaxItem> FulfilledItems {
-            get {
-                return fulfilledItems ?? (fulfilledItems = new List<RelaxItem>());
-            }
+        public List<RelaxItem> FulfilledItems
+        {
+            get { return fulfilledItems ?? (fulfilledItems = new List<RelaxItem>()); }
         }
 
         private List<RelaxItem> fulfilledItems;
@@ -94,18 +92,19 @@ namespace GraphSynth.Representation {
         /// <summary>
         /// Gets the summary of relaxation that were used to make the match.
         /// </summary>
-        public string RelaxationSummary {
-            get {
+        public string RelaxationSummary
+        {
+            get
+            {
                 var result = "";
-                foreach (var f in fulfilledItems) {
+                foreach (var f in fulfilledItems)
+                {
                     result += "\n" + f.RelaxationType.ToString().Replace('_', ' ');
                     result += " on the ";
-                    if (f.GraphElement == null)
-                        result += "LHS graph";
+                    if (f.GraphElement == null) result += "LHS graph";
                     else
                         result += f.GraphElement.GetType().BaseType.Name + " named " + f.GraphElement.name;
-                    if (f.Datum != null)
-                        result += ": " + f.Datum;
+                    if (f.Datum != null) result += ": " + f.Datum;
                 }
                 result += ".\n";
                 return result.Remove(0, 1);
@@ -118,7 +117,8 @@ namespace GraphSynth.Representation {
         /// <returns>
         /// A <see cref="T:System.Collections.Generic.IEnumerator`1"/> that can be used to iterate through the collection.
         /// </returns>
-        public IEnumerator<RelaxItem> GetEnumerator() {
+        public IEnumerator<RelaxItem> GetEnumerator()
+        {
             return items.GetEnumerator();
         }
 
@@ -128,7 +128,8 @@ namespace GraphSynth.Representation {
         /// <returns>
         /// An <see cref="T:System.Collections.IEnumerator"/> object that can be used to iterate through the collection.
         /// </returns>
-        IEnumerator IEnumerable.GetEnumerator() {
+        IEnumerator IEnumerable.GetEnumerator()
+        {
             return GetEnumerator();
         }
 
@@ -136,9 +137,11 @@ namespace GraphSynth.Representation {
         /// Copies this instance.
         /// </summary>
         /// <returns></returns>
-        public Relaxation copy() {
+        public Relaxation copy()
+        {
             items = items ?? (items = new List<RelaxItem>());
-            return new Relaxation {
+            return new Relaxation
+            {
                 fulfilledItems = new List<RelaxItem>(FulfilledItems),
                 InitialAllowableRelaxes = InitialAllowableRelaxes,
                 items = items.Select(r => new RelaxItem(r.RelaxationType, r.NumberAllowed, r.GraphElement, r.Datum)).ToList(),
@@ -150,7 +153,8 @@ namespace GraphSynth.Representation {
         /// <summary>
         /// Resets the relaxation back to the way it was originally defined.
         /// </summary>
-        public void Reset() {
+        public void Reset()
+        {
             NumberAllowable = initialNumberAllowable;
             fulfilledItems = null;
             for (int i = 0; i < InitialAllowableRelaxes.GetLength(0); i++)
@@ -161,16 +165,15 @@ namespace GraphSynth.Representation {
     /// The RelaxItem describes the manner in which one can relax a rule or ruleset.
     /// A list of these is defined for the Relaxation class.
     /// </summary>
-    public class RelaxItem {
+    public class RelaxItem
+    {
         private readonly string prefixForAltered;
-        private readonly bool bothRevokeAndImpose;
+        private readonly Boolean bothRevokeAndImpose;
 
         /// <summary>
         /// Gets the elt.
         /// </summary>
-        public graphElement GraphElement {
-            get; private set;
-        }
+        public graphElement GraphElement { get; private set; }
 
         /// <summary>
         /// Gets the type of the relaxation.
@@ -178,24 +181,19 @@ namespace GraphSynth.Representation {
         /// <value>
         /// The type of the relaxation.
         /// </value>
-        public Relaxations RelaxationType {
-            get; private set;
-        }
+        public Relaxations RelaxationType { get; private set; }
 
         /// <summary>
         /// Gets the datum.
         /// </summary>
-        public string Datum {
-            get; private set;
-        }
+        public string Datum { get; private set; }
 
         /// <summary>
         /// Gets the applies to.
         /// </summary>
-        RelaxAppliesTo AppliesTo {
-            get; set;
-        }
-        enum RelaxAppliesTo {
+        RelaxAppliesTo AppliesTo { get; set; }
+        enum RelaxAppliesTo
+        {
             graph, node, arc, hyperarc, element
         }
         /// <summary>
@@ -204,9 +202,7 @@ namespace GraphSynth.Representation {
         /// <value>
         /// The number allowed.
         /// </value>
-        public int NumberAllowed {
-            get; set;
-        }
+        public int NumberAllowed { get; set; }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="RelaxItem"/> class.
@@ -215,16 +211,17 @@ namespace GraphSynth.Representation {
         /// <param name="NumberAllowed">The number allowed.</param>
         /// <param name="GraphElement">The graph element.</param>
         /// <param name="Datum">The datum.</param>
-        public RelaxItem(Relaxations RelaxationType, int NumberAllowed, graphElement GraphElement = null, string Datum = null) {
+        public RelaxItem(Relaxations RelaxationType, int NumberAllowed, graphElement GraphElement = null, string Datum = null)
+        {
             this.GraphElement = GraphElement;
             this.RelaxationType = RelaxationType;
             bothRevokeAndImpose = RelaxationType.ToString().EndsWith("_Altered");
             if (bothRevokeAndImpose)
-                prefixForAltered = RelaxationType.ToString().Replace("_Altered", "");
+                prefixForAltered = RelaxationType.ToString().Replace("_Altered","");
             this.Datum = Datum;
             this.NumberAllowed = NumberAllowed;
             if (GraphElement != null)
-                AppliesTo = (RelaxAppliesTo) Enum.Parse(typeof(RelaxAppliesTo), GraphElement.GetType().BaseType.Name, true);
+                AppliesTo = (RelaxAppliesTo)Enum.Parse(typeof(RelaxAppliesTo), GraphElement.GetType().BaseType.Name, true);
             else if (RelaxationType == Relaxations.Additional_Functions_Revoked
                     || RelaxationType == Relaxations.Contains_All_Global_Labels_Revoked
                     || RelaxationType == Relaxations.Ordered_Global_Labels_Revoked
@@ -241,38 +238,33 @@ namespace GraphSynth.Representation {
                 AppliesTo = RelaxAppliesTo.node;
             else if (RelaxationType == Relaxations.Strict_Node_Count_Revoked)
                 AppliesTo = RelaxAppliesTo.hyperarc;
-            else
-                AppliesTo = RelaxAppliesTo.element;
+            else AppliesTo = RelaxAppliesTo.element;
         }
 
-        internal bool Matches(Relaxations rType, graphElement g = null, string datum = "") {
-            if (!string.IsNullOrWhiteSpace(Datum) && Datum != datum)
-                return false;
-            if (NumberAllowed <= 0)
-                return false;
-            if (RelaxationType == Relaxations.Any)
-                return true;
-            if (bothRevokeAndImpose) {
-                if (!rType.ToString().StartsWith(prefixForAltered))
-                    return false;
-            } else if (RelaxationType != rType)
-                return false;
-            if (g == null)
-                return true;
-            if (GraphElement != null)
-                return GraphElement == g;
+        internal bool Matches(Relaxations rType, graphElement g = null, string datum = "")
+        {
+            if ((!string.IsNullOrWhiteSpace(Datum)) && (Datum != datum)) return false;
+            if (NumberAllowed <= 0) return false;
+            if (RelaxationType == Relaxations.Any) return true;
+            if (bothRevokeAndImpose)
+            {
+                if (!rType.ToString().StartsWith(prefixForAltered)) return false;
+            }
+            else if (RelaxationType != rType) return false;
+            if (g == null) return true;
+            if (GraphElement != null) return (GraphElement == g);
             /* in the remaining cases, g is not null, but GraphElement is, so we need to look at "Applies To" */
-            if (AppliesTo == RelaxAppliesTo.element)
-                return true;
-            return g is node && AppliesTo == RelaxAppliesTo.node
-                    || g is arc && AppliesTo == RelaxAppliesTo.arc
-                    || g is hyperarc && AppliesTo == RelaxAppliesTo.hyperarc;
+            if (AppliesTo == RelaxAppliesTo.element) return true;
+            return ((g is node && AppliesTo == RelaxAppliesTo.node)
+                    || (g is arc && AppliesTo == RelaxAppliesTo.arc)
+                    || (g is hyperarc && AppliesTo == RelaxAppliesTo.hyperarc));
         }
     }
     /// <summary>
     /// The enumerator of the Relaxation Types
     /// </summary>
-    public enum Relaxations {
+    public enum Relaxations
+    {
         /// <summary>
         /// Any is a wildcard for any of the following specific types of relaxations
         /// </summary>
