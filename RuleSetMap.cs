@@ -96,10 +96,11 @@ namespace ADArCWebApp
             while (this.numLoaded < ruleFileNames.Count)
             {
                 string rulePath = ruleFileNames[this.numLoaded];
-                Console.WriteLine(rulePath.Substring(rulePath.LastIndexOf("\\")));
+                Console.WriteLine(rulePath);
                 //Get the rule files from GitHub 
                 HttpResponseMessage ruleResponse =
-                    await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\")+1));
+                    await client.GetAsync(rulePath);
+				    //await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\") + 1));
 
 				string ruleText = await ruleResponse.Content.ReadAsStringAsync();
                 //var f = File.OpenText(rulePath);
