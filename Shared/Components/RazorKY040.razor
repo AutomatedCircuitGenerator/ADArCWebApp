@@ -124,8 +124,6 @@
     } */
 }
 
-render() {
- return html`
 <svg width="30.815mm"
      height="18.63mm"
      version="1.1"
@@ -157,31 +155,31 @@ render() {
         <rect x="9.05" y="36.1" width="6.95" height="2.47" rx=".756" />
     </g>
 
-    <g tabindex="0" @keydown=${this.keydown} @keyup=${this.keyup}>
+    <g tabindex="0" @keydown=@(this.keydown) @keyup=@(this.keyup)>
         <rect x="12.2" y="8.05" width="48.4" height="41" rx="7.12" fill="#e6e6e6" />
 
         <circle cx="36.6" cy="28.5" r="13.5" fill="#666" />
         <rect x="32.5" y="7.87" width="7.42" height="41.5" fill="#666" />
 
         <!-- Handle -->
-        <path transform="rotate(${this.angle}, 36.244, 28.5)"
+        <path transform="rotate(@(this.angle), 36.244, 28.5)"
               d="m36.3 21.4a7.03 7.14 0 0
               0-3.74 1.1v12.1a7.03 7.14 0 0 0 3.74 1.1 7.03 7.14 0 0 0 7.03-7.14 7.03 7.14 0 0
               0-7.03-7.14z"
               fill="#ccc"
               stroke="#060606"
               stroke-width=".3"
-              class="handle ${this.pressed ? 'active' : ''}"
-              @mousedown=${this.press}
-              @mouseup=${this.release}
-              @mouseleave=${this.release} />
+              class="handle @(this.pressed ? 'active' : '')"
+              @mousedown=@(this.press)
+              @mouseup=@(this.release)
+              @mouseleave=@(this.release) />
 
         <!-- Counter Clockwise Arrow -->
         <g class="arrow-container"
-           @click=${this.counterClockwiseStep}
-           @mousedown=${this.counterclockwiseArrowPress}
-           @mouseup=${this.arrowRelease}
-           @mouseleave=${this.arrowRelease}>
+           @click=@(this.counterClockwiseStep)
+           @mousedown=@(this.counterclockwiseArrowPress)
+           @mouseup=@(this.arrowRelease)
+           @mouseleave=@(this.arrowRelease)>
             <circle cx="20" cy="43" r="12" fill="red" opacity="0" />
             <path d="m21 44.5c-5.17-1.78-7.55-5.53-6.6-11.2 0.0662-0.327 0.107-0.938 0.272-1.06 0.204-0.137 0.312-0.116 0.39-0.1 0.0775 0.0152 0.139 0.0274 0.189 0.102 0.846 3.81 3.13 6.84 6.57 7.59 0.304-0.787 0.461-3.32 0.826-3.24 0.428 0.0848 4.31 5.73 4.93 6.65-0.978 0.839-6.07 4.44-6.95 4.28 0 0 0.206-2.19 0.362-2.96z"
                   fill="#b3b3b3"
@@ -192,10 +190,10 @@ render() {
 
         <!-- Clockwise Arrow -->
         <g class="arrow-container"
-           @click=${this.clockwiseStep}
-           @mousedown=${this.clockwiseArrowPress}
-           @mouseup=${this.arrowRelease}
-           @mouseleave=${this.arrowRelease}>
+           @click=@(this.clockwiseStep)
+           @mousedown=@(this.clockwiseArrowPress)
+           @mouseup=@(this.arrowRelease)
+           @mouseleave=@(this.arrowRelease)>
             <circle cx="20" cy="15" r="12" fill="red" opacity="0" />
             <path d="m21.2 12.1c-5.17 1.78-7.55 5.53-6.6 11.2 0.0662 0.327 0.107 0.938 0.272 1.06 0.204 0.137 0.312 0.116 0.39 0.1 0.0775-0.0152 0.139-0.0274 0.189-0.102 0.846-3.81 3.13-6.84 6.57-7.59 0.304 0.787 0.461 3.32 0.826 3.24 0.428-0.0848 4.31-5.73 4.93-6.65-0.978-0.839-6.07-4.44-6.95-4.28 0 0 0.206 2.19 0.362 2.96z"
                   fill="#b3b3b3"
@@ -240,11 +238,6 @@ render() {
         <text x="65.29" y="31.26" font-size="7.54px" fill="#ffffff">SW</text>
         <text x="70.42" y="39.99" font-size="6.82px" fill="#ffffff">+</text>
         <text x="64.31" y="49.74" font-size="7.59px" fill="#ffffff">GND</text>
-    </g>
+    </g> 
 </svg>
-    `;
-  }
-
-
-
-}
+`;
