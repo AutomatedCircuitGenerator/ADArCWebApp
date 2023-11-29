@@ -6,7 +6,7 @@ using System.Linq;
 
 namespace ADArCWebApp
 {
-    public class GraphSynthInvoke
+    public static class GraphSynthInvoke
     {
 
 
@@ -14,41 +14,50 @@ namespace ADArCWebApp
         //    {"add", null },
         //    {"connect1", null}
         //};
-        Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
+        static Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
 
         //inputs from user selecting components
-        List<string> inputs;
+        static List<string> inputs = new();
 
-        designGraph seed = new();
+        static designGraph seed = new();
         
-        public GraphSynthInvoke(List<string> inputs)
+        //public GraphSynthInvoke(List<string> inputs)
+        //{
+        //    this.inputs = inputs;
+        //}
+        public static void makeGraph(List<string> Inputs)
         {
-            this.inputs = inputs;
-        }
-        private designGraph makeSeed(List<string> Inputs)
-        {
-            designGraph Graph = new designGraph();
+            //designGraph Graph = new designGraph();
+            inputs.AddRange(Inputs);
             for (int i = 0; i < Inputs.Count; i++)
             {
-                Graph.addNode();
-                Graph.nodes[i].setLabel(0, "user_"+inputs[i]);
+                node n = new();
+                n.setLabel(0, "user_" + inputs[i]);
+                seed.addNode(n);
+                //seed.nodes[i].setLabel(0, "user_"+inputs[i]);
             }
-            return Graph;
         }
         //
-        public void recg_apply()
+        static public void recg_apply(List<string>? fInp = null)
         {
-            seed = makeSeed(inputs);
+            if (fInp != null) { 
+                makeGraph(fInp);
+            }
+            if (seed.nodes.Count == 0)
+            {
+                makeGraph(inputs);
+            }
             ruleSet r = new();
-            for(int i = 0; i < rulesets["CONNECT"].rules.Count; i++)
+            ruleSet connect = rulesets["CONNECT"];
+            for(int i = 0; i < connect.rules.Count; i++)
             {
                 for(int j = 0; j < inputs.Count; j++)
                 {
-                    if (rulesets["CONNECT"].rules[i].name.Contains(inputs[j]))
+                    if (connect.rules[i].name.Contains(inputs[j]))
                     {
-                        if (!r.rules.Contains(rulesets["CONNECT"].rules[i])){
-                            r.Add(rulesets["CONNECT"].rules[i]);
-                            Console.WriteLine(rulesets["CONNECT"].rules[i].name);
+                        if (!r.rules.Contains(connect.rules[i])){
+                            r.Add(connect.rules[i]);
+                            Console.WriteLine(connect.rules[i].name);
 						}
                     }
 
@@ -76,14 +85,14 @@ namespace ADArCWebApp
 			Console.WriteLine("connecting ends");
 		}
 
-        public List<arc> GetArcs()
+        static public List<arc> GetArcs()
         {
             return seed.arcs;
         }
 
-        public List<node> GetNodes()
+        static public List<node> GetNodes()
         {
             return seed.nodes;
         }
-        }
+    }
 }

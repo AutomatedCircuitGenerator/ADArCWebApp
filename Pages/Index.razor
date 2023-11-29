@@ -229,14 +229,14 @@
 		base.StateHasChanged();
 	}
 
-	List<String> inputs = new List<string> { "ky024", "arduinouno_rev3","adxl345","tfluna","hcsr04","hcsr04" };
-	 // List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
+	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
+	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
 	public void test()
 	{
-		GraphSynthInvoke a = new GraphSynthInvoke(inputs);
-		a.recg_apply();
-		List<node> b = a.GetNodes();
-		List<arc> c = a.GetArcs();
+
+		GraphSynthInvoke.recg_apply(inputs);
+		List<node> b = GraphSynthInvoke.GetNodes();
+		List<arc> c = GraphSynthInvoke.GetArcs();
 
 		int numofcon = 0;
 		for(int i = 0; i<c.Count; i++)
