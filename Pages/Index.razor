@@ -9,34 +9,41 @@
 	</script>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-
 	<div class="page">
 		<div class="toolbar">
+			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
 			<span class="adarc-text">ADArC</span>
 			<div class="center-toolbar">
 				<button class="toolbar-button">
-					<img src="save-icon.png" alt="Save Icon">
-					<span>Save</span>
+					<span>📂 Save</span>
 				</button>
 				<button class="toolbar-button">
-					<img src="help-icon.png" alt="Help Icon">
-					<span>Help</span>
+					<span>❓Help</span>
 				</button>
 				<button class="toolbar-button" @onclick="ToggleRunStop">
-					<img src="@runStopIcon" alt="@runStopText">
 					<span>@runStopText</span>
 				</button>
 			</div>
 		</div>
+		
 
-		<div class="page-content">
-			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
-				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;"></div>
-				<ComponentPane></ComponentPane>
+		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+			<div class="main-canvas">
+				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
-
+			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
+				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+					<span>◀</span>
+				</div>
+				<ComponentPane host="@this"></ComponentPane>
+			</div>
+			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
+				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
-				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;"></div>
+				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+					<span>◀</span>
+				</div>
 				<CodePane></CodePane>
 			</div>
 		</div>
@@ -49,8 +56,7 @@
 	bool isRightExpanded = false;
 	int leftPaneAlign => isLeftExpanded ? 0 : -23;
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
-	string runStopIcon => isRunning ? "stop-icon.png" : "run-icon.png";
-	string runStopText => isRunning ? "Stop" : "Run";
+	string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
 	bool isRunning = false;
 
 	void ToggleLeftSidebar()
@@ -76,6 +82,7 @@
 
 	public void StateChanged()
 	{
+		Console.WriteLine("targetcardId " + targetCardComponentId);
 		StateHasChanged();	
 	}
 
@@ -84,17 +91,29 @@
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
 	}
 
-	public static bool value;
+	private int localIds = 0;
+
+	public static Dictionary<int, ComponentInstance> comps = new()
+	{
+	};
+
+
+	public int selectedComponent = -1;
+
 	public static Index? app;
+	public static MainCanvas? buildCanvas;
+	public static readonly int defaultScreenWidth = 1920;
+	public static double currentRatio = 1;
 
 	public static ElementReference? refresh;
 
 	[JSInvokable]
-	public static async void updVal(bool nVal)
+	public static async void sendVal(int localId, int data)
 	{
+		var comp = Index.comps[localId];
 
+		ComponentDeclarations.components[comp.globalId].translate?.Invoke(comp, data);
 
-		Index.value = nVal;
 		await app.triggerRender();
 	}
 
@@ -103,10 +122,73 @@
 		if (firstRender)
 		{
 			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
-			await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
+			//await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
 
-			
+
+			updateScreenWidthRatio(await module.InvokeAsync<int>("getWindowWidth"));
 		}
 	}
+
+	[JSInvokable]
+	public static void updateScreenWidthRatio(int screenWidth)
+	{
+		currentRatio = ((double)screenWidth) / defaultScreenWidth;
+
+		Console.WriteLine("screen resized! new ratio: " + currentRatio);
+	}
+
+	#region component pane integration
+	private int targetCardComponentId = -1;
+	private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
+	private string isVisible = "hidden";
+	private bool allowDrop = false;
+
+	private double moverOffsetTop = 0;
+	private double moverOffsetLeft = 0;
+
+	public void setTargetID(int id)
+	{
+		targetCardComponentId = id;
+	}
+
+
+	private void checkForCardDrag(MouseEventArgs e)
+	{
+		if (e.Button == 0 && targetCardComponentId != -1)
+		{
+			isVisible = "visible";
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
+
+	private void dragCardIfPossible(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
+
+	public void addToCanvasIfNecessary(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			isVisible = "hidden";
+			if (allowDrop)
+			{
+				var d = ComponentDeclarations.components[targetCardComponentId];
+				comps.Add(++localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+			}
+			moverOffsetLeft = 0;
+			moverOffsetTop = 0;
+			targetCardComponentId = -1;
+		}
+	}
+	#endregion
+
+
+
 
 }

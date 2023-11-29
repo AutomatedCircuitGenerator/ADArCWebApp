@@ -5,57 +5,66 @@ namespace ADArCWebApp.Shared
 {
 	public class ComponentData
 	{
-		public string name;
-		public string imagePath;
-		public Type? type;
-		public bool enabled;
-		public string directoryPath;
-		public PropertyInfo? mainValue = null;
-		public Type? mainValueType = null;
-		public string paneHoverText = "";
-		string codeForGen = "";
-		public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
+        public string name;
+        public bool enabled;
+        public string directoryPath;
+        public string paneHoverText = "";
+        public string codeForGen = "";
+        public double rightOffset;
+        public double cardScaleFactor;
+        public double bottomOffset;
+
+        public object? defaultVal;
+
+        public Action<object, int>? translate;
+
+        public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
 
 		public ComponentData(ComponentDataBuilder builder) {
 			extraProperties = builder.properties;
 			name = builder.name;
-			imagePath = builder.imagePath;
-			type = builder.type;
 			enabled = builder.enabled;
 			directoryPath = builder.directoryPath;
-			mainValue = builder.mainValue;
-			mainValueType = builder.mainValueType;
 			paneHoverText = builder.paneHoverText;
 			codeForGen = builder.codeForGen;
+
+			rightOffset = builder.rightOffset;
+			cardScaleFactor = builder.cardScaleFactor;
+			bottomOffset = builder.bottomOffset;
+			defaultVal = builder.defaultVal;
+			translate = builder.translate;
 		}
 
     }
 
 	public class ComponentDataBuilder
 	{
-
-		public Dictionary<string, object> properties = new Dictionary<string, object>();
+		public Dictionary<string, object> properties = new();
 		public string name;
-		public string imagePath;
-		public Type? type;
 		public bool enabled;
 		public string directoryPath;
-		public PropertyInfo? mainValue = null;
-		public Type? mainValueType = null;
 		public string paneHoverText = "";
 		public string codeForGen = "";
+		public double rightOffset;
+		public double cardScaleFactor;
+		public double bottomOffset;
+
+		public object? defaultVal;
+
+		public Action<object, int>? translate;
 
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, string imagePath, Type? type, bool enabled, string directoryPath, PropertyInfo? mainValue = null, Type? mainValueType = null, string paneHoverText = "", string codeForGen = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<object, int>? translate = null, string paneHoverText = "", string codeForGen = "") {
 			this.name = name;
-			this.imagePath = imagePath;
-			this.type = type;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
-			this.mainValue = mainValue;
-			this.mainValueType = mainValueType;
 			this.paneHoverText = paneHoverText;
 			this.codeForGen = codeForGen;
+			this.translate = translate;
+			this.defaultVal = defaultVal;
+			this.rightOffset = rightOff;
+			this.bottomOffset = bottomOff;
+			this.cardScaleFactor = cardScaleFactor;
 
 		}
 

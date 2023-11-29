@@ -4038,6 +4038,7 @@ define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.runCode = void 0;
     avr8js = __importStar(avr8js);
+    var getInteropManager = interopManager_1.interopManager.getInteropManager;
     const program = new Uint16Array(16384);
     (0, arduino_blink_1.loadBlink)(program);
     const cpu = new avr8js.CPU(program);
@@ -4045,7 +4046,8 @@ define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "
     const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
     window.interopManager = interopManager_1.interopManager;
     portB.addListener(() => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "updVal", portB.pinState(5) === avr8js.PinState.High);
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5));
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5));
     }));
     function runCode() {
         for (let i = 0; i < 50000; i++) {
@@ -4055,6 +4057,7 @@ define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "
         setTimeout(runCode, 0);
     }
     exports.runCode = runCode;
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()); }));
 });
 define("interopManager", ["require", "exports", "main"], function (require, exports, main_1) {
     "use strict";
@@ -4065,6 +4068,9 @@ define("interopManager", ["require", "exports", "main"], function (require, expo
         class InteropManager {
             startCodeLoop(wrapper) {
                 (0, main_1.runCode)();
+            }
+            getWindowWidth() {
+                return window.innerWidth;
             }
         }
         interopManager.InteropManager = InteropManager;

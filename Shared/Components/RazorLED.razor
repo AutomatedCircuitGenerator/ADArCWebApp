@@ -42,8 +42,20 @@
             return new ElementPin[] {
                 new ElementPin(name: "A", x: anodeX, y: 42, signals: new PinSignalInfo[]{}, description: "Anode"),
                 new ElementPin(name: "C", x: cathodeX, y: 42, signals: new PinSignalInfo[]{ }, description: "Cathode")
-            };
+    };
         } 
+    }
+
+    public static void update(object toDo, int signalRec)
+    {
+        if (toDo is RazorLED val)
+        {
+            val.value = signalRec == 1;
+        }
+        else
+        {
+            throw new Exception("LED update got non-led component");    
+        }
     }
 
 }
