@@ -21,7 +21,7 @@
 					<img src="help-icon.png" alt="Help Icon">
 					<span>Help</span>
 				</button>
-				<button class="toolbar-button" @onclick="test">
+				<button class="toolbar-button" @onclick="ToggleRunStop">
 					<img src="@runStopIcon" alt="@runStopText">
 					<span>@runStopText</span>
 				</button>
@@ -182,6 +182,7 @@
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
+			test();
 		}
 	}
 	#endregion
@@ -214,7 +215,9 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		await RuleSetMap.getInstance().loadRuleSet("BIG1");
+		await RuleSetMap.getInstance().loadRuleSet("ADD");
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT");
+		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
 		// 	await RuleSetMap.getInstance().loadRuleSet(str);
@@ -224,26 +227,26 @@
 
 		// // allRulesLoaded = true;
 		base.StateHasChanged();
-		Console.WriteLine(RuleSetMap.getInstance().getRuleSet("BIG1").rules.Count);
 	}
 
-	List<String> inputs = new List<string> { "user_arduinouno_rev3" };
+	List<String> inputs = new List<string> { "ky024", "arduinouno_rev3","adxl345","tfluna","hcsr04","hcsr04" };
+	 // List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
 	public void test()
 	{
 		GraphSynthInvoke a = new GraphSynthInvoke(inputs);
 		a.recg_apply();
 		List<node> b = a.GetNodes();
-		if (b.Count > 0)
+		List<arc> c = a.GetArcs();
+
+		int numofcon = 0;
+		for(int i = 0; i<c.Count; i++)
 		{
-			Console.WriteLine("the number of nodes is " + b.Count);
-			// Console.WriteLine(a.GetNodes()[0].localLabels[0]);
-			// Console.WriteLine(a.GetNodes()[0].localLabels[1]);
-			// Console.WriteLine(a.GetNodes()[1].localLabels[0]);
-			// Console.WriteLine(a.GetNodes()[1].localLabels[1]);
+			if (c[i].localLabels.Contains("connection")){
+				numofcon++;
+			}
 		}
-		else
-		{
-			Console.WriteLine(a.GetNodes()[0]);
-		}
+		Console.WriteLine("the number of nodes is " + b.Count);
+		Console.WriteLine("the number of connections is " + numofcon);
+	
 	}
 }

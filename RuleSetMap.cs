@@ -70,7 +70,7 @@ namespace ADArCWebApp
             client.BaseAddress = new("https://localhost:7182/rules/");
             ////Load the file as plain text from GitHub
             HttpResponseMessage ruleSetResponse =
-                await client.GetAsync("BIG1.rsxml");
+                await client.GetAsync(name + ".rsxml");
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
 
@@ -96,7 +96,7 @@ namespace ADArCWebApp
             while (this.numLoaded < ruleFileNames.Count)
             {
                 string rulePath = ruleFileNames[this.numLoaded];
-                Console.WriteLine(rulePath);
+                Console.WriteLine(rulePath + " loaded");
                 //Get the rule files from GitHub 
                 HttpResponseMessage ruleResponse =
                     await client.GetAsync(rulePath);
