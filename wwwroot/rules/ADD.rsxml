@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ruleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ruleFileNames>
+    <string>add_a4988.grxml</string>
+    <string>add_adxl345.grxml</string>
+    <string>add_arduinoUno_rev3.grxml</string>
+    <string>add_arduinoUno_wifi_rev2.grxml</string>
+    <string>add_bno055.grxml</string>
+    <string>add_dc_motor.grxml</string>
+    <string>add_drv8825.grxml</string>
+    <string>add_drv8833.grxml</string>
+    <string>add_ds18b20.grxml</string>
+    <string>add_encoder.grxml</string>
+    <string>add_esc.grxml</string>
+    <string>add_hcsr04.grxml</string>
+    <string>add_hcsr501.grxml</string>
+    <string>add_hm10.grxml</string>
+    <string>add_hx711.grxml</string>
+    <string>add_ky003.grxml</string>
+    <string>add_ky012.grxml</string>
+    <string>add_ky018.grxml</string>
+    <string>add_ky022.grxml</string>
+    <string>add_ky024.grxml</string>
+    <string>add_ky035.grxml</string>
+    <string>add_l298n.grxml</string>
+    <string>add_lcd_i2c.grxml</string>
+    <string>add_lcd_parallel.grxml</string>
+    <string>add_led.grxml</string>
+    <string>add_led_rgb.grxml</string>
+    <string>add_lidar_tfluna.grxml</string>
+    <string>add_lm386.grxml</string>
+    <string>add_lm2596.grxml</string>
+    <string>add_loadcell.grxml</string>
+    <string>add_max6675.grxml</string>
+    <string>add_mpu6050.grxml</string>
+    <string>add_mq3.grxml</string>
+    <string>add_pca9685.grxml</string>
+    <string>add_rplidar.grxml</string>
+    <string>add_sdCard.grxml</string>
+    <string>add_servo.grxml</string>
+    <string>add_servo_9g.grxml</string>
+    <string>add_speaker.grxml</string>
+    <string>add_stepper_nema.grxml</string>
+    <string>add_uln2003.grxml</string>
+  </ruleFileNames>
+  <name>ADD</name>
+  <TriggerRuleNum>0</TriggerRuleNum>
+  <choiceMethod>Design</choiceMethod>
+  <interimCandidates>Unspecified</interimCandidates>
+  <finalCandidates>Unspecified</finalCandidates>
+  <recognizeSourceFiles />
+  <applySourceFiles />
+  <generationAfterNormal>Loop</generationAfterNormal>
+  <generationAfterChoice>Stop</generationAfterChoice>
+  <generationAfterCycleLimit>Stop</generationAfterCycleLimit>
+  <generationAfterNoRules>Stop</generationAfterNoRules>
+  <generationAfterTriggerRule>Stop</generationAfterTriggerRule>
+</ruleSet>
