@@ -8,12 +8,102 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Include="wwwroot\rules\a4988_arduino.grxml" />
+    <None Include="wwwroot\rules\add_a4988.grxml" />
+    <None Include="wwwroot\rules\add_adxl345.grxml" />
+    <None Include="wwwroot\rules\add_arduinoUno_rev3.grxml" />
+    <None Include="wwwroot\rules\add_arduinoUno_wifi_rev2.grxml" />
+    <None Include="wwwroot\rules\add_bno055.grxml" />
+    <None Include="wwwroot\rules\add_dc_motor.grxml" />
+    <None Include="wwwroot\rules\add_drv8825.grxml" />
+    <None Include="wwwroot\rules\add_drv8833.grxml" />
+    <None Include="wwwroot\rules\add_ds18b20.grxml" />
+    <None Include="wwwroot\rules\add_encoder.grxml" />
+    <None Include="wwwroot\rules\add_esc.grxml" />
+    <None Include="wwwroot\rules\add_hcsr04.grxml" />
+    <None Include="wwwroot\rules\add_hcsr501.grxml" />
+    <None Include="wwwroot\rules\add_hm10.grxml" />
+    <None Include="wwwroot\rules\add_hx711.grxml" />
+    <None Include="wwwroot\rules\add_ky003.grxml" />
+    <None Include="wwwroot\rules\add_ky012.grxml" />
+    <None Include="wwwroot\rules\add_ky018.grxml" />
+    <None Include="wwwroot\rules\add_ky022.grxml" />
+    <None Include="wwwroot\rules\add_ky024.grxml" />
+    <None Include="wwwroot\rules\add_ky035.grxml" />
+    <None Include="wwwroot\rules\add_l298n.grxml" />
+    <None Include="wwwroot\rules\add_lcd_i2c.grxml" />
+    <None Include="wwwroot\rules\add_lcd_parallel.grxml" />
+    <None Include="wwwroot\rules\add_led.grxml" />
+    <None Include="wwwroot\rules\add_led_rgb.grxml" />
+    <None Include="wwwroot\rules\add_lidar_tfluna.grxml" />
+    <None Include="wwwroot\rules\add_lm2596.grxml" />
+    <None Include="wwwroot\rules\add_lm386.grxml" />
+    <None Include="wwwroot\rules\add_loadcell.grxml" />
+    <None Include="wwwroot\rules\add_max6675.grxml" />
+    <None Include="wwwroot\rules\add_mpu6050.grxml" />
+    <None Include="wwwroot\rules\add_mq3.grxml" />
+    <None Include="wwwroot\rules\add_pca9685.grxml" />
+    <None Include="wwwroot\rules\add_rplidar.grxml" />
+    <None Include="wwwroot\rules\add_sdCard.grxml" />
+    <None Include="wwwroot\rules\add_servo.grxml" />
+    <None Include="wwwroot\rules\add_servo_9g.grxml" />
+    <None Include="wwwroot\rules\add_speaker.grxml" />
+    <None Include="wwwroot\rules\add_stepper_nema.grxml" />
+    <None Include="wwwroot\rules\add_uln2003.grxml" />
+    <None Include="wwwroot\rules\adxl345_arduino.grxml" />
+    <None Include="wwwroot\rules\BIG1.rsxml" />
+    <None Include="wwwroot\rules\bno055_arduino.grxml" />
+    <None Include="wwwroot\rules\dc_motor_l298n.grxml" />
+    <None Include="wwwroot\rules\drv8825_arduino.grxml" />
+    <None Include="wwwroot\rules\drv8833_arduino.grxml" />
+    <None Include="wwwroot\rules\ds18b20_arduino.grxml" />
+    <None Include="wwwroot\rules\encoder_arduino.grxml" />
+    <None Include="wwwroot\rules\esc_pca9685.grxml" />
+    <None Include="wwwroot\rules\hcsr04_arduino.grxml" />
+    <None Include="wwwroot\rules\hcsr501_arduino.grxml" />
+    <None Include="wwwroot\rules\hm10_arduino.grxml" />
+    <None Include="wwwroot\rules\hx711_arduino.grxml" />
+    <None Include="wwwroot\rules\hx711_loadcell.grxml" />
+    <None Include="wwwroot\rules\ky003_arduino.grxml" />
+    <None Include="wwwroot\rules\ky012_arduino.grxml" />
+    <None Include="wwwroot\rules\ky018_arduino.grxml" />
+    <None Include="wwwroot\rules\ky022_arduino.grxml" />
+    <None Include="wwwroot\rules\ky024_arduino.grxml" />
+    <None Include="wwwroot\rules\ky035_arduino.grxml" />
+    <None Include="wwwroot\rules\l298n_arduino.grxml" />
+    <None Include="wwwroot\rules\lcd_i2c_arduino.grxml" />
+    <None Include="wwwroot\rules\lcd_parallel_arduino.grxml" />
+    <None Include="wwwroot\rules\led_arduino.grxml" />
+    <None Include="wwwroot\rules\led_rgb_arduino.grxml" />
+    <None Include="wwwroot\rules\lidar_tfluna_arduino.grxml" />
+    <None Include="wwwroot\rules\lm2596_a4988.grxml" />
+    <None Include="wwwroot\rules\lm2596_arduino.grxml" />
+    <None Include="wwwroot\rules\lm2596_l298n.grxml" />
+    <None Include="wwwroot\rules\lm2596_lm386.grxml" />
+    <None Include="wwwroot\rules\lm386_arduino.grxml" />
+    <None Include="wwwroot\rules\lm386_speaker.grxml" />
+    <None Include="wwwroot\rules\max6675_arduino.grxml" />
+    <None Include="wwwroot\rules\mpu6050_arduino.grxml" />
+    <None Include="wwwroot\rules\mq3_arduino.grxml" />
+    <None Include="wwwroot\rules\nema_a4988.grxml" />
+    <None Include="wwwroot\rules\nema_l298n.grxml" />
+    <None Include="wwwroot\rules\pca9685_arduino.grxml" />
+    <None Include="wwwroot\rules\rplidar_arduino.grxml" />
+    <None Include="wwwroot\rules\sdCard_arduino.grxml" />
+    <None Include="wwwroot\rules\servo_arduino.grxml" />
+    <None Include="wwwroot\rules\servo_pca9685.grxml" />
+    <None Include="wwwroot\rules\uln2003_arduino.grxml" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly" Version="7.0.12" />
     <PackageReference Include="Microsoft.AspNetCore.Components.WebAssembly.DevServer" Version="7.0.12" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.AspNetCore.StaticFiles" Version="2.2.0" />
     <PackageReference Include="Microsoft.TypeScript.MSBuild" Version="5.2.2">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="System.CodeDom" Version="7.0.0" />
   </ItemGroup>
 
   <ItemGroup>
