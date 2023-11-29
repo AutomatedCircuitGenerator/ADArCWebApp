@@ -1,11 +1,29 @@
-﻿.comp-container {
+﻿.col-layout {
+    display: grid;
+    grid-template-columns: 50% 50%;
+    width: 100%;
+    justify-items: center;
+    margin-top: 1%;
+    overflow-x: visible;
+}
+
+.card-container {
+    background-color: white;
+    border-radius: 4.5px;
+    width: 95%;
+    margin-bottom: 1%;
+    aspect-ratio: 4/5;
+    position: relative;
+}
+
+.comp-container {
     height: 100%;
     width: 100%;
     flex-direction: column;
     display: flex;
     background-color: lightgray;
-    overflow-y: scroll;
-    overflow-x: hidden;
+    overflow-y: scroll; 
+    overflow-x: visible;
     padding: 3%;
 }
 
@@ -53,14 +71,6 @@
     background-color: #94dbf5;
     border-radius: 4px;
     margin-bottom: 3.5px;
-}
-
-.col-layout {
-    display: grid;
-    grid-template-columns: 50% 50%;
-    width: 100%;
-    justify-items: center;
-    margin-top: 1%;
 }
 
 

@@ -14,7 +14,7 @@
 .card-img-container {
     width: 75%;
     height: 65%;
-    background-color: lightgray;
+    background-color: white;
     margin-top: 5%;
     margin-left: 5%;
     margin-right: 5%;
@@ -31,24 +31,38 @@
 
 .card-name {
     text-align: center;
-    overflow-wrap: anywhere;
+    overflow-wrap: break-word;
     color: black;
-    padding: 1%;
+    /*padding: 1%; */
     line-height: 1.1;
     height: fit-content;
+    padding-left: 5%;
+    padding-right: 5%;
 }
 
-
-.altContainer {
-    visibility: hidden;
-    height: 100%;
-    width: 100%;
-    background-color: lightblue;
-    opacity: 45%;
+.popup-container {
+    display: none;
     position: absolute;
+    top: 100%;
+    left: 50%; 
+    transform: translateX(-50%); 
+    width: 95%;
+    padding: 10px;
+    background-color: lightblue;
+    border-radius: 4.5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
 
+.card-container {
+    position: relative; 
+}
 
-.card-container:hover > .altContainer {
-    visibility: visible;
+.card-container:hover .popup-container::before {
+    content: "";
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 9998;
 }
