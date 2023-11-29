@@ -116,7 +116,7 @@
 
 			AppInterop.runtime = JsRuntime;
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
-			
+
 			AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
 			AppInterop.startSimWrapper();
 		}
@@ -165,8 +165,16 @@
 			isVisible = "hidden";
 			if (allowDrop)
 			{
+				++localIds;
 				var d = ComponentDeclarations.components[targetCardComponentId];
-				comps.Add(++localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				//var n = new node(d.nodeName, "localId:"+localIds);//label with localId (easy tracking)
+				//GS.graph.nodes.add(n);
+
+				//rca
+				//n.arcs.ForEach(a=>a.labels.Add(localIds)); //descend to pins as well later
+				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, /*n,*/ e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+																																															//GS.recognizeChooseApply();   //apply rules
+																																															//comps.ForEach((k,v)=>{updatePinBindings(v)});
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
@@ -175,7 +183,6 @@
 		}
 	}
 	#endregion
-
 
 	private readonly List<string> ruleNames = new();
 	private readonly double totalRules = 19.0;
@@ -216,6 +223,40 @@
 
 		// // allRulesLoaded = true;
 		base.StateHasChanged();
+	}
+
+	public void updatePinBindings(ComponentInstance comp)
+	{
+		var compPins = getPins(comp.gsNode);
+
+		//var connArcs = GS.graph.arcs.Where(a=>a.labels.Contains("connection")).ToList();
+		List<arc> connArcs = new();
+
+		foreach (arc a in connArcs)
+		{
+			ComponentInstance ha = comps[Convert.ToInt32(a.To.labels.Find(s => s.StartsWith("localId:")).Substring(8))];
+			ComponentInstance hb = comps[Convert.ToInt32(a.From.labels.Find(s => s.StartsWith("localId:")).Substring(8))];
+
+			if (ha != comp)
+			{
+				var temp = ha;
+				ha = hb;
+				hb = temp;
+			}
+
+			int i1 = ComponentDeclarations.components[ha.globalId].pins[a.To.name];
+			int i2 = ComponentDeclarations.components[hb.globalId].pins[a.From.name];
+
+
+			comp.connMap.Add(i1, i2);
+		}
+	}
+
+
+	public List<node> getPins(node n){
+
+		return (from a in n.arcs select a.To == n ? a.From : a.To).ToList();
+
 	}
 
 	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };

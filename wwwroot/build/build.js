@@ -4088,7 +4088,6 @@ define("interopManager", ["require", "exports", "main"], function (require, expo
     (function (interopManager) {
         class InteropManager {
             startCodeLoop(wrapper) {
-                console.log("hw");
                 (0, main_1.runCode)();
             }
             getWindowWidth() {

@@ -13,7 +13,7 @@
 			<RazorSevenSeg></RazorSevenSeg>
 			break;
 		case 41:
-			<RazorLCD1602 text=@individualData.mainValue.ToString()></RazorLCD1602>
+			<RazorLCD1602 text=@individualData.mainValue.ToString() blink=@((bool)individualData.moreData["blink"]) background="@((string)individualData.moreData["bg"])" backlight=@((bool)individualData.moreData["back"]) cursor=@((bool)individualData.moreData["cursor"]) cursorX="@((int)individualData.moreData["cX"])" cursorY="@((int)individualData.moreData["cY"])" color="@((string)individualData.moreData["color"])"></RazorLCD1602>
 			break;
 		case 59:
 			<RazorResistor value=@((int)individualData.mainValue)></RazorResistor>

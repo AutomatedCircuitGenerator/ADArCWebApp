@@ -29,6 +29,7 @@
 
 
 		public static bool getPinState(int index) {
+			//TODO: subtract from index when pins added!
 			return (maskable & (1 << (19-index))) > 0;
 		}
 	}

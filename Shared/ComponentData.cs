@@ -1,7 +1,4 @@
-﻿using ADArCWebApp.Shared.Components;
-using System.Reflection;
-
-namespace ADArCWebApp.Shared
+﻿namespace ADArCWebApp.Shared
 {
 	public class ComponentData
 	{
@@ -54,9 +51,8 @@ namespace ADArCWebApp.Shared
 
 		public Action<ComponentInstance>? translate;
 		public Dictionary<string, int> pins = new();
-
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", string codeForGen = "", Dictionary<string,int>? pins = null) {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", string codeForGen = "", List<string>? pins = null, string gsNodeName = "") {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -69,7 +65,10 @@ namespace ADArCWebApp.Shared
 			this.cardScaleFactor = cardScaleFactor;
 			if (pins != null)
 			{
-				this.pins = pins;
+				for (int i = 0; i < pins.Count; i++)
+				{
+					this.pins.Add(pins[i], i);
+				}
 			}
 
 		}

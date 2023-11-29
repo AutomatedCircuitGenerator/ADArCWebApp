@@ -47,6 +47,44 @@
         }
     }
 
+    public static void update(ComponentInstance comp)
+    {
+        ComponentData data = ComponentDeclarations.components[comp.globalId];
+        if (AvrCPU.getPinState(comp.connMap[data.pins["enable"]]))         //TODO: change name
+        {
+
+            if (comp.connMap.ContainsKey(data.pins["data5"]))
+            {
+                //assume 8pin setup
+            }
+            else
+            {
+                //assume 4pin setup
+                bool a1 = AvrCPU.getPinState(comp.connMap[data.pins["data1"]]);
+                bool a2 = AvrCPU.getPinState(comp.connMap[data.pins["data2"]]);
+                bool a3 = AvrCPU.getPinState(comp.connMap[data.pins["data3"]]);
+                bool a4 = AvrCPU.getPinState(comp.connMap[data.pins["data4"]]);
+                if (comp.midSignal > 0)
+                {
+                    int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);
+                    sig = sig << 4;
+                    sig = sig | comp.midSignal;
+                    
+                    //find/exec function
+
+                    comp.midSignal = 0;
+                }
+                else
+                {
+                    
+
+                    int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);
+                    comp.midSignal = sig;
+                }
+            }
+        }
+    }
+
     private string genPath()
     {
         double xSpacing = 0.6;
