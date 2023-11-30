@@ -184,7 +184,7 @@
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
-			// test();
+			test();
 		}
 	}
 	#endregion
@@ -237,6 +237,9 @@
 	{
 
 		GraphSynthInvoke.recg_apply(inputs);
+		node Comp2remove = Index.comps[Index.app.selectedComponent].gsNode;
+		Console.WriteLine("here");
+		GraphSynthInvoke.removeComp(Comp2remove);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
 

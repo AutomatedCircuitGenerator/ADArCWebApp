@@ -85,6 +85,19 @@ namespace ADArCWebApp
 			Console.WriteLine("connecting ends");
 		}
 
+        static public void removeComp(node n)
+        {
+			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
+			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
+            {
+                seed.removeNode(nodeToRemove);
+                foreach (var arcToRemove in nodeToRemove.arcs.ToList())
+                {
+                    seed.removeArc((arc)arcToRemove);
+                }
+            }
+        }
+
         static public List<arc> GetArcs()
         {
             return seed.arcs;
