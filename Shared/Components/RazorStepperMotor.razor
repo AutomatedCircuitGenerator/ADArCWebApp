@@ -1,0 +1,286 @@
+﻿@code { //  UNFINISHED, mmToPix still needs to be propperly converted
+    // Most likely the most buggy one
+    [Parameter] public int defaultSize { get; set; } = 23;
+    [Parameter] public int angle { get; set;  } = 0;
+    [Parameter] public string arrow { get; set; } = "";
+    [Parameter] public string value { get; set; } = "";
+    [Parameter] public string units { get; set; } = "";
+    //[Parameter] public int[] size { get; set; } = { 8, 11, 14, 17, 23, 34 };
+
+    [Parameter] public int id { get; set; } = 17;
+    [Parameter] public double frameSize { get; set; } = 42.3;
+    [Parameter] public double holeRadius { get; set; } = 1.5;
+    [Parameter] public double shaftRadius { get; set; } = 5;
+    [Parameter] public double cornerRadius { get; set; } = 5;
+    [Parameter] public double cornerOffset { get; set; } = 5.5;
+    [Parameter] public double bodyRadius { get; set; } = 14;
+    [Parameter] public double textSize { get; set; } = 16;
+    [Parameter] public double valueYPosition { get; set; } = 30.5;
+    [Parameter] public double unitsYPosition { get; set; } = 33.7;
+
+    /**
+     * NemaSpec describes a NEMA Stepper specification (for the purpose of visualisation)
+     *
+     */
+    /*private class NEMAData
+    {
+        int id: number; // Nema common number representing the size shorthand (Nema11 Nema 17 etc)
+        frameSize: number; // the frame size in mm. Since Nema Steppers are square, only one side needed
+        holeRadius: number; // Fastening hole size
+        shaftRadius: number; // Motor shaft radius
+        cornerRadius: number; // Frame corner radius
+        cornerOffset: number; // Offset from corner to center of hole
+        bodyRadius: number; // the round motor body size
+        textSize: number; // Text size showing units etc
+        /**  Y position of value text /
+        valueYPosition: number;
+        /**  Y position of units text /
+        unitsYPosition: number;
+    }*/
+
+    // Nema 17 Specs
+    /*'17': {
+      id: 17,
+      frameSize: 42.3,
+      holeRadius: 1.5,
+      shaftRadius: 5,
+      cornerRadius: 5,
+      cornerOffset: 5.5,
+      bodyRadius: 14,
+      textSize: 16,
+      valueYPosition: 30.5,
+      unitsYPosition: 33.7,
+    },*/
+
+    // Render Parameters (Commented out parts that still refer/use interface functions)
+    //[Parameter] spec = this.nemaSpecMap[this.size] ?? this.nemaSpecMap[defaultSize];
+    // [Parameter] cornerRadius = spec.cornerRadius;
+    // [Parameter] holeRadius = spec.holeRadius;
+    // [Parameter] shaftRadius = spec.shaftRadius;
+    // [Parameter] frameSize = spec.frameSize;
+    // [Parameter] cornerOffset = spec.cornerOffset;
+    // [Parameter] bodyRadius = spec.bodyRadius;
+
+    [Parameter] halfShaft = shaftRadius / 2;
+    [Parameter] halfFrame = frameSize / 2;
+
+    [Parameter] innerHoleRadius = holeRadius * 0.9;
+    [Parameter] outerHoleRadius = holeRadius * 1.1;
+
+    // shaft radius offset, needed for transform
+    [Parameter] rOff = Math.sqrt(0.75 * Math.pow(shaftRadius, 2));
+
+    // these offsets match the transform in renderFace
+    const xOff = (spec.frameSize / 2 - 3.75) * mmToPix + 1;
+    const yOff = (spec.frameSize + 5) * mmToPix;
+
+    ElementPin[] pinInfo{
+        get
+        {
+            return new ElementPin
+
+                new ElementPin(name: "A-", x: xOff, y: yOff, number: 1, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "A+", x: xOff + 2.54 * , y: yOff, number: 2, signals: new PinSignalInfo[] { }),
+                new ElementPin( name: "B+", x: xOff + 5.08, y: yOff, number: 3, signals: new PinSignalInfo[] { } ),
+                new ElementPin( name: "B-", x: xOff + 7.62, y: yOff, number: 4, signals: new PinSignalInfo[] { } ),
+                // new ElementPin( name: "Center Tap 2", x: 0, y: 69, number: 5, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+                // new ElementPin( name: "PWM", x: 0, y: 69, number: 6, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+            };
+        }
+    }
+}
+
+  get pinInfo(): ElementPin[] {
+    const spec = this.nemaSpecMap[this.size] ?? this.nemaSpecMap[defaultSize];
+
+    // these offsets match the transform in renderFace
+    const xOff = (spec.frameSize / 2 - 3.75) * mmToPix + 1;
+    const yOff = (spec.frameSize + 5) * mmToPix;
+
+    const pi = [
+      { name: 'A-', y: yOff, x: xOff, number: 1, signals: [] },
+      { name: 'A+', y: yOff, x: xOff + 2.54 * mmToPix, number: 2, signals: [] },
+      { name: 'B+', y: yOff, x: xOff + 5.08 * mmToPix, number: 3, signals: [] },
+      { name: 'B-', y: yOff, x: xOff + 7.62 * mmToPix, number: 4, signals: [] },
+    ];
+
+    return pi;
+  }
+
+  
+
+  update(changedProperties: Map<string, unknown>) {
+    if (changedProperties.has('size')) {
+      this.dispatchEvent(new CustomEvent('pininfo-change'));
+    }
+    super.update(changedProperties);
+  }
+
+  <svg
+      width="@(frameSize + 1)mm"
+      height="@(frameSize + 5)mm"
+      version="1.1"
+      viewBox="0 0 @((1 + frameSize) * mmToPix} ${(5 + frameSize) * mmToPix)"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+    >
+      <defs>
+        <linearGradient
+          id="frame-gradient"
+          x1="-@(frameSize * 0.2)"
+          x2="@(frameSize * 2)"
+          y1="@(frameSize)"
+          y2="@(frameSize)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#666" offset="0" />
+          <stop stop-color="#fff" offset="1" />
+        </linearGradient>
+        <linearGradient
+          id="shaft-gradient"
+          x1="0"
+          x2="0"
+          y1="-5"
+          y2="5"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#9d9d9d" offset="0" />
+          <stop stop-color="#9d9d9d" stop-opacity="0" offset="1" />
+        </linearGradient>
+        <linearGradient
+          id="body-gradient"
+          x1="@(frameSize * 0.1)"
+          x2="@(frameSize * 0.7)"
+          y1="@(frameSize)"
+          y2="@(frameSize)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#9d9d9d" offset="0" />
+          <stop stop-color="#fdfafa" offset=".29501" />
+          <stop offset="1" stop-color="#2a2a2a" />
+        </linearGradient>
+      </defs>
+      <!-- Body -->
+      <g transform="translate(1,1)">
+        <g transform="scale(@(mmToPix))">
+          <!-- Pins -->
+          <path
+            id="pin"
+            transform="translate(@(halfFrame - 3.75} ${frameSize))"
+            fill="#9f9f9f"
+            d="m 0 0 c .5 0 .5 0 .5 .5 v 4.55 c -.5 .5 -.5 .5 -1 0 v -4.5 c 0 -.5 0 -.5 .5 -.5"
+          />
+          <use xlink:href="#pin" x="2.54" />
+          <use xlink:href="#pin" x="5.08" />
+          <use xlink:href="#pin" x="7.62" />
+
+          <g stroke-linecap="round" stroke-linejoin="round">
+            <rect
+              width="@(frameSize)"
+              height="@(frameSize)"
+              rx="@(cornerRadius)"
+              ry="@(cornerRadius)"
+              fill="url(#frame-gradient)"
+              stroke="#000"
+              stroke-width=".3245"
+            />
+            <circle cx="@(cornerOffset}" cy="${cornerOffset}" r="${outerHoleRadius)" fill="#666" />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+          </g>
+
+          <!-- motor body -->
+          <circle
+            cx="@(halfFrame)"
+            cy="@(halfFrame)"
+            r="@(bodyRadius)"
+            fill="#868686"
+            fill-opacity=".89602"
+            opacity=".73"
+            stroke="url(#body-gradient)"
+            stroke-width="1.41429"
+          />
+          <!-- Rotator -->
+          <g>
+            <path
+              id="arrow-path"
+              transform="
+                rotate(@(this.angle}, ${halfFrame},${halfFrame)) 
+                translate(@(halfFrame} ${halfFrame))"
+              fill="@(this.arrow || 'transparent')"
+              d="m 0 0 l -@(shaftRadius} 0 l ${shaftRadius) 
+                -@(halfFrame - 3} l ${shaftRadius} ${halfFrame - 3) z"
+            />
+            <path
+              id="shaft-path"
+              transform="
+                translate(@(halfFrame}, ${halfFrame)) 
+                rotate(@(this.angle)) 
+                translate(0, 0)"
+              d="m -@(halfShaft} -${rOff} a ${shaftRadius} ${shaftRadius} 0 1 0 ${shaftRadius) 0 z"
+              fill="#4d4d4d"
+              stroke="url(#shaft-gradient)"
+              stroke-width=".57968"
+            />
+          </g>
+
+          <!-- Text -->
+          <text font-family="arial" font-size="14.667px" text-align="center" text-anchor="middle">
+            <tspan
+              x="@(halfFrame)"
+              y="@(spec.valueYPosition)"
+              font-size="@(spec.textSize / mmToPix)px"
+            >
+              @(this.value)
+            </tspan>
+            <tspan
+              x="@(halfFrame)"
+              y="@(spec.unitsYPosition)"
+              font-size="@((0.7 * spec.textSize) / mmToPix)px"
+            >
+              @(this.units)
+            </tspan>
+          </text>
+        </g>
+      </g>
+    </svg>
