@@ -6,11 +6,13 @@
         public bool enabled;
         public string directoryPath;
         public string paneHoverText = "";
-        public string codeForGen = "";
+        public Dictionary<string, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
         public double bottomOffset;
 		public Dictionary<string, int> pins;
+		public List<string> pinNames => pins.Keys.ToList();
+		public string? nodeName;
         public object? defaultVal;
 
         public Action<ComponentInstance>? translate;
@@ -31,6 +33,7 @@
 			defaultVal = builder.defaultVal;
 			translate = builder.translate;
 			pins = builder.pins;
+			nodeName = builder.nodeName;
 		}
 
     }
@@ -42,7 +45,7 @@
 		public bool enabled;
 		public string directoryPath;
 		public string paneHoverText = "";
-		public string codeForGen = "";
+		public Dictionary<string, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
 		public double bottomOffset;
@@ -51,8 +54,9 @@
 
 		public Action<ComponentInstance>? translate;
 		public Dictionary<string, int> pins = new();
+		public string? nodeName;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", string codeForGen = "", List<string>? pins = null, string gsNodeName = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, string gsNodeName = "") {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -71,6 +75,7 @@
 				}
 			}
 
+			this.nodeName = gsNodeName;
 		}
 
 

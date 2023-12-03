@@ -16,10 +16,10 @@
 			maskable |= portB << 14;
 			maskable |= portC << 8;
 			maskable |= portD;
-			Console.WriteLine(Convert.ToString(portB, 2));
-			Console.WriteLine(Convert.ToString(portC, 2));
-			Console.WriteLine(Convert.ToString(portD, 2));
-			Console.WriteLine("combi:" +Convert.ToString(maskable, 2));
+			//Console.WriteLine(Convert.ToString(portB, 2));
+			//Console.WriteLine(Convert.ToString(portC, 2));
+			//Console.WriteLine(Convert.ToString(portD, 2));
+			//Console.WriteLine("combi:" +Convert.ToString(maskable, 2));
 		}
 
 

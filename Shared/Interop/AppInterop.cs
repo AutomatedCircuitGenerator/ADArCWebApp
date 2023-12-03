@@ -53,5 +53,14 @@ namespace ADArCWebApp.Shared.Interop
 			await jsModule!.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(Pages.Index.app!));
 		}
 
-	}
+        public static async void updateCodeWrapper()
+        {
+            await jsModule!.InvokeVoidAsync("updateCodeInPane", BuildCode.code);
+        }
+
+		public static async Task<string> getCodeWrapper() {
+			return await jsModule!.InvokeAsync<string>("getCodeInPane");
+		}
+
+    }
 }

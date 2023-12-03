@@ -1,6 +1,6 @@
 ﻿//imported by index.html
 "use strict";
-import { loadBlink, loadHex, lcd } from "./lib/arduino-blink"
+import { loadHex, lcd } from "./lib/arduino-blink"
 import * as avr8js from './lib/avr8js/index';
 import getInteropManager = interopManager.getInteropManager;
 import { interopManager } from "./interopManager";

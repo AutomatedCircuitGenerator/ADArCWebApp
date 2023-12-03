@@ -4093,6 +4093,12 @@ define("interopManager", ["require", "exports", "main"], function (require, expo
             getWindowWidth() {
                 return window.innerWidth;
             }
+            updateCodeInPane(code) {
+                monaco.editor.getModels[0].setValue(code);
+            }
+            getCodeInPane() {
+                return monaco.editor.getModels[0].getValue();
+            }
         }
         interopManager.InteropManager = InteropManager;
         function getInteropManager() {

@@ -52,205 +52,238 @@
 
 
 @code{
-	bool isLeftExpanded = true;
-	bool isRightExpanded = false;
-	int leftPaneAlign => isLeftExpanded ? 0 : -23;
-	int rightPaneAlign => isRightExpanded ? 0 : -37;
-	string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
-	bool isRunning = false;
+    bool isLeftExpanded = true;
+    bool isRightExpanded = false;
+    int leftPaneAlign => isLeftExpanded ? 0 : -23;
+    int rightPaneAlign => isRightExpanded ? 0 : -37;
+    string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
+    bool isRunning = false;
 
-	void ToggleLeftSidebar()
-	{
-		isLeftExpanded = !isLeftExpanded;
-		isRightExpanded = false;
-	}
+    void ToggleLeftSidebar()
+    {
+        isLeftExpanded = !isLeftExpanded;
+        isRightExpanded = false;
+    }
 
-	void ToggleRightSidebar()
-	{
-		isRightExpanded = !isRightExpanded;
-		isLeftExpanded = false;
-	}
-	void ToggleRunStop()
-	{
-		isRunning = !isRunning;
-	}
+    void ToggleRightSidebar()
+    {
+        isRightExpanded = !isRightExpanded;
+        isLeftExpanded = false;
+    }
+    void ToggleRunStop()
+    {
+        isRunning = !isRunning;
+    }
 
-	public Index()
-	{
-		app = this;
-	}
+    public Index()
+    {
+        app = this;
+    }
 
-	public void StateChanged()
-	{
-		Console.WriteLine("targetcardId " + targetCardComponentId);
-		StateHasChanged();	
-	}
+    public void StateChanged()
+    {
+        Console.WriteLine("targetcardId " + targetCardComponentId);
+        StateHasChanged();	
+    }
 
-	async Task triggerRender()
-	{
-		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
-	}
+    async Task triggerRender()
+    {
+        await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
+    }
 
-	private int localIds = 0;
+    private int localIds = 0;
 
-	public static Dictionary<int, ComponentInstance> comps = new()
-	{
-	};
-
-
-	public int selectedComponent = -1;
-
-	public static Index? app;
-	public static MainCanvas? buildCanvas;
-	public static readonly int defaultScreenWidth = 1920;
-	public static double currentRatio = 1;
-
-	public static ElementReference? refresh;
+    public static Dictionary<int, ComponentInstance> comps = new()
+    {
+    };
 
 
+    public int selectedComponent = -1;
 
-	protected async override Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
+    public static Index? app;
+    public static MainCanvas? buildCanvas;
+    public static CodePane? codePane;
+    public static readonly int defaultScreenWidth = 1920;
+    public static double currentRatio = 1;
 
-			AppInterop.runtime = JsRuntime;
-			AppInterop.jsModule = await AppInterop.getModuleWrapper();
-
-			AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
-			AppInterop.startSimWrapper();
-		}
-	}
+    public static ElementReference? refresh;
 
 
 
-	#region component pane integration
-	private int targetCardComponentId = -1;
-	private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
-	private string isVisible = "hidden";
-	private bool allowDrop = false;
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
 
-	private double moverOffsetTop = 0;
-	private double moverOffsetLeft = 0;
+            AppInterop.runtime = JsRuntime;
+            AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
-	public void setTargetID(int id)
-	{
-		targetCardComponentId = id;
-	}
-
-
-	private void checkForCardDrag(MouseEventArgs e)
-	{
-		if (e.Button == 0 && targetCardComponentId != -1)
-		{
-			isVisible = "visible";
-			moverOffsetLeft = e.ClientX;
-			moverOffsetTop = e.ClientY;
-		}
-	}
-
-	private void dragCardIfPossible(MouseEventArgs e)
-	{
-		if (targetCardComponentId != -1)
-		{
-			moverOffsetLeft = e.ClientX;
-			moverOffsetTop = e.ClientY;
-		}
-	}
-
-	public void addToCanvasIfNecessary(MouseEventArgs e)
-	{
-		if (targetCardComponentId != -1)
-		{
-			isVisible = "hidden";
-			if (allowDrop)
-			{
-				++localIds;
-				var d = ComponentDeclarations.components[targetCardComponentId];
-				var n = new node();//label with localId (easy tracking)
-				n.localLabels.Add("localId:" + localIds);
+            AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
+            AppInterop.startSimWrapper();
+            AppInterop.updateCodeWrapper();
+        }
+    }
 
 
-				//TODO: uncomment:GraphSynthInvoke.recg_apply(d.gsNodeName);
 
-				n.arcs.ForEach(a => a.localLabels.Add("localId:" + localIds));
-				n.arcs.ForEach(a => ((arc)a).otherNode(n).localLabels.Add("localId:" + localIds));
-				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
-				foreach (var c in comps.Values)
-				{
-					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
-				}
-			}
-			moverOffsetLeft = 0;
-			moverOffsetTop = 0;
-			targetCardComponentId = -1;
-			// test();
-		}
-	}
-	#endregion
+    #region component pane integration
+    private int targetCardComponentId = -1;
+    private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
+    private string isVisible = "hidden";
+    private bool allowDrop = false;
 
-	private readonly List<string> ruleNames = new();
-	private readonly double totalRules = 19.0;
-	private string fileToLoad = "";
-	private double loadPercent = 0;
-	protected override async Task OnInitializedAsync()
-	{
-		// loads rulesets
-		// allRulesLoaded = false;
-		// ruleNames.Add("BondGraphRuleset"); //58
-		// ruleNames.Add("SimplificationRuleset"); //28
-		// ruleNames.Add("DirRuleset"); //5
-		// ruleNames.Add("newDirectionRuleSet_2"); //17
-		// ruleNames.Add("DirRuleset3"); //4
-		// ruleNames.Add("Simplification2"); //32
-		// ruleNames.Add("NewCausalityMethodRuleset"); //6
-		// ruleNames.Add("NewCausalityMethodRuleset_2"); //4
-		// ruleNames.Add("NewCausalityMethodRuleset_3"); //2
-		// ruleNames.Add("INVDMarkerRules"); //6
-		// ruleNames.Add("INVDMarkerRules_2"); //0?
-		// ruleNames.Add("CalibrationNewRuleset"); //12
-		// ruleNames.Add("CalibrationNewRuleset_2"); //0?
-		// ruleNames.Add("RFlagCleanRuleset"); //1
-		// ruleNames.Add("ICFixTotalRuleset"); //12
-		// ruleNames.Add("TransformerFlipRuleset"); //1
-		// ruleNames.Add("TransformerFlipRuleset2"); //1
-		// ruleNames.Add("Clean23Ruleset"); //4
-		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		await RuleSetMap.getInstance().loadRuleSet("ADD");
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT");
-		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
-		// foreach (string str in ruleNames)
-		// {
-		// 	await RuleSetMap.getInstance().loadRuleSet(str);
-		// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-		// 	base.StateHasChanged();
-		// }
+    private double moverOffsetTop = 0;
+    private double moverOffsetLeft = 0;
 
-		// // allRulesLoaded = true;
-		base.StateHasChanged();
-	}
+    public void setTargetID(int id)
+    {
+        targetCardComponentId = id;
+    }
 
-	public void updatePinBindings(ComponentInstance comp)
-	{
-		var compPins = getPins(comp.gsNode);
 
-		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
-		//List<arc> connArcs = new();
+    private void checkForCardDrag(MouseEventArgs e)
+    {
+        if (e.Button == 0 && targetCardComponentId != -1)
+        {
+            isVisible = "visible";
+            moverOffsetLeft = e.ClientX;
+            moverOffsetTop = e.ClientY;
+        }
+    }
 
-		foreach (arc a in connArcs)
-		{
-			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
-			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+    private void dragCardIfPossible(MouseEventArgs e)
+    {
+        if (targetCardComponentId != -1)
+        {
+            moverOffsetLeft = e.ClientX;
+            moverOffsetTop = e.ClientY;
+        }
+    }
 
-			if (ha != comp)
-			{
-				var temp = ha;
-				ha = hb;
-				hb = temp;
-			}
+    public void addToCanvasIfNecessary(MouseEventArgs e)
+    {
+        if (targetCardComponentId != -1)
+        {
+            isVisible = "hidden";
+            if (allowDrop)
+            {
+                ++localIds;
+                var d = ComponentDeclarations.components[targetCardComponentId];
+                var n = new node();//label with localId (easy tracking)
+                n.localLabels.Add("user_" + d.nodeName);
 
-			int i1 = ComponentDeclarations.components[ha.globalId].pins[a.To.name];
-			int i2 = ComponentDeclarations.components[hb.globalId].pins[a.From.name];
+                GraphSynthInvoke.GetNodes().Add(n);
+                GraphSynthInvoke.inputs.Add(d.nodeName);
+                GraphSynthInvoke.recg_apply();
+
+                GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+                comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+                foreach (var c in comps.Values)
+                {
+                    updatePinBindings(c);	//keep an eye on this. could be not good for performance.
+                }
+
+                AppInterop.updateCodeWrapper();
+            }
+            moverOffsetLeft = 0;
+            moverOffsetTop = 0;
+            targetCardComponentId = -1;
+
+            test();
+        }
+    }
+    #endregion
+
+    private readonly List<string> ruleNames = new();
+    private readonly double totalRules = 19.0;
+    private string fileToLoad = "";
+    private double loadPercent = 0;
+    protected override async Task OnInitializedAsync()
+    {
+        // loads rulesets
+        // allRulesLoaded = false;
+        // ruleNames.Add("BondGraphRuleset"); //58
+        // ruleNames.Add("SimplificationRuleset"); //28
+        // ruleNames.Add("DirRuleset"); //5
+        // ruleNames.Add("newDirectionRuleSet_2"); //17
+        // ruleNames.Add("DirRuleset3"); //4
+        // ruleNames.Add("Simplification2"); //32
+        // ruleNames.Add("NewCausalityMethodRuleset"); //6
+        // ruleNames.Add("NewCausalityMethodRuleset_2"); //4
+        // ruleNames.Add("NewCausalityMethodRuleset_3"); //2
+        // ruleNames.Add("INVDMarkerRules"); //6
+        // ruleNames.Add("INVDMarkerRules_2"); //0?
+        // ruleNames.Add("CalibrationNewRuleset"); //12
+        // ruleNames.Add("CalibrationNewRuleset_2"); //0?
+        // ruleNames.Add("RFlagCleanRuleset"); //1
+        // ruleNames.Add("ICFixTotalRuleset"); //12
+        // ruleNames.Add("TransformerFlipRuleset"); //1
+        // ruleNames.Add("TransformerFlipRuleset2"); //1
+        // ruleNames.Add("Clean23Ruleset"); //4
+        // ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
+        await RuleSetMap.getInstance().loadRuleSet("ADD");
+        await RuleSetMap.getInstance().loadRuleSet("CONNECT");
+        // await RuleSetMap.getInstance().loadRuleSet("BIG1");
+        // foreach (string str in ruleNames)
+        // {
+        // 	await RuleSetMap.getInstance().loadRuleSet(str);
+        // 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
+        // 	base.StateHasChanged();
+        // }
+
+        // // allRulesLoaded = true;
+
+        
+        base.StateHasChanged();
+    }
+
+    public void updatePinBindings(ComponentInstance comp)
+    {
+        BuildCode.outputPins.Clear();
+        var compPins = getPins(comp.gsNode, comp.data.nodeName);
+
+        var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
+        //List<arc> connArcs = new();
+
+        foreach (arc a in connArcs)
+        {
+            ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+            ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+
+            if (ha == hb)
+            {
+                continue;
+            }
+
+            if (ha != comp)
+            {
+                var temp = ha;
+                ha = hb;
+                hb = temp;
+            }
+
+            var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            string bPinName = "";
+
+            if (aPinName == "**NF**")
+            {
+                aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            }
+            else
+            {
+                bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            }
+
+            //if arduino and data pin being connected, register to code.
+            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "@d[0-9]{1,2}").Success)
+            {
+                BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));  
+            }
+
+			int i1 = ha.data.pins[aPinName];
+			int i2 = hb.data.pins[bPinName];
 
 
 			comp.connMap.Add(i1, i2);
@@ -258,9 +291,14 @@
 	}
 
 
-	public List<node> getPins(node n){
+	public List<node> getPins(node n, string name){
+		//n is root, connected to main node but not main node.
+		string fullName = "user_" + name;
+		var mainNode = ((arc)n.arcs[0]).otherNode(n);
+		//traverse arcs to get pin nodes, except the root node
+		var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
+		return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
 
-		return (from a in n.arcs select ((arc)a).otherNode(n)).ToList();
 
 	}
 
@@ -269,7 +307,7 @@
 	public void test()
 	{
 
-		GraphSynthInvoke.recg_apply(inputs);
+		//GraphSynthInvoke.recg_apply(inputs);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
 

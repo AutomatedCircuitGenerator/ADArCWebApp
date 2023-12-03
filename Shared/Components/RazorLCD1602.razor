@@ -49,7 +49,7 @@
 
     public static void update(ComponentInstance comp)
     {
-        ComponentData data = ComponentDeclarations.components[comp.globalId];
+        ComponentData data = comp.data;
         if (AvrCPU.getPinState(comp.connMap[data.pins["enable"]]))         //TODO: change name if necess
         {
 

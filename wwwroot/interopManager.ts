@@ -12,8 +12,13 @@ export namespace interopManager {
             return window.innerWidth;
         }
 
+        updateCodeInPane(code: string) {
+            monaco.editor.getModels[0].setValue(code);
+        }
 
-
+        getCodeInPane(): string {
+            return monaco.editor.getModels[0].getValue();
+        }
 
 
 
