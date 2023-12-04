@@ -1,4 +1,5 @@
 ﻿using ADArCWebApp.ComponentNamespace;
+using GraphSynth.Representation;
 
 namespace ADArCWebApp.Shared
 {
@@ -16,7 +17,12 @@ namespace ADArCWebApp.Shared
 
 		public object mainValue;
 
-		public ComponentInstance(int globalId, object mainValueInitial, double x = 10.0, double y = 10.0) {
+		public Dictionary<int, int> connMap = new Dictionary<int, int>(); //comp->arduino
+		public node gsNode;
+		public int midSignal;
+		public Dictionary<string, object> moreData = new Dictionary<string, object>();
+
+		public ComponentInstance(int globalId, object mainValueInitial, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
 			this.x = x;
@@ -24,7 +30,7 @@ namespace ADArCWebApp.Shared
 			zoomedX = x;
 			zoomedY = y;
 			mainValue = mainValueInitial;
-
+			this.gsNode = gsNode;
 		}
 	}
 }

@@ -40,11 +40,26 @@
 </div>
 
 @code {
+
+    public CodePane()
+    {
+        Pages.Index.codePane = this;
+    }
+
     string? text="Hello World";
+
+    string codeContents = "";
     // Create a function to update the console output
     public void updateConsoleOutput(string text)
     {
         this.text = text;
     }
+
+    public void updatePaneCode()
+    {
+        this.codeContents = BuildCode.code;    
+    }
+
+
   
 }

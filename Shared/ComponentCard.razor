@@ -1,6 +1,6 @@
 ﻿<div class="card-container" @onmousedown="handleClick">
 	<div class="card-img-container">
-		<VaryingComponent disableBorder="true" posAbolute="false" individualData="new(globalId, ComponentDeclarations.components[globalId].defaultVal, 0, 0)" objId="@globalId" zoomFactor="@(ComponentDeclarations.components[globalId].cardScaleFactor * ADArCWebApp.Pages.Index.currentRatio)" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+		<VaryingComponent disableBorder="true" posAbolute="false" individualData="new(globalId, ComponentDeclarations.components[globalId].defaultVal, new(), 0, 0)" objId="@globalId" zoomFactor="@(ComponentDeclarations.components[globalId].cardScaleFactor * ADArCWebApp.Pages.Index.currentRatio)" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
 	</div>
 	<div class="altContainer">
 		@ComponentDeclarations.components[globalId].paneHoverText

@@ -17,7 +17,7 @@ namespace ADArCWebApp
         static Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
 
         //inputs from user selecting components
-        static List<string> inputs = new();
+        public static List<string> inputs = new();
 
         static designGraph seed = new();
         
@@ -32,7 +32,7 @@ namespace ADArCWebApp
             for (int i = 0; i < Inputs.Count; i++)
             {
                 node n = new();
-                n.setLabel(0, "user_" + inputs[i]);
+                n.setLabel(0, "user_" + Inputs[i]);
                 seed.addNode(n);
                 //seed.nodes[i].setLabel(0, "user_"+inputs[i]);
             }

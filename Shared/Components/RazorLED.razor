@@ -45,17 +45,15 @@
     };
         } 
     }
-
-    public static void update(object toDo, int signalRec)
+    //static int count = 0;
+    public static void update(ComponentInstance toDo)
     {
-        if (toDo is RazorLED val)
-        {
-            val.value = signalRec == 1;
-        }
-        else
-        {
-            throw new Exception("LED update got non-led component");    
-        }
+        var data = toDo.data;
+        toDo.mainValue = AvrCPU.getPinState(toDo.connMap[data.pins["anode"]]);
+
+        //Console.WriteLine(count++);
+
+        
     }
 
 }

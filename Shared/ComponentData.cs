@@ -1,7 +1,4 @@
-﻿using ADArCWebApp.Shared.Components;
-using System.Reflection;
-
-namespace ADArCWebApp.Shared
+﻿namespace ADArCWebApp.Shared
 {
 	public class ComponentData
 	{
@@ -9,14 +6,16 @@ namespace ADArCWebApp.Shared
         public bool enabled;
         public string directoryPath;
         public string paneHoverText = "";
-        public string codeForGen = "";
+        public Dictionary<string, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
         public double bottomOffset;
-
+		public Dictionary<string, int> pins;
+		public List<string> pinNames => pins.Keys.ToList();
+		public string? nodeName;
         public object? defaultVal;
 
-        public Action<object, int>? translate;
+        public Action<ComponentInstance>? translate;
 
         public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
 
@@ -33,6 +32,8 @@ namespace ADArCWebApp.Shared
 			bottomOffset = builder.bottomOffset;
 			defaultVal = builder.defaultVal;
 			translate = builder.translate;
+			pins = builder.pins;
+			nodeName = builder.nodeName;
 		}
 
     }
@@ -44,17 +45,18 @@ namespace ADArCWebApp.Shared
 		public bool enabled;
 		public string directoryPath;
 		public string paneHoverText = "";
-		public string codeForGen = "";
+		public Dictionary<string, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
 		public double bottomOffset;
 
 		public object? defaultVal;
 
-		public Action<object, int>? translate;
-
+		public Action<ComponentInstance>? translate;
+		public Dictionary<string, int> pins = new();
+		public string? nodeName;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<object, int>? translate = null, string paneHoverText = "", string codeForGen = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, string gsNodeName = "") {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -65,7 +67,15 @@ namespace ADArCWebApp.Shared
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;
+			if (pins != null)
+			{
+				for (int i = 0; i < pins.Count; i++)
+				{
+					this.pins.Add(pins[i], i);
+				}
+			}
 
+			this.nodeName = gsNodeName;
 		}
 
 
