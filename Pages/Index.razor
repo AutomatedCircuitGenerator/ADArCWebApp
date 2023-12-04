@@ -184,7 +184,7 @@
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
-			test();
+			// test();
 		}
 	}
 	#endregion
@@ -233,13 +233,14 @@
 
 	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
 	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
-	public void test()
+
+	public void addcomp()
 	{
 
 		GraphSynthInvoke.recg_apply(inputs);
-		node Comp2remove = Index.comps[Index.app.selectedComponent].gsNode;
+		// node Comp2remove = Index.comps[Index.app.selectedComponent].gsNode;
 		Console.WriteLine("here");
-		GraphSynthInvoke.removeComp(Comp2remove);
+		// GraphSynthInvoke.removeComp(Comp2remove);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
 
@@ -252,6 +253,25 @@
 		}
 		Console.WriteLine("the number of nodes is " + b.Count);
 		Console.WriteLine("the number of connections is " + numofcon);
-	
+	}
+
+	public void removecomp()
+	{
+		// node Comp2remove = Index.comps[Index.app.selectedComponent].gsNode;
+		Console.WriteLine("here");
+		// GraphSynthInvoke.removeComp(Comp2remove);
+		List<node> b = GraphSynthInvoke.GetNodes();
+		List<arc> c = GraphSynthInvoke.GetArcs();
+
+		int numofcon = 0;
+		for (int i = 0; i < c.Count; i++)
+		{
+			if (c[i].localLabels.Contains("connection"))
+			{
+				numofcon++;
+			}
+		}
+		Console.WriteLine("the number of nodes is " + b.Count);
+		Console.WriteLine("the number of connections is " + numofcon);
 	}
 }

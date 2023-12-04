@@ -90,12 +90,13 @@ namespace ADArCWebApp
 			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
 			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
             {
-                seed.removeNode(nodeToRemove);
-                foreach (var arcToRemove in nodeToRemove.arcs.ToList())
+                foreach (arc arcToRemove in nodeToRemove.arcs.ToList())
                 {
-                    seed.removeArc((arc)arcToRemove);
+                    arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
+                    seed.removeArc(arcToRemove);
                 }
-            }
+				seed.removeNode(nodeToRemove);
+			}
         }
 
         static public List<arc> GetArcs()
