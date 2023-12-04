@@ -9,7 +9,7 @@ namespace ADArCWebApp.ComponentNamespace
 	{
 		public static Dictionary<int, ComponentData> components = new()
 		{
-			{ 1, new ComponentDataBuilder("Uno Rev3", true, "Arduino", 0.33, 280, 210, gsNodeName:"arduinouno_rev3", codeForGen:new(){{"global", ""}, {"setup", ""}, {"loopMain", ""}, {"delayLoop", ""}, {"delayTime", ""}}, pins:new(){"d8","d9","d10","d11","d12","d13","d14","d15","d16","d17","d18","d19","d0","d1","d2","d3","d4","d5","d6","d7", "gnd"}).Finish() },
+			{ 1, new ComponentDataBuilder("Uno Rev3", true, "Arduino", 0.33, 280, 210, gsNodeName:"arduinouno_rev3", codeForGen:new(){{"global", ""}, {"setup", ""}, {"loopMain", ""}, {"delayLoop", ""}, {"delayTime", ""}}, pins:new(){"d0","d1","d2","d3","d4","d5","d6","d7","d8","d9","d10","d11","d12","d13","d14","d15","d16","d17","d18","d19","gnd"}).Finish() },
 			{ 2, new ComponentDataBuilder("MEGA 2560", false, "Arduino", 1, 75, 75).Finish() },
 			{ 3, new ComponentDataBuilder("Uno WIFI Rev2", false, "Arduino", 1, 75, 75).Finish() },
 			{ 4, new ComponentDataBuilder("Pushbutton", false, "Input/Buttons and Switches", 1, 75, 75).Finish() },

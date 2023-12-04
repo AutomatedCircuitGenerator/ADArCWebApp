@@ -45,11 +45,15 @@
     };
         } 
     }
-
+    //static int count = 0;
     public static void update(ComponentInstance toDo)
     {
-        var data = ComponentNamespace.ComponentDeclarations.components[31];
+        var data = toDo.data;
         toDo.mainValue = AvrCPU.getPinState(toDo.connMap[data.pins["anode"]]);
+
+        //Console.WriteLine(count++);
+
+        
     }
 
 }

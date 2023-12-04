@@ -56,7 +56,7 @@
     bool isRightExpanded = false;
     int leftPaneAlign => isLeftExpanded ? 0 : -23;
     int rightPaneAlign => isRightExpanded ? 0 : -37;
-    string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
+    string runStopText = "▶ Run";
     bool isRunning = false;
 
     void ToggleLeftSidebar()
@@ -70,9 +70,32 @@
         isRightExpanded = !isRightExpanded;
         isLeftExpanded = false;
     }
-    void ToggleRunStop()
+    async Task ToggleRunStop()
     {
-        isRunning = !isRunning;
+        if (!isRunning)
+        {
+            runStopText = "Compiling...";
+            var response = await AppInterop.compileWrapper();
+
+
+            if (response.stderr != "")
+            {
+                codePane.updateConsoleOutput(response.stderr);
+                runStopText = "▶ Run";
+            }
+            else
+            {
+                codePane.updateConsoleOutput(response.stdout);
+                AppInterop.startSimWrapper();
+                runStopText = "🟥 Stop";
+                isRunning = true;
+            }
+        }
+        else
+        {
+            AppInterop.stopWrapper();
+            runStopText = "▶ Run";
+            isRunning = false;        }
     }
 
     public Index()
@@ -82,11 +105,10 @@
 
     public void StateChanged()
     {
-        Console.WriteLine("targetcardId " + targetCardComponentId);
-        StateHasChanged();	
+        StateHasChanged();
     }
 
-    async Task triggerRender()
+    public async Task triggerRender()
     {
         await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
     }
@@ -114,13 +136,14 @@
     {
         if (firstRender)
         {
+            Console.WriteLine("Blazor Load Completed!");
 
             AppInterop.runtime = JsRuntime;
             AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
             AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
-            AppInterop.startSimWrapper();
-            AppInterop.updateCodeWrapper();
+            //AppInterop.startSimWrapper();
+            //AppInterop.updateCodeWrapper();
         }
     }
 
@@ -179,11 +202,16 @@
                 GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
                 GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
                 comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+                BuildCode.outputPins.Clear();
                 foreach (var c in comps.Values)
                 {
                     updatePinBindings(c);	//keep an eye on this. could be not good for performance.
                 }
-
+                if (comps[localIds].globalId != 1)
+                {
+                    //TODO: fix to add more components!
+                    AvrCPU.addListener(comps[localIds].connMap[comps[localIds].data.pins["anode"]], comps[localIds], comps[localIds].data.translate);
+                }
                 AppInterop.updateCodeWrapper();
             }
             moverOffsetLeft = 0;
@@ -234,13 +262,13 @@
 
         // // allRulesLoaded = true;
 
-        
+
         base.StateHasChanged();
     }
 
     public void updatePinBindings(ComponentInstance comp)
     {
-        BuildCode.outputPins.Clear();
+        
         var compPins = getPins(comp.gsNode, comp.data.nodeName);
 
         var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
@@ -277,9 +305,10 @@
             }
 
             //if arduino and data pin being connected, register to code.
-            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "@d[0-9]{1,2}").Success)
+            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
-                BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));  
+                BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
+                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
             }
 
 			int i1 = ha.data.pins[aPinName];

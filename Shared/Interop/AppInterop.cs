@@ -23,6 +23,7 @@ namespace ADArCWebApp.Shared.Interop
 		[JSInvokable]
 		public static void sendVal(int data, int register) //0-B, 1-c, 2-d
 		{
+			//Console.WriteLine(register + " " + data);
 			switch (register)
 			{
 				case 0:
@@ -36,7 +37,7 @@ namespace ADArCWebApp.Shared.Interop
 			}
 
 			AvrCPU.updateMasking();
-			AvrCPU.updateComponents();
+
 		}
 
 		public static async Task<int> getWindowWidth() {
@@ -62,5 +63,18 @@ namespace ADArCWebApp.Shared.Interop
 			return await jsModule!.InvokeAsync<string>("getCodeInPane");
 		}
 
+		public static async void stopWrapper() { 
+			await jsModule!.InvokeVoidAsync("stop");
+        }
+
+        public static async Task<CompileResponse> compileWrapper()
+        {
+            return await jsModule!.InvokeAsync<CompileResponse>("compile");
+        }
+
+		public class CompileResponse { 
+			public string stdout {get;set;}
+			public string stderr { get;set;}
+		}
     }
 }

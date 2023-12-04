@@ -7,17 +7,17 @@ namespace ADArCWebApp.Shared.Simulation
 {
 	public static class BuildCode
 	{
-		public static List<int> outputPins { get; } = new();
+		public static List<int> outputPins = new();
 
 		public static string code => globalCode() + "\n\n" + setupCode() + "\n\n" + loopCode();
 
 
 		private static string globalCode (){
 			StringBuilder b = new StringBuilder();
-
+			//Console.WriteLine("2: " + outputPins.Count);
 			b.Append("char outputPins[] = {");
 			for (int i = 0; i < outputPins.Count; i++) {
-				b.Append(i);
+				b.Append(outputPins[i]);
 				if (i != outputPins.Count -1) { b.Append(", "); }
 			}
 
@@ -43,8 +43,8 @@ namespace ADArCWebApp.Shared.Simulation
 			StringBuilder b = new StringBuilder();
 
 			b.AppendLine("void setup() {");
-			b.AppendLine("  Serial.begin(9600)");//keep an eye on
-			b.AppendLine("  for int i = 0; i < "+ outputPins.Count+ "; i++) {");
+			b.AppendLine("  Serial.begin(9600);");//keep an eye on
+			b.AppendLine("  for (int i = 0; i < "+ outputPins.Count+ "; i++) {");
 			b.AppendLine("    pinMode(outputPins[i], OUTPUT);");
 			b.AppendLine("  }");
 			b.AppendLine("}");
@@ -78,13 +78,13 @@ namespace ADArCWebApp.Shared.Simulation
 
             b.AppendLine("void loop() {");
 			foreach (ComponentInstance c in Pages.Index.comps.Values) {
-				b.AppendLine(c.data.codeForGen["loopMain"]);
+				b.Append(c.data.codeForGen["loopMain"]);
 			}
 
 			int i = 0;
 			foreach(var kv in usedTimes) {	//this is technically wrong (keys not necessary in order), fix later probably
 
-				b.AppendLine("  if (millis() - last" + i + " >= " + kv.Key+ ") {");
+				b.AppendLine("  if (millis() - last" + i + " <= " + kv.Key+ ") {");
 				b.AppendLine("    last" + i + " += " + kv.Key + ";");
 
 				foreach (var v in kv.Value)
@@ -97,7 +97,7 @@ namespace ADArCWebApp.Shared.Simulation
                     b.AppendLine(after);
 				}
 
-				b.AppendLine("}");
+				b.AppendLine("  }");
 				i++;
 			}
 
