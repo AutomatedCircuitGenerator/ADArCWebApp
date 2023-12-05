@@ -1,4 +1,4 @@
-﻿namespace MinAVR
+﻿namespace ADArCWebApp
 {
     public class PinSignalInfo
     {

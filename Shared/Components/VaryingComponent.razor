@@ -1,0 +1,100 @@
+﻿<div class="comp-wrapper @(borderClasses())" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+	@switch(objId){
+		case 1:
+			<RazorArduinoUno></RazorArduinoUno>
+			break;
+		case 20:
+			<RazorDHT22></RazorDHT22>
+			break;
+		case 31:
+			<RazorLED value=@(boolValue())></RazorLED>
+			break;
+		case 32:
+			<RazorSevenSeg></RazorSevenSeg>
+			break;
+		case 41:
+			<RazorLCD1602 text=@individualData.mainValue.ToString()></RazorLCD1602>
+			break;
+		case 59:
+			<RazorResistor value=@((int)individualData.mainValue)></RazorResistor>
+			break;
+		default:
+			<div>does not match any ID: @objId</div>
+			break;
+	}
+</div>
+
+
+@code {
+	[Parameter]
+	public int objId { get; set; }
+
+	[Parameter]
+	public bool posAbolute { get; set; } = true;
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragStart { get; set; }
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragProgress { get; set; }
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> DragEnd { get; set; }
+
+
+	[Parameter]
+	public EventCallback<MouseEventArgs> handleClick { get; set; }
+
+	[Parameter]
+	public ComponentInstance individualData { get; set; }
+
+
+	[Parameter]
+	public double zoomFactor { get; set; } = 1;
+
+	private bool enableBorder = false;
+
+	[Parameter]
+	public bool disableBorder { get; set; } = false;
+
+	[Parameter]
+	public bool forceBorder { get; set; } = false;
+
+	public bool boolValue()
+	{
+		if (individualData.mainValue is bool value)
+		{
+			return value;
+		}
+		else
+		{
+			Console.WriteLine("Component using bool value got non-bool value!");
+			return false;
+		}
+
+	}
+
+
+	private string borderClasses()
+	{
+		if (!disableBorder)
+		{
+			if (forceBorder)
+			{
+				return "a-border";
+			}
+			else if (enableBorder)
+			{
+				return "b-border";
+			}
+			else
+			{
+				return "";	
+			}
+		}
+		else
+		{
+			return "";	
+		}
+	}
+}

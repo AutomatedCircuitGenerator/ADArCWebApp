@@ -1,6 +1,6 @@
 {
-  "name": "MinAVR",
-  "short_name": "MinAVR",
+  "name": "ADArCWebApp",
+  "short_name": "ADArCWebApp",
   "start_url": "./",
   "display": "standalone",
   "background_color": "#ffffff",
