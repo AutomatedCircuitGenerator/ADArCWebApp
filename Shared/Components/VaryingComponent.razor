@@ -3,8 +3,26 @@
 		case 1:
 			<RazorArduinoUno></RazorArduinoUno>
 			break;
+		case 2:
+			<RazorArduinoMega></RazorArduinoMega>
+			break;
+		case 7:
+			<RazorMPU6050></RazorMPU6050>
+			break;
+		case 8:
+			<RazorBNO055></RazorBNO055>
+			break;
+		case 12:
+			<RazorHC_SR04></RazorHC_SR04>
+			break;
 		case 20:
 			<RazorDHT22></RazorDHT22>
+			break;
+		case 28:
+			<RazorKY022></RazorKY022>
+			break;
+		case 30:
+			<RazorHX711></RazorHX711>
 			break;
 		case 31:
 			<RazorLED value=@(boolValue())></RazorLED>
@@ -12,8 +30,26 @@
 		case 32:
 			<RazorSevenSeg></RazorSevenSeg>
 			break;
+		case 36:
+			<RazorRGBLED></RazorRGBLED>
+			break;
+		case 39:
+			<RazorLCD2004 text=@individualData.mainValue.ToString()></RazorLCD2004>
+			break;
+		case 40:
+			<RazorLCD2004I2C text=@individualData.mainValue.ToString()></RazorLCD2004I2C>
+			break;
 		case 41:
 			<RazorLCD1602 text=@individualData.mainValue.ToString()></RazorLCD1602>
+			break;
+		case 42:
+			<RazorLCD1602I2C text=@individualData.mainValue.ToString()></RazorLCD1602I2C>
+			break;
+		case 45:
+			<RazorServo></RazorServo>
+			break;
+		case 53:
+			<RazorStepperMotor></RazorStepperMotor>
 			break;
 		case 59:
 			<RazorResistor value=@((int)individualData.mainValue)></RazorResistor>

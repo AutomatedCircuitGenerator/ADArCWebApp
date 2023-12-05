@@ -31,8 +31,8 @@
     //limited to: "full" | "i2c" | "none"
     public string pins { get; set; } = "full";
 
-    protected int numCols { get; } = 16;
-    protected int numRows { get; } = 2;
+    protected int numCols { get; } = 20;
+    protected int numRows { get; } = 4;
 
     [Parameter]
     public string text {
@@ -96,33 +96,34 @@
         get
         {
             double y = 87.5 + panelHeight * 3.78;
-            // switch (pins) {
-            //     case "i2c":
-            //         return new ElementPin[]{
-            //             new ElementPin( name: "GND", x: 4, y: 32, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
-            //             new ElementPin( name: "VCC", x: 4, y: 41.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
-            //             new ElementPin( name: "SDA", x: 4, y: 51, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA)} ),
-            //             new ElementPin( name: "SCL", x: 4, y: 60.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL)} ),
-            // };
-            //     default:
-                    return new ElementPin[]{
-                        new ElementPin( name: "VSS", x: 32, y, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
-                        new ElementPin( name: "VDD", x: 41.5, y, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
-                        new ElementPin( name: "V0", x: 51.5, y, number: 3, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "RS", x: 60.5, y, number: 4, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "RW", x: 70.5, y, number: 5, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "E", x: 80, y, number: 6, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D0", x: 89.5, y, number: 7, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D1", x: 99.5, y, number: 8, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D2", x: 109, y, number: 9, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D3", x: 118.5, y, number: 10, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D4", x: 128, y, number: 11, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D5", x: 137.5, y, number: 12, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D6", x: 147, y, number: 13, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "D7", x: 156.5, y, number: 14, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "A", x: 166.5, y, number: 15, signals: new PinSignalInfo[]{} ),
-                        new ElementPin( name: "K", x: 176, y, number: 16, signals: new PinSignalInfo[]{} ),
-                    };
+            //switch (pins) {
+            //case "i2c":
+            return new ElementPin[]{
+                        new ElementPin( name: "GND", x: 4, y: 32, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
+                        new ElementPin( name: "VCC", x: 4, y: 41.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
+                        new ElementPin( name: "SDA", x: 4, y: 51, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA)} ),
+                        new ElementPin( name: "SCL", x: 4, y: 60.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL)} )
+                };
+            //};
+                // default:
+                //     return new ElementPin[]{
+                //         new ElementPin( name: "VSS", x: 32, y, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
+                //         new ElementPin( name: "VDD", x: 41.5, y, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
+                //         new ElementPin( name: "V0", x: 51.5, y, number: 3, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "RS", x: 60.5, y, number: 4, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "RW", x: 70.5, y, number: 5, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "E", x: 80, y, number: 6, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D0", x: 89.5, y, number: 7, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D1", x: 99.5, y, number: 8, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D2", x: 109, y, number: 9, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D3", x: 118.5, y, number: 10, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D4", x: 128, y, number: 11, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D5", x: 137.5, y, number: 12, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D6", x: 147, y, number: 13, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "D7", x: 156.5, y, number: 14, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "A", x: 166.5, y, number: 15, signals: new PinSignalInfo[]{} ),
+                //         new ElementPin( name: "K", x: 176, y, number: 16, signals: new PinSignalInfo[]{} ),
+                //     };
             //} 
         }
     }
