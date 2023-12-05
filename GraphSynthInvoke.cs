@@ -83,7 +83,8 @@ namespace ADArCWebApp
 
             }
 			Console.WriteLine("connecting ends");
-		}
+            Console.WriteLine(seed.nodes.Count);
+        }
 
         static public void removeComp(node n)
         {

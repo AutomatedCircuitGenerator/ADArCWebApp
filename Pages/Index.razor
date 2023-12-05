@@ -28,7 +28,7 @@
 		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-			<div class="main-canvas">
+            <div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
 				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
 			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
@@ -218,7 +218,7 @@
             moverOffsetTop = 0;
             targetCardComponentId = -1;
 
-            test();
+            //test();
         }
     }
     #endregion
@@ -268,7 +268,7 @@
 
     public void updatePinBindings(ComponentInstance comp)
     {
-        
+
         var compPins = getPins(comp.gsNode, comp.data.nodeName);
 
         var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
@@ -311,64 +311,75 @@
                 //Console.WriteLine("1: " + BuildCode.outputPins.Count);
             }
 
-			int i1 = ha.data.pins[aPinName];
-			int i2 = hb.data.pins[bPinName];
+            int i1 = ha.data.pins[aPinName];
+            int i2 = hb.data.pins[bPinName];
 
 
-			comp.connMap.Add(i1, i2);
-		}
-	}
+            comp.connMap.Add(i1, i2);
+        }
+    }
 
 
-	public List<node> getPins(node n, string name){
-		//n is root, connected to main node but not main node.
-		string fullName = "user_" + name;
-		var mainNode = ((arc)n.arcs[0]).otherNode(n);
-		//traverse arcs to get pin nodes, except the root node
-		var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
-		return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
+    public List<node> getPins(node n, string name){
+        //n is root, connected to main node but not main node.
+        string fullName = "user_" + name;
+        var mainNode = ((arc)n.arcs[0]).otherNode(n);
+        //traverse arcs to get pin nodes, except the root node
+        var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
+        return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
 
 
-	}
+    }
 
-	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
-	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
+    //List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
+    // List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
 
-	public void addcomp()
-	{
+    //    public void addcomp()
+    //    {
 
-		//GraphSynthInvoke.recg_apply(inputs);
-		List<node> b = GraphSynthInvoke.GetNodes();
-		List<arc> c = GraphSynthInvoke.GetArcs();
 
-		int numofcon = 0;
-		for(int i = 0; i<c.Count; i++)
-		{
-			if (c[i].localLabels.Contains("connection")){
-				numofcon++;
-			}
-		}
-		Console.WriteLine("the number of nodes is " + b.Count);
-		Console.WriteLine("the number of connections is " + numofcon);
-	}
+    //        GraphSynthInvoke.recg_apply();
+    // 	List<node> b = GraphSynthInvoke.GetNodes();
+    // 	List<arc> c = GraphSynthInvoke.GetArcs();
 
-	public void removecomp()
-	{
-		// node Comp2remove = Index.comps[Index.app.selectedComponent].gsNode;
-		Console.WriteLine("here");
-		// GraphSynthInvoke.removeComp(Comp2remove);
-		List<node> b = GraphSynthInvoke.GetNodes();
-		List<arc> c = GraphSynthInvoke.GetArcs();
+    // 	int numofcon = 0;
+    // 	for(int i = 0; i<c.Count; i++)
+    // 	{
+    // 		if (c[i].localLabels.Contains("connection")){
+    // 			numofcon++;
+    // 		}
+    // 	}
+    // 	Console.WriteLine("the number of nodes is " + b.Count);
+    // 	Console.WriteLine("the number of connections is " + numofcon);
+    // }
 
-		int numofcon = 0;
-		for (int i = 0; i < c.Count; i++)
-		{
-			if (c[i].localLabels.Contains("connection"))
-			{
-				numofcon++;
-			}
-		}
-		Console.WriteLine("the number of nodes is " + b.Count);
-		Console.WriteLine("the number of connections is " + numofcon);
-	}
+    public void removecomp()
+    {
+        node Comp2remove = Index.comps[selectedComponent].gsNode;
+
+        GraphSynthInvoke.removeComp(Comp2remove);
+        comps.Remove(selectedComponent);
+        List<node> b = GraphSynthInvoke.GetNodes();
+        List<arc> c = GraphSynthInvoke.GetArcs();
+
+        int numofcon = 0;
+        for (int i = 0; i < c.Count; i++)
+        {
+            if (c[i].localLabels.Contains("connection"))
+            {
+                numofcon++;
+            }
+        }
+        Console.WriteLine("the number of nodes is " + b.Count);
+        Console.WriteLine("the number of connections is " + numofcon);
+    }
+
+    public void handleKeyPress(KeyboardEventArgs e)
+    {
+        Console.WriteLine(e.Key);
+        if (e.Key == "Backspace" || e.Key =="Delete")
+        {
+            removecomp();
+        }
+    }
 }
