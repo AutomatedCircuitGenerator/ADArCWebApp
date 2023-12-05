@@ -16,12 +16,11 @@
             };
         }
     }
-}
 
-  render() {
-    const { ledRed, ledGreen, ledBlue } = this;
-    const brightness = Math.max(ledRed, ledGreen, ledBlue);
-    const opacity = brightness ? 0.2 + brightness * 0.6 : 0;
+
+    private int brightness => new List<int>() { ledBlue, ledGreen, ledRed }.Max();
+    private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0;
+}
 
 <?xml version="1.0" encoding="UTF-8" ?>
 <svg width="42.129"
@@ -75,40 +74,40 @@
         <feGaussianBlur stdDeviation="4" />
     </filter>
     <filter id="ledFilterRed" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="${ledRed * 3}" />
+        <feGaussianBlur stdDeviation="@(ledRed * 3)" />
     </filter>
     <filter id="ledFilterGreen" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="${ledGreen * 3}" />
+        <feGaussianBlur stdDeviation="@(ledGreen * 3)" />
     </filter>
     <filter id="ledFilterBlue" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="${ledBlue * 3}" />
+        <feGaussianBlur stdDeviation="@(ledBlue * 3)" />
     </filter>
 
     <circle cx="1.7"
             cy="3"
-            r="${ledRed * 5 + 2}"
+            r="@(ledRed * 5 + 2)"
             fill="rgb(255, 0, 0)"
-            opacity="${Math.min(ledRed * 20, 0.3)}"
+            opacity="@(Math.Min(ledRed * 20, 0.3))"
             filter="url(#ledFilterRed)" />
     <circle cx="2.7"
             cy="5"
-            r="${ledGreen * 5 + 2}"
+            r="@(ledGreen * 5 + 2)"
             fill="rgb(0, 255, 0)"
-            opacity="${Math.min(ledGreen * 20, 0.3)}"
+            opacity="@(Math.Min(ledGreen * 20, 0.3))"
             filter="url(#ledFilterGreen)" />
     <circle cx="0.7"
             cy="5"
-            r="${ledBlue * 5 + 2}"
+            r="@(ledBlue * 5 + 2)"
             fill="rgb(1,85,253)"
-            opacity="${Math.min(ledBlue * 20, 0.3)}"
+            opacity="@(Math.Min(ledBlue * 20, 0.3))"
             filter="url(#ledFilterBlue)" />
 
     <circle cx="1.7"
             cy="4"
             r="10"
-            fill="rgb(${ledRed * 255}, ${ledGreen * 255 + ledBlue * 90}, ${ledBlue * 255})"
+            fill="rgb(@(ledRed * 255), @(ledGreen * 255 + ledBlue * 90), @(ledBlue * 255))"
             filter="url(#ledFilter)"
-            opacity="${opacity}" />
+            opacity="@(opacity)" />
 
     <!-- Grey hollow around the LED -->
     <circle cx="1.7"
@@ -118,5 +117,5 @@
             stroke-width="1"
             fill="none"
             filter="url(#ledFilter)"
-            opacity="${opacity}" />
+            opacity="@(opacity)" />
 </svg>
