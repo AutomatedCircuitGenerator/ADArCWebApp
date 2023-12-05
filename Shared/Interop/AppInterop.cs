@@ -63,8 +63,11 @@ namespace ADArCWebApp.Shared.Interop
 			return await jsModule!.InvokeAsync<string>("getCodeInPane");
 		}
 
-		public static async void stopWrapper() { 
+		public static async void stopWrapper() {
 			await jsModule!.InvokeVoidAsync("stop");
+			AvrCPU.portB = 0; AvrCPU.portC = 0;	AvrCPU.portD = 0;
+			AvrCPU.updateMasking();
+
         }
 
         public static async Task<CompileResponse> compileWrapper()

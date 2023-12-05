@@ -39,7 +39,7 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 28, new ComponentDataBuilder("IR receiver", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "KY-022").Finish() },
 			{ 29, new ComponentDataBuilder("SD Card Reader", false, "Input/Other Sensors", 1, 75, 75).Finish() },
 			{ 30, new ComponentDataBuilder("Load Cell(HX711)", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "TAL221").Finish() },
-			{ 31, new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, false, RazorLED.update, gsNodeName:"led", codeForGen: new(){{"global", "boolean pin = false;"}, {"setup", ""}, {"loopMain", ""}, {"delayLoop", "    digitalWrite(~\"anode\", pin);\n    pin = !pin;"}, {"delayTime", "500"}}, pins:new(){ "anode", "cathode"}).Finish() },
+			{ 31, new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, false, RazorLED.update, gsNodeName:"led", codeForGen: new(){{"global", "boolean pin = false;"}, {"setup", ""}, {"loopMain", ""}, {"delayLoop", "    digitalWrite(~\"anode\", pin);\n    pin = !pin;"}, {"delayTime", "500"}}, pins:new(){ "anode", "cathode"}, listenOn: new(){ "anode"}).Finish() },
 			{ 32, new ComponentDataBuilder("7-segment", true, "Output/LED", 1, 50, 85, paneHoverText: "Adafruit 0.56''").Finish() },
 			{ 33, new ComponentDataBuilder("Bar", false, "Output/LED", 1, 75, 75, paneHoverText: "Adafruit Bi-Color 24").Finish() },
 			{ 34, new ComponentDataBuilder("Matrix", false, "Output/LED", 1, 75, 75, paneHoverText: "MAX7219/MAX7221").Finish() },
