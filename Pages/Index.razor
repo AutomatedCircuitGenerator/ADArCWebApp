@@ -377,7 +377,7 @@
     public void handleKeyPress(KeyboardEventArgs e)
     {
         Console.WriteLine(e.Key);
-        if (e.Key == "Backspace" || e.Key =="Delete")
+        if ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1)
         {
             removecomp();
         }
