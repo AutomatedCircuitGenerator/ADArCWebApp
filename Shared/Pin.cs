@@ -69,6 +69,10 @@
             return new PinSignalInfo(PinSignalType.POWER, PinSignal.VCC, voltage: voltage);
         }
 
+        public static PinSignalInfo PWM() {
+            return new PinSignalInfo(PinSignalType.PWM);
+        }
+
     }
 
 

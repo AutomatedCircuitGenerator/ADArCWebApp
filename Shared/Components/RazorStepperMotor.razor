@@ -1,0 +1,218 @@
+﻿@code {
+
+    private double mmToPix = 3.78;
+    // Most likely the most buggy one
+    [Parameter] public int angle { get; set;  } = 0;
+    [Parameter] public string arrow { get; set; } = "";
+    [Parameter] public string value { get; set; } = "";
+    [Parameter] public string units { get; set; } = "";
+    //[Parameter] public int[] size { get; set; } = { 8, 11, 14, 17, 23, 34 };
+
+    private int id { get; } = 17;
+    private double frameSize { get; } = 42.3;
+    private double holeRadius { get; } = 1.5;
+    private double shaftRadius { get; } = 5;
+    private double cornerRadius { get; } = 5;
+    private double cornerOffset { get; } = 5.5;
+    private double bodyRadius { get; } = 14;
+    private double textSize { get; } = 16;
+    private double valueYPosition { get; } = 30.5;
+    private double unitsYPosition { get; } = 33.7;
+
+    private double halfShaft => shaftRadius / 2;
+    private double halfFrame => frameSize / 2;
+
+    private double innerHoleRadius => holeRadius * 0.9;
+    private double outerHoleRadius => holeRadius * 1.1;
+
+    // shaft radius offset, needed for transform
+    private double rOff => Math.Sqrt(0.75 * Math.Pow(shaftRadius, 2));
+
+    // these offsets match the transform in renderFace
+    double xOff => (frameSize / 2 - 3.75) * mmToPix + 1;
+    double yOff => (frameSize + 5) * mmToPix;
+
+    public ElementPin[] pinInfo {
+        get
+        {
+            return new ElementPin[]{
+
+                new ElementPin(name: "A-", x: xOff, y: yOff, number: 1, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "A+", x: xOff + 2.54 * mmToPix, y: yOff, number: 2, signals: new PinSignalInfo[] { }),
+                new ElementPin( name: "B+", x: xOff + 5.08 * mmToPix, y: yOff, number: 3, signals: new PinSignalInfo[] { } ),
+                new ElementPin( name: "B-", x: xOff + 7.62 * mmToPix, y: yOff, number: 4, signals: new PinSignalInfo[] { } ),
+                // new ElementPin( name: "Center Tap 2", x: 0, y: 69, number: 5, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+                // new ElementPin( name: "PWM", x: 0, y: 69, number: 6, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+            };
+        }
+    }
+}
+
+  <svg
+      width="@(frameSize + 1)mm"
+      height="@(frameSize + 5)mm"
+      version="1.1"
+      viewBox="0 0 @((1 + frameSize) * mmToPix) @((5 + frameSize) * mmToPix)"
+      xmlns="http://www.w3.org/2000/svg"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+    >
+      <defs>
+        <linearGradient
+          id="frame-gradient"
+          x1="-@(frameSize * 0.2)"
+          x2="@(frameSize * 2)"
+          y1="@(frameSize)"
+          y2="@(frameSize)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#666" offset="0" />
+          <stop stop-color="#fff" offset="1" />
+        </linearGradient>
+        <linearGradient
+          id="shaft-gradient"
+          x1="0"
+          x2="0"
+          y1="-5"
+          y2="5"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#9d9d9d" offset="0" />
+          <stop stop-color="#9d9d9d" stop-opacity="0" offset="1" />
+        </linearGradient>
+        <linearGradient
+          id="body-gradient"
+          x1="@(frameSize * 0.1)"
+          x2="@(frameSize * 0.7)"
+          y1="@(frameSize)"
+          y2="@(frameSize)"
+          gradientUnits="userSpaceOnUse"
+        >
+          <stop stop-color="#9d9d9d" offset="0" />
+          <stop stop-color="#fdfafa" offset=".29501" />
+          <stop offset="1" stop-color="#2a2a2a" />
+        </linearGradient>
+      </defs>
+      <!-- Body -->
+      <g transform="translate(1,1)">
+        <g transform="scale(@(mmToPix))">
+          <!-- Pins -->
+          <path
+            id="pin"
+            transform="translate(@(halfFrame - 3.75) @(frameSize))"
+            fill="#9f9f9f"
+            d="m 0 0 c .5 0 .5 0 .5 .5 v 4.55 c -.5 .5 -.5 .5 -1 0 v -4.5 c 0 -.5 0 -.5 .5 -.5"
+          />
+          <use xlink:href="#pin" x="2.54" />
+          <use xlink:href="#pin" x="5.08" />
+          <use xlink:href="#pin" x="7.62" />
+
+          <g stroke-linecap="round" stroke-linejoin="round">
+            <rect
+              width="@(frameSize)"
+              height="@(frameSize)"
+              rx="@(cornerRadius)"
+              ry="@(cornerRadius)"
+              fill="url(#frame-gradient)"
+              stroke="#000"
+              stroke-width=".3245"
+            />
+            <circle cx="@(cornerOffset)" cy="@(cornerOffset)" r="@(outerHoleRadius)" fill="#666" />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(outerHoleRadius)"
+              fill="#666"
+            />
+            <circle
+              cx="@(frameSize - cornerOffset)"
+              cy="@(frameSize - cornerOffset)"
+              r="@(innerHoleRadius)"
+              fill="#e6e6e6"
+            />
+          </g>
+
+          <!-- motor body -->
+          <circle
+            cx="@(halfFrame)"
+            cy="@(halfFrame)"
+            r="@(bodyRadius)"
+            fill="#868686"
+            fill-opacity=".89602"
+            opacity=".73"
+            stroke="url(#body-gradient)"
+            stroke-width="1.41429"
+          />
+          <!-- Rotator -->
+          <g>
+            <path
+              id="arrow-path"
+              transform="
+                rotate(@(this.angle), @(halfFrame), @(halfFrame)) 
+                translate(@(halfFrame) @(halfFrame))"
+              fill="@(this.arrow != "" ? this.arrow : "transparent")"
+              d="m 0 0 l -@(shaftRadius) 0 l @(shaftRadius) 
+                -@(halfFrame - 3) l @(shaftRadius) @(halfFrame - 3) z"
+            />
+            <path
+              id="shaft-path"
+              transform="
+                translate(@(halfFrame), @(halfFrame)) 
+                rotate(@(this.angle)) 
+                translate(0, 0)"
+              d="m -@(halfShaft) -@(rOff) a @(shaftRadius) @(shaftRadius) 0 1 0 @(shaftRadius) 0 z"
+              fill="#4d4d4d"
+              stroke="url(#shaft-gradient)"
+              stroke-width=".57968"
+            />
+          </g>
+
+          <!-- Text -->
+          <text font-family="arial" font-size="14.667px" text-align="center" text-anchor="middle">
+            <tspan
+              x="@(halfFrame)"
+              y="@(valueYPosition)"
+              font-size="@(textSize / mmToPix)px"
+            >
+              @(this.value)
+            </tspan>
+            <tspan
+              x="@(halfFrame)"
+              y="@(unitsYPosition)"
+              font-size="@((0.7 * textSize) / mmToPix)px"
+            >
+              @(this.units)
+            </tspan>
+          </text>
+        </g>
+      </g>
+    </svg>

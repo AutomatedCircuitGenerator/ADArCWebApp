@@ -31,8 +31,8 @@
     //limited to: "full" | "i2c" | "none"
     public string pins { get; set; } = "full";
 
-    protected int numCols { get; } = 16;
-    protected int numRows { get; } = 2;
+    protected int numCols { get; } = 20;
+    protected int numRows { get; } = 4;
 
     [Parameter]
     public string text {
@@ -44,87 +44,6 @@
         {
             //maybe wrong replacement
             this.characters = value.ToCharArray().Take(32).Select(c => (byte)c).ToArray();
-        }
-    }
-
-    public static void update(ComponentInstance comp)
-    {
-        ComponentData data = comp.data;
-        if (AvrCPU.getPinState(comp.connMap[data.pins["enable"]]))         //TODO: change name if necess
-        {
-
-            if (comp.connMap.ContainsKey(data.pins["data5"]))
-            {
-                //assume 8pin setup
-            }
-            else
-            {
-                //assume 4pin setup
-                bool a1 = AvrCPU.getPinState(comp.connMap[data.pins["data1"]]);
-                bool a2 = AvrCPU.getPinState(comp.connMap[data.pins["data2"]]);
-                bool a3 = AvrCPU.getPinState(comp.connMap[data.pins["data3"]]);
-                bool a4 = AvrCPU.getPinState(comp.connMap[data.pins["data4"]]);
-                bool rs = AvrCPU.getPinState(comp.connMap[data.pins["rs"]]);
-                if (comp.midSignal > 0)
-                {
-                    int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);//may need to reverse sig
-                    sig = sig << 4;
-                    sig = sig | comp.midSignal;
-
-                    if (rs)
-                    {
-                        //r/w ram. cant be bothered right now.
-                        //if ((sig))    
-                    }
-                    else
-                    {
-                        if ((sig & 1 << 7) > 0)
-                        {
-                            //set ddram addr?    
-                        }
-                        else if ((sig & 1 << 6) > 0)
-                        {
-                            //set cgram addr?
-                        }
-                        else if ((sig & 1 << 5) > 0)
-                        {
-                            //function set. probably from begin() or init()    
-                        }
-                        else if ((sig & 1 << 4) > 0)
-                        {
-                            //cursor shifting supposedly
-                        }
-                        else if ((sig & 1 << 3) > 0)
-                        {
-                            //display control    
-                        }
-                        else if ((sig & 1 << 2) > 0)
-                        {
-                            //entry mode set? auto shift cursor maybe?    
-                        }
-                        else if ((sig & 0b10) > 0)
-                        {
-                            //cursor display POSITION reset.    
-                        }
-                        else if ((sig & 1) > 0)
-                        {
-                            //clear text    
-                        }
-                        else
-                        {
-                            Console.WriteLine("Possible error: did not catch instruction: " + Convert.ToString(sig, 2));    
-                        }
-                    }
-
-                    comp.midSignal = 0;
-                }
-                else
-                {
-
-                    int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);
-                    comp.midSignal = sig;
-                }
-            }
         }
     }
 
@@ -185,7 +104,7 @@
             //             new ElementPin( name: "SDA", x: 4, y: 51, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA)} ),
             //             new ElementPin( name: "SCL", x: 4, y: 60.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL)} ),
             // };
-            //     default:
+            //  default:
                     return new ElementPin[]{
                         new ElementPin( name: "VSS", x: 32, y, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
                         new ElementPin( name: "VDD", x: 41.5, y, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
