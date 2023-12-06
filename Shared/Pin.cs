@@ -1,4 +1,4 @@
-﻿namespace MinAVR
+﻿namespace ADArCWebApp
 {
     public class PinSignalInfo
     {
@@ -67,6 +67,10 @@
         public static PinSignalInfo VCC(double? voltage = 0)
         {
             return new PinSignalInfo(PinSignalType.POWER, PinSignal.VCC, voltage: voltage);
+        }
+
+        public static PinSignalInfo PWM() {
+            return new PinSignalInfo(PinSignalType.PWM);
         }
 
     }
