@@ -3,13 +3,12 @@
 	{
 		get
 		{
-			return new ElementPin
+			return new ElementPin []
 			{
-
 				new ElementPin(name: "S", x: 36.229, y: 104.57, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
 				new ElementPin(name: "Mid", x: 38.688, y: 104.52, signals: new PinSignalInfo[] { }, number: 2),
 				new ElementPin(name: "GND",  x: 41.397, y: 104.52, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3)
-			}
+			};
 
 		}
 	}
