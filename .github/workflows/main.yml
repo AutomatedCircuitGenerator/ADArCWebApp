@@ -19,8 +19,8 @@ jobs:
         with:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BRANCH: gh-pages
-          FOLDER: wwwroot
+          FOLDER: release/wwwroot
       - name: Add .nojekyll file
-        run: touch wwwroot/.nojekyll
-      - name: copy index.html to 404.html
-        run: cp wwwroot/index.html wwwroot/404.html
+        run: touch release/wwwroot/.nojekyll
+      - name: copy release/index.html to release/404.html
+        run: cp release/wwwroot/index.html release/wwwroot/404.html
