@@ -1,4 +1,5 @@
-﻿@code { // DHT22
+﻿@code {
+    // DHT22
     ElementPin[] pinInfo
     {
         get
@@ -11,6 +12,39 @@
                 new ElementPin(name: "GND", x: 43.8, y: 114.9, signals: new PinSignalInfo[] { }, number: 4)
             };
         }
+    }
+
+    double humidity = 40.0;
+    double temp = 20.0;
+    //16 bits humidity: 400 = 40%, 16 bits temp deg C: 200 = 20%, 8 bits checksum = last 8 sum prev
+    //output sig: 0b0000 0001 1001 0000 0000 0000 1100 1000 0101 1000
+    byte[] getSignal()
+    {
+        byte[] ret = new byte[5];
+        int rh = (int)(humidity * 10);
+        int t = (int)(temp * 10);
+        int sum = t + rh;
+
+        ret[0] = (byte)(rh & 0b1111111100000000);
+        ret[1] = (byte)(rh & 0b0000000011111111);
+        ret[2] = (byte)(t & 0b1111111100000000);
+        ret[3] = (byte)(t & 0b0000000011111111);
+        ret[4] = (byte)(sum & 0b0000000011111111);
+
+        return ret;
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        // false 1ms+ -> true (20-40us) trigger
+        //then send
+    }
+
+
+    async void sendSignal()
+    {
+        //false (80us) -> true (80us) ack
+        //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
     }
 }
 <svg width="15.1mm"
