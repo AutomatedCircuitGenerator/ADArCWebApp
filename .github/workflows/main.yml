@@ -15,7 +15,7 @@ jobs:
       - name: publish .NET Core Project
         run: dotnet publish ADArCWebApp.csproj -c Release -o release --nologo
       - name: Add .nojekyll file
-        run: touch release/.nojekyll
+        run: touch release/wwwroot/.nojekyll
       - name: copy release/index.html to release/404.html
         run: cp release/wwwroot/index.html release/wwwroot/404.html
       - name: Commit wwwroot to GitHub Pages
