@@ -50,7 +50,14 @@
     public static void update(ComponentInstance comp)
     {
         ComponentData data = comp.data;
-        if (AvrCPU.getPinState(comp.connMap[data.pins["enable"]]))         //TODO: change name if necess
+        int enable = -1;
+        if (0 == comp.getConnection("enable", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            enable = conn!.toId;
+        }
+
+
+        if (AvrCPU.getPinState(enable))         //TODO: change name if necess
         {
 
             if (comp.connMap.ContainsKey(data.pins["data5"]))
@@ -60,11 +67,32 @@
             else
             {
                 //assume 4pin setup
-                bool a1 = AvrCPU.getPinState(comp.connMap[data.pins["data1"]]);
-                bool a2 = AvrCPU.getPinState(comp.connMap[data.pins["data2"]]);
-                bool a3 = AvrCPU.getPinState(comp.connMap[data.pins["data3"]]);
-                bool a4 = AvrCPU.getPinState(comp.connMap[data.pins["data4"]]);
-                bool rs = AvrCPU.getPinState(comp.connMap[data.pins["rs"]]);
+                int p1 = -1, p2=-1, p3=-1, p4=-1, rs0=-1;
+                if (0 == comp.getConnection("data1", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+                {
+                    p1 = conn2!.toId;
+                }
+                if (0 == comp.getConnection("data2", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+                {
+                    p2 = conn3!.toId;
+                }
+                if (0 == comp.getConnection("data3", out InstanceConnection? conn4, out List<InstanceConnection>? all4))
+                {
+                    p3 = conn4!.toId;
+                }
+                if (0 == comp.getConnection("data4", out InstanceConnection? conn5, out List<InstanceConnection>? all5))
+                {
+                    p4 = conn5!.toId;
+                }
+                if (0 == comp.getConnection("rs", out InstanceConnection? conn6, out List<InstanceConnection>? all6))
+                {
+                    rs0 = conn6!.toId;
+                }
+                bool a1 = AvrCPU.getPinState(p1);
+                bool a2 = AvrCPU.getPinState(p2);
+                bool a3 = AvrCPU.getPinState(p3);
+                bool a4 = AvrCPU.getPinState(p4);
+                bool rs = AvrCPU.getPinState(rs0);
                 if (comp.midSignal > 0)
                 {
                     int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);//may need to reverse sig

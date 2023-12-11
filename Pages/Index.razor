@@ -208,15 +208,40 @@
 				{
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
 				}
-				if (targetCardComponentId != 1)
+
+
+				if (comps.Values.Any(c=>c.globalId==1))	//set has an arduino uno
 				{
-					var inst = comps[localIds];
-					foreach (string listen in inst.data.pinsToListen)
+					foreach (var c in comps.Values)		//iterate all components (don't know what listeners exist already)
 					{
-						AvrCPU.addListener(inst.connMap[d.pins[listen]], inst, inst.data.translate);
+						if (c.globalId != 1)			//exclude the arduino
+						{
+							foreach (string listen in c.data.pinsToListen)	//add a listener for each important pin
+							{
+								int pin = -1;
+								if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+								{
+									pin = conn!.toId;
+								}
+
+								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+								//hopefully the only time the list extends 
+								//is on arduino, which is excluded here
+								if (!hasList || !list.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
+								{
+									int pin2 = -1;
+									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+									{
+										pin2 = conn2!.toId;
+									}
+									AvrCPU.addListener(pin2, c, c.data.translate);
+								}
+							}
+						}
 					}
+
+					AppInterop.updateCodeWrapper();
 				}
-				AppInterop.updateCodeWrapper();
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
@@ -270,7 +295,7 @@
 
 	public void updatePinBindings(ComponentInstance comp)
 	{
-		
+		comp.connMap.Clear();
 		var compPins = getPins(comp.gsNode, comp.data.nodeName);
 
 		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
@@ -286,7 +311,11 @@
 				continue;
 			}
 
-			if (ha != comp)
+			if (ha != comp && hb != comp)
+			{
+				continue;	
+			}
+			else if (ha != comp)
 			{
 				var temp = ha;
 				ha = hb;
@@ -317,7 +346,7 @@
 			int i2 = hb.data.pins[bPinName];
 
 
-			comp.connMap.Add(i1, i2);
+			comp.addConnection(i1, hb, i2);
 		}
 	}
 

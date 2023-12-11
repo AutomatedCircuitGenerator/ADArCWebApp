@@ -49,7 +49,15 @@
     public static void update(ComponentInstance toDo)
     {
         var data = toDo.data;
-        toDo.mainValue = AvrCPU.getPinState(toDo.connMap[data.pins["anode"]]);
+
+        if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            toDo.mainValue = AvrCPU.getPinState(conn!.toId);
+        }
+        else
+        {
+            Console.WriteLine("GetConnection failed from LED Component!");    
+        }
 
         //Console.WriteLine(count++);
 

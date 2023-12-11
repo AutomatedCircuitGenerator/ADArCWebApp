@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -12,15 +21,39 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
+define("lib/compile-util", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.buildHex = exports.loadHex = void 0;
+    function loadHex(source, target) {
+        for (const line of source.split('\n')) {
+            if (line[0] === ':' && line.substr(7, 2) === '00') {
+                const bytes = parseInt(line.substr(1, 2), 16);
+                const addr = parseInt(line.substr(3, 4), 16);
+                for (let i = 0; i < bytes; i++) {
+                    target[addr + i] = parseInt(line.substr(9 + i * 2, 2), 16);
+                }
+            }
+        }
+    }
+    exports.loadHex = loadHex;
+    const url = 'https://hexi.wokwi.com';
+    function buildHex(source) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const resp = yield fetch(url + '/build', {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sketch: source })
+            });
+            return (yield resp.json());
+        });
+    }
+    exports.buildHex = buildHex;
+});
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -3117,6 +3150,44 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
+define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-util"], function (require, exports, index_1, compile_util_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.AVRRunner = void 0;
+    const FLASH = 0x8000;
+    class AVRRunner {
+        constructor(hex) {
+            this.program = new Uint16Array(FLASH);
+            this.stopped = false;
+            (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
+            this.cpu = new index_1.CPU(this.program);
+            this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
+            this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
+            this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
+            this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
+        }
+        execute(callback) {
+            return __awaiter(this, void 0, void 0, function* () {
+                this.stopped = false;
+                for (;;) {
+                    (0, index_1.avrInstruction)(this.cpu);
+                    this.cpu.tick();
+                    if (this.cpu.cycles % 50000 === 0) {
+                        callback(this.cpu);
+                        yield new Promise(resolve => setTimeout(resolve, 0));
+                        if (this.stopped) {
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+        stop() {
+            this.stopped = true;
+        }
+    }
+    exports.AVRRunner = AVRRunner;
+});
 define("lib/avr8js/utils/assembler", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -4008,77 +4079,6 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
         }
     }
     exports.TestProgramRunner = TestProgramRunner;
-});
-define("lib/compile-util", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.buildHex = exports.loadHex = void 0;
-    function loadHex(source, target) {
-        for (const line of source.split('\n')) {
-            if (line[0] === ':' && line.substr(7, 2) === '00') {
-                const bytes = parseInt(line.substr(1, 2), 16);
-                const addr = parseInt(line.substr(3, 4), 16);
-                for (let i = 0; i < bytes; i++) {
-                    target[addr + i] = parseInt(line.substr(9 + i * 2, 2), 16);
-                }
-            }
-        }
-    }
-    exports.loadHex = loadHex;
-    const url = 'https://hexi.wokwi.com';
-    function buildHex(source) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const resp = yield fetch(url + '/build', {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ sketch: source })
-            });
-            return (yield resp.json());
-        });
-    }
-    exports.buildHex = buildHex;
-});
-define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-util"], function (require, exports, index_1, compile_util_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRRunner = void 0;
-    const FLASH = 0x8000;
-    class AVRRunner {
-        constructor(hex) {
-            this.program = new Uint16Array(FLASH);
-            this.stopped = false;
-            (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
-            this.cpu = new index_1.CPU(this.program);
-            this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
-            this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
-            this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
-            this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
-        }
-        execute(callback) {
-            return __awaiter(this, void 0, void 0, function* () {
-                this.stopped = false;
-                for (;;) {
-                    (0, index_1.avrInstruction)(this.cpu);
-                    this.cpu.tick();
-                    if (this.cpu.cycles % 50000 === 0) {
-                        callback(this.cpu);
-                        yield new Promise(resolve => setTimeout(resolve, 0));
-                        if (this.stopped) {
-                            break;
-                        }
-                    }
-                }
-            });
-        }
-        stop() {
-            this.stopped = true;
-        }
-    }
-    exports.AVRRunner = AVRRunner;
 });
 define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute"], function (require, exports, compile_util_2, execute_1) {
     "use strict";

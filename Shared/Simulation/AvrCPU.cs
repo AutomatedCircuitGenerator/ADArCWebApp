@@ -8,7 +8,8 @@
 
 		public static int maskable;
 
-		private static Dictionary<int, List<(ComponentInstance actor, Action<ComponentInstance> action)>> pinListeners = new();
+		//avr pinId -> component
+		public static Dictionary<int, List<(ComponentInstance actor, Action<ComponentInstance> action)>> pinListeners = new();
 
 		public static void updateMasking() {
 			int oldMask = maskable;
