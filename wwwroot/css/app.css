@@ -105,3 +105,10 @@ a, .btn-link {
 #app {
     height: 100%;
 }
+
+
+#monaco-editor {
+    height: 650px;
+    width: 100%;
+    border: 1px solid #ccc;
+}

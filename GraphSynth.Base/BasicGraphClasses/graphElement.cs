@@ -57,7 +57,7 @@ namespace GraphSynth.Representation
         /// </summary>
         /// <value>The old data.</value>
         [XmlAnyElement]
-        public XElement[] extraData { get; set; }
+        public XmlElement[] extraData { get; set; }
 
         //private Shape _displayShape;
         /// <summary>

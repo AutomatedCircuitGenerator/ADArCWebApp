@@ -8,7 +8,8 @@
 
 		public static int maskable;
 
-		private static Dictionary<int, List<(ComponentInstance actor, Action<ComponentInstance> action)>> pinListeners = new();
+		//avr pinId -> component
+		public static Dictionary<int, List<(ComponentInstance actor, Action<ComponentInstance> action)>> pinListeners = new();
 
 		public static void updateMasking() {
 			int oldMask = maskable;
@@ -47,6 +48,50 @@
 
 		public static bool getPinState(int index) {
 			return (maskable & (1 << (index))) > 0;
+		}
+
+		public static void setPinState(int index, bool state) { 
+			int st = state ? 1 : 0;
+			bool isOn = getPinState(index);
+
+
+			if (index < 8)
+			{
+				if (isOn)
+				{
+					portD &= (st << (index));
+				}
+				else
+				{
+					portD |= (st << (index));
+				}
+			}
+			else if (index < 14)
+			{
+				if (isOn)
+				{
+					portB &= (st << (index - 8));
+				}
+				else
+				{
+					portB |= (st << (index - 8));
+				}
+			}
+			else {
+                if (isOn)
+                {
+                    portC &= (st << (index - 14));
+                }
+                else
+                {
+                    portC |= (st << (index - 14));
+                }
+            }
+
+			//appinterop
+			//dont update components, bad for important performance
+
+
 		}
 	}
 }

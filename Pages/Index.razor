@@ -1,12 +1,10 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @inject IJSRuntime JsRuntime
+@inject NavigationManager navMan
 
 <PageTitle>Index</PageTitle>
 <body>
-	<script>
-		window.triggerClick = (elt) => elt.click();
-	</script>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 	<div class="page">
@@ -52,272 +50,303 @@
 
 
 @code{
-    bool isLeftExpanded = true;
-    bool isRightExpanded = false;
-    int leftPaneAlign => isLeftExpanded ? 0 : -23;
-    int rightPaneAlign => isRightExpanded ? 0 : -37;
-    string runStopText = "▶ Run";
-    bool isRunning = false;
+	bool isLeftExpanded = true;
+	bool isRightExpanded = false;
+	int leftPaneAlign => isLeftExpanded ? 0 : -23;
+	int rightPaneAlign => isRightExpanded ? 0 : -37;
+	string runStopText = "▶ Run";
+	bool isRunning = false;
 
-    void ToggleLeftSidebar()
-    {
-        isLeftExpanded = !isLeftExpanded;
-        isRightExpanded = false;
-    }
+	void ToggleLeftSidebar()
+	{
+		isLeftExpanded = !isLeftExpanded;
+		isRightExpanded = false;
+	}
 
-    void ToggleRightSidebar()
-    {
-        isRightExpanded = !isRightExpanded;
-        isLeftExpanded = false;
-    }
-    async Task ToggleRunStop()
-    {
-        if (!isRunning)
-        {
-            runStopText = "Compiling...";
-            var response = await AppInterop.compileWrapper();
-
-
-            if (response.stderr != "")
-            {
-                codePane.updateConsoleOutput(response.stderr);
-                runStopText = "▶ Run";
-            }
-            else
-            {
-                codePane.updateConsoleOutput(response.stdout);
-                AppInterop.startSimWrapper();
-                runStopText = "🟥 Stop";
-                isRunning = true;
-            }
-        }
-        else
-        {
-            AppInterop.stopWrapper();
-            runStopText = "▶ Run";
-            isRunning = false;        }
-    }
-
-    public Index()
-    {
-        app = this;
-    }
-
-    public void StateChanged()
-    {
-        StateHasChanged();
-    }
-
-    public async Task triggerRender()
-    {
-        await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
-    }
-
-    private int localIds = 0;
-
-    public static Dictionary<int, ComponentInstance> comps = new()
-    {
-    };
+	void ToggleRightSidebar()
+	{
+		isRightExpanded = !isRightExpanded;
+		isLeftExpanded = false;
+	}
+	async Task ToggleRunStop()
+	{
+		if (!isRunning)
+		{
+			runStopText = "Compiling...";
+			var response = await AppInterop.compileWrapper();
 
 
-    public int selectedComponent = -1;
+			if (response.stderr != "")
+			{
+				codePane.updateConsoleOutput(response.stderr);
+				runStopText = "▶ Run";
+			}
+			else
+			{
+				codePane.updateConsoleOutput(response.stdout);
+				AppInterop.startSimWrapper();
+				runStopText = "🟥 Stop";
+				isRunning = true;
+			}
+		}
+		else
+		{
+			AppInterop.stopWrapper();
+			runStopText = "▶ Run";
+			isRunning = false;
+		}
+	}
 
-    public static Index? app;
-    public static MainCanvas? buildCanvas;
-    public static CodePane? codePane;
-    public static readonly int defaultScreenWidth = 1920;
-    public static double currentRatio = 1;
+	public Index()
+	{
+		app = this;
+	}
 
-    public static ElementReference? refresh;
+	public void StateChanged()
+	{
+		StateHasChanged();
+	}
+
+	public async Task triggerRender()
+	{
+		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
+	}
+
+	private int localIds = 0;
+
+	public static Dictionary<int, ComponentInstance> comps = new()
+	{
+	};
 
 
+	public int selectedComponent = -1;
 
-    protected async override Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            Console.WriteLine("Blazor Load Completed!");
+	public static Index? app;
+	public static MainCanvas? buildCanvas;
+	public static CodePane? codePane;
+	public static readonly int defaultScreenWidth = 1920;
+	public static double currentRatio = 1;
 
-            AppInterop.runtime = JsRuntime;
-            AppInterop.jsModule = await AppInterop.getModuleWrapper();
-
-            AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
-            //AppInterop.startSimWrapper();
-            //AppInterop.updateCodeWrapper();
-        }
-    }
+	public static ElementReference? refresh;
 
 
 
-    #region component pane integration
-    private int targetCardComponentId = -1;
-    private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
-    private string isVisible = "hidden";
-    private bool allowDrop = false;
+	protected async override Task OnAfterRenderAsync(bool firstRender)
+	{
+		if (firstRender)
+		{
+			Console.WriteLine("Blazor Load Completed!");
 
-    private double moverOffsetTop = 0;
-    private double moverOffsetLeft = 0;
+			AppInterop.runtime = JsRuntime;
+			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
-    public void setTargetID(int id)
-    {
-        targetCardComponentId = id;
-    }
-
-
-    private void checkForCardDrag(MouseEventArgs e)
-    {
-        if (e.Button == 0 && targetCardComponentId != -1)
-        {
-            isVisible = "visible";
-            moverOffsetLeft = e.ClientX;
-            moverOffsetTop = e.ClientY;
-        }
-    }
-
-    private void dragCardIfPossible(MouseEventArgs e)
-    {
-        if (targetCardComponentId != -1)
-        {
-            moverOffsetLeft = e.ClientX;
-            moverOffsetTop = e.ClientY;
-        }
-    }
-
-    public void addToCanvasIfNecessary(MouseEventArgs e)
-    {
-        if (targetCardComponentId != -1)
-        {
-            isVisible = "hidden";
-            if (allowDrop)
-            {
-                ++localIds;
-                var d = ComponentDeclarations.components[targetCardComponentId];
-                var n = new node();//label with localId (easy tracking)
-                n.localLabels.Add("user_" + d.nodeName);
-
-                GraphSynthInvoke.GetNodes().Add(n);
-                GraphSynthInvoke.inputs.Add(d.nodeName);
-                GraphSynthInvoke.recg_apply();
-
-                GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
-                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-                comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
-                BuildCode.outputPins.Clear();
-                foreach (var c in comps.Values)
-                {
-                    updatePinBindings(c);	//keep an eye on this. could be not good for performance.
-                }
-                if (comps[localIds].globalId != 1)
-                {
-                    //TODO: fix to add more components!
-                    AvrCPU.addListener(comps[localIds].connMap[comps[localIds].data.pins["anode"]], comps[localIds], comps[localIds].data.translate);
-                }
-                AppInterop.updateCodeWrapper();
-            }
-            moverOffsetLeft = 0;
-            moverOffsetTop = 0;
-            targetCardComponentId = -1;
-
-            //test();
-        }
-    }
-    #endregion
-
-    private readonly List<string> ruleNames = new();
-    private readonly double totalRules = 19.0;
-    private string fileToLoad = "";
-    private double loadPercent = 0;
-    protected override async Task OnInitializedAsync()
-    {
-        // loads rulesets
-        // allRulesLoaded = false;
-        // ruleNames.Add("BondGraphRuleset"); //58
-        // ruleNames.Add("SimplificationRuleset"); //28
-        // ruleNames.Add("DirRuleset"); //5
-        // ruleNames.Add("newDirectionRuleSet_2"); //17
-        // ruleNames.Add("DirRuleset3"); //4
-        // ruleNames.Add("Simplification2"); //32
-        // ruleNames.Add("NewCausalityMethodRuleset"); //6
-        // ruleNames.Add("NewCausalityMethodRuleset_2"); //4
-        // ruleNames.Add("NewCausalityMethodRuleset_3"); //2
-        // ruleNames.Add("INVDMarkerRules"); //6
-        // ruleNames.Add("INVDMarkerRules_2"); //0?
-        // ruleNames.Add("CalibrationNewRuleset"); //12
-        // ruleNames.Add("CalibrationNewRuleset_2"); //0?
-        // ruleNames.Add("RFlagCleanRuleset"); //1
-        // ruleNames.Add("ICFixTotalRuleset"); //12
-        // ruleNames.Add("TransformerFlipRuleset"); //1
-        // ruleNames.Add("TransformerFlipRuleset2"); //1
-        // ruleNames.Add("Clean23Ruleset"); //4
-        // ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-        await RuleSetMap.getInstance().loadRuleSet("ADD");
-        await RuleSetMap.getInstance().loadRuleSet("CONNECT");
-        // await RuleSetMap.getInstance().loadRuleSet("BIG1");
-        // foreach (string str in ruleNames)
-        // {
-        // 	await RuleSetMap.getInstance().loadRuleSet(str);
-        // 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-        // 	base.StateHasChanged();
-        // }
-
-        // // allRulesLoaded = true;
+			AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
+			//AppInterop.startSimWrapper();
+			//AppInterop.updateCodeWrapper();
+		}
+	}
 
 
-        base.StateHasChanged();
-    }
 
-    public void updatePinBindings(ComponentInstance comp)
-    {
+	#region component pane integration
+	private int targetCardComponentId = -1;
+	private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
+	private string isVisible = "hidden";
+	private bool allowDrop = false;
 
-        var compPins = getPins(comp.gsNode, comp.data.nodeName);
+	private double moverOffsetTop = 0;
+	private double moverOffsetLeft = 0;
 
-        var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
-        //List<arc> connArcs = new();
+	public void setTargetID(int id)
+	{
+		targetCardComponentId = id;
+	}
 
-        foreach (arc a in connArcs)
-        {
-            ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
-            ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 
-            if (ha == hb)
-            {
-                continue;
-            }
+	private void checkForCardDrag(MouseEventArgs e)
+	{
+		if (e.Button == 0 && targetCardComponentId != -1)
+		{
+			isVisible = "visible";
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
 
-            if (ha != comp)
-            {
-                var temp = ha;
-                ha = hb;
-                hb = temp;
-            }
+	private void dragCardIfPossible(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			moverOffsetLeft = e.ClientX;
+			moverOffsetTop = e.ClientY;
+		}
+	}
 
-            var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-            string bPinName = "";
+	public void addToCanvasIfNecessary(MouseEventArgs e)
+	{
+		if (targetCardComponentId != -1)
+		{
+			isVisible = "hidden";
+			if (allowDrop)
+			{
+				++localIds;
+				var d = ComponentDeclarations.components[targetCardComponentId];
+				var n = new node();//label with localId (easy tracking)
+				n.localLabels.Add("user_" + d.nodeName);
 
-            if (aPinName == "**NF**")
-            {
-                aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-                bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-            }
-            else
-            {
-                bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-            }
+				GraphSynthInvoke.GetNodes().Add(n);
+				GraphSynthInvoke.inputs.Add(d.nodeName);
+				GraphSynthInvoke.recg_apply();
 
-            //if arduino and data pin being connected, register to code.
-            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
-            {
-                BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
-                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
-            }
+				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				BuildCode.outputPins.Clear();
+				foreach (var c in comps.Values)
+				{
+					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
+				}
+
+
+				if (comps.Values.Any(c=>c.globalId==1))	//set has an arduino uno
+				{
+					foreach (var c in comps.Values)		//iterate all components (don't know what listeners exist already)
+					{
+						if (c.globalId != 1)			//exclude the arduino
+						{
+							foreach (string listen in c.data.pinsToListen)	//add a listener for each important pin
+							{
+								int pin = -1;
+								if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+								{
+									pin = conn!.toId;
+								}
+
+								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+								//hopefully the only time the list extends 
+								//is on arduino, which is excluded here
+								if (!hasList || !list.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
+								{
+									int pin2 = -1;
+									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+									{
+										pin2 = conn2!.toId;
+									}
+									AvrCPU.addListener(pin2, c, c.data.translate);
+								}
+							}
+						}
+					}
+
+					AppInterop.updateCodeWrapper();
+				}
+			}
+			moverOffsetLeft = 0;
+			moverOffsetTop = 0;
+			targetCardComponentId = -1;
+		}
+	}
+	#endregion
+
+	private readonly List<string> ruleNames = new();
+	private readonly double totalRules = 19.0;
+	private string fileToLoad = "";
+	private double loadPercent = 0;
+	protected override async Task OnInitializedAsync()
+	{
+		// loads rulesets
+		// allRulesLoaded = false;
+		// ruleNames.Add("BondGraphRuleset"); //58
+		// ruleNames.Add("SimplificationRuleset"); //28
+		// ruleNames.Add("DirRuleset"); //5
+		// ruleNames.Add("newDirectionRuleSet_2"); //17
+		// ruleNames.Add("DirRuleset3"); //4
+		// ruleNames.Add("Simplification2"); //32
+		// ruleNames.Add("NewCausalityMethodRuleset"); //6
+		// ruleNames.Add("NewCausalityMethodRuleset_2"); //4
+		// ruleNames.Add("NewCausalityMethodRuleset_3"); //2
+		// ruleNames.Add("INVDMarkerRules"); //6
+		// ruleNames.Add("INVDMarkerRules_2"); //0?
+		// ruleNames.Add("CalibrationNewRuleset"); //12
+		// ruleNames.Add("CalibrationNewRuleset_2"); //0?
+		// ruleNames.Add("RFlagCleanRuleset"); //1
+		// ruleNames.Add("ICFixTotalRuleset"); //12
+		// ruleNames.Add("TransformerFlipRuleset"); //1
+		// ruleNames.Add("TransformerFlipRuleset2"); //1
+		// ruleNames.Add("Clean23Ruleset"); //4
+		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
+		await RuleSetMap.getInstance().loadRuleSet("ADD", navMan);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan);
+		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
+		// foreach (string str in ruleNames)
+		// {
+		// 	await RuleSetMap.getInstance().loadRuleSet(str);
+		// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
+		// 	base.StateHasChanged();
+		// }
+
+		// // allRulesLoaded = true;
+
+
+		base.StateHasChanged();
+	}
+
+	public void updatePinBindings(ComponentInstance comp)
+	{
+		comp.connMap.Clear();
+		var compPins = getPins(comp.gsNode, comp.data.nodeName);
+
+		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
+		//List<arc> connArcs = new();
+
+		foreach (arc a in connArcs)
+		{
+			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+
+			if (ha == hb)
+			{
+				continue;
+			}
+
+			if (ha != comp && hb != comp)
+			{
+				continue;	
+			}
+			else if (ha != comp)
+			{
+				var temp = ha;
+				ha = hb;
+				hb = temp;
+			}
+
+			var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			string bPinName = "";
+
+			if (aPinName == "**NF**")
+			{
+				aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+				bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
+			else
+			{
+				bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
+
+			//if arduino and data pin being connected, register to code.
+			if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
+			{
+				BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
+				//Console.WriteLine("1: " + BuildCode.outputPins.Count);
+			}
 
             int i1 = ha.data.pins[aPinName];
             int i2 = hb.data.pins[bPinName];
 
 
-            comp.connMap.Add(i1, i2);
-        }
-    }
+			comp.addConnection(i1, hb, i2);
+		}
+	}
 
 
     public List<node> getPins(node n, string name){

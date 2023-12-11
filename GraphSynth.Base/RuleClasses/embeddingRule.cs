@@ -68,7 +68,7 @@ namespace GraphSynth.Representation
         ///   to proper places. See use in BasicFiler.cs
         /// </summary>
         [XmlAnyElement]
-        public XElement[] oldLabels;
+        public XmlElement[] oldLabels;
 
         /// <summary>
         ///   Gets or sets the name of the L node that was attached to the 

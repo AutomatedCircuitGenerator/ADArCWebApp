@@ -91,7 +91,12 @@ namespace ADArCWebApp.Shared.Simulation
 				{
 					string prePin = v.data.codeForGen["delayLoop"];
 
-					string after = Regex.Replace(prePin, "(~\"(.*)\")", m => v.connMap[v.data.pins[m.Value[2..^1]]].ToString());	//2..^1 is substring from 3rd char to end-1 char
+
+
+					string after = Regex.Replace(prePin, "(~\"(.*)\")", m => {
+						v.getConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+						return conn!.toId.ToString(); 
+					});	//2..^1 is substring from 3rd char to end-1 char
 
 
                     b.AppendLine(after);

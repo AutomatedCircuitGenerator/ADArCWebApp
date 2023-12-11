@@ -21,6 +21,10 @@ export namespace interopManager {
             this.runner.portD.addListener(async (e) => {
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
             });
+
+            this.runner.usart.onByteTransmit = async (value: number) => {
+                await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+            };
             this.runCode();
         }
 

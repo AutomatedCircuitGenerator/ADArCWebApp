@@ -18,6 +18,7 @@
         public Action<ComponentInstance>? translate;
 
         public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
+		public List<string> pinsToListen = new();
 
 		public ComponentData(ComponentDataBuilder builder) {
 			extraProperties = builder.properties;
@@ -34,6 +35,7 @@
 			translate = builder.translate;
 			pins = builder.pins;
 			nodeName = builder.nodeName;
+			pinsToListen = builder.pinsToListen;
 		}
 
     }
@@ -54,9 +56,10 @@
 
 		public Action<ComponentInstance>? translate;
 		public Dictionary<string, int> pins = new();
+		public List<string> pinsToListen = new();
 		public string? nodeName;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, string gsNodeName = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "") {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -74,7 +77,9 @@
 					this.pins.Add(pins[i], i);
 				}
 			}
-
+			if (listenOn != null) {
+				pinsToListen = listenOn;
+			}
 			this.nodeName = gsNodeName;
 		}
 
