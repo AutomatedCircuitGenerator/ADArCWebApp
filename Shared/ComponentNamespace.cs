@@ -32,7 +32,7 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 21, new ComponentDataBuilder("SHT31", false, "Input/Temperature and Humidity Sensors", 1, 75, 75).Finish() },
 			{ 22, new ComponentDataBuilder("DS18B20", false, "Input/Temperature and Humidity Sensors", 1, 75, 75).Finish() },
 			{ 23, new ComponentDataBuilder("Hall effect", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "KY-024").Finish() },
-			{ 24, new ComponentDataBuilder("Hall effect", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "KY-003").Finish() },
+			{ 24, new ComponentDataBuilder("Hall effect", true, "Input/Other Sensors", 1.15, 60, 115, paneHoverText: "KY-003").Finish() },
 			{ 25, new ComponentDataBuilder("Hall effect", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "KY-004").Finish() },
 			{ 26, new ComponentDataBuilder("K-Thermocouple", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "MAX6675").Finish() },
 			{ 27, new ComponentDataBuilder("PIR motion sensor", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "HC-SR501").Finish() },
@@ -59,19 +59,16 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 48, new ComponentDataBuilder("Driver - DS-7001HV", false, "Output/Motors/Servo Motor", 1, 75, 75, paneHoverText: "PCA9685").Finish() },
 			{ 49, new ComponentDataBuilder("Direct - Motor", false, "Output/Motors/DC Motor", 1, 75, 75).Finish() },
 			{ 50, new ComponentDataBuilder("Driver - Motor", false, "Output/Motors/DC Motor", 1, 75, 75, paneHoverText: "DRV8833").Finish() },
-			{ 51, new ComponentDataBuilder("Brushless ESC - Motor", false, "Output/Motors/DC Motor", 1, 75, 75).Finish() },
+			{ 51, new ComponentDataBuilder("Brushless ESC - Motor", true, "Output/Motors/DC Motor", 2, 40, 55).Finish() },
 			{ 52, new ComponentDataBuilder("28BYJ-48", false, "Output/Motors/Stepper Motor", 1, 75, 75, paneHoverText: "Includes driver").Finish() },
 			{ 53, new ComponentDataBuilder("Nema-17", true, "Output/Motors/Stepper Motor", 0.6, 165, 180, paneHoverText: "Includes driver").Finish() },
-			{ 54, new ComponentDataBuilder("Speaker", false, "Output/Others", 1, 75, 75, paneHoverText: "LM387").Finish() },
-			{ 55, new ComponentDataBuilder("Buzzer", false, "Output/Others", 1, 75, 75).Finish() },
+			{ 54, new ComponentDataBuilder("Speaker", true, "Output/Others", 1, 75, 75, paneHoverText: "LM387").Finish() },
+			{ 55, new ComponentDataBuilder("Buzzer", true, "Output/Others", 1.4, 70, 75).Finish() },
 			{ 56, new ComponentDataBuilder("Encoder", false, "Others", 1, 75, 75, paneHoverText: "E6B2-CWZ3E").Finish() },
 			{ 57, new ComponentDataBuilder("Voltage regulator", false, "Others", 1, 75, 75, paneHoverText: "LM2596").Finish() },
 			{ 58, new ComponentDataBuilder("Bluetooth Module", false, "Others", 1, 75, 75, paneHoverText: "HM-10").Finish() },
 			{ 59, new ComponentDataBuilder("resistor", true, "", 1, 75, 75, 1000).Finish() },
             { 60, new ComponentDataBuilder("stepper driver", false, "", 1, 75, 75).Finish() }
-
-
-
 
 
 		};

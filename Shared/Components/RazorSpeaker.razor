@@ -1,14 +1,15 @@
-﻿@code { // 0.5W Speaker
+﻿@code {
+	// 0.5W Speaker
 	ElementPin[] pinInfo
 	{
 		get
 		{
-			return new ElementPin
+			return new ElementPin[]
 			{
 
 				new ElementPin(name: "Pos", x: 45.059, y: 41.968, signals: new PinSignalInfo[]{ }, number: 1),
 				new ElementPin(name: "GND", x: 45.911, y: 41.968, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2)
-			}
+			};
 
 	}
 	}
