@@ -67,7 +67,11 @@ namespace ADArCWebApp
 
 			////Setup HTTP client that we will use to load the file
 			HttpClient client = new HttpClient();
+            #if DEBUG
             client.BaseAddress = new("https://localhost:7182/rules/");
+            #else
+            client.BaseAddress = new("https://automatedcircuitgenerator.github.io/ADArCWebApp/rules/");
+            #endif
             ////Load the file as plain text from GitHub
             HttpResponseMessage ruleSetResponse =
                 await client.GetAsync(name + ".rsxml");
