@@ -3165,6 +3165,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
             this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
             this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
+            this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, 16e6);
         }
         execute(callback) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -4101,6 +4102,9 @@ define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute
                 this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
                     yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
                 }));
+                this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                });
                 this.runCode();
             }
             getWindowWidth() {

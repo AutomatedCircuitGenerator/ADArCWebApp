@@ -40,6 +40,11 @@ namespace ADArCWebApp.Shared.Interop
 
 		}
 
+		[JSInvokable]
+		public static void sendSerial(string text) {
+			Pages.Index.codePane!.updateConsoleOutput(text);
+		}
+
 		public static async Task<int> getWindowWidth() {
 			int ret = await jsModule!.InvokeAsync<int>("getWindowWidth");
 			return ret;

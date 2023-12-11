@@ -53,10 +53,19 @@
     List<string> text = new() { "Welcome to the App!"};
 
     string codeContents = "";
+    int index = 1;
     // Create a function to update the console output
     public void updateConsoleOutput(string text)
     {
-        this.text.Add(text);
+        if (this.text.Count == index)
+        {
+            this.text.Add("");
+        }
+        this.text[index] += text;
+        if (text.EndsWith("\n"))
+        {
+            index++;
+        }
         StateHasChanged();
     }
 
