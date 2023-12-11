@@ -657,19 +657,15 @@
       "url": "rules\/a4988_arduino.grxml"
     },
     {
-      "hash": "sha256-zj9sSBQpYDSrQHvrCLrYhPzmyiq0tA\/b7IHEmlhOjrc=",
-      "url": "rules\/add_a4988.grxml"
-    },
-    {
       "hash": "sha256-2oRLJP3\/FGxIXl9JoS7ObPxAtxp1Oth4sVNoER6ajtM=",
       "url": "rules\/add_adxl345.grxml"
     },
     {
-      "hash": "sha256-c31yLunOacIJR7lMhZ8PlaROj2lOS8apYN23nMsfgcE=",
+      "hash": "sha256-w4l0mZf3ovOlZY6sUIUJoHe2R+G34bJ+4xzfARRXPAc=",
       "url": "rules\/add_arduinoUno_rev3.grxml"
     },
     {
-      "hash": "sha256-hdUOfm61Qk\/9VhH8stapuerfe5kcR6vAD8Kr42eDfXg=",
+      "hash": "sha256-reShlDMG+piGVkG\/Y8xO2eIculJg7tZq\/TN9H3PocwA=",
       "url": "rules\/add_arduinoUno_wifi_rev2.grxml"
     },
     {
@@ -677,8 +673,12 @@
       "url": "rules\/add_bno055.grxml"
     },
     {
-      "hash": "sha256-mt2tspIJ\/cpP1+WNFlydaNDCLqSyZAm84jVCPlj3Qx0=",
-      "url": "rules\/add_dc_motor.grxml"
+      "hash": "sha256-BKhJqGv82Urya8vMhfl+GVRsRYmDTOBTug38voWm2QA=",
+      "url": "rules\/add_dc_motor_direct.grxml"
+    },
+    {
+      "hash": "sha256-8KOubyQ8ax3nGDAs6KI8nY3uh6s4UKccuJlRGoeXl98=",
+      "url": "rules\/add_dc_motor_l298n.grxml"
     },
     {
       "hash": "sha256-emhp2oerXC2SOSbWEjHJECfiN72uQm6ereumeRuOoXE=",
@@ -689,7 +689,7 @@
       "url": "rules\/add_drv8833.grxml"
     },
     {
-      "hash": "sha256-XOl\/ViEkiCXJgEIQ4ppmiI+wvRnvmk\/fhyb5dJb+9T8=",
+      "hash": "sha256-+mRbpgaa1oVaIQFpDe0U1fHTR7e1VD+1C9Ru6ZCuSFI=",
       "url": "rules\/add_ds18b20.grxml"
     },
     {
@@ -697,8 +697,8 @@
       "url": "rules\/add_encoder.grxml"
     },
     {
-      "hash": "sha256-jCipg28ZluVFJaEDqkdKHlgzR+6paHkhWc6Qupc9kiM=",
-      "url": "rules\/add_esc.grxml"
+      "hash": "sha256-y6Fs0KhRT1ZXmEA2GMULofMEjpVRhxiYFTXnn1aZWyE=",
+      "url": "rules\/add_esc_pca9685.grxml"
     },
     {
       "hash": "sha256-OsSCvgSV8++h7noGettCl48xTditkf14oDxbYCUGug4=",
@@ -713,10 +713,6 @@
       "url": "rules\/add_hm10.grxml"
     },
     {
-      "hash": "sha256-uPEAMjHgfBF6GdN7J08JI2AswovvBCWA1PabRbnZCqE=",
-      "url": "rules\/add_hx711.grxml"
-    },
-    {
       "hash": "sha256-J2i6toeb\/2Wsb6tsE8l091e\/UhGOgAqoAQoLRWimgHE=",
       "url": "rules\/add_ky003.grxml"
     },
@@ -725,7 +721,7 @@
       "url": "rules\/add_ky012.grxml"
     },
     {
-      "hash": "sha256-1IiHR9QizXbTkQtPAu9lsw1SU2hLMOCsYLC52TFPRi8=",
+      "hash": "sha256-o3x8QWo0E7UaTNDPHcHIPkpOdd3maI+vLjX6rkYvgxI=",
       "url": "rules\/add_ky018.grxml"
     },
     {
@@ -741,16 +737,20 @@
       "url": "rules\/add_ky035.grxml"
     },
     {
-      "hash": "sha256-kuv2uiTwSERwUObaWHgLuyyoCxZjD7PCW1aQE1D+rWI=",
-      "url": "rules\/add_l298n.grxml"
+      "hash": "sha256-xHq63jCz8506y\/diJRuB6JetoZcAYOwa8Zx+sHINfKY=",
+      "url": "rules\/add_lcd_1602_i2c.grxml"
     },
     {
-      "hash": "sha256-QTpMdM9Pqkl7P09bQCrFYBazHAh4OX2NunH5mtp6yKU=",
-      "url": "rules\/add_lcd_i2c.grxml"
+      "hash": "sha256-GO07WNRQ1XLgoBDNbPzCwopWa+LWluZ2BHWR17TNct4=",
+      "url": "rules\/add_lcd_1602_parallel.grxml"
     },
     {
-      "hash": "sha256-5Q042mND7CMPk4Dx0hJCYKeoJM+M5Go\/7\/emg8Xw9wo=",
-      "url": "rules\/add_lcd_parallel.grxml"
+      "hash": "sha256-co\/1ANdVdlgiKj3OQo51mWPydH6epuRKVQk+M56cFfA=",
+      "url": "rules\/add_lcd_2004_i2c.grxml"
+    },
+    {
+      "hash": "sha256-jg9llu+MCIwsE9SV52ptaYqjvINA71zDxO0rKZv3hHo=",
+      "url": "rules\/add_lcd_2004_parallel.grxml"
     },
     {
       "hash": "sha256-qgRYheOh1XyC8HRDpmdytOcTy\/gPQMvj6f\/Iwa5vLkc=",
@@ -761,20 +761,20 @@
       "url": "rules\/add_led.grxml"
     },
     {
-      "hash": "sha256-6kY7u3KyLInsvAlh2e6JUgZYW24lJQfXbkVlbo0zLKY=",
-      "url": "rules\/add_lidar_tfluna.grxml"
+      "hash": "sha256-pDoHfnlTKKfN+JSSX3gOFvFbses05FHNwydKPxy\/sBU=",
+      "url": "rules\/add_lidar_tfluna_I2C.grxml"
+    },
+    {
+      "hash": "sha256-qJRIV540HeQCy1yl6IfbVcEMYkTRwvby0xwZzAFkI0M=",
+      "url": "rules\/add_lidar_tfluna_UART.grxml"
     },
     {
       "hash": "sha256-1KASY5TEBK0YWIZ+60MDvQhxn2ubzwQxdf\/A3yyNMUI=",
       "url": "rules\/add_lm2596.grxml"
     },
     {
-      "hash": "sha256-zz9e3E+D9gjkDVqZzsLtx9Clx5xr5q2KRTCiTdcUk9A=",
-      "url": "rules\/add_lm386.grxml"
-    },
-    {
-      "hash": "sha256-QTD9CgqkTPk91TqDPp\/UxQGC1\/wNzb5fgVSnlCgscks=",
-      "url": "rules\/add_loadcell.grxml"
+      "hash": "sha256-9IuX+2cXzBPqFjWyvJSKZF4DfAOfrpGWBEADqbCTasg=",
+      "url": "rules\/add_loadcell_hx711.grxml"
     },
     {
       "hash": "sha256-CTnuV0h6PSb8wcMOlBL0wA7LbDLmXjvzGV8MtFLDv04=",
@@ -789,8 +789,8 @@
       "url": "rules\/add_mq3.grxml"
     },
     {
-      "hash": "sha256-o9kGQprLdtBrclaFz8JS3F+Mk34nzteBJTn38W0hamI=",
-      "url": "rules\/add_pca9685.grxml"
+      "hash": "sha256-Zg9TWsCuHaUU8HhrJ5TMINTLS74vbrN5EJkMpWrZoZg=",
+      "url": "rules\/add_pushbutton.grxml"
     },
     {
       "hash": "sha256-RqtV9ZJZ\/zZXgfywiIq8LpfTVQ6tuUxlAIYOBz\/1QX8=",
@@ -801,27 +801,39 @@
       "url": "rules\/add_sdCard.grxml"
     },
     {
-      "hash": "sha256-Z8EIrUl11mhdZcAlkqgPq2+rfE45j7wpDidMLsgDFC4=",
-      "url": "rules\/add_servo_9g.grxml"
+      "hash": "sha256-Xm8wSYv92+WsxT+cbXP\/yHti+2kTcc\/DR7In5I1WC4U=",
+      "url": "rules\/add_servo_9g_direct.grxml"
     },
     {
-      "hash": "sha256-gHUZN1ijoXejCmoXJAWB7QlkHUuYvROk2imalSAM5vk=",
-      "url": "rules\/add_servo.grxml"
+      "hash": "sha256-BHtR4AotNmnWjUU8kZDgrvkTrPW1hWvLTXep62IH65c=",
+      "url": "rules\/add_servo_9g_pca9685.grxml"
     },
     {
-      "hash": "sha256-1rCNAQdRzLkb3eVCBwRTULM+cCBe5ke0qBPaoTpI+\/s=",
-      "url": "rules\/add_speaker.grxml"
+      "hash": "sha256-Gseh66BzDHMcqWpXKor\/o6FnOOiMFuzTSKEJB9ZhQTI=",
+      "url": "rules\/add_servo_direct.grxml"
     },
     {
-      "hash": "sha256-lY7ykfo93rpsM9A360XCJGev9Tyt+BnOYKkW8aOq24s=",
-      "url": "rules\/add_stepper_nema.grxml"
+      "hash": "sha256-\/u++SEaSgfw1XgogLprxXeytFP3N4aQmDnvGmTMgoSY=",
+      "url": "rules\/add_servo_pca9685.grxml"
+    },
+    {
+      "hash": "sha256-3KN25zo38+LOOvVE55mDtINU+l7PzSUS8MacduI1gvA=",
+      "url": "rules\/add_speaker_lm386.grxml"
+    },
+    {
+      "hash": "sha256-EBOHx46BI3ESrpGMKpwh2SLoWC8D7iTP+CBtdCS21tA=",
+      "url": "rules\/add_stepper_nema_a4988.grxml"
+    },
+    {
+      "hash": "sha256-ynTJidxPz7zgNb1st29esc5VpGD\/3scvPjMazp20xXg=",
+      "url": "rules\/add_stepper_nema_l298n.grxml"
     },
     {
       "hash": "sha256-y3vI2vuGSMWJItaHKBmRPmySw1ykuS4Qk6Diu3UnHRk=",
       "url": "rules\/add_uln2003.grxml"
     },
     {
-      "hash": "sha256-HYmmnVMTOYLmCgiE2FRI2uXmSVy6tlWQz4LaLSG7JVc=",
+      "hash": "sha256-ap+LUw+RsSzNSCkfDsuXYEA8ChKsL3qTYq170Wg+yi0=",
       "url": "rules\/ADD.rsxml"
     },
     {
@@ -829,20 +841,12 @@
       "url": "rules\/adxl345_arduino.grxml"
     },
     {
-      "hash": "sha256-YahE82qlW122OETS4Fg2ZSpt1nBcRGeVRVUJ+IMIidk=",
-      "url": "rules\/BIG1.rsxml"
-    },
-    {
       "hash": "sha256-tXzq7pN23ErxUmhM+D4AobNB5udqnzYcs6VjDCyZPfY=",
       "url": "rules\/bno055_arduino.grxml"
     },
     {
-      "hash": "sha256-rEGztBGS9KSSN4XYsIGo9o39dJonIosyRNWGibcfmmY=",
+      "hash": "sha256-M6TP4npuEYd8DIJqGZBSRZtUtalbc699FCday3pDIAM=",
       "url": "rules\/CONNECT.rsxml"
-    },
-    {
-      "hash": "sha256-G8qMC7yGo4ksJuD+6qvnYLK+r95jJRffndukTixzsX0=",
-      "url": "rules\/dc_motor_l298n.grxml"
     },
     {
       "hash": "sha256-QoFTd8CHrsnUewii0Q1\/R7zerAXuH8pq0WTkOQf\/6oA=",
@@ -861,10 +865,6 @@
       "url": "rules\/encoder_arduino.grxml"
     },
     {
-      "hash": "sha256-y2YfwK8rPeA4C3+63jPPMamtbP9OVhQyLXk5iTnxgwA=",
-      "url": "rules\/esc_pca9685.grxml"
-    },
-    {
       "hash": "sha256-9yBVY15XKKj+FP4k1vhdXRPeyCP+noQeDOf\/O7ob1bk=",
       "url": "rules\/hcsr04_arduino.grxml"
     },
@@ -879,10 +879,6 @@
     {
       "hash": "sha256-HMWacN61qMouj9SCcdE78GWKUUzCpvAKrKClU2nvuLQ=",
       "url": "rules\/hx711_arduino.grxml"
-    },
-    {
-      "hash": "sha256-ATpvxgm9MrC+z3cYZZNjzGHtBujt1GWMCHORziI42lU=",
-      "url": "rules\/hx711_loadcell.grxml"
     },
     {
       "hash": "sha256-7OD+Cu2lK34tohDsQbVMOP5ltBaptu\/tc4Wl642CM+U=",
@@ -929,8 +925,8 @@
       "url": "rules\/led_rgb_arduino.grxml"
     },
     {
-      "hash": "sha256-cj7hGhVoj8Ob8QJIQPZ+88uwdzR6YHw1fJ610tObAaY=",
-      "url": "rules\/lidar_tfluna_arduino.grxml"
+      "hash": "sha256-NIfndYdSwciCsn0APWWFlpwlD3602Efl3I++dkDFg3M=",
+      "url": "rules\/lidar_tfluna_arduino_I2C.grxml"
     },
     {
       "hash": "sha256-wy0jjohvJmKc\/BrI0SgOdwzQ5SZSFaUUB7Wj79ur85U=",
@@ -953,10 +949,6 @@
       "url": "rules\/lm386_arduino.grxml"
     },
     {
-      "hash": "sha256-rYFOhRlCApUdzx1fSyGg4eqN+RtvM2UwTF6yFlp5nEs=",
-      "url": "rules\/lm386_speaker.grxml"
-    },
-    {
       "hash": "sha256-WSdlYJ7sCBdHDCLkssejcRs9dWnXyyh\/wL3s4guh3EM=",
       "url": "rules\/max6675_arduino.grxml"
     },
@@ -969,16 +961,12 @@
       "url": "rules\/mq3_arduino.grxml"
     },
     {
-      "hash": "sha256-rBFDlN2k91GvrFiXHDsOrD9A3yO5M8wbTkUj6Y5hbCI=",
-      "url": "rules\/nema_a4988.grxml"
-    },
-    {
-      "hash": "sha256-grsfx6n+Xar4iXBSRJ71MGKkNF8VdoBYYq+Wj9weh0E=",
-      "url": "rules\/nema_l298n.grxml"
-    },
-    {
       "hash": "sha256-nwRG4PHdgeTIMmfodh\/EeDsWRwrAdqARJn6lIHBkqE8=",
       "url": "rules\/pca9685_arduino.grxml"
+    },
+    {
+      "hash": "sha256-rLbCPlLzA2qdjSUKqstgEEqYXz1XMrNIpztTnEtGylQ=",
+      "url": "rules\/pushbutton_arduino.grxml"
     },
     {
       "hash": "sha256-ks2zdJrnRW1ck+m3LXSfORY3oKDWWau4XURWIQKp7T0=",
@@ -991,10 +979,6 @@
     {
       "hash": "sha256-cwvT5qF7G+nCfmKb4C\/FPFmKeEz0tUJx0n4vK\/M08JY=",
       "url": "rules\/servo_arduino.grxml"
-    },
-    {
-      "hash": "sha256-nyRr7lPCRwVMMnMHXwlsbYiaz1wWhLJb4qj4AnOUJk0=",
-      "url": "rules\/servo_pca9685.grxml"
     },
     {
       "hash": "sha256-RjGiKaa3jsw9A+4TtyErXwj2W8dT6XQ6BwXFtTh4qW8=",
@@ -1037,11 +1021,11 @@
       "url": "_framework\/icudt.dat"
     },
     {
-      "hash": "sha256-r2+A1TGnLudOfphyc0URkUpoSjGi9LrpqBbUM6owL3E=",
+      "hash": "sha256-N+AXSmRtBmQNVUAIQdlt7d6CBVVbkVchpZGeCi0T5KY=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-LkiC+pqqvyVR6+F7TcGwWIRutxSDlpYQqI0HMG+DB5I=",
+      "hash": "sha256-Yy4WthluTboGFFUQtjtqAPYTjN1KAER0sF8A\/7rJDg8=",
       "url": "_framework\/ADArCWebApp.dll"
     },
     {
@@ -1057,7 +1041,7 @@
       "url": "_framework\/Microsoft.AspNetCore.Components.Forms.dll"
     },
     {
-      "hash": "sha256-iAIPK3wBX84bpx8Xl1qgdnLtXTWwpvdix2mcmD\/mJyY=",
+      "hash": "sha256-UsHBjDlCGezpgGqYcWWxIJIPEvxivZ3jo3RHZ8kWFOk=",
       "url": "_framework\/Microsoft.AspNetCore.Components.Web.dll"
     },
     {
@@ -2305,5 +2289,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "HuIC4\/Lp"
+  "version": "nXoh1+xQ"
 };
