@@ -25,6 +25,7 @@ namespace ADArCWebApp.Shared
 		public ComponentInstance(int globalId, object mainValueInitial, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
+			moreData = data.extraProperties;
 			this.x = x;
 			this.y = y;
 			zoomedX = x;

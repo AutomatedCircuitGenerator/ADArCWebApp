@@ -28,7 +28,7 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 17, new ComponentDataBuilder("Ambient Light", false, "Input/Light Sensors", 1, 75, 75, paneHoverText: "BH1750").Finish() },
 			{ 18, new ComponentDataBuilder("Luminosity", false, "Input/Light Sensors", 1, 75, 75, paneHoverText: "TSL2561").Finish() },
 			{ 19, new ComponentDataBuilder("Alt - Ambient Light", false, "Input/Light Sensors", 1, 75, 75, paneHoverText: "TEMT6000").Finish() },
-			{ 20, new ComponentDataBuilder("DHT11/DHT22 ", true, "Input/Temperature and Humidity Sensors", 0.9, 60, 120).Finish() },
+			{ 20, new ComponentDataBuilder("DHT11/DHT22 ", true, "Input/Temperature and Humidity Sensors", 0.9, 60, 120, 20.0, RazorDHT22.translate).Property("humidity", 40.0).Finish() },
 			{ 21, new ComponentDataBuilder("SHT31", false, "Input/Temperature and Humidity Sensors", 1, 75, 75).Finish() },
 			{ 22, new ComponentDataBuilder("DS18B20", false, "Input/Temperature and Humidity Sensors", 1, 75, 75).Finish() },
 			{ 23, new ComponentDataBuilder("Hall effect", false, "Input/Other Sensors", 1, 75, 75, paneHoverText: "KY-024").Finish() },
