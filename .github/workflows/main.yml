@@ -21,6 +21,6 @@ jobs:
           BRANCH: gh-pages
           FOLDER: release/wwwroot
       - name: Add .nojekyll file
-        run: touch release/wwwroot/.nojekyll
+        run: touch release/.nojekyll
       - name: copy release/index.html to release/404.html
         run: cp release/wwwroot/index.html release/wwwroot/404.html
