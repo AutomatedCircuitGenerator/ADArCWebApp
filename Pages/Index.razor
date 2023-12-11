@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @inject IJSRuntime JsRuntime
+@inject NavigationManager navMan
 
 <PageTitle>Index</PageTitle>
 <body>
@@ -274,8 +275,8 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		await RuleSetMap.getInstance().loadRuleSet("ADD");
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT");
+		await RuleSetMap.getInstance().loadRuleSet("ADD", navMan);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan);
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {

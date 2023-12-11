@@ -1,10 +1,8 @@
 ﻿using GraphSynth.Representation;
+using Microsoft.AspNetCore.Components;
 using System.Collections.Immutable;
 using System.Xml.Linq;
 using System.Xml.Serialization;
-using System.Windows;
-using System.Resources;
-using static System.Net.WebRequestMethods;
 
 namespace ADArCWebApp
 {
@@ -56,7 +54,7 @@ namespace ADArCWebApp
 				return instance ??= new RuleSetMap();
 			}
 		}
-		public async Task loadRuleSet(string name)
+		public async Task loadRuleSet(string name, NavigationManager navigationManager)
         {
             //Ensure that we only load each rule once
             if (rulesets.ContainsKey(name))
@@ -67,11 +65,7 @@ namespace ADArCWebApp
 
 			////Setup HTTP client that we will use to load the file
 			HttpClient client = new HttpClient();
-            #if DEBUG
-            client.BaseAddress = new("https://localhost:7182/rules/");
-            #else
-            client.BaseAddress = new("https://automatedcircuitgenerator.github.io/ADArCWebApp/rules/");
-            #endif
+            client.BaseAddress = new(navigationManager.BaseUri + "rules/");
             ////Load the file as plain text from GitHub
             HttpResponseMessage ruleSetResponse =
                 await client.GetAsync(name + ".rsxml");
