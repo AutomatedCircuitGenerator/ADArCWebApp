@@ -7,7 +7,7 @@
   "linkerEnabled": true,
   "resources": {
     "assembly": {
-      "ADArCWebApp.dll": "sha256-11UXW\/l+W5jzDj+ia37CUVU4ZLoBbh9prxeTiymoyDM=",
+      "ADArCWebApp.dll": "sha256-hbgahkpJIlR9FzlUTWhcBIu5Zhw27\/8M5Ltp4z0HCTg=",
       "BlazorMonaco.dll": "sha256-e2aNwHHs9k5ozSDQxHyQZkCPGnWTTfiZlSTbfpmsKgM=",
       "Microsoft.AspNetCore.Components.dll": "sha256-NZJbKwwKFCrzP9nNFCgGCwr667rAKBy8vDo5i7aBs0s=",
       "Microsoft.AspNetCore.Components.Forms.dll": "sha256-MXCy7QG2X4my3qR1h9lV++vc5WFACEcFZS+ZzkeHyMQ=",
