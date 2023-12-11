@@ -45,17 +45,22 @@
     };
         } 
     }
-
-    public static void update(object toDo, int signalRec)
+    //static int count = 0;
+    public static void update(ComponentInstance toDo)
     {
-        if (toDo is RazorLED val)
+        var data = toDo.data;
+
+        if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            val.value = signalRec == 1;
+            toDo.mainValue = AvrCPU.getPinState(conn!.toId);
         }
         else
         {
-            throw new Exception("LED update got non-led component");    
+            Console.WriteLine("GetConnection failed from LED Component!");    
         }
+
+        //Console.WriteLine(count++);
+
     }
 
 }

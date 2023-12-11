@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -12,38 +21,38 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
-define("lib/arduino-blink", ["require", "exports"], function (require, exports) {
+define("lib/compile-util", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.loadBlink = void 0;
-    const blink = `940c 005c 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 0113 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 940c 006e 0000 0000 0024 0027 002a 0000 0000 0025 0028 002b 0404 0404 0404 0404 0202 0202 0202 0303 0303 0303 0201 0804 2010 8040 0201 0804 2010 0201 0804 2010 0000 0800 0200 0001 0300 0704 0000 0000 0000 0000 2411 be1f efcf e0d8 bfde bfcd e021 e0a0 e0b1 c001 921d 30a9 07b2 f7e1 940e 015d 940c 01cc 940c 0000 ebe1 e0f0 9124 e9ed e0f0 9194 e8e9 e0f0 91e4 23ee f0c9 2322 f039 3023 f101 f4a8 3021 f119 3022 f129 e0f0 0fee 1fff 58ee 4fff 91a5 91b4 b72f 94f8 91ec 1181 c026 9590 239e 939c bf2f 9508 3027 f0a9 3028 f0c9 3024 f749 9120 0080 7d2f c003 9120 0080 772f 9320 0080 cfdf b524 772f bd24 cfdb b524 7d2f cffb 9120 00b0 772f 9320 00b0 cfd2 9120 00b0 7d2f cff9 2b9e cfda b73f 94f8 9180 0105 9190 0106 91a0 0107 91b0 0108 b526 9ba8 c005 3f2f f019 9601 1da1 1db1 bf3f 2fba 2fa9 2f98 2788 01bc 01cd 0f62 1d71 1d81 1d91 e042 0f66 1f77 1f88 1f99 954a f7d1 9508 928f 929f 92af 92bf 92cf 92df 92ef 92ff 940e 00b8 014b 015c ef84 2ec8 24dd 94d3 2ce1 2cf1 940e 00b8 1968 0979 098a 099b 3e68 4073 0581 0591 f3a8 e021 1ac2 08d1 08e1 08f1 ee88 0e88 e083 1e98 1ca1 1cb1 14c1 04d1 04e1 04f1 f729 90ff 90ef 90df 90cf 90bf 90af 909f 908f 9508 921f 920f b60f 920f 2411 932f 933f 938f 939f 93af 93bf 9180 0101 9190 0102 91a0 0103 91b0 0104 9130 0100 e023 0f23 372d f558 9601 1da1 1db1 9320 0100 9380 0101 9390 0102 93a0 0103 93b0 0104 9180 0105 9190 0106 91a0 0107 91b0 0108 9601 1da1 1db1 9380 0105 9390 0106 93a0 0107 93b0 0108 91bf 91af 919f 918f 913f 912f 900f be0f 900f 901f 9518 e826 0f23 9602 1da1 1db1 cfd2 9478 b584 6082 bd84 b584 6081 bd84 b585 6082 bd85 b585 6081 bd85 9180 006e 6081 9380 006e 9210 0081 9180 0081 6082 9380 0081 9180 0081 6081 9380 0081 9180 0080 6081 9380 0080 9180 00b1 6084 9380 00b1 9180 00b0 6081 9380 00b0 9180 007a 6084 9380 007a 9180 007a 6082 9380 007a 9180 007a 6081 9380 007a 9180 007a 6880 9380 007a 9210 00c1 e9ed e0f0 9124 e8e9 e0f0 9184 2388 f099 e090 0f88 1f99 01fc 59e8 4fff 91a5 91b4 01fc 58ee 4fff 9185 9194 b78f 94f8 91ec 2be2 93ec bf8f e0c0 e0d0 e081 940e 0070 940e 00dd e080 940e 0070 940e 00dd 9720 f3a1 940e 0000 cff1 94f8 cfff`;
-    function loadBlink(program) {
-        blink.split(' ').forEach((value, index) => {
-            program[index] = parseInt(value, 16);
+    exports.buildHex = exports.loadHex = void 0;
+    function loadHex(source, target) {
+        for (const line of source.split('\n')) {
+            if (line[0] === ':' && line.substr(7, 2) === '00') {
+                const bytes = parseInt(line.substr(1, 2), 16);
+                const addr = parseInt(line.substr(3, 4), 16);
+                for (let i = 0; i < bytes; i++) {
+                    target[addr + i] = parseInt(line.substr(9 + i * 2, 2), 16);
+                }
+            }
+        }
+    }
+    exports.loadHex = loadHex;
+    const url = 'https://hexi.wokwi.com';
+    function buildHex(source) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const resp = yield fetch(url + '/build', {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ sketch: source })
+            });
+            return (yield resp.json());
         });
     }
-    exports.loadBlink = loadBlink;
+    exports.buildHex = buildHex;
 });
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -3141,6 +3150,45 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
+define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-util"], function (require, exports, index_1, compile_util_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.AVRRunner = void 0;
+    const FLASH = 0x8000;
+    class AVRRunner {
+        constructor(hex) {
+            this.program = new Uint16Array(FLASH);
+            this.stopped = false;
+            (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
+            this.cpu = new index_1.CPU(this.program);
+            this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
+            this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
+            this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
+            this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
+            this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, 16e6);
+        }
+        execute(callback) {
+            return __awaiter(this, void 0, void 0, function* () {
+                this.stopped = false;
+                for (;;) {
+                    (0, index_1.avrInstruction)(this.cpu);
+                    this.cpu.tick();
+                    if (this.cpu.cycles % 50000 === 0) {
+                        callback(this.cpu);
+                        yield new Promise(resolve => setTimeout(resolve, 0));
+                        if (this.stopped) {
+                            break;
+                        }
+                    }
+                }
+            });
+        }
+        stop() {
+            this.stopped = true;
+        }
+    }
+    exports.AVRRunner = AVRRunner;
+});
 define("lib/avr8js/utils/assembler", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -4033,44 +4081,53 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("main", ["require", "exports", "lib/arduino-blink", "lib/avr8js/index", "interopManager"], function (require, exports, arduino_blink_1, avr8js, interopManager_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.runCode = void 0;
-    avr8js = __importStar(avr8js);
-    var getInteropManager = interopManager_1.interopManager.getInteropManager;
-    const program = new Uint16Array(16384);
-    (0, arduino_blink_1.loadBlink)(program);
-    const cpu = new avr8js.CPU(program);
-    const timer0 = new avr8js.AVRTimer(cpu, avr8js.timer0Config);
-    const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
-    window.interopManager = interopManager_1.interopManager;
-    portB.addListener(() => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5));
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5));
-    }));
-    function runCode() {
-        for (let i = 0; i < 50000; i++) {
-            avr8js.avrInstruction(cpu);
-            cpu.tick();
-        }
-        setTimeout(runCode, 0);
-    }
-    exports.runCode = runCode;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()); }));
-});
-define("interopManager", ["require", "exports", "main"], function (require, exports, main_1) {
+define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute"], function (require, exports, compile_util_2, execute_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
     var interopManager;
     (function (interopManager) {
         class InteropManager {
+            constructor() {
+                this.interopLoc = "ADArCWebApp";
+            }
             startCodeLoop(wrapper) {
-                (0, main_1.runCode)();
+                console.log("starting code!");
+                this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
+                }));
+                this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 1);
+                }));
+                this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
+                }));
+                this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                });
+                this.runCode();
             }
             getWindowWidth() {
                 return window.innerWidth;
+            }
+            updateCodeInPane(code) {
+                window.monaco.editor.getModels()[0].setValue(code);
+            }
+            getCodeInPane() {
+                return window.monaco.editor.getModels()[0].getValue();
+            }
+            compile() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
+                    this.runner = new execute_1.AVRRunner(res.hex);
+                    return { stdout: res.stdout, stderr: res.stderr };
+                });
+            }
+            runCode() {
+                this.runner.execute(cpu => { });
+            }
+            stop() {
+                this.runner.stop();
             }
         }
         interopManager.InteropManager = InteropManager;
@@ -4079,5 +4136,12 @@ define("interopManager", ["require", "exports", "main"], function (require, expo
         }
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
+});
+define("main", ["require", "exports", "interopManager"], function (require, exports, interopManager_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var getInteropManager = interopManager_1.interopManager.getInteropManager;
+    window.interopManager = interopManager_1.interopManager;
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()); }));
 });
 //# sourceMappingURL=build.js.map

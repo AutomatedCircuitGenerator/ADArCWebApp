@@ -9,8 +9,12 @@
 <div id="monaco-editor-container" style="height:650px; width: 100%; border: 1px solid #ccc;"></div>
 
 <!-- Create a container for the console output -->
-<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll;">
-    @text
+<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text">
+        @foreach(string line in text)
+        {
+            @line;
+            <hr>
+        }
 </div>
 
 <!-- Include Monaco Editor scripts -->
@@ -40,11 +44,36 @@
 </div>
 
 @code {
-    string? text="Hello World";
+
+    public CodePane()
+    {
+        Pages.Index.codePane = this;
+    }
+
+    List<string> text = new() { "Welcome to the App!"};
+
+    string codeContents = "";
+    int index = 1;
     // Create a function to update the console output
     public void updateConsoleOutput(string text)
     {
-        this.text = text;
+        if (this.text.Count == index)
+        {
+            this.text.Add("");
+        }
+        this.text[index] += text;
+        if (text.EndsWith("\n"))
+        {
+            index++;
+        }
+        StateHasChanged();
     }
+
+    public void updatePaneCode()
+    {
+        this.codeContents = BuildCode.code;    
+    }
+
+
   
 }

@@ -1,4 +1,5 @@
-﻿@code { // DHT22
+﻿@code {
+    // DHT22
     ElementPin[] pinInfo
     {
         get
@@ -10,6 +11,86 @@
                 new ElementPin(name: "NC", x: 34.1, y: 114.9, signals: new PinSignalInfo[] { }, number: 3),
                 new ElementPin(name: "GND", x: 43.8, y: 114.9, signals: new PinSignalInfo[] { }, number: 4)
             };
+        }
+    }
+
+    //16 bits humidity: 400 = 40%, 16 bits temp deg C: 200 = 20%, 8 bits checksum = last 8 sum prev
+    //output sig: 0b0000 0001 1001 0000 0000 0000 1100 1000 0101 1000
+    static byte[] getSignal(ComponentInstance comp)
+    {
+        byte[] ret = new byte[5];
+        int rh = (int)((double)comp.moreData["humidity"] * 10);
+        int t = (int)((double)comp.mainValue * 10);
+        int sum = t + rh;
+
+        ret[0] = (byte)(rh & 0b1111111100000000);
+        ret[1] = (byte)(rh & 0b0000000011111111);
+        ret[2] = (byte)(t & 0b1111111100000000);
+        ret[3] = (byte)(t & 0b0000000011111111);
+        ret[4] = (byte)(sum & 0b0000000011111111);
+
+        return ret;
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool pin = false;
+        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            pin = AvrCPU.getPinState(conn!.toId);
+        }
+
+        if (!pin && comp.midSignal == 0)
+        {
+            comp.midSignal = 1;
+        }
+        if (pin && comp.midSignal == 1)
+        {
+            comp.midSignal = 2;
+            sendSignal(comp, conn!.toId);
+        }
+        // false 1ms+ -> true (20-40us) trigger
+        //then send
+    }
+
+
+    async static void sendSignal(ComponentInstance comp, int id)
+    {
+        //false (80us) -> true (80us) ack
+        //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
+
+        AvrCPU.setPinState(id, false);
+        udelay(80);
+        AvrCPU.setPinState(id, true);
+        udelay(80);
+        byte[] sig = getSignal(comp);
+        for (int i = 0; i < 40; i++)
+        {
+            bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
+            AvrCPU.setPinState(id, false);
+            udelay(50);
+            AvrCPU.setPinState(id, true);
+            if (res)
+            {
+                udelay(70);
+            }
+            else
+            {
+                udelay(27);        
+            }
+        }
+
+        AvrCPU.setPinState(id, false);
+
+        comp.midSignal = 0;
+    }
+
+    static void udelay(long us)
+    {
+        var sw = System.Diagnostics.Stopwatch.StartNew();
+        long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
+        while (sw.ElapsedTicks < v)
+        {
         }
     }
 }
