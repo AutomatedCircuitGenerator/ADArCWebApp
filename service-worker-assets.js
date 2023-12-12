@@ -73,6 +73,10 @@
       "url": "images\/adarc-logo.001.png"
     },
     {
+      "hash": "sha256-kIKH0c4hCLcDVe9XFs2eb7JS8JW5bRiS8psjUnlTC2c=",
+      "url": "images\/redx.png"
+    },
+    {
       "hash": "sha256-2dcsONYheWf7ZxtuCxNIMnp9bzVfnNYBfbHejO6DukI=",
       "url": "index.html"
     },
@@ -1021,11 +1025,11 @@
       "url": "_framework\/icudt.dat"
     },
     {
-      "hash": "sha256-N+AXSmRtBmQNVUAIQdlt7d6CBVVbkVchpZGeCi0T5KY=",
+      "hash": "sha256-zMU6mhAZvIQITnJwS03iGBiHZBs704UR+hpkJyrrIvE=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-Yy4WthluTboGFFUQtjtqAPYTjN1KAER0sF8A\/7rJDg8=",
+      "hash": "sha256-uLfUNYMaJaZM88X1wZxUY4LWJ+V1qFCJ3qLsNzukbwg=",
       "url": "_framework\/ADArCWebApp.dll"
     },
     {
@@ -1305,7 +1309,7 @@
       "url": "_framework\/System.Xml.XmlSerializer.dll"
     },
     {
-      "hash": "sha256-bc5aWxmcHXejfceSCpnk1Q0GrEAQrZjxIBbcdAcNqJ4=",
+      "hash": "sha256-6wagnQKHxh10ZkoF4LZO15MZrJSmoQz9ft2y9ViAO0M=",
       "url": "ADArCWebApp.styles.css"
     },
     {
@@ -2289,5 +2293,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "nXoh1+xQ"
+  "version": "QeHUijeQ"
 };

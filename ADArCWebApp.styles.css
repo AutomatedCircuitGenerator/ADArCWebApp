@@ -409,8 +409,20 @@ polygon[b-41q8yj9qd7] {
 /* /Shared/Components/VaryingComponent.razor.rz.scp.css */
 .comp-wrapper[b-i2jr7w3d23] {
     padding: 25px;
+    display: flex;
+}
+#deletebutton[b-i2jr7w3d23]{
+    right: 2%;
+    top: 2%;
+    position: absolute;
+    border: none;
+    background-color: transparent;
 }
 
+    #deletebutton img[b-i2jr7w3d23] {
+        width: 10px;
+        height: 10px;
+    }
 .a-border[b-i2jr7w3d23] {
     background-image: linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%);
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
