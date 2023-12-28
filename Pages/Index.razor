@@ -26,7 +26,7 @@
 		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-			<div class="main-canvas">
+			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
 				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
 			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
@@ -368,24 +368,55 @@
 
 	}
 
-	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
+	//List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
 	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
-	public void test()
-	{
 
-		//GraphSynthInvoke.recg_apply(inputs);
+	//    public void addcomp()
+	//    {
+
+
+	//        GraphSynthInvoke.recg_apply();
+	// 	List<node> b = GraphSynthInvoke.GetNodes();
+	// 	List<arc> c = GraphSynthInvoke.GetArcs();
+
+	// 	int numofcon = 0;
+	// 	for(int i = 0; i<c.Count; i++)
+	// 	{
+	// 		if (c[i].localLabels.Contains("connection")){
+	// 			numofcon++;
+	// 		}
+	// 	}
+	// 	Console.WriteLine("the number of nodes is " + b.Count);
+	// 	Console.WriteLine("the number of connections is " + numofcon);
+	// }
+
+	public void removecomp()
+	{
+		node Comp2remove = Index.comps[selectedComponent].gsNode;
+
+		GraphSynthInvoke.removeComp(Comp2remove);
+		comps.Remove(selectedComponent);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
 
 		int numofcon = 0;
-		for(int i = 0; i<c.Count; i++)
+		for (int i = 0; i < c.Count; i++)
 		{
-			if (c[i].localLabels.Contains("connection")){
+			if (c[i].localLabels.Contains("connection"))
+			{
 				numofcon++;
 			}
 		}
 		Console.WriteLine("the number of nodes is " + b.Count);
 		Console.WriteLine("the number of connections is " + numofcon);
-	
+	}
+
+	public void handleKeyPress(KeyboardEventArgs e)
+	{
+		Console.WriteLine(e.Key);
+		if ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1)
+		{
+			removecomp();
+		}
 	}
 }

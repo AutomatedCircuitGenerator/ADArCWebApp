@@ -1,4 +1,10 @@
 ﻿<div class="comp-wrapper @(borderClasses())" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+	@if(forceBorder)
+	{
+		<button id="deletebutton" @onclick="remove">
+				<img src="images/redx.png">
+		</button>
+	}
 	@switch(objId){
 		case 1:
 			<RazorArduinoUno></RazorArduinoUno>
@@ -133,5 +139,9 @@
 		{
 			return "";	
 		}
+	}
+	public void remove()
+	{
+		Pages.Index.app!.removecomp();
 	}
 }

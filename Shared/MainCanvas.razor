@@ -1,6 +1,6 @@
 ﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
-		<VaryingComponent forceBorder="c.Key==selection" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
 </div>
 
@@ -138,13 +138,13 @@
 	public void componentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
 	{
 		targetFound = true;
-		if (selection > 0)
+		if (Pages.Index.app.selectedComponent > 0)
 		{
-			selection = -1;
+			Pages.Index.app.selectedComponent = -1;
 		}
 		else
 		{
-			selection = c.Key;
+			Pages.Index.app.selectedComponent = c.Key;
 		}
 	}
 
@@ -160,7 +160,7 @@
 		{
 			if (!disable)
 			{
-				selection = -2;	
+				Pages.Index.app.selectedComponent = -2;
 			}	
 		}
 		targetFound = false;
