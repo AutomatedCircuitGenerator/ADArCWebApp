@@ -295,6 +295,10 @@
 	{
 		comp.connMap.Clear();
 		var compPins = getPins(comp.gsNode, comp.data.nodeName);
+		if (compPins.Count == 0)
+		{
+			return;	
+		}
 
 		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
 		//List<arc> connArcs = new();
@@ -352,6 +356,10 @@
 	public List<node> getPins(node n, string name){
 		//n is root, connected to main node but not main node.
 		string fullName = "user_" + name;
+		if (n.arcs.Count == 0)
+		{
+			return new();
+		}
 		var mainNode = ((arc)n.arcs[0]).otherNode(n);
 		//traverse arcs to get pin nodes, except the root node
 		var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
