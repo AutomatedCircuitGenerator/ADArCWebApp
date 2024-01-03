@@ -1,5 +1,5 @@
 ﻿<div class="comp-wrapper @(borderClasses())" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
-	@if(forceBorder)
+	@if(forceBorder && !Pages.Index.app!.isRunning)
 	{
 		<button id="deletebutton" @onclick="remove">
 				<img src="images/redx.png">

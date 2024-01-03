@@ -55,7 +55,7 @@
 	int leftPaneAlign => isLeftExpanded ? 0 : -23;
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
 	string runStopText = "▶ Run";
-	bool isRunning = false;
+	public bool isRunning = false;
 
 	void ToggleLeftSidebar()
 	{
@@ -78,12 +78,23 @@
 
 			if (response.stderr != "")
 			{
-				codePane.updateConsoleOutput(response.stderr);
+				codePane.updateConsoleOutput(response.stderr, false);
+
+				string lineSection = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures.First().Value;
+				lineSection = lineSection[1..^1];
+				int mid = lineSection.IndexOf(":");
+				int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+				int column = int.Parse(lineSection[(mid+1)..^0]);
+
+				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+				AppInterop.makeMonacoErrorWrapper(message, line, column);
+
 				runStopText = "▶ Run";
 			}
 			else
 			{
-				codePane.updateConsoleOutput(response.stdout);
+				codePane.updateConsoleOutput(response.stdout, false);
+				AppInterop.clearMonacoErrorsWrapper();
 				AppInterop.startSimWrapper();
 				runStopText = "🟥 Stop";
 				isRunning = true;
@@ -92,6 +103,8 @@
 		else
 		{
 			AppInterop.stopWrapper();
+			codePane!.newLineIfNot();
+			codePane!.updateConsoleOutput("Stopped.\n", false);
 			runStopText = "▶ Run";
 			isRunning = false;
 		}
@@ -124,6 +137,7 @@
 	public static Index? app;
 	public static MainCanvas? buildCanvas;
 	public static CodePane? codePane;
+	public static ComponentPane? compPane;
 	public static readonly int defaultScreenWidth = 1920;
 	public static double currentRatio = 1;
 
@@ -277,6 +291,7 @@
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
 		await RuleSetMap.getInstance().loadRuleSet("ADD", navMan);
 		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan);
+		compPane!.releaseLockout();
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
