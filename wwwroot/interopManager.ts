@@ -32,12 +32,31 @@ export namespace interopManager {
             return window.innerWidth;
         }
 
+        private getModel() {
+            return (<any>window).monaco.editor.getModels()[0];
+        }
+
         updateCodeInPane(code: string) {
-            (<any>window).monaco.editor.getModels()[0].setValue(code);
+            this.getModel().setValue(code);
         }
 
         getCodeInPane(): string {
-            return (<any>window).monaco.editor.getModels()[0].getValue();
+            return this.getModel().getValue();
+        }
+
+        makeMonacoError(message, line, column) {
+            var marker = {
+                message: message,
+                severity: monaco.MarkerSeverity.Error,
+                startLineNumber: line,
+                startColumn: column,
+                endLineNumber: line,
+                endColumn: column,
+            };
+            (<any>window).monaco.editor.setModelMarkers(this.getModel(), "owner", [marker]);
+        }
+        clearMonacoErrors() {
+            (<any>window).monaco.editor.setModelMarkers(this.getModel(), "owner", []);
         }
 
         async compile(): Promise<object> {

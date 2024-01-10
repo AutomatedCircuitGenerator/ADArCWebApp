@@ -1,5 +1,4 @@
 ﻿<div class="comp-container">
-	<InputText @bind-Value="searchText" contenteditable="false"></InputText>
 	<div class="card-wrapper">
 		@foreach (Directory d1 in dir.subDirectories)
 		{
@@ -29,7 +28,7 @@
 										<div class="col-layout">
 											@foreach (ComponentCard card in d3.contents)
 											{
-												<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
+												<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 											}
 										</div>
 									</div>
@@ -40,7 +39,7 @@
 								<div class="col-layout">
 									@foreach (ComponentCard card in d2.contents)
 									{
-										<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
+										<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 									}
 								</div>
 							}
@@ -52,7 +51,7 @@
 					<div class="col-layout">
 						@foreach (ComponentCard card in d1.contents)
 						{
-							<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)"></ComponentCard>
+							<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 						}
 					</div>
 				}
@@ -62,9 +61,21 @@
 </div>
 
 @code {
-	string? searchText;
 
 	private Directory _dir = new Directory("notready", new List<Directory>());
+
+	private bool loadLockout = true;
+
+	public void releaseLockout()
+	{
+		loadLockout = false;
+		StateHasChanged();
+	}
+
+	public ComponentPane()
+	{
+		Pages.Index.compPane = this;	
+	}
 
 	Directory dir
 	{

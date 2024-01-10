@@ -4110,11 +4110,28 @@ define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute
             getWindowWidth() {
                 return window.innerWidth;
             }
+            getModel() {
+                return window.monaco.editor.getModels()[0];
+            }
             updateCodeInPane(code) {
-                window.monaco.editor.getModels()[0].setValue(code);
+                this.getModel().setValue(code);
             }
             getCodeInPane() {
-                return window.monaco.editor.getModels()[0].getValue();
+                return this.getModel().getValue();
+            }
+            makeMonacoError(message, line, column) {
+                var marker = {
+                    message: message,
+                    severity: monaco.MarkerSeverity.Error,
+                    startLineNumber: line,
+                    startColumn: column,
+                    endLineNumber: line,
+                    endColumn: column,
+                };
+                window.monaco.editor.setModelMarkers(this.getModel(), "owner", [marker]);
+            }
+            clearMonacoErrors() {
+                window.monaco.editor.setModelMarkers(this.getModel(), "owner", []);
             }
             compile() {
                 return __awaiter(this, void 0, void 0, function* () {

@@ -42,7 +42,7 @@ namespace ADArCWebApp.Shared.Interop
 
 		[JSInvokable]
 		public static void sendSerial(string text) {
-			Pages.Index.codePane!.updateConsoleOutput(text);
+			Pages.Index.codePane!.updateConsoleOutput(text, true);
 		}
 
 		public static async Task<int> getWindowWidth() {
@@ -63,6 +63,14 @@ namespace ADArCWebApp.Shared.Interop
         {
             await jsModule!.InvokeVoidAsync("updateCodeInPane", BuildCode.code);
         }
+
+		public static async void makeMonacoErrorWrapper(string message, int line, int column) {
+			await jsModule!.InvokeVoidAsync("makeMonacoError", message, line, column);
+		}
+		public static async void clearMonacoErrorsWrapper()
+		{
+			await jsModule!.InvokeVoidAsync("clearMonacoErrors");
+		}
 
 		public static async Task<string> getCodeWrapper() {
 			return await jsModule!.InvokeAsync<string>("getCodeInPane");

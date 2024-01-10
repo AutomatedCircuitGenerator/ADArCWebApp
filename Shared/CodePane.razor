@@ -10,11 +10,10 @@
 <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
 
 <!-- Create a container for the console output -->
-<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text">
+<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
         @foreach(string line in text)
         {
-            @line;
-            <hr>
+            <span class="@(line.Contains("Error during build:")?"error":"auto")">@line</span><hr>
         }
 </div>
 
@@ -44,30 +43,59 @@
         Pages.Index.codePane = this;
     }
 
-    List<string> text = new() { "Welcome to the App!"};
+    List<string> text = ["Welcome to the App!"];
 
     string codeContents = "";
     int index = 1;
+
     // Create a function to update the console output
-    public void updateConsoleOutput(string text)
+    public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
+    {
+        if (middleNewLinesMakeHR)
+        {
+            var lines = newText.Split("\n");
+            for (int i = 0; i < lines.Count(); i++)
+            {
+                string line = lines[i];
+                if (i != lines.Count() - 1)
+                {
+                    singleLine(line + "\n");
+                }
+                else
+                {
+                    singleLine(line);
+                }
+            }
+        }
+        else
+        {
+            singleLine(newText);    
+        }
+
+        StateHasChanged();
+    }
+
+    private void singleLine(string line)
     {
         if (this.text.Count == index)
         {
             this.text.Add("");
         }
-        this.text[index] += text;
-        if (text.EndsWith("\n"))
+        this.text[index] += line;
+        if (line.EndsWith("\n"))
         {
             index++;
         }
-        StateHasChanged();
+
     }
 
-    public void updatePaneCode()
+    public void newLineIfNot()
     {
-        this.codeContents = BuildCode.code;    
+        if (!this.text.Last().EndsWith("\n"))
+        {
+            this.text[index] += "\n";
+            index++;
+        }
     }
-
-
   
 }
