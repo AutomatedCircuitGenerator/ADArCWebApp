@@ -1,5 +1,4 @@
 ﻿<div class="comp-container">
-	<InputText @bind-Value="searchText" contenteditable="false"></InputText>
 	<div class="card-wrapper">
 		@foreach (Directory d1 in dir.subDirectories)
 		{
@@ -62,7 +61,6 @@
 </div>
 
 @code {
-	string? searchText;
 
 	private Directory _dir = new Directory("notready", new List<Directory>());
 
