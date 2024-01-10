@@ -7,6 +7,7 @@
     <string>add_bno055.grxml</string>
     <string>add_dc_motor_direct.grxml</string>
     <string>add_dc_motor_l298n.grxml</string>
+	<string>add_dht22.grxml</string>
     <string>add_drv8825.grxml</string>
     <string>add_drv8833.grxml</string>
     <string>add_ds18b20.grxml</string>

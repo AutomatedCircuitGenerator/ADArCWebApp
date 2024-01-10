@@ -140,6 +140,10 @@ div[b-s7qrrfca0g], span[b-s7qrrfca0g] {
 hr[b-ve6qiki0tf] {
     margin: 5px 0;
 }
+
+.error[b-ve6qiki0tf] {
+    color: orangered;
+}
 /* /Shared/ComponentCard.razor.rz.scp.css */
 .card-container[b-1ylg6kr75c] {
     background-color: white;
