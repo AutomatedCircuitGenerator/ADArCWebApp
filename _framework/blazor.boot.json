@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ADArCWebApp",
   "resources": {
-    "hash": "sha256-xuPpdSsJlj3aM7csBtWfAkeqprr8ops6c2/P7FnLwsU=",
+    "hash": "sha256-sqmF4PDfoNbGUf+4wXFNWpFioBbW1IjhSjxB7PFwwlw=",
     "jsModuleNative": {
       "dotnet.native.8.0.1.ahpp78valh.js": "sha256-SGOlISx+3G4kkvpC9Uq3qoPGsnjxGmW61QBev0lyI5U="
     },
@@ -17,7 +17,7 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "ADArCWebApp.wasm": "sha256-hb5Z/vPCLQDMY70l1P/H7is36WvDMApG7gNtYP0H3MI=",
+      "ADArCWebApp.wasm": "sha256-vvrhBDoNjFUvsVFNwmiDSEvCZqyU9pMIqCiZ5MYAGnY=",
       "BlazorMonaco.wasm": "sha256-sBPTDoXCnXpg2cEy78KvbTiCQaohN4h4qsW5rsxoXGc=",
       "Microsoft.AspNetCore.Components.wasm": "sha256-dQPtnp+KcglAe6IGKs1mj85TTX8XU1ShIyE3Oygkox8=",
       "Microsoft.AspNetCore.Components.Web.wasm": "sha256-U/NwimRCCoixmIN/TfehotJDdzwU/3T4zyUhg9JrdwE=",
