@@ -13,8 +13,7 @@
 <div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
         @foreach(string line in text)
         {
-            @line;
-            <hr>
+            <span class="@(line.Contains("Error during build:")?"error":"auto")">@line</span><hr>
         }
 </div>
 
