@@ -46,13 +46,13 @@
         } 
     }
     //static int count = 0;
-    public static void update(ComponentInstance toDo)
+    public static void translate(ComponentInstance toDo)
     {
         var data = toDo.data;
 
         if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            toDo.mainValue = AvrCPU.getPinState(conn!.toId);
+            toDo.compParams["value"] = AvrCPU.getPinState(conn!.toId);
         }
         else
         {

@@ -36,7 +36,7 @@
 				<ComponentPane host="@this"></ComponentPane>
 			</div>
 			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
 			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
 				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
@@ -214,7 +214,7 @@
 
 				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
 				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
 				BuildCode.outputPins.Clear();
 				foreach (var c in comps.Values)
 				{
@@ -239,14 +239,22 @@
 								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
 								//hopefully the only time the list extends 
 								//is on arduino, which is excluded here
-								if (!hasList || !list.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
+								if (!hasList || !list!.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
 								{
 									int pin2 = -1;
 									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
 									{
 										pin2 = conn2!.toId;
 									}
-									AvrCPU.addListener(pin2, c, c.data.translate);
+									var info = c.data.compType.GetMethod("translate");
+									if (info != null)
+									{
+										AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
+									}
+									else
+									{
+										Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");	
+									}
 								}
 							}
 						}

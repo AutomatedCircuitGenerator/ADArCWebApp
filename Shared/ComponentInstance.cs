@@ -15,22 +15,19 @@ namespace ADArCWebApp.Shared
 		public double zoomedX;
 		public double zoomedY;
 
-		public object mainValue;
-
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
 		public int midSignal;
-		public Dictionary<string, object> moreData = new Dictionary<string, object>();
+		public Dictionary<string, object> compParams = new Dictionary<string, object>();
 
-		public ComponentInstance(int globalId, object mainValueInitial, node gsNode, double x = 10.0, double y = 10.0) {
+		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			moreData = data.extraProperties;
+			compParams = data.compParams;
 			this.x = x;
 			this.y = y;
 			zoomedX = x;
 			zoomedY = y;
-			mainValue = mainValueInitial;
 			this.gsNode = gsNode;
 		}
 

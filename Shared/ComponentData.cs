@@ -1,4 +1,6 @@
-﻿namespace ADArCWebApp.Shared
+﻿using ADArCWebApp.Shared.Components;
+
+namespace ADArCWebApp.Shared
 {
 	public class ComponentData
 	{
@@ -13,15 +15,14 @@
 		public Dictionary<string, int> pins;
 		public List<string> pinNames => pins.Keys.ToList();
 		public string? nodeName;
-        public object? defaultVal;
 
-        public Action<ComponentInstance>? translate;
+        public Type compType;
 
-        public Dictionary<string,object> extraProperties = new Dictionary<string,object>();
+        public Dictionary<string,object> compParams = new Dictionary<string,object>();
 		public List<string> pinsToListen = new();
 
 		public ComponentData(ComponentDataBuilder builder) {
-			extraProperties = builder.properties;
+			compParams = builder.properties;
 			name = builder.name;
 			enabled = builder.enabled;
 			directoryPath = builder.directoryPath;
@@ -31,8 +32,7 @@
 			rightOffset = builder.rightOffset;
 			cardScaleFactor = builder.cardScaleFactor;
 			bottomOffset = builder.bottomOffset;
-			defaultVal = builder.defaultVal;
-			translate = builder.translate;
+			compType = builder.compType;
 			pins = builder.pins;
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
@@ -52,21 +52,18 @@
 		public double cardScaleFactor;
 		public double bottomOffset;
 
-		public object? defaultVal;
-
-		public Action<ComponentInstance>? translate;
+		public Type compType;
 		public Dictionary<string, int> pins = new();
 		public List<string> pinsToListen = new();
 		public string? nodeName;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, object? defaultVal = null, Action<ComponentInstance>? translate = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "") {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
 			this.paneHoverText = paneHoverText;
 			this.codeForGen = codeForGen;
-			this.translate = translate;
-			this.defaultVal = defaultVal;
+			this.compType = compType ?? typeof(InvalidComponent);
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;
