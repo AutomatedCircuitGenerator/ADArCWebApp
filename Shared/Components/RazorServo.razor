@@ -44,6 +44,46 @@
             }
         }
     }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool pin = false;
+        if (0 == comp.getConnection("PWM", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            pin = AvrCPU.getPinState(conn!.toId);
+        }
+
+        if (pin)//if HIGH(pulse)
+        {
+            comp.midSignal = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+        }
+        if (!pin)//end of pulse, back to LOW
+        {
+            comp.midSignal = System.Diagnostics.Stopwatch.GetElapsedTime(comp.midSignal).Microseconds;//stop the timers
+        }
+
+
+        if (comp.midSignal > 950 && comp.midSignal < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+        {
+            comp.mainValue = 0;//all the way to the left/-90
+        }
+        else if (comp.midSignal > 1450 && comp.midSignal < 1550)//if the pulse width is 1.5ms
+        {
+            comp.mainValue = 90;//in the middle/0
+        }
+        else if (comp.midSignal > 1950 && comp.midSignal < 2050)//if the pulse width is 2ms
+        {
+            comp.mainValue = 180;//all the way to the right/90
+        }
+        else if(comp.midSignal > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
+        {
+            Console.WriteLine("simulator timing error - unrecognized pulse width");
+        }
+        else//if timer did not start
+        {
+            Console.WriteLine("timer didn't start");
+        }
+    }
 }
 
 

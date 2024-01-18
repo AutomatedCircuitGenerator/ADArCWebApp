@@ -19,7 +19,7 @@ namespace ADArCWebApp.Shared
 
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
-		public int midSignal;
+		public long midSignal;
 		public Dictionary<string, object> moreData = new Dictionary<string, object>();
 
 		public ComponentInstance(int globalId, object mainValueInitial, node gsNode, double x = 10.0, double y = 10.0) {
