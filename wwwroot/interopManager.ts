@@ -32,6 +32,10 @@ export namespace interopManager {
             return window.innerWidth;
         }
 
+        getWindowHeight(): number {
+            return window.innerHeight;
+        }
+
         private getModel() {
             return (<any>window).monaco.editor.getModels()[0];
         }

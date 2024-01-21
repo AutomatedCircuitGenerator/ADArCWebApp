@@ -4,3 +4,10 @@
     display: grid;
     grid-template-columns: 33% 33% 33%;
 }
+
+svg {
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+}
