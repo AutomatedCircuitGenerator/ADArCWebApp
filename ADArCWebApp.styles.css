@@ -459,6 +459,13 @@ polygon[b-41q8yj9qd7] {
     display: grid;
     grid-template-columns: 33% 33% 33%;
 }
+
+svg[b-9ycb6eis6j] {
+    top: 0;
+    left: 0;
+    position: absolute;
+    pointer-events: none;
+}
 /* /Shared/MainLayout.razor.rz.scp.css */
 body[b-8rp2ts1m1k] {
     overflow: hidden;

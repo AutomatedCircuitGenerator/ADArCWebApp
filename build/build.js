@@ -4110,6 +4110,9 @@ define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute
             getWindowWidth() {
                 return window.innerWidth;
             }
+            getWindowHeight() {
+                return window.innerHeight;
+            }
             getModel() {
                 return window.monaco.editor.getModels()[0];
             }
@@ -4159,6 +4162,6 @@ define("main", ["require", "exports", "interopManager"], function (require, expo
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()); }));
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
 });
 //# sourceMappingURL=build.js.map

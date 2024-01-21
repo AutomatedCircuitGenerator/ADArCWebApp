@@ -1,11 +1,11 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-4rdKcM0v8ylN5DpZheHDbvdMkv+RWahvnVa+rYojLGg=",
+      "hash": "sha256-qAm9DodNGxLVqXOPoO2vzWVO1vsTaEy1RMZIUsMIWJs=",
       "url": "build\/build.js"
     },
     {
-      "hash": "sha256-5CeioYiyNPM+rDTA25RGI8wfMeVl5WJECpB2WU\/AtRQ=",
+      "hash": "sha256-r3CJWHA+NSRIyCn\/uq7AAs08HkfFASv8xKHU2dbmspw=",
       "url": "build\/build.js.map"
     },
     {
@@ -75,6 +75,10 @@
     {
       "hash": "sha256-kIKH0c4hCLcDVe9XFs2eb7JS8JW5bRiS8psjUnlTC2c=",
       "url": "images\/redx.png"
+    },
+    {
+      "hash": "sha256-6BcM5odNLFC+Re+rS8Av\/2GQG7\/QkXRR6rEpIhzkvm8=",
+      "url": "images\/unavail.png"
     },
     {
       "hash": "sha256-XeddycKmt1NaoW1UaK7s8uwG1H+3LJ6O7eFBRKEcPX0=",
@@ -685,7 +689,7 @@
       "url": "rules\/add_dc_motor_l298n.grxml"
     },
     {
-      "hash": "sha256-s2v67WL5To9LKJlfG9tfviTZ+\/SSOR8lsxeLGlCFJlE=",
+      "hash": "sha256-iIK6q96ydmHD5PqTGofXRDev3jbVCagGPybsL1V2cnk=",
       "url": "rules\/add_dht22.grxml"
     },
     {
@@ -853,8 +857,12 @@
       "url": "rules\/bno055_arduino.grxml"
     },
     {
-      "hash": "sha256-M6TP4npuEYd8DIJqGZBSRZtUtalbc699FCday3pDIAM=",
+      "hash": "sha256-Nr631PXUx7P+H+HgF9PiVoTTiGENk6OFCEDoarzgLbE=",
       "url": "rules\/CONNECT.rsxml"
+    },
+    {
+      "hash": "sha256-Zd6r7aRKmXAd6L5rf\/0+36UbqL0nozp7mBg0sUdl5+A=",
+      "url": "rules\/dht22_arduino.grxml"
     },
     {
       "hash": "sha256-QoFTd8CHrsnUewii0Q1\/R7zerAXuH8pq0WTkOQf\/6oA=",
@@ -1029,11 +1037,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-JdONmXPtNqg3dMSDNLclTzbAJFs7fG2rpngzQTY8aCs=",
+      "hash": "sha256-ruHNiyN8ODpu\/z7bW7jWSS\/AmdSwealmhZVEI2NC3Zs=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-vvrhBDoNjFUvsVFNwmiDSEvCZqyU9pMIqCiZ5MYAGnY=",
+      "hash": "sha256-T6BXIVjIXeEENGwFs5qXl0IMpEo19fw\/TBBa3jMxWAo=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -1041,7 +1049,7 @@
       "url": "_framework\/BlazorMonaco.wasm"
     },
     {
-      "hash": "sha256-dQPtnp+KcglAe6IGKs1mj85TTX8XU1ShIyE3Oygkox8=",
+      "hash": "sha256-AAdQbmJ4yWuvVWOs+j8Rtg2+d6w0gM+49PX34H\/zGvs=",
       "url": "_framework\/Microsoft.AspNetCore.Components.wasm"
     },
     {
@@ -1233,7 +1241,7 @@
       "url": "_framework\/System.ObjectModel.wasm"
     },
     {
-      "hash": "sha256-RQyggKLDLvdVht6TO6xsp5UHFCDKpkJO5GLL9Z9lH1w=",
+      "hash": "sha256-iehtrtjcfxSEvApAfFkNdQaffRl28j0zciVd08aXyiM=",
       "url": "_framework\/System.Private.CoreLib.wasm"
     },
     {
@@ -1257,7 +1265,7 @@
       "url": "_framework\/System.Runtime.InteropServices.wasm"
     },
     {
-      "hash": "sha256-4Osk+sUeR2PLvtSUCLssv3S3jluthnZG4De+dOvxCsU=",
+      "hash": "sha256-UNCsAWB3FAJKeAkgMi2W90G773ul7HE04HSumJ0T4nA=",
       "url": "_framework\/System.Runtime.wasm"
     },
     {
@@ -1313,7 +1321,7 @@
       "url": "_framework\/System.Xml.XmlSerializer.wasm"
     },
     {
-      "hash": "sha256-Bl6sHF4rZBC5B11+m96JCnAcN5fCj1sknXVCZE9eFO8=",
+      "hash": "sha256-mvpOM23cKNrLnCl0MeBC3dXRf+Rm\/COKg1CbwGerH9k=",
       "url": "ADArCWebApp.styles.css"
     },
     {
@@ -2297,5 +2305,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "+i6q9swZ"
+  "version": "jgOxjuz+"
 };
