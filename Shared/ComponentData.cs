@@ -15,7 +15,7 @@ namespace ADArCWebApp.Shared
 		public Dictionary<string, int> pins;
 		public List<string> pinNames => pins.Keys.ToList();
 		public string? nodeName;
-
+		public ElementPin[] pinInfo;
         public Type compType;
 
         public Dictionary<string,object> compParams = new Dictionary<string,object>();
@@ -36,6 +36,7 @@ namespace ADArCWebApp.Shared
 			pins = builder.pins;
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
+			pinInfo = builder.pinInfo;
 		}
 
     }
@@ -56,6 +57,8 @@ namespace ADArCWebApp.Shared
 		public Dictionary<string, int> pins = new();
 		public List<string> pinsToListen = new();
 		public string? nodeName;
+
+		public ElementPin[] pinInfo;
 		/* needs more later, good enough for now.*/
 		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "") {
 			this.name = name;
@@ -78,6 +81,19 @@ namespace ADArCWebApp.Shared
 				pinsToListen = listenOn;
 			}
 			this.nodeName = gsNodeName;
+
+			if (compType != typeof(InvalidComponent)) {
+				try {
+					var p_i = compType!.GetProperty("pinInfo");
+					if (p_i != null)
+					{
+						this.pinInfo = (ElementPin[])p_i.GetValue(compType.GetConstructors()[0].Invoke(new object[] { }));
+					}
+				}
+				catch {
+					Console.WriteLine(name + " pinInfo setup failed!");
+				}
+			}
 		}
 
 

@@ -139,7 +139,9 @@
 	public static CodePane? codePane;
 	public static ComponentPane? compPane;
 	public static readonly int defaultScreenWidth = 1920;
-	public static double currentRatio = 1;
+	public static double currentWidthRatio = 1;
+	public static readonly int defaultScreenHeight = 1080;
+	public static double currentHeightRatio = 1;
 
 	public static ElementReference? refresh;
 
@@ -154,7 +156,7 @@
 			AppInterop.runtime = JsRuntime;
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
-			AppInterop.updateScreenWidthRatio(await AppInterop.getWindowWidth());
+			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
@@ -214,8 +216,9 @@
 
 				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
 				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-				comps.Add(localIds, buildCanvas.unZoom(new(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				comps.Add(localIds, buildCanvas.unZoom(new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
 				BuildCode.outputPins.Clear();
+				buildCanvas!.connLines.Clear();
 				foreach (var c in comps.Values)
 				{
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
@@ -317,6 +320,8 @@
 	public void updatePinBindings(ComponentInstance comp)
 	{
 		comp.connMap.Clear();
+		//buildCanvas!.connLines.Clear();
+
 		var compPins = getPins(comp.gsNode, comp.data.nodeName);
 		if (compPins.Count == 0)
 		{
@@ -371,7 +376,7 @@
 			int i2 = hb.data.pins[bPinName];
 
 
-			comp.addConnection(i1, hb, i2);
+			comp.addConnection(i1, hb, i2, a);
 		}
 	}
 

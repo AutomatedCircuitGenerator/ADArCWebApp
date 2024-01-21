@@ -15,9 +15,6 @@
     [Parameter]
     public string label { get; set; } = "";
 
-    [Parameter]
-    public bool flip { get; set; } = false;
-
     public int xScale = 1;
 
     public Dictionary<string, string> lightColors = new Dictionary<string, string>()
@@ -33,17 +30,14 @@
 
 
 
-    ElementPin[] pinInfo { 
+    public static ElementPin[] pinInfo { 
         get
         {
-            int anodeX = flip ? 15 : 25;
-            int cathodeX = flip ? 25 : 15;
-
             return new ElementPin[] {
-                new ElementPin(name: "A", x: anodeX, y: 42, signals: new PinSignalInfo[]{}, description: "Anode"),
-                new ElementPin(name: "C", x: cathodeX, y: 42, signals: new PinSignalInfo[]{ }, description: "Cathode")
-    };
-        } 
+                new ElementPin(name: "A", x: 50, y: 16, signals: new PinSignalInfo[]{}, description: "Anode"),
+                new ElementPin(name: "C", x: 39, y: 16, signals: new PinSignalInfo[]{ }, description: "Cathode")
+            };
+        }
     }
     //static int count = 0;
     public static void translate(ComponentInstance toDo)
@@ -69,7 +63,7 @@
         <svg
           width="40"
           height="50"
-          transform="scale(@(flip?-1:1) 1)"
+          transform="scale(1 1)"
           version="1.2"
           viewBox="-10 -5 35.456 39.618"
           xmlns="http://www.w3.org/2000/svg"
