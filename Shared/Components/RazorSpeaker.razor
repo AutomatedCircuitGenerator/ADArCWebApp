@@ -1,0 +1,26 @@
+﻿@code {
+	// 0.5W Speaker
+	ElementPin[] pinInfo
+	{
+		get
+		{
+			return new ElementPin[]
+			{
+
+				new ElementPin(name: "Pos", x: 45.059, y: 41.968, signals: new PinSignalInfo[]{ }, number: 1),
+				new ElementPin(name: "GND", x: 45.911, y: 41.968, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2)
+			};
+
+	}
+	}
+}
+
+<svg width="3mm" height="3mm" version="1.1" viewBox="0 0 3 3" xmlns="http://www.w3.org/2000/svg">
+	<g transform="translate(-44.015 -39.046)">
+		<ellipse transform="translate(-1.0417e-6)" cx="45.059" cy="41.968" rx=".1647" ry=".071794" fill="#333" stroke-width=".351" />
+		<ellipse transform="translate(-1.0417e-6)" cx="45.911" cy="41.968" rx=".1647" ry=".071794" fill="#8a0f0f" stroke-width=".351" />
+		<circle cx="45.515" cy="40.546" r="1.5" fill="#4d4d4d" stroke-width=".1755" />
+		<circle cx="45.515" cy="40.546" r="1.4" fill="#262626" stroke-width=".17869" />
+		<circle cx="45.515" cy="40.546" r=".25" fill="#ccc" stroke-width=".1755" />
+	</g>
+</svg>
