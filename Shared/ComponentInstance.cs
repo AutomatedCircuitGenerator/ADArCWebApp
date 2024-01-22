@@ -16,7 +16,9 @@ namespace ADArCWebApp.Shared
 
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
-		public long midSignal;
+		public long midSignal;//counter
+		public long state;
+		public long timer;
 		public Dictionary<string, object> compParams = new Dictionary<string, object>();
 
 		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {

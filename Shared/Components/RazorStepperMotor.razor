@@ -2,7 +2,7 @@
 
     private double mmToPix = 3.78;
     // Most likely the most buggy one
-    [Parameter] public int angle { get; set;  } = 0;
+    [Parameter] public double angle { get; set;  } = 0;
     [Parameter] public string arrow { get; set; } = "";
     [Parameter] public string value { get; set; } = "";
     [Parameter] public string units { get; set; } = "";
@@ -41,9 +41,53 @@
                 new ElementPin(name: "A+", x: xOff + 2.54 * mmToPix, y: yOff, number: 2, signals: new PinSignalInfo[] { }),
                 new ElementPin( name: "B+", x: xOff + 5.08 * mmToPix, y: yOff, number: 3, signals: new PinSignalInfo[] { } ),
                 new ElementPin( name: "B-", x: xOff + 7.62 * mmToPix, y: yOff, number: 4, signals: new PinSignalInfo[] { } ),
-                // new ElementPin( name: "Center Tap 2", x: 0, y: 69, number: 5, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
-                // new ElementPin( name: "PWM", x: 0, y: 69, number: 6, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
-            };
+    // new ElementPin( name: "Center Tap 2", x: 0, y: 69, number: 5, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+    // new ElementPin( name: "PWM", x: 0, y: 69, number: 6, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
+    };
+        }
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool dir = false;
+        bool step = false;
+        if (0 == comp.getConnection("DIR", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            dir = AvrCPU.getPinState(conn!.toId);
+        }
+        if (0 == comp.getConnection("STEP", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        {
+            step = AvrCPU.getPinState(conn2!.toId);
+        }
+
+
+        //A low-to-high transition on the STEP input advances the motor one increment
+        //200 Steps/Revolution -> 1.8 degrees/step
+        //direction of the rotation is subjective towards user, we assume the following:
+        //step = true clockwise, step = false counter-clockwise
+        // if (!step && comp.state == 0)//LOW until trigger pulse
+        // {
+        //     comp.state = 1;
+        // }
+        if (step && comp.state == 0)//pulse arrives, goes to HIGH
+        {
+            comp.state = 1;
+        }
+        if (comp.state == 1)//rotate 1.8 degrees
+        {
+            if (dir)
+            {
+                comp.compParams["angle"] = Convert.ToDouble(comp.compParams["angle"]) + 1.8;
+            }
+            else
+            {
+                comp.compParams["angle"] = Convert.ToDouble(comp.compParams["angle"]) - 1.8;
+            }
+            comp.state = 2;
+        }
+        if (!step && comp.state == 2)//pulse ends, goes to LOW
+        {
+            comp.state = 0;
         }
     }
 }
