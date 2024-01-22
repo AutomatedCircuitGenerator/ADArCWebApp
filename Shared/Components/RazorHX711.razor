@@ -23,7 +23,7 @@
         //8388607 = +50kg up (assumption here, values defined by the actual physical loadcell)
         //-8388608 = -50kg down
         double step = 16777215 / 1000;//one decimal place
-        long number = Convert.ToInt64((double)comp.moreData["weight"] * 10 * step);
+        long number = Convert.ToInt64((double)comp.compParams["weight"] * 10 * step);
         List<bool> bits = new List<bool>();
         bool isNegative = number < 0;
         number = Math.Abs(number);
