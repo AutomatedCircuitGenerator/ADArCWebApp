@@ -5,6 +5,7 @@
     <string>add_uln2003.grxml</string>
     <string>adxl345_arduino.grxml</string>
     <string>bno055_arduino.grxml</string>
+	<string>dht22_arduino.grxml</string>
     <string>drv8825_arduino.grxml</string>
     <string>drv8833_arduino.grxml</string>
     <string>ds18b20_arduino.grxml</string>

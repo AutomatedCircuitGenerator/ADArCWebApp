@@ -10,13 +10,15 @@ namespace ADArCWebApp.Shared.Interop
 		public static IJSRuntime? runtime;
 
 		[JSInvokable]
-		public static void updateScreenWidthRatio(int screenWidth)
+		public static void updateScreenRatios(int screenWidth, int screenHeight)
 		{
 			var r = ((double)screenWidth) / Pages.Index.defaultScreenWidth;
 
-			Pages.Index.currentRatio = r;
+			Pages.Index.currentWidthRatio = r;
 
-			Console.WriteLine("screen resized! new ratio: " + r);
+			var r2 = ((double)screenHeight) / Pages.Index.defaultScreenHeight;
+
+			Pages.Index.currentHeightRatio = r2;
 		}
 
 
@@ -47,6 +49,12 @@ namespace ADArCWebApp.Shared.Interop
 
 		public static async Task<int> getWindowWidth() {
 			int ret = await jsModule!.InvokeAsync<int>("getWindowWidth");
+			return ret;
+		}
+
+		public static async Task<int> getWindowHeight()
+		{
+			int ret = await jsModule!.InvokeAsync<int>("getWindowHeight");
 			return ret;
 		}
 

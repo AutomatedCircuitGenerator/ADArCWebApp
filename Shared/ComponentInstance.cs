@@ -9,34 +9,41 @@ namespace ADArCWebApp.Shared
 
 		public int globalId;
 		public double x;
-
 		public double y;
 
 		public double zoomedX;
 		public double zoomedY;
 
-		public object mainValue;
-
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
-		public long midSignal;
-		public Dictionary<string, object> moreData = new Dictionary<string, object>();
+		public int midSignal;
+		public Dictionary<string, object> compParams = new Dictionary<string, object>();
 
-		public ComponentInstance(int globalId, object mainValueInitial, node gsNode, double x = 10.0, double y = 10.0) {
+		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			moreData = data.extraProperties;
+			compParams = data.compParams;
 			this.x = x;
 			this.y = y;
 			zoomedX = x;
 			zoomedY = y;
-			mainValue = mainValueInitial;
 			this.gsNode = gsNode;
 		}
 
 
-		public void addConnection(int i1, ComponentInstance to, int i2) {
-			InstanceConnection toAdd = new(this, i1, i2, to);
+		private static Dictionary<string, string> colorMap = new()
+		{
+			{ "BK", "black" },
+			{ "RD", "red"},
+			{ "LB", "lightblue"},
+			{ "DB", "navyblue"},
+			{ "GN", "green"},
+			{ "VT", "violet"},
+			{ "OG", "orange"}
+		};
+
+		public void addConnection(int i1, ComponentInstance to, int i2, arc arc) {
+			InstanceConnection toAdd = new(this, i1, i2, to, colorMap[arc.localLabels.Find(colorMap.ContainsKey) ?? "BK"]);
 
 			if (connMap.ContainsKey(i1)) {
 
@@ -49,10 +56,22 @@ namespace ADArCWebApp.Shared
 					Console.WriteLine("WARNING: Pin list extended for " + data.name + " component. This is probably an error!");
 				}
 				connMap[i1].Add(toAdd);
+
+				if (globalId != 1)
+				{
+					Pages.Index.buildCanvas!.connLines.Add(toAdd);
+
+				}
 			}
 			else
 			{
 				connMap[i1] = new() { toAdd };
+
+				if (globalId != 1)
+				{
+					Pages.Index.buildCanvas!.connLines.Add(toAdd);
+
+				}
 			}
 		}
 
@@ -87,12 +106,14 @@ namespace ADArCWebApp.Shared
 		public int fromId;
 		public int toId;
 		public ComponentInstance to;
+		public string color;
 
-		public InstanceConnection(ComponentInstance from, int fromId, int toId, ComponentInstance to) { 
+		public InstanceConnection(ComponentInstance from, int fromId, int toId, ComponentInstance to, string color) { 
 			this.from = from;
 			this.fromId = fromId;
 			this.to = to;
 			this.toId = toId;
+			this.color = color;
 		}
 
 
