@@ -1,4 +1,7 @@
 ﻿@code {
+	[Parameter]
+	public bool value { get; set; } = false;
+
 	ElementPin[] pinInfo
 	{
 		get
@@ -11,6 +14,21 @@
 			};
 
 		}
+	}
+
+	public static void translate(ComponentInstance toDo)
+	{
+		var data = toDo.data;
+
+		if (0 == toDo.getConnection("S", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		{
+			toDo.compParams["value"] = AvrCPU.getPinState(conn!.toId);
+		}
+		else
+		{
+			Console.WriteLine("GetConnection failed from KY012 buzzer Component!");
+		}
+
 	}
 }
 

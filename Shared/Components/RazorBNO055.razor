@@ -1,4 +1,5 @@
-﻿@code {     /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
+﻿@code {
+    /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
     ElementPin[] pinInfo {
         get 
         {
@@ -15,6 +16,117 @@
                 new ElementPin(name: "INT", x: 80.627, y: 50.809, signals: new PinSignalInfo[] { }, number: 9),
                 new ElementPin(name: "ADR", x: 83.377411, y: 50.809, signals: new PinSignalInfo[] { }, number: 10)
             };
+        }
+    }
+    //refer to if more registers needed https://adarc-help.mech.website/datasheet/bno055_bosch.pdf
+    //currently only have 
+    static Dictionary<ulong, ulong> register = new Dictionary<ulong, ulong>
+    {
+        { 0x33, 0b01 },
+        { 0x34, 2 },
+        { 0x35, 3 }
+    };
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool sda = false;
+        bool scl = false;
+        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            sda = AvrCPU.getPinState(conn!.toId);
+        }
+        if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        {
+            scl = AvrCPU.getPinState(conn2!.toId);
+        }
+
+        //10Hz sampling rate
+        if (sda && scl && comp.state == 0)//before start, scl and sda pulled-up
+        {
+            comp.state = 1;
+        }
+        if (!sda && scl && comp.state == 1)//HIGH-to-LOW on SDA, start condition
+        {
+            comp.state = 2;
+        }
+        if(!scl && comp.state == 2)//wait until first LOW for scl ends
+        {
+            comp.state = 3;
+        }
+        if (scl && comp.state == 3)//HIGH on scl, read data on sda
+        {
+            comp.state = 4;
+            comp.midSignal |= (ulong)(sda ? 1 : 0) << 1;//store data in midSignal, HIGH = 1, LOW = 0
+        }
+        if (!scl && comp.state == 4)
+        {
+            comp.state = 3;
+            comp.counter++;
+
+            if (comp.counter == 8 && (comp.midSignal >> 1) == 0x28 && comp.midSignal % 2 == 1)//the read/write set to 1 signifying read
+            {
+                comp.state = 10;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
+            }
+            else if (comp.counter == 8 && (comp.midSignal >> 1) == 0x28)//device address matched 0x28 for bno055
+            {
+                comp.state = 5;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
+            }
+            else if (comp.counter == 17 && register.TryGetValue((comp.midSignal & 0xFF), out ulong result))
+            {
+                comp.state = 6;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
+            }
+        }
+        if (scl && comp.state == 5)//ACK by Slave after slave device address
+        {
+            comp.state = 4;
+        }
+        if (scl && comp.state == 6)//ACK by Slave after register address
+        {
+            comp.state = 7;
+        }
+        if (!scl && comp.state == 7)//scl LOW after ACK/NACK
+        {
+            comp.midSignal = 0;
+            comp.counter = 0;
+            if (sda)//sda pulled high before Repeated start for reading data
+            {
+                comp.state = 0;
+            }
+            else
+            {
+                comp.state = 8;
+            }
+        }
+        if (scl && comp.state == 8)//HIGH on scl, read data on sda
+        {
+            comp.state = 9;
+            comp.midSignal |= (ulong)(sda ? 1 : 0) << 1;//store data in midSignal, HIGH = 1, LOW = 0
+            while (sda != AvrCPU.getPinState(conn!.toId))
+            {
+                comp.state = 12;
+                break;
+            }
+        }
+        if (!scl && comp.state == 9)
+        {
+            comp.state = 8;
+            comp.counter++;
+            if (comp.counter % 9 == 8)//the read/write set to 1 signifying read
+            {
+                comp.state = 11;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
+            }
+        }
+        if(scl && comp.state == 10)
+        {
+            //Slave sends data to master
+        }
+        if (scl && comp.state == 11)//ACK by Slave after writing a byte
+        {
+            comp.state = 9;
         }
     }
 }

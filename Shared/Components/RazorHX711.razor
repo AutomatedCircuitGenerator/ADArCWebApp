@@ -88,14 +88,14 @@
         if (sck && comp.state == 1)//trigger pulse HIGH
         {
             comp.state = 2;
-            if (comp.midSignal == 24)
+            if (comp.counter == 24)
             {
                 AvrCPU.setPinState(conn!.toId, true);//set DOUT to high after 25th pulse
-                comp.midSignal = 0;
+                comp.counter = 0;
                 comp.state = 0;
                 udelay(51);
             }
-            else if (getSignal(comp)[23 - (int)comp.midSignal])
+            else if (getSignal(comp)[23 - comp.counter])
             {
                 AvrCPU.setPinState(conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
             }
@@ -106,7 +106,7 @@
         }
         if (!sck && comp.state == 2)//trigger pulse LOW, gap in between pulses
         {
-            comp.midSignal++;
+            comp.counter++;
             comp.state = 1;
         }
     }

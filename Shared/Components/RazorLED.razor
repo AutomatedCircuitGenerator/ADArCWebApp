@@ -53,7 +53,7 @@
             Console.WriteLine("GetConnection failed from LED Component!");    
         }
 
-        //Console.WriteLine(count++);
+        Console.WriteLine(AvrCPU.getPinState(conn!.toId));
 
     }
 

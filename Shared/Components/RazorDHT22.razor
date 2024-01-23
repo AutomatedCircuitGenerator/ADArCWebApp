@@ -46,13 +46,13 @@
             pin = AvrCPU.getPinState(conn!.toId);
         }
 
-        if (!pin && comp.midSignal == 0)
+        if (!pin && comp.state == 0)
         {
-            comp.midSignal = 1;
+            comp.state = 1;
         }
-        if (pin && comp.midSignal == 1)
+        if (pin && comp.state == 1)
         {
-            comp.midSignal = 2;
+            comp.state = 2;
             sendSignal(comp, conn!.toId);
         }
         // false 1ms+ -> true (20-40us) trigger

@@ -1,5 +1,6 @@
 ﻿using ADArCWebApp.ComponentNamespace;
 using GraphSynth.Representation;
+using System.Numerics;
 
 namespace ADArCWebApp.Shared
 {
@@ -16,8 +17,9 @@ namespace ADArCWebApp.Shared
 
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
-		public long midSignal;//counter
-		public long state;
+		public ulong midSignal;
+		public int counter;
+		public int state;
 		public long timer;
 		public Dictionary<string, object> compParams = new Dictionary<string, object>();
 
