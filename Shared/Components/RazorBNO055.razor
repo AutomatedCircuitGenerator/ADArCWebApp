@@ -40,7 +40,7 @@
             scl = AvrCPU.getPinState(conn2!.toId);
         }
 
-        //10Hz sampling rate
+        //
         if (sda && scl && comp.state == 0)//before start, scl and sda pulled-up
         {
             comp.state = 1;
@@ -73,7 +73,7 @@
                 comp.state = 5;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
             }
-            else if (comp.counter == 17 && register.TryGetValue((comp.midSignal & 0xFF), out ulong result))
+            else if (comp.counter == 17 && register.TryGetValue((comp.midSignal & (ulong)0xFF), out ulong result))
             {
                 comp.state = 6;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK/NACK by Slave
@@ -89,7 +89,7 @@
         }
         if (!scl && comp.state == 7)//scl LOW after ACK/NACK
         {
-            comp.midSignal = 0;
+            comp.midSignal &= (ulong)0xFF;
             comp.counter = 0;
             if (sda)//sda pulled high before Repeated start for reading data
             {
@@ -104,10 +104,15 @@
         {
             comp.state = 9;
             comp.midSignal |= (ulong)(sda ? 1 : 0) << 1;//store data in midSignal, HIGH = 1, LOW = 0
-            while (sda != AvrCPU.getPinState(conn!.toId))
+            while (AvrCPU.getPinState(conn2!.toId))
             {
-                comp.state = 12;
-                break;
+                if (!sda && AvrCPU.getPinState(conn!.toId))//stop condition 
+                {
+                    comp.state = 0;
+                    comp.midSignal = 0;
+                    comp.counter = 0;
+                    break;
+                }
             }
         }
         if (!scl && comp.state == 9)
@@ -127,6 +132,7 @@
         if (scl && comp.state == 11)//ACK by Slave after writing a byte
         {
             comp.state = 9;
+
         }
     }
 }
