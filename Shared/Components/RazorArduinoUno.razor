@@ -12,46 +12,48 @@
 
     private string resetStroke = "#777";
 
-    ElementPin[] pinInfo
+    public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
-            {
-                // new ElementPin( name: "NC", number: 1, x: 361, y: 9, signals: new PinSignalInfo[]{}, description: "Not Connected" ),
-                new ElementPin( name: "IOREF", number: 2, x: 131, y: 191.5, signals: new PinSignalInfo[]{}, description: "Reference for digital logic V - connected to 5V" ),
-                new ElementPin( name: "RESET", number: 3, x: 140.5, y: 191.5, signals: new PinSignalInfo[]{}, description: "Reset" ),
-                new ElementPin( name: "+3V3", number: 4, x: 150, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(3.3) }, description: "+3V3 Power Rail" ),
-                new ElementPin( name: "+5V", number: 5, x: 160, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(5)}, description: "+5V Power Rail" ),
-                new ElementPin( name: "GND.2", number: 6, x: 169.5, y: 191.5, signals: new PinSignalInfo[]{}, description: "Ground" ),
-                new ElementPin( name: "GND.3", number: 7, x: 179, y: 191.5, signals: new PinSignalInfo[]{}, description: "Ground" ),
-                new ElementPin( name: "VIN", number: 8, x: 188.5, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()  }, description: "Voltage Input" ),
-                new ElementPin( name: "A0", number: 9, x: 208, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(0) }, description: "Analog input 0 /GPIO" ),
-                new ElementPin( name: "A1", number: 10, x: 217.5, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(1) }, description: "Analog input 1 /GPIO" ),
-                new ElementPin( name: "A2", number: 11, x: 227, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(2) }, description: "Analog input 2 /GPIO" ),
-                new ElementPin( name: "A3", number: 12, x: 236.5, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(3) }, description: "Analog input 3 /GPIO" ),
-                new ElementPin( name: "A4", number: 13, x: 246, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(4), PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, description: "Analog input 4 /GPIO" ),
-                new ElementPin( name: "A5", number: 14, x: 255.5, y: 191.5, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(5), PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, description: "Analog input 5 /GPIO" ),
-                
-                new ElementPin( name: "SCL", number: 15, x: 87, y: 9, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, description: "Digital Input 21/I2C Dataline" ),
-                new ElementPin( name: "SDA", number: 16, x: 97, y: 9, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, description: "Digital Input 20/I2C Dataline" ),
-                new ElementPin( name: "AREF", number: 17, x: 106, y: 9, signals: new PinSignalInfo[]{}, description: "Analog Reference Voltage" ),
-                new ElementPin( name: "GND.1", number: 18, x: 115.5, y: 9, signals: new PinSignalInfo[]{ PinSignalInfo.GND() }, description: "Ground 1" ),
-                new ElementPin( name: "D13", number: 19, x: 125, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 13/GPIO" ),
-                new ElementPin( name: "D12", number: 20, x: 134.5, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 12/GPIO" ),
-                new ElementPin( name: "D11", number: 21, x: 144, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 11/GPIO" ),
-                new ElementPin( name: "D10", number: 22, x: 153.5, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 10/GPIO" ),
-                new ElementPin( name: "D9", number: 23, x: 163, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 9/GPIO" ),
-                new ElementPin( name: "D8", number: 24, x: 173, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 8/GPIO" ),
-                new ElementPin( name: "D7", number: 25, x: 189, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 7/GPIO" ),
-                new ElementPin( name: "D6", number: 26, x: 198.5, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 6/GPIO" ),
-                new ElementPin( name: "D5", number: 27, x: 208, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 5/GPIO" ),
-                new ElementPin( name: "D4", number: 28, x: 217.5, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 4/GPIO" ),
-                new ElementPin( name: "D3", number: 29, x: 227, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 3/GPIO" ),
-                new ElementPin( name: "D2", number: 30, x: 236.5, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 2/GPIO" ),
-                new ElementPin( name: "D1", number: 31, x: 246, y: 9, signals: new PinSignalInfo[]{}, description: "Digital Input 1/GPIO" ),
-                new ElementPin( name: "D0", number: 2, x: 255.5, y: 9, signals: new PinSignalInfo[]{ PinSignalInfo.USART(PinSignalInfo.PinSignal.RX, 0) }, description: "Digital Input 0/GPIO" )
+            {   
+                //this order is important! must match namespace pin order!
+                new ElementPin( name: "D0", number: 2, x: 280.5, y: -15, signals: new PinSignalInfo[]{ PinSignalInfo.USART(PinSignalInfo.PinSignal.RX, 0) }, description: "Digital Input 0/GPIO" ),
+                new ElementPin( name: "D1", number: 31, x: 271, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 1/GPIO" ),
+                new ElementPin( name: "D2", number: 30, x: 261.5, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 2/GPIO" ),
+                new ElementPin( name: "D3", number: 29, x: 252, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 3/GPIO" ),
+                new ElementPin( name: "D4", number: 28, x: 242.5, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 4/GPIO" ),
+                new ElementPin( name: "D5", number: 27, x: 233, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 5/GPIO" ),
+                new ElementPin( name: "D6", number: 26, x: 223.5, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 6/GPIO" ),
+                new ElementPin( name: "D7", number: 25, x: 214, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 7/GPIO" ),
+                new ElementPin( name: "D8", number: 24, x: 198, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 8/GPIO" ),
+                new ElementPin( name: "D9", number: 23, x: 188, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 9/GPIO" ),
+                new ElementPin( name: "D10", number: 22, x: 178.5, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 10/GPIO" ),
+                new ElementPin( name: "D11", number: 21, x: 169, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 11/GPIO" ),
+                new ElementPin( name: "D12", number: 20, x: 159.5, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 12/GPIO" ),
+                new ElementPin( name: "D13", number: 19, x: 150, y: -15, signals: new PinSignalInfo[]{}, description: "Digital Input 13/GPIO" ),
+                new ElementPin( name: "A0", number: 9, x: 233, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(0) }, description: "Analog input 0 /GPIO" ),
+                new ElementPin( name: "A1", number: 10, x: 242.5, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(1) }, description: "Analog input 1 /GPIO" ),
+                new ElementPin( name: "A2", number: 11, x: 252, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(2) }, description: "Analog input 2 /GPIO" ),
+                new ElementPin( name: "A3", number: 12, x: 261.5, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(3) }, description: "Analog input 3 /GPIO" ),
+                new ElementPin( name: "A4", number: 13, x: 271, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(4), PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, description: "Analog input 4 /GPIO" ),
+                new ElementPin( name: "A5", number: 14, x: 280.5, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.Analog(5), PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, description: "Analog input 5 /GPIO" ),
+                new ElementPin( name: "GND.1", number: 18, x: 140, y: -15, signals: new PinSignalInfo[]{ PinSignalInfo.GND() }, description: "Ground 1" ),
 
+                //below this point are currently inaccessible. (I think.)
+                // new ElementPin( name: "NC", number: 1, x: 361, y: -15, signals: new PinSignalInfo[]{}, description: "Not Connected" ),
+                new ElementPin( name: "IOREF", number: 2, x: 131, y: 168, signals: new PinSignalInfo[]{}, description: "Reference for digital logic V - connected to 5V" ),
+                new ElementPin( name: "RESET", number: 3, x: 140.5, y: 168, signals: new PinSignalInfo[]{}, description: "Reset" ),
+                new ElementPin( name: "+3V3", number: 4, x: 150, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(3.3) }, description: "+3V3 Power Rail" ),
+                new ElementPin( name: "+5V", number: 5, x: 160, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(5)}, description: "+5V Power Rail" ),
+                new ElementPin( name: "GND.2", number: 6, x: 169.5, y: 168, signals: new PinSignalInfo[]{}, description: "Ground" ),
+                new ElementPin( name: "GND.3", number: 7, x: 179, y: 168, signals: new PinSignalInfo[]{}, description: "Ground" ),
+                new ElementPin( name: "VIN", number: 8, x: 188.5, y: 168, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()  }, description: "Voltage Input" ),
+
+                new ElementPin( name: "SCL", number: 15, x: 87, y: -15, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, description: "Digital Input 21/I2C Dataline" ),
+                new ElementPin( name: "SDA", number: 16, x: 97, y: -15, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, description: "Digital Input 20/I2C Dataline" ),
+                new ElementPin( name: "AREF", number: 17, x: 106, y: -15, signals: new PinSignalInfo[]{}, description: "Analog Reference Voltage" ),
             };
         }
     }

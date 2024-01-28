@@ -1,7 +1,16 @@
-﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" style="transform:scale(@(zoomFactor))" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
-		<VaryingComponent forceBorder="c.Key==selection" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
+
+
+	<svg viewBox="0 0 @(Pages.Index.defaultScreenWidth * Pages.Index.currentWidthRatio) @(Pages.Index.defaultScreenHeight* Pages.Index.currentHeightRatio -50)" xmlns="http://www.w3.org/2000/svg">
+			@foreach(var line in connLines){
+			<line x1="@(getConnectionCoord(0, line))" y1="@(getConnectionCoord(1, line))" x2="@(getConnectionCoord(2, line))" y2="@(getConnectionCoord(3, line))" stroke="@line.color" stroke-width="@(3 * zoomFactor)"></line>
+			}
+	</svg>
+
+	
 </div>
 
 @code {
@@ -9,6 +18,8 @@
 	{
 		ADArCWebApp.Pages.Index.buildCanvas = this;
 	}
+
+	public List<InstanceConnection> connLines = new List<InstanceConnection>();
 
 	[Parameter]
 	public Dictionary<int, ComponentInstance> comps { get; set; }
@@ -27,6 +38,45 @@
 
 	public double zoomFactor = 1;
 
+
+	private double getConnectionCoord(int coord, InstanceConnection conn)
+	{
+		//var canvasHeight = (Pages.Index.currentHeightRatio * Pages.Index.defaultScreenHeight)-50;
+		//var canvasWidth = Pages.Index.currentWidthRatio * Pages.Index.defaultScreenWidth;
+
+		ElementPin[] arr = conn.to.data.pinInfo;
+		var pin = arr[conn.toId];
+
+		(double x, double y) crd = (conn.to.x + pin.x, conn.to.y + pin.y);
+
+		ElementPin[] arr1 = conn.from.data.pinInfo;
+
+		var pin1 = arr1[conn.fromId];
+
+		(double x, double y) crd1 = (conn.from.x + pin1.x, conn.from.y + pin1.y);
+
+		crd = zoomCoord(crd);
+		crd1 = zoomCoord(crd1);
+
+		switch (coord)
+		{
+			case 0:
+				return crd.x;
+			case 1:
+				return (crd.y+50);
+			case 2:
+				return crd1.x;
+			case 3:
+				return (crd1.y+50);
+			default:
+				return -1;
+
+		}
+
+	}
+
+
+
 	private void updZoom(WheelEventArgs e)
 	{
 
@@ -35,16 +85,16 @@
 		zoomFactor = Math.Clamp(zoomFactor, .4, 3);
 
 
-		foreach (var comp in comps.Values)
+		/*foreach (var comp in comps.Values)
 		{
 			adjustCompToZoom(comp);
-		}
+		}*/
 
 	}
 
 	public ComponentInstance adjustCompToZoom(ComponentInstance comp)
 	{
-		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentRatio;
+		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
 		double baseY = .3 * baseX;
 
 		double compX = comp.x;
@@ -62,9 +112,29 @@
 		return comp;
 	}
 
+	public (double x, double y) zoomCoord((double x, double y) coord)
+	{
+		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
+		double baseY = .3 * baseX;
+
+		double compX = coord.x;
+		double compY = coord.y;
+
+		double vectorX = compX - baseX;
+		double vectorY = compY - baseY;
+
+		double iX = zoomFactor * vectorX;
+		double iY = zoomFactor * vectorY;
+
+		coord.x = iX + baseX;
+		coord.y = iY + baseY;
+
+		return coord;
+	}
+
 	public ComponentInstance unZoom(ComponentInstance comp)
 	{
-		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentRatio;
+		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
 		double baseY = .3 * baseX;
 
 		double zoomedX = comp.x;
@@ -138,13 +208,13 @@
 	public void componentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
 	{
 		targetFound = true;
-		if (selection > 0)
+		if (Pages.Index.app.selectedComponent > 0)
 		{
-			selection = -1;
+			Pages.Index.app.selectedComponent = -1;
 		}
 		else
 		{
-			selection = c.Key;
+			Pages.Index.app.selectedComponent = c.Key;
 		}
 	}
 
@@ -160,7 +230,7 @@
 		{
 			if (!disable)
 			{
-				selection = -2;	
+				Pages.Index.app.selectedComponent = -2;
 			}	
 		}
 		targetFound = false;

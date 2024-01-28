@@ -67,10 +67,13 @@
 			<div>does not match any ID: @objId</div>
 			break;
 	}
+
+	<DynamicComponent Type="individualData.data.compType" Parameters="individualData.data.compParams"></DynamicComponent>
 </div>
 
 
 @code {
+	// for lcd: blink=@((bool)individualData.moreData["blink"]) background="@((string)individualData.moreData["bg"])" backlight=@((bool)individualData.moreData["back"]) cursor=@((bool)individualData.moreData["cursor"]) cursorX="@((int)individualData.moreData["cX"])" cursorY="@((int)individualData.moreData["cY"])" color="@((string)individualData.moreData["color"])"
 	[Parameter]
 	public int objId { get; set; }
 
@@ -105,19 +108,6 @@
 	[Parameter]
 	public bool forceBorder { get; set; } = false;
 
-	public bool boolValue()
-	{
-		if (individualData.mainValue is bool value)
-		{
-			return value;
-		}
-		else
-		{
-			Console.WriteLine("Component using bool value got non-bool value!");
-			return false;
-		}
-
-	}
 
 
 	private string borderClasses()
@@ -134,12 +124,16 @@
 			}
 			else
 			{
-				return "";	
+				return "";
 			}
 		}
 		else
 		{
-			return "";	
+			return "";
 		}
+	}
+	public void remove()
+	{
+		Pages.Index.app!.removecomp();
 	}
 }

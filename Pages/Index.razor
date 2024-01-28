@@ -1,12 +1,10 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @inject IJSRuntime JsRuntime
+@inject NavigationManager navMan
 
 <PageTitle>Index</PageTitle>
 <body>
-	<script>
-		window.triggerClick = (elt) => elt.click();
-	</script>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 	<div class="page">
@@ -28,7 +26,7 @@
 		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-			<div class="main-canvas">
+			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
 				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
 			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
@@ -38,7 +36,7 @@
 				<ComponentPane host="@this"></ComponentPane>
 			</div>
 			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, ComponentDeclarations.components[moverID].defaultVal, 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
 			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
 				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
@@ -56,8 +54,8 @@
 	bool isRightExpanded = false;
 	int leftPaneAlign => isLeftExpanded ? 0 : -23;
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
-	string runStopText => isRunning ? "🟥 Stop" : "▶ Run";
-	bool isRunning = false;
+	string runStopText = "▶ Run";
+	public bool isRunning = false;
 
 	void ToggleLeftSidebar()
 	{
@@ -70,9 +68,46 @@
 		isRightExpanded = !isRightExpanded;
 		isLeftExpanded = false;
 	}
-	void ToggleRunStop()
+	async Task ToggleRunStop()
 	{
-		isRunning = !isRunning;
+		if (!isRunning)
+		{
+			runStopText = "Compiling...";
+			var response = await AppInterop.compileWrapper();
+
+
+			if (response.stderr != "")
+			{
+				codePane.updateConsoleOutput(response.stderr, false);
+
+				string lineSection = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures.First().Value;
+				lineSection = lineSection[1..^1];
+				int mid = lineSection.IndexOf(":");
+				int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+				int column = int.Parse(lineSection[(mid+1)..^0]);
+
+				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+				AppInterop.makeMonacoErrorWrapper(message, line, column);
+
+				runStopText = "▶ Run";
+			}
+			else
+			{
+				codePane.updateConsoleOutput(response.stdout, false);
+				AppInterop.clearMonacoErrorsWrapper();
+				AppInterop.startSimWrapper();
+				runStopText = "🟥 Stop";
+				isRunning = true;
+			}
+		}
+		else
+		{
+			AppInterop.stopWrapper();
+			codePane!.newLineIfNot();
+			codePane!.updateConsoleOutput("Stopped.\n", false);
+			runStopText = "▶ Run";
+			isRunning = false;
+		}
 	}
 
 	public Index()
@@ -82,11 +117,10 @@
 
 	public void StateChanged()
 	{
-		Console.WriteLine("targetcardId " + targetCardComponentId);
-		StateHasChanged();	
+		StateHasChanged();
 	}
 
-	async Task triggerRender()
+	public async Task triggerRender()
 	{
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
 	}
@@ -102,40 +136,33 @@
 
 	public static Index? app;
 	public static MainCanvas? buildCanvas;
+	public static CodePane? codePane;
+	public static ComponentPane? compPane;
 	public static readonly int defaultScreenWidth = 1920;
-	public static double currentRatio = 1;
+	public static double currentWidthRatio = 1;
+	public static readonly int defaultScreenHeight = 1080;
+	public static double currentHeightRatio = 1;
 
 	public static ElementReference? refresh;
 
-	[JSInvokable]
-	public static async void sendVal(int localId, int data)
-	{
-		var comp = Index.comps[localId];
 
-		ComponentDeclarations.components[comp.globalId].translate?.Invoke(comp, data);
-
-		await app.triggerRender();
-	}
 
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
 		{
-			var module = await JsRuntime.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
-			//await module.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(this));
+			Console.WriteLine("Blazor Load Completed!");
 
+			AppInterop.runtime = JsRuntime;
+			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
-			updateScreenWidthRatio(await module.InvokeAsync<int>("getWindowWidth"));
+			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+			//AppInterop.startSimWrapper();
+			//AppInterop.updateCodeWrapper();
 		}
 	}
 
-	[JSInvokable]
-	public static void updateScreenWidthRatio(int screenWidth)
-	{
-		currentRatio = ((double)screenWidth) / defaultScreenWidth;
 
-		Console.WriteLine("screen resized! new ratio: " + currentRatio);
-	}
 
 	#region component pane integration
 	private int targetCardComponentId = -1;
@@ -178,17 +205,73 @@
 			isVisible = "hidden";
 			if (allowDrop)
 			{
+				++localIds;
 				var d = ComponentDeclarations.components[targetCardComponentId];
-				comps.Add(++localIds, buildCanvas.unZoom(new(targetCardComponentId, d.defaultVal, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				var n = new node();//label with localId (easy tracking)
+				n.localLabels.Add("user_" + d.nodeName);
+
+				GraphSynthInvoke.GetNodes().Add(n);
+				GraphSynthInvoke.inputs.Add(d.nodeName);
+				GraphSynthInvoke.recg_apply();
+
+				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+				comps.Add(localIds, buildCanvas.unZoom(new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				BuildCode.outputPins.Clear();
+				buildCanvas!.connLines.Clear();
+				foreach (var c in comps.Values)
+				{
+					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
+				}
+
+
+				if (comps.Values.Any(c=>c.globalId==1))	//set has an arduino uno
+				{
+					foreach (var c in comps.Values)		//iterate all components (don't know what listeners exist already)
+					{
+						if (c.globalId != 1)			//exclude the arduino
+						{
+							foreach (string listen in c.data.pinsToListen)	//add a listener for each important pin
+							{
+								int pin = -1;
+								if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+								{
+									pin = conn!.toId;
+								}
+
+								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+								//hopefully the only time the list extends 
+								//is on arduino, which is excluded here
+								if (!hasList || !list!.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
+								{
+									int pin2 = -1;
+									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+									{
+										pin2 = conn2!.toId;
+									}
+									var info = c.data.compType.GetMethod("translate");
+									if (info != null)
+									{
+										AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
+									}
+									else
+									{
+										Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");	
+									}
+								}
+							}
+						}
+					}
+
+					AppInterop.updateCodeWrapper();
+				}
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
-			// test();
 		}
 	}
 	#endregion
-
 
 	private readonly List<string> ruleNames = new();
 	private readonly double totalRules = 19.0;
@@ -217,8 +300,9 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		await RuleSetMap.getInstance().loadRuleSet("ADD");
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT");
+		await RuleSetMap.getInstance().loadRuleSet("ADD", navMan);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan);
+		compPane!.releaseLockout();
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
@@ -228,27 +312,139 @@
 		// }
 
 		// // allRulesLoaded = true;
+
+
 		base.StateHasChanged();
 	}
 
-	List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
-	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
-	public void test()
+	public void updatePinBindings(ComponentInstance comp)
 	{
+		comp.connMap.Clear();
+		//buildCanvas!.connLines.Clear();
 
-		GraphSynthInvoke.recg_apply(inputs);
+		var compPins = getPins(comp.gsNode, comp.data.nodeName);
+		if (compPins.Count == 0)
+		{
+			return;	
+		}
+
+		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
+		//List<arc> connArcs = new();
+
+		foreach (arc a in connArcs)
+		{
+			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+
+			if (ha == hb)
+			{
+				continue;
+			}
+
+			if (ha != comp && hb != comp)
+			{
+				continue;	
+			}
+			else if (ha != comp)
+			{
+				var temp = ha;
+				ha = hb;
+				hb = temp;
+			}
+
+			var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			string bPinName = "";
+
+			if (aPinName == "**NF**")
+			{
+				aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+				bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
+			else
+			{
+				bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
+
+			//if arduino and data pin being connected, register to code.
+			if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
+			{
+				BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
+				//Console.WriteLine("1: " + BuildCode.outputPins.Count);
+			}
+
+			int i1 = ha.data.pins[aPinName];
+			int i2 = hb.data.pins[bPinName];
+
+
+			comp.addConnection(i1, hb, i2, a);
+		}
+	}
+
+
+	public List<node> getPins(node n, string name){
+		//n is root, connected to main node but not main node.
+		string fullName = "user_" + name;
+		if (n.arcs.Count == 0)
+		{
+			return new();
+		}
+		var mainNode = ((arc)n.arcs[0]).otherNode(n);
+		//traverse arcs to get pin nodes, except the root node
+		var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
+		return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
+
+
+	}
+
+	//List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
+	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
+
+	//    public void addcomp()
+	//    {
+
+
+	//        GraphSynthInvoke.recg_apply();
+	// 	List<node> b = GraphSynthInvoke.GetNodes();
+	// 	List<arc> c = GraphSynthInvoke.GetArcs();
+
+	// 	int numofcon = 0;
+	// 	for(int i = 0; i<c.Count; i++)
+	// 	{
+	// 		if (c[i].localLabels.Contains("connection")){
+	// 			numofcon++;
+	// 		}
+	// 	}
+	// 	Console.WriteLine("the number of nodes is " + b.Count);
+	// 	Console.WriteLine("the number of connections is " + numofcon);
+	// }
+
+	public void removecomp()
+	{
+		node Comp2remove = Index.comps[selectedComponent].gsNode;
+
+		GraphSynthInvoke.removeComp(Comp2remove);
+		comps.Remove(selectedComponent);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
 
 		int numofcon = 0;
-		for(int i = 0; i<c.Count; i++)
+		for (int i = 0; i < c.Count; i++)
 		{
-			if (c[i].localLabels.Contains("connection")){
+			if (c[i].localLabels.Contains("connection"))
+			{
 				numofcon++;
 			}
 		}
 		Console.WriteLine("the number of nodes is " + b.Count);
 		Console.WriteLine("the number of connections is " + numofcon);
-	
+	}
+
+	public void handleKeyPress(KeyboardEventArgs e)
+	{
+		Console.WriteLine(e.Key);
+		if (!isRunning && ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1))
+		{
+			removecomp();
+		}
 	}
 }

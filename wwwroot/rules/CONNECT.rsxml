@@ -2,19 +2,18 @@
 <ruleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
   <ruleFileNames>
     <string>a4988_arduino.grxml</string>
+    <string>add_uln2003.grxml</string>
     <string>adxl345_arduino.grxml</string>
     <string>bno055_arduino.grxml</string>
-    <string>dc_motor_l298n.grxml</string>
+	<string>dht22_arduino.grxml</string>
     <string>drv8825_arduino.grxml</string>
     <string>drv8833_arduino.grxml</string>
     <string>ds18b20_arduino.grxml</string>
     <string>encoder_arduino.grxml</string>
-    <string>esc_pca9685.grxml</string>
     <string>hcsr04_arduino.grxml</string>
     <string>hcsr501_arduino.grxml</string>
     <string>hm10_arduino.grxml</string>
     <string>hx711_arduino.grxml</string>
-    <string>hx711_loadcell.grxml</string>
     <string>ky003_arduino.grxml</string>
     <string>ky012_arduino.grxml</string>
     <string>ky018_arduino.grxml</string>
@@ -26,9 +25,8 @@
     <string>lcd_parallel_arduino.grxml</string>
     <string>led_arduino.grxml</string>
     <string>led_rgb_arduino.grxml</string>
-    <string>lidar_tfluna_arduino.grxml</string>
+    <string>lidar_tfluna_arduino_I2C.grxml</string>
     <string>lm386_arduino.grxml</string>
-    <string>lm386_speaker.grxml</string>
     <string>lm2596_a4988.grxml</string>
     <string>lm2596_arduino.grxml</string>
     <string>lm2596_l298n.grxml</string>
@@ -36,13 +34,11 @@
     <string>max6675_arduino.grxml</string>
     <string>mpu6050_arduino.grxml</string>
     <string>mq3_arduino.grxml</string>
-    <string>nema_a4988.grxml</string>
-    <string>nema_l298n.grxml</string>
     <string>pca9685_arduino.grxml</string>
+    <string>pushbutton_arduino.grxml</string>
     <string>rplidar_arduino.grxml</string>
     <string>sdCard_arduino.grxml</string>
     <string>servo_arduino.grxml</string>
-    <string>servo_pca9685.grxml</string>
     <string>uln2003_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>

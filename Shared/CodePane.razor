@@ -1,50 +1,101 @@
-﻿
+﻿@using BlazorMonaco
+@using BlazorMonaco.Editor
+@using BlazorMonaco.Languages
+
+
 <div class="code-container">
 
 
-<!-- Include Monaco Editor styles -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/editor/editor.main.min.css">
-
 <!-- Create a container for the Monaco Editor -->
-<div id="monaco-editor-container" style="height:650px; width: 100%; border: 1px solid #ccc;"></div>
+<StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
 
 <!-- Create a container for the console output -->
-<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll;">
-    @text
+<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
+        @foreach(string line in text)
+        {
+            <span class="@(line.Contains("Error during build:")?"error":"auto")">@line</span><hr>
+        }
 </div>
-
-<!-- Include Monaco Editor scripts -->
-<script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs/loader.min.js"></script>
-<script>
-    require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.44.0/min/vs' }});
-    require(['vs/editor/editor.main'], function() {
-        var editor = monaco.editor.create(document.getElementById('monaco-editor-container'), {
-            value: [
-                'void setup() {',
-                '// put your setup code here, to run once:',
-                ,
-                '}',
-                ,
-                'void loop() {',
-                '// put your main code here, to run repeatedly:',
-                ,
-                '}'
-            ].join('\n'),
-            minimap: {enabled: "false"},
-            language: 'cpp'
-        });
-        
-    });
-</script>
 
 </div>
 
 @code {
-    string? text="Hello World";
-    // Create a function to update the console output
-    public void updateConsoleOutput(string text)
+
+    private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
     {
-        this.text = text;
+        return new StandaloneEditorConstructionOptions
+            {
+                AutomaticLayout = true,
+                Language = "cpp",
+                Value = "void setup() {\n" +
+                    "// put your setup code here, to run once:\n\n" +
+                    "}\n\n" +
+                    "void loop() {\n" +
+                    "// put your main code here, to run repeatedly:\n\n" +
+                    "}",
+                Minimap = new EditorMinimapOptions() { Enabled = false }
+            };
+    }
+
+
+    public CodePane()
+    {
+        Pages.Index.codePane = this;
+    }
+
+    List<string> text = ["Welcome to the App!"];
+
+    string codeContents = "";
+    int index = 1;
+
+    // Create a function to update the console output
+    public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
+    {
+        if (middleNewLinesMakeHR)
+        {
+            var lines = newText.Split("\n");
+            for (int i = 0; i < lines.Count(); i++)
+            {
+                string line = lines[i];
+                if (i != lines.Count() - 1)
+                {
+                    singleLine(line + "\n");
+                }
+                else
+                {
+                    singleLine(line);
+                }
+            }
+        }
+        else
+        {
+            singleLine(newText);    
+        }
+
+        StateHasChanged();
+    }
+
+    private void singleLine(string line)
+    {
+        if (this.text.Count == index)
+        {
+            this.text.Add("");
+        }
+        this.text[index] += line;
+        if (line.EndsWith("\n"))
+        {
+            index++;
+        }
+
+    }
+
+    public void newLineIfNot()
+    {
+        if (!this.text.Last().EndsWith("\n"))
+        {
+            this.text[index] += "\n";
+            index++;
+        }
     }
   
 }

@@ -79,8 +79,8 @@
     public class ElementPin
     {
         string name;
-        double x;
-        double y;
+        public double x;
+        public double y;
         PinSignalInfo[] signals;
         int? number;
         string? description;

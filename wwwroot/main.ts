@@ -1,34 +1,10 @@
 ﻿//imported by index.html
 "use strict";
-import { loadBlink } from "./lib/arduino-blink"
-import * as avr8js from './lib/avr8js/index';
+
 import getInteropManager = interopManager.getInteropManager;
 import { interopManager } from "./interopManager";
-
-
-const program = new Uint16Array(16384);
-loadBlink(program);
-
-const cpu = new avr8js.CPU(program);
-const timer0 = new avr8js.AVRTimer(cpu, avr8js.timer0Config);
-const portB = new avr8js.AVRIOPort(cpu, avr8js.portBConfig);
 
 (<any>window).interopManager = interopManager;
 
 
-portB.addListener(async () => {
-    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 0, portB.pinState(5));
-    await DotNet.invokeMethodAsync("ADArCWebApp", "sendVal", 1, portB.pinState(5));
-});
-
-export function runCode() {
-    for (let i = 0; i < 50000; i++) {
-        avr8js.avrInstruction(cpu);
-        cpu.tick();
-    }
-    setTimeout(runCode, 0);
-}
-
-
-
-(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth()) });
+(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()) });

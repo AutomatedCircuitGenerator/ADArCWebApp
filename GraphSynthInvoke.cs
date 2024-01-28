@@ -3,6 +3,7 @@ using GraphSynth.Representation;
 using GraphSynth.Search;
 using Microsoft.AspNetCore.Components;
 using System.Linq;
+using System.Xml.Linq;
 
 namespace ADArCWebApp
 {
@@ -17,7 +18,7 @@ namespace ADArCWebApp
         static Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
 
         //inputs from user selecting components
-        static List<string> inputs = new();
+        public static List<string> inputs = new();
 
         static designGraph seed = new();
         
@@ -32,12 +33,12 @@ namespace ADArCWebApp
             for (int i = 0; i < Inputs.Count; i++)
             {
                 node n = new();
-                n.setLabel(0, "user_" + inputs[i]);
+                n.setLabel(0, "user_" + Inputs[i]);
                 seed.addNode(n);
                 //seed.nodes[i].setLabel(0, "user_"+inputs[i]);
             }
         }
-        //
+        //apply the GraphSynth rules
         static public void recg_apply(List<string>? fInp = null)
         {
             if (fInp != null) { 
@@ -53,6 +54,32 @@ namespace ADArCWebApp
             {
                 for(int j = 0; j < inputs.Count; j++)
                 {
+
+                    if(inputs[j].Contains("servo") && inputs[j].Contains( "direct"))
+{
+                        inputs[j] = "servo";
+                    }
+                    else if (inputs[j].Contains("pca9685"))
+                    {
+                        inputs[j] = "pca9685";
+                    }
+                    else if (inputs[j].Contains("l298n"))
+                    {
+                        inputs[j] = "l298n";
+                    }
+                    else if (inputs[j].Contains("a4988"))
+                    {
+                        inputs[j] = "a4988";
+                    }
+                    else if (inputs[j].Contains("lm386"))
+                    {
+                        inputs[j] = "lm386";
+                    }
+                    else if (inputs[j].Contains("hx711"))
+                    {
+                        inputs[j] = "hx711";
+                    }
+
                     if (connect.rules[i].name.Contains(inputs[j]))
                     {
                         if (!r.rules.Contains(connect.rules[i])){
@@ -64,7 +91,7 @@ namespace ADArCWebApp
 				}
             }
 
-            Console.WriteLine(r.rules.Count);
+            //Console.WriteLine(r.rules.Count);
             List<option> options = rulesets["ADD"].recognize(seed, true);
             //List<option> options = r.recognize(seed, true);
 
@@ -83,13 +110,29 @@ namespace ADArCWebApp
 
             }
 			Console.WriteLine("connecting ends");
-		}
+            Console.WriteLine(seed.nodes.Count);
+        }
 
+        //Remove component from seed
+        static public void removeComp(node n)
+        {
+			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
+			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
+            {
+                foreach (arc arcToRemove in nodeToRemove.arcs.ToList())
+                {
+                    arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
+                    seed.removeArc(arcToRemove);
+                }
+				seed.removeNode(nodeToRemove);
+			}
+        }
+        //returns the arcs of seed
         static public List<arc> GetArcs()
         {
             return seed.arcs;
         }
-
+        //returns the nodes of seed
         static public List<node> GetNodes()
         {
             return seed.nodes;
