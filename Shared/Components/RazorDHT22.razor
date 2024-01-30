@@ -41,7 +41,7 @@
     public static void translate(ComponentInstance comp)
     {
         bool pin = false;
-        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("sda", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             pin = AvrCPU.getPinState(conn!.toId);
         }
