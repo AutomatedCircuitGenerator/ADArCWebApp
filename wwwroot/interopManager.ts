@@ -1,4 +1,5 @@
-﻿import { buildHex } from "./lib/compile-util";
+﻿import { AVRADC, adcConfig } from "./lib/avr8js/index";
+import { buildHex } from "./lib/compile-util";
 import { AVRRunner } from "./lib/execute";
 
 export namespace interopManager {
@@ -7,6 +8,7 @@ export namespace interopManager {
 
         interopLoc = "ADArCWebApp";
         runner: AVRRunner;
+        adc: AVRADC;
 
         startCodeLoop(wrapper: any) {
             console.log("starting code!")
@@ -25,6 +27,7 @@ export namespace interopManager {
             this.runner.usart.onByteTransmit = async (value: number) => {
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
             };
+            
             this.runCode();
         }
 
@@ -66,6 +69,7 @@ export namespace interopManager {
         async compile(): Promise<object> {
             var res = await buildHex(this.getCodeInPane());
             this.runner = new AVRRunner(res.hex);
+            this.adc = new AVRADC(this.runner.cpu, adcConfig);
             return { stdout: res.stdout, stderr: res.stderr }
         }
         
@@ -75,6 +79,22 @@ export namespace interopManager {
 
         stop() {
             this.runner.stop();
+        }
+
+        arduinoInput(pin: number, value: boolean) {
+            if (pin < 8) {
+                this.runner.portD.setPin(pin, value);
+            }
+            else if (pin < 14) {
+                this.runner.portB.setPin(pin - 8, value);
+            }
+            else if (pin < 20) {
+                this.runner.portC.setPin(pin - 14, value);
+            }
+        }
+
+        arduinoADCInput(channel: number, value: number) {
+            this.adc.channelValues[channel] = value;
         }
 
 

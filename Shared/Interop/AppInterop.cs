@@ -100,5 +100,16 @@ namespace ADArCWebApp.Shared.Interop
 			public string stdout {get;set;}
 			public string stderr { get;set;}
 		}
+
+        public static async void sendPinToArduino(int pin, bool value)
+        {
+            await jsModule!.InvokeVoidAsync("arduinoInput", pin, value);
+        }
+
+        public static async void sendADCToArduino(int channel, double value)
+        {
+            await jsModule!.InvokeVoidAsync("arduinoADCInput", channel, value);
+        }
+
     }
 }

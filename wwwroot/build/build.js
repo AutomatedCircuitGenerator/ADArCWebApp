@@ -4081,7 +4081,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute"], function (require, exports, compile_util_2, execute_1) {
+define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, index_2, compile_util_2, execute_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4140,6 +4140,7 @@ define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute
                 return __awaiter(this, void 0, void 0, function* () {
                     var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
                     this.runner = new execute_1.AVRRunner(res.hex);
+                    this.adc = new index_2.AVRADC(this.runner.cpu, index_2.adcConfig);
                     return { stdout: res.stdout, stderr: res.stderr };
                 });
             }
@@ -4148,6 +4149,20 @@ define("interopManager", ["require", "exports", "lib/compile-util", "lib/execute
             }
             stop() {
                 this.runner.stop();
+            }
+            arduinoInput(pin, value) {
+                if (pin < 8) {
+                    this.runner.portD.setPin(pin, value);
+                }
+                else if (pin < 14) {
+                    this.runner.portB.setPin(pin - 8, value);
+                }
+                else if (pin < 20) {
+                    this.runner.portC.setPin(pin - 14, value);
+                }
+            }
+            arduinoADCInput(channel, value) {
+                this.adc.channelValues[channel] = value;
             }
         }
         interopManager.InteropManager = InteropManager;

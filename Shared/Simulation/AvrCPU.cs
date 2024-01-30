@@ -1,4 +1,6 @@
-﻿namespace ADArCWebApp.Shared.Simulation
+﻿using ADArCWebApp.Shared.Interop;
+
+namespace ADArCWebApp.Shared.Simulation
 {
 	public static class AvrCPU
 	{
@@ -90,7 +92,7 @@
 
 			//appinterop
 			//dont update components, bad for important performance
-
+			AppInterop.sendPinToArduino(index, state);
 
 		}
 	}
