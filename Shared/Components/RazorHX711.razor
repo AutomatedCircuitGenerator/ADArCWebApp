@@ -79,24 +79,25 @@
         //if data ready, 25-27 pulses will be sent through SCK, each pulse shifts out 1 bit, starting from msb
         //the 25th pulse bring DOUT to HIGH
         //10Hz sampling rate
-        if (!sck && comp.state == 0)//starting state
+        if (!sck && comp.midSignal == 0)//starting state
         {
+            comp.midSignal = 1;
+            comp.compParams["counter"] = 0;
             AvrCPU.setPinState(conn!.toId, false);//DOUT goes to LOW indicating data is ready
-            comp.state = 1;
-            udelay(1);
+            udelay(1); 
         }
-        if (sck && comp.state == 1)//trigger pulse HIGH
+        if (sck && comp.midSignal == 1)//trigger pulse HIGH
         {
-            comp.state = 2;
-            if (comp.counter == 24)
+            comp.midSignal = 2;
+            if ((int)comp.compParams["counter"] == 24)
             {
                 AvrCPU.setPinState(conn!.toId, true);//set DOUT to high after 25th pulse
-                comp.counter = 0;
-                comp.state = 0;
+                comp.midSignal = 0;
+                comp.compParams["counter"] = 0;
                 udelay(51);
             }
-            else if (getSignal(comp)[23 - comp.counter])
-            {
+            else if (getSignal(comp)[23 - (int)comp.compParams["counter"]])
+    {
                 AvrCPU.setPinState(conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
             }
             else
@@ -104,10 +105,10 @@
                 AvrCPU.setPinState(conn!.toId, false);
             }
         }
-        if (!sck && comp.state == 2)//trigger pulse LOW, gap in between pulses
+        if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
         {
-            comp.counter++;
-            comp.state = 1;
+            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.midSignal = 0;
         }
     }
     static void udelay(long us)

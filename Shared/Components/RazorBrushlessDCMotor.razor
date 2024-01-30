@@ -1,57 +1,64 @@
 ﻿@code {
-	[Parameter] public string speed { get; set; } = "";
-	ElementPin[] pinInfo
-	{
-		get
-		{
-			return new ElementPin[]
-			{
+    [Parameter] public string speed { get; set; } = "";
+    ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
 
 				new ElementPin(name: "A", x: 78.566, y: 83.235, signals: new PinSignalInfo[]{ }, number: 1),
 				new ElementPin(name: "B", x: 79.947, y: 83.17, signals: new PinSignalInfo[] { }, number: 2),
 				new ElementPin(name: "C",  x: 81.27, y: 83.17, signals: new PinSignalInfo[] { }, number: 3)
-			};
+            };
 
-		}
-	}
+        }
+    }
 
     public static void translate(ComponentInstance comp)
     {
         bool pin = false;
+
         if (0 == comp.getConnection("PWM", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             pin = AvrCPU.getPinState(conn!.toId);
         }
 
-        if (pin)//if HIGH(pulse)
+        if (pin && comp.midSignal == 0)//if HIGH(pulse)
         {
-            comp.timer = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+            comp.midSignal = 1;
         }
-        if (!pin)//end of pulse, back to LOW
+        if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
         {
-            comp.timer = System.Diagnostics.Stopwatch.GetElapsedTime(comp.timer).Microseconds;//stop the timers
+            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetElapsedTime((long)comp.compParams["timer"]).Microseconds;//stop the timers
+            comp.midSignal = 2;
         }
 
-
-        if (comp.timer > 950 && comp.timer < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+        if(comp.midSignal == 2)
         {
-            comp.compParams["speed"] = "stop";//all the way to the left/-90
-        }
-        else if (comp.timer > 1450 && comp.timer < 1550)//if the pulse width is 1.5ms
-        {
-            comp.compParams["speed"] = "half";//in the middle/0
-        }
-        else if (comp.timer > 1950 && comp.timer < 2050)//if the pulse width is 2ms
-        {
-            comp.compParams["speed"] = "full";//all the way to the right/90
-        }
-        else if (comp.timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
-        {
-            Console.WriteLine("simulator timing error - unrecognized pulse width");
-        }
-        else//if timer did not start
-        {
-            Console.WriteLine("timer didn't start");
+            long timer = (long)comp.compParams["timer"];
+            if (timer > 950 && timer < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+            {
+                comp.compParams["speed"] = "stop";//stationary motor
+            }
+            else if (timer > 1450 && timer < 1550)//if the pulse width is 1.5ms
+            {
+                comp.compParams["speed"] = "half";//half speed
+            }
+            else if (timer > 1950 && timer < 2050)//if the pulse width is 2ms
+            {
+                comp.compParams["speed"] = "full";//full speed
+            }
+            else if (timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
+            {
+                Console.WriteLine("simulator timing error - unrecognized pulse width");
+            }
+            else//if timer did not start
+            {
+                Console.WriteLine("timer didn't start");
+            }
+            comp.midSignal = 0;
         }
     }
 }
