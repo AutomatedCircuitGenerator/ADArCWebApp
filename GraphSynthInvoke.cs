@@ -102,12 +102,13 @@ namespace ADArCWebApp
             }
             //Console.WriteLine(options.Count);
             Console.WriteLine("adding ends");
-            options = r.recognize(seed, true);
+            options = r.recognize(seed, true);      //also overwrites the add ruleset with the connect set
             while (options.Count > 0)
             {
+                Console.WriteLine(options.Count);
                 options[0].apply(seed, null);
 				options = r.recognize(seed, true);
-
+                
             }
 			Console.WriteLine("connecting ends");
             Console.WriteLine(seed.nodes.Count);

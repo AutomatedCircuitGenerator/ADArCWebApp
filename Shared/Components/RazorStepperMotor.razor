@@ -65,15 +65,15 @@
         //200 Steps/Revolution -> 1.8 degrees/step
         //direction of the rotation is subjective towards user, we assume the following:
         //step = true clockwise, step = false counter-clockwise
-        // if (!step && comp.state == 0)//LOW until trigger pulse
+        // if (!step && comp.midSignal == 0)//LOW until trigger pulse
         // {
-        //     comp.state = 1;
+        //     comp.midSignal = 1;
         // }
-        if (step && comp.state == 0)//pulse arrives, goes to HIGH
+        if (step && comp.midSignal == 0)//pulse arrives, goes to HIGH
         {
-            comp.state = 1;
+            comp.midSignal = 1;
         }
-        if (comp.state == 1)//rotate 1.8 degrees
+        if (comp.midSignal == 1)//rotate 1.8 degrees
         {
             if (dir)
             {
@@ -83,11 +83,11 @@
             {
                 comp.compParams["angle"] = Convert.ToDouble(comp.compParams["angle"]) - 1.8;
             }
-            comp.state = 2;
+            comp.midSignal = 2;
         }
-        if (!step && comp.state == 2)//pulse ends, goes to LOW
+        if (!step && comp.midSignal == 2)//pulse ends, goes to LOW
         {
-            comp.state = 0;
+            comp.midSignal = 0;
         }
     }
 }
