@@ -38,10 +38,10 @@
         return ret;
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp)
     {
         bool pin = false;
-        if (0 == comp.getConnection("sda", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             pin = AvrCPU.getPinState(conn!.toId);
         }
@@ -53,7 +53,7 @@
         if (pin && comp.midSignal == 1)
         {
             comp.midSignal = 2;
-            sendSignal(comp, conn!.toId);
+            sendSignalAsync(comp, conn!.toId);
         }
         // false 1ms+ -> true (20-40us) trigger
         //then send
@@ -98,6 +98,41 @@
         while (sw.ElapsedTicks < v)
         {
         }
+    }
+
+    async static void sendSignalAsync(ComponentInstance comp, int id)
+    {
+        //false (80us) -> true (80us) ack
+        //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
+
+        AvrCPU.setPinState(id, false);
+        await udelayAsync(80);
+        AvrCPU.setPinState(id, true);
+        await udelayAsync(80);
+        byte[] sig = getSignal(comp);
+        for (int i = 0; i < 40; i++)
+        {
+            bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
+            AvrCPU.setPinState(id, false);
+            udelay(50);
+            AvrCPU.setPinState(id, true);
+            if (res)
+            {
+                udelay(70);
+            }
+            else
+            {
+                udelay(27);
+            }
+        }
+
+        AvrCPU.setPinState(id, false);
+
+        comp.midSignal = 0;
+    }
+    static Task udelayAsync(long us)
+    {
+        return Task.Delay(TimeSpan.FromMicroseconds(us));
     }
 }
 <svg width="15.1mm"

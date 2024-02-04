@@ -1,4 +1,5 @@
 ﻿@code {
+	[Parameter] public double alcohol { get; set; }
 	ElementPin[] pinInfo
 	{
 		get
@@ -13,6 +14,16 @@
 
 		}
 	}
+
+	async static void translate(ComponentInstance comp)
+	{
+		int pin = -1;
+		if (0 == comp.getConnection("aout", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		{
+			pin = conn!.toId;
+		}
+		AppInterop.sendADCToArduino(pin-14, (double)comp.compParams["alcohol"]);//pin number and channel CAN BE DIFFERENT! SUBJECT TO CHANGE.
+	}
 }
 
 <svg width="46.688mm" height="21mm" version="1.1" viewBox="0 0 46.688 21" xmlns="http://www.w3.org/2000/svg">
@@ -25,7 +36,7 @@
 			<circle cx="123.37" cy="89.603" r="7" fill="#c4c4c4" stroke-width=".19496" />
 			<circle cx="110.9" cy="80.559" r=".97426" fill="#ccc" stroke-width=".027134" />
 			<circle cx="110.91" cy="80.555" r=".71788" fill="#f2f2f2" stroke-width=".019994" />
-			<circle cx="110.82" cy="99.053" r=".97426" fill="#ccc" stroke-width=".027134" />
+			<circle cx="110.82" cy="99.053" r=".97426" fill="#ccc" stroke-width=".027134" /> 
 			<circle cx="110.83" cy="99.049" r=".71788" fill="#f2f2f2" stroke-width=".019994" />
 			<circle cx="148.32" cy="80.492" r=".97426" fill="#ccc" stroke-width=".027134" />
 			<circle cx="148.32" cy="80.488" r=".71788" fill="#f2f2f2" stroke-width=".019994" />

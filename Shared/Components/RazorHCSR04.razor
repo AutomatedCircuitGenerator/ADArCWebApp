@@ -18,11 +18,11 @@
     {
         bool trig = false;
         bool echo = false;
-        if (0 == comp.getConnection("TRIG", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("trig", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             trig = AvrCPU.getPinState(conn!.toId);
         }
-        if (0 == comp.getConnection("ECHO", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        if (0 == comp.getConnection("echo", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
             echo = AvrCPU.getPinState(conn2!.toId);
         }
@@ -47,24 +47,25 @@
         AvrCPU.setPinState(id, true);//HIGH, sending a ECHO pulse
         if (distance >= 2 && distance <= 400)//min and max range of HC-SR04
         {
-            udelay(pulsewidth);
+            await udelay(pulsewidth);
         }
         else//nothing detected, probably will never be here
         {
-            udelay(38000);
+            await udelay(38000);
         }
 
         AvrCPU.setPinState(id, false);//end of ECHO pulse
         comp.midSignal = 0;
     }
     
-    static void udelay(long us)
+    static Task udelay(long us)
     {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        while (sw.ElapsedTicks < v)
-        {
-        }
+        // var sw = System.Diagnostics.Stopwatch.StartNew();
+        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
+        // while (sw.ElapsedTicks < v)
+        // {
+        // }
+        return Task.Delay(TimeSpan.FromMicroseconds(us));
     }
 }
 

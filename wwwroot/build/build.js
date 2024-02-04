@@ -4155,7 +4155,7 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                     this.runner.portD.setPin(pin, value);
                 }
                 else if (pin < 14) {
-                    this.runner.portB.setPin(pin - 8, value);
+                    this.runner.portB.setPin(pin - 9, value);
                 }
                 else if (pin < 20) {
                     this.runner.portC.setPin(pin - 14, value);

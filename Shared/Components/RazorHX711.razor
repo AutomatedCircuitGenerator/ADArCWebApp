@@ -63,7 +63,7 @@
         return bits;
     }
 
-    public static void translate(ComponentInstance comp)
+    async public static void translate(ComponentInstance comp)
     {
         bool dt = false;
         bool sck = false;
@@ -84,7 +84,7 @@
             comp.midSignal = 1;
             comp.compParams["counter"] = 0;
             AvrCPU.setPinState(conn!.toId, false);//DOUT goes to LOW indicating data is ready
-            udelay(1); 
+            await udelay(1); 
         }
         if (sck && comp.midSignal == 1)//trigger pulse HIGH
         {
@@ -94,7 +94,7 @@
                 AvrCPU.setPinState(conn!.toId, true);//set DOUT to high after 25th pulse
                 comp.midSignal = 0;
                 comp.compParams["counter"] = 0;
-                udelay(51);
+                await udelay(51);
             }
             else if (getSignal(comp)[23 - (int)comp.compParams["counter"]])
     {
@@ -111,13 +111,14 @@
             comp.midSignal = 0;
         }
     }
-    static void udelay(long us)
+    static Task udelay(long us)
     {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        while (sw.ElapsedTicks < v)
-        {
-        }
+        // var sw = System.Diagnostics.Stopwatch.StartNew();
+        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
+        // while (sw.ElapsedTicks < v)
+        // {
+        // }
+        return Task.Delay(TimeSpan.FromMicroseconds(us));
     }
 }
 

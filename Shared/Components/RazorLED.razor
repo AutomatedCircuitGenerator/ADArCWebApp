@@ -36,7 +36,7 @@
             return new ElementPin[] {
                 new ElementPin(name: "A", x: 50, y: 16, signals: new PinSignalInfo[]{}, description: "Anode"),
                 new ElementPin(name: "C", x: 39, y: 16, signals: new PinSignalInfo[]{ }, description: "Cathode")
-            };
+    };
         }
     }
     //static int count = 0;
@@ -52,7 +52,10 @@
         {
             Console.WriteLine("GetConnection failed from LED Component!");    
         }
-
+       
+        
+        AvrCPU.setPinState(conn!.toId, true);
+         
         Console.WriteLine(AvrCPU.getPinState(conn!.toId));
 
     }

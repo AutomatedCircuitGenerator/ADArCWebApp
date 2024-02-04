@@ -75,9 +75,9 @@
         if (!sda && scl && comp.midSignal == 1)//HIGH-to-LOW on SDA, start condition
         {
             comp.midSignal = 2;
-            comp.compParams["counter"] = 0;
-            comp.compParams["data"] = 0;
-            comp.compParams["readByte"] = 7;
+            comp.counter = 0;
+            comp.Wbuffer = 0;
+            comp.byteIndex = 7;
         }
         if (!sda && !scl && comp.midSignal == 2)//wait until first LOW for scl ends
         {
@@ -86,24 +86,24 @@
         if (scl && comp.midSignal == 3)//HIGH on scl, read data on sda
         {
             comp.midSignal = 4;
-            comp.compParams["data"] = (int)comp.compParams["data"] << 1 | (sda ? 1 : 0);//store data in midSignal, HIGH = 1, LOW = 0
-            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.Wbuffer = comp.Wbuffer << 1 | (sda ? 1 : 0);//store data in Wbuffer, HIGH = 1, LOW = 0
+            comp.counter++;
         }
         if (!scl && comp.midSignal == 4)
         {
             comp.midSignal = 3;
 
-            if ((int)comp.compParams["counter"] == 8 && ((int)comp.compParams["data"] >> 1) == 0b1101000 && (int)comp.compParams["data"] % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
+            if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
             {
                 comp.midSignal = 17;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
-            else if ((int)comp.compParams["counter"] == 8 && ((int)comp.compParams["data"] >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0x28 for bno055
+            else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0b1101000 for MPU6050
             {
                 comp.midSignal = 5;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
-            else if ((int)comp.compParams["counter"] == 16 && getReg(comp).ContainsKey((int)comp.compParams["data"] & 0xFF))
+            else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
             {
                 comp.midSignal = 6;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
@@ -123,8 +123,8 @@
         }
         if (!sda && !scl && comp.midSignal == 7)//scl LOW after ACK
         {
-            comp.compParams["regAddr"] = (int)comp.compParams["data"] & 0xFF;
-            comp.compParams["data"] = 0;
+            comp.RegAddr = comp.Wbuffer & 0xFF;
+            comp.Wbuffer = 0;
             comp.midSignal = 8;
         }
         if (!sda && scl && comp.midSignal == 8)
@@ -133,8 +133,8 @@
         }
         if (!sda && !scl && comp.midSignal == 12)
         {
-            comp.compParams["data"] = (int)comp.compParams["data"] << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
             comp.midSignal = 11;
         }
         if (sda && !scl && comp.midSignal == 8)
@@ -151,14 +151,14 @@
         }
         if (sda && !scl && comp.midSignal == 10)
         {
-            comp.compParams["data"] = (int)comp.compParams["data"] << 1 | 1;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.Wbuffer = comp.Wbuffer << 1 | 1;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
             comp.midSignal = 11;
         }
         if (!scl && comp.midSignal == 11)
         {
             comp.midSignal = 8;
-            if ((int)comp.compParams["counter"] % 8 == 0)//the read/write set to 1 signifying read
+            if (comp.counter == 0)//the read/write set to 1 signifying read
             {
                 comp.midSignal = 13;
                 AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
@@ -168,8 +168,8 @@
         //Slave sends data to master
         if (scl && comp.midSignal == 17)
         {
-            int a = getReg(comp)[(int)comp.compParams["regAddr"]] >> (int)comp.compParams["readByte"];
-            comp.compParams["readByte"] = (int)comp.compParams["readByte"] - 1;
+            int a = getReg(comp)[comp.RegAddr] >> comp.byteIndex;
+            comp.byteIndex--;
             if (a % 2 == 1)
             {
                 AvrCPU.setPinState(conn!.toId, true);
@@ -179,7 +179,7 @@
                 AvrCPU.setPinState(conn!.toId, false);
             }
             comp.midSignal = 18;
-            if ((int)comp.compParams["readByte"] == 0)
+            if (comp.byteIndex == 0)
             {
                 comp.midSignal = 19;
             }
@@ -219,12 +219,12 @@
         if (scl && sda && comp.midSignal == 16)//stop condition
         {
             comp.midSignal = 0;
-            getReg(comp)[(int)comp.compParams["regAddr"]] = (int)comp.compParams["data"];//write data into register
+            getReg(comp)[comp.RegAddr] = comp.Wbuffer;//write data into register
         }
         if (!scl && !sda && comp.midSignal == 16)
         {
-            comp.compParams["data"] = (int)comp.compParams["data"] << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
             comp.midSignal = 11;
         }
 
@@ -239,6 +239,10 @@
         if (scl && sda && comp.midSignal == 101)//stop condition
         {
             comp.midSignal = 0;
+        }
+        else
+        {
+            comp.midSignal = 99;
         }
     }
 }
