@@ -7,15 +7,25 @@
 <body>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-	<div class="page">
-		<div class="toolbar">
-			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-			<span class="adarc-text">ADArC</span>
+<div class="page">
+	<div class="toolbar">
+		<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
+		<span class="adarc-text">ADArC</span>
+		<div class="zoom-bar-container">
+        		<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
+                <button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
+        </div>
 			<div class="center-toolbar">
+				<button class="toolbar-button">
+					<span>⬇️️ Import</span>
+				</button>
+				<button class="toolbar-button">
+					<span>⬆️ Export</span>
+				</button>
 				<button class="toolbar-button">
 					<span>📂 Save</span>
 				</button>
-				<button class="toolbar-button">
+				<button class="toolbar-button" @onclick="OpenExternalHelp">
 					<span>❓Help</span>
 				</button>
 				<button class="toolbar-button" @onclick="ToggleRunStop">
@@ -46,6 +56,10 @@
 			</div>
 		</div>
 	</div>
+<div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+			<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 2))% component rules loaded</span>
+			<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+		</div>
 </body>
 
 
@@ -110,6 +124,12 @@
 		}
 	}
 
+	void OpenExternalHelp()
+	{
+		string url = "https://adarc-help.mech.website/";
+		JsRuntime.InvokeVoidAsync("window.open", url, "_blank");	
+	}
+	
 	public Index()
 	{
 		app = this;
@@ -300,9 +320,16 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		await RuleSetMap.getInstance().loadRuleSet("ADD", navMan);
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan);
+		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,84);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,84);
 		compPane!.releaseLockout();
+		base.StateHasChanged();
+		
+		
+		//all else finish first
+		await Task.Delay(1000);
+		loadingProgress = -1;
+		
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
@@ -314,7 +341,7 @@
 		// // allRulesLoaded = true;
 
 
-		base.StateHasChanged();
+		
 	}
 
 	public void updatePinBindings(ComponentInstance comp)
@@ -439,7 +466,7 @@
 		Console.WriteLine("the number of connections is " + numofcon);
 	}
 
-	public void handleKeyPress(KeyboardEventArgs e)
+	private void handleKeyPress(KeyboardEventArgs e)
 	{
 		Console.WriteLine(e.Key);
 		if (!isRunning && ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1))
@@ -447,4 +474,26 @@
 			removecomp();
 		}
 	}
+	
+	//progress bar (actual input needed, timer for now)
+	public double loadingProgress = 0;
+	
+	private void HandleZoom(string action)
+	{
+		const double zoomStep = 0.1;
+
+		if (action == "in")
+		{
+			buildCanvas!.zoomFactor -= zoomStep;
+		}
+		else if (action == "out")
+		{
+			buildCanvas!.zoomFactor += zoomStep;
+		}
+
+		buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
+		
+		StateHasChanged();
+	}
+
 }
