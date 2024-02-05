@@ -4090,6 +4090,7 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
+                this.cyclesPerUs = -1;
             }
             startCodeLoop(wrapper) {
                 console.log("starting code!");
@@ -4155,7 +4156,7 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                     this.runner.portD.setPin(pin, value);
                 }
                 else if (pin < 14) {
-                    this.runner.portB.setPin(pin - 9, value);
+                    this.runner.portB.setPin(pin - 8, value);
                 }
                 else if (pin < 20) {
                     this.runner.portC.setPin(pin - 14, value);
@@ -4163,6 +4164,32 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             }
             arduinoADCInput(channel, value) {
                 this.adc.channelValues[channel] = value;
+            }
+            delayus(delay) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const start = performance.now();
+                    for (var counter = 0; counter < this.cyclesPerUs * delay; counter++) {
+                        performance.now();
+                    }
+                    var real = performance.now() - start;
+                    if (real < 1) {
+                        return true;
+                    }
+                    var adjustRatio = (delay / 1000) / real;
+                    adjustRatio = Math.max(Math.min(adjustRatio, 1.1), .9);
+                    this.cyclesPerUs *= adjustRatio;
+                    console.log(this.cyclesPerUs);
+                    return true;
+                });
+            }
+            calibrateTiming() {
+                let counter = 0;
+                const start = performance.now();
+                while (performance.now() - start < 2000) {
+                    counter++;
+                }
+                this.cyclesPerUs = counter / 2000000;
+                console.log("cyclesPerUs: " + this.cyclesPerUs);
             }
         }
         interopManager.InteropManager = InteropManager;

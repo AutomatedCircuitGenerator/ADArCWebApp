@@ -53,7 +53,7 @@
         if (pin && comp.midSignal == 1)
         {
             comp.midSignal = 2;
-            sendSignalAsync(comp, conn!.toId);
+            sendSignal(comp, conn!.toId);
         }
         // false 1ms+ -> true (20-40us) trigger
         //then send
@@ -66,28 +66,30 @@
         //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
 
         AvrCPU.setPinState(id, false);
-        udelay(80);
+        Pages.Index.codePane!.updateConsoleOutput("set False", false);
+        bool r = await AppInterop.usDelay(10);
         AvrCPU.setPinState(id, true);
-        udelay(80);
-        byte[] sig = getSignal(comp);
-        for (int i = 0; i < 40; i++)
-        {
-            bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
-            AvrCPU.setPinState(id, false);
-            udelay(50);
-            AvrCPU.setPinState(id, true);
-            if (res)
-            {
-                udelay(70);
-            }
-            else
-            {
-                udelay(27);        
-            }
-        }
+        Pages.Index.codePane!.updateConsoleOutput("set true", false);
+        r = await AppInterop.usDelay(2000000);
+        // byte[] sig = getSignal(comp);
+         // for (int i = 0; i < 40; i++)
+         // {
+         //     bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
+         //     AvrCPU.setPinState(id, false);
+         //     udelay(35);
+         //     AvrCPU.setPinState(id, true);
+         //     if (res)
+         //    {
+         //         udelay(55);
+         //     }
+         //    else
+         //     {
+         //         udelay(12);        
+         //     }
+         // }
 
         AvrCPU.setPinState(id, false);
-
+        Pages.Index.codePane!.updateConsoleOutput("set False", false);
         comp.midSignal = 0;
     }
 

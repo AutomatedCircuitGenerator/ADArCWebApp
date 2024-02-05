@@ -111,5 +111,13 @@ namespace ADArCWebApp.Shared.Interop
             await jsModule!.InvokeVoidAsync("arduinoADCInput", channel, value);
         }
 
+		public static async Task<bool> usDelay(int us) {
+			return await jsModule!.InvokeAsync<bool>("delayus", us);
+		}
+
+		public static async void calibrate()
+		{
+			await jsModule!.InvokeVoidAsync("calibrateTiming");
+		}
     }
 }

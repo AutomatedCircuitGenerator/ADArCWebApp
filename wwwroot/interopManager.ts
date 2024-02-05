@@ -86,7 +86,7 @@ export namespace interopManager {
                 this.runner.portD.setPin(pin, value);
             }
             else if (pin < 14) {
-                this.runner.portB.setPin(pin - 9, value);
+                this.runner.portB.setPin(pin - 8, value);
             }
             else if (pin < 20) {
                 this.runner.portC.setPin(pin - 14, value);
@@ -97,7 +97,43 @@ export namespace interopManager {
             this.adc.channelValues[channel] = value;
         }
 
+        async delayus(delay: number): Promise<boolean> {
+            const start = performance.now();
 
+            for (var counter = 0; counter < this.cyclesPerUs * delay; counter++) {
+                performance.now();
+            }
+            //console.log("start: " + start + "end: " + performance.now());
+
+            var real = performance.now() - start;
+
+            if (real < 1) {
+                return true;
+            }
+
+            var adjustRatio = (delay / 1000) / real;
+
+            adjustRatio = Math.max(Math.min(adjustRatio,1.1), .9);
+
+            this.cyclesPerUs *= adjustRatio;
+
+            console.log(this.cyclesPerUs);
+
+            return true;
+        }
+
+        cyclesPerUs = -1;
+
+        calibrateTiming() {
+            let counter = 0;
+            const start = performance.now();
+            while (performance.now() - start < 2000) {
+                counter++;
+            }
+
+            this.cyclesPerUs = counter / 2000000;
+            console.log("cyclesPerUs: " + this.cyclesPerUs);
+        }
     }
 
     
