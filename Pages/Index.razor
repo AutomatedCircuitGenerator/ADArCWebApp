@@ -376,7 +376,7 @@
 			int i2 = hb.data.pins[bPinName];
 
 
-			comp.addConnection(i1, hb, i2, a);
+			comp.addConnection(i1, hb, i2, a);	//also sets up the drawn line
 		}
 	}
 
@@ -426,6 +426,13 @@
 		comps.Remove(selectedComponent);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
+
+		BuildCode.outputPins.Clear();
+		buildCanvas!.connLines.Clear();
+		foreach (var comp in comps.Values)
+		{
+			updatePinBindings(comp);   //keep an eye on this. could be not good for performance.
+		}
 
 		int numofcon = 0;
 		for (int i = 0; i < c.Count; i++)

@@ -1,4 +1,4 @@
-﻿<div class="canvas-container" style="transform:scale(@(zoomFactor))" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
 			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
@@ -33,10 +33,15 @@
 
 
 	private bool dragging = false;
-	private bool hasTarget = false;
+	private bool hasTarget = false;		//refers to whether or not a drag process has a target, meaning that a component is dragged
 	private KeyValuePair<int, ComponentInstance> target;
 
-	public double zoomFactor = 1;
+	private Transform transform = new Transform();
+
+	private (double x, double y) zoomOrigin = (950 / 2, 1080 / 2);//assumes 1920x1080, doesn't really matter, but shouldn't change
+
+	//compatibility property to reference into the transform without refactoring everything
+	public double zoomFactor { get { return transform.scale; } set { transform.scale = value; } }
 
 
 	private double getConnectionCoord(int coord, InstanceConnection conn)
@@ -47,27 +52,24 @@
 		ElementPin[] arr = conn.to.data.pinInfo;
 		var pin = arr[conn.toId];
 
-		(double x, double y) crd = (conn.to.x + pin.x, conn.to.y + pin.y);
-
 		ElementPin[] arr1 = conn.from.data.pinInfo;
 
 		var pin1 = arr1[conn.fromId];
 
-		(double x, double y) crd1 = (conn.from.x + pin1.x, conn.from.y + pin1.y);
 
-		crd = zoomCoord(crd);
-		crd1 = zoomCoord(crd1);
+		var crd = zoomCoord((conn.to.x + pin.x, conn.to.y + pin.y));
+		var crd1 = zoomCoord((conn.from.x + pin1.x, conn.from.y + pin1.y));
 
 		switch (coord)
 		{
 			case 0:
 				return crd.x;
 			case 1:
-				return (crd.y+50);
+				return crd.y;
 			case 2:
 				return crd1.x;
 			case 3:
-				return (crd1.y+50);
+				return crd1.y;
 			default:
 				return -1;
 
@@ -85,110 +87,89 @@
 		zoomFactor = Math.Clamp(zoomFactor, .4, 3);
 
 
-		/*foreach (var comp in comps.Values)
+		foreach (var comp in comps.Values)
 		{
 			adjustCompToZoom(comp);
-		}*/
+		}
 
 	}
 
 	public ComponentInstance adjustCompToZoom(ComponentInstance comp)
 	{
-		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
-		double baseY = .3 * baseX;
+		var coord = (comp.x, comp.y);
 
-		double compX = comp.x;
-		double compY = comp.y;
+		var z = zoomCoord(coord);
 
-		double vectorX = compX - baseX;
-		double vectorY = compY - baseY;
-
-		double iX = zoomFactor * vectorX;
-		double iY = zoomFactor * vectorY;
-
-		comp.zoomedX = iX + baseX;
-		comp.zoomedY = iY + baseY;
+		comp.zoomedX = z.x;
+		comp.zoomedY = z.y;
 
 		return comp;
 	}
 
 	public (double x, double y) zoomCoord((double x, double y) coord)
 	{
-		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
-		double baseY = .3 * baseX;
-
-		double compX = coord.x;
-		double compY = coord.y;
-
-		double vectorX = compX - baseX;
-		double vectorY = compY - baseY;
-
-		double iX = zoomFactor * vectorX;
-		double iY = zoomFactor * vectorY;
-
-		coord.x = iX + baseX;
-		coord.y = iY + baseY;
+		coord.x = (coord.x + (transform.translate.x * (1 / zoomFactor)) - zoomOrigin.x) * zoomFactor + zoomOrigin.x;
+		coord.y = (coord.y + (transform.translate.y * (1 / zoomFactor)) - zoomOrigin.y) * zoomFactor + zoomOrigin.y;
 
 		return coord;
 	}
 
 	public ComponentInstance unZoom(ComponentInstance comp)
 	{
-		double baseX = .5 * ADArCWebApp.Pages.Index.defaultScreenWidth * ADArCWebApp.Pages.Index.currentWidthRatio;
-		double baseY = .3 * baseX;
 
-		double zoomedX = comp.x;
-		double zoomedY = comp.y;
+		comp.x = (comp.x - zoomOrigin.x) / zoomFactor + zoomOrigin.x - (transform.translate.x * (1 / zoomFactor));
+		comp.y = (comp.y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - (transform.translate.y * (1 / zoomFactor));
 
-		double iX = zoomedX - baseX;
-		double iY = zoomedY - baseY;
-
-		double vectorX = iX / zoomFactor;
-		double vectorY = iY / zoomFactor;
-
-		comp.x = vectorX + baseX;
-		comp.y = vectorY + baseY;
 
 		return comp;
 	}
 
+
+	//handle the start of drags that target a specific component
 	private void dragComponentStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
 	{
 
 		if (e.Button == 0)
 		{
-			dragging = true;
+			dragging = true;		//start drag, signal that there is a selected component, and remember it
 			hasTarget = true;
 			this.target = target;
 		}
 	}
 
+	//generic continous drag, whether or not there is a component.
 	private void dragMiddle(MouseEventArgs e)
 	{
-		if (dragging && hasTarget)
+		if (dragging && hasTarget)	//dragging a specific component, the target
 		{
 			target.Value.x += (e.MovementX / zoomFactor);
 			target.Value.y += (e.MovementY / zoomFactor);
 			adjustCompToZoom(target.Value);
 		}
-		else if (dragging)
+		else if (dragging)			//dragging the canvas, all components
 		{
+
+			transform.translate.x += e.MovementX;
+			transform.translate.y += e.MovementY;
 			foreach (var t in comps)
 			{
-				t.Value.x += (e.MovementX / zoomFactor);
-				t.Value.y += (e.MovementY / zoomFactor);
+				//t.Value.x += (e.MovementX / zoomFactor);
+				//t.Value.y += (e.MovementY / zoomFactor);
 				adjustCompToZoom(t.Value);
 			}	
 		}
 	}
+	bool dragEndFlag = false;	//disable deselection at end of drag
 
+	//handles the end of a drag targetting a specific component, removing the target
 	private void dragComponentEnd(MouseEventArgs e)
 	{
 		dragging = false;
 		hasTarget = false;
+		dragEndFlag = true;
 	}
 
-
+	//canvas drag start, signal that there is a drag.
 	private void dragStart(MouseEventArgs e)
 	{
 		if (e.Button == 0)
@@ -197,42 +178,44 @@
 		}
 	}
 
+	//canvas drag end, stop drag
 	private void dragEnd(MouseEventArgs e)
 	{
 		dragging = false;
 	}
 
-	int selection = -1;
 	bool targetFound = false;
 
+	//click on a component handler. 
 	public void componentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
 	{
 		targetFound = true;
-		if (Pages.Index.app.selectedComponent > 0)
+		if (Pages.Index.app!.selectedComponent < 0)     //no previous selection
 		{
-			Pages.Index.app.selectedComponent = -1;
+			Pages.Index.app!.selectedComponent = c.Key;
 		}
-		else
+		else if (Pages.Index.app!.selectedComponent != c.Key)   //selection is not the previously selected component. Could be || with prev, readability.
 		{
-			Pages.Index.app.selectedComponent = c.Key;
+			Pages.Index.app!.selectedComponent = c.Key;
+		}
+		else if (dragEndFlag)              //avoid deselects at the end of drags
+		{
+			dragEndFlag = false;
+			Pages.Index.app!.selectedComponent = c.Key;
+		}
+		else    //catch weird stuff with deselect
+		{
+			Pages.Index.app!.selectedComponent = -1;
 		}
 	}
 
-
+	//click on the canvas handler.
 	private void canvasClick()
 	{
-		bool disable = false;
-		if (targetFound)
+		if (!targetFound)
 		{
-			disable = true;
-		}
-		else
-		{
-			if (!disable)
-			{
-				Pages.Index.app.selectedComponent = -2;
-			}	
-		}
+			Pages.Index.app!.selectedComponent = -2;
+		}	
 		targetFound = false;
 	}
 }
