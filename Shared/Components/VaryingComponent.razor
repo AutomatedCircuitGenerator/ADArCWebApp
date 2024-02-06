@@ -2,7 +2,7 @@
 @using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true" @onclick:stopPropagation @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true"@onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
     @if(forceBorder && !Pages.Index.app!.isRunning)
     {
         <button id="deletebutton" @onclick="remove">
@@ -127,29 +127,7 @@
     
     private bool showMenu = false;
 
-    protected override void OnInitialized()
-    {
-        base.OnInitialized();
-    }
 
-    public void HandleComponentClick()
-    {
-        showMenu = !showMenu;
-        if (showMenu)
-        {
-            // Call JavaScript function to get component dimensions
-            _ = GetDimensions();
-        }
-    }
-
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            // Add event listener to handle clicks outside the menu
-            await JsRuntime.InvokeVoidAsync("addClickOutsideListener", "EnvironmentalSettingsClass", DotNetObjectReference.Create(this));
-        }
-    }
 
     [JSInvokable]
     public void HandleClickOutside()
@@ -158,18 +136,6 @@
         StateHasChanged();
     }
 
-    private async Task GetDimensions()
-    {
-        // Call JavaScript function to get component dimensions
-        var dimensions = await JsRuntime.InvokeAsync<Dictionary<string, double>>("getComponentDimensions", "comp-wrapper");
-        if (dimensions != null)
-        {
-            // Adjust menu position based on component dimensions and zoom factor
-            menuTop = dimensions["top"] + (dimensions["height"] * zoomFactor) + 10; // Adjust as needed
-            menuLeft = dimensions["left"] + (dimensions["width"] * zoomFactor) + 10; // Adjust as needed
-            StateHasChanged();
-        }
-    }
 
     private double menuTop = 0;
     private double menuLeft = 0;
