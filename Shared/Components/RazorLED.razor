@@ -6,7 +6,7 @@
     [Parameter]
     public double? brightness { get; set; } = 1.0;
 
-    [Parameter]
+    [Parameter] [DropdownSetting(["red", "blue", "green"])]
     public string color { get; set; } = "red";
 
     [Parameter]

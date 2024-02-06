@@ -14,10 +14,11 @@
         }
     }
 
-    [Parameter]
+    //have the same name as in the actual component
+    [Parameter] [ValueSetting("%", 40, 0, 100)]
     public double humidity { get; set; }
 
-    [Parameter]
+    [Parameter] 
     public double temperature { get; set; }
 
     //16 bits humidity: 400 = 40%, 16 bits temp deg C: 200 = 20%, 8 bits checksum = last 8 sum prev

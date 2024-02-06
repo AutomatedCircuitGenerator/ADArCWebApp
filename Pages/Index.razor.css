@@ -114,10 +114,18 @@
     transform: translate(50%, -50%) rotate(90deg);
 }
 
+.logo-and-adarc {
+    flex-wrap: nowrap;
+    display: flex;
+    overflow: hidden;
+}
+
 .adarc-text {
     font-size: 24px;
-    margin: 0px 10px;
-    
+    margin: 0px 15px;
+    top: 3px;
+    position: relative;
+    overflow: hidden;
 }
 
 .logo {
@@ -125,6 +133,7 @@
     max-width: 35px;
     overflow: hidden;
     margin-right: 10px;
+    
 }
 
 div, span {
@@ -183,3 +192,6 @@ div, span {
     z-index: 10000;
 }
 
+.toolbar-button {
+    flex-direction: row;
+}

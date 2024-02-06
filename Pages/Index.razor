@@ -9,30 +9,32 @@
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 <div class="page">
 	<div class="toolbar">
-		<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-		<span class="adarc-text">ADArC</span>
-		<div class="zoom-bar-container">
-        		<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
-                <button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
-        </div>
-			<div class="center-toolbar">
-				<button class="toolbar-button">
-					<span>⬇️️ Import</span>
-				</button>
-				<button class="toolbar-button">
-					<span>⬆️ Export</span>
-				</button>
-				<button class="toolbar-button">
-					<span>📂 Save</span>
-				</button>
-				<button class="toolbar-button" @onclick="OpenExternalHelp">
-					<span>❓Help</span>
-				</button>
-				<button class="toolbar-button" @onclick="ToggleRunStop">
-					<span>@runStopText</span>
-				</button>
-			</div>
+		<div class="logo-and-adarc">
+			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
+            		<span class="adarc-text">ADArC</span>
 		</div>
+		<div class="zoom-bar-container">
+			<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
+			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
+		</div>
+		<div class="center-toolbar">
+			<button class="toolbar-button">
+				<span>⬇️️ Import</span>
+			</button>
+			<button class="toolbar-button">
+				<span>⬆️ Export</span>
+			</button>
+			<button class="toolbar-button">
+				<span>📂 Save</span>
+			</button>
+			<button class="toolbar-button" @onclick="OpenExternalHelp">
+				<span>❓Help</span>
+			</button>
+			<button class="toolbar-button" @onclick="ToggleRunStop">
+				<span>@runStopText</span>
+			</button>
+		</div>
+	</div>
 		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
@@ -57,7 +59,7 @@
 		</div>
 	</div>
 <div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-			<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 2))% component rules loaded</span>
+			<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
 			<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
 		</div>
 </body>

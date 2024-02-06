@@ -1,77 +1,189 @@
-﻿<div class="comp-wrapper @(borderClasses())" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
-	@if(forceBorder && !Pages.Index.app!.isRunning)
-	{
-		<button id="deletebutton" @onclick="remove">
-				<img src="images/redx.png">
-		</button>
-	}
+﻿@using System.Reflection
+@using System.Text.RegularExpressions
+@inject IJSRuntime JsRuntime
 
-	<DynamicComponent Type="individualData.data.compType" Parameters="individualData.data.compParams"></DynamicComponent>
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true" @onclick:stopPropagation @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+    @if(forceBorder && !Pages.Index.app!.isRunning)
+    {
+        <button id="deletebutton" @onclick="remove">
+            <img src="images/redx.png">
+        </button>
+    }
+
+    <DynamicComponent Type="individualData.data.compType" Parameters="individualData.data.compParams"></DynamicComponent>
 </div>
 
+<!-- ignore scaling -->
+<div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
+    <div class="settingsContainer">
+        <button class="close-button" @onclick="HandleClickOutside">&#10006;</button>
+        <h2>Environmental Settings</h2>
+
+    <!-- Value Setting -->
+        @foreach(var prop in individualData.data.compType.GetProperties())
+        {
+            foreach (var value in prop.GetCustomAttributes<ValueSetting>())
+            {
+                <div class="valueSetting" style="padding: 10px 0;">
+                    <h2>@(formatTitle(prop))</h2>
+                    <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = (double)e.Value; }" min="@value.MinValue" max="@value.MaxValue"></input>
+                    <span class="default-value-label">@value.Label</span>
+                    <p class="min-value">Min: @value.MinValue</p>
+                    <p class="max-value">Max: @value.MaxValue</p>
+                </div>
+            }
+        }
+        
+        <!-- DropdownSetting -->
+        @foreach(var prop in individualData.data.compType.GetProperties())
+        {
+            foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
+            {
+                <div class="dropdownSetting" style="padding: 10px 0;">
+                    <h2>@(formatTitle(prop))</h2>
+                    <select @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = e.Value; }">
+                        @foreach (var s in value.dropdownList)
+                        {
+                            <option value="@s">@s</option>
+                        }
+                    </select>
+                </div>
+            }
+        }
+            
+    </div>
+</div>
 
 @code {
-	// for lcd: blink=@((bool)individualData.moreData["blink"]) background="@((string)individualData.moreData["bg"])" backlight=@((bool)individualData.moreData["back"]) cursor=@((bool)individualData.moreData["cursor"]) cursorX="@((int)individualData.moreData["cX"])" cursorY="@((int)individualData.moreData["cY"])" color="@((string)individualData.moreData["color"])"
-	[Parameter]
-	public int objId { get; set; }
 
-	[Parameter]
-	public bool posAbolute { get; set; } = true;
+    private string formatTitle(PropertyInfo prop)
+    {
+        var addSpace = Regex.Replace(prop.Name, "[A-Z]", (m) => " " + m.Captures[0].Value);
+        var firstCapital = Regex.Replace(addSpace, "^[a-z]", (m) => m.Captures[0].Value.ToUpper());
 
-	[Parameter]
-	public EventCallback<MouseEventArgs> DragStart { get; set; }
+        return firstCapital;
+    }
 
-	[Parameter]
-	public EventCallback<MouseEventArgs> DragProgress { get; set; }
+    // for lcd: blink=@((bool)individualData.moreData["blink"]) background="@((string)individualData.moreData["bg"])" backlight=@((bool)individualData.moreData["back"]) cursor=@((bool)individualData.moreData["cursor"]) cursorX="@((int)individualData.moreData["cX"])" cursorY="@((int)individualData.moreData["cY"])" color="@((string)individualData.moreData["color"])"
+    [Parameter]
+    public int objId { get; set; }
 
-	[Parameter]
-	public EventCallback<MouseEventArgs> DragEnd { get; set; }
+    [Parameter]
+    public bool posAbolute { get; set; } = true;
 
+    [Parameter]
+    public EventCallback<MouseEventArgs> DragStart { get; set; }
 
-	[Parameter]
-	public EventCallback<MouseEventArgs> handleClick { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> DragProgress { get; set; }
 
-	[Parameter]
-	public ComponentInstance individualData { get; set; }
+    [Parameter]
+    public EventCallback<MouseEventArgs> DragEnd { get; set; }
 
+    [Parameter]
+    public EventCallback<MouseEventArgs> handleClick { get; set; }
 
-	[Parameter]
-	public double zoomFactor { get; set; } = 1;
+    [Parameter]
+    public ComponentInstance individualData { get; set; }
 
-	private bool enableBorder = false;
+    [Parameter]
+    public double zoomFactor { get; set; } = 1;
 
-	[Parameter]
-	public bool disableBorder { get; set; } = false;
+    private bool enableBorder = false;
 
-	[Parameter]
-	public bool forceBorder { get; set; } = false;
+    [Parameter]
+    public bool disableBorder { get; set; } = false;
 
+    [Parameter]
+    public bool forceBorder { get; set; } = false;
 
+    private string borderClasses()
+    {
+        if (!disableBorder)
+        {
+            if (forceBorder)
+            {
+                return "a-border";
+            }
+            else if (enableBorder)
+            {
+                return "b-border";
+            }
+            else
+            {
+                return "";  
+            }
+        }
+        else
+        {
+            return "";  
+        }
+    }
 
-	private string borderClasses()
-	{
-		if (!disableBorder)
-		{
-			if (forceBorder)
-			{
-				return "a-border";
-			}
-			else if (enableBorder)
-			{
-				return "b-border";
-			}
-			else
-			{
-				return "";	
-			}
-		}
-		else
-		{
-			return "";	
-		}
-	}
-	public void remove()
-	{
-		Pages.Index.app!.removecomp();
-	}
+    public void remove()
+    {
+        Pages.Index.app!.removecomp();
+    }
+    
+    private bool showMenu = false;
+
+    protected override void OnInitialized()
+    {
+        base.OnInitialized();
+    }
+
+    public void HandleComponentClick()
+    {
+        showMenu = !showMenu;
+        if (showMenu)
+        {
+            // Call JavaScript function to get component dimensions
+            _ = GetDimensions();
+        }
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Add event listener to handle clicks outside the menu
+            await JsRuntime.InvokeVoidAsync("addClickOutsideListener", "EnvironmentalSettingsClass", DotNetObjectReference.Create(this));
+        }
+    }
+
+    [JSInvokable]
+    public void HandleClickOutside()
+    {
+        showMenu = false;
+        StateHasChanged();
+    }
+
+    private async Task GetDimensions()
+    {
+        // Call JavaScript function to get component dimensions
+        var dimensions = await JsRuntime.InvokeAsync<Dictionary<string, double>>("getComponentDimensions", "comp-wrapper");
+        if (dimensions != null)
+        {
+            // Adjust menu position based on component dimensions and zoom factor
+            menuTop = dimensions["top"] + (dimensions["height"] * zoomFactor) + 10; // Adjust as needed
+            menuLeft = dimensions["left"] + (dimensions["width"] * zoomFactor) + 10; // Adjust as needed
+            StateHasChanged();
+        }
+    }
+
+    private double menuTop = 0;
+    private double menuLeft = 0;
+    
+    public async Task HandleContextMenu(MouseEventArgs args)
+    {
+        // Set the menu to be visible
+        showMenu = true;
+
+        // Set menu position
+        menuTop = args.ClientY;
+        menuLeft = args.ClientX;
+        
+        //todo: make default browser context menu not appear
+    }
+
 }
