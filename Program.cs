@@ -9,8 +9,6 @@ using SpawnDev.BlazorJS.WebWorkers;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-builder.Services.AddBlazorJSRuntime();
-builder.Services.AddWebWorkerService();
 
 
 builder.Services.AddBlazorJSRuntime();
