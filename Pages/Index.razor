@@ -2,6 +2,8 @@
 @using GraphSynth.Representation
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
+@inject WebWorkerService webWorkerService
+@inject IDelayService delayService
 
 <PageTitle>Index</PageTitle>
 <body>
@@ -56,6 +58,7 @@
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
 	string runStopText = "▶ Run";
 	public bool isRunning = false;
+	public WebWorker? webworker;
 
 	void ToggleLeftSidebar()
 	{
@@ -157,8 +160,12 @@
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-
+			if (webworker == null) webworker = await webWorkerService.GetWebWorker();
+			//delayServiceWorker = webworker!.GetService<IDelayService>();
 			AppInterop.calibrate();
+
+
+			
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
