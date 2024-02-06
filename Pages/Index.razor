@@ -281,7 +281,7 @@
 	private double loadPercent = 0;
 	protected override async Task OnInitializedAsync()
 	{
-		
+
 		// loads rulesets
 		// allRulesLoaded = false;
 		// ruleNames.Add("BondGraphRuleset"); //58
@@ -358,8 +358,13 @@
 				hb = temp;
 			}
 
-			var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			var aPinName = "**NF**";
+			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
+			{
+				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
 			string bPinName = "";
+			
 
 			if (aPinName == "**NF**")
 			{
