@@ -1,5 +1,5 @@
 ﻿@code {
-    [Parameter] public double distance { get; set; }=0;
+    [Parameter] public double distance { get; set; }=20;
     public static ElementPin[] pinInfo
     {
         get
@@ -18,11 +18,11 @@
     {
         bool trig = false;
         bool echo = false;
-        if (0 == comp.getConnection("trig", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("pin2", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             trig = AvrCPU.getPinState(conn!.toId);
         }
-        if (0 == comp.getConnection("echo", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        if (0 == comp.getConnection("pin3", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
             echo = AvrCPU.getPinState(conn2!.toId);
         }

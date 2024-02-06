@@ -6,7 +6,7 @@
     [Parameter]
     public int z { get; set; }
     /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
-    ElementPin[] pinInfo {
+    public static ElementPin[] pinInfo {
         get 
         {
             return new ElementPin[]
@@ -85,11 +85,11 @@
     {
         bool sda = false;
         bool scl = false;
-        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("sda", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             sda = AvrCPU.getPinState(conn!.toId);
         }
-        if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        if (0 == comp.getConnection("scl", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
             scl = AvrCPU.getPinState(conn2!.toId);
         }
