@@ -55,8 +55,12 @@ namespace ADArCWebApp
                 for(int j = 0; j < inputs.Count; j++)
                 {
 
-                    if(inputs[j].Contains("servo") && inputs[j].Contains( "direct"))
+                    if(inputs[j].Contains("servo_9g") && inputs[j].Contains( "direct"))
 {
+                        inputs[j] = "servo_9g";
+                    }
+                    else if (inputs[j].Contains("servo") && inputs[j].Contains("direct"))
+                    {
                         inputs[j] = "servo";
                     }
                     else if (inputs[j].Contains("pca9685"))
