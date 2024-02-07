@@ -52,7 +52,7 @@
         // {
         //     await udelay(38000);
         // }
-
+        await Task.Delay(1);
         AppInterop.sendPinToArduino(id, false);//end of ECHO pulse
         comp.midSignal = 0;
     }

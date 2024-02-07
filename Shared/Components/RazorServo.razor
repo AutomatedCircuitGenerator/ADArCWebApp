@@ -48,7 +48,7 @@
     public static void translate(ComponentInstance comp)
     {
         bool pin = false;
-
+        Console.WriteLine("servo translate");
         if (0 == comp.getConnection("pin3", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             pin = AvrCPU.getPinState(conn!.toId);
@@ -61,8 +61,9 @@
         }
         if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
         {
-            comp.timer = System.Diagnostics.Stopwatch.GetElapsedTime(comp.timer).Microseconds;//stop the timers
+            comp.timer = (long)System.Diagnostics.Stopwatch.GetElapsedTime(comp.timer).TotalMilliseconds;//stop the timers
             comp.midSignal = 2;
+            Console.WriteLine(comp.timer + " now starting servo move");
         }
 
         if (comp.midSignal == 2)
