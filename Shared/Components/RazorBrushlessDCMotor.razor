@@ -1,0 +1,98 @@
+﻿@code {
+    [Parameter] public string speed { get; set; } = "";
+    ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+
+				new ElementPin(name: "A", x: 78.566, y: 83.235, signals: new PinSignalInfo[]{ }, number: 1),
+				new ElementPin(name: "B", x: 79.947, y: 83.17, signals: new PinSignalInfo[] { }, number: 2),
+				new ElementPin(name: "C",  x: 81.27, y: 83.17, signals: new PinSignalInfo[] { }, number: 3)
+            };
+
+        }
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool pin = false;
+
+        if (0 == comp.getConnection("PWM", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            pin = AvrCPU.getPinState(conn!.toId);
+        }
+
+        if (pin && comp.midSignal == 0)//if HIGH(pulse)
+        {
+            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+            comp.midSignal = 1;
+        }
+        if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
+        {
+            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetElapsedTime((long)comp.compParams["timer"]).Microseconds;//stop the timers
+            comp.midSignal = 2;
+        }
+
+        if(comp.midSignal == 2)
+        {
+            long timer = (long)comp.compParams["timer"];
+            if (timer > 950 && timer < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+            {
+                comp.compParams["speed"] = "stop";//stationary motor
+            }
+            else if (timer > 1450 && timer < 1550)//if the pulse width is 1.5ms
+            {
+                comp.compParams["speed"] = "half";//half speed
+            }
+            else if (timer > 1950 && timer < 2050)//if the pulse width is 2ms
+            {
+                comp.compParams["speed"] = "full";//full speed
+            }
+            else if (timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
+            {
+                Console.WriteLine("simulator timing error - unrecognized pulse width");
+            }
+            else//if timer did not start
+            {
+                Console.WriteLine("timer didn't start");
+            }
+            comp.midSignal = 0;
+        }
+    }
+}
+
+<svg width="10.5mm" height="13.564mm" version="1.1" viewBox="0 0 10.5 13.564" xmlns="http://www.w3.org/2000/svg">
+ <g transform="translate(-74.72 -70.005)">
+  <g>
+   <circle cx="79.97" cy="75.255" r="5.25" fill="#404040" stroke-width=".1755"/>
+   <rect x="77.733" y="79.525" width="4.3913" height="1.8911" fill="#262626" stroke-width=".1755"/>
+   <circle cx="79.945" cy="75.23" r="5" fill="#1a1a1a" stroke-width=".16714"/>
+  </g>
+  <path transform="matrix(.15814 0 0 .15824 73.258 57.99)" d="m53.655 110.81c-3.1324 11.62 7.0755 21.559-4.5543 24.656s-7.7173-10.602-16.215-19.125c-8.4973-8.523-22.208-4.6518-19.076-16.272 3.1324-11.62 13.04-1.3825 24.67-4.4799 11.63-3.0974 15.133-16.907 23.63-8.3839s-5.3227 11.984-8.4551 23.605z" fill="#8a0f0f" stroke-width=".351"/>
+  <g>
+   <g stroke-width=".1755">
+    <circle cx="76.567" cy="74.108" r=".5" fill="#1a1a1a"/>
+    <circle cx="82.231" cy="72.49" r=".5" fill="#1a1a1a"/>
+    <circle cx="79.85" cy="75.136" r=".5" fill="#e6e6e6"/>
+    <circle cx="79.718" cy="75.136" r=".5" fill="#1a1a1a"/>
+    <circle cx="80.776" cy="78.443" r=".5" fill="#1a1a1a"/>
+   </g>
+   <circle cx="79.72" cy="74.96" r="1.25" fill="#404040" stroke-width=".43875"/>
+   <circle cx="79.72" cy="75.005" r=".5" fill="#595959" stroke-width=".1755"/>
+  </g>
+  <g fill="#262626">
+   <g stroke-width=".32332">
+    <rect x="78.029" y="80.305" width="1.0769" height="3.2637"/>
+    <rect x="79.434" y="80.305" width="1.0769" height="3.2637"/>
+    <rect x="80.805" y="80.305" width="1.0769" height="3.2637"/>
+   </g>
+   <g stroke-width=".351">
+    <circle cx="78.566" cy="83.235" r=".2"/>
+    <circle cx="79.947" cy="83.17" r=".2"/>
+    <circle cx="81.27" cy="83.17" r=".2"/>
+   </g>
+  </g>
+ </g>
+</svg>

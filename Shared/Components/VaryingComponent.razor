@@ -2,7 +2,7 @@
 @using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true"@onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
     @if(forceBorder && !Pages.Index.app!.isRunning)
     {
         <button id="deletebutton" @onclick="remove">
@@ -27,7 +27,7 @@
                 <div class="valueSetting" style="padding: 3px 0;">
                     <h2>@(formatTitle(prop))</h2>
                     <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = (double)e.Value; }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = Convert.ToDouble(e.Value); }" min="@value.MinValue" max="@value.MaxValue"></input>
                         <span class="default-value-label">@value.Label</span>
                     </div>
                     <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
@@ -125,10 +125,8 @@
     {
         Pages.Index.app!.removecomp();
     }
-    
+
     private bool showMenu = false;
-
-
 
     [JSInvokable]
     public void HandleClickOutside()
@@ -136,26 +134,20 @@
         showMenu = false;
         StateHasChanged();
     }
-    
-    
+
+
     private double menuTop = 0;
     private double menuLeft = 0;
-    
-    public async Task HandleContextMenu(MouseEventArgs args)
+
+    public void HandleContextMenu(MouseEventArgs args)
     {
         // Set the menu to be visible
         showMenu = true;
+        Console.WriteLine("lel");
 
         // Set menu position
         menuTop = args.ClientY;
         menuLeft = args.ClientX;
     }
     
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (firstRender)
-        {
-            await JsRuntime.InvokeVoidAsync("initializeDraggable", "EnvironmentalSettingsClass");
-        }
-    }
 }

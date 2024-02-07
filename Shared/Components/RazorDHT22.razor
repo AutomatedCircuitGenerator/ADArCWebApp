@@ -26,8 +26,8 @@
     static byte[] getSignal(ComponentInstance comp)
     {
         byte[] ret = new byte[5];
-        int rh = (int)((double)comp.compParams["humidity"] * 10);
-        int t = (int)((double)comp.compParams["temperature"] * 10);
+        int rh = Convert.ToInt32((double)comp.compParams["humidity"] * 10);
+        int t = Convert.ToInt32((double)comp.compParams["temperature"] * 10);
         int sum = t + rh;
 
         ret[0] = (byte)(rh & 0b1111111100000000);
@@ -39,10 +39,10 @@
         return ret;
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp)
     {
         bool pin = false;
-        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.getConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             pin = AvrCPU.getPinState(conn!.toId);
         }
@@ -67,38 +67,43 @@
         //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
 
         AvrCPU.setPinState(id, false);
-        udelay(80);
+        await udelay(80);
+        //Pages.Index.codePane!.updateConsoleOutput("set False", false);
+        //bool r = await AppInterop.usDelay(10);
         AvrCPU.setPinState(id, true);
-        udelay(80);
-        byte[] sig = getSignal(comp);
-        for (int i = 0; i < 40; i++)
-        {
-            bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
-            AvrCPU.setPinState(id, false);
-            udelay(50);
-            AvrCPU.setPinState(id, true);
-            if (res)
-            {
-                udelay(70);
-            }
-            else
-            {
-                udelay(27);        
-            }
-        }
+        await udelay(80);
+        //Pages.Index.codePane!.updateConsoleOutput("set true", false);
+        //r = await AppInterop.usDelay(2000000);
+        // byte[] sig = getSignal(comp);
+        // for (int i = 0; i < 40; i++)
+        // {
+        //     bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
+        //     AvrCPU.setPinState(id, false);
+        //     udelay(35);
+        //     AvrCPU.setPinState(id, true);
+        //     if (res)
+        //    {
+        //         udelay(55);
+        //     }
+        //    else
+        //     {
+        //         udelay(12);        
+        //     }
+        // }
 
-        AvrCPU.setPinState(id, false);
-
+        AvrCPU.setPinState(id, false);       
+        //Pages.Index.codePane!.updateConsoleOutput("set False", false);
         comp.midSignal = 0;
     }
 
-    static void udelay(long us)
+    async static Task udelay(long us)
     {
-        var sw = System.Diagnostics.Stopwatch.StartNew();
-        long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        while (sw.ElapsedTicks < v)
-        {
-        }
+        // var sw = System.Diagnostics.Stopwatch.StartNew();
+        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
+        // while (sw.ElapsedTicks < v)
+        // {
+        // }
+        await Task.Delay(TimeSpan.FromMicroseconds(us));
     }
 }
 <svg width="15.1mm"

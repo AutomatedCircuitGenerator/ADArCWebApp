@@ -179,6 +179,8 @@
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+
+			AppInterop.calibrate();
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
@@ -301,6 +303,7 @@
 	private double loadPercent = 0;
 	protected override async Task OnInitializedAsync()
 	{
+
 		// loads rulesets
 		// allRulesLoaded = false;
 		// ruleNames.Add("BondGraphRuleset"); //58
@@ -365,6 +368,9 @@
 			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 
+			node temasd = a.To;
+			node adstemasd = a.From;
+
 			if (ha == hb)
 			{
 				continue;
@@ -381,8 +387,13 @@
 				hb = temp;
 			}
 
-			var aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			var aPinName = "**NF**";
+			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
+			{
+				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+			}
 			string bPinName = "";
+			
 
 			if (aPinName == "**NF**")
 			{
@@ -401,6 +412,14 @@
 				//Console.WriteLine("1: " + BuildCode.outputPins.Count);
 			}
 
+			if (aPinName == "**NF**")
+			{
+				Console.WriteLine(ha.data.name + " is missing a pin definition!");
+			}
+			if (bPinName == "**NF**")
+			{
+				Console.WriteLine(hb.data.name + " is missing a pin definition!");
+			}
 			int i1 = ha.data.pins[aPinName];
 			int i2 = hb.data.pins[bPinName];
 

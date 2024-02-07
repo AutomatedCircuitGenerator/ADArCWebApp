@@ -1,7 +1,12 @@
 ﻿@code {
     [Parameter] public bool led1 { get; set; } = false;
-
-    ElementPin[] pinInfo
+    [Parameter]
+    public int x { get; set; }
+    [Parameter]
+    public int y { get; set; }
+    [Parameter]
+    public int z { get; set; }
+    public static ElementPin[] pinInfo
     {
         get
         {
@@ -16,6 +21,228 @@
                 new ElementPin( name: "GND", x: 64.8, y: 5.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
                 new ElementPin( name: "VCC", x: 74.4, y: 5.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
             };
+        }
+    }
+    static int TwosComplement8Bits(int number)
+    {
+        // Apply 2's complement operation
+        int complement = (~number + 1) & 0xFF; // Masking to keep only the 8 least significant bits
+
+        return complement;
+    }
+
+    static Dictionary<int, int> getReg(ComponentInstance comp)
+    {
+        Dictionary<int, int> register = new Dictionary<int, int>
+        {
+            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF00 >> 8 },//ACCEL_XOUT_H
+            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF },//ACCEL_XOUT_L
+            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF00 >> 8 },//ACCEL_YOUT_H
+            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF },//ACCEL_YOUT_L
+            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
+            { 0x40, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF },//ACCEL_ZOUT_L
+            { 0x41, 0 },//TEMP_OUT_H
+            { 0x42, 0 },//TEMP_OUT_L
+            { 0x43, 0 },//GYRO_XOUT_H
+            { 0x44, 0 },//GYRO_XOUT_L
+            { 0x45, 0 },//GYRO_YOUT_H
+            { 0x46, 0 },//GYRO_YOUT_L
+            { 0x47, 0 },//GYRO_ZOUT_H
+            { 0x48, 0 },//GYRO_ZOUT_L
+        };
+
+        return register;
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool sda = false;
+        bool scl = false;
+        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            sda = AvrCPU.getPinState(conn!.toId);
+        }
+        if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        {
+            scl = AvrCPU.getPinState(conn2!.toId);
+        }
+
+        //
+        if (sda && scl && comp.midSignal == 0)//before start, scl and sda pulled-up
+        {
+            comp.midSignal = 1;
+        }
+        if (!sda && scl && comp.midSignal == 1)//HIGH-to-LOW on SDA, start condition
+        {
+            comp.midSignal = 2;
+            comp.counter = 0;
+            comp.Wbuffer = 0;
+            comp.byteIndex = 7;
+        }
+        if (!sda && !scl && comp.midSignal == 2)//wait until first LOW for scl ends
+        {
+            comp.midSignal = 3;
+        }
+        if (scl && comp.midSignal == 3)//HIGH on scl, read data on sda
+        {
+            comp.midSignal = 4;
+            comp.Wbuffer = comp.Wbuffer << 1 | (sda ? 1 : 0);//store data in Wbuffer, HIGH = 1, LOW = 0
+            comp.counter++;
+        }
+        if (!scl && comp.midSignal == 4)
+        {
+            comp.midSignal = 3;
+
+            if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
+            {
+                comp.midSignal = 17;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+            }
+            else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0b1101000 for MPU6050
+            {
+                comp.midSignal = 5;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+            }
+            else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
+            {
+                comp.midSignal = 6;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+            }
+            else//here it is assumed that the master will always pull sda to HIGH, might not be true
+            {
+                comp.midSignal = 99;//not this device, go wait until the communication ends
+            }
+        }
+        if (!sda && scl && comp.midSignal == 5)//ACK by Slave after slave device address
+        {
+            comp.midSignal = 4;
+        }
+        if (!sda && scl && comp.midSignal == 6)//ACK by Slave after register address
+        {
+            comp.midSignal = 7;
+        }
+        if (!sda && !scl && comp.midSignal == 7)//scl LOW after ACK
+        {
+            comp.RegAddr = comp.Wbuffer & 0xFF;
+            comp.Wbuffer = 0;
+            comp.midSignal = 8;
+        }
+        if (!sda && scl && comp.midSignal == 8)
+        {
+            comp.midSignal = 12;
+        }
+        if (!sda && !scl && comp.midSignal == 12)
+        {
+            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
+            comp.midSignal = 11;
+        }
+        if (sda && !scl && comp.midSignal == 8)
+        {
+            comp.midSignal = 9;
+        }
+        if (sda && scl && comp.midSignal == 9)
+        {
+            comp.midSignal = 10;
+        }
+        if (!sda && scl && comp.midSignal == 10)
+        {
+            comp.midSignal = 1;//repeated start
+        }
+        if (sda && !scl && comp.midSignal == 10)
+        {
+            comp.Wbuffer = comp.Wbuffer << 1 | 1;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
+            comp.midSignal = 11;
+        }
+        if (!scl && comp.midSignal == 11)
+        {
+            comp.midSignal = 8;
+            if (comp.counter == 0)//the read/write set to 1 signifying read
+            {
+                comp.midSignal = 13;
+                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+            }
+        }
+
+        //Slave sends data to master
+        if (scl && comp.midSignal == 17)
+        {
+            int a = getReg(comp)[comp.RegAddr] >> comp.byteIndex;
+            comp.byteIndex--;
+            if (a % 2 == 1)
+            {
+                AvrCPU.setPinState(conn!.toId, true);
+            }
+            else
+            {
+                AvrCPU.setPinState(conn!.toId, false);
+            }
+            comp.midSignal = 18;
+            if (comp.byteIndex == 0)
+            {
+                comp.midSignal = 19;
+            }
+        }
+        if (!scl && comp.midSignal == 18)
+        {
+            comp.midSignal = 17;
+        }
+        if (!scl && comp.midSignal == 19)
+        {
+            comp.midSignal = 20;
+        }
+        if (scl && comp.midSignal == 20)
+        {
+            if (sda)
+            {
+                comp.midSignal = 14;
+            }
+            else
+            {
+                comp.midSignal = 18;
+            }
+        }
+
+        if (!sda && scl && comp.midSignal == 13)//ACK by Slave after writing a byte
+        {
+            comp.midSignal = 14;
+        }
+        if (!scl && !sda && comp.midSignal == 14)
+        {
+            comp.midSignal = 15;
+        }
+        if (scl && !sda && comp.midSignal == 15)
+        {
+            comp.midSignal = 16;
+        }
+        if (scl && sda && comp.midSignal == 16)//stop condition
+        {
+            comp.midSignal = 0;
+            getReg(comp)[comp.RegAddr] = comp.Wbuffer;//write data into register
+        }
+        if (!scl && !sda && comp.midSignal == 16)
+        {
+            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
+            comp.counter++;
+            comp.midSignal = 11;
+        }
+
+        if (!scl && !sda && comp.midSignal == 99)
+        {
+            comp.midSignal = 100;
+        }
+        if (scl && !sda && comp.midSignal == 100)
+        {
+            comp.midSignal = 101;
+        }
+        if (scl && sda && comp.midSignal == 101)//stop condition
+        {
+            comp.midSignal = 0;
+        }
+        else
+        {
+            comp.midSignal = 99;
         }
     }
 }

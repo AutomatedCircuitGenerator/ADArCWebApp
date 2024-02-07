@@ -13,7 +13,7 @@
     [Parameter] public string hornColor { get; set; } = "black";
     // hornColor = "#ccc";
 
-    ElementPin[] pinInfo
+    public static ElementPin[] pinInfo
     {
         get
         {
@@ -42,6 +42,53 @@
                 default:
                     return "m101.6 59.589-4.3167-54.166c0-2.8654-2.6026-5.1912-5.8145-5.1912s-5.8145 2.3258-5.8145 5.1912l-4.3167 54.166a8.3264 8.3264 0 0 0-0.10234 1.2792c0 5.047 4.5818 9.1381 10.234 9.1381s10.234-4.0911 10.234-9.1381a8.3264 8.3264 0 0 0-0.10233-1.2792zm-10.131-48.658a2.791 2.791 0 1 1-2.791 2.791 2.791 2.791 0 0 1 2.791-2.791zm0 8.6055a2.791 2.791 0 1 1-2.791 2.791 2.791 2.791 0 0 1 2.791-2.791zm0 8.3729a2.791 2.791 0 1 1-2.791 2.791 2.791 2.791 0 0 1 2.791-2.791zm0 8.6055a2.791 2.791 0 1 1-2.791 2.791 2.791 2.791 0 0 1 2.791-2.791zm5.9215 29.412a8.3729 8.3729 0 1 1 0-11.843 8.3729 8.3729 0 0 1 0 11.843z";
             }
+        }
+    }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool pin = false;
+        Console.WriteLine("servo translate");
+        if (0 == comp.getConnection("pin3", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            pin = AvrCPU.getPinState(conn!.toId);
+        }
+
+        if (pin && comp.midSignal == 0)//if HIGH(pulse)
+        {
+            comp.timer = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+            comp.midSignal = 1;
+        }
+        if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
+        {
+            comp.timer = (long)System.Diagnostics.Stopwatch.GetElapsedTime(comp.timer).TotalMilliseconds;//stop the timers
+            comp.midSignal = 2;
+            Console.WriteLine(comp.timer + " now starting servo move");
+        }
+
+        if (comp.midSignal == 2)
+        {
+            if (comp.timer > 900 && comp.timer < 1100)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+            {
+                comp.compParams["angle"] = 0;//all the way to the left/-90
+            }
+            else if (comp.timer > 1400 && comp.timer < 1600)//if the pulse width is 1.5ms
+            {
+                comp.compParams["angle"] = 90;//in the middle/0
+            }
+            else if (comp.timer > 1900 && comp.timer < 2100)//if the pulse width is 2ms
+            {
+                comp.compParams["angle"] = 180;//all the way to the right/90
+            }
+            else if (comp.timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
+            {
+                Console.WriteLine("simulator timing error - unrecognized pulse width");
+            }
+            else//if timer did not start
+            {
+                Console.WriteLine("timer didn't start");
+            }
+            comp.midSignal = 0;
         }
     }
 }

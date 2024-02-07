@@ -4,7 +4,7 @@
     flex-direction: column;
     display: flex;
     background-color: lightgray;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     padding: 3%;
 }

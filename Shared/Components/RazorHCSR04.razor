@@ -1,4 +1,7 @@
 ﻿@code {
+    [Parameter]
+    [ValueSetting("cm", 2, 2, 400)]
+    public double distance { get; set; } = 20;
 
     public static ElementPin[] pinInfo
     {
@@ -13,10 +16,60 @@
             };
         }
     }
+
+    public static void translate(ComponentInstance comp)
+    {
+        bool trig = false;
+        bool echo = false;
+        if (0 == comp.getConnection("pin2", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            trig = AvrCPU.getPinState(conn!.toId);
+        }
+        if (0 == comp.getConnection("pin3", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        {
+            echo = AvrCPU.getPinState(conn2!.toId);
+        }
+
+        if (trig && comp.midSignal == 0)//LOW until trigger pulse
+        {
+            comp.midSignal = 1;
+        }
+        if (trig && comp.midSignal == 1)//HIGH during trigger pulse(10us)
+        {
+            comp.midSignal = 2;
+            sendSignal(comp, conn2!.toId);
+        }
+    }
+    async static void sendSignal(ComponentInstance comp, int id)
+    {
+        //Test distance = (high level time×velocity of sound (340M/S) / 2
+        //high level = (Test distance * 2)/velocity of sound
+        double distance = (double)comp.compParams["distance"];
+        int pulsewidth = Convert.ToInt32(distance * 2 / 0.0343);
+        AppInterop.sendPinToArduino(id, true);//HIGH, sending a ECHO pulse
+        // if (distance >= 2 && distance <= 400)//min and max range of HC-SR04
+        // {
+        //     await udelay(pulsewidth);
+        // }
+        // else//nothing detected, probably will never be here
+        // {
+        //     await udelay(38000);
+        // }
+        await Task.Delay(1);
+        AppInterop.sendPinToArduino(id, false);//end of ECHO pulse
+        comp.midSignal = 0;
+    }
     
-    [Parameter]
-    [ValueSetting("cm", 2, 2, 400)]
-    public double distance { get; set; }
+    static Task udelay(long us)
+    {
+        // var sw = System.Diagnostics.Stopwatch.StartNew();
+        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
+        // while (sw.ElapsedTicks < v)
+        // {
+        // }
+        return Task.Delay(TimeSpan.FromMicroseconds(us));
+        // return Task.Delay((int)us);
+    }
 }
 
 <svg xmlns="http://www.w3.org/2000/svg"
