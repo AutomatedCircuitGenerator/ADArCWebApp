@@ -23,12 +23,12 @@ namespace ADArCWebApp.Shared
 		public int RegAddr;
 		public int byteIndex;
 		public long timer;
-		public Dictionary<string, object> compParams = new Dictionary<string, object>();
+		public Dictionary<string, object> compParams;
 
 		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			compParams = data.compParams;
+			compParams = new Dictionary<string, object>(data.compParams);
 			this.x = x;
 			this.y = y;
 			zoomedX = x;
