@@ -20,12 +20,6 @@
 
     [Parameter] [ValueSetting("°C", 32, -40, 80)]
     public double temperature { get; set; }
-    
-    [Parameter] [ValueSetting("%", 40, 0, 100)]
-    public double distance { get; set; }
-
-    [Parameter] [ValueSetting("°C", 32, -40, 80)]
-    public double color { get; set; }
 
     //16 bits humidity: 400 = 40%, 16 bits temp deg C: 200 = 20%, 8 bits checksum = last 8 sum prev
     //output sig: 0b0000 0001 1001 0000 0000 0000 1100 1000 0101 1000
