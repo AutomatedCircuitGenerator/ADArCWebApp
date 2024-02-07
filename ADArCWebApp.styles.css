@@ -48,7 +48,7 @@
     left: 0;
     z-index: 1000;
     padding: 0 20px;
-    overflow: scroll;
+    overflow: auto;
 }
 
 .center-toolbar[b-s7qrrfca0g] {
@@ -274,7 +274,7 @@ hr[b-ve6qiki0tf] {
     flex-direction: column;
     display: flex;
     background-color: lightgray;
-    overflow-y: scroll;
+    overflow-y: auto;
     overflow-x: hidden;
     padding: 3%;
 }
@@ -529,7 +529,7 @@ polygon[b-41q8yj9qd7] {
     padding: 5px;
     max-height: 350px; /* Max height for scrollable container, adjusting later to fit around 3 settings */
     width: 250px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-radius: 1rem 1rem 1rem 1rem;
     font-size: 15px;
     object-fit: contain;
@@ -551,7 +551,7 @@ polygon[b-41q8yj9qd7] {
     font-size: 19px;
     flex-direction: row;
     padding-top: 1px;
-    overflow-y: scroll;
+    overflow-y: auto;
 }
 
 .valueSetting h2[b-i2jr7w3d23], .dropdownSetting h2[b-i2jr7w3d23] {
