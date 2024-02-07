@@ -24,12 +24,13 @@
         {
             foreach (var value in prop.GetCustomAttributes<ValueSetting>())
             {
-                <div class="valueSetting" style="padding: 10px 0;">
+                <div class="valueSetting" style="padding: 3px 0;">
                     <h2>@(formatTitle(prop))</h2>
-                    <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = (double)e.Value; }" min="@value.MinValue" max="@value.MaxValue"></input>
-                    <span class="default-value-label">@value.Label</span>
-                    <p class="min-value">Min: @value.MinValue</p>
-                    <p class="max-value">Max: @value.MaxValue</p>
+                    <div style="margin-left: 10px;">
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = (double)e.Value; }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <span class="default-value-label">@value.Label</span>
+                    </div>
+                    <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
                 </div>
             }
         }
@@ -135,8 +136,8 @@
         showMenu = false;
         StateHasChanged();
     }
-
-
+    
+    
     private double menuTop = 0;
     private double menuLeft = 0;
     
@@ -148,8 +149,13 @@
         // Set menu position
         menuTop = args.ClientY;
         menuLeft = args.ClientX;
-        
-        //todo: make default browser context menu not appear
     }
-
+    
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("initializeDraggable", "EnvironmentalSettingsClass");
+        }
+    }
 }
