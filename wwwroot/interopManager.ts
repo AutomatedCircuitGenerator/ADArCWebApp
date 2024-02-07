@@ -10,7 +10,7 @@ export namespace interopManager {
         runner: AVRRunner;
         adc: AVRADC;
 
-        startCodeLoop(wrapper: any) {
+        async startCodeLoop(wrapper: any) {
             console.log("starting code!")
             this.runner.portB.addListener(async (e) => {
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
@@ -124,7 +124,7 @@ export namespace interopManager {
 
         cyclesPerUs = -1;
 
-        calibrateTiming() {
+        async calibrateTiming(): Promise<boolean>{
             let counter = 0;
             const start = performance.now();
             while (performance.now() - start < 2000) {
@@ -133,6 +133,7 @@ export namespace interopManager {
 
             this.cyclesPerUs = counter / 2000000;
             console.log("cyclesPerUs: " + this.cyclesPerUs);
+            return true;
         }
     }
 

@@ -1,6 +1,6 @@
 ﻿@page "/"
 @using GraphSynth.Representation
-@inject IJSRuntime JsRuntime
+@inject BlazorJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject WebWorkerService webWorkerService
 @inject IDelayService delayService
@@ -123,11 +123,6 @@
 		StateHasChanged();
 	}
 
-	public async Task triggerRender()
-	{
-		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
-	}
-
 	private int localIds = 0;
 
 	public static Dictionary<int, ComponentInstance> comps = new()
@@ -157,9 +152,9 @@
 			Console.WriteLine("Blazor Load Completed!");
 
 			AppInterop.runtime = JsRuntime;
-			AppInterop.jsModule = await AppInterop.getModuleWrapper();
+			AppInterop.jsModule = AppInterop.getModuleWrapper();
 
-			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+			AppInterop.updateScreenRatios(AppInterop.getWindowWidth(), AppInterop.getWindowHeight());
 			if (webworker == null) webworker = await webWorkerService.GetWebWorker();
 			//delayServiceWorker = webworker!.GetService<IDelayService>();
 			AppInterop.calibrate();

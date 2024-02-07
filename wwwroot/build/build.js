@@ -4093,20 +4093,22 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                 this.cyclesPerUs = -1;
             }
             startCodeLoop(wrapper) {
-                console.log("starting code!");
-                this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
-                }));
-                this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 1);
-                }));
-                this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
-                }));
-                this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                return __awaiter(this, void 0, void 0, function* () {
+                    console.log("starting code!");
+                    this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                        yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
+                    }));
+                    this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                        yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 1);
+                    }));
+                    this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                        yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
+                    }));
+                    this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
+                        yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                    });
+                    this.runCode();
                 });
-                this.runCode();
             }
             getWindowWidth() {
                 return window.innerWidth;
@@ -4183,13 +4185,16 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                 });
             }
             calibrateTiming() {
-                let counter = 0;
-                const start = performance.now();
-                while (performance.now() - start < 2000) {
-                    counter++;
-                }
-                this.cyclesPerUs = counter / 2000000;
-                console.log("cyclesPerUs: " + this.cyclesPerUs);
+                return __awaiter(this, void 0, void 0, function* () {
+                    let counter = 0;
+                    const start = performance.now();
+                    while (performance.now() - start < 2000) {
+                        counter++;
+                    }
+                    this.cyclesPerUs = counter / 2000000;
+                    console.log("cyclesPerUs: " + this.cyclesPerUs);
+                    return true;
+                });
             }
         }
         interopManager.InteropManager = InteropManager;
@@ -4204,6 +4209,6 @@ define("main", ["require", "exports", "interopManager"], function (require, expo
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
 });
 //# sourceMappingURL=build.js.map

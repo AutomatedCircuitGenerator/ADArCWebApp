@@ -1,13 +1,15 @@
 ﻿using ADArCWebApp.ComponentNamespace;
 using ADArCWebApp.Shared.Simulation;
 using Microsoft.JSInterop;
+using SpawnDev.BlazorJS;
+using System.Runtime.InteropServices.JavaScript;
 
 namespace ADArCWebApp.Shared.Interop
 {
 	public static class AppInterop
 	{
-		public static IJSObjectReference? jsModule;
-		public static IJSRuntime? runtime;
+		public static IJSInProcessObjectReference jsModule;
+		public static BlazorJSRuntime? runtime;
 
 		[JSInvokable]
 		public static void updateScreenRatios(int screenWidth, int screenHeight)
@@ -47,45 +49,48 @@ namespace ADArCWebApp.Shared.Interop
 			Pages.Index.codePane!.updateConsoleOutput(text, true);
 		}
 
-		public static async Task<int> getWindowWidth() {
-			int ret = await jsModule!.InvokeAsync<int>("getWindowWidth");
+		public static int getWindowWidth() {
+			int ret = runtime!.Get<int>("window.innerWidth");
+			//Console.WriteLine("width: " + ret);
 			return ret;
 		}
 
-		public static async Task<int> getWindowHeight()
+		public static int getWindowHeight()
 		{
-			int ret = await jsModule!.InvokeAsync<int>("getWindowHeight");
+			int ret =  runtime!.Get<int>("window.innerHeight");
 			return ret;
 		}
 
-
-		public static async Task<IJSObjectReference> getModuleWrapper() { 
-			return await runtime!.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
+		
+		public static IJSInProcessObjectReference getModuleWrapper() { 
+			var module =runtime!.Call<IJSInProcessObjectReference>("window.interopManager.getInteropManager");
+			Console.WriteLine(module);
+			return module;
 		}
 
 		public static async void startSimWrapper() {
-			await jsModule!.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(Pages.Index.app!));
+			jsModule!.CallVoidAsync("startCodeLoop", DotNetObjectReference.Create(Pages.Index.app!));
 		}
 
-        public static async void updateCodeWrapper()
+        public static void updateCodeWrapper()
         {
-            await jsModule!.InvokeVoidAsync("updateCodeInPane", BuildCode.code);
+            jsModule!.CallVoid("updateCodeInPane", BuildCode.code);
         }
-
-		public static async void makeMonacoErrorWrapper(string message, int line, int column) {
-			await jsModule!.InvokeVoidAsync("makeMonacoError", message, line, column);
+		
+		public static void makeMonacoErrorWrapper(string message, int line, int column) {
+			jsModule!.CallVoid("makeMonacoError", message, line, column);
 		}
-		public static async void clearMonacoErrorsWrapper()
+		public static void clearMonacoErrorsWrapper()
 		{
-			await jsModule!.InvokeVoidAsync("clearMonacoErrors");
+			jsModule!.CallVoid("clearMonacoErrors");
 		}
 
-		public static async Task<string> getCodeWrapper() {
-			return await jsModule!.InvokeAsync<string>("getCodeInPane");
+		public static string getCodeWrapper() {
+			return jsModule!.Call<string>("getCodeInPane");
 		}
 
-		public static async void stopWrapper() {
-			await jsModule!.InvokeVoidAsync("stop");
+		public static void stopWrapper() {
+			jsModule!.CallVoid("stop");
 			AvrCPU.portB = 0; AvrCPU.portC = 0;	AvrCPU.portD = 0;
 			AvrCPU.updateMasking();
 
@@ -93,7 +98,15 @@ namespace ADArCWebApp.Shared.Interop
 
         public static async Task<CompileResponse> compileWrapper()
         {
-            return await jsModule!.InvokeAsync<CompileResponse>("compile");
+            var obj = await jsModule!.CallAsync<IJSInProcessObjectReference>("compile");
+
+            var ret = new CompileResponse
+            {
+                stdout = obj.Get<string>("stdout"),
+                stderr = obj.Get<string>("stderr")
+            };
+
+            return ret;
         }
 
 		public class CompileResponse { 
@@ -101,23 +114,23 @@ namespace ADArCWebApp.Shared.Interop
 			public string stderr { get;set;}
 		}
 
-        public static async void sendPinToArduino(int pin, bool value)
+        public static void sendPinToArduino(int pin, bool value)
         {
-            await jsModule!.InvokeVoidAsync("arduinoInput", pin, value);
+            jsModule!.CallVoid("arduinoInput", pin, value);
         }
 
-        public static async void sendADCToArduino(int channel, double value)
+        public static void sendADCToArduino(int channel, double value)
         {
-            await jsModule!.InvokeVoidAsync("arduinoADCInput", channel, value);
+            jsModule!.CallVoid("arduinoADCInput", channel, value);
         }
 
 		public static async Task<bool> usDelay(int us) {
-			return await jsModule!.InvokeAsync<bool>("delayus", us);
+			return await jsModule!.CallAsync<bool>("delayus", us);
 		}
 
 		public static async void calibrate()
 		{
-			await jsModule!.InvokeVoidAsync("calibrateTiming");
+            await jsModule!.CallVoidAsync("calibrateTiming");
 		}
     }
 }

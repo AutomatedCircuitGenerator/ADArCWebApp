@@ -25,7 +25,7 @@ namespace ADArCWebApp.Shared.Simulation
 			{
 				if ((((1 << i) & oldMask) ^ ((1 << i) & maskable)) > 0) {
 					updateComponents(i);
-                    Pages.Index.app!.triggerRender();
+                    Pages.Index.app!.StateChanged();
                 }
 			}
 		}
