@@ -54,13 +54,13 @@ namespace ADArCWebApp
 				return instance ??= new RuleSetMap();
 			}
 		}
-		public async Task loadRuleSet(string name, NavigationManager navigationManager)
+		public async Task<int> loadRuleSet(string name, NavigationManager navigationManager, Pages.Index main, int current, int total)
         {
             //Ensure that we only load each rule once
             if (rulesets.ContainsKey(name))
             {
                 Console.WriteLine("Rule " + name + " already loaded.");
-                return;
+                return 0;
             }
 
 			////Setup HTTP client that we will use to load the file
@@ -128,11 +128,16 @@ namespace ADArCWebApp
                             break;
                         }
                 }
-
+                
                 this.numLoaded++;
+                main.loadingProgress = (double)(numLoaded + current) / total *100;
+                //Console.WriteLine(main.loadingProgress);
+                main.StateChanged();
             }
 
             rulesets[name].rules = rules;
+            
+            return numLoaded;
         }
         /// <summary>
         /// Returns the number of loaded rules

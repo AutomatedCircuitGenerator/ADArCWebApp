@@ -109,7 +109,7 @@
 
 			string path = data.directoryPath;
 
-			if (path == null || path == "")   //throw them out if they don't have a path
+			if (path == null || path == ""  || !data.enabled)   //throw them out if they don't have a path or if they are disabled
 			{
 				continue;
 			}

@@ -45,9 +45,9 @@
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 1000;
     padding: 0 20px;
-    grid-row: 1;
+    overflow: scroll;
 }
 
 .center-toolbar {
@@ -59,12 +59,14 @@
     background-color: #989494;
     color: black !important;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0 10px;
+    margin: 0 5px;
+    height: 10px;
+    overflow-wrap: unset;
 }
 
 .toolbar-button img {
@@ -112,17 +114,83 @@
     transform: translate(50%, -50%) rotate(90deg);
 }
 
+.logo-and-adarc {
+    flex-wrap: nowrap;
+    display: flex;
+    overflow: hidden;
+}
+
 .adarc-text {
-    margin-right: auto;
     font-size: 24px;
-    translate: 10px;
+    margin: 0px 15px;
+    position: relative;
+    overflow: hidden;
 }
 
 .logo {
-    height: 35px;
-    width: 35px;
+    max-height: 35px;
+    max-width: 35px;
+    overflow: hidden;
+    margin-right: 10px;
+    
 }
 
 div, span {
     user-select: none;
+}
+
+.zoom-bar-container {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+}
+
+.zoom-bar {
+    min-width: 150px;
+    width: auto;
+    height: 10px;
+    background-color: #ddd;
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.zoom-bar-handle {
+    width: 30px;
+    height: 100%;
+    cursor: grab;
+    border-radius: 5px;
+    font-size: 16px;
+    color: black;
+}
+
+.zoom-button {
+    background-color: #989494;
+    color: black !important;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+
+.progress-container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background-color: #f1f1f1;
+    z-index: 9999;
+
+}
+
+.progress-bar {
+    height: 100%;
+    background-color: dodgerblue;
+    z-index: 10000;
+}
+
+.toolbar-button {
+    flex-direction: row;
 }
