@@ -53,14 +53,14 @@
         if (pin && comp.midSignal == 1)
         {
             comp.midSignal = 2;
-            sendSignal(comp, conn!.toId);
+            await sendSignal(comp, conn!.toId);
         }
         // false 1ms+ -> true (20-40us) trigger
         //then send
     }
 
 
-    async static void sendSignal(ComponentInstance comp, int id)
+    async static Task sendSignal(ComponentInstance comp, int id)
     {
         var delayworker = Pages.Index.app!.webworker!.GetService<IDelayService>();
         //false (80us) -> true (80us) ack
@@ -68,12 +68,12 @@
 
         AvrCPU.setPinState(id, false);
         Pages.Index.codePane!.updateConsoleOutput("set False", false);
-        await delayworker.delay(1000);
+        await delayworker.delay(65);
         
         //bool r = await AppInterop.usDelay(10);
         AvrCPU.setPinState(id, true);
         Pages.Index.codePane!.updateConsoleOutput("set true", false);
-        await delayworker.delay(1000);
+        await delayworker.delay(65);
         //r = await AppInterop.usDelay(2000000);
         // byte[] sig = getSignal(comp);
         // for (int i = 0; i < 40; i++)

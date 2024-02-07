@@ -1,4 +1,5 @@
-﻿using System.Diagnostics;
+﻿using ADArCWebApp.Shared.Interop;
+using System.Diagnostics;
 
 namespace ADArCWebApp
 {
@@ -11,12 +12,9 @@ namespace ADArCWebApp
 	{
 		public async Task delay(int millisec)
 		{
-			var sw = new Stopwatch();
-			sw.Start();
 
-			while (sw.ElapsedMilliseconds > 0) {
-				await Task.Delay(1);
-			}
+
+			await AppInterop.usDelay(millisec);
 
 			return;
 		}
