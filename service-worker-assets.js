@@ -81,7 +81,7 @@
       "url": "images\/unavail.png"
     },
     {
-      "hash": "sha256-XeddycKmt1NaoW1UaK7s8uwG1H+3LJ6O7eFBRKEcPX0=",
+      "hash": "sha256-5fQYlq5MaHDbK\/o2Sm7CEL0ROYNjHL+ccDrzie41iT4=",
       "url": "index.html"
     },
     {
@@ -1037,11 +1037,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-ruHNiyN8ODpu\/z7bW7jWSS\/AmdSwealmhZVEI2NC3Zs=",
+      "hash": "sha256-DguSxMBUycdccd21rsw9d2sxukKiCW9E\/T1OCbJVulQ=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-T6BXIVjIXeEENGwFs5qXl0IMpEo19fw\/TBBa3jMxWAo=",
+      "hash": "sha256-GQvxv7aNAJzeMi4Laklk5WJ1VJwqbgnPkaq7H6\/8JW4=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -1049,11 +1049,11 @@
       "url": "_framework\/BlazorMonaco.wasm"
     },
     {
-      "hash": "sha256-AAdQbmJ4yWuvVWOs+j8Rtg2+d6w0gM+49PX34H\/zGvs=",
+      "hash": "sha256-GDrHeQbXw7XPjO39ZYx9chItRbWEEXUBJ6Aisip5ICQ=",
       "url": "_framework\/Microsoft.AspNetCore.Components.wasm"
     },
     {
-      "hash": "sha256-U\/NwimRCCoixmIN\/TfehotJDdzwU\/3T4zyUhg9JrdwE=",
+      "hash": "sha256-+ni+Lku+SOVwzC+jiYs3SXOTheqaKyr4miwMnInFnbc=",
       "url": "_framework\/Microsoft.AspNetCore.Components.Web.wasm"
     },
     {
@@ -1241,7 +1241,7 @@
       "url": "_framework\/System.ObjectModel.wasm"
     },
     {
-      "hash": "sha256-iehtrtjcfxSEvApAfFkNdQaffRl28j0zciVd08aXyiM=",
+      "hash": "sha256-toXD+\/lX0CfRA6NdURN4hTE9sUz6l8sWPdq4wWeOS7c=",
       "url": "_framework\/System.Private.CoreLib.wasm"
     },
     {
@@ -1265,7 +1265,7 @@
       "url": "_framework\/System.Runtime.InteropServices.wasm"
     },
     {
-      "hash": "sha256-UNCsAWB3FAJKeAkgMi2W90G773ul7HE04HSumJ0T4nA=",
+      "hash": "sha256-Cgr\/7yrB7LDiTClrKzxVWWdWtaWrDh\/+HY3rxAG3tzM=",
       "url": "_framework\/System.Runtime.wasm"
     },
     {
@@ -1321,7 +1321,7 @@
       "url": "_framework\/System.Xml.XmlSerializer.wasm"
     },
     {
-      "hash": "sha256-mvpOM23cKNrLnCl0MeBC3dXRf+Rm\/COKg1CbwGerH9k=",
+      "hash": "sha256-j375xiFUessac+EKHK6\/UmKbJ+yABUptgv+To26\/N9g=",
       "url": "ADArCWebApp.styles.css"
     },
     {
@@ -2305,5 +2305,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "jgOxjuz+"
+  "version": "\/X4CaUzR"
 };

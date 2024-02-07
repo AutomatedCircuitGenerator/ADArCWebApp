@@ -46,9 +46,9 @@
     position: fixed;
     top: 0;
     left: 0;
-    z-index: 1;
+    z-index: 1000;
     padding: 0 20px;
-    grid-row: 1;
+    overflow: scroll;
 }
 
 .center-toolbar[b-s7qrrfca0g] {
@@ -60,12 +60,14 @@
     background-color: #989494;
     color: black !important;
     border: none;
-    padding: 10px 20px;
+    padding: 10px 15px;
     cursor: pointer;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    margin: 0 10px;
+    margin: 0 5px;
+    height: 10px;
+    overflow-wrap: unset;
 }
 
 .toolbar-button img[b-s7qrrfca0g] {
@@ -113,19 +115,85 @@
     transform: translate(50%, -50%) rotate(90deg);
 }
 
+.logo-and-adarc[b-s7qrrfca0g] {
+    flex-wrap: nowrap;
+    display: flex;
+    overflow: hidden;
+}
+
 .adarc-text[b-s7qrrfca0g] {
-    margin-right: auto;
     font-size: 24px;
-    translate: 10px;
+    margin: 0px 15px;
+    position: relative;
+    overflow: hidden;
 }
 
 .logo[b-s7qrrfca0g] {
-    height: 35px;
-    width: 35px;
+    max-height: 35px;
+    max-width: 35px;
+    overflow: hidden;
+    margin-right: 10px;
+    
 }
 
 div[b-s7qrrfca0g], span[b-s7qrrfca0g] {
     user-select: none;
+}
+
+.zoom-bar-container[b-s7qrrfca0g] {
+    display: flex;
+    align-items: center;
+    width: fit-content;
+}
+
+.zoom-bar[b-s7qrrfca0g] {
+    min-width: 150px;
+    width: auto;
+    height: 10px;
+    background-color: #ddd;
+    position: relative;
+    border-radius: 5px;
+    overflow: hidden;
+    margin: 0 10px;
+}
+
+.zoom-bar-handle[b-s7qrrfca0g] {
+    width: 30px;
+    height: 100%;
+    cursor: grab;
+    border-radius: 5px;
+    font-size: 16px;
+    color: black;
+}
+
+.zoom-button[b-s7qrrfca0g] {
+    background-color: #989494;
+    color: black !important;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+}
+
+
+.progress-container[b-s7qrrfca0g] {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    height: 10px;
+    background-color: #f1f1f1;
+    z-index: 9999;
+
+}
+
+.progress-bar[b-s7qrrfca0g] {
+    height: 100%;
+    background-color: dodgerblue;
+    z-index: 10000;
+}
+
+.toolbar-button[b-s7qrrfca0g] {
+    flex-direction: row;
 }
 /* /Shared/CodePane.razor.rz.scp.css */
 .code-container[b-ve6qiki0tf] {
@@ -267,7 +335,6 @@ hr[b-ve6qiki0tf] {
 
 
 .icon[b-vtl0xvyh0e] {
-
 }
 /* /Shared/Components/RazorArduinoMega.razor.rz.scp.css */
 text[b-qr4y3v1db0] {
@@ -451,6 +518,69 @@ polygon[b-41q8yj9qd7] {
     100% {
         background-position: left 15px top, right 15px bottom, left bottom 15px, right top 15px;
     }
+}
+
+.settingsContainer[b-i2jr7w3d23] {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    justify-content: center;
+    background-color: lightgray;
+    padding: 5px;
+    max-height: 350px; /* Max height for scrollable container, adjusting later to fit around 3 settings */
+    width: 250px;
+    overflow-y: scroll;
+    border-radius: 1rem 1rem 1rem 1rem;
+    font-size: 15px;
+    object-fit: contain;
+    display: inline-block;
+    position: absolute;
+    margin-top: 0;
+}
+
+.EnvironmentalSettingsClass[b-i2jr7w3d23] {
+    max-height: 350px; 
+    width: 250px;
+    flex-direction: column;
+    translate: 600px 100px;
+    padding-bottom: 5px;
+    z-index: 1000000;
+}
+
+.settingsContainer h2[b-i2jr7w3d23]{
+    font-size: 19px;
+    flex-direction: row;
+    padding-top: 1px;
+    overflow-y: scroll;
+}
+
+.valueSetting h2[b-i2jr7w3d23], .dropdownSetting h2[b-i2jr7w3d23] {
+    font-size: 20px;
+}
+
+.valueSetting[b-i2jr7w3d23] {
+    background-color: #a1d9f7;
+    border-radius: 1rem 1rem 1rem 1rem;
+    margin-bottom: 7px;
+}
+
+.dropdownSetting[b-i2jr7w3d23] {
+    background-color: #a1d9f7;
+    border-radius: 1rem 1rem 1rem 1rem;
+    margin-bottom: 7px;
+}
+
+.min-max-values[b-i2jr7w3d23] {
+    padding-bottom: 2px;
+}
+
+.close-button[b-i2jr7w3d23] {
+    position: absolute;
+    right: 0;
+    border-radius: 1rem 1rem 1rem 1rem;
+    background-color: transparent;
+    color: red;
+    border: transparent;
 }
 /* /Shared/MainCanvas.razor.rz.scp.css */
 .canvas-container[b-9ycb6eis6j] {
