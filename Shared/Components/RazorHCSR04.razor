@@ -1,13 +1,16 @@
 ﻿@code {
-    [Parameter] public double distance { get; set; }=20;
+    [Parameter]
+    [ValueSetting("cm", 2, 2, 400)]
+    public double distance { get; set; } = 20;
+
     public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 71.3, y: 94.5, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()}, number: 1),
-                new ElementPin(name: "TRIG",  x: 81.3, y: 94.5, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "VCC", x: 71.3, y: 94.5, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "TRIG", x: 81.3, y: 94.5, signals: new PinSignalInfo[] { }, number: 2),
                 new ElementPin(name: "ECHO", x: 91.3, y: 94.5, signals: new PinSignalInfo[] { }, number: 3),
                 new ElementPin(name: "GND", x: 101.3, y: 94.5, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
             };
