@@ -73,7 +73,7 @@
     padding: 5px;
     max-height: 350px; /* Max height for scrollable container, adjusting later to fit around 3 settings */
     width: 250px;
-    overflow-y: scroll;
+    overflow-y: auto;
     border-radius: 1rem 1rem 1rem 1rem;
     font-size: 15px;
     object-fit: contain;
@@ -98,6 +98,7 @@
     overflow-y: scroll;
     text-align: left;
     padding-left: 15px;
+    overflow-y: auto;
 }
 
 .valueSetting h2, .dropdownSetting h2 {

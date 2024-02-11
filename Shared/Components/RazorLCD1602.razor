@@ -66,7 +66,7 @@
             }
             else
             {
-                //assume 4pin setup
+                //assume 4pin setup, pin11,12,13,14 as DB4,5,6,7
                 int p1 = -1, p2=-1, p3=-1, p4=-1, rs0=-1;
                 if (0 == comp.getConnection("data1", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
                 {
@@ -95,9 +95,9 @@
                 bool rs = AvrCPU.getPinState(rs0);
                 if (comp.midSignal > 0)
                 {
-                    int sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);//may need to reverse sig
+                    long sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);//may need to reverse sig
                     sig = sig << 4;
-                    sig = sig | comp.midSignal;
+                    sig = sig | (long)comp.midSignal;
 
                     if (rs)
                     {

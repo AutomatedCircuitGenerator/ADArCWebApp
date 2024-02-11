@@ -1,5 +1,6 @@
 ﻿using ADArCWebApp.ComponentNamespace;
 using GraphSynth.Representation;
+using System.Numerics;
 
 namespace ADArCWebApp.Shared
 {
@@ -17,12 +18,17 @@ namespace ADArCWebApp.Shared
 		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
 		public node gsNode;
 		public int midSignal;
-		public Dictionary<string, object> compParams = new Dictionary<string, object>();
+		public int counter;
+		public int Wbuffer;
+		public int RegAddr;
+		public int byteIndex;
+		public long timer;
+		public Dictionary<string, object> compParams;
 
 		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			compParams = data.compParams;
+			compParams = new Dictionary<string, object>(data.compParams);
 			this.x = x;
 			this.y = y;
 			zoomedX = x;
@@ -36,7 +42,7 @@ namespace ADArCWebApp.Shared
 			{ "BK", "black" },
 			{ "RD", "red"},
 			{ "LB", "lightblue"},
-			{ "DB", "navyblue"},
+			{ "DB", "#000435"},
 			{ "GN", "green"},
 			{ "VT", "violet"},
 			{ "OG", "orange"}

@@ -9,9 +9,18 @@ namespace ADArCWebApp.Shared.Simulation
 	{
 		public static List<int> outputPins = new();
 
-		public static string code => globalCode() + "\n\n" + setupCode() + "\n\n" + loopCode();
+		public static string code => includeCode() + "\n\n" + globalCode() + "\n\n" + setupCode() + "\n\n" + loopCode();
 
+		private static string includeCode()
+		{
+            StringBuilder b = new StringBuilder();
+            foreach (ComponentInstance c in Pages.Index.comps.Values)
+            {
+                b.Append(parseProvidedCode(c, "include", true));
 
+            }
+			return b.ToString();
+        }
 		private static string globalCode() {
 			StringBuilder b = new StringBuilder();
 			//Console.WriteLine("2: " + outputPins.Count);
