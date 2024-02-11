@@ -2,11 +2,19 @@
 @using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true"@onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu:preventDefault="true"@onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
     @if(forceBorder && !Pages.Index.app!.isRunning)
     {
         <button id="deletebutton" @onclick="remove">
-            <img src="images/redx.png">
+            <span>❌</span>
+        </button>
+        
+        <button id="environmental-settings-button" @onclick="HandleContextMenu">
+            <span>⚙️</span>
+        </button>
+        
+        <button id="component-help-button"> <!-- ADD THIS FOR CONTEXT SENSITIVE HELP: @onclick="component-help-action" -->
+            <span>❓</span>
         </button>
     }
 
@@ -16,7 +24,7 @@
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
     <div class="settingsContainer">
-        <button class="close-button" @onclick="HandleClickOutside">&#10006;</button>
+        <button class="close-button" @onclick="HandleClickOutside">❌</button>
         <h2>Environmental Settings</h2>
 
     <!-- Value Setting -->

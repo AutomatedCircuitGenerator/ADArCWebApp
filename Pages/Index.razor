@@ -5,19 +5,19 @@
 
 <PageTitle>Index</PageTitle>
 <body>
-	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
-	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+<script suppress-error="BL9992" type="module" src="build/build.js"></script>
+<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 <div class="page">
 	<div class="toolbar">
 		<div class="logo-and-adarc">
 			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-            		<span class="adarc-text">ADArC</span>
+			<span class="adarc-text">ADArC</span>
 		</div>
-		<div class="zoom-bar-container">
-			<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
-			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
-		</div>
-		<div class="center-toolbar">
+		<div class="zoom-bar-container" @onmouseover="ShowLabel">
+            <button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 15px;">🔎</button>
+            <button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 24px;">🔎</button>
+        </div>
+		<div class="center-toolbar" style="font-size: 18px">
 			<button class="toolbar-button">
 				<span>⬇️️ Import</span>
 			</button>
@@ -37,53 +37,77 @@
 	</div>
 		
 
-		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
-				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
-			</div>
-			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
-				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+	<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+		<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
+			<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
+		</div>
+		<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
+			<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+				@if (isLeftExpanded)
+				{
+					<span>▶</span>
+				}
+				else
+				{
 					<span>◀</span>
-				</div>
-				<ComponentPane host="@this"></ComponentPane>
+
+				}
 			</div>
-			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
-			</div>
-			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
-				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+			<ComponentPane host="@this"></ComponentPane>
+		</div>
+		<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
+			<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+		</div>
+		<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
+			<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+				@if (isRightExpanded)
+				{
+					<span>▶</span>
+				}
+				else
+				{
 					<span>◀</span>
-				</div>
-				<CodePane></CodePane>
+				}
 			</div>
+			<CodePane></CodePane>
 		</div>
 	</div>
+	@if (showLabel)
+                {
+    	            <div class="zoom-tooltip" style="background: #ece1be">
+    		            <label>Use these buttons to zoom in and out of the Canvas</label>
+    		            <button @onclick="GotItClicked">Got it!</button>
+    	            </div>
+                }
+</div>
 <div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-			<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
-			<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
-		</div>
+	<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
+	<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+</div>
 </body>
-
 
 @code{
 	bool isLeftExpanded = true;
 	bool isRightExpanded = false;
-	int leftPaneAlign => isLeftExpanded ? 0 : -23;
-	int rightPaneAlign => isRightExpanded ? 0 : -37;
+	int leftPaneAlign => isLeftExpanded ? 0 : -24;
+	int rightPaneAlign => isRightExpanded ? 0 : -39;
 	string runStopText = "▶ Run";
 	public bool isRunning = false;
-
+	
 	void ToggleLeftSidebar()
 	{
 		isLeftExpanded = !isLeftExpanded;
 		isRightExpanded = false;
+		StateHasChanged();
 	}
 
 	void ToggleRightSidebar()
 	{
 		isRightExpanded = !isRightExpanded;
 		isLeftExpanded = false;
+		StateHasChanged();
 	}
+	
 	async Task ToggleRunStop()
 	{
 		if (!isRunning)
@@ -505,4 +529,26 @@
 		StateHasChanged();
 	}
 
+	bool showLabel = false;
+	bool labelShownBefore = false;
+
+	void ShowLabel()
+	{
+		if (!labelShownBefore)
+		{
+			showLabel = true;
+		}
+	}
+
+	void HideLabel()
+	{
+		showLabel = false;
+	}
+
+	void GotItClicked()
+	{
+		labelShownBefore = true;
+		showLabel = false;
+	}
 }
+

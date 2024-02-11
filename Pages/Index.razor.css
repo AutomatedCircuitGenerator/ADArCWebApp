@@ -48,6 +48,7 @@
     z-index: 1000;
     padding: 0 20px;
     overflow: scroll;
+    overflow-y: hidden;
 }
 
 .center-toolbar {
@@ -193,4 +194,27 @@ div, span {
 
 .toolbar-button {
     flex-direction: row;
+}
+
+.rotate180 {
+    transform: rotate(180deg);
+}
+
+.zoom-tooltip {
+    position: absolute;
+    z-index: 999999;
+    border-radius: 5px 5px 5px 5px;
+    padding-left: 6px;
+    padding-right: 3px;
+    left: 25%;
+    top: 40px;
+}
+
+.zoom-tooltip button {
+    background-color: white;
+    border-radius: 5px 5px 5px 5px;
+    border-color: transparent;
+    transform: scale(80%);
+    padding-left: 1px;
+    padding-right: 1px;
 }
