@@ -12,14 +12,21 @@
         {
             return new ElementPin[]
             {
-                new ElementPin( name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "VCC", x: 101, y: 32.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
+                new ElementPin( name: "GND", x: 91, y: 32.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
+                new ElementPin( name: "SCL", x: 81, y: 32.78, number: 11, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
+                new ElementPin( name: "SDA", x: 71, y: 32.78, number: 10, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
                 new ElementPin( name: "XDA", x: 36.0, y: 5.78, number: 10, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "SDA", x: 45.6, y: 5.78, number: 10, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
-                new ElementPin( name: "SCL", x: 55.2, y: 5.78, number: 11, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
-                new ElementPin( name: "GND", x: 64.8, y: 5.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
-                new ElementPin( name: "VCC", x: 74.4, y: 5.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
+                new ElementPin( name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[]{} ),
+                
+                
+                
+                
+                
+                
+                
             };
         }
     }

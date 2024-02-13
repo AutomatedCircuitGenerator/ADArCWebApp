@@ -3,16 +3,16 @@
 
     [Parameter] public double width { get; set; } = 507;
     [Parameter] public double height { get; set; } = 269;
-    ElementPin[] pinInfo
+    public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 7, y: 55, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "DT",  x: 7, y: 36.3, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "SCK", x: 7, y: 46.2, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "GND", x: 7, y: 26.5, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
+                new ElementPin(name: "VCC", x: 33, y: 80, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "DT",  x: 33, y: 60, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "SCK", x: 33, y: 70, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "GND", x: 33, y: 50, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
             };
         }
     }

@@ -43,10 +43,11 @@
 
                 //below this point are currently inaccessible. (I think.)
                 // new ElementPin( name: "NC", number: 1, x: 361, y: 35, signals: new PinSignalInfo[]{}, description: "Not Connected" ),
+                new ElementPin( name: "+5V", number: 5, x: 185, y: 218, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(5)}, description: "+5V Power Rail" ),
+                new ElementPin( name: "+3V3", number: 4, x: 175, y: 218, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(3.3) }, description: "+3V3 Power Rail" ),
                 new ElementPin( name: "IOREF", number: 2, x: 131, y: 218, signals: new PinSignalInfo[]{}, description: "Reference for digital logic V - connected to 5V" ),
                 new ElementPin( name: "RESET", number: 3, x: 140.5, y: 218, signals: new PinSignalInfo[]{}, description: "Reset" ),
                 new ElementPin( name: "+3V3", number: 4, x: 150, y: 218, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(3.3) }, description: "+3V3 Power Rail" ),
-                new ElementPin( name: "+5V", number: 5, x: 160, y: 218, signals: new PinSignalInfo[]{ PinSignalInfo.VCC(5)}, description: "+5V Power Rail" ),
                 new ElementPin( name: "GND.2", number: 6, x: 169.5, y: 218, signals: new PinSignalInfo[]{}, description: "Ground" ),
                 new ElementPin( name: "GND.3", number: 7, x: 179, y: 218, signals: new PinSignalInfo[]{}, description: "Ground" ),
                 new ElementPin( name: "VIN", number: 8, x: 188.5, y: 218, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()  }, description: "Voltage Input" ),

@@ -3,20 +3,46 @@
     [Parameter] public int ledGreen { get; set; } = 0;
     [Parameter] public int ledBlue { get; set; } = 0;
 
-    ElementPin[] pinInfo
+    public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin( name: "R", x: 8.5, y: 44, number: 1, signals: new PinSignalInfo[]{ } ),
-                new ElementPin( name: "COM", x: 18, y: 54, number: 2, signals: new PinSignalInfo[]{ } ),
-                new ElementPin( name: "G", x: 26.4, y: 44, number: 3, signals: new PinSignalInfo[]{ } ),
-                new ElementPin( name: "B", x: 35.7, y: 44, number: 3, signals: new PinSignalInfo[]{ } ),
+                new ElementPin( name: "R", x: 34, y: 69, number: 1, signals: new PinSignalInfo[]{ } ),
+                new ElementPin( name: "G", x: 52, y: 69, number: 3, signals: new PinSignalInfo[]{ } ),
+                new ElementPin( name: "B", x: 62, y: 69, number: 3, signals: new PinSignalInfo[]{ } ),
+                new ElementPin( name: "COM", x: 43, y: 79, number: 2, signals: new PinSignalInfo[]{ } ),
             };
         }
     }
+    //seems like RGBLED involves pulsewidth of the signal, timing restricted
+    public static void translate(ComponentInstance comp)
+    {
+        var data = comp.data;
 
+        bool R = false;
+        bool G = false;
+        if (0 == comp.getConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            R = AvrCPU.getPinState(conn!.toId);
+        }
+        if (0 == comp.getConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        {
+            G = AvrCPU.getPinState(conn2!.toId);
+        }
+        if (0 == comp.getConnection("G", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+        {
+            G = AvrCPU.getPinState(conn3!.toId);
+        }
+
+        
+
+
+        AvrCPU.setPinState(conn!.toId, true);
+
+
+    }
 
     private int brightness => new List<int>() { ledBlue, ledGreen, ledRed }.Max();
     private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0;

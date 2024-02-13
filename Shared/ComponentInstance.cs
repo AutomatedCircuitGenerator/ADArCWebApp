@@ -1,12 +1,14 @@
 ﻿using ADArCWebApp.ComponentNamespace;
 using GraphSynth.Representation;
 using System.Numerics;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 namespace ADArCWebApp.Shared
 {
 	public class ComponentInstance
 	{
-		public ComponentData data;
+		[JsonIgnore] public ComponentData data;
 
 		public int globalId;
 		public double x;
@@ -15,8 +17,8 @@ namespace ADArCWebApp.Shared
 		public double zoomedX;
 		public double zoomedY;
 
-		public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
-		public node gsNode;
+		[JsonIgnore]public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
+		[JsonIgnore]public node gsNode;
 		public int midSignal;
 		public int counter;
 		public int Wbuffer;

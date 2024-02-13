@@ -1,28 +1,29 @@
 ﻿@code {
-	[Parameter] public double alcohol { get; set; }
-	ElementPin[] pinInfo
+	[Parameter][ValueSetting("", 0, 0, 1024)] public double alcohol { get; set; }
+	[Parameter] public bool translateOnInput { get; set; }
+	public static ElementPin[] pinInfo
 	{
 		get
 		{
 			return new ElementPin[]
 			{
-				new ElementPin(name: "DOUT", x: 155.91, y: 85.793, signals: new PinSignalInfo[]{ }, number: 1),
-				new ElementPin(name: "AOUT", x: 155.84, y: 88.274, signals: new PinSignalInfo[] { }, number: 2),
-				new ElementPin(name: "GND",  x: 155.9, y: 90.67, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3),
-				new ElementPin(name: "VCC",  x: 155.87, y: 93.615, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 4)
+				new ElementPin(name: "GND",  x: 200.9, y: 68.67, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
+				new ElementPin(name: "VCC",  x: 200.87, y: 79.615, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
+				new ElementPin(name: "DOUT", x: 200.84, y: 48.274, signals: new PinSignalInfo[] { }, number: 3),
+				new ElementPin(name: "AOUT", x: 200.91, y: 58.793, signals: new PinSignalInfo[]{ }, number: 4)
 			};
 
 		}
 	}
 
-	async static void translate(ComponentInstance comp)
+	public async static void translate(ComponentInstance comp)
 	{
 		int pin = -1;
-		if (0 == comp.getConnection("aout", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		if (0 == comp.getConnection("pin4", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
 			pin = conn!.toId;
 		}
-		AppInterop.sendADCToArduino(pin-14, (double)comp.compParams["alcohol"]);//pin number and channel CAN BE DIFFERENT! SUBJECT TO CHANGE.
+		AppInterop.sendADCToArduino(pin-14, (double)comp.compParams["alcohol"]*5/1024);//pin number and channel CAN BE DIFFERENT! SUBJECT TO CHANGE.
 	}
 }
 

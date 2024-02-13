@@ -1,5 +1,6 @@
 ﻿@page "/"
 @using GraphSynth.Representation
+@using System.Text.Json
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 
@@ -18,10 +19,11 @@
 			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
 		</div>
 		<div class="center-toolbar">
-			<button class="toolbar-button">
+			<InputFile id="fileInput" OnChange="HandleFileChange" style="display: none;" />
+			<button class="toolbar-button" @onclick="SelectFile">
 				<span>⬇️️ Import</span>
 			</button>
-			<button class="toolbar-button">
+				<button class="toolbar-button" @onclick="ExportJSON">
 				<span>⬆️ Export</span>
 			</button>
 			<button class="toolbar-button">
@@ -131,7 +133,81 @@
 		string url = "https://adarc-help.mech.website/";
 		JsRuntime.InvokeVoidAsync("window.open", url, "_blank");	
 	}
-	
+
+	class Data
+	{
+		// public List<InstanceConnection> ConnLines { get; set; }
+		public int LocalId { get; set; }
+		public string Code { get; set; }
+		public Dictionary<int, ComponentInstance> Comps { get; set; }
+	}
+	async void ExportJSON(){
+		Data parentObject = new Data
+		{
+			// ConnLines = Index.buildCanvas.connLines,
+			Comps = comps,
+			LocalId = localIds,
+			Code = await AppInterop.getCodeWrapper()
+		};
+		// Console.WriteLine("file creating");
+		// string fileName = "WeatherForecast.json";
+		// await using FileStream createStream = File.Create(fileName);
+		// await JsonSerializer.SerializeAsync(createStream, parentObject);
+		// Console.WriteLine("file created");
+		// Console.WriteLine(File.ReadAllText(fileName));
+		var options = new JsonSerializerOptions { IncludeFields = true};
+		string result = JsonSerializer.Serialize(parentObject,options);
+		Console.WriteLine(result);
+	}
+	private async Task SelectFile()
+	{
+		// Trigger file selection by clicking the hidden input file component
+		await JsRuntime.InvokeVoidAsync("eval", "document.getElementById('fileInput').click();");
+	}
+
+    private async Task HandleFileChange(InputFileChangeEventArgs e)
+    {
+		var file = e.GetMultipleFiles().FirstOrDefault();
+		if (file != null)
+		{
+			var buffer = new byte[file.Size];
+			await file.OpenReadStream().ReadAsync(buffer);
+			string jsonString = System.Text.Encoding.UTF8.GetString(buffer);
+
+			// Now you have the JSON string, you can use it as needed
+			Console.WriteLine(jsonString);
+			DeserializeJSON(jsonString);
+		}
+	}
+
+	private void DeserializeJSON(string jsonString)
+	{
+		try
+		{
+			// Deserialize JSON data into a Data object
+			Data canvasData = JsonSerializer.Deserialize<Data>(jsonString);
+
+			// Now you have access to the deserialized data as a CanvasData object
+			// Do whatever you need with this data
+			// Console.WriteLine($"ConnLines:");
+			// foreach (var connLine in canvasData.ConnLines)
+			// {
+			// 	Console.WriteLine($"Id: {connLine.Id}");
+			// }
+
+			// Console.WriteLine($"Comps:");
+			// foreach (var kvp in canvasData.Comps)
+			// {
+			// 	Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value.Id}");
+			// }
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error during deserialization: {ex.Message}");
+		}
+	}
+
+
 	public Index()
 	{
 		app = this;
