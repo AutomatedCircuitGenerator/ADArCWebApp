@@ -70,15 +70,15 @@
         {
             if (comp.timer > 900 && comp.timer < 1100)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
             {
-                comp.compParams["angle"] = 0;//all the way to the left/-90
+                comp.compParams["angle"].setValue(0);//all the way to the left/-90
             }
             else if (comp.timer > 1400 && comp.timer < 1600)//if the pulse width is 1.5ms
             {
-                comp.compParams["angle"] = 90;//in the middle/0
+                comp.compParams["angle"].setValue(90);//in the middle/0
             }
             else if (comp.timer > 1900 && comp.timer < 2100)//if the pulse width is 2ms
             {
-                comp.compParams["angle"] = 180;//all the way to the right/90
+                comp.compParams["angle"].setValue(180);//all the way to the right/90
             }
             else if (comp.timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
             {

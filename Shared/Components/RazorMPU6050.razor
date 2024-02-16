@@ -42,12 +42,12 @@
     {
         Dictionary<int, int> register = new Dictionary<int, int>
         {
-            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF00 >> 8 },//ACCEL_XOUT_H
-            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF },//ACCEL_XOUT_L
-            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF00 >> 8 },//ACCEL_YOUT_H
-            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF },//ACCEL_YOUT_L
-            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
-            { 0x40, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF },//ACCEL_ZOUT_L
+            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF00 >> 8 },//ACCEL_XOUT_H
+            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF },//ACCEL_XOUT_L
+            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF00 >> 8 },//ACCEL_YOUT_H
+            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF },//ACCEL_YOUT_L
+            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
+            { 0x40, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF },//ACCEL_ZOUT_L
             { 0x41, 0 },//TEMP_OUT_H
             { 0x42, 0 },//TEMP_OUT_L
             { 0x43, 0 },//GYRO_XOUT_H

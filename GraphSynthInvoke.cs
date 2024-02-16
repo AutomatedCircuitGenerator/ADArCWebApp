@@ -21,7 +21,12 @@ namespace ADArCWebApp
         public static List<string> inputs = new();
 
         static designGraph seed = new();
-        
+
+
+        public static void destroyGraph() {
+            seed = new();
+        }
+
         //public GraphSynthInvoke(List<string> inputs)
         //{
         //    this.inputs = inputs;

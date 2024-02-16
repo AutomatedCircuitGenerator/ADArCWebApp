@@ -44,7 +44,7 @@
     {
         //Test distance = (high level time×velocity of sound (340M/S) / 2
         //high level = (Test distance * 2)/velocity of sound
-        double distance = (double)comp.compParams["distance"];
+        double distance = (double)comp.compParams["distance"].getValue();
         int pulsewidth = Convert.ToInt32(distance * 2 / 0.0343);
         AppInterop.sendPinToArduino(id, true);//HIGH, sending a ECHO pulse
         // if (distance >= 2 && distance <= 400)//min and max range of HC-SR04

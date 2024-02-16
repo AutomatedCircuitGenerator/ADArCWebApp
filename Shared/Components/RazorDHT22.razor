@@ -27,8 +27,8 @@
     static byte[] getSignal(ComponentInstance comp)
     {
         byte[] ret = new byte[5];
-        int rh = Convert.ToInt32((double)comp.compParams["humidity"] * 10);
-        int t = Convert.ToInt32((double)comp.compParams["temperature"] * 10);
+        int rh = Convert.ToInt32((double)comp.compParams["humidity"].getValue() * 10);
+        int t = Convert.ToInt32((double)comp.compParams["temperature"].getValue() * 10);
         int sum = t + rh;
 
         ret[0] = (byte)(rh & 0b1111111100000000);

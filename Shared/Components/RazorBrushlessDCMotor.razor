@@ -26,29 +26,29 @@
 
         if (pin && comp.midSignal == 0)//if HIGH(pulse)
         {
-            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
+            comp.compParams["timer"].setValue<long>(System.Diagnostics.Stopwatch.GetTimestamp());//start timing the pulse
             comp.midSignal = 1;
         }
         if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
         {
-            comp.compParams["timer"] = System.Diagnostics.Stopwatch.GetElapsedTime((long)comp.compParams["timer"]).Microseconds;//stop the timers
+            comp.compParams["timer"].setValue<long>(System.Diagnostics.Stopwatch.GetElapsedTime((long)comp.compParams["timer"].getValue()).Microseconds);//stop the timers
             comp.midSignal = 2;
         }
 
         if(comp.midSignal == 2)
         {
-            long timer = (long)comp.compParams["timer"];
+            long timer = (long)comp.compParams["timer"].getValue();
             if (timer > 950 && timer < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
             {
-                comp.compParams["speed"] = "stop";//stationary motor
+                comp.compParams["speed"].setValue<string>("stop");//stationary motor
             }
             else if (timer > 1450 && timer < 1550)//if the pulse width is 1.5ms
             {
-                comp.compParams["speed"] = "half";//half speed
+                comp.compParams["speed"].setValue<string>("half");//half speed
             }
             else if (timer > 1950 && timer < 2050)//if the pulse width is 2ms
             {
-                comp.compParams["speed"] = "full";//full speed
+                comp.compParams["speed"].setValue<string>("full");//full speed
             }
             else if (timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
             {

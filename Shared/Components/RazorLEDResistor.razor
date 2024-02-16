@@ -49,7 +49,7 @@
 
 		if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			toDo.compParams["value"] = AvrCPU.getPinState(conn!.toId);
+			toDo.compParams["value"].setValue(AvrCPU.getPinState(conn!.toId));
 		}
 		else
 		{

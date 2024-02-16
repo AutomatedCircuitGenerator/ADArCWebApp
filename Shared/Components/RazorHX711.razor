@@ -23,7 +23,7 @@
         //8388607 = +50kg up (assumption here, values defined by the actual physical loadcell)
         //-8388608 = -50kg down
         double step = 16777215 / 1000;//one decimal place
-        long number = Convert.ToInt64((double)comp.compParams["weight"] * 10 * step);
+        long number = Convert.ToInt64((double)comp.compParams["weight"].getValue() * 10 * step);
         List<bool> bits = new List<bool>();
         bool isNegative = number < 0;
         number = Math.Abs(number);
@@ -82,21 +82,21 @@
         if (!sck && comp.midSignal == 0)//starting state
         {
             comp.midSignal = 1;
-            comp.compParams["counter"] = 0;
+            comp.compParams["counter"].setValue(0);
             AvrCPU.setPinState(conn!.toId, false);//DOUT goes to LOW indicating data is ready
             await udelay(1); 
         }
         if (sck && comp.midSignal == 1)//trigger pulse HIGH
         {
             comp.midSignal = 2;
-            if ((int)comp.compParams["counter"] == 24)
+            if ((int)comp.compParams["counter"].getValue() == 24)
             {
                 AvrCPU.setPinState(conn!.toId, true);//set DOUT to high after 25th pulse
                 comp.midSignal = 0;
-                comp.compParams["counter"] = 0;
+                comp.compParams["counter"].setValue(0);
                 await udelay(51);
             }
-            else if (getSignal(comp)[23 - (int)comp.compParams["counter"]])
+            else if (getSignal(comp)[23 - (int)comp.compParams["counter"].getValue()])
     {
                 AvrCPU.setPinState(conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
             }
@@ -107,7 +107,7 @@
         }
         if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
         {
-            comp.compParams["counter"] = (int)comp.compParams["counter"] + 1;
+            comp.compParams["counter"].setValue( (int)comp.compParams["counter"].getValue() + 1);
             comp.midSignal = 0;
         }
     }

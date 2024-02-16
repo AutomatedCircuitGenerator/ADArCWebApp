@@ -39,7 +39,7 @@ export namespace interopManager {
             return window.innerHeight;
         }
 
-        private getModel() {
+        private getModel(){
             return (<any>window).monaco.editor.getModels()[0];
         }
 
@@ -49,6 +49,10 @@ export namespace interopManager {
 
         getCodeInPane(): string {
             return this.getModel().getValue();
+        }
+
+        setPaneCode(text: string) {
+            this.getModel().setValue(text);
         }
 
         makeMonacoError(message, line, column) {
@@ -134,6 +138,22 @@ export namespace interopManager {
             this.cyclesPerUs = counter / 2000000;
             console.log("cyclesPerUs: " + this.cyclesPerUs);
         }
+
+
+        async downloadFile(filename: string, contentStreamRef: any) {
+            await contentStreamRef;
+            console.log("download!");
+            const data = await contentStreamRef.arrayBuffer();
+            const blob = new Blob([data]);
+            const url = URL.createObjectURL(blob);
+            const anchor = document.createElement('a');
+            anchor.href = url;
+            anchor.download = filename ?? "";
+            anchor.click();
+            anchor.remove();
+            URL.revokeObjectURL(url);
+        }
+
     }
 
     

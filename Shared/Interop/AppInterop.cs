@@ -84,6 +84,11 @@ namespace ADArCWebApp.Shared.Interop
 			return await jsModule!.InvokeAsync<string>("getCodeInPane");
 		}
 
+		public static async void setCodeWrapper(string code)
+		{
+			await jsModule!.InvokeVoidAsync("setPaneCode", code);
+		}
+
 		public static async void stopWrapper() {
 			await jsModule!.InvokeVoidAsync("stop");
 			AvrCPU.portB = 0; AvrCPU.portC = 0;	AvrCPU.portD = 0;
@@ -119,5 +124,11 @@ namespace ADArCWebApp.Shared.Interop
 		{
 			await jsModule!.InvokeVoidAsync("calibrateTiming");
 		}
+
+		public static async void downloadFile(string fileName, DotNetStreamReference content) {
+			await jsModule!.InvokeVoidAsync("downloadFile", fileName, content);
+			content.Dispose();
+		}
+
     }
 }

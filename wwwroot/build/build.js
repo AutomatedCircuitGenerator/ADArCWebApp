@@ -4123,6 +4123,9 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             getCodeInPane() {
                 return this.getModel().getValue();
             }
+            setPaneCode(text) {
+                this.getModel().setValue(text);
+            }
             makeMonacoError(message, line, column) {
                 var marker = {
                     message: message,
@@ -4190,6 +4193,21 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                 }
                 this.cyclesPerUs = counter / 2000000;
                 console.log("cyclesPerUs: " + this.cyclesPerUs);
+            }
+            downloadFile(filename, contentStreamRef) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    yield contentStreamRef;
+                    console.log("download!");
+                    const data = yield contentStreamRef.arrayBuffer();
+                    const blob = new Blob([data]);
+                    const url = URL.createObjectURL(blob);
+                    const anchor = document.createElement('a');
+                    anchor.href = url;
+                    anchor.download = filename !== null && filename !== void 0 ? filename : "";
+                    anchor.click();
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
+                });
             }
         }
         interopManager.InteropManager = InteropManager;

@@ -31,12 +31,12 @@
     {
         Dictionary<int, int> register = new Dictionary<int, int>
         {
-            { 0x08, (int)comp.compParams["x"] & 0xFF },//ACC_DATA_X_LSB
-            { 0x09, (int)comp.compParams["x"] & 0xFF00 >> 8 },//ACC_DATA_X_MSB
-            { 0x0A, (int)comp.compParams["y"] & 0xFF },//ACC_DATA_Y_LSB
-            { 0x0B, (int)comp.compParams["y"] & 0xFF00 >> 8 },//ACC_DATA_Y_MSB
-            { 0x0C, (int)comp.compParams["z"] & 0xFF },//ACC_DATA_Z_LSB
-            { 0x0D, (int)comp.compParams["z"] & 0xFF00 >> 8 },//ACC_DATA_Z_MSB
+            { 0x08, (int)comp.compParams["x"].getValue() & 0xFF },//ACC_DATA_X_LSB
+            { 0x09, (int)comp.compParams["x"].getValue() & 0xFF00 >> 8 },//ACC_DATA_X_MSB
+            { 0x0A, (int)comp.compParams["y"].getValue() & 0xFF },//ACC_DATA_Y_LSB
+            { 0x0B, (int)comp.compParams["y"].getValue() & 0xFF00 >> 8 },//ACC_DATA_Y_MSB
+            { 0x0C, (int)comp.compParams["z"].getValue() & 0xFF },//ACC_DATA_Z_LSB
+            { 0x0D, (int)comp.compParams["z"].getValue() & 0xFF00 >> 8 },//ACC_DATA_Z_MSB
             { 0x0E, 0 },//MAG_DATA_X_LSB
             { 0x0F, 0 },//MAG_DATA_X_MSB
             { 0x10, 0 },//MAG_DATA_Y_LSB

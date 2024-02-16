@@ -10,7 +10,7 @@
         </button>
     }
 
-    <DynamicComponent Type="individualData.data.compType" Parameters="individualData.compParams"></DynamicComponent>
+    <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent>
 </div>
 
 <!-- ignore scaling -->
@@ -122,7 +122,17 @@
     }
     public void onInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
-        individualData.compParams[prop.Name.ToLower()] = convert? Convert.ToDouble(e.Value) : e.Value; 
+
+
+        if (convert)//theoretically number data has convert true, -> double, whereas strings have convert false.
+        {
+            individualData.compParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
+        }
+        else
+        {
+            individualData.compParams[prop.Name.ToLower()].setValue((string)e.Value);
+        }
+
         if (individualData.compParams.ContainsKey("translateOnInput")) 
         {
             individualData.data.compType.GetMethod("translate").Invoke(individualData, [individualData]);

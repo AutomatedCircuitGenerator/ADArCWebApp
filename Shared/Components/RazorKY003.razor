@@ -21,7 +21,7 @@
 			sig = AvrCPU.getPinState(conn!.toId);
 		}
 		
-		if ((bool)comp.compParams["magfield"])//set signal to low when a magnetic field is present
+		if ((bool)comp.compParams["magfield"].getValue())//set signal to low when a magnetic field is present
 		{
 			AvrCPU.setPinState(conn!.toId, false);
 		}

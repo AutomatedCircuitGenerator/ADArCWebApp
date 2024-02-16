@@ -19,15 +19,13 @@
 			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
 		</div>
 		<div class="center-toolbar">
-			<InputFile id="fileInput" OnChange="HandleFileChange" style="display: none;" />
-			<button class="toolbar-button" @onclick="SelectFile">
-				<span>⬇️️ Import</span>
-			</button>
-				<button class="toolbar-button" @onclick="ExportJSON">
+			<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile"/>
+			<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
+				⬇️️ Import
+			</label>
+
+			<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
 				<span>⬆️ Export</span>
-			</button>
-			<button class="toolbar-button">
-				<span>📂 Save</span>
 			</button>
 			<button class="toolbar-button" @onclick="OpenExternalHelp">
 				<span>❓Help</span>
@@ -134,78 +132,7 @@
 		JsRuntime.InvokeVoidAsync("window.open", url, "_blank");	
 	}
 
-	class Data
-	{
-		// public List<InstanceConnection> ConnLines { get; set; }
-		public int LocalId { get; set; }
-		public string Code { get; set; }
-		public Dictionary<int, ComponentInstance> Comps { get; set; }
-	}
-	async void ExportJSON(){
-		Data parentObject = new Data
-		{
-			// ConnLines = Index.buildCanvas.connLines,
-			Comps = comps,
-			LocalId = localIds,
-			Code = await AppInterop.getCodeWrapper()
-		};
-		// Console.WriteLine("file creating");
-		// string fileName = "WeatherForecast.json";
-		// await using FileStream createStream = File.Create(fileName);
-		// await JsonSerializer.SerializeAsync(createStream, parentObject);
-		// Console.WriteLine("file created");
-		// Console.WriteLine(File.ReadAllText(fileName));
-		var options = new JsonSerializerOptions { IncludeFields = true};
-		string result = JsonSerializer.Serialize(parentObject,options);
-		Console.WriteLine(result);
-	}
-	private async Task SelectFile()
-	{
-		// Trigger file selection by clicking the hidden input file component
-		await JsRuntime.InvokeVoidAsync("eval", "document.getElementById('fileInput').click();");
-	}
 
-    private async Task HandleFileChange(InputFileChangeEventArgs e)
-    {
-		var file = e.GetMultipleFiles().FirstOrDefault();
-		if (file != null)
-		{
-			var buffer = new byte[file.Size];
-			await file.OpenReadStream().ReadAsync(buffer);
-			string jsonString = System.Text.Encoding.UTF8.GetString(buffer);
-
-			// Now you have the JSON string, you can use it as needed
-			Console.WriteLine(jsonString);
-			DeserializeJSON(jsonString);
-		}
-	}
-
-	private void DeserializeJSON(string jsonString)
-	{
-		try
-		{
-			// Deserialize JSON data into a Data object
-			Data canvasData = JsonSerializer.Deserialize<Data>(jsonString);
-
-			// Now you have access to the deserialized data as a CanvasData object
-			// Do whatever you need with this data
-			// Console.WriteLine($"ConnLines:");
-			// foreach (var connLine in canvasData.ConnLines)
-			// {
-			// 	Console.WriteLine($"Id: {connLine.Id}");
-			// }
-
-			// Console.WriteLine($"Comps:");
-			// foreach (var kvp in canvasData.Comps)
-			// {
-			// 	Console.WriteLine($"Key: {kvp.Key}, Value: {kvp.Value.Id}");
-			// }
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error during deserialization: {ex.Message}");
-		}
-	}
 
 
 	public Index()
@@ -324,59 +251,68 @@
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
 				}
 
+				setupListeners();
 
-				if (comps.Values.Any(c=>c.globalId==1))	//set has an arduino uno
-				{
-					foreach (var c in comps.Values)		//iterate all components (don't know what listeners exist already)
-					{
-						if (c.globalId != 1)			//exclude the arduino
-						{
-							foreach (string listen in c.data.pinsToListen)	//add a listener for each important pin
-							{
-								int pin = -1;
-								if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
-								{
-									pin = conn!.toId;
-								}
-
-								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
-								//hopefully the only time the list extends 
-								//is on arduino, which is excluded here
-								if (!hasList || !list!.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
-								{
-									int pin2 = -1;
-									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-									{
-										pin2 = conn2!.toId;
-									}
-									var info = c.data.compType.GetMethod("translate");
-									if (info != null)
-									{
-										AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
-									}
-									else
-									{
-										Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");	
-									}
-								}
-							}
-						}
-					}
-
-					AppInterop.updateCodeWrapper();
-				}
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
 		}
 	}
+
+
+	private void setupListeners()
+	{
+		if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
+		{
+			foreach (var c in comps.Values)     //iterate all components (don't know what listeners exist already)
+			{
+				if (c.globalId != 1)            //exclude the arduino
+				{
+					foreach (string listen in c.data.pinsToListen)  //add a listener for each important pin
+					{
+						int pin = -1;
+						if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+						{
+							pin = conn!.toId;
+						}
+
+						bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+						//hopefully the only time the list extends
+						//is on arduino, which is excluded here
+						if (!hasList || !list!.Any(el => el.actor == c))            //no list for this pin yet, or the list does not contain any connections for this component
+						{
+							int pin2 = -1;
+							if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+							{
+								pin2 = conn2!.toId;
+							}
+							var info = c.data.compType.GetMethod("translate");
+							if (info != null)
+							{
+								AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
+							}
+							else
+							{
+								Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
+							}
+						}
+					}
+				}
+			}
+
+			AppInterop.updateCodeWrapper();
+		}
+	}
+
 	#endregion
 
 	private readonly List<string> ruleNames = new();
 	private readonly double totalRules = 19.0;
 	private string fileToLoad = "";
 	private double loadPercent = 0;
+	private bool selLockedOut = true;
+
 	protected override async Task OnInitializedAsync()
 	{
 
@@ -404,13 +340,15 @@
 		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,84);
 		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,84);
 		compPane!.releaseLockout();
+		selLockedOut = false;
+
 		base.StateHasChanged();
-		
-		
+
+
 		//all else finish first
 		await Task.Delay(1000);
 		loadingProgress = -1;
-		
+
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
@@ -422,7 +360,7 @@
 		// // allRulesLoaded = true;
 
 
-		
+
 	}
 
 	public void updatePinBindings(ComponentInstance comp)
@@ -444,8 +382,6 @@
 			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 
-			node temasd = a.To;
-			node adstemasd = a.From;
 
 			if (ha == hb)
 			{
@@ -464,12 +400,13 @@
 			}
 
 			var aPinName = "**NF**";
+			//TODO: del/readd err here !!
 			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
 			{
 				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
 			}
 			string bPinName = "";
-			
+
 
 			if (aPinName == "**NF**")
 			{
@@ -578,10 +515,10 @@
 			removecomp();
 		}
 	}
-	
+
 	//progress bar
 	public double loadingProgress = 0;
-	
+
 	private void HandleZoom(string action)
 	{
 		const double zoomStep = 0.1;
@@ -596,8 +533,106 @@
 		}
 
 		buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
-		
+
 		StateHasChanged();
 	}
 
+
+
+	public async Task loadFromFile(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+		var buffer = new byte[file.Size];
+		await e.File.OpenReadStream(512000).ReadAsync(buffer);
+		var str = System.Text.Encoding.UTF8.GetString(buffer);
+		Data data = DeserializeJSON(str);
+		comps.Clear();
+		buildCanvas!.connLines.Clear();
+		GraphSynthInvoke.inputs.Clear();
+		GraphSynthInvoke.destroyGraph();
+		BuildCode.outputPins.Clear();
+
+		//Console.WriteLine(ex);
+		localIds = data.LocalId;
+
+		foreach (var kv in data.Comps)
+		{
+			comps.Add(kv.Key, kv.Value);
+			var n = new node();//label with localId (easy tracking)
+			n.localLabels.Add("user_" + kv.Value.data.nodeName);
+			kv.Value.gsNode = n;
+
+			GraphSynthInvoke.GetNodes().Add(n);
+			GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+			GraphSynthInvoke.recg_apply();
+			GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
+			GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
+
+		}
+
+		foreach (var c in comps.Values)
+		{
+			updatePinBindings(c);   //keep an eye on this. could be not good for performance.
+		}
+		setupListeners();
+
+		AppInterop.setCodeWrapper(data.Code);
+	}
+
+	public async void downloadFile()
+	{
+		var stream = new MemoryStream();
+		var writer = new StreamWriter(stream);
+		writer.Write(await ExportJSON());
+		writer.Flush();
+		stream.Position = 0;
+
+		using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
+
+		AppInterop.downloadFile("adarc-circuit.adarc", streamRef);
+	}
+
+
+	class Data
+	{
+		// public List<InstanceConnection> ConnLines { get; set; }
+		public int LocalId { get; set; }
+		public string Code { get; set; }
+		public Dictionary<int, ComponentInstance> Comps { get; set; }
+	}
+	private async Task<string> ExportJSON(){
+		Data parentObject = new Data
+		{
+			// ConnLines = Index.buildCanvas.connLines,
+			Comps = comps,
+			LocalId = localIds,
+			Code = await AppInterop.getCodeWrapper()
+		};
+
+		var options = new JsonSerializerOptions { IncludeFields = true};
+		options.Converters.Add(new ParamSerializer());
+		return JsonSerializer.Serialize(parentObject,options);
+	}
+
+	private Data DeserializeJSON(string jsonString)
+	{
+		try
+		{
+			// Deserialize JSON data into a Data object
+			var options = new JsonSerializerOptions { IncludeFields = true };
+			options.Converters.Add(new ParamSerializer());
+			Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+
+			// Now you have access to the deserialized data as a CanvasData object
+			// Do whatever you need with this data
+
+			return canvasData;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error during deserialization: {ex.Message}");
+		}
+
+		return null;
+	}
 }

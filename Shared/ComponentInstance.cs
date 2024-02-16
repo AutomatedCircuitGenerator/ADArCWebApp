@@ -25,12 +25,12 @@ namespace ADArCWebApp.Shared
 		public int RegAddr;
 		public int byteIndex;
 		public long timer;
-		public Dictionary<string, object> compParams;
+		public Dictionary<string, IComponentParameter> compParams;
 
 		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			compParams = new Dictionary<string, object>(data.compParams);
+			compParams = new Dictionary<string, IComponentParameter>(data.templateParams);
 			this.x = x;
 			this.y = y;
 			zoomedX = x;
@@ -38,6 +38,14 @@ namespace ADArCWebApp.Shared
 			this.gsNode = gsNode;
 		}
 
+		public Dictionary<string, object> getPropsAsParams() {
+			Dictionary<string, object> ret = [];
+
+			foreach (var kv in compParams) { 
+				ret.Add(kv.Key, kv.Value.getValue());
+			}
+			return ret;
+		}
 
 		private static Dictionary<string, string> colorMap = new()
 		{

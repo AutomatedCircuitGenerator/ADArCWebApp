@@ -23,7 +23,7 @@
 		{
 			pin = conn!.toId;
 		}
-		AppInterop.sendADCToArduino(pin-14, (double)comp.compParams["alcohol"]*5/1024);//pin number and channel CAN BE DIFFERENT! SUBJECT TO CHANGE.
+		AppInterop.sendADCToArduino(pin-14, (double)comp.compParams["alcohol"].getValue()*5/1024);//pin number and channel CAN BE DIFFERENT! SUBJECT TO CHANGE.
 	}
 }
 
