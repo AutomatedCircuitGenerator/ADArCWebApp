@@ -1,4 +1,6 @@
-﻿@code {
+﻿@inject IDelayService delayservice
+@inject WebWorkerService webWorkerService;
+@code {
 
     [Parameter]
     public bool value { get; set; } = false;
@@ -40,9 +42,11 @@
         }
     }
     //static int count = 0;
-    public static void translate(ComponentInstance toDo)
+    public static async Task translate(ComponentInstance toDo)
     {
         var data = toDo.data;
+
+
 
         if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
@@ -50,14 +54,20 @@
         }
         else
         {
-            Console.WriteLine("GetConnection failed from LED Component!");    
+            Console.WriteLine("GetConnection failed from LED Component!");
         }
-       
+        AvrCPU.setPinState(conn!.toId, true);
+        Console.WriteLine("one"+AvrCPU.getPinState(conn!.toId));
+        //Console.WriteLine("LED worker: " + Pages.Index.app!.delayworker);
+        var worker = await Pages.Index.app!.getWorker();
+        Console.WriteLine("worker:" + worker);
+        await worker.delay(1000000);
         
         AvrCPU.setPinState(conn!.toId, true);
-         
-        Console.WriteLine(AvrCPU.getPinState(conn!.toId));
+        Console.WriteLine("two"+AvrCPU.getPinState(conn!.toId));
+        await worker.delay(1000000);
 
+        Console.WriteLine("three" + AvrCPU.getPinState(conn!.toId));
     }
 
 }

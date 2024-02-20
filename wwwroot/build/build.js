@@ -4169,29 +4169,38 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             }
             delayus(delay) {
                 return __awaiter(this, void 0, void 0, function* () {
+                    if (this.cyclesPerUs == -1) {
+                        yield this.calibrateTiming();
+                    }
+                    console.log("hello");
                     const start = performance.now();
                     for (var counter = 0; counter < this.cyclesPerUs * delay; counter++) {
                         performance.now();
                     }
+                    console.log("start: " + start + "end: " + performance.now());
                     var real = performance.now() - start;
                     if (real < 1) {
-                        return true;
+                        return new Promise((resolve, reject) => {
+                            resolve(true);
+                        });
                     }
                     var adjustRatio = (delay / 1000) / real;
                     adjustRatio = Math.max(Math.min(adjustRatio, 1.1), .9);
                     this.cyclesPerUs *= adjustRatio;
                     console.log(this.cyclesPerUs);
-                    return true;
+                    return new Promise((resolve, reject) => {
+                        resolve(true);
+                    });
                 });
             }
             calibrateTiming() {
                 return __awaiter(this, void 0, void 0, function* () {
                     let counter = 0;
                     const start = performance.now();
-                    while (performance.now() - start < 2000) {
+                    while (performance.now() - start < 20) {
                         counter++;
                     }
-                    this.cyclesPerUs = counter / 2000000;
+                    this.cyclesPerUs = counter / 20000;
                     console.log("cyclesPerUs: " + this.cyclesPerUs);
                     return true;
                 });

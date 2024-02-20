@@ -2,6 +2,7 @@
 using ADArCWebApp.Shared.Simulation;
 using Microsoft.JSInterop;
 using SpawnDev.BlazorJS;
+using SpawnDev.BlazorJS.JSObjects;
 using System.Runtime.InteropServices.JavaScript;
 
 namespace ADArCWebApp.Shared.Interop
@@ -64,7 +65,7 @@ namespace ADArCWebApp.Shared.Interop
 		
 		public static IJSInProcessObjectReference getModuleWrapper() { 
 			var module =runtime!.Call<IJSInProcessObjectReference>("window.interopManager.getInteropManager");
-			Console.WriteLine(module);
+			//Console.WriteLine(module);
 			return module;
 		}
 
@@ -124,8 +125,9 @@ namespace ADArCWebApp.Shared.Interop
             jsModule!.CallVoid("arduinoADCInput", channel, value);
         }
 
-		public static async Task<bool> usDelay(int us) {
-			return await jsModule!.CallAsync<bool>("delayus", us);
+		public static Task<bool> usDelay(int us) {
+			Console.WriteLine("prejs");
+			return jsModule!.CallAsync<bool>("delayus", us);
 		}
 
 		public static async void calibrate()

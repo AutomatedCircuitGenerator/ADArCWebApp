@@ -1,4 +1,4 @@
-﻿@page "/"
+﻿@page "/Index"
 @using GraphSynth.Representation
 @inject BlazorJSRuntime JsRuntime
 @inject NavigationManager navMan
@@ -58,7 +58,8 @@
 	int rightPaneAlign => isRightExpanded ? 0 : -37;
 	string runStopText = "▶ Run";
 	public bool isRunning = false;
-	public WebWorker? webworker;
+	public WebWorker? webWorker;
+	public IDelayService? delayworker;
 
 	void ToggleLeftSidebar()
 	{
@@ -82,16 +83,17 @@
 			if (response.stderr != "")
 			{
 				codePane.updateConsoleOutput(response.stderr, false);
+				var c = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
+				if (c.Count > 0) {
+					string lineSection = c.First().Value;
+					lineSection = lineSection[1..^1];
+					int mid = lineSection.IndexOf(":");
+					int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+					int column = int.Parse(lineSection[(mid + 1)..^0]);
 
-				string lineSection = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures.First().Value;
-				lineSection = lineSection[1..^1];
-				int mid = lineSection.IndexOf(":");
-				int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
-				int column = int.Parse(lineSection[(mid+1)..^0]);
-
-				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
-				AppInterop.makeMonacoErrorWrapper(message, line, column);
-
+					string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+					AppInterop.makeMonacoErrorWrapper(message, line, column);
+				}
 				runStopText = "▶ Run";
 			}
 			else
@@ -155,17 +157,25 @@
 			AppInterop.jsModule = AppInterop.getModuleWrapper();
 
 			AppInterop.updateScreenRatios(AppInterop.getWindowWidth(), AppInterop.getWindowHeight());
-			if (webworker == null) webworker = await webWorkerService.GetWebWorker();
-			//delayServiceWorker = webworker!.GetService<IDelayService>();
+
 			AppInterop.calibrate();
 
 
-			
+
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
 	}
 
+	public async Task<IDelayService> getWorker()
+	{
+		if (webWorker == null) webWorker = await webWorkerService.GetWebWorker();
+
+		delayworker = webWorker!.GetService<IDelayService>();
+		Console.WriteLine("worker: " + delayworker);
+
+		return delayworker;
+	}
 
 
 	#region component pane integration

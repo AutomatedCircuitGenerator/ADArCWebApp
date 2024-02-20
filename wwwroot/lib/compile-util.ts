@@ -26,7 +26,7 @@ export async function buildHex(source: string) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ sketch: source })
+        body: JSON.stringify({ sketch: source})
     });
     return (await resp.json()) as IHexiResult;
 }

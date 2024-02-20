@@ -5,18 +5,17 @@ namespace ADArCWebApp
 {
 
 	public interface IDelayService {
-		Task delay(int millisec);
+		Task<bool> delay(int usec);
 	}
 
 	public class DelayService : IDelayService
 	{
-		public async Task delay(int millisec)
+		public async Task<bool> delay(int usec)
 		{
 
 
-			await AppInterop.usDelay(millisec);
+			return await AppInterop.usDelay(usec);
 
-			return;
 		}
 	}
 }
