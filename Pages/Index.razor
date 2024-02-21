@@ -192,6 +192,7 @@
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
 
 			AppInterop.calibrate();
+			await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
@@ -647,8 +648,8 @@
 	// runs the introjs tutorial
 	private async Task runTutorial()
 	{
-		var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
+		// var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
 		// ant-menu-submenu-hidden
-		await module.InvokeAsync<object>("runTutorial");
+		await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
 	}
 }
