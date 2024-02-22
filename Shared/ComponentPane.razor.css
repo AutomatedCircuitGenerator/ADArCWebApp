@@ -66,3 +66,37 @@
 
 .icon {
 }
+
+.palette-tooltip {
+    z-index: 9999999999999;
+    border-radius: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: start;
+    width: 100%;
+    position: static;
+    margin-bottom: 18px;
+    padding: 5px;
+    font-size: 13.5px;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.palette-tooltip button {
+    background-color: white;
+    border-radius: 5px 5px 5px 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 1px;
+    padding-right: 1px;
+    border-color: transparent;
+    justify-self: center;
+    transform: scale(100%);
+    width: 80px;
+    align-self: center;
+    text-align: center;
+}
+
+.palette-tooltip label {
+    margin-bottom: 5px;
+}

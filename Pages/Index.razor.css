@@ -206,8 +206,9 @@ div, span {
     border-radius: 5px 5px 5px 5px;
     padding-left: 6px;
     padding-right: 3px;
-    left: 25%;
-    top: 40px;
+    left: 37%;
+    top: 55px;
+    font-size: 14px;
 }
 
 .zoom-tooltip button {
@@ -217,4 +218,58 @@ div, span {
     transform: scale(80%);
     padding-left: 1px;
     padding-right: 1px;
+    width: 60px;
+}
+
+.right-click-tooltip {
+    position: fixed;
+    z-index: 1;
+    border-radius: 5px 5px 5px 5px;
+    padding-left: 6px;
+    padding-right: 3px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    bottom: 35px;
+    left: 50%;
+    transform: translateX(-50%);
+    flex-wrap: wrap;
+    justify-content: center;
+    width: 550px;
+    align-items: center;
+    text-align: center;
+}
+
+.right-click-tooltip button {
+    background-color: white;
+    border-radius: 5px 5px 5px 5px;
+    border-color: transparent;
+    transform: scale(80%);
+    padding-left: 1px;
+    padding-right: 1px;
+    align-self: center;
+    width: 80px;
+}
+
+/* hides X-axis scrollbar in toolbar, but it is still scrollable */
+.toolbar[b-s7qrrfca0g]::-webkit-scrollbar {
+    display: none;
+}
+
+.tooltip-icon-for-zoom {
+    width: 5%;
+    height: 5%;
+}
+
+
+.workbench-title {
+    position: fixed;
+    z-index: 1;
+    padding-left: 6px;
+    padding-right: 3px;
+    padding-bottom: 5px;
+    padding-top: 5px;
+    bottom: 25px;
+    left: 50%;
+    transform: translateX(-50%);
+    font-size: 20px;
 }

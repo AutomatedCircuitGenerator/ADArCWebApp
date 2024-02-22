@@ -13,10 +13,17 @@
 			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
 			<span class="adarc-text">ADArC</span>
 		</div>
-		<div class="zoom-bar-container" @onmouseover="ShowLabel">
-            <button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 15px;">🔎</button>
-            <button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 24px;">🔎</button>
-        </div>
+		<div class="tutorial-button" style="font-size: 18px" @onclick="ShowTutorial"> <!-- change -->
+			<span>💡 Tutorial</span>
+		</div>
+
+		<!-- Disabling zoom for case study demo -->
+		<!--
+		<div class="zoom-bar-container">
+			<button class="zoom-button" @onclick=() => HandleZoom("in")' style="font-size: 15px;">🔎</button>
+			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 24px;">🔎</button>
+		</div>
+		-->
 		<div class="center-toolbar" style="font-size: 18px">
 			<button class="toolbar-button">
 				<span>⬇️️ Import</span>
@@ -24,24 +31,21 @@
 			<button class="toolbar-button">
 				<span>⬆️ Export</span>
 			</button>
-			<button class="toolbar-button">
-				<span>📂 Save</span>
-			</button>
 			<button class="toolbar-button" @onclick="OpenExternalHelp">
-				<span>❓Help</span>
+				<span>ℹ️ Help</span>
 			</button>
 			<button class="toolbar-button" @onclick="ToggleRunStop">
 				<span>@runStopText</span>
 			</button>
 		</div>
 	</div>
-		
+
 
 	<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
 		<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
-			<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
+			<MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
 		</div>
-		<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")">
+		<div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")">
 			<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
 				@if (isLeftExpanded)
 				{
@@ -55,10 +59,11 @@
 			</div>
 			<ComponentPane host="@this"></ComponentPane>
 		</div>
+		
 		<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-			<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+			<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null ? 1 : buildCanvas.zoomFactor" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
 		</div>
-		<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")">
+		<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")"> <!-- code panel -->
 			<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
 				@if (isRightExpanded)
 				{
@@ -72,13 +77,29 @@
 			<CodePane></CodePane>
 		</div>
 	</div>
-	@if (showLabel)
-                {
-    	            <div class="zoom-tooltip" style="background: #ece1be">
-    		            <label>Use these buttons to zoom in and out of the Canvas</label>
-    		            <button @onclick="GotItClicked">Got it!</button>
-    	            </div>
-                }
+	@if (showZoomTooltip) 
+	{
+		<div class="zoom-tooltip" style="background: #ece1be">
+			<label>Use these buttons to zoom in and out of the Canvas.</label>
+			<button @onclick="GotItClicked">Got it!</button>
+		</div>
+	}
+	
+	@if (loadingProgress == -1)
+	{
+		<div class="workbench-title">
+			<span @onclick="showRightClickTooltipFn">💡 Workbench</span>
+		</div>
+	}
+	@if (showRightClickTooltip) {
+		<div class="right-click-tooltip" style="background: #ece1be">
+			<label>This is the Workbench.</label>
+			<label style="font-size: 13.5px">Right-click components dragged from the Component Pallete for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
+			<button @onclick="HideRightClickTooltip">Got it!</button>
+		</div>
+	}
+
+
 </div>
 <div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
 	<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
@@ -91,7 +112,7 @@
 	bool isRightExpanded = false;
 	int leftPaneAlign => isLeftExpanded ? 0 : -24;
 	int rightPaneAlign => isRightExpanded ? 0 : -39;
-	string runStopText = "▶ Run";
+	string runStopText = "▶️ Run";
 	public bool isRunning = false;
 	
 	void ToggleLeftSidebar()
@@ -129,7 +150,7 @@
 				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
 				AppInterop.makeMonacoErrorWrapper(message, line, column);
 
-				runStopText = "▶ Run";
+				runStopText = "▶️ Run";
 			}
 			else
 			{
@@ -548,26 +569,45 @@
 		StateHasChanged();
 	}
 
-	bool showLabel = false;
+	bool showZoomTooltip = false;
 	bool labelShownBefore = false;
 
 	void ShowLabel()
 	{
 		if (!labelShownBefore)
 		{
-			showLabel = true;
+			showZoomTooltip = true;
 		}
 	}
 
 	void HideLabel()
 	{
-		showLabel = false;
+		showZoomTooltip = false;
 	}
 
-	void GotItClicked()
+	void GotItClicked() //for zoom tooltip
 	{
 		labelShownBefore = true;
-		showLabel = false;
+		showZoomTooltip = false;
 	}
+
+	bool showRightClickTooltip = false;
+	void HideRightClickTooltip() {
+		showRightClickTooltip = false;
+	}
+
+	
+	void ShowTutorial()
+	{
+		<!-- Add intro js tutorial -->
+	}
+	
+	void showRightClickTooltipFn()
+	{
+		showRightClickTooltip = true;
+
+	}
+	
+	
 }
 

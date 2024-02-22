@@ -2,21 +2,31 @@
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
 
+<span @onclick="showCodeTooltipFn" style="font-size: 20px; color: black; display: block; text-align: center; padding-bottom: 10px; margin-top: 3px">💡 Code Panel</span>
+
+@if (showCodeTooltip) {
+			<div class="code-tooltip" style="background: #ece1be">
+                <label>Each component added to the Workbench auto-generates code in this Panel, which you can edit freely.</label><br/>
+                <label>Click the '▶️ Run' button above to compile it and start the simulation on the Workbench.</label><br/>
+                <label>All types of output after running the code will appear in the Console, right below the Code Editor.</label><br/>
+                <label>The '⬆️ Export' button above will save to a file both your code below and the components on the Workbench.</label>
+                <button @onclick="GotItClickedCode">Got it!</button>
+			</div>
+		}
 
 <div class="code-container">
+    
+    <!-- Container for the Monaco Editor -->
+    <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
 
-
-<!-- Create a container for the Monaco Editor -->
-<StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
-
-<!-- Create a container for the console output -->
-<div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
-        @foreach(string line in text)
+    <!-- Container for the console output -->
+    <div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
+        @foreach (string line in text)
         {
-            <span class="@(line.Contains("Error during build:")?"error":"auto")">@line</span><hr>
+            <span class="@(line.Contains("Error during build:") ? "error" : "auto")">@line</span>
+            <hr>
         }
-</div>
-
+    </div>
 </div>
 
 @code {
@@ -37,11 +47,11 @@
             };
     }
 
-
     public CodePane()
     {
         Pages.Index.codePane = this;
     }
+
 
     List<string> text = ["This is the Console"];
 
@@ -97,5 +107,15 @@
             index++;
         }
     }
-  
+
+    public bool showCodeTooltip = false;
+    void showCodeTooltipFn() { showCodeTooltip = true;  }
+    
+    public int gotItClickedCode = 0;
+    void HideCodeTooltipCode() { showCodeTooltip = false; }
+
+    void GotItClickedCode() {  
+        gotItClickedCode = 1; // Set to 1 when "Got it!" is clicked
+        HideCodeTooltipCode(); // Hide the tooltip
+    }
 }

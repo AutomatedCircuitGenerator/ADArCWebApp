@@ -1,49 +1,14 @@
 ﻿.comp-wrapper {
     padding: 25px;
     display: flex;
-}
-#deletebutton {
-    right: 5px;
-    top: 0.5%;
     position: absolute;
-    border: none;
-    background-color: transparent;
 }
-
-    #deletebutton span {   
-        font-size: 15px;
-    }
-    
-#environmental-settings-button {
-    right: 30px;
-    top: 0.5%;
-    position: absolute;
-    border: none;
-    background-color: transparent;
-}
-
-    #environmental-settings-button span {
-        font-size: 18px;
-    }
-
-#component-help-button {
-    right: 55px;
-    top: 0.5%;
-    position: absolute;
-    border: none;
-    background-color: transparent;
-}
-
-    #component-help-button span {
-        font-size: 18px;
-    }
 
 .a-border {
-    background-image: linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%);
+    background-image: linear-gradient(90deg, gray 50%, gray 50%), linear-gradient(90deg, gray 50%, gray 50%), linear-gradient(0deg, gray 50%, gray 50%), linear-gradient(0deg, gray 50%, gray 50%);
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-size: 15px 2px, 15px 2px, 2px 15px, 2px 15px;
     background-position: left top, right bottom, left bottom, right top;
-    animation: border-dance 1s infinite linear;
 }
 
 .b-border {
@@ -131,3 +96,49 @@
     border: transparent;
     font-size: 15px;
 }
+
+.comp-menu {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+.right-click-container {
+    z-index: 99999999999999999999;
+    display: flex;
+    flex-direction: column;
+    background-color: lightgray;
+    border-radius: 1rem 1rem 1rem 1rem;
+    position: absolute;
+    max-width: fit-content;
+    justify-content: left;
+    margin-left: 5px;
+    margin-right: 5px;
+    align-items: flex-start;
+    min-width: fit-content;
+    border-color: gray;
+    border-style: solid;
+    text-align: left;
+}
+
+.right-click-container button {
+    background-color: transparent;
+    border-color: transparent;
+    justify-content: flex-start;
+    align-items: flex-start;
+    max-width: 100%;
+    padding-right: 5px;
+    padding-left: 5px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    margin-right: 5px;
+    color: black;
+    text-align: left;
+    min-width: fit-content;
+    white-space: nowrap;
+    display: flex;
+    text-align-all: start;
+}
+
+.right-click-container button:not(:last-child) {
+    border-bottom: 1px solid rgba(145, 145, 145, 0.3); }

@@ -1,5 +1,18 @@
 ﻿<div class="comp-container">
 	<div class="card-wrapper">
+		
+		<span @onclick="showPaletteTooltipFn" style="font-size: 20px; color: black; display: block; text-align: center; padding-bottom: 13px; margin-top: -18px;">
+			💡 Component Palette
+		</span>
+		
+		@if (showPaletteTooltip) {
+			<div class="palette-tooltip" style="background: #ece1be">
+				<label>Drag components from the Component Palette to the Workbench and they will automatically connect to the Arduino of your choice.</label>
+				<label>Right click components for specific information.</label>
+				<button @onclick="GotItClickedPalette">Got it!</button>
+			</div>
+                    		}
+
 		@foreach (Directory d1 in dir.subDirectories)
 		{
 			<button class="directory-button level-1" @onclick="@(e => d1.isHidden = !d1.isHidden)">
@@ -28,7 +41,7 @@
 										<div class="col-layout">
 											@foreach (ComponentCard card in d3.contents)
 											{
-												<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
+												<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="() => setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 											}
 										</div>
 									</div>
@@ -39,7 +52,7 @@
 								<div class="col-layout">
 									@foreach (ComponentCard card in d2.contents)
 									{
-										<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
+										<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="() => setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 									}
 								</div>
 							}
@@ -51,7 +64,7 @@
 					<div class="col-layout">
 						@foreach (ComponentCard card in d1.contents)
 						{
-							<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="()=>setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
+							<ComponentCard name="@card.name" globalId="@card.globalId" handleClick="() => setHostTargetId(card.globalId)" disabled="@loadLockout"></ComponentCard>
 						}
 					</div>
 				}
@@ -156,4 +169,27 @@
 	{
 		host.setTargetID(id);
 	}
+	
+	public bool showPaletteTooltip = false;
+
+	void showPaletteTooltipFn()
+	{
+		showPaletteTooltip = true;
+
+	}
+
+	public int gotItClicked = 0;
+	
+	void HidePaletteTooltip()
+	{
+		showPaletteTooltip = false;
+	}
+
+	void GotItClickedPalette()
+	{
+		gotItClicked = 1; // Set to 1 when "Got it!" is clicked
+		HidePaletteTooltip(); // Hide the tooltip
+	}
+
+}
 }
