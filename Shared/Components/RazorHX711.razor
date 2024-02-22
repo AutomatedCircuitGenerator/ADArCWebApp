@@ -63,17 +63,17 @@
         return bits;
     }
 
-    async public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool dt = false;
         bool sck = false;
         if (0 == comp.getConnection("DT", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            dt = AvrCPU.getPinState(conn!.toId);
+            dt = await AvrCPU.getPinState(conn!.toId);
         }
         if (0 == comp.getConnection("SCK", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            sck = AvrCPU.getPinState(conn2!.toId);
+            sck = await AvrCPU.getPinState(conn2!.toId);
         }
 
         //if data ready, 25-27 pulses will be sent through SCK, each pulse shifts out 1 bit, starting from msb
@@ -83,26 +83,24 @@
         {
             comp.midSignal = 1;
             comp.compParams["counter"].setValue(0);
-            AvrCPU.setPinState(conn!.toId, false);//DOUT goes to LOW indicating data is ready
-            await udelay(1); 
+            AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//DOUT goes to LOW indicating data is ready
         }
         if (sck && comp.midSignal == 1)//trigger pulse HIGH
         {
             comp.midSignal = 2;
             if ((int)comp.compParams["counter"].getValue() == 24)
             {
-                AvrCPU.setPinState(conn!.toId, true);//set DOUT to high after 25th pulse
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);//set DOUT to high after 25th pulse
                 comp.midSignal = 0;
                 comp.compParams["counter"].setValue(0);
-                await udelay(51);
             }
             else if (getSignal(comp)[23 - (int)comp.compParams["counter"].getValue()])
     {
-                AvrCPU.setPinState(conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
             }
             else
             {
-                AvrCPU.setPinState(conn!.toId, false);
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
             }
         }
         if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
@@ -110,15 +108,6 @@
             comp.compParams["counter"].setValue( (int)comp.compParams["counter"].getValue() + 1);
             comp.midSignal = 0;
         }
-    }
-    static Task udelay(long us)
-    {
-        // var sw = System.Diagnostics.Stopwatch.StartNew();
-        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        // while (sw.ElapsedTicks < v)
-        // {
-        // }
-        return Task.Delay(TimeSpan.FromMicroseconds(us));
     }
 }
 

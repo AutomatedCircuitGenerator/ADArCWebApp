@@ -1,4 +1,5 @@
-﻿import { AVRADC, adcConfig } from "./lib/avr8js/index";
+﻿import { TimingPacket } from "./lib/TimingPacket";
+import { AVRADC, PinState, adcConfig } from "./lib/avr8js/index";
 import { buildHex } from "./lib/compile-util";
 import { AVRRunner } from "./lib/execute";
 
@@ -13,15 +14,16 @@ export namespace interopManager {
         startCodeLoop(wrapper: any) {
             console.log("starting code!")
             this.runner.portB.addListener(async (e) => {
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
+                console.log("send time: " + new Date(Date.now()).toISOString() + " value: " + e);
+                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
             });
 
             this.runner.portC.addListener(async (e) => {
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 1);
+                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
             });
 
             this.runner.portD.addListener(async (e) => {
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
+                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
             });
 
             this.runner.usart.onByteTransmit = async (value: number) => {
@@ -85,58 +87,36 @@ export namespace interopManager {
             this.runner.stop();
         }
 
-        arduinoInput(pin: number, value: boolean) {
-            if (pin < 8) {
-                this.runner.portD.setPin(pin, value);
-            }
-            else if (pin < 14) {
-                this.runner.portB.setPin(pin - 8, value);
-            }
-            else if (pin < 20) {
-                this.runner.portC.setPin(pin - 14, value);
-            }
+        arduinoInput(insts: TimingPacket) {
+            console.log("arrive time: " + new Date(Date.now()).toISOString());
+            this.runner.instructions.push(insts);
         }
 
         arduinoADCInput(channel: number, value: number) {
             this.adc.channelValues[channel] = value;
         }
 
-        async delayus(delay: number): Promise<boolean> {
-            const start = performance.now();
-
-            for (var counter = 0; counter < this.cyclesPerUs * delay; counter++) {
-                performance.now();
+        getPinState(index: number): boolean {
+            var state: PinState;
+            if (index < 8) {
+                state = this.runner.portD.pinState(index);
             }
-            //console.log("start: " + start + "end: " + performance.now());
+            else if (index < 14) {
+                state = this.runner.portB.pinState(index - 8);
+            }
+            else if (index < 20) {
+                state = this.runner.portC.pinState(index - 14);
+            }
+            else {
+                console.log("getPinState received invalid index: " + index);
+            }
 
-            var real = performance.now() - start;
-
-            if (real < 1) {
+            if (state == PinState.High || state == PinState.InputPullUp) {
                 return true;
             }
-
-            var adjustRatio = (delay / 1000) / real;
-
-            adjustRatio = Math.max(Math.min(adjustRatio,1.1), .9);
-
-            this.cyclesPerUs *= adjustRatio;
-
-            console.log(this.cyclesPerUs);
-
-            return true;
-        }
-
-        cyclesPerUs = -1;
-
-        calibrateTiming() {
-            let counter = 0;
-            const start = performance.now();
-            while (performance.now() - start < 2000) {
-                counter++;
+            else {
+                return false;
             }
-
-            this.cyclesPerUs = counter / 2000000;
-            console.log("cyclesPerUs: " + this.cyclesPerUs);
         }
 
 

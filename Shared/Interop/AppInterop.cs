@@ -1,6 +1,7 @@
 ﻿using ADArCWebApp.ComponentNamespace;
 using ADArCWebApp.Shared.Simulation;
 using Microsoft.JSInterop;
+using System.Text.Json;
 
 namespace ADArCWebApp.Shared.Interop
 {
@@ -23,8 +24,9 @@ namespace ADArCWebApp.Shared.Interop
 
 
 		[JSInvokable]
-		public static void sendVal(int data, int register) //0-B, 1-c, 2-d
+		public static void sendVal(int data, int originCycle, int register) //0-B, 1-c, 2-d
 		{
+			Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:FFFFFFF"));
 			//Console.WriteLine(register + " " + data);
 			switch (register)
 			{
@@ -38,7 +40,7 @@ namespace ADArCWebApp.Shared.Interop
 					throw new Exception("invalid portRegister ID detected!");
 			}
 
-			AvrCPU.updateMasking();
+			AvrCPU.updateMasking(originCycle);
 
 		}
 
@@ -59,7 +61,7 @@ namespace ADArCWebApp.Shared.Interop
 		}
 
 
-		public static async Task<IJSObjectReference> getModuleWrapper() { 
+		public static async Task<IJSObjectReference> getModuleWrapper() {
 			return await runtime!.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
 		}
 
@@ -67,10 +69,10 @@ namespace ADArCWebApp.Shared.Interop
 			await jsModule!.InvokeVoidAsync("startCodeLoop", DotNetObjectReference.Create(Pages.Index.app!));
 		}
 
-        public static async void updateCodeWrapper()
-        {
-            await jsModule!.InvokeVoidAsync("updateCodeInPane", BuildCode.code);
-        }
+		public static async void updateCodeWrapper()
+		{
+			await jsModule!.InvokeVoidAsync("updateCodeInPane", BuildCode.code);
+		}
 
 		public static async void makeMonacoErrorWrapper(string message, int line, int column) {
 			await jsModule!.InvokeVoidAsync("makeMonacoError", message, line, column);
@@ -91,38 +93,36 @@ namespace ADArCWebApp.Shared.Interop
 
 		public static async void stopWrapper() {
 			await jsModule!.InvokeVoidAsync("stop");
-			AvrCPU.portB = 0; AvrCPU.portC = 0;	AvrCPU.portD = 0;
-			AvrCPU.updateMasking();
+			AvrCPU.portB = 0; AvrCPU.portC = 0; AvrCPU.portD = 0;
+			AvrCPU.updateMasking(0);
 
-        }
-
-        public static async Task<CompileResponse> compileWrapper()
-        {
-            return await jsModule!.InvokeAsync<CompileResponse>("compile");
-        }
-
-		public class CompileResponse { 
-			public string stdout {get;set;}
-			public string stderr { get;set;}
 		}
 
-        public static async void sendPinToArduino(int pin, bool value)
-        {
-            await jsModule!.InvokeVoidAsync("arduinoInput", pin, value);
-        }
-
-        public static async void sendADCToArduino(int channel, double value)
-        {
-            await jsModule!.InvokeVoidAsync("arduinoADCInput", channel, value);
-        }
-
-		public static async Task<bool> usDelay(int us) {
-			return await jsModule!.InvokeAsync<bool>("delayus", us);
-		}
-
-		public static async void calibrate()
+		public static async Task<CompileResponse> compileWrapper()
 		{
-			await jsModule!.InvokeVoidAsync("calibrateTiming");
+			return await jsModule!.InvokeAsync<CompileResponse>("compile");
+		}
+
+		public class CompileResponse {
+			public string stdout { get; set; }
+			public string stderr { get; set; }
+		}
+
+		public static async void sendIntructionsToArduino(TimingPacket pkt)
+		{
+			//var str = JsonSerializer.Serialize(pkt);
+			//Console.WriteLine(str);
+			Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:FFFFFFF"));
+			await jsModule!.InvokeVoidAsync("arduinoInput", pkt);
+		}
+
+		public static async void sendADCToArduino(int channel, double value)
+		{
+			await jsModule!.InvokeVoidAsync("arduinoADCInput", channel, value);
+		}
+
+		public static async Task<bool> getPinValue(int pinInd) {
+			return await jsModule!.InvokeAsync<bool>("getPinState", pinInd);
 		}
 
 		public static async void downloadFile(string fileName, DotNetStreamReference content) {

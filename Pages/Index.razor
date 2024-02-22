@@ -95,17 +95,20 @@
 			if (response.stderr != "")
 			{
 				codePane.updateConsoleOutput(response.stderr, false);
-
-				string lineSection = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures.First().Value;
-				lineSection = lineSection[1..^1];
-				int mid = lineSection.IndexOf(":");
-				int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
-				int column = int.Parse(lineSection[(mid+1)..^0]);
-
-				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
-				AppInterop.makeMonacoErrorWrapper(message, line, column);
-
 				runStopText = "▶ Run";
+				var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
+				if (caps.Count > 0)
+				{
+					string lineSection = caps.First().Value;
+					lineSection = lineSection[1..^1];
+					int mid = lineSection.IndexOf(":");
+					int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+					int column = int.Parse(lineSection[(mid + 1)..^0]);
+
+					string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+					AppInterop.makeMonacoErrorWrapper(message, line, column);
+				}
+
 			}
 			else
 			{
@@ -183,7 +186,6 @@
 
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
 
-			AppInterop.calibrate();
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
@@ -290,7 +292,7 @@
 							var info = c.data.compType.GetMethod("translate");
 							if (info != null)
 							{
-								AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
+								AvrCPU.addListener(pin2, c, info);
 							}
 							else
 							{
@@ -337,8 +339,8 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,84);
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,84);
+		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,85);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,85);
 		compPane!.releaseLockout();
 		selLockedOut = false;
 

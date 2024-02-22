@@ -149,7 +149,7 @@
         return values[startIndex + index] != 0 ? this.color : this.offColor;
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         int a = -1, b = -1, c = -1, d = -1, e = -1, f = -1, g = -1, dp = -1;
         if (0 == comp.getConnection("a", out InstanceConnection? conn, out List<InstanceConnection>? all))
@@ -186,14 +186,14 @@
         }
 
         int[] value = { 0, 0, 0, 0, 0, 0, 0, 0 };
-        value[0] = AvrCPU.getPinState(a) ? 1 : 0;
-        value[1] = AvrCPU.getPinState(b) ? 1 : 0;
-        value[2] = AvrCPU.getPinState(c) ? 1 : 0;
-        value[3] = AvrCPU.getPinState(d) ? 1 : 0;
-        value[4] = AvrCPU.getPinState(e) ? 1 : 0;
-        value[5] = AvrCPU.getPinState(f) ? 1 : 0;
-        value[6] = AvrCPU.getPinState(g) ? 1 : 0;
-        value[7] = AvrCPU.getPinState(dp) ? 1 : 0;
+        value[0] = await AvrCPU.getPinState(a) ? 1 : 0;
+        value[1] = await AvrCPU.getPinState(b) ? 1 : 0;
+        value[2] = await AvrCPU.getPinState(c) ? 1 : 0;
+        value[3] = await AvrCPU.getPinState(d) ? 1 : 0;
+        value[4] = await AvrCPU.getPinState(e) ? 1 : 0;
+        value[5] = await AvrCPU.getPinState(f) ? 1 : 0;
+        value[6] = await AvrCPU.getPinState(g) ? 1 : 0;
+        value[7] = await AvrCPU.getPinState(dp) ? 1 : 0;
 
         comp.compParams["values"].setValue(value);
 

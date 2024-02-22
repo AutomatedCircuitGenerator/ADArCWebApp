@@ -43,13 +43,13 @@
 
 	
 	//static int count = 0;
-	public static void translate(ComponentInstance toDo)
+	public static void translate(ComponentInstance comp, int pinChangeCycle)
 	{
-		var data = toDo.data;
+		var data = comp.data;
 
-		if (0 == toDo.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		if (0 == comp.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			toDo.compParams["value"].setValue(AvrCPU.getPinState(conn!.toId));
+			comp.compParams["value"].setValue(AvrCPU.getPinState(conn!.toId));
 		}
 		else
 		{

@@ -10,7 +10,7 @@
                 new ElementPin(name: "SDA",  x: 49.8, y: 139, signals: new PinSignalInfo[] { }, number: 2),
                 new ElementPin(name: "GND", x: 69.4, y: 139, signals: new PinSignalInfo[] { }, number: 4),
                 new ElementPin(name: "NC", x: 59.6, y: 139, signals: new PinSignalInfo[] { }, number: 3),
-                
+
             };
         }
     }
@@ -40,12 +40,12 @@
         return ret;
     }
 
-    public static async void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool pin = false;
         if (0 == comp.getConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            pin = AvrCPU.getPinState(conn!.toId);
+            pin = await AvrCPU.getPinState(conn!.toId);
         }
 
         if (!pin && comp.midSignal == 0)
@@ -55,57 +55,46 @@
         if (pin && comp.midSignal == 1)
         {
             comp.midSignal = 2;
-            sendSignal(comp, conn!.toId);
+            sendSignal(pinChangeCycle, comp, conn!.toId);
         }
         // false 1ms+ -> true (20-40us) trigger
         //then send
     }
 
 
-    async static void sendSignal(ComponentInstance comp, int id)
+    static void sendSignal(int originCycles, ComponentInstance comp, int id)
     {
         //false (80us) -> true (80us) ack
         //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
+        var pkt = new TimingPacket(originCycles);
+        var inst = pkt.addInstruction(new(id, false, 1));//1 us delay, shouldn't matter that much
+        inst = pkt.addInstruction(new(inst, 75, true)); //80 us after prev, change the line state (to true)
 
-        AvrCPU.setPinState(id, false);
-        await udelay(80);
-        //Pages.Index.codePane!.updateConsoleOutput("set False", false);
-        //bool r = await AppInterop.usDelay(10);
-        AvrCPU.setPinState(id, true);
-        await udelay(80);
-        //Pages.Index.codePane!.updateConsoleOutput("set true", false);
-        //r = await AppInterop.usDelay(2000000);
-        // byte[] sig = getSignal(comp);
-        // for (int i = 0; i < 40; i++)
-        // {
-        //     bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
-        //     AvrCPU.setPinState(id, false);
-        //     udelay(35);
-        //     AvrCPU.setPinState(id, true);
-        //     if (res)
-        //    {
-        //         udelay(55);
-        //     }
-        //    else
-        //     {
-        //         udelay(12);        
-        //     }
-        // }
 
-        AvrCPU.setPinState(id, false);       
-        //Pages.Index.codePane!.updateConsoleOutput("set False", false);
+        inst = pkt.addInstruction(new(inst, 75, true));//another 80 us, change line state (to false)
+
+        byte[] sig = getSignal(comp);
+        for (int i = 0; i < 40; i++)
+        {
+            bool res = (sig[i / 8] & 1 << (i % 8)) == 1;
+            inst = pkt.addInstruction(new(inst, 50, true));//entry is false, wait 50 us, then change (to high)
+
+            if (res)
+            {
+                inst = pkt.addInstruction(new(inst, 70, true));//run true for 70 us, then change (to false)
+            }
+            else
+            {
+                inst = pkt.addInstruction(new(inst, 27, true));//see above, but only 27 us for 0
+            }
+        }
+
+        //state exits loop in false state, no need to change.
+
+        AppInterop.sendIntructionsToArduino(pkt);
         comp.midSignal = 0;
     }
 
-    async static Task udelay(long us)
-    {
-        // var sw = System.Diagnostics.Stopwatch.StartNew();
-        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        // while (sw.ElapsedTicks < v)
-        // {
-        // }
-        await Task.Delay(TimeSpan.FromMicroseconds(us));
-    }
 }
 <svg width="15.1mm"
      height="30.885mm"
