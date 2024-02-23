@@ -253,6 +253,11 @@
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
 				}
 
+				if (comps[localIds].globalId == 20)
+				{
+					//Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+					AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
+				}
 				setupListeners();
 
 			}
@@ -485,10 +490,16 @@
 	{
 		node Comp2remove = Index.comps[selectedComponent].gsNode;
 
+		if (comps[selectedComponent].globalId == 20)
+		{
+			AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
+		}
+
 		GraphSynthInvoke.removeComp(Comp2remove);
 		comps.Remove(selectedComponent);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
+
 
 		BuildCode.outputPins.Clear();
 		buildCanvas!.connLines.Clear();

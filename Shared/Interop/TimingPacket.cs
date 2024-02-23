@@ -34,7 +34,7 @@
 
     public class PinInstruction : IComparable<PinInstruction>
     {
-        public bool IsOn { get; set; }
+        public bool isOn { get; set; }
         public int pin { get; set; }
         public double cumulUsSinceOriginCycle { get; set; }
 
@@ -43,14 +43,14 @@
         public PinInstruction(int affectsPin, bool shouldSetOn, double timeSinceOriginUs) { 
             this.pin = affectsPin;
             this.cumulUsSinceOriginCycle = timeSinceOriginUs;
-            this.IsOn = shouldSetOn;
+            this.isOn = shouldSetOn;
         }
 
         public PinInstruction(PinInstruction prev, int furtherUsDelay, bool changeState) {
             if (changeState) {
-                IsOn = !prev.IsOn;
+                isOn = !prev.isOn;
             }
-            else { IsOn = prev.IsOn; }
+            else { isOn = prev.isOn; }
             pin = prev.pin;
             cumulUsSinceOriginCycle = prev.cumulUsSinceOriginCycle + furtherUsDelay;
         }

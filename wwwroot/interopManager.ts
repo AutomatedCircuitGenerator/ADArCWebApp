@@ -10,19 +10,51 @@ export namespace interopManager {
         interopLoc = "ADArCWebApp";
         runner: AVRRunner;
         adc: AVRADC;
+        awaitResponseOn: number[] = [];
+        prevB: number = 0;
+        prevC: number = 0;
+        prevD: number = 0;
+
+        private getChangedPins(newReg: number, regIndex: number): number[] {
+            var diff: number;
+            var delta: number;
+            if (regIndex === 0) {
+                //b
+                diff = newReg ^ this.prevB;
+                delta = 8;
+            }
+            else if (regIndex === 1) {
+                //c
+                diff = newReg ^ this.prevC;
+                delta = 14;
+            }
+            else {
+                //d
+                diff = newReg ^ this.prevD;
+                delta = 0;
+            }
+            //magic bitshift. maps each bit to array 0/1, multiply by index +1, remove 0s, 
+            //then subtract the one and convert to absolute pins
+            return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta-1));
+        }
 
         startCodeLoop(wrapper: any) {
             console.log("starting code!")
             this.runner.portB.addListener(async (e) => {
-                console.log("send time: " + new Date(Date.now()).toISOString() + " value: " + e);
+                this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
+                this.prevB = e;
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
             });
 
             this.runner.portC.addListener(async (e) => {
+                this.runner.pausedOn.concat(this.getChangedPins(e, 1).filter(e => this.awaitResponseOn.includes(e)));
+                this.prevC = e;
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
             });
 
             this.runner.portD.addListener(async (e) => {
+                this.runner.pausedOn.concat(this.getChangedPins(e, 2).filter(e => this.awaitResponseOn.includes(e)));
+                this.prevD = e;
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
             });
 
@@ -85,11 +117,30 @@ export namespace interopManager {
 
         stop() {
             this.runner.stop();
+            this.runner.pausedOn = [];
+        }
+
+        //go 0-19 or whatever
+        addResponseReqFlag(absoluteIndex: number) {
+            this.awaitResponseOn.push(absoluteIndex);
+        }
+
+        //go 0-19 or whatever
+        removeResponseReqFlag(absoluteIndex: number) {
+            const index = this.awaitResponseOn.indexOf(absoluteIndex);
+            if (index > -1) {
+                this.awaitResponseOn.splice(index, 1);
+            }
         }
 
         arduinoInput(insts: TimingPacket) {
-            console.log("arrive time: " + new Date(Date.now()).toISOString());
-            this.runner.instructions.push(insts);
+            //console.log("JS arrive cycle:" + this.runner.cpu.cycles);
+            var real = TimingPacket.fix(insts);//comes in unsorted for some reason. fix it here.
+            this.runner.instructions.push(real);
+            const index = this.runner.pausedOn.indexOf(insts.instructions[0].pin);
+            if (index > -1) {
+                this.runner.pausedOn.splice(index, 1);//remove element
+            }
         }
 
         arduinoADCInput(channel: number, value: number) {

@@ -26,7 +26,6 @@ namespace ADArCWebApp.Shared.Interop
 		[JSInvokable]
 		public static void sendVal(int data, int originCycle, int register) //0-B, 1-c, 2-d
 		{
-			Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:FFFFFFF"));
 			//Console.WriteLine(register + " " + data);
 			switch (register)
 			{
@@ -60,6 +59,14 @@ namespace ADArCWebApp.Shared.Interop
 			return ret;
 		}
 
+		public static async void registerResponseRequired(int absoluteIndex) {
+			await jsModule!.InvokeVoidAsync("addResponseReqFlag", absoluteIndex);
+		}
+
+		public static async void unregisterResponseRequired(int absoluteIndex)
+		{
+			await jsModule!.InvokeVoidAsync("removeResponseReqFlag", absoluteIndex);
+		}
 
 		public static async Task<IJSObjectReference> getModuleWrapper() {
 			return await runtime!.InvokeAsync<IJSObjectReference>("interopManager.getInteropManager");
@@ -110,9 +117,6 @@ namespace ADArCWebApp.Shared.Interop
 
 		public static async void sendIntructionsToArduino(TimingPacket pkt)
 		{
-			//var str = JsonSerializer.Serialize(pkt);
-			//Console.WriteLine(str);
-			Console.WriteLine(DateTime.Now.ToString("hh:mm:ss:FFFFFFF"));
 			await jsModule!.InvokeVoidAsync("arduinoInput", pkt);
 		}
 

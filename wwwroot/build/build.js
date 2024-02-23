@@ -21,6 +21,30 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
+define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PinInstruction = exports.TimingPacket = void 0;
+    class TimingPacket {
+        constructor(originCycle, instructions) {
+            this.originCycle = originCycle;
+            this.instructions = instructions.sort((a, b) => a.cyclesSinceOrigin - b.cyclesSinceOrigin);
+        }
+        static fix(other) {
+            return new TimingPacket(other.originCycle, other.instructions);
+        }
+    }
+    exports.TimingPacket = TimingPacket;
+    class PinInstruction {
+        constructor(isOn, pin, cumulUsSinceOriginCycle, cyclesSinceOrigin) {
+            this.isOn = isOn;
+            this.pin = pin;
+            this.cumulUsSinceOriginCycle = cumulUsSinceOriginCycle;
+            this.cyclesSinceOrigin = cyclesSinceOrigin;
+        }
+    }
+    exports.PinInstruction = PinInstruction;
+});
 define("lib/compile-util", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -53,27 +77,6 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
         });
     }
     exports.buildHex = buildHex;
-});
-define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PinInstruction = exports.TimingPacket = void 0;
-    class TimingPacket {
-        constructor(originCycle, instructions) {
-            this.originCycle = originCycle;
-            this.instructions = instructions;
-        }
-    }
-    exports.TimingPacket = TimingPacket;
-    class PinInstruction {
-        constructor(IsOn, pin, cumulUsSinceOriginCycle, cyclesSinceOrigin) {
-            this.IsOn = IsOn;
-            this.pin = pin;
-            this.cumulUsSinceOriginCycle = cumulUsSinceOriginCycle;
-            this.cyclesSinceOrigin = cyclesSinceOrigin;
-        }
-    }
-    exports.PinInstruction = PinInstruction;
 });
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -3181,6 +3184,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.program = new Uint16Array(FLASH);
             this.MHZ = 16e6;
             this.instructions = [];
+            this.pausedOn = [];
             this.stopped = false;
             (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
             this.cpu = new index_1.CPU(this.program);
@@ -3194,8 +3198,13 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             return __awaiter(this, void 0, void 0, function* () {
                 this.stopped = false;
                 for (;;) {
-                    (0, index_1.avrInstruction)(this.cpu);
-                    this.cpu.tick();
+                    if (this.pausedOn.length == 0) {
+                        (0, index_1.avrInstruction)(this.cpu);
+                        this.cpu.tick();
+                    }
+                    else {
+                        yield new Promise(resolve => setTimeout(resolve, 0));
+                    }
                     let markDel = [];
                     this.instructions.forEach(t => {
                         var next = t.instructions[0];
@@ -3205,13 +3214,13 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                                 markDel.push(t);
                             }
                             if (next.pin < 8) {
-                                this.portD.setPin(next.pin, next.IsOn);
+                                this.portD.setPin(next.pin, next.isOn);
                             }
                             else if (next.pin < 14) {
-                                this.portB.setPin(next.pin - 8, next.IsOn);
+                                this.portB.setPin(next.pin - 8, next.isOn);
                             }
                             else if (next.pin < 20) {
-                                this.portC.setPin(next.pin - 14, next.IsOn);
+                                this.portC.setPin(next.pin - 14, next.isOn);
                             }
                         }
                     });
@@ -4124,7 +4133,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, index_2, compile_util_2, execute_1) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4133,17 +4142,43 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
+                this.awaitResponseOn = [];
+                this.prevB = 0;
+                this.prevC = 0;
+                this.prevD = 0;
+            }
+            getChangedPins(newReg, regIndex) {
+                var diff;
+                var delta;
+                if (regIndex === 0) {
+                    diff = newReg ^ this.prevB;
+                    delta = 8;
+                }
+                else if (regIndex === 1) {
+                    diff = newReg ^ this.prevC;
+                    delta = 14;
+                }
+                else {
+                    diff = newReg ^ this.prevD;
+                    delta = 0;
+                }
+                return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta - 1));
             }
             startCodeLoop(wrapper) {
                 console.log("starting code!");
                 this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    console.log("send time: " + new Date(Date.now()).toISOString() + " value: " + e);
+                    this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevB = e;
                     yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
                 }));
                 this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                    this.runner.pausedOn.concat(this.getChangedPins(e, 1).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevC = e;
                     yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
                 }));
                 this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
+                    this.runner.pausedOn.concat(this.getChangedPins(e, 2).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevD = e;
                     yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
                 }));
                 this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
@@ -4196,10 +4231,24 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             }
             stop() {
                 this.runner.stop();
+                this.runner.pausedOn = [];
+            }
+            addResponseReqFlag(absoluteIndex) {
+                this.awaitResponseOn.push(absoluteIndex);
+            }
+            removeResponseReqFlag(absoluteIndex) {
+                const index = this.awaitResponseOn.indexOf(absoluteIndex);
+                if (index > -1) {
+                    this.awaitResponseOn.splice(index, 1);
+                }
             }
             arduinoInput(insts) {
-                console.log("arrive time: " + new Date(Date.now()).toISOString());
-                this.runner.instructions.push(insts);
+                var real = TimingPacket_1.TimingPacket.fix(insts);
+                this.runner.instructions.push(real);
+                const index = this.runner.pausedOn.indexOf(insts.instructions[0].pin);
+                if (index > -1) {
+                    this.runner.pausedOn.splice(index, 1);
+                }
             }
             arduinoADCInput(channel, value) {
                 this.adc.channelValues[channel] = value;

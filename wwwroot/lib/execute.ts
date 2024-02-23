@@ -27,7 +27,7 @@ export class AVRRunner {
     readonly MHZ = 16e6;
 
     public instructions: TimingPacket[] = [];
-
+    public pausedOn: number[] = [];
 
     private stopped = false;
 
@@ -44,9 +44,15 @@ export class AVRRunner {
     async execute(callback: (cpu: CPU) => void) {
         this.stopped = false;
         for (; ;) {
-            //do instruction and update cycles
-            avrInstruction(this.cpu);
-            this.cpu.tick();
+            if (this.pausedOn.length == 0) {//do not tick if waiting for a response. Essentially stops arduino time
+                //do instruction and update cycles
+                avrInstruction(this.cpu);
+                this.cpu.tick();
+            }
+            else {
+                //release thread while waiting for instructions
+                await new Promise(resolve => setTimeout(resolve, 0));
+            }
 
             let markDel: TimingPacket[] = [];//setup deletion list
 
@@ -62,13 +68,15 @@ export class AVRRunner {
 
                     //modify pins
                     if (next.pin < 8) {
-                        this.portD.setPin(next.pin, next.IsOn);
+                        this.portD.setPin(next.pin, next.isOn);
                     }
                     else if (next.pin < 14) {
-                        this.portB.setPin(next.pin - 8, next.IsOn);
+                        this.portB.setPin(next.pin - 8, next.isOn);
+                        //console.log("theoretical state of 13: " + this.portB.pinState(5));
+                        //console.log("Execution cycle: " + this.cpu.cycles + " set to: " + next.isOn);
                     }
                     else if (next.pin < 20) {
-                        this.portC.setPin(next.pin - 14, next.IsOn);
+                        this.portC.setPin(next.pin - 14, next.isOn);
                     }
                 }
             });
