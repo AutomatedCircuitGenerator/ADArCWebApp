@@ -4209,6 +4209,23 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                     URL.revokeObjectURL(url);
                 });
             }
+            runTutorial() {
+                console.log("weird but fine");
+                const intro = window.introJs();
+                if (intro) {
+                    console.log("intro is a valid object");
+                }
+                else {
+                    console.log("intro not valid");
+                }
+                intro.setOptions({
+                    steps: [
+                        {
+                            intro: "Hello world!"
+                        }
+                    ]
+                }).start();
+            }
         }
         interopManager.InteropManager = InteropManager;
         function getInteropManager() {

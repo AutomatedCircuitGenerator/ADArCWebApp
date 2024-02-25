@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Builder;
 using SpawnDev.BlazorJS;
 using SpawnDev.BlazorJS.WebWorkers;
+//using Blazor.IntroJs;
 
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
@@ -18,3 +19,4 @@ provider.Mappings.Add(".rsxml", "application/rsxml");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.Configure<StaticFileOptions>(options => { options.ContentTypeProvider = provider; });
 await builder.Build().BlazorJSRunAsync();
+//builder.Services.AddIntroJs();
