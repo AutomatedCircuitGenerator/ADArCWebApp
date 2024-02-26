@@ -61,17 +61,17 @@
         return register;
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool sda = false;
         bool scl = false;
         if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            sda = AvrCPU.getPinState(conn!.toId);
+            sda = await AvrCPU.getPinState(conn!.toId);
         }
         if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            scl = AvrCPU.getPinState(conn2!.toId);
+            scl = await AvrCPU.getPinState(conn2!.toId);
         }
 
         //
@@ -103,17 +103,17 @@
             if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
             {
                 comp.midSignal = 17;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0b1101000 for MPU6050
             {
                 comp.midSignal = 5;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
             {
                 comp.midSignal = 6;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else//here it is assumed that the master will always pull sda to HIGH, might not be true
             {
@@ -168,7 +168,7 @@
             if (comp.counter == 0)//the read/write set to 1 signifying read
             {
                 comp.midSignal = 13;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
         }
 
@@ -179,11 +179,11 @@
             comp.byteIndex--;
             if (a % 2 == 1)
             {
-                AvrCPU.setPinState(conn!.toId, true);
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
             }
             else
             {
-                AvrCPU.setPinState(conn!.toId, false);
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
             }
             comp.midSignal = 18;
             if (comp.byteIndex == 0)

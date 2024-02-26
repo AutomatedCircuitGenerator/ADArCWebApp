@@ -17,7 +17,7 @@
         }
     }
     //seems like RGBLED involves pulsewidth of the signal, timing restricted
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         var data = comp.data;
 
@@ -25,21 +25,21 @@
         bool G = false;
         if (0 == comp.getConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            R = AvrCPU.getPinState(conn!.toId);
+            R = await AvrCPU.getPinState(conn!.toId);
         }
         if (0 == comp.getConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            G = AvrCPU.getPinState(conn2!.toId);
+            G = await AvrCPU.getPinState(conn2!.toId);
         }
         if (0 == comp.getConnection("G", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
         {
-            G = AvrCPU.getPinState(conn3!.toId);
+            G = await AvrCPU.getPinState(conn3!.toId);
         }
 
         
 
 
-        AvrCPU.setPinState(conn!.toId, true);
+        //AvrCPU.setPinState(conn!.toId, true);
 
 
     }

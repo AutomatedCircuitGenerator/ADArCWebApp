@@ -45,13 +45,13 @@
         }
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool pin = false;
         Console.WriteLine("servo translate");
         if (0 == comp.getConnection("pin3", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            pin = AvrCPU.getPinState(conn!.toId);
+            pin = await AvrCPU.getPinState(conn!.toId);
         }
 
         if (pin && comp.midSignal == 0)//if HIGH(pulse)
