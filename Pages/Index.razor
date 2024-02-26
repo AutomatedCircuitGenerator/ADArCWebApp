@@ -11,16 +11,21 @@
 <body>
 	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-	<div class="page" data-title="Welcome Screen" data-intro="Welcome to ADArC!">
-		<div class="toolbar" data-title="Toolbar" data-intro="This is the your toolbar. This contains tools to modify, research, and run your project">
+	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
+		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
 		<div class="logo-and-adarc">
 			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
             		<span class="adarc-text">ADArC</span>
 		</div>
-		<div class="zoom-bar-container" data-title="Zoom" data-intro="These are the Zoom Buttons. This will help you change the scale of your project">
+
+			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial()">
+				<!-- change -->
+				💡 Tutorial
+			</button>
+		@* <div class="zoom-bar-container" data-title="Zoom" data-intro="These are the Zoom Buttons. This will help you change the scale of your project">
 			<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
 			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
-		</div>
+		</div> *@
 		@* <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
 			<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile"/>
 			<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
@@ -663,5 +668,6 @@
 		// var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
 		// ant-menu-submenu-hidden
 		await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
+		
 	}
 }
