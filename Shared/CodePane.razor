@@ -51,6 +51,7 @@
     // Create a function to update the console output
     public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
     {
+        newText = Regex.Replace(newText, @"Â", "");
         if (middleNewLinesMakeHR)
         {
             var lines = newText.Split("\n");
