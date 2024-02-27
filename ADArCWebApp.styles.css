@@ -3,12 +3,14 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    display: grid;
-    grid-template-rows: 50px auto;
+    position:absolute;
 }
 
 .page-content[b-s7qrrfca0g] {
-    grid-row: 2;
+    margin-top:50px;
+    position:absolute;
+    width:100%;
+    height:100%;
 }
 .sidebar[b-s7qrrfca0g],
 .sidebar-right[b-s7qrrfca0g] {
@@ -195,6 +197,12 @@ div[b-s7qrrfca0g], span[b-s7qrrfca0g] {
 .toolbar-button[b-s7qrrfca0g] {
     flex-direction: row;
 }
+
+
+.Import-Export[b-s7qrrfca0g] {
+    display:flex;
+
+}
 /* /Shared/CodePane.razor.rz.scp.css */
 .code-container[b-ve6qiki0tf] {
     height: 100%;
@@ -287,7 +295,6 @@ hr[b-ve6qiki0tf] {
 }
 
 .card-wrapper[b-vtl0xvyh0e] {
-    margin-top: 3%;
     display: flex;
     flex-direction: column;
 }
@@ -495,11 +502,10 @@ polygon[b-41q8yj9qd7] {
         height: 10px;
     }
 .a-border[b-i2jr7w3d23] {
-    background-image: linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(90deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%), linear-gradient(0deg, black 50%, transparent 50%);
+    background-image: linear-gradient(90deg, black 100%, transparent 50%), linear-gradient(90deg, black 100%, transparent 50%), linear-gradient(0deg, black 100%, transparent 50%), linear-gradient(0deg, black 100%, transparent 50%);
     background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
     background-size: 15px 2px, 15px 2px, 2px 15px, 2px 15px;
     background-position: left top, right bottom, left bottom, right top;
-    animation: border-dance-b-i2jr7w3d23 1s infinite linear;
 }
 
 .b-border[b-i2jr7w3d23] {
