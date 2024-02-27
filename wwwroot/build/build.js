@@ -21,30 +21,6 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
 };
-define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.PinInstruction = exports.TimingPacket = void 0;
-    class TimingPacket {
-        constructor(originCycle, instructions) {
-            this.originCycle = originCycle;
-            this.instructions = instructions.sort((a, b) => a.cyclesSinceOrigin - b.cyclesSinceOrigin);
-        }
-        static fix(other) {
-            return new TimingPacket(other.originCycle, other.instructions);
-        }
-    }
-    exports.TimingPacket = TimingPacket;
-    class PinInstruction {
-        constructor(isOn, pin, cumulUsSinceOriginCycle, cyclesSinceOrigin) {
-            this.isOn = isOn;
-            this.pin = pin;
-            this.cumulUsSinceOriginCycle = cumulUsSinceOriginCycle;
-            this.cyclesSinceOrigin = cyclesSinceOrigin;
-        }
-    }
-    exports.PinInstruction = PinInstruction;
-});
 define("lib/compile-util", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -77,6 +53,30 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
         });
     }
     exports.buildHex = buildHex;
+});
+define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PinInstruction = exports.TimingPacket = void 0;
+    class TimingPacket {
+        constructor(originCycle, instructions) {
+            this.originCycle = originCycle;
+            this.instructions = instructions.sort((a, b) => a.cyclesSinceOrigin - b.cyclesSinceOrigin);
+        }
+        static fix(other) {
+            return new TimingPacket(other.originCycle, other.instructions);
+        }
+    }
+    exports.TimingPacket = TimingPacket;
+    class PinInstruction {
+        constructor(isOn, pin, cumulUsSinceOriginCycle, cyclesSinceOrigin) {
+            this.isOn = isOn;
+            this.pin = pin;
+            this.cumulUsSinceOriginCycle = cumulUsSinceOriginCycle;
+            this.cyclesSinceOrigin = cyclesSinceOrigin;
+        }
+    }
+    exports.PinInstruction = PinInstruction;
 });
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";

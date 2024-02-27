@@ -177,6 +177,7 @@
 
 	public static Dictionary<int, ComponentInstance> comps = new()
 	{
+		{0, new ComponentInstance(1, null, 829, 219)}
 	};
 
 
@@ -368,7 +369,8 @@
 		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,85);
 		compPane!.releaseLockout();
 		selLockedOut = false;
-
+		//hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
+		setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
 		base.StateHasChanged();
 
 
@@ -578,7 +580,11 @@
 		var buffer = new byte[file.Size];
 		await e.File.OpenReadStream(512000).ReadAsync(buffer);
 		var str = System.Text.Encoding.UTF8.GetString(buffer);
-		Data data = DeserializeJSON(str);
+		setupBenchFromJSONString(str);
+	}
+
+	public void setupBenchFromJSONString(string JSON){
+		Data data = DeserializeJSON(JSON);
 		comps.Clear();
 		buildCanvas!.connLines.Clear();
 		GraphSynthInvoke.inputs.Clear();

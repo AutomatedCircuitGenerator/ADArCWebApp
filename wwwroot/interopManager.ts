@@ -222,7 +222,7 @@ export namespace interopManager {
             //    console.error('Intro.js not found. Make sure it is loaded in your application.');
             //}
             
-            const intro = window.introJs();
+            const intro = (<any>window).introJs();
             if (intro) {
                 console.log("intro is a valid object")
             }

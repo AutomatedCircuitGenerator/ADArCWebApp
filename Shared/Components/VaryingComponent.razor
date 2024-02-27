@@ -3,7 +3,7 @@
 @inject IJSRuntime JsRuntime
 
 <div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
-    @if(forceBorder && !Pages.Index.app!.isRunning)
+    @if(forceBorder && !Pages.Index.app!.isRunning && individualData.globalId != 1)
     {
         <button id="deletebutton" @onclick="remove">
             <img src="images/redx.png">
