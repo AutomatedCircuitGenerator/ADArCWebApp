@@ -7,4 +7,4 @@ import { interopManager } from "./interopManager";
 (<any>window).interopManager = interopManager;
 
 
-(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()) });
+(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()) });

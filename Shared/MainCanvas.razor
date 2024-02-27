@@ -1,4 +1,4 @@
-﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmousewheel="updZoom" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
 			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}

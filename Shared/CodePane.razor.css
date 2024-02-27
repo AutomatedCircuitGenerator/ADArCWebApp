@@ -6,11 +6,43 @@
     flex-direction: column;
 }
 
-
 hr {
     margin: 5px 0;
 }
 
 .error {
     color: orangered;
+}
+
+.code-tooltip {
+    z-index: 9999999999999;
+    border-radius: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: start;
+    width: 100%;
+    position: static;
+    margin-bottom: 18px;
+    padding: 10px;
+    padding-left: 5%;
+    padding-right: 5%;
+    font-size: 13.5px;
+}
+
+.code-tooltip button {
+    background-color: white;
+    border-radius: 5px 5px 5px 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 1px;
+    padding-right: 1px;
+    border-color: transparent;
+    justify-self: center;
+    transform: scale(100%);
+    width: 80px;
+    text-align: center;
+}
+
+.code-tooltip label {
+    margin-bottom: 5px;
 }

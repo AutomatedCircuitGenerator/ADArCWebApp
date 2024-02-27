@@ -39,19 +39,19 @@
 .level-1 {
     background-color: #56baf0;
     border-radius: 4px;
-    margin-bottom: 3.5px;
+    margin-bottom: 7px;
 }
 
 .level-2 {
     background-color: #7ecdf5;
     border-radius: 4px;
-    margin-bottom: 3.5px;
+    margin-bottom: 7px;
 }
 
 .level-3 {
     background-color: #94dbf5;
     border-radius: 4px;
-    margin-bottom: 3.5px;
+    margin-bottom: 7px;
 }
 
 .col-layout {
@@ -59,9 +59,43 @@
     grid-template-columns: 50% 50%;
     width: 100%;
     justify-items: center;
-    margin-top: 1%;
+    margin-bottom: 7px;
 }
 
 
 .icon {
+}
+
+.palette-tooltip {
+    z-index: 9999999999999;
+    border-radius: 5px;
+    flex-wrap: wrap;
+    justify-content: center;
+    text-align: start;
+    width: 100%;
+    position: static;
+    margin-bottom: 18px;
+    padding: 5px;
+    font-size: 13.5px;
+    padding-left: 5%;
+    padding-right: 5%;
+}
+
+.palette-tooltip button {
+    background-color: white;
+    border-radius: 5px 5px 5px 5px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 1px;
+    padding-right: 1px;
+    border-color: transparent;
+    justify-self: center;
+    transform: scale(100%);
+    width: 80px;
+    align-self: center;
+    text-align: center;
+}
+
+.palette-tooltip label {
+    margin-bottom: 5px;
 }

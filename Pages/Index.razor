@@ -14,15 +14,15 @@
 	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
 		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
 			<div class="logo-and-adarc" >
-			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-            		<span class="adarc-text">ADArC</span>
-		</div>
+				<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
+				<span class="adarc-text">ADArC</span>
+			</div>
 
-			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial">
+			<button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
 				<!-- change -->
 				💡 Tutorial
 			</button>
-		<div class="center-toolbar">
+			<div class="center-toolbar">
 				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
 					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
 					<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
@@ -33,23 +33,29 @@
 						<span>⬆️ Export</span>
 					</button>
 				</div>
-			<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
-				<span>❓Help</span>
-			</button>
-				<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
-				<span>@runStopText</span>
-			</button>
+				<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
+					<span>❓Help</span>
+				</button>
+					<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
+					<span>@runStopText</span>
+				</button>
+			</div>
 		</div>
-	</div>
-		
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
 			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
 				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
-			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")" data-title="Component Pane" data-intro="This is the Component Pane. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
+			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
 				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
-					<span>◀</span>
+					@if (isLeftExpanded)
+					{
+						<span>▶</span>
+					}
+					else
+					{
+						<span>◀</span>
+					}
 				</div>
 				<ComponentPane host="@this"></ComponentPane>
 			</div>
@@ -58,43 +64,74 @@
 			</div>
 			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
 				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
-					<span>◀</span>
+					@if (isRightExpanded)
+					{
+						<span>▶</span>
+					}
+					else
+					{
+						<span>◀</span>
+					}
 				</div>
 				<CodePane></CodePane>
 			</div>
 		</div>
-	</div>
-<div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-			<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
-			<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+	@if (showZoomTooltip) 
+	{
+		<div class="zoom-tooltip" style="background: #ece1be">
+			<label>Use these buttons to zoom in and out of the Canvas.</label>
+			<button @onclick="GotItClicked">Got it!</button>
 		</div>
+	}
+	
+	@if (loadingProgress == -1)
+	{
+		<div class="workbench-title">
+			<span @onclick="showRightClickTooltipFn">💡 Workbench</span>
+		</div>
+	}
+	@if (showRightClickTooltip) {
+		<div class="right-click-tooltip" style="background: #ece1be">
+			<label>This is the Workbench.</label>
+			<label style="font-size: 13.5px">Right-click components dragged from the Component Palette for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
+			<button @onclick="HideRightClickTooltip">Got it!</button>
+		</div>
+	}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 	<script>
 		introJs().start();
 	</script>
 
-</body>
 
+</div>
+<div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+	<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
+	<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+</div>
+</body>
 
 @code{
 	bool isLeftExpanded = true;
 	bool isRightExpanded = false;
-	int leftPaneAlign => isLeftExpanded ? 0 : -23;
-	int rightPaneAlign => isRightExpanded ? 0 : -37;
-	string runStopText = "▶ Run";
+	int leftPaneAlign => isLeftExpanded ? 0 : -24;
+	int rightPaneAlign => isRightExpanded ? 0 : -39;
+	string runStopText = "▶️ Run";
 	public bool isRunning = false;
-
+	
 	void ToggleLeftSidebar()
 	{
 		isLeftExpanded = !isLeftExpanded;
 		isRightExpanded = false;
+		StateHasChanged();
 	}
 
 	void ToggleRightSidebar()
 	{
 		isRightExpanded = !isRightExpanded;
 		isLeftExpanded = false;
+		StateHasChanged();
 	}
+	
 	async Task ToggleRunStop()
 	{
 		if (!isRunning)
@@ -558,6 +595,38 @@
 		buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
 
 		StateHasChanged();
+	}
+
+	bool showZoomTooltip = false;
+	bool labelShownBefore = false;
+
+	void ShowLabel()
+	{
+		if (!labelShownBefore)
+		{
+			showZoomTooltip = true;
+		}
+	}
+
+	void HideLabel()
+	{
+		showZoomTooltip = false;
+	}
+
+	void GotItClicked() //for zoom tooltip
+	{
+		labelShownBefore = true;
+		showZoomTooltip = false;
+	}
+
+	bool showRightClickTooltip = false;
+	void HideRightClickTooltip() {
+		showRightClickTooltip = false;
+	}
+	void showRightClickTooltipFn()
+	{
+		showRightClickTooltip = true;
+
 	}
 
 

@@ -2,12 +2,31 @@
 @using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu="HandleContextMenu" @oncontextmenu:preventDefault="true" @onclick="handleClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
-    @if(forceBorder && !Pages.Index.app!.isRunning && individualData.globalId != 1)
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="rightClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+    @if (!forceBorder)
     {
-        <button id="deletebutton" @onclick="remove">
-            <img src="images/redx.png">
-        </button>
+        rightClickable = false;
+    }
+    @if (forceBorder && !Pages.Index.app!.isRunning && individualData.globalId != 1) {
+        @if (rightClickable)
+        {
+            <div class="right-click-container">
+                <button id="environmental-settings-button" @onclick="HandleEnvrSettingsMenu">
+                    <span>⚙</span>
+                    <span style="padding-left: 5px">￨ Environmental Settings</span>
+                </button>
+
+                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.data.nodeName)))">
+                    <span style="padding-left: 3px">𝗶</span>
+                    <span style="padding-left: 7px">￨ Component Information</span>
+                </button>
+
+                <button id="deletebutton" @onclick="remove">
+                    <span>x</span>
+                    <span style="padding-left: 6px">￨ Delete Component</span>
+                </button>
+            </div>
+        }
     }
 
     <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent>
@@ -16,7 +35,7 @@
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
     <div class="settingsContainer">
-        <button class="close-button" @onclick="HandleClickOutside">&#10006;</button>
+        <button class="close-button" @onclick="CloseEnvrSettings">❌</button>
         <h2>Environmental Settings</h2>
 
     <!-- Value Setting -->
@@ -66,37 +85,27 @@
     }
 
     // for lcd: blink=@((bool)individualData.moreData["blink"]) background="@((string)individualData.moreData["bg"])" backlight=@((bool)individualData.moreData["back"]) cursor=@((bool)individualData.moreData["cursor"]) cursorX="@((int)individualData.moreData["cX"])" cursorY="@((int)individualData.moreData["cY"])" color="@((string)individualData.moreData["color"])"
-    [Parameter]
-    public int objId { get; set; }
+    [Parameter] public int objId { get; set; }
 
-    [Parameter]
-    public bool posAbolute { get; set; } = true;
+    [Parameter] public bool posAbolute { get; set; } = true;
 
-    [Parameter]
-    public EventCallback<MouseEventArgs> DragStart { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DragStart { get; set; }
 
-    [Parameter]
-    public EventCallback<MouseEventArgs> DragProgress { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DragProgress { get; set; }
 
-    [Parameter]
-    public EventCallback<MouseEventArgs> DragEnd { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DragEnd { get; set; }
 
-    [Parameter]
-    public EventCallback<MouseEventArgs> handleClick { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
 
-    [Parameter]
-    public ComponentInstance individualData { get; set; }
+    [Parameter] public ComponentInstance individualData { get; set; }
 
-    [Parameter]
-    public double zoomFactor { get; set; } = 1;
+    [Parameter] public double zoomFactor { get; set; } = 1;
 
     private bool enableBorder = false;
 
-    [Parameter]
-    public bool disableBorder { get; set; } = false;
+    [Parameter] public bool disableBorder { get; set; } = false;
 
-    [Parameter]
-    public bool forceBorder { get; set; } = false;
+    [Parameter] public bool forceBorder { get; set; } = false;
 
     private string borderClasses()
     {
@@ -112,12 +121,12 @@
             }
             else
             {
-                return "";  
+                return "";
             }
         }
         else
         {
-            return "";  
+            return "";
         }
     }
     public void onInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
@@ -147,7 +156,7 @@
     private bool showMenu = false;
 
     [JSInvokable]
-    public void HandleClickOutside()
+    public void CloseEnvrSettings()
     {
         showMenu = false;
         StateHasChanged();
@@ -157,9 +166,9 @@
     private double menuTop = 0;
     private double menuLeft = 0;
 
-    public void HandleContextMenu(MouseEventArgs args)
+    public void HandleEnvrSettingsMenu(MouseEventArgs args)
     {
-        // Set the menu to be visible
+        // Set the envr settings menu to be visible
         showMenu = true;
         Console.WriteLine("lel");
 
@@ -168,4 +177,149 @@
         menuLeft = args.ClientX;
     }
     
+    private bool rightClickable = false;
+    private bool rightClick2 = false;
+
+    private void rightClick()
+    {
+        rightClickable = true;
+        if (rightClickable && forceBorder)
+        {
+            rightClick2 = true;
+        }
+        else
+        {
+            rightClick2 = false;
+        }
+    }
+    
+    string GenerateLink(string nodeName) {
+    Console.WriteLine($"nodeName: {nodeName}");
+    switch (nodeName)
+    {
+        case "arduinouno_rev3":
+            return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
+        case "MEGA 2560":
+            return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
+        case "Uno WIFI Rev2":
+            return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
+        case "Pushbutton":
+            return ""; // Add link for Pushbutton here
+        case "Switch":
+            return ""; // Add link for Switch here
+        case "ADXL345":
+            return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520"; 
+        case "MPU6050":
+            return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
+        case "BNO-055":
+            return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
+        case "TF-Luna Lidar - I2C":
+            return ""; // Add link for TF-Luna Lidar - I2C here
+        case "TF-Luna Lidar - UART":
+            return ""; // Add link for TF-Luna Lidar - UART here
+        case "Ultrasonic":
+            return ""; // Add link for Ultrasonic here
+        case "IR Distance":
+            return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1"; 
+        case "MQ-3":
+            return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1"; 
+        case "SGP41":
+            return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1"; 
+        case "KY-018 LDR":
+            return ""; // Add link for KY-018 LDR here
+        case "Ambient Light":
+            return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
+        case "Luminosity":
+            return "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1"; 
+        case "Alt - Ambient Light":
+            return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1"; 
+        case "DHT11 / DHT22":
+            return "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1"; 
+        case "SHT31":
+            return "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1";
+        case "DS18B20":
+            return "https://adarc-help.mech.website/ds18b20.html#styler-id1.1.1.2.8.13.8.1";
+        case "Hall effect":
+            return "https://adarc-help.mech.website/hallEffect.html#styler-id1.1.1.2.8.14.7.1";
+        case "K-Thermocouple":
+            return "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1";
+        case "PIR motion sensor":
+            return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
+        case "IR receiver":
+            return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
+        case "SD Card Reader":
+            return "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1"; 
+        case "Load Cell(HX711)":
+            return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1"; 
+        case "LED":
+            return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1"; 
+        case "7 - segment":
+            return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1"; 
+        case "Bar":
+            return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B"; 
+        case "Matrix":
+            return "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B";
+        case "RGB":
+            return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018"; 
+        case "RGB module":
+            return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
+        case "Laser LED":
+            return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
+        case "LCD2004":
+            return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
+        case "LCD2004 - I2C":
+            return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
+        case "LCD1602":
+            return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
+        case "LCD1602 - I2C":
+            return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
+        case "SH1106 OLED - SPI":
+            return "https://adarc-help.mech.website";
+        case "SH1106 OLED - I2C":
+            return "https://adarc-help.mech.website";
+        case "Direct - SG90":
+            return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1"; 
+        case "Direct - DS-7001HV":
+            return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1"; 
+        case "Driver - SG90":
+            return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; 
+        case "Driver - DS-7001HV":
+            return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
+        case "Direct - Motor":
+            return "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1";
+        case "Driver - Motor":
+            return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; 
+        case "Brushless ESC - Motor":
+            return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1"; 
+        case "28BYJ-48":
+            return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
+        case "Nema-17":
+            return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
+        case "Speaker":
+            return ""; // Add link for Speaker here
+        case "Buzzer":
+            return ""; // Add link for Buzzer here
+        case "Encoder":
+            return ""; // Add link for Encoder here
+        case "Voltage regulator":
+            return ""; // Add link for Voltage regulator here
+        case "Bluetooth Module":
+            return "https://adarc-help.mech.website"; // Add link for Bluetooth Module here
+        case "resistor":
+            return ""; // Add link for resistor here
+        case "stepper driver":
+            return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; // Add link for stepper driver here
+        default:
+            return "https://adarc-help.mech.website"; // Default just in case it returns null
+    }
 }
+
+    
+    void OpenLink(string url)
+    {
+        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+    }
+
+}
+
+

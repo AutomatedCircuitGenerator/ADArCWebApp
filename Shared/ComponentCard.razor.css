@@ -52,3 +52,38 @@
 .card-container:hover > .altContainer {
     visibility: visible;
 }
+
+.palette-right-click-container {
+    z-index: 9999999999999;
+    font-size: 65%;
+    margin-top: 16%;
+    opacity: 100%;
+    display: flex;
+    background-color: lightgray;
+    flex-direction: column;
+    border-radius: 0.5rem 0.5rem 0.5rem 0.5rem;
+    position: fixed;
+    border-color: gray;
+    border-style: solid;
+    min-width: 95%;
+    text-wrap: none;
+    margin-right: 2.5%;
+    margin-left: 2.5%;
+}
+
+.palette-right-click-container button {
+    background-color: transparent;
+    border-color: transparent;
+    padding: 5%;
+    color: black;
+    text-align: left;
+    width: auto;
+    white-space: normal;
+    max-width: 100%;
+    min-width: min-content;
+    text-wrap: avoid;
+}
+
+.palette-right-click-container button:not(:last-child) {
+    border-bottom: 1px solid rgba(145, 145, 145, 0.3);
+}
