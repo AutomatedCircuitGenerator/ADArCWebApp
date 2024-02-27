@@ -16,7 +16,7 @@
                     <span style="padding-left: 5px">￨ Environmental Settings</span>
                 </button>
 
-                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.data.nodeName)))">
+                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.data.name)))">
                     <span style="padding-left: 3px">𝗶</span>
                     <span style="padding-left: 7px">￨ Component Information</span>
                 </button>
@@ -198,7 +198,7 @@
     Console.WriteLine($"nodeName: {nodeName}");
     switch (nodeName)
     {
-        case "arduinouno_rev3":
+        case "Rev 3":
             return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
         case "MEGA 2560":
             return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
