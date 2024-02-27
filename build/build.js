@@ -4312,6 +4312,6 @@ define("main", ["require", "exports", "interopManager"], function (require, expo
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenWidthRatio", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
 });
 //# sourceMappingURL=build.js.map

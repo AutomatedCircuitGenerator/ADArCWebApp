@@ -1,11 +1,11 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-jaI6\/tiFoeB9qzcBOLFMhhNfKH2I6+Gt88Mb8WSjVr0=",
+      "hash": "sha256-QJy0HvHPE6xvvjYKkTlxW2SPoIpqd\/3EnJ9GCR081\/Q=",
       "url": "build\/build.js"
     },
     {
-      "hash": "sha256-zEzh82wikAIZyw7\/fu8XZl8lk3PorCOynX6AqZ3wicg=",
+      "hash": "sha256-GDtFLENWB2i0rFnynvG1ZO4569Z5eAQiTL9uh7gmZis=",
       "url": "build\/build.js.map"
     },
     {
@@ -1053,11 +1053,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-DtI7OIOTZOpcZ1l3SZvPwF8BM6oNXJhDj7rvbbUU4Qw=",
+      "hash": "sha256-dW5HXyQgH5\/2sKdubviAF5G0NEGFXt2wfl\/AG76CKs0=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-jL+xCgQ41cHjh\/t5mcEajyntrQtJuDkhe8AygdvhpRI=",
+      "hash": "sha256-L82SrINHrHEuJWtWDl70Y2syGHiXKrWXCGljAdcYkyc=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -1257,7 +1257,7 @@
       "url": "_framework\/System.ObjectModel.wasm"
     },
     {
-      "hash": "sha256-XBiQGWWbneKX+SYpndx0Z1xIr8CBQH0Nle6\/5E+crgo=",
+      "hash": "sha256-DImpNCxPgimmltvNYgp29sJp7+cy1dHWI2S2A0CBOTU=",
       "url": "_framework\/System.Private.CoreLib.wasm"
     },
     {
@@ -1337,7 +1337,7 @@
       "url": "_framework\/System.Xml.XmlSerializer.wasm"
     },
     {
-      "hash": "sha256-PkLG0l64N+2lw7410WA\/S9CDhJ1QeqBeu1KFyG30UPk=",
+      "hash": "sha256-9K9zecEl8eslUL9Vi1YwDbaFFIUvKwXwLQmwnlZlHQo=",
       "url": "ADArCWebApp.styles.css"
     },
     {
@@ -2321,5 +2321,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "4RoohKGB"
+  "version": "Ds21MYJ8"
 };
