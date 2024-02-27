@@ -8,7 +8,6 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings.Add(".grxml", "application/grxml");
 provider.Mappings.Add(".rsxml", "application/rsxml");

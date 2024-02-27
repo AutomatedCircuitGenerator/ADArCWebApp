@@ -187,40 +187,8 @@ export namespace interopManager {
             URL.revokeObjectURL(url);
         }
 
-        //public runTutorial() {
-        //    document.addEventListener('DOMContentLoaded', function () {
-        //        var intro = introJs();
-        //        intro.setOptions({
-        //            steps: [
-        //                {
-        //                    intro: 'Step 1: This is your first step!',
-        //                    //element: '#element-id' // Replace with the actual ID of the element to highlight
-        //                },
-        //                // Add more steps as needed
-        //            ]
-        //        });
-        //        intro.start();
-        //    });
-        //}
-
         // runs the tutorial using Intro.js
-        public runTutorial() {
-            console.log("weird but fine");
-            //// Check if introJs is available
-            //if (introJs) {
-            //    const intro = window.introJs();
-            //    intro.setOptions({
-            //        steps: [
-            //            {
-            //                intro: "Welcome to your website!"
-            //            },
-            //            // Add more steps as needed
-            //        ]
-            //    });
-            //    intro.start();
-            //} else {
-            //    console.error('Intro.js not found. Make sure it is loaded in your application.');
-            //}
+        public runTutorial(closeImmediate: boolean) {
             
             const intro = (<any>window).introJs();
             if (intro) {
@@ -230,13 +198,10 @@ export namespace interopManager {
                 console.log("intro not valid")
             }
             //this.closeMenu("Help");
-            intro.setOptions({
-                steps: [
-                    {
-                        intro: "Hello world!"
-                    }
-                ]
-            }).start();
+            //intro.onafterchange((e) => { if (e.classList.contains("sidebar") || e.classList.contains("sidebar-right")) { e.style.marginTop = "50px"; } });
+            intro.start();
+            //intro.onexit(()=> intro.goToStep(6));
+            
         }
     }
 
