@@ -4209,8 +4209,7 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                     URL.revokeObjectURL(url);
                 });
             }
-            runTutorial() {
-                console.log("weird but fine");
+            runTutorial(closeImmediate) {
                 const intro = window.introJs();
                 if (intro) {
                     console.log("intro is a valid object");
@@ -4218,13 +4217,7 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
                 else {
                     console.log("intro not valid");
                 }
-                intro.setOptions({
-                    steps: [
-                        {
-                            intro: "Hello world!"
-                        }
-                    ]
-                }).start();
+                intro.start();
             }
         }
         interopManager.InteropManager = InteropManager;

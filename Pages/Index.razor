@@ -13,29 +13,15 @@
 	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
 		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
-		<div class="logo-and-adarc">
+			<div class="logo-and-adarc" >
 			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
             		<span class="adarc-text">ADArC</span>
 		</div>
 
-			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial()">
+			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial">
 				<!-- change -->
 				💡 Tutorial
 			</button>
-		@* <div class="zoom-bar-container" data-title="Zoom" data-intro="These are the Zoom Buttons. This will help you change the scale of your project">
-			<button class="zoom-button" @onclick='() => HandleZoom("in")' style="font-size: 12px;">🔎</button>
-			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 21px;">🔎</button>
-		</div> *@
-		@* <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-			<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile"/>
-			<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
-				⬇️️ Import
-			</label>
-
-			<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
-				<span>⬆️ Export</span>
-			</button>
-		</div> *@
 		<div class="center-toolbar">
 				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
 					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
@@ -196,7 +182,6 @@
 	public static ElementReference? refresh;
 
 
-
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -335,8 +320,6 @@
 
 	private readonly List<string> ruleNames = new();
 	private readonly double totalRules = 19.0;
-	private string fileToLoad = "";
-	private double loadPercent = 0;
 	private bool selLockedOut = true;
 
 	protected override async Task OnInitializedAsync()
@@ -663,11 +646,12 @@
 	}
 
 	// runs the introjs tutorial
-	private async Task runTutorial()
+	private async void runTutorial()
 	{
 		// var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
 		// ant-menu-submenu-hidden
-		await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
-		
+		await AppInterop.jsModule!.InvokeVoidAsync("runTutorial");
+		//await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
+		StateHasChanged();
 	}
 }
