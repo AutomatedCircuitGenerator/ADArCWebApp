@@ -45,12 +45,12 @@
 
     List<string> text = ["Welcome to the App!"];
 
-    string codeContents = "";
     int index = 1;
 
     // Create a function to update the console output
     public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
     {
+        newText = Regex.Replace(newText, @"Â", ""); //possible utf conversion error fix. rare, good to have
         if (middleNewLinesMakeHR)
         {
             var lines = newText.Split("\n");

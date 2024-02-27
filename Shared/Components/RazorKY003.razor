@@ -13,21 +13,21 @@
 
 		}
 	}
-	public static void translate(ComponentInstance comp)
+	public static async void translate(ComponentInstance comp, int pinChangeCycle)
 	{
 		bool sig = false;
 		if (0 == comp.getConnection("Signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			sig = AvrCPU.getPinState(conn!.toId);
+			sig = await AvrCPU.getPinState(conn!.toId);
 		}
 		
-		if ((bool)comp.compParams["magfield"])//set signal to low when a magnetic field is present
+		if ((bool)comp.compParams["magfield"].getValue())//set signal to low when a magnetic field is present
 		{
-			AvrCPU.setPinState(conn!.toId, false);
+			AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
 		}
 		else//set signal to low when a magnetic field is present
 		{
-			AvrCPU.setPinState(conn!.toId, true);
+			AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
 		}
 	}
 

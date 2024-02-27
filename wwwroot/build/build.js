@@ -54,6 +54,30 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
     }
     exports.buildHex = buildHex;
 });
+define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PinInstruction = exports.TimingPacket = void 0;
+    class TimingPacket {
+        constructor(originCycle, instructions) {
+            this.originCycle = originCycle;
+            this.instructions = instructions.sort((a, b) => a.cyclesSinceOrigin - b.cyclesSinceOrigin);
+        }
+        static fix(other) {
+            return new TimingPacket(other.originCycle, other.instructions);
+        }
+    }
+    exports.TimingPacket = TimingPacket;
+    class PinInstruction {
+        constructor(isOn, pin, cumulUsSinceOriginCycle, cyclesSinceOrigin) {
+            this.isOn = isOn;
+            this.pin = pin;
+            this.cumulUsSinceOriginCycle = cumulUsSinceOriginCycle;
+            this.cyclesSinceOrigin = cyclesSinceOrigin;
+        }
+    }
+    exports.PinInstruction = PinInstruction;
+});
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -3158,6 +3182,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
     class AVRRunner {
         constructor(hex) {
             this.program = new Uint16Array(FLASH);
+            this.MHZ = 16e6;
+            this.instructions = [];
+            this.pausedOn = [];
             this.stopped = false;
             (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
             this.cpu = new index_1.CPU(this.program);
@@ -3165,14 +3192,39 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
             this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
             this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
-            this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, 16e6);
+            this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
         }
         execute(callback) {
             return __awaiter(this, void 0, void 0, function* () {
                 this.stopped = false;
                 for (;;) {
-                    (0, index_1.avrInstruction)(this.cpu);
-                    this.cpu.tick();
+                    if (this.pausedOn.length == 0) {
+                        (0, index_1.avrInstruction)(this.cpu);
+                        this.cpu.tick();
+                    }
+                    else {
+                        yield new Promise(resolve => setTimeout(resolve, 0));
+                    }
+                    let markDel = [];
+                    this.instructions.forEach(t => {
+                        var next = t.instructions[0];
+                        if (this.cpu.cycles >= t.originCycle + next.cyclesSinceOrigin) {
+                            t.instructions.shift();
+                            if (t.instructions.length === 0) {
+                                markDel.push(t);
+                            }
+                            if (next.pin < 8) {
+                                this.portD.setPin(next.pin, next.isOn);
+                            }
+                            else if (next.pin < 14) {
+                                this.portB.setPin(next.pin - 8, next.isOn);
+                            }
+                            else if (next.pin < 20) {
+                                this.portC.setPin(next.pin - 14, next.isOn);
+                            }
+                        }
+                    });
+                    this.instructions = this.instructions.filter(i => !markDel.includes(i));
                     if (this.cpu.cycles % 50000 === 0) {
                         callback(this.cpu);
                         yield new Promise(resolve => setTimeout(resolve, 0));
@@ -4081,7 +4133,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, index_2, compile_util_2, execute_1) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4090,18 +4142,44 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
-                this.cyclesPerUs = -1;
+                this.awaitResponseOn = [];
+                this.prevB = 0;
+                this.prevC = 0;
+                this.prevD = 0;
+            }
+            getChangedPins(newReg, regIndex) {
+                var diff;
+                var delta;
+                if (regIndex === 0) {
+                    diff = newReg ^ this.prevB;
+                    delta = 8;
+                }
+                else if (regIndex === 1) {
+                    diff = newReg ^ this.prevC;
+                    delta = 14;
+                }
+                else {
+                    diff = newReg ^ this.prevD;
+                    delta = 0;
+                }
+                return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta - 1));
             }
             startCodeLoop(wrapper) {
                 console.log("starting code!");
                 this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 0);
+                    this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevB = e;
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
                 }));
                 this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 1);
+                    this.runner.pausedOn.concat(this.getChangedPins(e, 1).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevC = e;
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
                 }));
                 this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, 2);
+                    this.runner.pausedOn.concat(this.getChangedPins(e, 2).filter(e => this.awaitResponseOn.includes(e)));
+                    this.prevD = e;
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
                 }));
                 this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
                     yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
@@ -4122,6 +4200,9 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             }
             getCodeInPane() {
                 return this.getModel().getValue();
+            }
+            setPaneCode(text) {
+                this.getModel().setValue(text);
             }
             makeMonacoError(message, line, column) {
                 var marker = {
@@ -4150,46 +4231,73 @@ define("interopManager", ["require", "exports", "lib/avr8js/index", "lib/compile
             }
             stop() {
                 this.runner.stop();
+                this.runner.pausedOn = [];
             }
-            arduinoInput(pin, value) {
-                if (pin < 8) {
-                    this.runner.portD.setPin(pin, value);
+            addResponseReqFlag(absoluteIndex) {
+                this.awaitResponseOn.push(absoluteIndex);
+            }
+            removeResponseReqFlag(absoluteIndex) {
+                const index = this.awaitResponseOn.indexOf(absoluteIndex);
+                if (index > -1) {
+                    this.awaitResponseOn.splice(index, 1);
                 }
-                else if (pin < 14) {
-                    this.runner.portB.setPin(pin - 8, value);
-                }
-                else if (pin < 20) {
-                    this.runner.portC.setPin(pin - 14, value);
+            }
+            arduinoInput(insts) {
+                var real = TimingPacket_1.TimingPacket.fix(insts);
+                this.runner.instructions.push(real);
+                const index = this.runner.pausedOn.indexOf(insts.instructions[0].pin);
+                if (index > -1) {
+                    this.runner.pausedOn.splice(index, 1);
                 }
             }
             arduinoADCInput(channel, value) {
                 this.adc.channelValues[channel] = value;
             }
-            delayus(delay) {
-                return __awaiter(this, void 0, void 0, function* () {
-                    const start = performance.now();
-                    for (var counter = 0; counter < this.cyclesPerUs * delay; counter++) {
-                        performance.now();
-                    }
-                    var real = performance.now() - start;
-                    if (real < 1) {
-                        return true;
-                    }
-                    var adjustRatio = (delay / 1000) / real;
-                    adjustRatio = Math.max(Math.min(adjustRatio, 1.1), .9);
-                    this.cyclesPerUs *= adjustRatio;
-                    console.log(this.cyclesPerUs);
+            getPinState(index) {
+                var state;
+                if (index < 8) {
+                    state = this.runner.portD.pinState(index);
+                }
+                else if (index < 14) {
+                    state = this.runner.portB.pinState(index - 8);
+                }
+                else if (index < 20) {
+                    state = this.runner.portC.pinState(index - 14);
+                }
+                else {
+                    console.log("getPinState received invalid index: " + index);
+                }
+                if (state == index_2.PinState.High || state == index_2.PinState.InputPullUp) {
                     return true;
+                }
+                else {
+                    return false;
+                }
+            }
+            downloadFile(filename, contentStreamRef) {
+                return __awaiter(this, void 0, void 0, function* () {
+                    yield contentStreamRef;
+                    console.log("download!");
+                    const data = yield contentStreamRef.arrayBuffer();
+                    const blob = new Blob([data]);
+                    const url = URL.createObjectURL(blob);
+                    const anchor = document.createElement('a');
+                    anchor.href = url;
+                    anchor.download = filename !== null && filename !== void 0 ? filename : "";
+                    anchor.click();
+                    anchor.remove();
+                    URL.revokeObjectURL(url);
                 });
             }
-            calibrateTiming() {
-                let counter = 0;
-                const start = performance.now();
-                while (performance.now() - start < 2000) {
-                    counter++;
+            runTutorial(closeImmediate) {
+                const intro = window.introJs();
+                if (intro) {
+                    console.log("intro is a valid object");
                 }
-                this.cyclesPerUs = counter / 2000000;
-                console.log("cyclesPerUs: " + this.cyclesPerUs);
+                else {
+                    console.log("intro not valid");
+                }
+                intro.start();
             }
         }
         interopManager.InteropManager = InteropManager;

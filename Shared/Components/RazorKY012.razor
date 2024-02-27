@@ -16,13 +16,13 @@
 		}
 	}
 
-	public static void translate(ComponentInstance toDo)
+	public static async void translate(ComponentInstance comp, int pinChangeCycle)
 	{
-		var data = toDo.data;
+		var data = comp.data;
 
-		if (0 == toDo.getConnection("S", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		if (0 == comp.getConnection("S", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			toDo.compParams["value"] = AvrCPU.getPinState(conn!.toId);
+			comp.compParams["value"].setValue<bool>( await AvrCPU.getPinState(conn!.toId));
 		}
 		else
 		{
