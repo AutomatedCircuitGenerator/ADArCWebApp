@@ -9,25 +9,25 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 71.3, y: 94.5, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "TRIG", x: 81.3, y: 94.5, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "ECHO", x: 91.3, y: 94.5, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "GND", x: 101.3, y: 94.5, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
+                new ElementPin(name: "VCC", x: 96.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "TRIG", x: 106.3, y: 118, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "ECHO", x: 116.3, y: 118, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "GND", x: 126.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
             };
         }
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool trig = false;
         bool echo = false;
         if (0 == comp.getConnection("pin2", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            trig = AvrCPU.getPinState(conn!.toId);
+            trig = await AvrCPU.getPinState(conn!.toId);
         }
         if (0 == comp.getConnection("pin3", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            echo = AvrCPU.getPinState(conn2!.toId);
+            echo = await AvrCPU.getPinState(conn2!.toId);
         }
 
         if (trig && comp.midSignal == 0)//LOW until trigger pulse
@@ -37,38 +37,30 @@
         if (trig && comp.midSignal == 1)//HIGH during trigger pulse(10us)
         {
             comp.midSignal = 2;
-            sendSignal(comp, conn2!.toId);
+            sendSignal(pinChangeCycle, comp, conn2!.toId);
         }
     }
-    async static void sendSignal(ComponentInstance comp, int id)
+    async static void sendSignal(int originCyc, ComponentInstance comp, int id)
     {
         //Test distance = (high level time×velocity of sound (340M/S) / 2
         //high level = (Test distance * 2)/velocity of sound
-        double distance = (double)comp.compParams["distance"];
+        double distance = (double)comp.compParams["distance"].getValue();
         int pulsewidth = Convert.ToInt32(distance * 2 / 0.0343);
-        AppInterop.sendPinToArduino(id, true);//HIGH, sending a ECHO pulse
-        // if (distance >= 2 && distance <= 400)//min and max range of HC-SR04
-        // {
-        //     await udelay(pulsewidth);
-        // }
-        // else//nothing detected, probably will never be here
-        // {
-        //     await udelay(38000);
-        // }
-        await Task.Delay(1);
-        AppInterop.sendPinToArduino(id, false);//end of ECHO pulse
+
+        TimingPacket pkt = new(originCyc);
+        pkt.addInstruction(new PinInstruction(id, true, 0));//HIGH, sending a ECHO pulse
+        
+       
+        if (distance >= 2 && distance <= 400)//min and max range of HC-SR04
+        {
+            pkt.addInstruction(new PinInstruction(id, false, pulsewidth));  //read as set false (pulsewidth us) after trigger cycle
+        }
+        else//nothing detected, probably will never be here
+        {
+            pkt.addInstruction(new PinInstruction(id, false, 38000));
+        }
+        //end of ECHO pulse
         comp.midSignal = 0;
-    }
-    
-    static Task udelay(long us)
-    {
-        // var sw = System.Diagnostics.Stopwatch.StartNew();
-        // long v = (us * System.Diagnostics.Stopwatch.Frequency) / 1000000;
-        // while (sw.ElapsedTicks < v)
-        // {
-        // }
-        return Task.Delay(TimeSpan.FromMicroseconds(us));
-        // return Task.Delay((int)us);
     }
 }
 

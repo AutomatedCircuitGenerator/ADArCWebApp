@@ -7,7 +7,7 @@
     {
         rightClickable = false;
     }
-    @if (forceBorder && !Pages.Index.app!.isRunning) {
+    @if (forceBorder && !Pages.Index.app!.isRunning && individualData.globalId != 1) {
         @if (rightClickable)
         {
             <div class="right-click-container">
@@ -29,7 +29,7 @@
         }
     }
 
-    <DynamicComponent Type="individualData.data.compType" Parameters="individualData.compParams"></DynamicComponent>
+    <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent>
 </div>
 
 <!-- ignore scaling -->
@@ -46,7 +46,7 @@
                 <div class="valueSetting" style="padding: 3px 0;">
                     <h2>@(formatTitle(prop))</h2>
                     <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = Convert.ToDouble(e.Value); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { onInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
                         <span class="default-value-label">@value.Label</span>
                     </div>
                     <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
@@ -61,7 +61,7 @@
             {
                 <div class="dropdownSetting" style="padding: 10px 0;">
                     <h2>@(formatTitle(prop))</h2>
-                    <select @oninput="(e) => { individualData.data.compParams[prop.Name.ToLower()] = e.Value; }">
+                    <select @onchange="(e) => { onInput(e, prop, false); }">
                         @foreach (var s in value.dropdownList)
                         {
                             <option value="@s">@s</option>
@@ -127,6 +127,24 @@
         else
         {
             return "";
+        }
+    }
+    public void onInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
+    {
+
+
+        if (convert)//theoretically number data has convert true, -> double, whereas strings have convert false.
+        {
+            individualData.compParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
+        }
+        else
+        {
+            individualData.compParams[prop.Name.ToLower()].setValue((string)e.Value);
+        }
+
+        if (individualData.compParams.ContainsKey("translateOnInput")) 
+        {
+            individualData.data.compType.GetMethod("translate").Invoke(individualData, [individualData]);
         }
     }
 

@@ -47,7 +47,7 @@
         }
     }
 
-    public static void update(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         ComponentData data = comp.data;
         int enable = -1;
@@ -57,7 +57,7 @@
         }
 
 
-        if (AvrCPU.getPinState(enable))         //TODO: change name if necess
+        if (await AvrCPU.getPinState(enable))         //TODO: change name if necess
         {
 
             if (comp.connMap.ContainsKey(data.pins["data5"]))
@@ -88,11 +88,11 @@
                 {
                     rs0 = conn6!.toId;
                 }
-                bool a1 = AvrCPU.getPinState(p1);
-                bool a2 = AvrCPU.getPinState(p2);
-                bool a3 = AvrCPU.getPinState(p3);
-                bool a4 = AvrCPU.getPinState(p4);
-                bool rs = AvrCPU.getPinState(rs0);
+                bool a1 = await AvrCPU.getPinState(p1);
+                bool a2 = await AvrCPU.getPinState(p2);
+                bool a3 = await AvrCPU.getPinState(p3);
+                bool a4 = await AvrCPU.getPinState(p4);
+                bool rs = await AvrCPU.getPinState(rs0);
                 if (comp.midSignal > 0)
                 {
                     long sig = (a4 ? 1:0) | ((a3 ? 1:0) << 1) | ((a2 ? 1:0) << 2) | ((a1 ? 1:0) << 3);//may need to reverse sig

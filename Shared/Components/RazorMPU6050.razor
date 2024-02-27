@@ -12,14 +12,21 @@
         {
             return new ElementPin[]
             {
-                new ElementPin( name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "VCC", x: 101, y: 32.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
+                new ElementPin( name: "GND", x: 91, y: 32.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
+                new ElementPin( name: "SCL", x: 81, y: 32.78, number: 11, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
+                new ElementPin( name: "SDA", x: 71, y: 32.78, number: 10, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
                 new ElementPin( name: "XDA", x: 36.0, y: 5.78, number: 10, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "SDA", x: 45.6, y: 5.78, number: 10, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
-                new ElementPin( name: "SCL", x: 55.2, y: 5.78, number: 11, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
-                new ElementPin( name: "GND", x: 64.8, y: 5.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
-                new ElementPin( name: "VCC", x: 74.4, y: 5.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
+                new ElementPin( name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[]{} ),
+                new ElementPin( name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[]{} ),
+                
+                
+                
+                
+                
+                
+                
             };
         }
     }
@@ -35,12 +42,12 @@
     {
         Dictionary<int, int> register = new Dictionary<int, int>
         {
-            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF00 >> 8 },//ACCEL_XOUT_H
-            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"]) & 0xFF },//ACCEL_XOUT_L
-            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF00 >> 8 },//ACCEL_YOUT_H
-            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"]) & 0xFF },//ACCEL_YOUT_L
-            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
-            { 0x40, TwosComplement8Bits((int)comp.compParams["z"]) & 0xFF },//ACCEL_ZOUT_L
+            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF00 >> 8 },//ACCEL_XOUT_H
+            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF },//ACCEL_XOUT_L
+            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF00 >> 8 },//ACCEL_YOUT_H
+            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF },//ACCEL_YOUT_L
+            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
+            { 0x40, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF },//ACCEL_ZOUT_L
             { 0x41, 0 },//TEMP_OUT_H
             { 0x42, 0 },//TEMP_OUT_L
             { 0x43, 0 },//GYRO_XOUT_H
@@ -54,17 +61,17 @@
         return register;
     }
 
-    public static void translate(ComponentInstance comp)
+    public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         bool sda = false;
         bool scl = false;
         if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            sda = AvrCPU.getPinState(conn!.toId);
+            sda = await AvrCPU.getPinState(conn!.toId);
         }
         if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            scl = AvrCPU.getPinState(conn2!.toId);
+            scl = await AvrCPU.getPinState(conn2!.toId);
         }
 
         //
@@ -96,17 +103,17 @@
             if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
             {
                 comp.midSignal = 17;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0b1101000 for MPU6050
             {
                 comp.midSignal = 5;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
             {
                 comp.midSignal = 6;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
             else//here it is assumed that the master will always pull sda to HIGH, might not be true
             {
@@ -161,7 +168,7 @@
             if (comp.counter == 0)//the read/write set to 1 signifying read
             {
                 comp.midSignal = 13;
-                AvrCPU.setPinState(conn!.toId, false);//set sda to LOW to prepare ACK by Slave
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
             }
         }
 
@@ -172,11 +179,11 @@
             comp.byteIndex--;
             if (a % 2 == 1)
             {
-                AvrCPU.setPinState(conn!.toId, true);
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
             }
             else
             {
-                AvrCPU.setPinState(conn!.toId, false);
+                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
             }
             comp.midSignal = 18;
             if (comp.byteIndex == 0)

@@ -19,11 +19,11 @@ namespace ADArCWebApp.Shared
 		public ElementPin[] pinInfo;
         public Type compType;
 
-        public Dictionary<string,object> compParams = new Dictionary<string,object>();
+        public Dictionary<string,IComponentParameter> templateParams = new Dictionary<string,IComponentParameter>();
 		public List<string> pinsToListen = new();
 
 		public ComponentData(ComponentDataBuilder builder) {
-			compParams = builder.properties;
+			templateParams = builder.properties;
 			name = builder.name;
 			enabled = builder.enabled;
 			directoryPath = builder.directoryPath;
@@ -44,7 +44,7 @@ namespace ADArCWebApp.Shared
 
 	public class ComponentDataBuilder
 	{
-		public Dictionary<string, object> properties = new();
+		public Dictionary<string, IComponentParameter> properties = new();
 		public string name;
 		public bool enabled;
 		public string directoryPath;
@@ -98,9 +98,9 @@ namespace ADArCWebApp.Shared
 		}
 
 
-		public ComponentDataBuilder Property(string name, object data)
+		public ComponentDataBuilder Property<T>(string name, T data)
 		{
-			properties[name] = data;
+			properties[name] = new ComponentParameter<T>(data);
 			return this;
 		}
 

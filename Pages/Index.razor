@@ -1,82 +1,81 @@
 ﻿@page "/"
 @using GraphSynth.Representation
+@using System.Text.Json
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 
 <PageTitle>Index</PageTitle>
+<head>
+	<link href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css" rel="stylesheet" />
+</head>
 <body>
-<script suppress-error="BL9992" type="module" src="build/build.js"></script>
-<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-<div class="page">
-	<div class="toolbar">
-		<div class="logo-and-adarc">
+	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
+	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
+		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
+			<div class="logo-and-adarc" >
 			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
 			<span class="adarc-text">ADArC</span>
 		</div>
-		<div class="tutorial-button" style="font-size: 18px" @onclick="ShowTutorial"> <!-- change -->
-			<span>💡 Tutorial</span>
-		</div>
 
-		<!-- Disabling zoom for case study demo -->
-		<!--
-		<div class="zoom-bar-container">
-			<button class="zoom-button" @onclick=() => HandleZoom("in")' style="font-size: 15px;">🔎</button>
-			<button class="zoom-button" @onclick='() => HandleZoom("out")' style="font-size: 24px;">🔎</button>
-		</div>
-		-->
-		<div class="center-toolbar" style="font-size: 18px">
-			<button class="toolbar-button">
-				<span>⬇️️ Import</span>
+			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial">
+				<!-- change -->
+				💡 Tutorial
 			</button>
-			<button class="toolbar-button">
-				<span>⬆️ Export</span>
+		<div class="center-toolbar">
+				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
+					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
+					<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
+						<span>⬇️️ Import</span>
+					</label>
+
+					<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
+						<span>⬆️ Export</span>
+					</button>
+				</div>
+			<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
+				<span>❓Help</span>
 			</button>
-			<button class="toolbar-button" @onclick="OpenExternalHelp">
-				<span>ℹ️ Help</span>
-			</button>
-			<button class="toolbar-button" @onclick="ToggleRunStop">
+				<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
 				<span>@runStopText</span>
 			</button>
 		</div>
 	</div>
 
-
-	<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-		<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
-			<MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
-		</div>
-		<div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")">
-			<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
-				@if (isLeftExpanded)
-				{
-					<span>▶</span>
-				}
-				else
-				{
-					<span>◀</span>
-
-				}
+		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
+				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
 			</div>
-			<ComponentPane host="@this"></ComponentPane>
-		</div>
-		
-		<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-			<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null ? 1 : buildCanvas.zoomFactor" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
-		</div>
-		<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")"> <!-- code panel -->
-			<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
-				@if (isRightExpanded)
-				{
-					<span>▶</span>
-				}
-				else
-				{
-					<span>◀</span>
-				}
+			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
+				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+					@if (isLeftExpanded)
+					{
+						<span>▶</span>
+					}
+					else
+					{
+						<span>◀</span>
+					}
+				</div>
+				<ComponentPane host="@this"></ComponentPane>
 			</div>
-			<CodePane></CodePane>
+			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
+				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="buildCanvas?.zoomFactor == null? 1: buildCanvas.zoomFactor" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+			</div>
+			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
+				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+					@if (isRightExpanded)
+					{
+						<span>▶</span>
+					}
+					else
+					{
+						<span>◀</span>
+					}
+				</div>
+				<CodePane></CodePane>
+			</div>
 		</div>
-	</div>
 	@if (showZoomTooltip) 
 	{
 		<div class="zoom-tooltip" style="background: #ece1be">
@@ -94,10 +93,16 @@
 	@if (showRightClickTooltip) {
 		<div class="right-click-tooltip" style="background: #ece1be">
 			<label>This is the Workbench.</label>
-			<label style="font-size: 13.5px">Right-click components dragged from the Component Pallete for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
+			<label style="font-size: 13.5px">Right-click components dragged from the Component Palette for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
 			<button @onclick="HideRightClickTooltip">Got it!</button>
 		</div>
 	}
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+	<script>
+		introJs().start();
+	</script>
+
+</body>
 
 
 </div>
@@ -140,17 +145,20 @@
 			if (response.stderr != "")
 			{
 				codePane.updateConsoleOutput(response.stderr, false);
+				runStopText = "▶ Run";
+				var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
+				if (caps.Count > 0)
+				{
+					string lineSection = caps.First().Value;
+					lineSection = lineSection[1..^1];
+					int mid = lineSection.IndexOf(":");
+					int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+					int column = int.Parse(lineSection[(mid + 1)..^0]);
 
-				string lineSection = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures.First().Value;
-				lineSection = lineSection[1..^1];
-				int mid = lineSection.IndexOf(":");
-				int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
-				int column = int.Parse(lineSection[(mid+1)..^0]);
+					string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+					AppInterop.makeMonacoErrorWrapper(message, line, column);
+				}
 
-				string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
-				AppInterop.makeMonacoErrorWrapper(message, line, column);
-
-				runStopText = "▶️ Run";
 			}
 			else
 			{
@@ -176,7 +184,10 @@
 		string url = "https://adarc-help.mech.website/";
 		JsRuntime.InvokeVoidAsync("window.open", url, "_blank");	
 	}
-	
+
+
+
+
 	public Index()
 	{
 		app = this;
@@ -196,6 +207,7 @@
 
 	public static Dictionary<int, ComponentInstance> comps = new()
 	{
+		{0, new ComponentInstance(1, null, 829, 219)}
 	};
 
 
@@ -213,7 +225,6 @@
 	public static ElementReference? refresh;
 
 
-
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -224,8 +235,7 @@
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-
-			AppInterop.calibrate();
+			await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}
@@ -293,59 +303,71 @@
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
 				}
 
-
-				if (comps.Values.Any(c=>c.globalId==1))	//set has an arduino uno
+				if (comps[localIds].globalId == 20)
 				{
-					foreach (var c in comps.Values)		//iterate all components (don't know what listeners exist already)
-					{
-						if (c.globalId != 1)			//exclude the arduino
-						{
-							foreach (string listen in c.data.pinsToListen)	//add a listener for each important pin
-							{
-								int pin = -1;
-								if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
-								{
-									pin = conn!.toId;
-								}
-
-								bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
-								//hopefully the only time the list extends 
-								//is on arduino, which is excluded here
-								if (!hasList || !list!.Any(el => el.actor == c))			//no list for this pin yet, or the list does not contain any connections for this component
-								{
-									int pin2 = -1;
-									if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-									{
-										pin2 = conn2!.toId;
-									}
-									var info = c.data.compType.GetMethod("translate");
-									if (info != null)
-									{
-										AvrCPU.addListener(pin2, c, (c) => info.Invoke(c, [c]));
-									}
-									else
-									{
-										Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");	
-									}
-								}
-							}
-						}
-					}
-
-					AppInterop.updateCodeWrapper();
+					//Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+					AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
 				}
+				setupListeners();
+
 			}
 			moverOffsetLeft = 0;
 			moverOffsetTop = 0;
 			targetCardComponentId = -1;
 		}
 	}
+
+
+	private void setupListeners()
+	{
+		if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
+		{
+			foreach (var c in comps.Values)     //iterate all components (don't know what listeners exist already)
+			{
+				if (c.globalId != 1)            //exclude the arduino
+				{
+					foreach (string listen in c.data.pinsToListen)  //add a listener for each important pin
+					{
+						int pin = -1;
+						if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+						{
+							pin = conn!.toId;
+						}
+
+						bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+						//hopefully the only time the list extends
+						//is on arduino, which is excluded here
+						if (!hasList || !list!.Any(el => el.actor == c))            //no list for this pin yet, or the list does not contain any connections for this component
+						{
+							int pin2 = -1;
+							if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+							{
+								pin2 = conn2!.toId;
+							}
+							var info = c.data.compType.GetMethod("translate");
+							if (info != null)
+							{
+								AvrCPU.addListener(pin2, c, info);
+							}
+							else
+							{
+								Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
+							}
+						}
+					}
+				}
+			}
+
+			AppInterop.updateCodeWrapper();
+		}
+	}
+
 	#endregion
 
 	private readonly List<string> ruleNames = new();
 	private readonly double totalRules = 19.0;
-	private string fileToLoad = "";
-	private double loadPercent = 0;
+	private bool selLockedOut = true;
+
 	protected override async Task OnInitializedAsync()
 	{
 
@@ -370,16 +392,19 @@
 		// ruleNames.Add("TransformerFlipRuleset2"); //1
 		// ruleNames.Add("Clean23Ruleset"); //4
 		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
-		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,84);
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,84);
+		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,85);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,85);
 		compPane!.releaseLockout();
+		selLockedOut = false;
+		//hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
+		setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
 		base.StateHasChanged();
-		
-		
+
+
 		//all else finish first
 		await Task.Delay(1000);
 		loadingProgress = -1;
-		
+
 		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
 		// foreach (string str in ruleNames)
 		// {
@@ -391,7 +416,7 @@
 		// // allRulesLoaded = true;
 
 
-		
+
 	}
 
 	public void updatePinBindings(ComponentInstance comp)
@@ -413,8 +438,6 @@
 			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 
-			node temasd = a.To;
-			node adstemasd = a.From;
 
 			if (ha == hb)
 			{
@@ -433,12 +456,13 @@
 			}
 
 			var aPinName = "**NF**";
+			//TODO: del/readd err here !!
 			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
 			{
 				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
 			}
 			string bPinName = "";
-			
+
 
 			if (aPinName == "**NF**")
 			{
@@ -515,10 +539,16 @@
 	{
 		node Comp2remove = Index.comps[selectedComponent].gsNode;
 
+		if (comps[selectedComponent].globalId == 20)
+		{
+			AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
+		}
+
 		GraphSynthInvoke.removeComp(Comp2remove);
 		comps.Remove(selectedComponent);
 		List<node> b = GraphSynthInvoke.GetNodes();
 		List<arc> c = GraphSynthInvoke.GetArcs();
+
 
 		BuildCode.outputPins.Clear();
 		buildCanvas!.connLines.Clear();
@@ -547,10 +577,10 @@
 			removecomp();
 		}
 	}
-	
+
 	//progress bar
 	public double loadingProgress = 0;
-	
+
 	private void HandleZoom(string action)
 	{
 		const double zoomStep = 0.1;
@@ -565,7 +595,7 @@
 		}
 
 		buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
-		
+
 		StateHasChanged();
 	}
 
@@ -595,19 +625,122 @@
 	void HideRightClickTooltip() {
 		showRightClickTooltip = false;
 	}
-
-	
-	void ShowTutorial()
-	{
-		<!-- Add intro js tutorial -->
-	}
-	
 	void showRightClickTooltipFn()
 	{
 		showRightClickTooltip = true;
 
 	}
-	
-	
-}
 
+
+
+	public async Task loadFromFile(InputFileChangeEventArgs e)
+	{
+		var file = e.File;
+		var buffer = new byte[file.Size];
+		await e.File.OpenReadStream(512000).ReadAsync(buffer);
+		var str = System.Text.Encoding.UTF8.GetString(buffer);
+		setupBenchFromJSONString(str);
+	}
+
+	public void setupBenchFromJSONString(string JSON){
+		Data data = DeserializeJSON(JSON);
+		comps.Clear();
+		buildCanvas!.connLines.Clear();
+		GraphSynthInvoke.inputs.Clear();
+		GraphSynthInvoke.destroyGraph();
+		BuildCode.outputPins.Clear();
+
+		//Console.WriteLine(ex);
+		localIds = data.LocalId;
+
+		foreach (var kv in data.Comps)
+		{
+			comps.Add(kv.Key, kv.Value);
+			var n = new node();//label with localId (easy tracking)
+			n.localLabels.Add("user_" + kv.Value.data.nodeName);
+			kv.Value.gsNode = n;
+
+			GraphSynthInvoke.GetNodes().Add(n);
+			GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+			GraphSynthInvoke.recg_apply();
+			GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
+			GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
+
+		}
+
+		foreach (var c in comps.Values)
+		{
+			updatePinBindings(c);   //keep an eye on this. could be not good for performance.
+		}
+		setupListeners();
+
+		AppInterop.setCodeWrapper(data.Code);
+	}
+
+	public async void downloadFile()
+	{
+		var stream = new MemoryStream();
+		var writer = new StreamWriter(stream);
+		writer.Write(await ExportJSON());
+		writer.Flush();
+		stream.Position = 0;
+
+		using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
+
+		AppInterop.downloadFile("adarc-circuit.adarc", streamRef);
+	}
+
+
+	class Data
+	{
+		// public List<InstanceConnection> ConnLines { get; set; }
+		public int LocalId { get; set; }
+		public string Code { get; set; }
+		public Dictionary<int, ComponentInstance> Comps { get; set; }
+	}
+	private async Task<string> ExportJSON(){
+		Data parentObject = new Data
+		{
+			// ConnLines = Index.buildCanvas.connLines,
+			Comps = comps,
+			LocalId = localIds,
+			Code = await AppInterop.getCodeWrapper()
+		};
+
+		var options = new JsonSerializerOptions { IncludeFields = true};
+		options.Converters.Add(new ParamSerializer());
+		return JsonSerializer.Serialize(parentObject,options);
+	}
+
+	private Data DeserializeJSON(string jsonString)
+	{
+		try
+		{
+			// Deserialize JSON data into a Data object
+			var options = new JsonSerializerOptions { IncludeFields = true };
+			options.Converters.Add(new ParamSerializer());
+			Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+
+			// Now you have access to the deserialized data as a CanvasData object
+			// Do whatever you need with this data
+
+			return canvasData;
+		}
+		catch (Exception ex)
+		{
+			Console.WriteLine($"Error during deserialization: {ex.Message}");
+		}
+
+		return null;
+	}
+
+	// runs the introjs tutorial
+	private async void runTutorial()
+	{
+		// var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
+		// ant-menu-submenu-hidden
+		await AppInterop.jsModule!.InvokeVoidAsync("runTutorial");
+		//await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
+		StateHasChanged();
+	}
+}
