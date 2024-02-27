@@ -16,13 +16,13 @@
             };
         }
     }
-    //seems like RGBLED involves pulsewidth of the signal, timing restricted
     public static async void translate(ComponentInstance comp, int pinChangeCycle)
     {
         var data = comp.data;
 
         bool R = false;
         bool G = false;
+        bool B = false;
         if (0 == comp.getConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
             R = await AvrCPU.getPinState(conn!.toId);
@@ -31,13 +31,42 @@
         {
             G = await AvrCPU.getPinState(conn2!.toId);
         }
-        if (0 == comp.getConnection("G", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+        if (0 == comp.getConnection("B", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
         {
-            G = await AvrCPU.getPinState(conn3!.toId);
+            B = await AvrCPU.getPinState(conn3!.toId);
+        }
+        // var pkt = new TimingPacket(pinChangeCycle);
+
+        //too many cases with 3 PWM signals and 2 options for frequency(490Hz & 980Hz)
+        //only red is done here
+        if (R && comp.midSignal==0)
+        {
+            comp.timer = pinChangeCycle;
+            comp.midSignal = 1;
+        }
+        if (!R && comp.midSignal==1)
+        {
+            comp.timer = (pinChangeCycle - comp.timer) / 16;
+            comp.midSignal = 0;
+            
+            if (conn.toId == 3 || conn.toId == 9 || conn.toId == 10 || conn.toId == 11)
+            {
+                int freq = 490;
+                int cycle = 1000000 / freq;
+                int value = 255 * (int)comp.timer / cycle;
+                comp.compParams["ledRed"].setValue(value);
+            }
+            else if (conn.toId == 5 || conn.toId == 6)
+            {
+                int freq = 980;
+                int cycle = 1000000 / freq;
+                int value = 255 * (int)comp.timer / cycle;
+
+                comp.compParams["ledRed"].setValue(value);
+            }
         }
 
         
-
 
         //AvrCPU.setPinState(conn!.toId, true);
 
