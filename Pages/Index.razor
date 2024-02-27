@@ -14,15 +14,15 @@
 	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
 		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
 			<div class="logo-and-adarc" >
-			<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-			<span class="adarc-text">ADArC</span>
-		</div>
+				<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
+				<span class="adarc-text">ADArC</span>
+			</div>
 
-			<button class="tutorial-button" style="font-size: 18px" @onclick="runTutorial">
+			<button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
 				<!-- change -->
 				💡 Tutorial
 			</button>
-		<div class="center-toolbar">
+			<div class="center-toolbar">
 				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
 					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
 					<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
@@ -33,14 +33,14 @@
 						<span>⬆️ Export</span>
 					</button>
 				</div>
-			<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
-				<span>❓Help</span>
-			</button>
-				<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
-				<span>@runStopText</span>
-			</button>
+				<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
+					<span>❓Help</span>
+				</button>
+					<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
+					<span>@runStopText</span>
+				</button>
+			</div>
 		</div>
-	</div>
 
 		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
 			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
@@ -101,8 +101,6 @@
 	<script>
 		introJs().start();
 	</script>
-
-</body>
 
 
 </div>

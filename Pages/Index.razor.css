@@ -196,6 +196,7 @@ div, span {
 
 .toolbar-button {
     flex-direction: row;
+
 }
 
 .rotate180 {
@@ -253,7 +254,7 @@ div, span {
 }
 
 /* hides X-axis scrollbar in toolbar, but it is still scrollable */
-.toolbar[b-s7qrrfca0g]::-webkit-scrollbar {
+.toolbar::-webkit-scrollbar {
     display: none;
 }
 
