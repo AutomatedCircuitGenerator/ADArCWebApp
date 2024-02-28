@@ -1,11 +1,11 @@
 ﻿self.assetsManifest = {
   "assets": [
     {
-      "hash": "sha256-QJy0HvHPE6xvvjYKkTlxW2SPoIpqd\/3EnJ9GCR081\/Q=",
+      "hash": "sha256-0TedeQLW4btCzgTJiYr7Xv5vk9d1D6sSspB3MhOEcpo=",
       "url": "build\/build.js"
     },
     {
-      "hash": "sha256-GDtFLENWB2i0rFnynvG1ZO4569Z5eAQiTL9uh7gmZis=",
+      "hash": "sha256-ExyyNSRi2xjYCJGKYlA07QXh\/xyGiytTA0H69DP2Hls=",
       "url": "build\/build.js.map"
     },
     {
@@ -1053,11 +1053,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-cU1gyq0XrhAQGVSSlpUW8UqfkdjgOACR6BZ6aAza5E8=",
+      "hash": "sha256-3qlCG+r3GfeGQzcUupV66kXi968FN7Zv\/Ewr3h3Isrg=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-MIgKGS7HYgX776CdJQlN2G5oDv4NYk8LsJMCGWulYDA=",
+      "hash": "sha256-MUpRtdiuxEDwN9flOAsENONE71VbQslCMC2i3K4pr\/c=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -2321,5 +2321,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "kQ4JWFo0"
+  "version": "g+FAEjKh"
 };

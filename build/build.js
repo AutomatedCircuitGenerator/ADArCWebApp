@@ -4290,7 +4290,8 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 });
             }
             runTutorial(closeImmediate) {
-                const intro = window.introJs();
+                const intro = window.introJs().setOption('keyboardNavigation', false);
+                ;
                 if (intro) {
                     console.log("intro is a valid object");
                 }
