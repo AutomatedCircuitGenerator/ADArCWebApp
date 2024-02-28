@@ -38,6 +38,11 @@
 
 	private Transform transform = new Transform();
 
+	public void resetTransform()
+	{
+		transform = new Transform();	
+	}
+
 	private (double x, double y) zoomOrigin = (950 / 2, 1080 / 2);//assumes 1920x1080, doesn't really matter, but shouldn't change
 
 	//compatibility property to reference into the transform without refactoring everything

@@ -24,14 +24,14 @@
 			</button>
 			<div class="center-toolbar">
 				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
+					<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
+						<span>⬆️ Export</span>
+					</button>
+					
 					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
 					<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
 						<span>⬇️️ Import</span>
 					</label>
-
-					<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
-						<span>⬆️ Export</span>
-					</button>
 				</div>
 				<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
 					<span>ℹ Help</span>
@@ -641,6 +641,7 @@
 		Data data = DeserializeJSON(JSON);
 		comps.Clear();
 		buildCanvas!.connLines.Clear();
+		buildCanvas!.resetTransform();
 		GraphSynthInvoke.inputs.Clear();
 		GraphSynthInvoke.destroyGraph();
 		BuildCode.outputPins.Clear();
