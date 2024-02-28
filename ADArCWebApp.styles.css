@@ -331,6 +331,22 @@ hr[b-ve6qiki0tf] {
 .code-tooltip label[b-ve6qiki0tf] {
     margin-bottom: 5px;
 }
+
+#console-container[b-ve6qiki0tf] {
+    flex: 1; 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    background-color: #f4f4f4; 
+    overflow-y: scroll; 
+    user-select:text; 
+    white-space:pre;
+    overscroll-behavior-y: contain;
+    scroll-snap-type:y mandatory;
+}
+
+    #console-container > #console-container:last-child[b-ve6qiki0tf] {
+        scroll-snap-align:start;
+    }
 /* /Shared/ComponentCard.razor.rz.scp.css */
 .card-container[b-1ylg6kr75c] {
     background-color: white;
