@@ -46,3 +46,19 @@ hr {
 .code-tooltip label {
     margin-bottom: 5px;
 }
+
+#console-container {
+    flex: 1; 
+    border: 1px solid #ccc; 
+    padding: 10px; 
+    background-color: #f4f4f4; 
+    overflow-y: scroll; 
+    user-select:text; 
+    white-space:pre;
+    overscroll-behavior-y: contain;
+    scroll-snap-type:y mandatory;
+}
+
+    #console-container > #console-container:last-child {
+        scroll-snap-align:start;
+    }

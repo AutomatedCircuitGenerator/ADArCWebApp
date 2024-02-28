@@ -20,7 +20,7 @@
     <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
 
     <!-- Container for the console output -->
-    <div id="console-container" style="flex: 1; border: 1px solid #ccc; padding: 10px; background-color: #f4f4f4; overflow-y: scroll; user-select:text; white-space:pre">
+    <div id="console-container">
         @foreach (string line in text)
         {
             <span class="@(line.Contains("Error during build:") ? "error" : "auto")">@line</span>
@@ -94,6 +94,7 @@
         this.text[index] += line;
         if (line.EndsWith("\n"))
         {
+            this.text[index] = Regex.Replace(this.text[index], "\r\n|\n\n", "");
             index++;
         }
 

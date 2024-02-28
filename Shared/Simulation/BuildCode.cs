@@ -51,7 +51,14 @@ namespace ADArCWebApp.Shared.Simulation
 			b.AppendLine("  for (int i = 0; i < " + outputPins.Count + "; i++) {");
 			b.AppendLine("    pinMode(outputPins[i], OUTPUT);");
 			b.AppendLine("  }");
-			b.AppendLine("}");
+
+            //insert global vars from components
+            foreach (ComponentInstance c in Pages.Index.comps.Values)
+            {
+                b.Append(parseProvidedCode(c, "setup", true));
+
+            }
+            b.AppendLine("}");
 
 			return b.ToString();
 		}
