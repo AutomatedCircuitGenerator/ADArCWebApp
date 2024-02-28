@@ -519,6 +519,8 @@ hr[b-ve6qiki0tf] {
     font-size: 13.5px;
     padding-left: 5%;
     padding-right: 5%;
+    display: flex;
+    flex-direction:column;
 }
 
 .palette-tooltip button[b-vtl0xvyh0e] {
@@ -538,6 +540,7 @@ hr[b-ve6qiki0tf] {
 
 .palette-tooltip label[b-vtl0xvyh0e] {
     margin-bottom: 5px;
+    text-align: center;
 }
 /* /Shared/Components/RazorArduinoMega.razor.rz.scp.css */
 text[b-qr4y3v1db0] {
