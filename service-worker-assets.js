@@ -1053,11 +1053,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-OVQeaoN63f4Z9HZZ5MuCX1X3SMrhxUTpUsCRhukybd8=",
+      "hash": "sha256-6t550or8Z1jG9rqnyZEfm7NBKEEfIuNJxpIhrUtZwPI=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-URvmABfj0c+iDR48di+hX9yjN+YuaRVS9m3LzkI0ogo=",
+      "hash": "sha256-7NJqnkaG0KIRy7Ryr3zEn+2hzoGkLXhlS3ULFh2B7wg=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -2321,5 +2321,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "+FcyfCt4"
+  "version": "ahhJXzRQ"
 };
