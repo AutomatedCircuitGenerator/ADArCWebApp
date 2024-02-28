@@ -1,5 +1,5 @@
 ﻿@code {
-	ElementPin[] pinInfo
+	public static ElementPin[] pinInfo
 	{
 		get
 		{
@@ -13,6 +13,53 @@
 				new ElementPin(name: "GND_C",  x: 18.359, y: 13.324, signals: new PinSignalInfo[] { }, number: 5)
 			};
 
+		}
+	}
+
+	public static async void translate(ComponentInstance comp, int pinChangeCycle)
+	{
+		bool pin = false;
+
+		if (0 == comp.getConnection("PWM", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		{
+			pin = await AvrCPU.getPinState(conn!.toId);
+		}
+
+		if (pin && comp.midSignal == 0)//if HIGH(pulse)
+		{
+			comp.compParams["timer"].setValue<long>(System.Diagnostics.Stopwatch.GetTimestamp());//start timing the pulse
+			comp.midSignal = 1;
+		}
+		if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
+		{
+			comp.compParams["timer"].setValue<long>(System.Diagnostics.Stopwatch.GetElapsedTime((long)comp.compParams["timer"].getValue()).Microseconds);//stop the timers
+			comp.midSignal = 2;
+		}
+
+		if (comp.midSignal == 2)
+		{
+			long timer = (long)comp.compParams["timer"].getValue();
+			if (timer > 950 && timer < 1050)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
+			{
+				comp.compParams["speed"].setValue<string>("stop");//stationary motor
+			}
+			else if (timer > 1450 && timer < 1550)//if the pulse width is 1.5ms
+			{
+				comp.compParams["speed"].setValue<string>("half");//half speed
+			}
+			else if (timer > 1950 && timer < 2050)//if the pulse width is 2ms
+			{
+				comp.compParams["speed"].setValue<string>("full");//full speed
+			}
+			else if (timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
+			{
+				Console.WriteLine("simulator timing error - unrecognized pulse width");
+			}
+			else//if timer did not start
+			{
+				Console.WriteLine("timer didn't start");
+			}
+			comp.midSignal = 0;
 		}
 	}
 }
