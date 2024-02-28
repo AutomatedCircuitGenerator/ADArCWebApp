@@ -16,8 +16,10 @@
 
 <div class="code-container">
     
-    <!-- Container for the Monaco Editor -->
-    <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
+    <div id="editor-wrapper" style="height:60%; overflow-y:hidden;">
+        <!-- Container for the Monaco Editor -->
+        <StandaloneCodeEditor  Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
+    </div>
 
     <!-- Container for the console output -->
     <div id="console-container">
