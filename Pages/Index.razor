@@ -98,9 +98,6 @@
 		</div>
 	}
 	<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
-	<script>
-		introJs().start();
-	</script>
 
 
 </div>
@@ -117,7 +114,7 @@
 	int rightPaneAlign => isRightExpanded ? 0 : -39;
 	string runStopText = "▶️ Run";
 	public bool isRunning = false;
-	
+
 	void ToggleLeftSidebar()
 	{
 		isLeftExpanded = !isLeftExpanded;
@@ -131,7 +128,7 @@
 		isLeftExpanded = false;
 		StateHasChanged();
 	}
-	
+
 	async Task ToggleRunStop()
 	{
 		if (!isRunning)
@@ -233,7 +230,7 @@
 			AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
 			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-			await AppInterop.jsModule!.InvokeAsync<object>("runTutorial");
+			runTutorial();
 			//AppInterop.startSimWrapper();
 			//AppInterop.updateCodeWrapper();
 		}

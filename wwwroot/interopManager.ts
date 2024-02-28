@@ -190,7 +190,7 @@ export namespace interopManager {
         // runs the tutorial using Intro.js
         public runTutorial(closeImmediate: boolean) {
             
-            const intro = (<any>window).introJs();
+            const intro = (<any>window).introJs().setOption('keyboardNavigation', false);;
             if (intro) {
                 console.log("intro is a valid object")
             }
@@ -198,7 +198,7 @@ export namespace interopManager {
                 console.log("intro not valid")
             }
             //this.closeMenu("Help");
-            //intro.onafterchange((e) => { if (e.classList.contains("sidebar") || e.classList.contains("sidebar-right")) { e.style.marginTop = "50px"; } });
+            
             intro.start();
             //intro.onexit(()=> intro.goToStep(6));
             
