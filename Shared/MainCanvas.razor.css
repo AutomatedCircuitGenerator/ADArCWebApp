@@ -11,3 +11,7 @@ svg {
     position: absolute;
     pointer-events: none;
 }
+
+line {
+    z-index: 50;
+}

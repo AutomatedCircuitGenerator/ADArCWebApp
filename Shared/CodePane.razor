@@ -53,7 +53,7 @@
     }
 
 
-    List<string> text = ["This is the Console"];
+    List<string> text = ["This is the Console. Compiler and Serial output appears here!", ""];
 
     int index = 1;
 
@@ -66,48 +66,33 @@
             var lines = newText.Split("\n");
             for (int i = 0; i < lines.Count(); i++)
             {
-                string line = lines[i];
-                if (i != lines.Count() - 1)
+                this.text[index] += lines[i];
+                if (lines.Count() > 1 && i != lines.Count()-1)
                 {
-                    singleLine(line + "\n");
-                }
-                else
-                {
-                    singleLine(line);
+                    commitBuffer();
                 }
             }
         }
         else
         {
-            singleLine(newText);    
+            this.text[index] += newText;
+            if (newText.EndsWith("\n"))
+            {
+                commitBuffer();
+            }
         }
+
+
 
         StateHasChanged();
     }
 
-    private void singleLine(string line)
+    public void commitBuffer()
     {
-        if (this.text.Count == index)
-        {
-            this.text.Add("");
-        }
-        this.text[index] += line;
-        if (line.EndsWith("\n"))
-        {
-            this.text[index] = Regex.Replace(this.text[index], "\r\n|\n\n", "");
-            index++;
-        }
-
+        this.text.Add("");
+        index++;
     }
 
-    public void newLineIfNot()
-    {
-        if (!this.text.Last().EndsWith("\n"))
-        {
-            this.text[index] += "\n";
-            index++;
-        }
-    }
 
     public bool showCodeTooltip = false;
     void showCodeTooltipFn() { showCodeTooltip = true;  }

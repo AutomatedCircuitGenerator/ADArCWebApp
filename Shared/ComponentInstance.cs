@@ -25,13 +25,16 @@ namespace ADArCWebApp.Shared
 		public int RegAddr;
 		public int byteIndex;
 		public long timer;
-		public Dictionary<string, IComponentParameter> compParams;
+		public Dictionary<string, IComponentParameter> compParams = new();
 
 		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
 			this.globalId = globalId;
 			data = ComponentDeclarations.components[globalId];
-			compParams = new Dictionary<string, IComponentParameter>(data.templateParams);
-			this.x = x;
+            foreach (var kv in data.templateParams)
+            {
+				compParams.Add(kv.Key, kv.Value.copy());
+            }
+            this.x = x;
 			this.y = y;
 			zoomedX = x;
 			zoomedY = y;

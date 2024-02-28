@@ -8,6 +8,8 @@
 
 		public void setValue<T>(T obj);
 
+		public IComponentParameter copy();
+
 	}
 
 	public class ComponentParameter<T> : IComponentParameter {
@@ -15,6 +17,7 @@
 		public ComponentParameter(T val) { 
 			Value = val;
 		}
+
 		private T Value { get; set; }
 
 		public object getValue()
@@ -43,6 +46,12 @@
 				throw new InvalidCastException();
 			}
 		}
-    }
+
+		public IComponentParameter copy()
+		{
+			IComponentParameter ret =  new ComponentParameter<T>(Value);
+			return ret;
+		}
+	}
 
 }

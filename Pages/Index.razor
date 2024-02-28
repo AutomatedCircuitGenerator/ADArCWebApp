@@ -167,7 +167,7 @@
 		else
 		{
 			AppInterop.stopWrapper();
-			codePane!.newLineIfNot();
+			codePane!.commitBuffer();
 			codePane!.updateConsoleOutput("Stopped.\n", false);
 			runStopText = "▶ Run";
 			isRunning = false;
