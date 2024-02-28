@@ -4277,7 +4277,8 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             downloadFile(filename, contentStreamRef) {
                 return __awaiter(this, void 0, void 0, function* () {
                     yield contentStreamRef;
-                    console.log("download!");
+                    filename = new Date(Date.now()).toISOString() + " - " + filename;
+                    console.log(filename);
                     const data = yield contentStreamRef.arrayBuffer();
                     const blob = new Blob([data]);
                     const url = URL.createObjectURL(blob);

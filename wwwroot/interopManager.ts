@@ -175,7 +175,9 @@ export namespace interopManager {
 
         async downloadFile(filename: string, contentStreamRef: any) {
             await contentStreamRef;
-            console.log("download!");
+
+            filename = new Date(Date.now()).toISOString() + " - " + filename;
+            console.log(filename);
             const data = await contentStreamRef.arrayBuffer();
             const blob = new Blob([data]);
             const url = URL.createObjectURL(blob);
