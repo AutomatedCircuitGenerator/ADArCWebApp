@@ -4,15 +4,15 @@
     {
 
         //properties for easier jsoning
-        public int originCycle { get; set; }
+        public long originCycle { get; set; }
 
         public List<PinInstruction> instructions { get;} = [];
 
-        public TimingPacket(int originCycle) { 
+        public TimingPacket(long originCycle) { 
             this.originCycle = originCycle;
         }
 
-        public TimingPacket(int originCycle, params PinInstruction[] inst) {
+        public TimingPacket(long originCycle, params PinInstruction[] inst) {
             this.originCycle=originCycle;
             instructions.AddRange(inst);
             instructions.Sort();
@@ -58,7 +58,7 @@
 
         public int CompareTo(PinInstruction? other)
         {
-            //avoid double precision errors
+            //avoid double precision errors on equals
             if ((cumulUsSinceOriginCycle - other?.cumulUsSinceOriginCycle) < .001)
             {
                 return 0;

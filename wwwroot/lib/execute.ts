@@ -16,6 +16,11 @@ import { loadHex } from "./compile-util";
 // ATmega328p params
 const FLASH = 0x8000;
 
+/**
+ * 
+ * This is mostly taken from the examples provided on the avr8js github
+ * In general, it provides utilities related to working with the Arduino CPU.
+ */
 export class AVRRunner {
     readonly program = new Uint16Array(FLASH);
     readonly cpu: CPU;
@@ -40,7 +45,7 @@ export class AVRRunner {
         this.portD = new AVRIOPort(this.cpu, portDConfig);
         this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
     }
-
+    
     async execute(callback: (cpu: CPU) => void) {
         this.stopped = false;
         for (; ;) {

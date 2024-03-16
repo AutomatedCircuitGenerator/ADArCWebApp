@@ -95,7 +95,7 @@ namespace ADArCWebApp.Shared.Interop
 
 		public static async void setCodeWrapper(string code)
 		{
-			await jsModule!.InvokeVoidAsync("setPaneCode", code);
+			await jsModule!.InvokeVoidAsync("updateCodeInPane", code);
 		}
 
 		public static async void stopWrapper() {

@@ -121,6 +121,9 @@ namespace ADArCWebApp
         //Remove component from seed
         static public void removeComp(node n)
         {
+            if (n == null) {
+                return;
+            }
 			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
 			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
             {

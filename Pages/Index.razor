@@ -129,6 +129,10 @@
 		StateHasChanged();
 	}
 
+
+	/*
+		* attempts to run the code.
+		*/
 	async Task ToggleRunStop()
 	{
 		if (!isRunning)
@@ -141,21 +145,26 @@
 			{
 				codePane.updateConsoleOutput(response.stderr, false);
 				runStopText = "▶ Run";
+				//look for available error messages (format roughly error:linenum:columnnum:message)
 				var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
 				if (caps.Count > 0)
 				{
 					string lineSection = caps.First().Value;
+					//cut off the colons at the beginning and end
 					lineSection = lineSection[1..^1];
+					//get the index of the middle colon
 					int mid = lineSection.IndexOf(":");
+					//grab line number only
 					int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+					//grab column number only
 					int column = int.Parse(lineSection[(mid + 1)..^0]);
-
+					//cut off error: to get message
 					string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
 					AppInterop.makeMonacoErrorWrapper(message, line, column);
 				}
 
 			}
-			else
+			else  //no errors
 			{
 				codePane.updateConsoleOutput(response.stdout, false);
 				AppInterop.clearMonacoErrorsWrapper();
@@ -164,7 +173,7 @@
 				isRunning = true;
 			}
 		}
-		else
+		else    //stop running
 		{
 			AppInterop.stopWrapper();
 			codePane!.commitBuffer();
@@ -188,11 +197,15 @@
 		app = this;
 	}
 
+	//provide avenue for non-component classes to invoke render
 	public void StateChanged()
 	{
 		StateHasChanged();
 	}
 
+	//re-render is also triggered on events, so create an event with a triggered click.
+	//generally the same as previous and should be removed if possible.
+	//TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
 	public async Task triggerRender()
 	{
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
@@ -200,6 +213,9 @@
 
 	private int localIds = 0;
 
+
+	//main component storage. provides a arduino by default. The arduino is overwritten when rule loading finishes,
+	//but does not change visually (hopefully)
 	public static Dictionary<int, ComponentInstance> comps = new()
 	{
 		{0, new ComponentInstance(1, null, 829, 219)}
@@ -219,7 +235,7 @@
 
 	public static ElementReference? refresh;
 
-
+	//does setup for javascript interop on page load.
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -252,7 +268,7 @@
 		targetCardComponentId = id;
 	}
 
-
+	//functions to handle component dragged from palette to workbench
 	private void checkForCardDrag(MouseEventArgs e)
 	{
 		if (e.Button == 0 && targetCardComponentId != -1)
@@ -277,7 +293,7 @@
 		if (targetCardComponentId != -1)
 		{
 			isVisible = "hidden";
-			if (allowDrop)
+			if (allowDrop)  //ie, cursor is over the workbench
 			{
 				++localIds;
 				var d = ComponentDeclarations.components[targetCardComponentId];
@@ -286,23 +302,31 @@
 
 				GraphSynthInvoke.GetNodes().Add(n);
 				GraphSynthInvoke.inputs.Add(d.nodeName);
-				GraphSynthInvoke.recg_apply();
+				GraphSynthInvoke.recg_apply();			//do component connection backend
 
+				//label all new nodes and connections witht the localid of the component that added them.
 				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
 				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+				//create frontend instance
 				comps.Add(localIds, buildCanvas.unZoom(new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
 				BuildCode.outputPins.Clear();
 				buildCanvas!.connLines.Clear();
+				//reset the way that component pins are bound to the arduino.
+				//TODO: check for performance improvements here.
 				foreach (var c in comps.Values)
 				{
 					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
 				}
 
+				//register the dht specifically to forced the arduino to pause while awaiting response from sensor
+				//TODO: improve and generalize.
 				if (comps[localIds].globalId == 20)
 				{
 					//Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
 					AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
 				}
+				//create listeners for arduino pins to components.
+				//Personally, not a huge fan of this system. good place for improvement
 				setupListeners();
 
 			}
@@ -312,7 +336,7 @@
 		}
 	}
 
-
+	//binds component translation functions to arduino pins through listeners
 	private void setupListeners()
 	{
 		if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
@@ -339,6 +363,7 @@
 							{
 								pin2 = conn2!.toId;
 							}
+							//TODO: fix so that all componenents inherit from one class
 							var info = c.data.compType.GetMethod("translate");
 							if (info != null)
 							{
@@ -365,28 +390,8 @@
 
 	protected override async Task OnInitializedAsync()
 	{
-
-		// loads rulesets
-		// allRulesLoaded = false;
-		// ruleNames.Add("BondGraphRuleset"); //58
-		// ruleNames.Add("SimplificationRuleset"); //28
-		// ruleNames.Add("DirRuleset"); //5
-		// ruleNames.Add("newDirectionRuleSet_2"); //17
-		// ruleNames.Add("DirRuleset3"); //4
-		// ruleNames.Add("Simplification2"); //32
-		// ruleNames.Add("NewCausalityMethodRuleset"); //6
-		// ruleNames.Add("NewCausalityMethodRuleset_2"); //4
-		// ruleNames.Add("NewCausalityMethodRuleset_3"); //2
-		// ruleNames.Add("INVDMarkerRules"); //6
-		// ruleNames.Add("INVDMarkerRules_2"); //0?
-		// ruleNames.Add("CalibrationNewRuleset"); //12
-		// ruleNames.Add("CalibrationNewRuleset_2"); //0?
-		// ruleNames.Add("RFlagCleanRuleset"); //1
-		// ruleNames.Add("ICFixTotalRuleset"); //12
-		// ruleNames.Add("TransformerFlipRuleset"); //1
-		// ruleNames.Add("TransformerFlipRuleset2"); //1
-		// ruleNames.Add("Clean23Ruleset"); //4
-		// ruleNames.Add("BeforeBG-VerifyDirRuleSet"); //8
+		//load rules.
+		//TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
 		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,85);
 		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,85);
 		compPane!.releaseLockout();
@@ -414,6 +419,8 @@
 
 	}
 
+	//sets up a components pin bindings to an arduino.
+	//TODO: improve this function or find a way to remove it entirely.
 	public void updatePinBindings(ComponentInstance comp)
 	{
 		comp.connMap.Clear();
@@ -451,7 +458,7 @@
 			}
 
 			var aPinName = "**NF**";
-			//TODO: del/readd err here !!
+
 			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
 			{
 				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
@@ -492,7 +499,7 @@
 		}
 	}
 
-
+	//helper for previous function to get all pins of a component as graphsynth nodes.
 	public List<node> getPins(node n, string name){
 		//n is root, connected to main node but not main node.
 		string fullName = "user_" + name;
@@ -508,32 +515,13 @@
 
 	}
 
-	//List<String> inputs = new List<string> {  "arduinouno_rev3","adxl345" };
-	// List<String> inputs = new List<string> {  "arduinoUno_rev3","led" };
-
-	//    public void addcomp()
-	//    {
-
-
-	//        GraphSynthInvoke.recg_apply();
-	// 	List<node> b = GraphSynthInvoke.GetNodes();
-	// 	List<arc> c = GraphSynthInvoke.GetArcs();
-
-	// 	int numofcon = 0;
-	// 	for(int i = 0; i<c.Count; i++)
-	// 	{
-	// 		if (c[i].localLabels.Contains("connection")){
-	// 			numofcon++;
-	// 		}
-	// 	}
-	// 	Console.WriteLine("the number of nodes is " + b.Count);
-	// 	Console.WriteLine("the number of connections is " + numofcon);
-	// }
-
+	//deletes a component
 	public void removecomp()
 	{
 		node Comp2remove = Index.comps[selectedComponent].gsNode;
 
+		//specifically deregisters the dht pins from requiring a pause on the arduino.
+		//TODO: improve and generalize.
 		if (comps[selectedComponent].globalId == 20)
 		{
 			AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
@@ -552,21 +540,22 @@
 			updatePinBindings(comp);   //keep an eye on this. could be not good for performance.
 		}
 
-		int numofcon = 0;
+		/*int numofcon = 0;
 		for (int i = 0; i < c.Count; i++)
-		{
-			if (c[i].localLabels.Contains("connection"))
 			{
+			if (c[i].localLabels.Contains("connection"))
+				{
 				numofcon++;
-			}
+		}
 		}
 		Console.WriteLine("the number of nodes is " + b.Count);
-		Console.WriteLine("the number of connections is " + numofcon);
+		Console.WriteLine("the number of connections is " + numofcon);*/
 	}
 
+	//deletes a component when delete/backspace pressed.
 	private void handleKeyPress(KeyboardEventArgs e)
 	{
-		Console.WriteLine(e.Key);
+		//Console.WriteLine(e.Key);
 		if (!isRunning && ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1))
 		{
 			removecomp();
@@ -576,6 +565,7 @@
 	//progress bar
 	public double loadingProgress = 0;
 
+	//unused
 	private void HandleZoom(string action)
 	{
 		const double zoomStep = 0.1;
@@ -627,7 +617,7 @@
 	}
 
 
-
+	//when a file is imported, handle it
 	public async Task loadFromFile(InputFileChangeEventArgs e)
 	{
 		var file = e.File;
@@ -636,10 +626,17 @@
 		var str = System.Text.Encoding.UTF8.GetString(buffer);
 		setupBenchFromJSONString(str);
 	}
-
+	//handles most of the setup process of the bench after import.
 	public void setupBenchFromJSONString(string JSON){
 		Data data = DeserializeJSON(JSON);
-		comps.Clear();
+		//clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
+		//notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
+		foreach (var comp in comps)
+		{
+			selectedComponent = comp.Key;
+			removecomp();
+			selectedComponent = -1;
+		}
 		buildCanvas!.connLines.Clear();
 		buildCanvas!.resetTransform();
 		GraphSynthInvoke.inputs.Clear();
@@ -673,6 +670,7 @@
 		AppInterop.setCodeWrapper(data.Code);
 	}
 
+	//create file data and send it off to JS for downloading.
 	public async void downloadFile()
 	{
 		var stream = new MemoryStream();
