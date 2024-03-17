@@ -2,6 +2,11 @@
 
 namespace ADArCWebApp.Shared
 {
+
+	/// <summary>
+	/// Primary data class. Extremely bloated. Stores template data about a type of component.
+	/// TODO: try to improve system to avoid this class. Component parent class?
+	/// </summary>
 	public class ComponentData
 	{
         public string name;
@@ -70,7 +75,7 @@ namespace ADArCWebApp.Shared
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;
-			if (pins != null)
+			if (pins != null)//create pin ids
 			{
 				for (int i = 0; i < pins.Count; i++)
 				{
@@ -82,6 +87,8 @@ namespace ADArCWebApp.Shared
 			}
 			this.nodeName = gsNodeName;
 
+			//quick hack to get the pinInfo from a component without having to setup a field in the namespace file.
+			//TODO: fix!
 			if (compType != typeof(InvalidComponent)) {
 				try {
 					var p_i = compType!.GetProperty("pinInfo");

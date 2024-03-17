@@ -27,10 +27,12 @@ namespace ADArCWebApp
             seed = new();
         }
 
-        //public GraphSynthInvoke(List<string> inputs)
-        //{
-        //    this.inputs = inputs;
-        //}
+        /// <summary>
+        /// This function sets up the seed graph from the inputs.
+        /// This system is not great.
+        /// TODO: improve.
+        /// </summary>
+        /// <param name="Inputs">A list of graphsynth node names with their "user_" prefix missing.</param>
         public static void makeGraph(List<string> Inputs)
         {
             //designGraph Graph = new designGraph();

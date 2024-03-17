@@ -17,7 +17,7 @@
         }
     }
 
-    public static async void translate(ComponentInstance comp, int pinChangeCycle)
+    public static async void translate(ComponentInstance comp, long pinChangeCycle)
     {
         bool trig = false;
         bool echo = false;
@@ -40,7 +40,7 @@
             sendSignal(pinChangeCycle, comp, conn2!.toId);
         }
     }
-    async static void sendSignal(int originCyc, ComponentInstance comp, int id)
+    async static void sendSignal(long originCyc, ComponentInstance comp, int id)
     {
         //Test distance = (high level time×velocity of sound (340M/S) / 2
         //high level = (Test distance * 2)/velocity of sound

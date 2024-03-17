@@ -37,7 +37,11 @@
 	private KeyValuePair<int, ComponentInstance> target;
 
 	private Transform transform = new Transform();
-
+	/// <summary>
+	/// Transform refers to the combination of fullscreen drag and zoom.
+	/// Zoom is currectly disabled.
+	/// This function resets both.
+	/// </summary>
 	public void resetTransform()
 	{
 		transform = new Transform();	
@@ -48,7 +52,12 @@
 	//compatibility property to reference into the transform without refactoring everything
 	public double zoomFactor { get { return transform.scale; } set { transform.scale = value; } }
 
-
+	/// <summary>
+	/// Gets 1 of 4 coordinates of a connection line.
+	/// </summary>
+	/// <param name="coord">0-3 to get each coordinate of the line.</param>
+	/// <param name="conn">Connection to display.</param>
+	/// <returns>The requested coordinate.</returns>
 	private double getConnectionCoord(int coord, InstanceConnection conn)
 	{
 		//var canvasHeight = (Pages.Index.currentHeightRatio * Pages.Index.defaultScreenHeight)-50;
@@ -83,7 +92,10 @@
 	}
 
 
-
+	/// <summary>
+	/// Currently unused. Handles scrollwheel zooming.
+	/// </summary>
+	/// <param name="e">Provided scrollwheel event.</param>
 	private void updZoom(WheelEventArgs e)
 	{
 
@@ -98,7 +110,11 @@
 		}
 
 	}
-
+	/// <summary>
+	/// Attempts to scale a component in place to account for zoom.
+	/// </summary>
+	/// <param name="comp">Component to adjust.</param>
+	/// <returns>the component, now adjusted.</returns>
 	public ComponentInstance adjustCompToZoom(ComponentInstance comp)
 	{
 		var coord = (comp.x, comp.y);
@@ -111,6 +127,11 @@
 		return comp;
 	}
 
+	/// <summary>
+	/// Atteampts to calculate the total effect of zoom on a coordinate.
+	/// </summary>
+	/// <param name="coord">a coordinate to zoom</param>
+	/// <returns>the zoomed coordinate.</returns>
 	public (double x, double y) zoomCoord((double x, double y) coord)
 	{
 		coord.x = (coord.x + (transform.translate.x * (1 / zoomFactor)) - zoomOrigin.x) * zoomFactor + zoomOrigin.x;
@@ -119,6 +140,11 @@
 		return coord;
 	}
 
+	/// <summary>
+	/// Attempts to reverse the effects of zoom on a zoomed component.
+	/// </summary>
+	/// <param name="comp">the component in question.</param>
+	/// <returns>the component, now returned to normal.</returns>
 	public ComponentInstance unZoom(ComponentInstance comp)
 	{
 

@@ -110,7 +110,15 @@
 @code{
 	bool isLeftExpanded = true;
 	bool isRightExpanded = false;
+	/// <summary>
+	/// Percentage of screen that the left pane is pushed to the left.
+	/// Default position (0) is fully on screen.
+	/// </summary>
 	int leftPaneAlign => isLeftExpanded ? 0 : -24;
+	/// <summary>
+	/// Percentage of screen that the right pane is pushed to the right.
+	/// Default position (0) is fully on screen.
+	/// </summary>
 	int rightPaneAlign => isRightExpanded ? 0 : -39;
 	string runStopText = "▶️ Run";
 	public bool isRunning = false;
@@ -130,9 +138,10 @@
 	}
 
 
-	/*
-		* attempts to run the code.
-		*/
+	/// <summary>
+	/// Attempts to compile and run the code.
+	/// </summary>
+	/// <returns></returns>
 	async Task ToggleRunStop()
 	{
 		if (!isRunning)
@@ -197,15 +206,21 @@
 		app = this;
 	}
 
-	//provide avenue for non-component classes to invoke render
+	/// <summary>
+	/// Provides avenue for non-component classes to invoke render.
+	/// </summary>
 	public void StateChanged()
 	{
 		StateHasChanged();
 	}
 
-	//re-render is also triggered on events, so create an event with a triggered click.
-	//generally the same as previous and should be removed if possible.
-	//TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
+
+	/// <summary>
+	/// re-render is also triggered on events, so create an event with a triggered click.
+	/// generally the same as previous and should be removed if possible.
+	/// TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
+	/// </summary>
+	/// <returns></returns>
 	public async Task triggerRender()
 	{
 		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
@@ -214,8 +229,10 @@
 	private int localIds = 0;
 
 
-	//main component storage. provides a arduino by default. The arduino is overwritten when rule loading finishes,
-	//but does not change visually (hopefully)
+	/// <summary>
+	/// main component storage. provides an arduino by default. The arduino is overwritten when rule loading finishes,
+	/// but does not change visually (hopefully)
+	/// </summary>
 	public static Dictionary<int, ComponentInstance> comps = new()
 	{
 		{0, new ComponentInstance(1, null, 829, 219)}
@@ -235,7 +252,12 @@
 
 	public static ElementReference? refresh;
 
-	//does setup for javascript interop on page load.
+	/// <summary>
+	/// Does setup for javascript interop on page load.
+	/// Defined by Blazor.
+	/// </summary>
+	/// <param name="firstRender">true if this is specifically the first render, false otherwise</param>
+	/// <returns></returns>
 	protected async override Task OnAfterRenderAsync(bool firstRender)
 	{
 		if (firstRender)
@@ -255,7 +277,13 @@
 
 
 	#region component pane integration
+	/// <summary>
+	/// Dragged component global id. Used to transfer data out of the palette to this file.
+	/// </summary>
 	private int targetCardComponentId = -1;
+	/// <summary>
+	/// Controls what component is displayed while the drag is ongoing.
+	/// </summary>
 	private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
 	private string isVisible = "hidden";
 	private bool allowDrop = false;
@@ -336,7 +364,9 @@
 		}
 	}
 
-	//binds component translation functions to arduino pins through listeners
+	/// <summary>
+	/// Binds component translation functions to arduino pins through listeners.
+	/// </summary>
 	private void setupListeners()
 	{
 		if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
@@ -385,15 +415,21 @@
 	#endregion
 
 	private readonly List<string> ruleNames = new();
-	private readonly double totalRules = 19.0;
+	/// <summary>
+	/// Disables the palette until rules are loaded.
+	/// </summary>
 	private bool selLockedOut = true;
-
+	/// <summary>
+	/// This is triggered exactly once when blazor is loaded, but before render if I remember correctly.
+	/// In general, order is html load -> this -> render
+	/// </summary>
+	/// <returns></returns>
 	protected override async Task OnInitializedAsync()
 	{
 		//load rules.
 		//TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,85);
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,85);
+		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,86);
+		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,86);
 		compPane!.releaseLockout();
 		selLockedOut = false;
 		//hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
@@ -418,9 +454,11 @@
 
 
 	}
-
-	//sets up a components pin bindings to an arduino.
-	//TODO: improve this function or find a way to remove it entirely.
+	/// <summary>
+	/// sets up a components pin bindings to an arduino.
+	/// TODO: improve this function or find a way to remove it entirely.
+	/// </summary>
+	/// <param name="comp">A component instance to update the bindings on.</param>
 	public void updatePinBindings(ComponentInstance comp)
 	{
 		comp.connMap.Clear();
@@ -499,7 +537,12 @@
 		}
 	}
 
-	//helper for previous function to get all pins of a component as graphsynth nodes.
+	/// <summary>
+	/// Helper for updatePinBindings to get all pins of a component as graphsynth nodes.
+	/// </summary>
+	/// <param name="n">The node to get the pins of. Specifically, the root node, not the main node.</param>
+	/// <param name="name">The name of the root node, excluding "user_".</param>
+	/// <returns></returns>
 	public List<node> getPins(node n, string name){
 		//n is root, connected to main node but not main node.
 		string fullName = "user_" + name;
@@ -515,7 +558,9 @@
 
 	}
 
-	//deletes a component
+	/// <summary>
+	/// Deletes a component.
+	/// </summary>
 	public void removecomp()
 	{
 		node Comp2remove = Index.comps[selectedComponent].gsNode;
@@ -552,7 +597,10 @@
 		Console.WriteLine("the number of connections is " + numofcon);*/
 	}
 
-	//deletes a component when delete/backspace pressed.
+	/// <summary>
+	/// Deletes a component when delete/backspace pressed.
+	/// </summary>
+	/// <param name="e"></param>
 	private void handleKeyPress(KeyboardEventArgs e)
 	{
 		//Console.WriteLine(e.Key);
@@ -617,7 +665,11 @@
 	}
 
 
-	//when a file is imported, handle it
+	/// <summary>
+	/// When a file is imported, handle it.
+	/// </summary>
+	/// <param name="e"></param>
+	/// <returns></returns>
 	public async Task loadFromFile(InputFileChangeEventArgs e)
 	{
 		var file = e.File;
@@ -626,7 +678,11 @@
 		var str = System.Text.Encoding.UTF8.GetString(buffer);
 		setupBenchFromJSONString(str);
 	}
-	//handles most of the setup process of the bench after import.
+
+	/// <summary>
+	/// Handles most of the setup process of the bench after import.
+	/// </summary>
+	/// <param name="JSON">The full JSON to deserialize.</param>
 	public void setupBenchFromJSONString(string JSON){
 		Data data = DeserializeJSON(JSON);
 		//clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
@@ -670,7 +726,9 @@
 		AppInterop.setCodeWrapper(data.Code);
 	}
 
-	//create file data and send it off to JS for downloading.
+	/// <summary>
+	/// Create file data and send it off to JS for downloading.
+	/// </summary>
 	public async void downloadFile()
 	{
 		var stream = new MemoryStream();
@@ -692,6 +750,10 @@
 		public string Code { get; set; }
 		public Dictionary<int, ComponentInstance> Comps { get; set; }
 	}
+	/// <summary>
+	/// Creates a JSON string representing most of the current state of the circuit.
+	/// </summary>
+	/// <returns>A JSON string of a Data object.</returns>
 	private async Task<string> ExportJSON(){
 		Data parentObject = new Data
 		{
@@ -705,7 +767,11 @@
 		options.Converters.Add(new ParamSerializer());
 		return JsonSerializer.Serialize(parentObject,options);
 	}
-
+	/// <summary>
+	/// Deserializes a JSON string to Data object.
+	/// </summary>
+	/// <param name="jsonString">The JSON to deserialize.</param>
+	/// <returns>A Data object.</returns>
 	private Data DeserializeJSON(string jsonString)
 	{
 		try

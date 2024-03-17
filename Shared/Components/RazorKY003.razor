@@ -13,7 +13,7 @@
 
 		}
 	}
-	public static async void translate(ComponentInstance comp, int pinChangeCycle)
+	public static async void translate(ComponentInstance comp, long pinChangeCycle)
 	{
 		bool sig = false;
 		if (0 == comp.getConnection("Signal", out InstanceConnection? conn, out List<InstanceConnection>? all))

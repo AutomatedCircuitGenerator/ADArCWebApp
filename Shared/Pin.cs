@@ -1,5 +1,9 @@
 ﻿namespace ADArCWebApp
 {
+
+    /// <summary>
+    /// Adapted from Wokwi for use in pinInfos.
+    /// </summary>
     public class PinSignalInfo
     {
         public enum PinSignalType { I2C, SPI, USART, POWER, PWM, ANALOG}

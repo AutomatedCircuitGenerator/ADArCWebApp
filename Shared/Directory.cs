@@ -2,6 +2,9 @@
 
 namespace ADArCWebApp
 {
+	/// <summary>
+	/// Representation of a directory structure for use in the Component Palette.
+	/// </summary>
 	public class Directory
 	{
 		public List<Directory> subDirectories = new List<Directory>();
