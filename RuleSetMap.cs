@@ -20,25 +20,8 @@ namespace ADArCWebApp
         {
             rulesets = new Dictionary<string, ruleSet>();
             //Setup set of rules which need to be modified
-            this.modifiedRules = ImmutableHashSet.Create("BondGraphRuleset",
-                "SimplificationRuleset",
-                "DirRuleset",
-                "newDirectionRuleSet_2",
-                "DirRuleset3",
-                "Simplification2",
-                "NewCausalityMethodRuleset",
-                "NewCausalityMethodRuleset_2",
-                "NewCausalityMethodRuleset_3",
-                "INVDMarkerRules",
-                "INVDMarkerRules_2",
-                "CalibrationNewRuleset",
-                "CalibrationNewRuleset_2",
-                "RFlagCleanRuleset",
-                "ICFixTotalRuleset",
-                "TransformerFlipRuleset",
-                "TransformerFlipRuleset2",
-                "Clean23Ruleset",
-                "BeforeBG-VerifyDirRuleSet",
+            //Inherited from BOGLWeb, probably not necessary
+            this.modifiedRules = ImmutableHashSet.Create(
                 "BIG1");
             this.numLoaded = 0;
         }
