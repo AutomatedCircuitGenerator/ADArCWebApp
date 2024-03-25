@@ -4164,8 +4164,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 }
                 return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta - 1));
             }
-            startCodeLoop(wrapper) {
-                console.log("starting code!");
+            startCodeLoop() {
                 this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
                     this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
                     this.prevB = e;
@@ -4201,9 +4200,6 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             getCodeInPane() {
                 return this.getModel().getValue();
             }
-            setPaneCode(text) {
-                this.getModel().setValue(text);
-            }
             makeMonacoError(message, line, column) {
                 var marker = {
                     message: message,
@@ -4237,9 +4233,9 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 this.awaitResponseOn.push(absoluteIndex);
             }
             removeResponseReqFlag(absoluteIndex) {
-                const index = this.awaitResponseOn.indexOf(absoluteIndex);
-                if (index > -1) {
-                    this.awaitResponseOn.splice(index, 1);
+                const indexInAwaits = this.awaitResponseOn.indexOf(absoluteIndex);
+                if (indexInAwaits > -1) {
+                    this.awaitResponseOn.splice(indexInAwaits, 1);
                 }
             }
             arduinoInput(insts) {
@@ -4290,7 +4286,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                     URL.revokeObjectURL(url);
                 });
             }
-            runTutorial(closeImmediate) {
+            runTutorial() {
                 const intro = window.introJs().setOption('keyboardNavigation', false);
                 ;
                 if (intro) {

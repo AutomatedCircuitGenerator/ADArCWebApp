@@ -40,11 +40,14 @@
         <div class="loading-progress-text"></div>
     </div>
 
+    <!-- hopefully clear the cache on load. doesn't entirely work, but not harmful -->
     <script type="text/javascript">
         caches.delete("blazor-resources-/").then(function (e) {
             console.log("'blazor-resources-/' cache deleted");
         });
     </script>
+    
+    <!-- this isn't really necessary, but is left in anyway-->
     <script>
         window.triggerClick = (elt) => elt.click();
     </script>
