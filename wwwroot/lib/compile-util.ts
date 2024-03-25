@@ -1,3 +1,12 @@
+/*
+    This file was taken from the examples provided on the avr8js github.
+
+
+
+*/
+
+
+
 export function loadHex(source: string, target: Uint8Array) {
     for (const line of source.split('\n')) {
         if (line[0] === ':' && line.substr(7, 2) === '00') {

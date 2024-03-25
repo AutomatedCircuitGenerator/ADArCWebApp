@@ -11,7 +11,12 @@
 		public IComponentParameter copy();
 
 	}
-
+	/// <summary>
+	/// Created in response to problems serialize Dict<string, object> to JSON.
+	/// This is a way to define the "object", retaining some notion of what the original type was,
+	/// and allowing it to be deserialized more nicely.
+	/// </summary>
+	/// <typeparam name="T">the type of the parameter to use.</typeparam>
 	public class ComponentParameter<T> : IComponentParameter {
 
 		public ComponentParameter(T val) { 
@@ -47,6 +52,7 @@
 			}
 		}
 
+		//Ran into some problems with template vs object params, this was created to fix that.
 		public IComponentParameter copy()
 		{
 			IComponentParameter ret =  new ComponentParameter<T>(Value);

@@ -27,10 +27,12 @@ namespace ADArCWebApp
             seed = new();
         }
 
-        //public GraphSynthInvoke(List<string> inputs)
-        //{
-        //    this.inputs = inputs;
-        //}
+        /// <summary>
+        /// This function sets up the seed graph from the inputs.
+        /// This system is not great.
+        /// TODO: improve.
+        /// </summary>
+        /// <param name="Inputs">A list of graphsynth node names with their "user_" prefix missing.</param>
         public static void makeGraph(List<string> Inputs)
         {
             //designGraph Graph = new designGraph();
@@ -59,6 +61,7 @@ namespace ADArCWebApp
             {
                 for(int j = 0; j < inputs.Count; j++)
                 {
+                    //edit the names to avoid adding rules that have common words in their name
                     if (inputs[j].Contains("servo") && inputs[j].Contains("direct"))
                     {
                         inputs[j] = "servo";
@@ -118,9 +121,15 @@ namespace ADArCWebApp
             Console.WriteLine(seed.nodes.Count);
         }
 
-        //Remove component from seed
+        /// <summary>
+        /// This function removes the component from the seed graph.
+        /// </summary>
+        /// <param name="n">A node that belongs to the component being removed.</param>
         static public void removeComp(node n)
         {
+            if (n == null) {
+                return;
+            }
 			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
 			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
             {
@@ -132,12 +141,18 @@ namespace ADArCWebApp
 				seed.removeNode(nodeToRemove);
 			}
         }
-        //returns the arcs of seed
+        /// <summary>
+		/// Returns the arcs of seed
+		/// </summary>
+		/// <returns>A list of arcs</returns>
         static public List<arc> GetArcs()
         {
             return seed.arcs;
         }
-        //returns the nodes of seed
+        /// <summary>
+		/// Returns the nodes of seed
+		/// </summary>
+		/// <returns>A list of nodes</returns>
         static public List<node> GetNodes()
         {
             return seed.nodes;

@@ -4,7 +4,11 @@ using ADArCWebApp.Shared.Components;
 namespace ADArCWebApp.ComponentNamespace
 {
 
-
+	/// <summary>
+	/// Primary data repository. Figure out a way to do this dynamically or something later.
+	/// 
+	/// TODO: figure out how to improve this.
+	/// </summary>
 	public static class ComponentDeclarations
 	{
 		public static Dictionary<int, ComponentData> components = new()

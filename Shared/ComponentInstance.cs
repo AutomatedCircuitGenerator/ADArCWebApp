@@ -6,6 +6,9 @@ using System.Text.Json.Serialization;
 
 namespace ADArCWebApp.Shared
 {
+	/// <summary>
+	/// Stores actual data about a single, specific component.
+	/// </summary>
 	public class ComponentInstance
 	{
 		[JsonIgnore] public ComponentData data;
@@ -40,7 +43,10 @@ namespace ADArCWebApp.Shared
 			zoomedY = y;
 			this.gsNode = gsNode;
 		}
-
+		/// <summary>
+		/// Transfers the property array to the format needed by DynamicComponent in VaryingComponent.razor.
+		/// </summary>
+		/// <returns>The property dictionary as <string, object>.</returns>
 		public Dictionary<string, object> getPropsAsParams() {
 			Dictionary<string, object> ret = [];
 
@@ -61,6 +67,13 @@ namespace ADArCWebApp.Shared
 			{ "OG", "orange"}
 		};
 
+		/// <summary>
+		/// Creates visual lines and sets up the connection map for this component.
+		/// </summary>
+		/// <param name="i1">my localId.</param>
+		/// <param name="to">the component to connect to to.</param>
+		/// <param name="i2">the localID of to.</param>
+		/// <param name="arc">the Graphsynth arc between the two components.</param>
 		public void addConnection(int i1, ComponentInstance to, int i2, arc arc) {
 			InstanceConnection toAdd = new(this, i1, i2, to, colorMap[arc.localLabels.Find(colorMap.ContainsKey) ?? "BK"]);
 
@@ -94,7 +107,13 @@ namespace ADArCWebApp.Shared
 			}
 		}
 
-
+		/// <summary>
+		/// Gets the pin id of the (Arduino?) pin connected to the given pin name.
+		/// </summary>
+		/// <param name="pinName">the name of the pin to get a connection of.</param>
+		/// <param name="conn">a place to store a connection if there is exactly one.</param>
+		/// <param name="all">A place to store connections if there are more than one.</param>
+		/// <returns>-1 if unconnected, 0 if exactly one connection, 1 if more than 1.</returns>
 		public int getConnection(string pinName, out InstanceConnection? conn, out List<InstanceConnection>? all) {
 			var conns = connMap[data.pins[pinName]];
 

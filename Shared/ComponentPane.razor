@@ -79,6 +79,9 @@
 
 	private bool loadLockout = true;
 
+	/// <summary>
+	/// Allow components to be dragged once more.
+	/// </summary>
 	public void releaseLockout()
 	{
 		loadLockout = false;
@@ -105,11 +108,12 @@
 	[Parameter]
 	public ADArCWebApp.Pages.Index host { get; set; }
 
-	/*
-	* Create the directory structure of the component pane based off the directory information in the components.
-	* May not be performant.
-	*
-	*/
+
+	/// <summary>
+	/// Create the directory structure of the component pane based off the directory information in the components.
+	/// May not be performant.
+	/// </summary>
+	/// <returns>A directory structure fit for display in the palette.</returns>
 	private Directory getDirectory()
 	{
 		Console.WriteLine("refresh Directories");       //make sure this doesn't happen too often.
@@ -164,7 +168,11 @@
 	}
 
 
-
+	/// <summary>
+	/// Sets the image of the dragged component in the Index.razor file.
+	/// Invoked on drag start.
+	/// </summary>
+	/// <param name="id">the global id of the component to show being dragged.</param>
 	private void setHostTargetId(int id)
 	{
 		host.setTargetID(id);

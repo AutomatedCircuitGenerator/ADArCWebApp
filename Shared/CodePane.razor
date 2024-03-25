@@ -33,6 +33,11 @@
 
 @code {
 
+    /// <summary>
+    /// Creates the options for the editor.
+    /// </summary>
+    /// <param name="editor">the editor to affect.</param>
+    /// <returns>the options.</returns>
     private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
     {
         return new StandaloneEditorConstructionOptions
@@ -59,7 +64,12 @@
 
     int index = 1;
 
-    // Create a function to update the console output
+    /// <summary>
+    /// Adds text to the console output.
+    /// TODO: test extremely thoroughly. Had many issues.
+    /// </summary>
+    /// <param name="newText">The text to add to the console.</param>
+    /// <param name="middleNewLinesMakeHR">if true, using \n in the middle of a line breaks the line. this does not happen if false.</param>
     public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
     {
         newText = Regex.Replace(newText, @"Â", ""); //possible utf conversion error fix. rare, good to have
@@ -89,6 +99,9 @@
         StateHasChanged();
     }
 
+    /// <summary>
+    /// Creates a new line in the console.
+    /// </summary>
     public void commitBuffer()
     {
         this.text.Add("");
