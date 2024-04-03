@@ -61,6 +61,7 @@ namespace ADArCWebApp
             {
                 for(int j = 0; j < inputs.Count; j++)
                 {
+                    //edit the names to avoid adding rules that have common words in their name
                     if (inputs[j].Contains("servo") && inputs[j].Contains("direct"))
                     {
                         inputs[j] = "servo";
@@ -120,7 +121,10 @@ namespace ADArCWebApp
             Console.WriteLine(seed.nodes.Count);
         }
 
-        //Remove component from seed
+        /// <summary>
+        /// This function removes the component from the seed graph.
+        /// </summary>
+        /// <param name="n">A node that belongs to the component being removed.</param>
         static public void removeComp(node n)
         {
             if (n == null) {
@@ -137,12 +141,18 @@ namespace ADArCWebApp
 				seed.removeNode(nodeToRemove);
 			}
         }
-        //returns the arcs of seed
+        /// <summary>
+		/// Returns the arcs of seed
+		/// </summary>
+		/// <returns>A list of arcs</returns>
         static public List<arc> GetArcs()
         {
             return seed.arcs;
         }
-        //returns the nodes of seed
+        /// <summary>
+		/// Returns the nodes of seed
+		/// </summary>
+		/// <returns>A list of nodes</returns>
         static public List<node> GetNodes()
         {
             return seed.nodes;
