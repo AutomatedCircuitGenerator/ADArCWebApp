@@ -71,7 +71,12 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ sketch: source })
+                body: JSON.stringify({ sketch: source, files: [{ name: "libraries.txt", content: "# Wokwi Library List\n" +
+                                "# See https://docs.wokwi.com/guides/libraries\n" +
+                                "\n" +
+                                "# Automatically added based on includes:\n" +
+                                "LiquidCrystal I2C\n" +
+                                "\n" }] })
             });
             return (yield resp.json());
         });
@@ -2502,7 +2507,71 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
     }
     exports.AVRTimer = AVRTimer;
 });
-define("lib/avr8js/peripherals/twi", ["require", "exports"], function (require, exports) {
+define("lib/i2c-bus", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.I2CBus = void 0;
+    class I2CBus {
+        constructor() {
+            this.devices = {};
+            this.activeDevice = null;
+            this.writeMode = false;
+        }
+        static getInstance() {
+            if (!I2CBus._instance) {
+                I2CBus._instance = new I2CBus();
+            }
+            return I2CBus._instance;
+        }
+        setTWI(twi) {
+            this.twi = twi;
+        }
+        registerDevice(addr, device) {
+            this.devices[addr] = device;
+        }
+        start() {
+            this.twi.completeStart();
+        }
+        stop() {
+            if (this.activeDevice) {
+                this.activeDevice.i2cDisconnect();
+                this.activeDevice = null;
+            }
+            this.twi.completeStop();
+        }
+        connectToSlave(addr, write) {
+            let result = false;
+            const device = this.devices[addr];
+            if (device) {
+                result = device.i2cConnect(addr, write);
+                if (result) {
+                    this.activeDevice = device;
+                    this.writeMode = write;
+                }
+            }
+            this.twi.completeConnect(result);
+        }
+        writeByte(value) {
+            if (this.activeDevice && this.writeMode) {
+                this.twi.completeWrite(this.activeDevice.i2cWriteByte(value));
+            }
+            else {
+                this.twi.completeWrite(false);
+            }
+        }
+        readByte(ack) {
+            if (this.activeDevice && !this.writeMode) {
+                this.twi.completeRead(this.activeDevice.i2cReadByte(ack));
+            }
+            else {
+                this.twi.completeRead(0xff);
+            }
+        }
+    }
+    exports.I2CBus = I2CBus;
+    I2CBus._instance = null;
+});
+define("lib/avr8js/peripherals/twi", ["require", "exports", "lib/i2c-bus"], function (require, exports, i2c_bus_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.AVRTWI = exports.NoopTWIEventHandler = exports.twiConfig = void 0;
@@ -2567,7 +2636,7 @@ define("lib/avr8js/peripherals/twi", ["require", "exports"], function (require, 
             this.cpu = cpu;
             this.config = config;
             this.freqHz = freqHz;
-            this.eventHandler = new NoopTWIEventHandler(this);
+            this.eventHandler = i2c_bus_1.I2CBus.getInstance();
             this.busy = false;
             this.TWI = {
                 address: this.config.twiInterrupt,
@@ -3193,6 +3262,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
             this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
             this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
+            this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
         }
         execute(callback) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -4133,7 +4203,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_1) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute", "lib/i2c-bus"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_1, i2c_bus_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4219,6 +4289,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                     var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
                     this.runner = new execute_1.AVRRunner(res.hex);
                     this.adc = new index_2.AVRADC(this.runner.cpu, index_2.adcConfig);
+                    i2c_bus_2.I2CBus.getInstance().setTWI(this.runner.twi);
                     return { stdout: res.stdout, stderr: res.stderr };
                 });
             }
@@ -4305,11 +4376,198 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("main", ["require", "exports", "interopManager"], function (require, exports, interopManager_1) {
+define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function (require, exports, i2c_bus_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
+    exports.LCD1602_ADDR = 0x27;
+    const LCD_MODE_CMD = 0x00;
+    const LCD_MODE_DATA = 0x40;
+    const LCD_CMD_CLEAR = 0x01;
+    const LCD_CMD_HOME = 0x02;
+    const LCD_CMD_ENTRY_MODE = 0x04;
+    const LCD_CMD_ENTRY_MODE_INCREMENT = 0x02;
+    const LCD_CMD_ENTRY_MODE_DECREMENT = 0x00;
+    const LCD_CMD_ENTRY_MODE_SHIFT = 0x01;
+    const LCD_CMD_DISPLAY_CONTROL = 0x08;
+    const LCD_CMD_DISPLAY_ENABLE = 0x04;
+    const LCD_CMD_DISPLAY_CURSOR = 0x02;
+    const LCD_CMD_DISPLAY_CURSOR_BLINK = 0x01;
+    const LCD_CMD_SHIFT = 0x10;
+    const LCD_CMD_SHIFT_CURSOR = 0x00;
+    const LCD_CMD_SHIFT_DISPLAY = 0x08;
+    const LCD_CMD_SHIFT_LEFT = 0x00;
+    const LCD_CMD_SHIFT_RIGHT = 0x04;
+    const LCD_CMD_FUNCTION = 0x20;
+    const LCD_CMD_FUNCTION_LCD_1LINE = 0x00;
+    const LCD_CMD_FUNCTION_LCD_2LINE = 0x08;
+    const LCD_CMD_FUNCTION_5x10_DOTS = 0x04;
+    const LCD_CMD_SET_CGRAM_ADDR = 0x40;
+    const LCD_CMD_SET_DRAM_ADDR = 0x80;
+    const LCD_CMD_SET_CONTRAST = 0x81;
+    const fOsc = 270000;
+    class LCD1602I2C {
+        constructor() {
+            this.cgram = new Uint8Array(64);
+            this.ddram = new Uint8Array(128);
+            this.addr = 0x00;
+            this.shift = 0x00;
+            this.data = 0x00;
+            this.displayOn = false;
+            this.blinkOn = false;
+            this.cursorOn = false;
+            this.backlight = false;
+            this.firstByte = true;
+            this.commandMode = false;
+            this.cgramMode = false;
+            this.cgramUpdated = true;
+            this.incrementMode = true;
+            this.shiftMode = false;
+            this.is8bit = true;
+            this.updated = false;
+        }
+        static getJSObjectReference() {
+            return new LCD1602I2C();
+        }
+        init() {
+            i2c_bus_3.I2CBus.getInstance().registerDevice(exports.LCD1602_ADDR, this);
+            this.render();
+        }
+        setStateReference(state) {
+            this.state = state;
+        }
+        update() {
+            if (this.updated) {
+                this.updated = false;
+                return this.render();
+            }
+            return false;
+        }
+        render() {
+            let characters = new Uint8Array(32);
+            if (this.displayOn) {
+                const r1 = this.shift % 64;
+                const r2 = 64 + this.shift % 64;
+                characters.set(this.ddram.slice(r1, r1 + 16));
+                characters.set(this.ddram.slice(r2, r2 + 16), 16);
+            }
+            else {
+                characters.fill(32);
+            }
+            this.cgramUpdated = false;
+            this.state.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
+        }
+        backlightOn(value) {
+            if (this.backlight !== value) {
+                this.backlight = value;
+            }
+        }
+        i2cConnect() {
+            return true;
+        }
+        i2cDisconnect() { }
+        i2cReadByte() {
+            return 0xff;
+        }
+        i2cWriteByte(value) {
+            const data = value & 0xF0;
+            const rs = (value & 0x01) ? true : false;
+            const bl = (value & LCD_CMD_DISPLAY_CONTROL) ? true : false;
+            this.backlightOn(bl);
+            if ((value & 0x04) && !(value & 0x02)) {
+                this.writeData(data, rs);
+            }
+            this.update();
+            return this.updated = true;
+        }
+        writeData(value, rs) {
+            if (!this.is8bit) {
+                if (this.firstByte) {
+                    this.firstByte = false;
+                    this.data = value;
+                    return false;
+                }
+                value = this.data | value >> 4;
+                this.firstByte = true;
+            }
+            if (rs) {
+                this.processData(value);
+            }
+            else {
+                this.processCommand(value);
+            }
+            this.updated = true;
+        }
+        processCommand(value) {
+            if (value & LCD_CMD_FUNCTION) {
+                this.is8bit = (value & 0x10) ? true : false;
+            }
+            else if (value & LCD_CMD_SET_DRAM_ADDR) {
+                this.cgramMode = false;
+                this.addr = value & 0x7F;
+            }
+            else if (value & LCD_CMD_SET_CGRAM_ADDR) {
+                this.cgramMode = true;
+                this.addr = value & 0x3F;
+            }
+            else if (value & LCD_CMD_SHIFT) {
+                const shiftDisplay = (value & LCD_CMD_SHIFT_DISPLAY) ? true : false;
+                const shiftRight = (value & LCD_CMD_SHIFT_RIGHT) ? 1 : -1;
+                this.cgramMode = false;
+                this.addr = (this.addr + shiftRight) % 128;
+                if (shiftDisplay) {
+                    this.shift = (this.shift + shiftRight) % 64;
+                }
+            }
+            else if (value & LCD_CMD_DISPLAY_CONTROL) {
+                this.displayOn = (value & LCD_CMD_DISPLAY_ENABLE) ? true : false;
+                this.blinkOn = (value & LCD_CMD_DISPLAY_CURSOR_BLINK) ? true : false;
+                this.cursorOn = (value & LCD_CMD_DISPLAY_CURSOR) ? true : false;
+            }
+            else if (value & LCD_CMD_ENTRY_MODE) {
+                this.cgramMode = false;
+                this.incrementMode = (value & LCD_CMD_ENTRY_MODE_INCREMENT) ? true : false;
+                this.shiftMode = (value & LCD_CMD_ENTRY_MODE_SHIFT) ? true : false;
+            }
+            else if (value & LCD_CMD_HOME) {
+                this.cgramMode = false;
+                this.addr = 0x00;
+                this.shift = 0x00;
+            }
+            else if (value & LCD_CMD_CLEAR) {
+                this.cgramMode = false;
+                this.incrementMode = true;
+                this.addr = 0x00;
+                this.shift = 0x00;
+                this.ddram.fill(32);
+            }
+            else {
+                console.warn('Unknown LCD1602 Command', value.toString(16));
+            }
+        }
+        processData(value) {
+            if (this.cgramMode) {
+                const data = (value & 0x01) << 4 | (value & 0x02) << 2 | (value & 0x04) | (value & 0x08) >> 2 | (value & 0x10) >> 4;
+                this.cgram[this.addr] = data;
+                this.addr = (this.addr + 1) % 64;
+                this.cgramUpdated = true;
+            }
+            else {
+                const mode = this.incrementMode ? 1 : -1;
+                this.ddram[this.addr] = value;
+                this.addr = (this.addr + mode) % 128,
+                    this.shiftMode && (this.shift = (this.shift + mode) % 40);
+            }
+        }
+    }
+    exports.LCD1602I2C = LCD1602I2C;
+});
+define("main", ["require", "exports", "interopManager", "components/lcd1602i2c"], function (require, exports, interopManager_1, lcd1602i2c_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
+    window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
 });
 //# sourceMappingURL=build.js.map

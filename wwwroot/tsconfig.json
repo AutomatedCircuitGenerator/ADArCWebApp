@@ -7,7 +7,14 @@
         "lib": [ "es2021", "dom" ],
         "esModuleInterop": true,
         "removeComments": true,
-        "outFile": "./build/build.js"
+        "outFile": "./build/build.js",
+        "typeRoots": ["./type-declarations/*"],
+        "moduleResolution": "node",
+        "paths": {
+            "@type-declarations/*": ["./type-declarations/*"],
+            "@components/*": ["./components/*"],
+            "@lib/*": ["./lib/*"]
+        }
     },
     "include": [ "lib/**/*.ts", "." ],
     "exclude": [

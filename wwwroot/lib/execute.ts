@@ -9,7 +9,7 @@ import {
     portCConfig,
     portDConfig,
     AVRUSART,
-    usart0Config
+    usart0Config, AVRTWI, twiConfig
 } from "./avr8js/index";
 import { loadHex } from "./compile-util";
 
@@ -29,6 +29,7 @@ export class AVRRunner {
     readonly portC: AVRIOPort;
     readonly portD: AVRIOPort;
     readonly usart: AVRUSART;
+    readonly twi: AVRTWI;
     readonly MHZ = 16e6;
 
     public instructions: TimingPacket[] = [];
@@ -44,6 +45,7 @@ export class AVRRunner {
         this.portC = new AVRIOPort(this.cpu, portCConfig);
         this.portD = new AVRIOPort(this.cpu, portDConfig);
         this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
+        this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
     }
     
     async execute(callback: (cpu: CPU) => void) {

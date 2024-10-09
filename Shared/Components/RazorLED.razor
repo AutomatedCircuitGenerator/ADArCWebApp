@@ -1,4 +1,6 @@
-﻿@code {
+﻿@inject IJSRuntime JS
+
+@code {
 
     [Parameter]
     public bool value { get; set; } = false;
@@ -28,6 +30,27 @@
         {"purple", "#ff80ff"},
     };
 
+    private DotNetObjectReference<RazorLED> _state;
+      
+    private IJSObjectReference? _reference;
+    
+    protected override void OnInitialized()
+    {
+      _state = DotNetObjectReference.Create(this);
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+      _reference = await JS.InvokeAsync<IJSObjectReference>("LCD1602I2C.getJSObjectReference");
+      await _reference.InvokeVoidAsync("setStateReference", _state);
+      await _reference.InvokeVoidAsync("init");
+    }
+
+    [JSInvokable]
+    public void Update(bool blink, bool cursor, int cursorX, int cursorY, byte[] characters, bool backlight, byte[] cgram, bool cgramUpdated)
+    {
+      Console.WriteLine(System.Text.Encoding.UTF8.GetString(characters));
+    }
 
 
     public static ElementPin[] pinInfo { 

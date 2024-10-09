@@ -1,5 +1,6 @@
 import { AVRInterruptConfig, CPU } from '../cpu/cpu';
 import { u8 } from '../types';
+import {I2CBus} from "@lib/i2c-bus";
 
 export interface TWIEventHandler {
   start(repeated: boolean): void;
@@ -67,33 +68,8 @@ export const twiConfig: TWIConfig = {
   TWAMR: 0xbd,
 };
 
-// A simple TWI Event Handler that sends a NACK for all events
-export class NoopTWIEventHandler implements TWIEventHandler {
-  constructor(protected twi: AVRTWI) {}
-
-  start() {
-    this.twi.completeStart();
-  }
-
-  stop() {
-    this.twi.completeStop();
-  }
-
-  connectToSlave() {
-    this.twi.completeConnect(false);
-  }
-
-  writeByte() {
-    this.twi.completeWrite(false);
-  }
-
-  readByte() {
-    this.twi.completeRead(0xff);
-  }
-}
-
 export class AVRTWI {
-  public eventHandler: TWIEventHandler = new NoopTWIEventHandler(this);
+  public eventHandler: TWIEventHandler = I2CBus.getInstance();
   private busy = false;
 
   // Interrupts

@@ -2,6 +2,7 @@
 import { AVRADC, PinState, adcConfig } from "./lib/avr8js/index";
 import { buildHex } from "./lib/compile-util";
 import { AVRRunner } from "./lib/execute";
+import {I2CBus} from "./lib/i2c-bus";
 
 /*declare var introJs: any;*/
 
@@ -160,6 +161,7 @@ export namespace interopManager {
             var res = await buildHex(this.getCodeInPane());
             this.runner = new AVRRunner(res.hex);
             this.adc = new AVRADC(this.runner.cpu, adcConfig);
+            I2CBus.getInstance().setTWI(this.runner.twi);
             return { stdout: res.stdout, stderr: res.stderr }
         }
         /**
