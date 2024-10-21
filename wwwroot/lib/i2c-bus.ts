@@ -5,38 +5,24 @@
  * Copyright (C) 2019, Uri Shaked
  */
 import { AVRTWI, TWIEventHandler } from './avr8js/index';
-import {DotNetObjectReference} from "@type-declarations/dotnet";
-export interface I2CDevice {
+export interface I2CController {
     i2cConnect(addr: number, write: boolean): boolean;
     i2cReadByte(acked: boolean): number;
     i2cWriteByte(value: number): boolean;
     i2cDisconnect(): void;
-    setStateReference(state: DotNetObjectReference): void;
 }
 
 export class I2CBus implements TWIEventHandler {
-    private static _instance: I2CBus | null = null;
-    
-    readonly devices: { [key: number]: I2CDevice } = {};
-    private activeDevice: I2CDevice | null = null;
+    readonly controllers: { [key: number]: I2CController } = {};
+    private activeController: I2CController | null = null;
     private writeMode = false;
-    private twi: AVRTWI;
-    
-    private constructor() {}
-    
-    static getInstance() {
-        if (!I2CBus._instance) {
-            I2CBus._instance = new I2CBus();
-        }
-        return I2CBus._instance;
-    }
-    
-    setTWI(twi: AVRTWI) {
-        this.twi = twi;
+
+    constructor(private twi: AVRTWI) {
+        twi.eventHandler = this;
     }
 
-    registerDevice(addr: number, device: I2CDevice) {
-        this.devices[addr] = device;
+    registerController(addr: number, device: I2CController) {
+        this.controllers[addr] = device;
     }
 
     start(): void {
@@ -44,20 +30,20 @@ export class I2CBus implements TWIEventHandler {
     }
 
     stop(): void {
-        if (this.activeDevice) {
-            this.activeDevice.i2cDisconnect();
-            this.activeDevice = null;
+        if (this.activeController) {
+            this.activeController.i2cDisconnect();
+            this.activeController = null;
         }
         this.twi.completeStop();
     }
 
     connectToSlave(addr: number, write: boolean): void {
         let result = false;
-        const device = this.devices[addr];
+        const device = this.controllers[addr];
         if (device) {
             result = device.i2cConnect(addr, write);
             if (result) {
-                this.activeDevice = device;
+                this.activeController = device;
                 this.writeMode = write;
             }
         }
@@ -65,16 +51,16 @@ export class I2CBus implements TWIEventHandler {
     }
 
     writeByte(value: number): void {
-        if (this.activeDevice && this.writeMode) {
-            this.twi.completeWrite(this.activeDevice.i2cWriteByte(value));
+        if (this.activeController && this.writeMode) {
+            this.twi.completeWrite(this.activeController.i2cWriteByte(value));
         } else {
             this.twi.completeWrite(false);
         }
     }
 
     readByte(ack: boolean): void {
-        if (this.activeDevice && !this.writeMode) {
-            this.twi.completeRead(this.activeDevice.i2cReadByte(ack));
+        if (this.activeController && !this.writeMode) {
+            this.twi.completeRead(this.activeController.i2cReadByte(ack));
         } else {
             this.twi.completeRead(0xff);
         }

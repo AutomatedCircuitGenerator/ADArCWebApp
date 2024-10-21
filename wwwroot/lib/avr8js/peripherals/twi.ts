@@ -1,6 +1,6 @@
 import { AVRInterruptConfig, CPU } from '../cpu/cpu';
 import { u8 } from '../types';
-import {I2CBus} from "@lib/i2c-bus";
+import {I2CBus, I2CController} from "@lib/i2c-bus";
 
 export interface TWIEventHandler {
   start(repeated: boolean): void;
@@ -12,6 +12,8 @@ export interface TWIEventHandler {
   writeByte(value: u8): void;
 
   readByte(ack: boolean): void;
+
+  registerController(addr: number, device: I2CController): void;
 }
 
 export interface TWIConfig {
@@ -69,7 +71,7 @@ export const twiConfig: TWIConfig = {
 };
 
 export class AVRTWI {
-  public eventHandler: TWIEventHandler = I2CBus.getInstance();
+  public eventHandler: TWIEventHandler = new I2CBus(this);
   private busy = false;
 
   // Interrupts

@@ -5,8 +5,10 @@
  * Copyright (C) 2019, Uri Shaked
  * Copyright (C) 2020, Anderson Costa
  */
-import {I2CBus, I2CDevice} from "@lib/i2c-bus";
+import {I2CBus, I2CController} from "@lib/i2c-bus";
 import {DotNetObjectReference} from "@type-declarations/dotnet";
+import {Controller} from "@controllers/controller";
+import {AVRRunner} from "@lib/execute";
 
 export const LCD1602_ADDR          = 0x27;
 
@@ -46,7 +48,7 @@ const LCD_CMD_SET_CONTRAST         = 0x81;
 // Oscillator frequency defined in datasheet is 270 kHz
 const fOsc = 270000;
 
-export class LCD1602I2C implements I2CDevice {
+export class LCD1602I2C extends Controller implements I2CController {
     // RAM settings
     private cgram = new Uint8Array(64);
     private ddram = new Uint8Array(128);
@@ -72,20 +74,8 @@ export class LCD1602I2C implements I2CDevice {
     private is8bit = true;
     private updated = false;
     
-    // Reference to c# state object
-    private state: DotNetObjectReference;
-
-    static getJSObjectReference() {
-        return new LCD1602I2C();
-    }
-    
-    init() {
-        I2CBus.getInstance().registerDevice(LCD1602_ADDR, this);
-        this.render();
-    }
-    
-    setStateReference(state: DotNetObjectReference) {
-        this.state = state;
+    setup() {
+        AVRRunner.getInstance().twi.eventHandler.registerController(LCD1602_ADDR, this);
     }
 
     update() {
@@ -112,7 +102,7 @@ export class LCD1602I2C implements I2CDevice {
         
         this.cgramUpdated = false;
 
-        this.state.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
+        this.component.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
     }
 
     backlightOn(value: boolean) {

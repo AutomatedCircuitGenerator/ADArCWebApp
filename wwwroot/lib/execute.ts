@@ -12,6 +12,7 @@ import {
     usart0Config, AVRTWI, twiConfig
 } from "./avr8js/index";
 import { loadHex } from "./compile-util";
+import {Controller} from "@controllers/controller";
 
 // ATmega328p params
 const FLASH = 0x8000;
@@ -22,22 +23,46 @@ const FLASH = 0x8000;
  * In general, it provides utilities related to working with the Arduino CPU.
  */
 export class AVRRunner {
-    readonly program = new Uint16Array(FLASH);
-    readonly cpu: CPU;
-    readonly timer: AVRTimer;
-    readonly portB: AVRIOPort;
-    readonly portC: AVRIOPort;
-    readonly portD: AVRIOPort;
-    readonly usart: AVRUSART;
-    readonly twi: AVRTWI;
-    readonly MHZ = 16e6;
+    private static _instance: AVRRunner | null = null;
+    
+    program = new Uint16Array(FLASH);
+    cpu: CPU;
+    timer: AVRTimer;
+    portB: AVRIOPort;
+    portC: AVRIOPort;
+    portD: AVRIOPort;
+    usart: AVRUSART;
+    twi: AVRTWI;
+    MHZ = 16e6;
 
     public instructions: TimingPacket[] = [];
     public pausedOn: number[] = [];
 
     private stopped = false;
+    
+    // list of component controllers
+    private controllers: Controller[] = [];
+    
+    // singleton, so constructor is private
+    private constructor() {}
 
-    constructor(hex: string) {
+    // get the one and only global copy of AVRRunner
+    static getInstance() {
+        if (!AVRRunner._instance) {
+            AVRRunner._instance = new AVRRunner();
+        }
+        return AVRRunner._instance;
+    }
+    
+    addController(controller: Controller) {
+        this.controllers.push(controller);
+    }
+
+    removeController(controller: Controller) {
+        this.controllers = this.controllers.filter(c => c !== controller);
+    }
+    
+    loadProgram(hex: string) {
         loadHex(hex, new Uint8Array(this.program.buffer));
         this.cpu = new CPU(this.program);
         this.timer = new AVRTimer(this.cpu, timer0Config);
@@ -46,6 +71,10 @@ export class AVRRunner {
         this.portD = new AVRIOPort(this.cpu, portDConfig);
         this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
         this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
+        
+        for (let controller of this.controllers) {
+            controller.setup();
+        }
     }
     
     async execute(callback: (cpu: CPU) => void) {

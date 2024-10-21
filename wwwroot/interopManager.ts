@@ -11,7 +11,7 @@ export namespace interopManager {
     export class InteropManager {
 
         interopLoc = "ADArCWebApp";
-        runner: AVRRunner;
+        runner: AVRRunner = AVRRunner.getInstance();
         adc: AVRADC;
         awaitResponseOn: number[] = [];
         prevB: number = 0;
@@ -159,9 +159,8 @@ export namespace interopManager {
          */
         async compile(): Promise<object> {
             var res = await buildHex(this.getCodeInPane());
-            this.runner = new AVRRunner(res.hex);
+            this.runner.loadProgram(res.hex);
             this.adc = new AVRADC(this.runner.cpu, adcConfig);
-            I2CBus.getInstance().setTWI(this.runner.twi);
             return { stdout: res.stdout, stderr: res.stderr }
         }
         /**

@@ -3,6 +3,7 @@ using GraphSynth.Representation;
 using System.Numerics;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using ADArCWebApp.Shared.Components;
 
 namespace ADArCWebApp.Shared
 {
@@ -53,6 +54,12 @@ namespace ADArCWebApp.Shared
 			foreach (var kv in compParams) { 
 				ret.Add(kv.Key, kv.Value.getValue());
 			}
+
+			if (data.compType.IsSubclassOf(typeof(RazorComponent)))
+			{
+				ret.Add("ComponentInstance", this);
+			}
+
 			return ret;
 		}
 

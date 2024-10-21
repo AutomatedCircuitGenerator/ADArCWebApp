@@ -12,7 +12,7 @@
         "moduleResolution": "node",
         "paths": {
             "@type-declarations/*": ["./type-declarations/*"],
-            "@components/*": ["./components/*"],
+            "@controllers/*": ["./controllers/*"],
             "@lib/*": ["./lib/*"]
         }
     },
