@@ -77,6 +77,29 @@ export class LCD1602I2C extends Controller implements I2CController {
     setup() {
         AVRRunner.getInstance().twi.eventHandler.registerController(LCD1602_ADDR, this);
     }
+    
+    reset() {
+        this.cgram.fill(0);  
+        this.ddram.fill(0); 
+
+        this.addr = 0x00;     
+        this.shift = 0x00;    
+        this.data = 0x00;    
+
+        this.displayOn = false; 
+        this.blinkOn = false;    
+        this.cursorOn = false;    
+        this.backlight = false;  
+
+        this.firstByte = true;      
+        this.commandMode = false;    
+        this.cgramMode = false;      
+        this.cgramUpdated = true;    
+        this.incrementMode = true;   
+        this.shiftMode = false;     
+        this.is8bit = true;         
+        this.updated = false;
+    }
 
     update() {
         if (this.updated) {

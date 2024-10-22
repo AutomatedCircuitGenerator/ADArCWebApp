@@ -21,7 +21,7 @@
     <string>ky024_arduino.grxml</string>
     <string>ky035_arduino.grxml</string>
     <string>l298n_arduino.grxml</string>
-    <string>lcd_i2c_arduino.grxml</string>
+    <string>lcd_1602_i2c_arduino.grxml</string>
     <string>lcd_parallel_arduino.grxml</string>
     <string>led_arduino.grxml</string>
     <string>led_rgb_arduino.grxml</string>

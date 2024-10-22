@@ -33,7 +33,7 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
         if (IsCanvasComponent)
         {
             var jsIdentifier = GetType().Name.Replace("Razor", "");
-            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.getReference");
+            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create");
             await _controller.InvokeVoidAsync("setComponentReference", _reference);
         }
     }

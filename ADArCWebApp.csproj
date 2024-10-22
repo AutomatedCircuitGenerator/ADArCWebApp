@@ -31,7 +31,7 @@
     <None Include="wwwroot\rules\add_ky024.grxml" />
     <None Include="wwwroot\rules\add_ky035.grxml" />
     <None Include="wwwroot\rules\add_l298n.grxml" />
-    <None Include="wwwroot\rules\add_lcd_i2c.grxml" />
+    <None Include="wwwroot\rules\add_lcd_1602_i2c.grxml" />
     <None Include="wwwroot\rules\add_lcd_parallel.grxml" />
     <None Include="wwwroot\rules\add_led.grxml" />
     <None Include="wwwroot\rules\add_led_rgb.grxml" />
@@ -71,7 +71,7 @@
     <None Include="wwwroot\rules\ky024_arduino.grxml" />
     <None Include="wwwroot\rules\ky035_arduino.grxml" />
     <None Include="wwwroot\rules\l298n_arduino.grxml" />
-    <None Include="wwwroot\rules\lcd_i2c_arduino.grxml" />
+    <None Include="wwwroot\rules\lcd_1602_i2c_arduino.grxml" />
     <None Include="wwwroot\rules\lcd_parallel_arduino.grxml" />
     <None Include="wwwroot\rules\led_arduino.grxml" />
     <None Include="wwwroot\rules\led_rgb_arduino.grxml" />
@@ -119,6 +119,7 @@
     <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
     <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
+    <TypeScriptCompile Remove="wwwroot\controllers\mq3.ts" />
   </ItemGroup>
 
 </Project>

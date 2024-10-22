@@ -92,14 +92,25 @@
 
     double xOffset { get { return 12.45 + cursorX * charXSpacing; } }
     double yOffset { get { return 12.55 + cursorY * charYSpacing; } }
+    
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]{
+                new ElementPin( name: "GND", x: 4, y: 32, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
+                new ElementPin( name: "VCC", x: 4, y: 41.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
+                new ElementPin( name: "SDA", x: 4, y: 51, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA)} ),
+                new ElementPin( name: "SCL", x: 4, y: 60.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL)} ),
+            };
+        }
+    }
 
     [JSInvokable]
     public void Update(bool blinkOn, bool cursorOn, int addrMod64, int addrDiv64, byte[] characters, bool backlight, byte[] cgram, bool cgramUpdated)
     {
         if (!this.characters.SequenceEqual(characters))
         {
-            Console.WriteLine(ComponentInstance?.compParams);
-            Console.WriteLine(System.Text.Encoding.UTF8.GetString(characters));
             ComponentInstance?.compParams["text"].setValue(System.Text.Encoding.UTF8.GetString(characters));
         } 
     }

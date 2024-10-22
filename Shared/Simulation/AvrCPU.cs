@@ -49,8 +49,10 @@ namespace ADArCWebApp.Shared.Simulation
 		/// <param name="pin">Which pin to invoke.</param>
 		/// <param name="cycles">The cycle the pin change came in on.</param>
 		public static void updateComponents(int pin, long cycles) {
-			foreach (var (actor, action) in pinListeners[pin]) {
-				action.Invoke(actor, [actor, cycles]);
+			if (pinListeners.TryGetValue(pin, out var listeners)) {
+				foreach (var (actor, action) in listeners) {
+					action.Invoke(actor, [actor, cycles]);
+				}
 			}
 		}
 

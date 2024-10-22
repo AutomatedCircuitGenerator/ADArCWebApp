@@ -73,6 +73,7 @@ export class AVRRunner {
         this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
         
         for (let controller of this.controllers) {
+            controller.reset();
             controller.setup();
         }
     }
