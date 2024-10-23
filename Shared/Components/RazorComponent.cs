@@ -30,11 +30,19 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
 
     protected override async Task OnInitializedAsync()
     {
-        if (IsCanvasComponent)
+        if (IsCanvasComponent && ComponentInstance != null)
         {
             var jsIdentifier = GetType().Name.Replace("Razor", "");
-            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create");
-            await _controller.InvokeVoidAsync("setComponentReference", _reference);
+            Dictionary<string, List<int>> pins = new();
+            
+            foreach (var pin in ComponentInstance.data.pins)
+            {
+                var connections = ComponentInstance.connMap[pin.Value];
+                var pinIds = connections.Select(connection => connection.toId);
+                pins[pin.Key] = pinIds.ToList();
+            }
+            
+            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", pins, _reference);
         }
     }
 

@@ -4,6 +4,8 @@ import {DotNetObjectReference} from "@type-declarations/dotnet";
 
 export abstract class Controller {
     protected component: DotNetObjectReference;
+    protected pins: { [key: string]: number[] };
+    
     protected constructor() {
         AVRRunner.getInstance().addController(this);
     }
@@ -17,11 +19,10 @@ export abstract class Controller {
     // this is called before setup, and should reset the internal state of the controller (registers, etc.) before each execution
     abstract reset(): void;
 
-    setComponentReference(component: DotNetObjectReference) {
-        this.component = component;
-    }
-
-    static create<T extends Controller>(this: new () => T): T {
-        return new this();
+    static create<T extends Controller>(this: new () => T, pins: Record<string, number[]>, component: DotNetObjectReference): T {
+        const instance = new this();
+        instance.pins = pins;
+        instance.component = component;
+        return instance;
     }
 }
