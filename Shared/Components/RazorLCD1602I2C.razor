@@ -32,7 +32,7 @@
     public bool backlight { get; set; } = true;
     [Parameter]
     //limited to: "full" | "i2c" | "none"
-    public string pins { get; set; } = "full";
+    public string pins { get; set; } = "i2c";
 
     protected int numCols { get; } = 16;
     protected int numRows { get; } = 2;
@@ -98,10 +98,10 @@
         get
         {
             return new ElementPin[]{
-                new ElementPin( name: "GND", x: 4, y: 32, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
-                new ElementPin( name: "VCC", x: 4, y: 41.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
-                new ElementPin( name: "SDA", x: 4, y: 51, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA)} ),
-                new ElementPin( name: "SCL", x: 4, y: 60.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL)} ),
+                new ElementPin( name: "GND", x: 30, y: 57, number: 1, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
+                new ElementPin( name: "VCC", x: 30, y: 66.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
+                new ElementPin( name: "SDA", x: 30, y: 76, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
+                new ElementPin( name: "SCL", x: 30, y: 85.5, number: 4, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
             };
         }
     }
@@ -163,44 +163,14 @@
           ry="1.5"
           opacity="@(darken)"
         />
-        @if (pins == "i2c"){
-            @:<rect x="7.55" y="-2.5" height="2.5" width="10.16" fill="url(#pins)" transform="rotate(90)" />
-            @:<text fill="white" font-size="1.5px" font-family= "monospace">
-                <tspan y="6.8" x="0.7" fill="white">1</tspan>
-                <tspan y="8.9" x="2.3" fill="white">GND</tspan>
-                <tspan y="11.4" x="2.3" fill="white">VCC</tspan>
-                <tspan y="14" x="2.3" fill="white">SDA</tspan>
-                <tspan y="16.6" x="2.3" fill="white">SCL</tspan>
-            @:</text>
-        }
-        @if (pins == "full")
-        {
-            double y = panelHeight + 21.1;
-
-                <g transform="translate(0, @y)">
-            <rect x="7.55" y="1" height="2.5" width="40.64" fill="url(#pins)" />
-            <text fill="white" font-size="1.5px" font-family= "monospace">
-              <tspan x="6" y="2.7">1</tspan>
-              <tspan x="7.2" y="0.7">VSS</tspan>
-              <tspan x="9.9" y="0.7">VDD</tspan>
-              <tspan x="12.7" y="0.7">V0</tspan>
-              <tspan x="15.2" y="0.7">RS</tspan>
-              <tspan x="17.8" y="0.7">RW</tspan>
-              <tspan x="20.8" y="0.7">E</tspan>
-              <tspan x="22.7" y="0.7">D0</tspan>
-              <tspan x="25.3" y="0.7">D1</tspan>
-              <tspan x="27.9" y="0.7">D2</tspan>
-              <tspan x="30.4" y="0.7">D3</tspan>
-              <tspan x="33" y="0.7">D4</tspan>
-              <tspan x="35.6" y="0.7">D5</tspan>
-              <tspan x="38.2" y="0.7">D6</tspan>
-              <tspan x="40.8" y="0.7">D7</tspan>
-              <tspan x="43.6" y="0.7">A</tspan>
-              <tspan x="46.2" y="0.7">K</tspan>
-              <tspan x="48" y="2.7">16</tspan>
-            </text>
-          </g>
-        }
+        <rect x="7.55" y="-2.5" height="2.5" width="10.16" fill="url(#pins)" transform="rotate(90)" />
+        <text fill="white" font-size="1.5px" font-family= "monospace">
+            <tspan y="6.8" x="0.7" fill="white">1</tspan>
+            <tspan y="8.9" x="2.3" fill="white">GND</tspan>
+            <tspan y="11.4" x="2.3" fill="white">VCC</tspan>
+            <tspan y="14" x="2.3" fill="white">SDA</tspan>
+            <tspan y="16.6" x="2.3" fill="white">SCL</tspan>
+        </text>
         <rect
           x="12.45"
           y="12.55"
