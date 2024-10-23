@@ -12,7 +12,6 @@ export namespace interopManager {
 
         interopLoc = "ADArCWebApp";
         runner: AVRRunner = AVRRunner.getInstance();
-        adc: AVRADC;
         awaitResponseOn: number[] = [];
         prevB: number = 0;
         prevC: number = 0;
@@ -160,7 +159,6 @@ export namespace interopManager {
         async compile(): Promise<object> {
             var res = await buildHex(this.getCodeInPane());
             this.runner.loadProgram(res.hex);
-            this.adc = new AVRADC(this.runner.cpu, adcConfig);
             return { stdout: res.stdout, stderr: res.stderr }
         }
         /**
@@ -226,7 +224,7 @@ export namespace interopManager {
          * which is then interpolated out to the internal adc value of 0-1024. not 100% sure.
          */
         arduinoADCInput(channel: number, value: number) {
-            this.adc.channelValues[channel] = value;
+            this.runner.adc.channelValues[channel] = value;
         }
 
         /**
