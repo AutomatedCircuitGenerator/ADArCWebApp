@@ -1,0 +1,73 @@
+﻿@* @inherits RazorComponent *@
+
+@code {
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "GND", x: 20, y: 100, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "VCC", x: 30, y: 100, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "SCK", x: 40, y: 100, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "CS", x: 50, y: 100, signals: new PinSignalInfo[] { }, number: 6), //chip select. pull low to enable serial interface
+                new ElementPin(name: "SO", x: 60, y: 100, signals: new PinSignalInfo[] { }, number: 7),
+            };
+        }
+    }
+
+    private double _temperature;
+    [Parameter]
+    [ValueSetting("°C", 20, 0, 1024)]// 1023.75*
+    public double temperature
+    {
+        get => _temperature;
+        set
+        {
+            Console.WriteLine("hi");
+            _temperature = value;
+        }
+    }
+
+}
+
+<svg data-bx-workspace="master" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100mm"
+     height="100mm">
+    <defs>
+        <clipPath id="a">
+            <circle style="stroke:#000;fill:silver" cx="226.9" cy="160.5" r="15"/>
+        </clipPath>
+        <clipPath id="b">
+            <circle style="stroke:#000;fill:silver" cx="273" cy="160.541" r="15"/>
+        </clipPath>
+    </defs>
+    <path d="M205 179.38h90v140.048h-90zm45 20.655c-8.558 0-15.495 6.937-15.495 15.495s6.937 15.495 15.495 15.495 15.495-6.937 15.495-15.495-6.937-15.495-15.495-15.495Z" style="stroke:#000;fill:#16619d" transform="translate(0 11.988)"/>
+    <path style="fill:#16eab2;stroke:#000" d="M202.768 0h45v60h-45zm45.464 0h45v60h-45z" transform="translate(2 131.078)"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="205.304" y="161.651" transform="translate(4.768 48.937)">+</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="279.057" y="159.737" transform="matrix(1.86792 0 0 1.15426 -243.489 23.75)">-</text>
+    <path style="stroke:#fff;fill:transparent" d="M216.329 313.675h67.342v14.303h-67.342z"/>
+    <path style="stroke:#000;fill:#252020" d="M347 303.487h24.434v29.797H347z" transform="matrix(.67973 0 0 .72701 15.713 43.957)"/>
+    <path style="fill:silver;stroke:silver" d="M330 307.5h16v1.3h-16zm0 7.744h16v1.3h-16zm0 7.215h16v1.3h-16zm0 5.734h16v1.3h-16zm42.4-20.693h16v1.3h-16zm0 7.744h16v1.3h-16zm0 7.215h16v1.3h-16zm0 5.734h16v1.3h-16z" transform="matrix(.67973 0 0 .72701 15.713 43.957)"/>
+    <path style="paint-order:fill;stroke:#fff;fill:transparent" d="M209.104 266.834h11.919v29.582h-11.919z"/>
+    <path style="fill:silver;stroke:silver" d="M211.82 270.012h6.334v23.154h-6.334z"/>
+    <rect x="219" y="315.484" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <path style="stroke:#c9a645;fill:#c9a645" d="M211.8 274.716h6.3v13.707h-6.3z"/>
+    <path style="stroke:#ccc;fill:#ccc" d="M223 320h2.641v28.413H223z"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:5.5px;white-space:pre" transform="rotate(-90 208.655 92.17)" x="41.329" y="100.486">HW-550</text>
+    <rect x="231.959" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="245" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="258" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="271" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <path style="stroke:#ccc;fill:#ccc" d="M236.645 320h2.641v28.413h-2.641zm12.231 0h2.641v28.413h-2.641zm13.775 0h2.641v28.413h-2.641zm12.541 0h2.641v28.413h-2.641z"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="219.929" y="311" data-bx-origin="0.482154 0.586267">GND</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="233.59" y="311" data-bx-origin="-0.918895 0.573658">VCC</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="247.042" y="311" data-bx-origin="-2.525539 0.674562">SCK</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="260.671" y="311" data-bx-origin="-6.322073 0.674562">CS</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="273.589" y="311" data-bx-origin="-9.032106 0.556843">SO</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.6px;white-space:pre" x="47.477" y="311" transform="rotate(-90 265.846 65.048)">MAX6675</text>
+    <circle style="stroke:#000;fill:silver" cx="226.9" cy="160.5" r="15"/>
+    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#a)" d="M222.626 144.826h8.845v31.744h-8.845z"/>
+    <circle style="stroke:#000;fill:silver" cx="272.9" cy="160.5" r="15"/>
+    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#b)" d="M268.626 144.826h8.845v31.744h-8.845z"/>
+</svg>

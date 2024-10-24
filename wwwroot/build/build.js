@@ -2512,56 +2512,49 @@ define("lib/i2c-bus", ["require", "exports"], function (require, exports) {
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.I2CBus = void 0;
     class I2CBus {
-        constructor() {
-            this.devices = {};
-            this.activeDevice = null;
-            this.writeMode = false;
-        }
-        static getInstance() {
-            if (!I2CBus._instance) {
-                I2CBus._instance = new I2CBus();
-            }
-            return I2CBus._instance;
-        }
-        setTWI(twi) {
+        constructor(twi) {
             this.twi = twi;
+            this.controllers = {};
+            this.activeController = null;
+            this.writeMode = false;
+            twi.eventHandler = this;
         }
-        registerDevice(addr, device) {
-            this.devices[addr] = device;
+        registerController(addr, device) {
+            this.controllers[addr] = device;
         }
         start() {
             this.twi.completeStart();
         }
         stop() {
-            if (this.activeDevice) {
-                this.activeDevice.i2cDisconnect();
-                this.activeDevice = null;
+            if (this.activeController) {
+                this.activeController.i2cDisconnect();
+                this.activeController = null;
             }
             this.twi.completeStop();
         }
         connectToSlave(addr, write) {
             let result = false;
-            const device = this.devices[addr];
+            const device = this.controllers[addr];
             if (device) {
                 result = device.i2cConnect(addr, write);
                 if (result) {
-                    this.activeDevice = device;
+                    this.activeController = device;
                     this.writeMode = write;
                 }
             }
             this.twi.completeConnect(result);
         }
         writeByte(value) {
-            if (this.activeDevice && this.writeMode) {
-                this.twi.completeWrite(this.activeDevice.i2cWriteByte(value));
+            if (this.activeController && this.writeMode) {
+                this.twi.completeWrite(this.activeController.i2cWriteByte(value));
             }
             else {
                 this.twi.completeWrite(false);
             }
         }
         readByte(ack) {
-            if (this.activeDevice && !this.writeMode) {
-                this.twi.completeRead(this.activeDevice.i2cReadByte(ack));
+            if (this.activeController && !this.writeMode) {
+                this.twi.completeRead(this.activeController.i2cReadByte(ack));
             }
             else {
                 this.twi.completeRead(0xff);
@@ -2569,12 +2562,11 @@ define("lib/i2c-bus", ["require", "exports"], function (require, exports) {
         }
     }
     exports.I2CBus = I2CBus;
-    I2CBus._instance = null;
 });
 define("lib/avr8js/peripherals/twi", ["require", "exports", "lib/i2c-bus"], function (require, exports, i2c_bus_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRTWI = exports.NoopTWIEventHandler = exports.twiConfig = void 0;
+    exports.AVRTWI = exports.twiConfig = void 0;
     const TWCR_TWINT = 0x80;
     const TWCR_TWEA = 0x40;
     const TWCR_TWSTA = 0x20;
@@ -2610,33 +2602,12 @@ define("lib/avr8js/peripherals/twi", ["require", "exports", "lib/i2c-bus"], func
         TWCR: 0xbc,
         TWAMR: 0xbd,
     };
-    class NoopTWIEventHandler {
-        constructor(twi) {
-            this.twi = twi;
-        }
-        start() {
-            this.twi.completeStart();
-        }
-        stop() {
-            this.twi.completeStop();
-        }
-        connectToSlave() {
-            this.twi.completeConnect(false);
-        }
-        writeByte() {
-            this.twi.completeWrite(false);
-        }
-        readByte() {
-            this.twi.completeRead(0xff);
-        }
-    }
-    exports.NoopTWIEventHandler = NoopTWIEventHandler;
     class AVRTWI {
         constructor(cpu, config, freqHz) {
             this.cpu = cpu;
             this.config = config;
             this.freqHz = freqHz;
-            this.eventHandler = i2c_bus_1.I2CBus.getInstance();
+            this.eventHandler = new i2c_bus_1.I2CBus(this);
             this.busy = false;
             this.TWI = {
                 address: this.config.twiInterrupt,
@@ -3243,18 +3214,53 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
+define("controllers/controller", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Controller = void 0;
+    class Controller {
+        constructor() {
+            execute_1.AVRRunner.getInstance().addController(this);
+        }
+        delete() {
+            execute_1.AVRRunner.getInstance().removeController(this);
+        }
+        setComponentReference(component) {
+            this.component = component;
+        }
+        static getReference() {
+            return new this();
+        }
+    }
+    exports.Controller = Controller;
+});
 define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-util"], function (require, exports, index_1, compile_util_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.AVRRunner = void 0;
     const FLASH = 0x8000;
     class AVRRunner {
-        constructor(hex) {
+        constructor() {
             this.program = new Uint16Array(FLASH);
             this.MHZ = 16e6;
             this.instructions = [];
             this.pausedOn = [];
             this.stopped = false;
+            this.controllers = [];
+        }
+        static getInstance() {
+            if (!AVRRunner._instance) {
+                AVRRunner._instance = new AVRRunner();
+            }
+            return AVRRunner._instance;
+        }
+        addController(controller) {
+            this.controllers.push(controller);
+        }
+        removeController(controller) {
+            this.controllers = this.controllers.filter(c => c !== controller);
+        }
+        loadProgram(hex) {
             (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
             this.cpu = new index_1.CPU(this.program);
             this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
@@ -3263,6 +3269,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
             this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
             this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
+            for (let controller of this.controllers) {
+                controller.setup();
+            }
         }
         execute(callback) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -3310,6 +3319,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
         }
     }
     exports.AVRRunner = AVRRunner;
+    AVRRunner._instance = null;
 });
 define("lib/avr8js/utils/assembler", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -4203,7 +4213,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute", "lib/i2c-bus"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_1, i2c_bus_2) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4212,6 +4222,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
+                this.runner = execute_2.AVRRunner.getInstance();
                 this.awaitResponseOn = [];
                 this.prevB = 0;
                 this.prevC = 0;
@@ -4287,9 +4298,8 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             compile() {
                 return __awaiter(this, void 0, void 0, function* () {
                     var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
-                    this.runner = new execute_1.AVRRunner(res.hex);
+                    this.runner.loadProgram(res.hex);
                     this.adc = new index_2.AVRADC(this.runner.cpu, index_2.adcConfig);
-                    i2c_bus_2.I2CBus.getInstance().setTWI(this.runner.twi);
                     return { stdout: res.stdout, stderr: res.stderr };
                 });
             }
@@ -4376,7 +4386,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function (require, exports, i2c_bus_3) {
+define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
@@ -4406,8 +4416,9 @@ define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function 
     const LCD_CMD_SET_DRAM_ADDR = 0x80;
     const LCD_CMD_SET_CONTRAST = 0x81;
     const fOsc = 270000;
-    class LCD1602I2C {
+    class LCD1602I2C extends controller_1.Controller {
         constructor() {
+            super(...arguments);
             this.cgram = new Uint8Array(64);
             this.ddram = new Uint8Array(128);
             this.addr = 0x00;
@@ -4426,15 +4437,8 @@ define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function 
             this.is8bit = true;
             this.updated = false;
         }
-        static getJSObjectReference() {
-            return new LCD1602I2C();
-        }
-        init() {
-            i2c_bus_3.I2CBus.getInstance().registerDevice(exports.LCD1602_ADDR, this);
-            this.render();
-        }
-        setStateReference(state) {
-            this.state = state;
+        setup() {
+            execute_3.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
         }
         update() {
             if (this.updated) {
@@ -4455,7 +4459,7 @@ define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function 
                 characters.fill(32);
             }
             this.cgramUpdated = false;
-            this.state.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
+            this.component.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
         }
         backlightOn(value) {
             if (this.backlight !== value) {
@@ -4562,12 +4566,12 @@ define("components/lcd1602i2c", ["require", "exports", "lib/i2c-bus"], function 
     }
     exports.LCD1602I2C = LCD1602I2C;
 });
-define("main", ["require", "exports", "interopManager", "components/lcd1602i2c"], function (require, exports, interopManager_1, lcd1602i2c_1) {
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"], function (require, exports, interopManager_1, lcd1602i2c_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
+    window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
 });
 //# sourceMappingURL=build.js.map
