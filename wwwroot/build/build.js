@@ -3228,7 +3228,7 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         setComponentReference(component) {
             this.component = component;
         }
-        static create() {
+        static getReference() {
             return new this();
         }
     }
@@ -3270,7 +3270,6 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
             this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
             for (let controller of this.controllers) {
-                controller.reset();
                 controller.setup();
             }
         }
@@ -4440,25 +4439,6 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         }
         setup() {
             execute_3.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
-        }
-        reset() {
-            this.cgram.fill(0);
-            this.ddram.fill(0);
-            this.addr = 0x00;
-            this.shift = 0x00;
-            this.data = 0x00;
-            this.displayOn = false;
-            this.blinkOn = false;
-            this.cursorOn = false;
-            this.backlight = false;
-            this.firstByte = true;
-            this.commandMode = false;
-            this.cgramMode = false;
-            this.cgramUpdated = true;
-            this.incrementMode = true;
-            this.shiftMode = false;
-            this.is8bit = true;
-            this.updated = false;
         }
         update() {
             if (this.updated) {
