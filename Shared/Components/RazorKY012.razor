@@ -1,35 +1,62 @@
-﻿@code {
-	[Parameter]
-	public bool value { get; set; } = false;
+﻿@using System.Text
+@inherits RazorComponent
 
-	ElementPin[] pinInfo
-	{
-		get
-		{
-			return new ElementPin []
-			{
-				new ElementPin(name: "S", x: 36.229, y: 104.57, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
-				new ElementPin(name: "Mid", x: 38.688, y: 104.52, signals: new PinSignalInfo[] { }, number: 2),
-				new ElementPin(name: "GND",  x: 41.397, y: 104.52, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3)
-			};
+@code {
+    /// <summary>
+    /// Defines the physical pins of the KY-012 Active Piezo-Buzzer:
+    /// - S: Signal pin - when HIGH (≥3.3V), generates 2.5kHz tone
+    /// - N.C: Not connected - this pin has no function
+    /// - GND: Ground connection
+    /// </summary>
+    ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                // Signal pin - needs ≥3.3V to activate
+                new ElementPin(
+                    name: "S", 
+                    x: 36.229, 
+                    y: 104.57, 
+                    signals: new PinSignalInfo[]{ PinSignalInfo.VCC(3.3) }, 
+                    number: 1,
+                    description: "Signal (≥3.3V for ON)"
+                ),
+                // No Connection pin - physically present but not used
+                new ElementPin(
+                    name: "N.C", 
+                    x: 38.688, 
+                    y: 104.52, 
+                    signals: new PinSignalInfo[] { }, 
+                    number: 2,
+                    description: "Not Connected"
+                ),
+                // Ground pin
+                new ElementPin(
+                    name: "GND",  
+                    x: 41.397, 
+                    y: 104.52, 
+                    signals: new PinSignalInfo[] { PinSignalInfo.GND() }, 
+                    number: 3,
+                    description: "Ground"
+                )
+            };
+        }
+    }
 
-		}
-	}
+    [JSInvokable]
+    public void PlayBuzzerSound()
+    {
+        Console.WriteLine("Buzzer sound playing - 2.5kHz tone");
+    }
 
-	public static async void translate(ComponentInstance comp, long pinChangeCycle)
-	{
-		var data = comp.data;
+    [JSInvokable]
+    public void StopBuzzerSound()
+    {
+        Console.WriteLine("Buzzer sound stopped");
+    }
 
-		if (0 == comp.getConnection("S", out InstanceConnection? conn, out List<InstanceConnection>? all))
-		{
-			comp.compParams["value"].setValue<bool>( await AvrCPU.getPinState(conn!.toId));
-		}
-		else
-		{
-			Console.WriteLine("GetConnection failed from KY012 buzzer Component!");
-		}
-
-	}
 }
 
 <svg width="18.5mm" height="19.154mm" version="1.1" viewBox="0 0 18.5 19.154" xmlns="http://www.w3.org/2000/svg">

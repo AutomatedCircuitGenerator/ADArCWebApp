@@ -72,7 +72,9 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 57, new ComponentDataBuilder("Voltage regulator", false, "Others", 1, 75, 75, paneHoverText: "LM2596", pins:["V+","V-"], gsNodeName: "lm2596").Finish() },
 			{ 58, new ComponentDataBuilder("Bluetooth Module", false, "Others", 1, 75, 75, paneHoverText: "HM-10", codeForGen:new(){{"include", ""},{"global", ""}, {"setup", ""}, {"loopMain", ""},{"functions", ""}, {"delayLoop", ""}, {"delayTime", ""}}, pins:["pin1","pin2","pin3","pin4"], gsNodeName: "hm-10").Finish() },
 			{ 59, new ComponentDataBuilder("resistor", true, "", 1, 75, 75, typeof(RazorResistor)).Property("ohms", 1000).Finish() },
-			{ 60, new ComponentDataBuilder("stepper driver", false, "", 1, 75, 75).Finish() }
+			{ 60, new ComponentDataBuilder("stepper driver", false, "", 1, 75, 75).Finish() },
+			{ 61, new ComponentDataBuilder("KY-012 Active Buzzer", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorKY012), paneHoverText: "2.5kHz Active Buzzer", codeForGen: new() { { "include", "" }, { "global", "const int buzzerPin = ~\"S\";  // Signal pin for the buzzer" }, { "setup", "pinMode(buzzerPin, OUTPUT);  // Set buzzer pin as output" }, { "loopMain", "// Buzzer is controlled by direct pin state" }, { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" } }, pins: new List<string> { "S", "GND" }, listenOn: new List<string> { "S" }, gsNodeName: "ky012").Finish() }
+
 		};
 
 	}
