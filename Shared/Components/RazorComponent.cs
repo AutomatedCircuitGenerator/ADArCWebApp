@@ -54,22 +54,4 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
             _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId, pins, _reference);
         }
     }
-
-    [JSInvokable]
-    public Dictionary<string, List<int>> GetPins()
-    {
-        Dictionary<string, List<int>> pins = new();
-
-        if (ComponentInstance is not null)
-        {
-            foreach (var pin in ComponentInstance.data.pins)
-            {
-                var connections = ComponentInstance.connMap[pin.Value];
-                var pinIds = connections.Select(connection => connection.toId);
-                pins[pin.Key] = pinIds.ToList();
-            }
-        }
-
-        return pins;
-    }
 }
