@@ -35,12 +35,12 @@ export async function buildHex(source: string) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ sketch: source, files: [{name: "libraries.txt", content: "# Wokwi Library List\n" +
+        body: JSON.stringify({ sketch: source, files: [{name: "libraries.txt", content:"# Wokwi Library List\n" +
                     "# See https://docs.wokwi.com/guides/libraries\n" +
                     "\n" +
                     "# Automatically added based on includes:\n" +
-                    "LiquidCrystal I2C\n" +
-                    "\n"}] })
+                    "# ---\n" +
+                    "Adafruit BNO055\n"}] })
     });
     return (await resp.json()) as IHexiResult;
 }

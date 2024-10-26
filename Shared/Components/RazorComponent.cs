@@ -46,9 +46,15 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
 
             foreach (var pin in ComponentInstance.data.pins)
             {
-                var connections = ComponentInstance.connMap[pin.Value];
-                var pinIds = connections.Select(connection => connection.toId);
-                pins[pin.Key] = pinIds.ToList();
+                if (ComponentInstance.connMap.TryGetValue(pin.Value, out var connections))
+                {
+                    var pinIds = connections.Select(connection => connection.toId);
+                    pins[pin.Key] = pinIds.ToList();
+                }
+                else
+                {
+                    pins[pin.Key] = new List<int>();
+                }
             }
 
             _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId, pins, _reference);
