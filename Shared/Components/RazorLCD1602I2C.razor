@@ -160,7 +160,7 @@
         height="@(panelHeight)"
         fill="url(#characters)"/>
     <path class="path" d="@genPath()" transform="translate(12.45, 12.55)" fill="@color"/>
-
+    <g class="cursor"></g>
     @if (cursorX >= 0 && cursorX < numCols && cursorY >= 0 && cursorY < numRows)
     {
         if (blink)

@@ -130,6 +130,30 @@ export class LCD1602I2C extends Controller implements I2CController {
 
         backlight.style.opacity = this.backlight ? '0' : '0.5';
         path.setAttribute("d", this.path(characters));
+        this.renderCursor(this.addr % 64, Math.floor(this.addr / 64));
+    }
+    
+    private renderCursor(cursorX: number, cursorY: number) {
+        const cursor = this.element.querySelector<HTMLElement>(".cursor");
+        const xOffset = 12.45 + cursorX * 3.55;
+        const yOffset = 12.55 + cursorY * 5.95;
+        cursor.innerHTML = '';
+        if (cursorX >= 0 && cursorX < 16 && cursorY >= 0 && cursorY < 2) {
+            if (this.blinkOn) {
+                cursor.innerHTML += `
+                        <rect x="${xOffset}" y="${yOffset}" width="2.95" height="5.55" fill="black">
+                            <animate attributeName="opacity" values="0;0;0;0;1;1;0;0;0;0" dur="1s" fill="freeze" repeatCount="indefinite"/>
+                        </rect>
+                    `;
+            }
+
+            if (this.cursorOn) {
+                const y = yOffset + 0.7 * 7;
+                cursor.innerHTML += `
+                        <rect x="${xOffset}" y="${y}" width="2.95" height="0.65" fill="black"/>
+                    `;
+            }
+        }
     }
 
     path(characters: Uint8Array | number[]) {
