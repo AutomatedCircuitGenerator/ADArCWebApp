@@ -100,21 +100,6 @@
             };
         }
     }
-
-    [JSInvokable]
-    public void Update(bool blinkOn, bool cursorOn, int cursorX, int cursorY, byte[] characters, bool backlight, byte[] cgram, bool cgramUpdated)
-    {
-        if (!this.characters.SequenceEqual(characters))
-        {
-            ComponentInstance?.compParams["text"].setValue(Encoding.UTF8.GetString(characters));
-            ComponentInstance?.compParams["backlight"].setValue(backlight);
-            ComponentInstance?.compParams["blink"].setValue(blinkOn);
-            ComponentInstance?.compParams["cursor"].setValue(cursorOn);
-            ComponentInstance?.compParams["cursorX"].setValue(cursorX);
-            ComponentInstance?.compParams["cursorY"].setValue(cursorY);
-        }
-    }
-
 }
 
 <svg
@@ -152,6 +137,7 @@
         ry="1.5"
         fill="@(actualBgColor)"/>
     <rect
+        class="backlight"
         x="7.55"
         y="10.3"
         width="@(panelWidth + 9.8)"
@@ -173,7 +159,7 @@
         width="@(panelWidth)"
         height="@(panelHeight)"
         fill="url(#characters)"/>
-    <path d="@genPath()" transform="translate(12.45, 12.55)" fill="@color"/>
+    <path class="path" d="@genPath()" transform="translate(12.45, 12.55)" fill="@color"/>
 
     @if (cursorX >= 0 && cursorX < numCols && cursorY >= 0 && cursorY < numRows)
     {

@@ -76,7 +76,6 @@ export class AVRRunner {
         
         for (let controller of this.controllers) {
             controller.reset();
-            await controller.updatePins();
             controller.setup();
         }
     }
