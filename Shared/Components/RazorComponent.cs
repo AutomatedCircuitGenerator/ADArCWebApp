@@ -11,7 +11,7 @@ namespace ADArCWebApp.Shared.Components;
  */
 public abstract class RazorComponent : ComponentBase, IAsyncDisposable
 {
-    private IJSObjectReference? _controller;
+    protected IJSObjectReference? _controller;
     private DotNetObjectReference<RazorComponent>? _reference;
 
     [Inject] protected IJSRuntime JS { get; set; }
