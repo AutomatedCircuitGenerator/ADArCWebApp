@@ -63,7 +63,7 @@ export class AVRRunner {
         this.controllers = this.controllers.filter(c => c !== controller);
     }
     
-    loadProgram(hex: string) {
+    async loadProgram(hex: string) {
         loadHex(hex, new Uint8Array(this.program.buffer));
         this.cpu = new CPU(this.program);
         this.timer = new AVRTimer(this.cpu, timer0Config);

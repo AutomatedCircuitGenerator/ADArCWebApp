@@ -37,9 +37,9 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
         if (IsCanvasComponent) _reference = DotNetObjectReference.Create(this);
     }
 
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (IsCanvasComponent && ComponentInstance != null)
+        if (IsCanvasComponent && ComponentInstance != null && firstRender)
         {
             var jsIdentifier = GetType().Name.Replace("Razor", "");
             Dictionary<string, List<int>> pins = new();
@@ -51,7 +51,7 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
                 pins[pin.Key] = pinIds.ToList();
             }
 
-            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", pins, _reference);
+            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId, pins, _reference);
         }
     }
 }

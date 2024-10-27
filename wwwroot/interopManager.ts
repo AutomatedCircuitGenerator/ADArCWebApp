@@ -158,7 +158,7 @@ export namespace interopManager {
          */
         async compile(): Promise<object> {
             var res = await buildHex(this.getCodeInPane());
-            this.runner.loadProgram(res.hex);
+            await this.runner.loadProgram(res.hex);
             return { stdout: res.stdout, stderr: res.stderr }
         }
         /**
