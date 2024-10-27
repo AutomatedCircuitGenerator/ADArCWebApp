@@ -24,13 +24,13 @@ namespace ADArCWebApp.Shared.Simulation
 		private static string globalCode() {
 			StringBuilder b = new StringBuilder();
 			//Console.WriteLine("2: " + outputPins.Count);
-			b.Append("char outputPins[] = {");
-			for (int i = 0; i < outputPins.Count; i++) {
-				b.Append(outputPins[i]);
-				if (i != outputPins.Count - 1) { b.Append(", "); }
-			}
-
-			b.AppendLine("};\n\n");
+			// b.Append("char outputPins[] = {");
+			// for (int i = 0; i < outputPins.Count; i++) {
+			// 	b.Append(outputPins[i]);
+			// 	if (i != outputPins.Count - 1) { b.Append(", "); }
+			// }
+			//
+			// b.AppendLine("};\n\n");
 
 
 			//insert global vars from components
@@ -47,10 +47,10 @@ namespace ADArCWebApp.Shared.Simulation
 			StringBuilder b = new StringBuilder();
 
 			b.AppendLine("void setup() {");
-			b.AppendLine("  Serial.begin(9600);");//keep an eye on
-			b.AppendLine("  for (int i = 0; i < " + outputPins.Count + "; i++) {");
-			b.AppendLine("    pinMode(outputPins[i], OUTPUT);");
-			b.AppendLine("  }");
+			// b.AppendLine("  Serial.begin(9600);");//keep an eye on
+			// b.AppendLine("  for (int i = 0; i < " + outputPins.Count + "; i++) {");
+			// b.AppendLine("    pinMode(outputPins[i], OUTPUT);");
+			// b.AppendLine("  }");
 
             //insert global vars from components
             foreach (ComponentInstance c in Pages.Index.comps.Values)

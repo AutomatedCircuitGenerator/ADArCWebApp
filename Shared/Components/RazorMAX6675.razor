@@ -1,4 +1,4 @@
-﻿@* @inherits RazorComponent *@
+﻿@inherits RazorComponent
 
 @code {
 
@@ -17,18 +17,15 @@
         }
     }
 
-    private double _temperature;
+
     [Parameter]
-    [ValueSetting("°C", 20, 0, 1024)]// 1023.75*
-    public double temperature
+    [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
+    public double temperature { get; set; } = 20;
+
+    [JSInvokable]
+    public double GetMax6675Temperature()
     {
-        get => _temperature;
-        set
-        {
-            // TODO need to send to JSland when we get update from env var
-            Console.WriteLine("hi");
-            _temperature = value;
-        }
+        return temperature;
     }
 
 }

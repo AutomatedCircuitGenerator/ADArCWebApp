@@ -76,6 +76,7 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
                                 "\n" +
                                 "# Automatically added based on includes:\n" +
                                 "LiquidCrystal I2C\n" +
+                                "MAX6675 with hardware SPI\n" +
                                 "\n" }] })
             });
             return (yield resp.json());
@@ -3225,8 +3226,9 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         delete() {
             execute_1.AVRRunner.getInstance().removeController(this);
         }
-        static create(pins, component) {
+        static create(id, pins, component) {
             const instance = new this();
+            instance.element = document.getElementById(`component-${id}`);
             instance.pins = pins;
             instance.component = component;
             return instance;
@@ -3261,19 +3263,22 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.controllers = this.controllers.filter(c => c !== controller);
         }
         loadProgram(hex) {
-            (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
-            this.cpu = new index_1.CPU(this.program);
-            this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
-            this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
-            this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
-            this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
-            this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
-            this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
-            this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
-            for (let controller of this.controllers) {
-                controller.reset();
-                controller.setup();
-            }
+            return __awaiter(this, void 0, void 0, function* () {
+                (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
+                this.cpu = new index_1.CPU(this.program);
+                this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
+                this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
+                this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
+                this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
+                this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
+                this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
+                this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
+                this.spi = new index_1.AVRSPI(this.cpu, index_1.spiConfig, this.MHZ);
+                for (let controller of this.controllers) {
+                    controller.reset();
+                    controller.setup();
+                }
+            });
         }
         execute(callback) {
             return __awaiter(this, void 0, void 0, function* () {
@@ -4300,7 +4305,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             compile() {
                 return __awaiter(this, void 0, void 0, function* () {
                     var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
-                    this.runner.loadProgram(res.hex);
+                    yield this.runner.loadProgram(res.hex);
                     return { stdout: res.stdout, stderr: res.stderr };
                 });
             }
@@ -4390,7 +4395,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
 define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
+    exports.fontA00 = exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
     exports.LCD1602_ADDR = 0x27;
     const LCD_MODE_CMD = 0x00;
     const LCD_MODE_DATA = 0x40;
@@ -4479,7 +4484,55 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
                 characters.fill(32);
             }
             this.cgramUpdated = false;
-            this.component.invokeMethodAsync("Update", this.blinkOn, this.cursorOn, this.addr % 64, Math.floor(this.addr / 64), characters, this.backlight, this.cgram, this.cgramUpdated);
+            const backlight = this.element.querySelector(".backlight");
+            const path = this.element.querySelector(".path");
+            backlight.style.opacity = this.backlight ? '0' : '0.5';
+            path.setAttribute("d", this.path(characters));
+            this.renderCursor(this.addr % 64, Math.floor(this.addr / 64));
+        }
+        renderCursor(cursorX, cursorY) {
+            const cursor = this.element.querySelector(".cursor");
+            const xOffset = 12.45 + cursorX * 3.55;
+            const yOffset = 12.55 + cursorY * 5.95;
+            cursor.innerHTML = '';
+            if (cursorX >= 0 && cursorX < 16 && cursorY >= 0 && cursorY < 2) {
+                if (this.blinkOn) {
+                    cursor.innerHTML += `
+                        <rect x="${xOffset}" y="${yOffset}" width="2.95" height="5.55" fill="black">
+                            <animate attributeName="opacity" values="0;0;0;0;1;1;0;0;0;0" dur="1s" fill="freeze" repeatCount="indefinite"/>
+                        </rect>
+                    `;
+                }
+                if (this.cursorOn) {
+                    const y = yOffset + 0.7 * 7;
+                    cursor.innerHTML += `
+                        <rect x="${xOffset}" y="${y}" width="2.95" height="0.65" fill="black"/>
+                    `;
+                }
+            }
+        }
+        path(characters) {
+            const xSpacing = 0.6;
+            const ySpacing = 0.7;
+            const charXSpacing = 3.55;
+            const charYSpacing = 5.95;
+            const result = [];
+            const cols = 16;
+            for (let i = 0; i < characters.length; i++) {
+                const charX = (i % cols) * charXSpacing;
+                const charY = Math.floor(i / cols) * charYSpacing;
+                for (let py = 0; py < 8; py++) {
+                    const row = exports.fontA00[characters[i] * 8 + py];
+                    for (let px = 0; px < 5; px++) {
+                        if (row & (1 << px)) {
+                            const x = (charX + px * xSpacing).toFixed(2);
+                            const y = (charY + py * ySpacing).toFixed(2);
+                            result.push(`M ${x} ${y}h0.55v0.65h-0.55Z`);
+                        }
+                    }
+                }
+            }
+            return result.join(' ');
         }
         backlightOn(value) {
             if (this.backlight !== value) {
@@ -4585,13 +4638,307 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         }
     }
     exports.LCD1602I2C = LCD1602I2C;
+    exports.fontA00 = new Uint8Array([
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        4, 4, 4, 4, 0, 0, 4, 0,
+        10, 10, 10, 0, 0, 0, 0, 0,
+        10, 10, 31, 10, 31, 10, 10, 0,
+        4, 30, 5, 14, 20, 15, 4, 0,
+        3, 19, 8, 4, 2, 25, 24, 0,
+        6, 9, 5, 2, 21, 9, 22, 0,
+        6, 4, 2, 0, 0, 0, 0, 0,
+        8, 4, 2, 2, 2, 4, 8, 0,
+        2, 4, 8, 8, 8, 4, 2, 0,
+        0, 4, 21, 14, 21, 4, 0, 0,
+        0, 4, 4, 31, 4, 4, 0, 0,
+        0, 0, 0, 0, 6, 4, 2, 0,
+        0, 0, 0, 31, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 6, 6, 0,
+        0, 16, 8, 4, 2, 1, 0, 0,
+        14, 17, 25, 21, 19, 17, 14, 0,
+        4, 6, 4, 4, 4, 4, 14, 0,
+        14, 17, 16, 8, 4, 2, 31, 0,
+        31, 8, 4, 8, 16, 17, 14, 0,
+        8, 12, 10, 9, 31, 8, 8, 0,
+        31, 1, 15, 16, 16, 17, 14, 0,
+        12, 2, 1, 15, 17, 17, 14, 0,
+        31, 17, 16, 8, 4, 4, 4, 0,
+        14, 17, 17, 14, 17, 17, 14, 0,
+        14, 17, 17, 30, 16, 8, 6, 0,
+        0, 6, 6, 0, 6, 6, 0, 0,
+        0, 6, 6, 0, 6, 4, 2, 0,
+        8, 4, 2, 1, 2, 4, 8, 0,
+        0, 0, 31, 0, 31, 0, 0, 0,
+        2, 4, 8, 16, 8, 4, 2, 0,
+        14, 17, 16, 8, 4, 0, 4, 0,
+        14, 17, 16, 22, 21, 21, 14, 0,
+        14, 17, 17, 17, 31, 17, 17, 0,
+        15, 17, 17, 15, 17, 17, 15, 0,
+        14, 17, 1, 1, 1, 17, 14, 0,
+        7, 9, 17, 17, 17, 9, 7, 0,
+        31, 1, 1, 15, 1, 1, 31, 0,
+        31, 1, 1, 15, 1, 1, 1, 0,
+        14, 17, 1, 29, 17, 17, 30, 0,
+        17, 17, 17, 31, 17, 17, 17, 0,
+        14, 4, 4, 4, 4, 4, 14, 0,
+        28, 8, 8, 8, 8, 9, 6, 0,
+        17, 9, 5, 3, 5, 9, 17, 0,
+        1, 1, 1, 1, 1, 1, 31, 0,
+        17, 27, 21, 21, 17, 17, 17, 0,
+        17, 17, 19, 21, 25, 17, 17, 0,
+        14, 17, 17, 17, 17, 17, 14, 0,
+        15, 17, 17, 15, 1, 1, 1, 0,
+        14, 17, 17, 17, 21, 9, 22, 0,
+        15, 17, 17, 15, 5, 9, 17, 0,
+        30, 1, 1, 14, 16, 16, 15, 0,
+        31, 4, 4, 4, 4, 4, 4, 0,
+        17, 17, 17, 17, 17, 17, 14, 0,
+        17, 17, 17, 17, 17, 10, 4, 0,
+        17, 17, 17, 21, 21, 21, 10, 0,
+        17, 17, 10, 4, 10, 17, 17, 0,
+        17, 17, 17, 10, 4, 4, 4, 0,
+        31, 16, 8, 4, 2, 1, 31, 0,
+        7, 1, 1, 1, 1, 1, 7, 0,
+        17, 10, 31, 4, 31, 4, 4, 0,
+        14, 8, 8, 8, 8, 8, 14, 0,
+        4, 10, 17, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 31, 0,
+        2, 4, 8, 0, 0, 0, 0, 0,
+        0, 0, 14, 16, 30, 17, 30, 0,
+        1, 1, 13, 19, 17, 17, 15, 0,
+        0, 0, 14, 1, 1, 17, 14, 0,
+        16, 16, 22, 25, 17, 17, 30, 0,
+        0, 0, 14, 17, 31, 1, 14, 0,
+        12, 18, 2, 7, 2, 2, 2, 0,
+        0, 30, 17, 17, 30, 16, 14, 0,
+        1, 1, 13, 19, 17, 17, 17, 0,
+        4, 0, 6, 4, 4, 4, 14, 0,
+        8, 0, 12, 8, 8, 9, 6, 0,
+        1, 1, 9, 5, 3, 5, 9, 0,
+        6, 4, 4, 4, 4, 4, 14, 0,
+        0, 0, 11, 21, 21, 17, 17, 0,
+        0, 0, 13, 19, 17, 17, 17, 0,
+        0, 0, 14, 17, 17, 17, 14, 0,
+        0, 0, 15, 17, 15, 1, 1, 0,
+        0, 0, 22, 25, 30, 16, 16, 0,
+        0, 0, 13, 19, 1, 1, 1, 0,
+        0, 0, 14, 1, 14, 16, 15, 0,
+        2, 2, 7, 2, 2, 18, 12, 0,
+        0, 0, 17, 17, 17, 25, 22, 0,
+        0, 0, 17, 17, 17, 10, 4, 0,
+        0, 0, 17, 21, 21, 21, 10, 0,
+        0, 0, 17, 10, 4, 10, 17, 0,
+        0, 0, 17, 17, 30, 16, 14, 0,
+        0, 0, 31, 8, 4, 2, 31, 0,
+        8, 4, 4, 2, 4, 4, 8, 0,
+        4, 4, 4, 4, 4, 4, 4, 0,
+        2, 4, 4, 8, 4, 4, 2, 0,
+        0, 4, 8, 31, 8, 4, 0, 0,
+        0, 4, 2, 31, 2, 4, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 7, 5, 7, 0,
+        28, 4, 4, 4, 0, 0, 0, 0,
+        0, 0, 0, 4, 4, 4, 7, 0,
+        0, 0, 0, 0, 1, 2, 4, 0,
+        0, 0, 0, 6, 6, 0, 0, 0,
+        0, 31, 16, 31, 16, 8, 4, 0,
+        0, 0, 31, 16, 12, 4, 2, 0,
+        0, 0, 8, 4, 6, 5, 4, 0,
+        0, 0, 4, 31, 17, 16, 12, 0,
+        0, 0, 31, 4, 4, 4, 31, 0,
+        0, 0, 8, 31, 12, 10, 9, 0,
+        0, 0, 2, 31, 18, 10, 2, 0,
+        0, 0, 0, 14, 8, 8, 31, 0,
+        0, 0, 15, 8, 15, 8, 15, 0,
+        0, 0, 0, 21, 21, 16, 12, 0,
+        0, 0, 0, 31, 0, 0, 0, 0,
+        31, 16, 20, 12, 4, 4, 2, 0,
+        16, 8, 4, 6, 5, 4, 4, 0,
+        4, 31, 17, 17, 16, 8, 4, 0,
+        0, 31, 4, 4, 4, 4, 31, 0,
+        8, 31, 8, 12, 10, 9, 8, 0,
+        2, 31, 18, 18, 18, 18, 9, 0,
+        4, 31, 4, 31, 4, 4, 4, 0,
+        0, 30, 18, 17, 16, 8, 6, 0,
+        2, 30, 9, 8, 8, 8, 4, 0,
+        0, 31, 16, 16, 16, 16, 31, 0,
+        10, 31, 10, 10, 8, 4, 2, 0,
+        0, 3, 16, 19, 16, 8, 7, 0,
+        0, 31, 16, 8, 4, 10, 17, 0,
+        2, 31, 18, 10, 2, 2, 28, 0,
+        0, 17, 17, 18, 16, 8, 6, 0,
+        0, 30, 18, 21, 24, 8, 6, 0,
+        8, 7, 4, 31, 4, 4, 2, 0,
+        0, 21, 21, 21, 16, 8, 4, 0,
+        14, 0, 31, 4, 4, 4, 2, 0,
+        2, 2, 2, 6, 10, 2, 2, 0,
+        4, 4, 31, 4, 4, 2, 1, 0,
+        0, 14, 0, 0, 0, 0, 31, 0,
+        0, 31, 16, 10, 4, 10, 1, 0,
+        4, 31, 8, 4, 14, 21, 4, 0,
+        8, 8, 8, 8, 8, 4, 2, 0,
+        0, 4, 8, 17, 17, 17, 17, 0,
+        1, 1, 31, 1, 1, 1, 30, 0,
+        0, 31, 16, 16, 16, 8, 6, 0,
+        0, 2, 5, 8, 16, 16, 0, 0,
+        4, 31, 4, 4, 21, 21, 4, 0,
+        0, 31, 16, 16, 10, 4, 8, 0,
+        0, 14, 0, 14, 0, 14, 16, 0,
+        0, 4, 2, 1, 17, 31, 16, 0,
+        0, 16, 16, 10, 4, 10, 1, 0,
+        0, 31, 2, 31, 2, 2, 28, 0,
+        2, 2, 31, 18, 10, 2, 2, 0,
+        0, 14, 8, 8, 8, 8, 31, 0,
+        0, 31, 16, 31, 16, 16, 31, 0,
+        14, 0, 31, 16, 16, 8, 4, 0,
+        9, 9, 9, 9, 8, 4, 2, 0,
+        0, 4, 5, 5, 21, 21, 13, 0,
+        0, 1, 1, 17, 9, 5, 3, 0,
+        0, 31, 17, 17, 17, 17, 31, 0,
+        0, 31, 17, 17, 16, 8, 4, 0,
+        0, 3, 0, 16, 16, 8, 7, 0,
+        4, 9, 2, 0, 0, 0, 0, 0,
+        7, 5, 7, 0, 0, 0, 0, 0,
+        0, 0, 18, 21, 9, 9, 22, 0,
+        10, 0, 14, 16, 30, 17, 30, 0,
+        0, 0, 14, 17, 15, 17, 15, 1,
+        0, 0, 14, 1, 6, 17, 14, 0,
+        0, 0, 17, 17, 17, 25, 23, 1,
+        0, 0, 30, 5, 9, 17, 14, 0,
+        0, 0, 12, 18, 17, 17, 15, 1,
+        0, 0, 30, 17, 17, 17, 30, 16,
+        0, 0, 28, 4, 4, 5, 2, 0,
+        0, 8, 11, 8, 0, 0, 0, 0,
+        8, 0, 12, 8, 8, 8, 8, 8,
+        0, 5, 2, 5, 0, 0, 0, 0,
+        0, 4, 14, 5, 21, 14, 4, 0,
+        2, 2, 7, 2, 7, 2, 30, 0,
+        14, 0, 13, 19, 17, 17, 17, 0,
+        10, 0, 14, 17, 17, 17, 14, 0,
+        0, 0, 13, 19, 17, 17, 15, 1,
+        0, 0, 22, 25, 17, 17, 30, 16,
+        0, 14, 17, 31, 17, 17, 14, 0,
+        0, 0, 0, 26, 21, 11, 0, 0,
+        0, 0, 14, 17, 17, 10, 27, 0,
+        10, 0, 17, 17, 17, 17, 25, 22,
+        31, 1, 2, 4, 2, 1, 31, 0,
+        0, 0, 31, 10, 10, 10, 25, 0,
+        31, 0, 17, 10, 4, 10, 17, 0,
+        0, 0, 17, 17, 17, 17, 30, 16,
+        0, 16, 15, 4, 31, 4, 4, 0,
+        0, 0, 31, 2, 30, 18, 17, 0,
+        0, 0, 31, 21, 31, 17, 17, 0,
+        0, 4, 0, 31, 0, 4, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0,
+        31, 31, 31, 31, 31, 31, 31, 31,
+    ]);
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"], function (require, exports, interopManager_1, lcd1602i2c_1) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_2, execute_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.MAX6675 = void 0;
+    class MAX6675 extends controller_2.Controller {
+        constructor() {
+            super(...arguments);
+            this.nextByteIsHigh = false;
+            this.spiCallback = (byte) => {
+                let _temperature = 0;
+                this.component.invokeMethodAsync("GetMax6675Temperature").then(v => _temperature = Math.round(v / 0.25) << 3, () => _temperature = 80 << 3).finally(() => this.dispatchSpi(_temperature));
+            };
+            this.dispatchSpi = (temperature) => {
+                console.log(`Temp ${temperature}\nTempbin ${temperature.toString(2)}\nhigh ${((temperature >> 8) & 0xFF).toString(2)}\nlow ${(temperature & 0xFF).toString(2)}`);
+                let byteToSend;
+                if (!this.nextByteIsHigh) {
+                    byteToSend = (temperature >> 8) & 0xFF;
+                }
+                else {
+                    byteToSend = temperature & 0xFF;
+                }
+                console.log(`ishighbyte: ${!this.nextByteIsHigh}\nbyte2send ${byteToSend.toString(2)}`);
+                this.nextByteIsHigh = !this.nextByteIsHigh;
+                execute_4.AVRRunner.getInstance().cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().spi.transferCycles);
+            };
+        }
+        setup() {
+            console.log("MAX6675");
+            execute_4.AVRRunner.getInstance().spi.onByte = this.spiCallback;
+        }
+        reset() {
+        }
+    }
+    exports.MAX6675 = MAX6675;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
+    window.MAX6675 = max6675_1.MAX6675;
 });
 //# sourceMappingURL=build.js.map
