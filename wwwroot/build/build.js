@@ -3225,11 +3225,11 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         delete() {
             execute_1.AVRRunner.getInstance().removeController(this);
         }
-        setComponentReference(component) {
-            this.component = component;
-        }
-        static getReference() {
-            return new this();
+        static create(pins, component) {
+            const instance = new this();
+            instance.pins = pins;
+            instance.component = component;
+            return instance;
         }
     }
     exports.Controller = Controller;
@@ -3269,7 +3269,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
             this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
             this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
+            this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
             for (let controller of this.controllers) {
+                controller.reset();
                 controller.setup();
             }
         }
@@ -4299,7 +4301,6 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 return __awaiter(this, void 0, void 0, function* () {
                     var res = yield (0, compile_util_2.buildHex)(this.getCodeInPane());
                     this.runner.loadProgram(res.hex);
-                    this.adc = new index_2.AVRADC(this.runner.cpu, index_2.adcConfig);
                     return { stdout: res.stdout, stderr: res.stderr };
                 });
             }
@@ -4328,7 +4329,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 }
             }
             arduinoADCInput(channel, value) {
-                this.adc.channelValues[channel] = value;
+                this.runner.adc.channelValues[channel] = value;
             }
             getPinState(index) {
                 var state;
@@ -4439,6 +4440,25 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         }
         setup() {
             execute_3.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
+        }
+        reset() {
+            this.cgram.fill(0);
+            this.ddram.fill(0);
+            this.addr = 0x00;
+            this.shift = 0x00;
+            this.data = 0x00;
+            this.displayOn = false;
+            this.blinkOn = false;
+            this.cursorOn = false;
+            this.backlight = false;
+            this.firstByte = true;
+            this.commandMode = false;
+            this.cgramMode = false;
+            this.cgramUpdated = true;
+            this.incrementMode = true;
+            this.shiftMode = false;
+            this.is8bit = true;
+            this.updated = false;
         }
         update() {
             if (this.updated) {
