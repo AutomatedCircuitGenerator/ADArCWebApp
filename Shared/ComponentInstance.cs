@@ -14,6 +14,8 @@ namespace ADArCWebApp.Shared
 	{
 		[JsonIgnore] public ComponentData data;
 
+		public int localId { get; set; }
+
 		public int globalId;
 		public double x;
 		public double y;

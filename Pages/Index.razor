@@ -336,7 +336,9 @@
 				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
 				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
 				//create frontend instance
-				comps.Add(localIds, buildCanvas.unZoom(new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5*d.rightOffset), e.ClientY - (.5*d.bottomOffset)-50)));//50 is height of toolbar
+				var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
+				comp.localId = localIds;
+				comps.Add(localIds, buildCanvas.unZoom(comp));//50 is height of toolbar
 				BuildCode.outputPins.Clear();
 				buildCanvas!.connLines.Clear();
 				//reset the way that component pins are bound to the arduino.

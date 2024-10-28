@@ -1,4 +1,4 @@
-﻿@* @inherits RazorComponent *@
+﻿@inherits RazorComponent
 
 @code {
 
@@ -8,32 +8,41 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "GND", x: 20, y: 100, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "VCC", x: 30, y: 100, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "SCK", x: 40, y: 100, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "CS", x: 50, y: 100, signals: new PinSignalInfo[] { }, number: 6), //chip select. pull low to enable serial interface
-                new ElementPin(name: "SO", x: 60, y: 100, signals: new PinSignalInfo[] { }, number: 7),
+                new ElementPin(name: "VCC", x: 94, y: 168, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "GND", x: 86, y: 168, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "SO", x: 116, y: 168, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "CS", x: 109, y: 168, signals: new PinSignalInfo[] { }, number: 6), //chip select. pull low to enable serial interface
+                new ElementPin(name: "SCK", x: 101, y: 168, signals: new PinSignalInfo[] { }, number: 7),
             };
         }
     }
 
-    private double _temperature;
+    private double _temperature = 20;
+
     [Parameter]
-    [ValueSetting("°C", 20, 0, 1024)]// 1023.75*
+    [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
     public double temperature
     {
-        get => _temperature;
+        get => this._temperature;
         set
         {
-            Console.WriteLine("hi");
-            _temperature = value;
+            this._temperature = value;
+            if (Controller is not null)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTemperature", _temperature); });
+            }
         }
     }
 
+    // [JSInvokable]
+    // public double GetMax6675Temperature()
+    // {
+    //     return temperature;
+    // }
+
 }
 
-<svg data-bx-workspace="master" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="100mm"
-     height="100mm">
+<svg data-bx-workspace="master" xmlns="http://www.w3.org/2000/svg" viewBox="150 100 200 260" width="40mm" height="40mm">
     <defs>
         <clipPath id="a">
             <circle style="stroke:#000;fill:silver" cx="226.9" cy="160.5" r="15"/>
