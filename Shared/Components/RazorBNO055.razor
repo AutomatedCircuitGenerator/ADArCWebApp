@@ -1,10 +1,41 @@
-﻿@code {
-    [Parameter]
-    public int x { get; set; }
-    [Parameter]
-    public int y { get; set; }
-    [Parameter]
-    public int z { get; set; }
+﻿@inherits RazorComponent;
+
+@code {
+   private (double heading, double roll, double pitch) _orientation;
+
+   [Parameter][ValueSetting("", 0, 0, 360)] 
+   public double heading 
+   { 
+      get => _orientation.heading; 
+      set => SetOrientation(value, _orientation.roll, _orientation.pitch); 
+   }
+
+   [Parameter][ValueSetting("", 0, -90, 90)] 
+   public double roll 
+   { 
+      get => _orientation.roll; 
+      set => SetOrientation(_orientation.heading, value, _orientation.pitch); 
+   }
+
+   [Parameter][ValueSetting("", 0, -180, 180)] 
+   public double pitch 
+   { 
+      get => _orientation.pitch; 
+      set => SetOrientation(_orientation.heading, _orientation.roll, value); 
+   }
+
+   private async void SetOrientation(double heading, double roll, double pitch)
+   {
+      if (_orientation != (heading, roll, pitch)) 
+      {
+         _orientation = (heading, roll, pitch); 
+         if (_controller is not null)
+         {
+            await _controller.InvokeVoidAsync("sensorControls.setOrientation", heading, roll, pitch);
+         }
+      }
+   }
+
     /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
     public static ElementPin[] pinInfo {
         get 
@@ -22,254 +53,6 @@
                 new ElementPin(name: "PS1", x: 78, y: 31, signals: new PinSignalInfo[] { }, number: 8),
                 new ElementPin(name: "3vo",  x: 75.377, y: 109, signals: new PinSignalInfo[] { }, number: 2),
             };
-        }
-    }
-    //refer to if more registers needed https://adarc-help.mech.website/datasheet/bno055_bosch.pdf
-    //Table 4-2 Register Map 0
-    //currently only have read only output data registers [0x08-0x34]
-    static Dictionary<int, int> getReg(ComponentInstance comp)
-    {
-        Dictionary<int, int> register = new Dictionary<int, int>
-        {
-            { 0x08, (int)comp.compParams["x"].getValue() & 0xFF },//ACC_DATA_X_LSB
-            { 0x09, (int)comp.compParams["x"].getValue() & 0xFF00 >> 8 },//ACC_DATA_X_MSB
-            { 0x0A, (int)comp.compParams["y"].getValue() & 0xFF },//ACC_DATA_Y_LSB
-            { 0x0B, (int)comp.compParams["y"].getValue() & 0xFF00 >> 8 },//ACC_DATA_Y_MSB
-            { 0x0C, (int)comp.compParams["z"].getValue() & 0xFF },//ACC_DATA_Z_LSB
-            { 0x0D, (int)comp.compParams["z"].getValue() & 0xFF00 >> 8 },//ACC_DATA_Z_MSB
-            { 0x0E, 0 },//MAG_DATA_X_LSB
-            { 0x0F, 0 },//MAG_DATA_X_MSB
-            { 0x10, 0 },//MAG_DATA_Y_LSB
-            { 0x11, 0 },//MAG_DATA_Y_MSB
-            { 0x12, 0 },//MAG_DATA_Z_LSB
-            { 0x13, 0 },//MAG_DATA_Z_MSB
-            { 0x14, 0 },//GYR_DATA_X_LSB
-            { 0x15, 0 },//GYR_DATA_X_MSB
-            { 0x16, 0 },//GYR_DATA_Y_LSB
-            { 0x17, 0 },//GYR_DATA_Y_MSB
-            { 0x18, 0 },//GYR_DATA_Z_LSB
-            { 0x19, 0 },//GYR_DATA_Z_MSB
-            { 0x1A, 0 },//EUL_Heading_LSB
-            { 0x1B, 0 },//EUL_Heading_MSB
-            { 0x1C, 0 },//EUL_Roll_LSB
-            { 0x1D, 0 },//EUL_Roll_MSB
-            { 0x1E, 0 },//EUL_Pitch_LSB
-            { 0x1F, 0 },//EUL_Pitch_MSB
-            { 0x20, 0 },//QUA_Data_w_MSB
-            { 0x21, 0 },//QUA_Data_w_MSB
-            { 0x22, 0 },//QUA_Data_x_LSB
-            { 0x23, 0 },//QUA_Data_x_MSB
-            { 0x24, 0 },//QUA_Data_y_LSB
-            { 0x25, 0 },//QUA_Data_y_MSB
-            { 0x26, 0 },//QUA_Data_z_LSB
-            { 0x27, 0 },//QUA_Data_z_MSB
-            { 0x28, 0 },//LIA_Data_X_LSB
-            { 0x29, 0 },//LIA_Data_X_MSB
-            { 0x2A, 0 },//LIA_Data_Y_LSB
-            { 0x2B, 0 },//LIA_Data_Y_MSB
-            { 0x2C, 0 },//LIA_Data_Z_LSB
-            { 0x2D, 0 },//LIA_Data_Z_MSB
-            { 0x2E, 0 },//GRV_Data_X_LSB
-            { 0x2F, 0 },//GRV_Data_X_MSB
-            { 0x30, 0 },//GRV_Data_Y_LSB
-            { 0x31, 0 },//GRV_Data_Y_MSB
-            { 0x32, 0 },//GRV_Data_Z_LSB
-            { 0x33, 0 },//GRV_Data_Z_MSB
-            { 0x34, 0 }//TEMP
-        };
-
-        return register;
-    }
-
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        bool sda = false;
-        bool scl = false;
-        if (0 == comp.getConnection("sda", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            sda = await AvrCPU.getPinState(conn!.toId);
-        }
-        if (0 == comp.getConnection("scl", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-        {
-            scl = await AvrCPU.getPinState(conn2!.toId);
-        }
-
-        //
-        if (sda && scl && comp.midSignal == 0)//before start, scl and sda pulled-up
-        {
-            comp.midSignal = 1;
-        }
-        if (!sda && scl && comp.midSignal == 1)//HIGH-to-LOW on SDA, start condition
-        {
-            comp.midSignal = 2;
-            comp.counter = 0;
-            comp.Wbuffer = 0;
-            comp.byteIndex = 7;
-        }
-        if (!sda && !scl && comp.midSignal == 2)//wait until first LOW for scl ends
-        {
-            comp.midSignal = 3;
-        }
-        if (scl && comp.midSignal == 3)//HIGH on scl, read data on sda
-        {
-            comp.midSignal = 4;
-            comp.Wbuffer = comp.Wbuffer << 1 | (sda ? 1 : 0);//store data in midSignal, HIGH = 1, LOW = 0
-            comp.counter++;
-        }
-        if (!scl && comp.midSignal == 4)
-        {
-            comp.midSignal = 3;
-
-            if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0x28 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
-            {
-                comp.midSignal = 17;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0x28)//CHECK THE ADDRESS HERE! device address matched 0x28 for bno055
-            {
-                comp.midSignal = 5;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
-            {
-                comp.midSignal = 6;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else//here it is assumed that the master will always pull sda to HIGH, might not be true
-            {
-                comp.midSignal = 99;//not this device, go wait until the communication ends
-            }
-        }
-        if (!sda && scl && comp.midSignal == 5)//ACK by Slave after slave device address
-        {
-            comp.midSignal = 4;
-        }
-        if (!sda && scl && comp.midSignal == 6)//ACK by Slave after register address
-        {
-            comp.midSignal = 7;
-        }
-        if (!sda && !scl && comp.midSignal == 7)//scl LOW after ACK
-        {
-            comp.RegAddr = comp.Wbuffer & 0xFF;
-            comp.Wbuffer = 0;
-            comp.midSignal = 8;
-        }
-        if (!sda && scl && comp.midSignal == 8)
-        {
-            comp.midSignal = 12;
-        }
-        if (!sda && !scl && comp.midSignal == 12)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in Wbuffer, HIGH = 1, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-        if (sda && !scl && comp.midSignal == 8)
-        {
-            comp.midSignal = 9;
-        }
-        if (sda && scl && comp.midSignal == 9)
-        {
-            comp.midSignal = 10;
-        }
-        if (!sda && scl && comp.midSignal == 10)
-        {
-            comp.midSignal = 1;//repeated start
-        }
-        if (sda && !scl && comp.midSignal == 10)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 1;//store data in Wbuffer, HIGH = 1, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-        if (!scl && comp.midSignal == 11)
-        {
-            comp.midSignal = 8;
-            if (comp.counter % 8 == 0)//the read/write set to 1 signifying read
-            {
-                comp.midSignal = 13;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-        }
-
-        //Slave sends data to master
-        if (scl && comp.midSignal == 17)
-        {
-            int a = getReg(comp)[comp.RegAddr] >> comp.byteIndex;
-            comp.byteIndex--;
-            if (a % 2 == 1)
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
-            }
-            else
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
-            }
-            comp.midSignal = 18;
-            if (comp.byteIndex == 0)
-            {
-                comp.midSignal = 19;
-            }
-        }
-        if (!scl && comp.midSignal == 18)
-        {
-            comp.midSignal = 17;
-        }
-        if (!scl && comp.midSignal == 19)
-        {
-            comp.midSignal = 20;
-        }
-        if (scl && comp.midSignal == 20)
-        {
-            if (sda)
-            {
-                comp.midSignal = 14;
-            }
-            else
-            {
-                comp.midSignal = 18;
-            }
-        }
-
-        if (!sda && scl && comp.midSignal == 13)//ACK by Slave after writing a byte
-        {
-            comp.midSignal = 14;
-        }
-        if (!scl && !sda && comp.midSignal == 14)
-        {
-            comp.midSignal = 15;
-        }
-        if (scl && !sda && comp.midSignal == 15)
-        {
-            comp.midSignal = 16;
-        }
-        if (scl && sda && comp.midSignal == 16)//stop condition
-        {
-            comp.midSignal = 0;
-            getReg(comp)[comp.RegAddr] = comp.Wbuffer;//write data into register
-        }
-        if (!scl && !sda && comp.midSignal == 16)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in Wbuffer, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-
-        if (!scl && !sda && comp.midSignal == 99)
-        {
-            comp.midSignal = 100;
-        }
-        if (scl && !sda && comp.midSignal == 100)
-        {
-            comp.midSignal = 101;
-        }
-        if (scl && sda && comp.midSignal == 101)//stop condition
-        {
-            comp.midSignal = 0;
-        }
-        else
-        {
-            comp.midSignal = 99;
         }
     }
 }
