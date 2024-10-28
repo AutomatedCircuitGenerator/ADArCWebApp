@@ -29,9 +29,9 @@
       if (_orientation != (heading, roll, pitch)) 
       {
          _orientation = (heading, roll, pitch); 
-         if (_controller is not null)
+         if (Controller is not null)
          {
-            await _controller.InvokeVoidAsync("sensorControls.setOrientation", heading, roll, pitch);
+            await Controller.InvokeVoidAsync("sensorControls.setOrientation", heading, roll, pitch);
          }
       }
    }
