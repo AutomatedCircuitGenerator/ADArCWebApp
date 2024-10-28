@@ -41,6 +41,7 @@ export async function buildHex(source: string) {
                     "# Automatically added based on includes:\n" +
                     "LiquidCrystal I2C\n" +
                     "MAX6675 with hardware SPI\n" +
+                    "Adafruit BNO055\n" +
                     "\n"}] })
     });
     return (await resp.json()) as IHexiResult;
