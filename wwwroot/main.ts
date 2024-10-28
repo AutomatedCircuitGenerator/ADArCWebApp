@@ -5,7 +5,7 @@ import getInteropManager = interopManager.getInteropManager;
 import { interopManager } from "./interopManager";
 import {LCD1602I2C} from "@controllers/lcd1602i2c";
 import {MAX6675} from "@controllers/max6675";
-import { KY012Controller } from "@controllers/KY012Controller";
+import {ky012} from "@controllers/ky012";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -15,4 +15,4 @@ import { KY012Controller } from "@controllers/KY012Controller";
 (<any>window).LCD1602I2C = LCD1602I2C;
 (<any>window).MAX6675 = MAX6675;
 
-(<any>window).KY012 = KY012Controller;
+(<any>window).KY012 = ky012;
