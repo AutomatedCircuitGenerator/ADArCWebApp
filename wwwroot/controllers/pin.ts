@@ -31,6 +31,7 @@ export class Pin {
     }
     
     setup() {
+        this.state = this.portMap[this.port]?.pinState(this.index);
         this.portMap[this.port]?.addListener(() => {
             let state = this.portMap[this.port].pinState(this.index);
 
