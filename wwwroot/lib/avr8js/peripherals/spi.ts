@@ -39,20 +39,23 @@ const bitsPerByte = 8;
 export class AVRSPI {
   /** @deprecated Use onByte() instead */
   public onTransfer: SPITransferCallback = () => 0;
-
+  
   /**
    * SPI byte transfer callback. Invoked whenever the user code starts an SPI transaction.
    * You can override this with your own SPI handler logic.
+   * 
+   * ADArC: SHOULD NOT BE OVERRIDEN
    *
    * The callback receives a argument: the byte sent over the SPI MOSI line.
    * It should call `completeTransfer()` within `transferCycles` CPU cycles.
+   * For example: `this.cpu.addClockEvent(() => this.completeTransfer(valueIn), this.transferCycles);`
    */
   public onByte: SPIByteTransferCallback = (value) => {
-    const valueIn = this.onTransfer(value);
-    this.cpu.addClockEvent(() => this.completeTransfer(valueIn), this.transferCycles);
+    this.listeners.forEach((onByteFn) => onByteFn(value));
   };
 
   private transmissionActive = false;
+  private listeners: SPIByteTransferCallback[] = [];
 
   // Interrupts
   private SPI: AVRInterruptConfig = {
@@ -92,6 +95,14 @@ export class AVRSPI {
       this.cpu.data[SPSR] = value;
       this.cpu.clearInterruptByFlag(this.SPI, value);
     };
+  }
+  
+  addListener(listener:SPIByteTransferCallback){
+    this.listeners.push(listener);
+  }
+
+  removeListener(listener: SPIByteTransferCallback) {
+    this.listeners = this.listeners.filter((l) => l !== listener);
   }
 
   reset() {

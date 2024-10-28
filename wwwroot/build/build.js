@@ -1848,10 +1848,10 @@ define("lib/avr8js/peripherals/spi", ["require", "exports"], function (require, 
             this.freqHz = freqHz;
             this.onTransfer = () => 0;
             this.onByte = (value) => {
-                const valueIn = this.onTransfer(value);
-                this.cpu.addClockEvent(() => this.completeTransfer(valueIn), this.transferCycles);
+                this.listeners.forEach((onByteFn) => onByteFn(value));
             };
             this.transmissionActive = false;
+            this.listeners = [];
             this.SPI = {
                 address: this.config.spiInterrupt,
                 flagRegister: this.config.SPSR,
@@ -1881,6 +1881,12 @@ define("lib/avr8js/peripherals/spi", ["require", "exports"], function (require, 
                 this.cpu.data[SPSR] = value;
                 this.cpu.clearInterruptByFlag(this.SPI, value);
             };
+        }
+        addListener(listener) {
+            this.listeners.push(listener);
+        }
+        removeListener(listener) {
+            this.listeners = this.listeners.filter((l) => l !== listener);
         }
         reset() {
             this.transmissionActive = false;
@@ -3229,9 +3235,30 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         static create(id, pins, component) {
             const instance = new this();
             instance.element = document.getElementById(`component-${id}`);
-            instance.pins = pins;
+            const pinItems = {};
+            for (const canonicalPinName in pins) {
+                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => ({
+                    absolutePort: serializedPin.item1,
+                    portRegion: serializedPin.item2,
+                    relativePort: serializedPin.item3
+                }));
+            }
+            console.log(pinItems);
+            instance.pins = pinItems;
             instance.component = component;
             return instance;
+        }
+        static item2toAVRIOPort(port) {
+            switch (port) {
+                case "B":
+                    return execute_1.AVRRunner.getInstance().portB;
+                case "C":
+                    return execute_1.AVRRunner.getInstance().portC;
+                case "D":
+                    return execute_1.AVRRunner.getInstance().portD;
+                default:
+                    return null;
+            }
         }
     }
     exports.Controller = Controller;
@@ -4904,13 +4931,30 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
     class MAX6675 extends controller_2.Controller {
         constructor() {
             super(...arguments);
+            this.setTemperature = (temperature) => {
+                this._temperature = temperature;
+            };
+            this.shouldReadSPI = false;
+            this.csCallback = (oldValue, value) => {
+                let pinState = value & this._csPort;
+                if (pinState === 0) {
+                    this.shouldReadSPI = true;
+                }
+                else if ((oldValue & this._csPort) === 0 && (value & this._csPort) > 0) {
+                    this.shouldReadSPI = false;
+                }
+            };
             this.nextByteIsHigh = false;
             this.spiCallback = (byte) => {
-                let _temperature = 0;
-                this.component.invokeMethodAsync("GetMax6675Temperature").then(v => _temperature = Math.round(v / 0.25) << 3, () => _temperature = 80 << 3).finally(() => this.dispatchSpi(_temperature));
+                if (!this.shouldReadSPI) {
+                    return;
+                }
+                if (this._temperature == undefined) {
+                    console.log("Undefined\n");
+                }
+                this.dispatchSpi(Math.round(this._temperature / 0.25) << 3);
             };
             this.dispatchSpi = (temperature) => {
-                console.log(`Temp ${temperature}\nTempbin ${temperature.toString(2)}\nhigh ${((temperature >> 8) & 0xFF).toString(2)}\nlow ${(temperature & 0xFF).toString(2)}`);
                 let byteToSend;
                 if (!this.nextByteIsHigh) {
                     byteToSend = (temperature >> 8) & 0xFF;
@@ -4918,14 +4962,14 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                 else {
                     byteToSend = temperature & 0xFF;
                 }
-                console.log(`ishighbyte: ${!this.nextByteIsHigh}\nbyte2send ${byteToSend.toString(2)}`);
                 this.nextByteIsHigh = !this.nextByteIsHigh;
                 execute_4.AVRRunner.getInstance().cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().spi.transferCycles);
             };
         }
         setup() {
-            console.log("MAX6675");
-            execute_4.AVRRunner.getInstance().spi.onByte = this.spiCallback;
+            execute_4.AVRRunner.getInstance().spi.addListener(this.spiCallback);
+            this._csPort = this.pins["cs"][0].relativePort;
+            MAX6675.item2toAVRIOPort(this.pins["cs"][0].portRegion).addListener(this.csCallback);
         }
         reset() {
         }

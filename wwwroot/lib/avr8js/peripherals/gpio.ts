@@ -317,7 +317,7 @@ export class AVRIOPort {
    * Get the state of a given GPIO pin
    *
    * @param index Pin index to return from 0 to 7
-   * @returns PinState.Low or PinState.High if the pin is set to output, PinState.Input if the pin is set
+   * @returns PinState.Low or PinState. High if the pin is set to output, PinState.Input if the pin is set
    *   to input, and PinState.InputPullUp if the pin is set to input and the internal pull-up resistor has
    *   been enabled.
    */

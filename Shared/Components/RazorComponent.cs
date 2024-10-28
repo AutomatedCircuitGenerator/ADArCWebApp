@@ -11,10 +11,10 @@ namespace ADArCWebApp.Shared.Components;
  */
 public abstract class RazorComponent : ComponentBase, IAsyncDisposable
 {
-    private IJSObjectReference? _controller;
+    protected IJSObjectReference? Controller;
     private DotNetObjectReference<RazorComponent>? _reference;
 
-    [Inject] protected IJSRuntime JS { get; set; }
+    [Inject] protected IJSRuntime js { get; set; }
 
     [Parameter] public ComponentInstance? ComponentInstance { get; set; }
 
@@ -24,10 +24,10 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
     public async ValueTask DisposeAsync()
     {
         if (IsCanvasComponent)
-            if (_controller is not null)
+            if (Controller is not null)
             {
-                await _controller.InvokeVoidAsync("delete");
-                await _controller.DisposeAsync();
+                await Controller.InvokeVoidAsync("delete");
+                await Controller.DisposeAsync();
                 _reference?.Dispose();
             }
     }
@@ -42,22 +42,57 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
         if (IsCanvasComponent && ComponentInstance != null && firstRender)
         {
             var jsIdentifier = GetType().Name.Replace("Razor", "");
-            Dictionary<string, List<int>> pins = new();
+            // Canonical pin name: "SO", to absolute pin, port, and relative pin port: 13, B, 6
+            Dictionary<string, List<Tuple<int, string, int>>> pins = new();
 
             foreach (var pin in ComponentInstance.data.pins)
             {
                 if (ComponentInstance.connMap.TryGetValue(pin.Value, out var connections))
                 {
+                    //one pin on a component can be connected to many pins on the arduino
                     var pinIds = connections.Select(connection => connection.toId);
-                    pins[pin.Key] = pinIds.ToList();
+
+                    var tuples = new List<Tuple<int, string, int>>();
+                    foreach (var pinId in pinIds)
+                    {
+                        AbsoluteUnoPinToPortAndRelativePin(pinId, out var port, out var relativePin);
+                        tuples.Add(new Tuple<int, string, int>(pinId, port, relativePin));
+                    }
+
+                    pins[pin.Key] = tuples;
                 }
                 else
                 {
-                    pins[pin.Key] = new List<int>();
+                    pins[pin.Key] = new List<Tuple<int, string, int>>();
                 }
             }
 
-            _controller = await JS.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId, pins, _reference);
+            Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId,
+                pins, _reference);
+        }
+    }
+
+    private void AbsoluteUnoPinToPortAndRelativePin(int absolutePin, out string portName, out int relativePin)
+    {
+        switch (absolutePin)
+        {
+            case >= 8 and <= 13:
+                portName = "B";
+                relativePin = absolutePin - 8;
+                break;
+            case >= 0 and <= 7:
+                portName = "D";
+                relativePin = absolutePin;
+                break;
+            case >= 14 and <= 19:
+                //also has reset port on arduino as 7, wont work for that
+                portName = "C";
+                relativePin = absolutePin - 14;
+                break;
+            default:
+                portName = "Null";
+                relativePin = -1;
+                break;
         }
     }
 }

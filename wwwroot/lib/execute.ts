@@ -83,6 +83,7 @@ export class AVRRunner {
         this.adc = new AVRADC(this.cpu, adcConfig);
         this.spi = new AVRSPI(this.cpu, spiConfig, this.MHZ);
 
+
         for (let controller of this.controllers) {
             controller.reset();
             controller.setup();

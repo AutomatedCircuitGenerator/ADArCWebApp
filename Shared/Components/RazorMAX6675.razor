@@ -17,16 +17,28 @@
         }
     }
 
+    private double _temperature = 20;
 
     [Parameter]
     [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
-    public double temperature { get; set; } = 20;
-
-    [JSInvokable]
-    public double GetMax6675Temperature()
+    public double temperature
     {
-        return temperature;
+        get => this._temperature;
+        set
+        {
+            this._temperature = value;
+            if (Controller is not null)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTemperature", _temperature); });
+            }
+        }
     }
+
+    // [JSInvokable]
+    // public double GetMax6675Temperature()
+    // {
+    //     return temperature;
+    // }
 
 }
 
