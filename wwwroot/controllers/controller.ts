@@ -2,12 +2,7 @@
 import {AVRRunner} from "@lib/execute";
 import {DotNetObjectReference} from "@type-declarations/dotnet";
 import {AVRIOPort} from "@lib/avr8js";
-
-type PinItem = {
-    absolutePort: number;
-    portRegion: string;
-    relativePort:number;
-}
+import {Pin, Port} from "@controllers/pin";
 
 type SerializedPinItem = {
     item1: number,
@@ -17,7 +12,7 @@ type SerializedPinItem = {
     
 export abstract class Controller {
     protected component: DotNetObjectReference;
-    protected pins: { [canonicalPinName: string]: PinItem[] };
+    protected pins: { [canonicalPinName: string]: Pin[] };
     protected element: HTMLDivElement;
     
     protected constructor() {
@@ -33,21 +28,24 @@ export abstract class Controller {
     // this is called before setup, and should reset the internal state of the controller (registers, etc.) before each execution
     abstract reset(): void;
     
+    init() {
+        this.reset();
+        this.setup();
+        
+        for (const pins of Object.values(this.pins)) {
+            pins.forEach((pin) => pin.setup());
+        }
+    }
+    
     static create<T extends Controller>(this: new () => T, id: number, pins: { [canonicalPinName: string]: SerializedPinItem[] }, component: DotNetObjectReference): T {
         const instance = new this();
         instance.element = document.getElementById(`component-${id}`) as HTMLDivElement;
         
-        const pinItems: { [canonicalPinName: string]: PinItem[] } = {};
+        const pinItems: { [canonicalPinName: string]: Pin[] } = {};
 
         for (const canonicalPinName in pins) {
-            pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => ({
-                absolutePort: serializedPin.item1,
-                portRegion: serializedPin.item2,
-                relativePort: serializedPin.item3
-            }));
+            pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => (new Pin(serializedPin.item3, serializedPin.item2 as Port)));
         }
-        
-        console.log(pinItems);
         
         instance.pins = pinItems;
         instance.component = component;

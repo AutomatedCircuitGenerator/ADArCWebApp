@@ -85,8 +85,7 @@ export class AVRRunner {
 
 
         for (let controller of this.controllers) {
-            controller.reset();
-            controller.setup();
+            controller.init();
         }
     }
 

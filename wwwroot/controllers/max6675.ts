@@ -1,32 +1,24 @@
 import {Controller} from "./controller";
 import {AVRRunner} from "@lib/execute";
-import {AVRIOPort} from "@lib/avr8js";
+import {AVRIOPort, PinState} from "@lib/avr8js";
 
 export class MAX6675 extends Controller {
 
     private _temperature: number;
-    private _csPort: number;
+
     setTemperature = (temperature: number) => {
         this._temperature = temperature
     }
 
     setup() {
         AVRRunner.getInstance().spi.addListener(this.spiCallback);
-        this._csPort = this.pins["cs"][0].relativePort;
-        MAX6675.item2toAVRIOPort(this.pins["cs"][0].portRegion).addListener(this.csCallback)
     }
 
     reset() {
     }
-
-    private shouldReadSPI:boolean = false;
-    csCallback = (oldValue: number, value: number) => {
-        let pinState = value & this._csPort;
-        if (pinState === 0){
-            this.shouldReadSPI = true;
-        } else if ((oldValue & this._csPort) === 0 && (value & this._csPort) > 0){
-            this.shouldReadSPI = false;
-        }
+    
+    private get shouldReadSPI(): boolean {
+        return this.pins.cs[0].getState() == PinState.Low;
     }
 
     private nextByteIsHigh = false;
@@ -37,7 +29,7 @@ export class MAX6675 extends Controller {
         if (this._temperature == undefined) {
             console.log("Undefined\n")
         }
-        let temperature = Math.round(this._temperature / 0.25) << 3);
+        let temperature = Math.round((this._temperature / 0.25) << 3);
         let byteToSend: number;
         if (!this.nextByteIsHigh) {
             byteToSend = (temperature >> 8) & 0xFF;
