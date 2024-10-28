@@ -3,9 +3,10 @@
 
 @code {
     /// <summary>
+	/// RazorKY012.razor
     /// Defines the physical pins of the KY-012 Active Piezo-Buzzer:
     /// - S: Signal pin - when HIGH (≥3.3V), generates 2.5kHz tone
-    /// - N.C: Not connected - this pin has no function
+    /// - +V: Not connected - this pin has no function
     /// - GND: Ground connection
     /// </summary>
     ElementPin[] pinInfo
@@ -25,7 +26,7 @@
                 ),
                 // No Connection pin - physically present but not used
                 new ElementPin(
-                    name: "N.C", 
+                    name: "+V", 
                     x: 38.688, 
                     y: 104.52, 
                     signals: new PinSignalInfo[] { }, 
