@@ -41,6 +41,7 @@
     <string>servo_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
 	<string>7segment_arduino.grxml</string>
+	<string>arcade_pushbutton_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
