@@ -14,7 +14,7 @@ export class MAX6675 extends Controller {
         AVRRunner.getInstance().spi.addListener(this.spiCallback);
     }
 
-    reset() {
+    cleanup() {
     }
 
     private get shouldReadSPI(): boolean {

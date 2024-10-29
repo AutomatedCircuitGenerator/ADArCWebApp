@@ -10,7 +10,7 @@ export class HCSR501 extends Controller {
     setup() {
     }
 
-    reset() {
+    cleanup() {
     }
 
 }

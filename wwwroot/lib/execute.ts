@@ -84,7 +84,7 @@ export class AVRRunner {
         this.spi = new AVRSPI(this.cpu, spiConfig, this.MHZ);
 
 
-        for (let controller of this.controllers) {
+        for (const controller of this.controllers) {
             controller.init();
         }
     }
@@ -141,5 +141,9 @@ export class AVRRunner {
 
     stop() {
         this.stopped = true;
+        
+        for (const controller of this.controllers) {
+            controller.cleanup();
+        }
     }
 }
