@@ -77,6 +77,7 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
                                 "# Automatically added based on includes:\n" +
                                 "LiquidCrystal I2C\n" +
                                 "MAX6675 with hardware SPI\n" +
+                                "Adafruit BNO055\n" +
                                 "\n" }] })
             });
             return (yield resp.json());
@@ -3221,29 +3222,76 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
-define("controllers/controller", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+define("controllers/pin", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Pin = exports.Port = void 0;
+    var Port;
+    (function (Port) {
+        Port["B"] = "B";
+        Port["C"] = "C";
+        Port["D"] = "D";
+        Port["Null"] = "Null";
+    })(Port || (exports.Port = Port = {}));
+    class Pin {
+        get portMap() {
+            return {
+                [Port.B]: execute_1.AVRRunner.getInstance().portB,
+                [Port.C]: execute_1.AVRRunner.getInstance().portC,
+                [Port.D]: execute_1.AVRRunner.getInstance().portD,
+                [Port.Null]: null,
+            };
+        }
+        constructor(index, port) {
+            this.listener = () => { };
+            this.index = index;
+            this.port = port;
+        }
+        setup() {
+            var _a, _b;
+            this.state = (_a = this.portMap[this.port]) === null || _a === void 0 ? void 0 : _a.pinState(this.index);
+            (_b = this.portMap[this.port]) === null || _b === void 0 ? void 0 : _b.addListener(() => {
+                let state = this.portMap[this.port].pinState(this.index);
+                if (state !== this.state) {
+                    this.listener(state);
+                }
+                this.state = state;
+            });
+        }
+        getState() {
+            return this.state;
+        }
+        setListener(listener) {
+            this.listener = listener;
+        }
+    }
+    exports.Pin = Pin;
+});
+define("controllers/controller", ["require", "exports", "lib/execute", "controllers/pin"], function (require, exports, execute_2, pin_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Controller = void 0;
     class Controller {
         constructor() {
-            execute_1.AVRRunner.getInstance().addController(this);
+            execute_2.AVRRunner.getInstance().addController(this);
         }
         delete() {
-            execute_1.AVRRunner.getInstance().removeController(this);
+            execute_2.AVRRunner.getInstance().removeController(this);
+        }
+        init() {
+            this.reset();
+            this.setup();
+            for (const pins of Object.values(this.pins)) {
+                pins.forEach((pin) => pin.setup());
+            }
         }
         static create(id, pins, component) {
             const instance = new this();
             instance.element = document.getElementById(`component-${id}`);
             const pinItems = {};
             for (const canonicalPinName in pins) {
-                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => ({
-                    absolutePort: serializedPin.item1,
-                    portRegion: serializedPin.item2,
-                    relativePort: serializedPin.item3
-                }));
+                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => (new pin_1.Pin(serializedPin.item3, serializedPin.item2)));
             }
-            console.log(pinItems);
             instance.pins = pinItems;
             instance.component = component;
             return instance;
@@ -3251,11 +3299,11 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         static item2toAVRIOPort(port) {
             switch (port) {
                 case "B":
-                    return execute_1.AVRRunner.getInstance().portB;
+                    return execute_2.AVRRunner.getInstance().portB;
                 case "C":
-                    return execute_1.AVRRunner.getInstance().portC;
+                    return execute_2.AVRRunner.getInstance().portC;
                 case "D":
-                    return execute_1.AVRRunner.getInstance().portD;
+                    return execute_2.AVRRunner.getInstance().portD;
                 default:
                     return null;
             }
@@ -3302,8 +3350,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                 this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
                 this.spi = new index_1.AVRSPI(this.cpu, index_1.spiConfig, this.MHZ);
                 for (let controller of this.controllers) {
-                    controller.reset();
-                    controller.setup();
+                    controller.init();
                 }
             });
         }
@@ -4247,7 +4294,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_2) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4256,7 +4303,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
-                this.runner = execute_2.AVRRunner.getInstance();
+                this.runner = execute_3.AVRRunner.getInstance();
                 this.awaitResponseOn = [];
                 this.prevB = 0;
                 this.prevC = 0;
@@ -4419,7 +4466,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_3) {
+define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.fontA00 = exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
@@ -4471,7 +4518,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.updated = false;
         }
         setup() {
-            execute_3.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
+            execute_4.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
         }
         reset() {
             this.cgram.fill(0);
@@ -4924,7 +4971,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         31, 31, 31, 31, 31, 31, 31, 31,
     ]);
 });
-define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_2, execute_4) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MAX6675 = void 0;
@@ -4934,16 +4981,6 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
             this.setTemperature = (temperature) => {
                 this._temperature = temperature;
             };
-            this.shouldReadSPI = false;
-            this.csCallback = (oldValue, value) => {
-                let pinState = value & this._csPort;
-                if (pinState === 0) {
-                    this.shouldReadSPI = true;
-                }
-                else if ((oldValue & this._csPort) === 0 && (value & this._csPort) > 0) {
-                    this.shouldReadSPI = false;
-                }
-            };
             this.nextByteIsHigh = false;
             this.spiCallback = (byte) => {
                 if (!this.shouldReadSPI) {
@@ -4952,9 +4989,7 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                 if (this._temperature == undefined) {
                     console.log("Undefined\n");
                 }
-                this.dispatchSpi(Math.round(this._temperature / 0.25) << 3);
-            };
-            this.dispatchSpi = (temperature) => {
+                let temperature = Math.round((this._temperature / 0.25) << 3);
                 let byteToSend;
                 if (!this.nextByteIsHigh) {
                     byteToSend = (temperature >> 8) & 0xFF;
@@ -4963,26 +4998,204 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                     byteToSend = temperature & 0xFF;
                 }
                 this.nextByteIsHigh = !this.nextByteIsHigh;
-                execute_4.AVRRunner.getInstance().cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().spi.transferCycles);
+                execute_5.AVRRunner.getInstance().cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().spi.transferCycles);
             };
         }
         setup() {
-            execute_4.AVRRunner.getInstance().spi.addListener(this.spiCallback);
-            this._csPort = this.pins["cs"][0].relativePort;
-            MAX6675.item2toAVRIOPort(this.pins["cs"][0].portRegion).addListener(this.csCallback);
+            execute_5.AVRRunner.getInstance().spi.addListener(this.spiCallback);
         }
         reset() {
+        }
+        get shouldReadSPI() {
+            return this.pins.cs[0].getState() == avr8js_1.PinState.Low;
         }
     }
     exports.MAX6675 = MAX6675;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1) {
+define("controllers/bno055", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_3, execute_6) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.BNO055 = exports.BNO055_ADDR = void 0;
+    exports.BNO055_ADDR = 0x28;
+    const registers = {
+        CHIP_ID: { address: 0x00, default: 0xA0 },
+        ACCEL_X_LSB: { address: 0x08 },
+        ACCEL_X_MSB: { address: 0x09 },
+        ACCEL_Y_LSB: { address: 0x0A },
+        ACCEL_Y_MSB: { address: 0x0B },
+        ACCEL_Z_LSB: { address: 0x0C },
+        ACCEL_Z_MSB: { address: 0x0D },
+        MAG_X_LSB: { address: 0x0E },
+        MAG_X_MSB: { address: 0x0F },
+        MAG_Y_LSB: { address: 0x10 },
+        MAG_Y_MSB: { address: 0x11 },
+        MAG_Z_LSB: { address: 0x12 },
+        MAG_Z_MSB: { address: 0x13 },
+        GYRO_X_LSB: { address: 0x14 },
+        GYRO_X_MSB: { address: 0x15 },
+        GYRO_Y_LSB: { address: 0x16 },
+        GYRO_Y_MSB: { address: 0x17 },
+        GYRO_Z_LSB: { address: 0x18 },
+        GYRO_Z_MSB: { address: 0x19 },
+        EULER_HEADING_LSB: { address: 0x1A },
+        EULER_HEADING_MSB: { address: 0x1B },
+        EULER_ROLL_LSB: { address: 0x1C },
+        EULER_ROLL_MSB: { address: 0x1D },
+        EULER_PITCH_LSB: { address: 0x1E },
+        EULER_PITCH_MSB: { address: 0x1F },
+        QUATERNION_W_LSB: { address: 0x20 },
+        QUATERNION_W_MSB: { address: 0x21 },
+        QUATERNION_X_LSB: { address: 0x22 },
+        QUATERNION_X_MSB: { address: 0x23 },
+        QUATERNION_Y_LSB: { address: 0x24 },
+        QUATERNION_Y_MSB: { address: 0x25 },
+        QUATERNION_Z_LSB: { address: 0x26 },
+        QUATERNION_Z_MSB: { address: 0x27 },
+        LINEAR_ACCEL_X_LSB: { address: 0x28 },
+        LINEAR_ACCEL_X_MSB: { address: 0x29 },
+        LINEAR_ACCEL_Y_LSB: { address: 0x2A },
+        LINEAR_ACCEL_Y_MSB: { address: 0x2B },
+        LINEAR_ACCEL_Z_LSB: { address: 0x2C },
+        LINEAR_ACCEL_Z_MSB: { address: 0x2D },
+        GRAVITY_X_LSB: { address: 0x2E },
+        GRAVITY_X_MSB: { address: 0x2F },
+        GRAVITY_Y_LSB: { address: 0x30 },
+        GRAVITY_Y_MSB: { address: 0x31 },
+        GRAVITY_Z_LSB: { address: 0x32 },
+        GRAVITY_Z_MSB: { address: 0x33 },
+        TEMP: { address: 0x34 },
+        CALIBRATION: { address: 0x35, default: 0xFF },
+    };
+    class BNO055 extends controller_3.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new Uint8Array(128);
+            this.sensorControls = {
+                setAcceleration: (x, y, z) => {
+                    this.setVector(registers.ACCEL_X_LSB.address, [x, y, z], 100);
+                },
+                setGravity: (x, y, z) => {
+                    this.setVector(registers.GRAVITY_X_LSB.address, [x, y, z], 100);
+                },
+                setMagnetometer: (x, y, z) => {
+                    this.setVector(registers.MAG_X_LSB.address, [x, y, z], 16);
+                },
+                setGyroscope: (x, y, z) => {
+                    this.setVector(registers.GYRO_X_LSB.address, [x, y, z], 16);
+                },
+                setLinearAcceleration: (x, y, z) => {
+                    this.setVector(registers.LINEAR_ACCEL_X_LSB.address, [x, y, z], 100);
+                },
+                setTemp: (temp) => {
+                    this.memory[registers.TEMP.address] = temp;
+                },
+                setOrientation: (heading, roll, pitch) => {
+                    this.setVector(registers.EULER_HEADING_LSB.address, [heading, roll, pitch], 16);
+                    const { w, x, y, z } = this.eulerToQuaternion(heading, roll, pitch);
+                    this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
+                }
+            };
+        }
+        setVector(address, vector, scalar) {
+            let writePointer = address;
+            for (const num of vector) {
+                const scaled = Math.round(num * scalar);
+                const lsb = scaled & 0xFF;
+                const msb = (scaled >> 8) & 0xFF;
+                this.memory[writePointer] = lsb;
+                writePointer++;
+                this.memory[writePointer] = msb;
+                writePointer++;
+            }
+        }
+        eulerToQuaternion(heading, roll, pitch) {
+            const toRadians = (degrees) => degrees * (Math.PI / 180);
+            heading = toRadians(heading);
+            roll = toRadians(roll);
+            pitch = toRadians(pitch);
+            const cy = Math.cos(heading * 0.5);
+            const sy = Math.sin(heading * 0.5);
+            const cr = Math.cos(roll * 0.5);
+            const sr = Math.sin(roll * 0.5);
+            const cp = Math.cos(pitch * 0.5);
+            const sp = Math.sin(pitch * 0.5);
+            const qx = sr * cp * cy - cr * sp * sy;
+            const qy = cr * sp * cy + sr * cp * sy;
+            const qz = cr * cp * sy - sr * sp * cy;
+            const qw = cr * cp * cy + sr * sp * sy;
+            return { x: qx, y: qy, z: qz, w: qw };
+        }
+        reset() {
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+            }
+            this.sensorControls.setAcceleration(1.0, 2.0, 3.0);
+            this.sensorControls.setGravity(0.0, 0.0, 9.81);
+            this.sensorControls.setMagnetometer(30.0, 0.0, 60.0);
+            this.sensorControls.setGyroscope(0.5, 0.5, 0.5);
+            this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
+            this.sensorControls.setTemp(75);
+        }
+        setup() {
+            execute_6.AVRRunner.getInstance().twi.eventHandler.registerController(exports.BNO055_ADDR, this);
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() { }
+        i2cReadByte(acked) {
+            let byte;
+            if (this.address !== null) {
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = acked ? (this.address + 1) % this.memory.length : null;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                this.address = null;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+    }
+    exports.BNO055 = BNO055;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/bno055"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, bno055_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
+    window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
+});
+define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HCSR501 = void 0;
+    class HCSR501 extends controller_4.Controller {
+        constructor() {
+            super(...arguments);
+            this.setIsMotionDetected = (isMotionDetected) => {
+                this.isMotionDetected = isMotionDetected > 0;
+            };
+        }
+        setup() {
+        }
+        reset() {
+        }
+    }
+    exports.HCSR501 = HCSR501;
 });
 //# sourceMappingURL=build.js.map

@@ -2,9 +2,18 @@
 
 @code {
 
+    //https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
     [Parameter]
-    [ValueSetting("m", 5, 0, 7)]
-    public double distance { get; set; } = 5;
+    [ValueSetting("", 0, 0, 1)]
+    public double isMotionDetected { get; set; } = 0;
+
+    [Parameter]
+    [ValueSetting("", 0, 0, 1)]
+    public double triggerMode { get; set; } = 0;
+
+    [Parameter]
+    [ValueSetting("", 0, 0, 1)]
+    public double timeDelayMs { get; set; } = 0;
 
     public static ElementPin[] pinInfo
     {
@@ -12,9 +21,9 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "pin1", x: 73, y: 105, signals: new PinSignalInfo[] { }, number: 1), //gnd
-                new ElementPin(name: "pin2", x: 82, y: 105, signals: new PinSignalInfo[] { }, number: 2), //digital_out
-                new ElementPin(name: "pin3", x: 91, y: 105, signals: new PinSignalInfo[] { }, number: 3), //5v
+                new ElementPin(name: "gnd", x: 73, y: 105, signals: new PinSignalInfo[] { }, number: 1), //gnd
+                new ElementPin(name: "digital_out", x: 82, y: 105, signals: new PinSignalInfo[] { }, number: 2), //digital_out
+                new ElementPin(name: "5V", x: 91, y: 105, signals: new PinSignalInfo[] { }, number: 3), //5v
             };
         }
     }

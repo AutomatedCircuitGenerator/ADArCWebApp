@@ -16,14 +16,15 @@ export class MAX6675 extends Controller {
 
     reset() {
     }
-    
+
     private get shouldReadSPI(): boolean {
         return this.pins.cs[0].getState() == PinState.Low;
     }
 
     private nextByteIsHigh = false;
+
     spiCallback = (byte: number) => {
-        if(!this.shouldReadSPI){
+        if (!this.shouldReadSPI) {
             return;
         }
         if (this._temperature == undefined) {
@@ -38,6 +39,5 @@ export class MAX6675 extends Controller {
         }
         this.nextByteIsHigh = !this.nextByteIsHigh;
         AVRRunner.getInstance().cpu.addClockEvent(() => AVRRunner.getInstance().spi.completeTransfer(byteToSend), AVRRunner.getInstance().spi.transferCycles);
-
     }
 }
