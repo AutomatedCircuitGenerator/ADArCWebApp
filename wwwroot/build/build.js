@@ -3261,6 +3261,9 @@ define("controllers/pin", ["require", "exports", "lib/execute"], function (requi
         getState() {
             return this.state;
         }
+        setState(state) {
+            this.portMap[this.port].setPin(this.index, state);
+        }
         setListener(listener) {
             this.listener = listener;
         }
@@ -5012,7 +5015,100 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
     }
     exports.MAX6675 = MAX6675;
 });
-define("controllers/bno055", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_3, execute_6) {
+define("controllers/ky012", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_3, avr8js_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY012 = void 0;
+    class KY012 extends controller_3.Controller {
+        constructor() {
+            super(...arguments);
+            this.audioContext = null;
+            this.oscillator = null;
+            this.gainNode = null;
+            this.BUZZER_FREQUENCY = 2500;
+            this.isActive = false;
+        }
+        setup() {
+            this.initAudio();
+            const signalPins = this.pins["digital_out"];
+            if (!(signalPins === null || signalPins === void 0 ? void 0 : signalPins.length)) {
+                console.warn("KY-012: Signal pin not connected");
+                return;
+            }
+            signalPins[0].setListener(this.handleStateChange.bind(this));
+        }
+        initAudio() {
+            try {
+                this.audioContext = new AudioContext();
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.gain.value = 0.1;
+                this.gainNode.connect(this.audioContext.destination);
+            }
+            catch (err) {
+                console.error("KY-012: Failed to initialize audio", err);
+            }
+        }
+        handleStateChange(state) {
+            switch (state) {
+                case avr8js_2.PinState.High:
+                    if (!this.isActive) {
+                        this.startBuzzer();
+                    }
+                    break;
+                case avr8js_2.PinState.Low:
+                    if (this.isActive) {
+                        this.stopBuzzer();
+                    }
+                    break;
+                default:
+                    if (this.isActive) {
+                        this.stopBuzzer();
+                    }
+            }
+        }
+        startBuzzer() {
+            try {
+                if (!this.audioContext || this.audioContext.state === 'closed') {
+                    this.initAudio();
+                }
+                this.oscillator = this.audioContext.createOscillator();
+                this.oscillator.type = 'square';
+                this.oscillator.frequency.setValueAtTime(this.BUZZER_FREQUENCY, this.audioContext.currentTime);
+                this.oscillator.connect(this.gainNode);
+                this.oscillator.start();
+                this.isActive = true;
+            }
+            catch (err) {
+                console.error("KY-012: Failed to start buzzer", err);
+            }
+        }
+        stopBuzzer() {
+            if (!this.isActive)
+                return;
+            try {
+                if (this.oscillator) {
+                    this.oscillator.stop();
+                    this.oscillator.disconnect();
+                    this.oscillator = null;
+                }
+                this.isActive = false;
+            }
+            catch (err) {
+                console.error("KY-012: Failed to stop buzzer", err);
+            }
+        }
+        reset() {
+            this.stopBuzzer();
+            if (this.audioContext) {
+                this.audioContext.close();
+                this.audioContext = null;
+                this.gainNode = null;
+            }
+        }
+    }
+    exports.KY012 = KY012;
+});
+define("controllers/bno055", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_4, execute_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BNO055 = exports.BNO055_ADDR = void 0;
@@ -5066,23 +5162,32 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
         TEMP: { address: 0x34 },
         CALIBRATION: { address: 0x35, default: 0xFF },
     };
-    class BNO055 extends controller_3.Controller {
+    class BNO055 extends controller_4.Controller {
         constructor() {
             super(...arguments);
             this.address = null;
             this.memory = new Uint8Array(128);
+            this.accelerometer = { x: 0, y: 0, z: 0 };
+            this.gyroscope = { x: 0, y: 0, z: 0 };
+            this.magnetometer = { x: 0, y: 0, z: 0 };
             this.sensorControls = {
                 setAcceleration: (x, y, z) => {
+                    this.accelerometer = { x, y, z };
                     this.setVector(registers.ACCEL_X_LSB.address, [x, y, z], 100);
+                    this.calculateOrientation();
                 },
                 setGravity: (x, y, z) => {
                     this.setVector(registers.GRAVITY_X_LSB.address, [x, y, z], 100);
                 },
                 setMagnetometer: (x, y, z) => {
+                    this.magnetometer = { x, y, z };
                     this.setVector(registers.MAG_X_LSB.address, [x, y, z], 16);
+                    this.calculateOrientation();
                 },
                 setGyroscope: (x, y, z) => {
+                    this.gyroscope = { x, y, z };
                     this.setVector(registers.GYRO_X_LSB.address, [x, y, z], 16);
+                    this.calculateOrientation();
                 },
                 setLinearAcceleration: (x, y, z) => {
                     this.setVector(registers.LINEAR_ACCEL_X_LSB.address, [x, y, z], 100);
@@ -5090,11 +5195,6 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
                 setTemp: (temp) => {
                     this.memory[registers.TEMP.address] = temp;
                 },
-                setOrientation: (heading, roll, pitch) => {
-                    this.setVector(registers.EULER_HEADING_LSB.address, [heading, roll, pitch], 16);
-                    const { w, x, y, z } = this.eulerToQuaternion(heading, roll, pitch);
-                    this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
-                }
             };
         }
         setVector(address, vector, scalar) {
@@ -5126,16 +5226,21 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             const qw = cr * cp * cy + sr * sp * sy;
             return { x: qx, y: qy, z: qz, w: qw };
         }
+        calculateOrientation() {
+            const avgX = (this.accelerometer.x + this.gyroscope.x + this.magnetometer.x) / 3;
+            const avgY = (this.accelerometer.y + this.gyroscope.y + this.magnetometer.y) / 3;
+            const avgZ = (this.accelerometer.z + this.gyroscope.z + this.magnetometer.z) / 3;
+            this.setVector(registers.EULER_HEADING_LSB.address, [avgX, avgY, avgZ], 16);
+            const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
+            this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
+        }
         reset() {
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
                 }
             }
-            this.sensorControls.setAcceleration(1.0, 2.0, 3.0);
             this.sensorControls.setGravity(0.0, 0.0, 9.81);
-            this.sensorControls.setMagnetometer(30.0, 0.0, 60.0);
-            this.sensorControls.setGyroscope(0.5, 0.5, 0.5);
             this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
             this.sensorControls.setTemp(75);
         }
@@ -5170,7 +5275,7 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
     }
     exports.BNO055 = BNO055;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/bno055"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, bno055_1) {
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -5179,12 +5284,13 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
+    window.KY012 = ky012_1.KY012;
 });
-define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_4) {
+define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HCSR501 = void 0;
-    class HCSR501 extends controller_4.Controller {
+    class HCSR501 extends controller_5.Controller {
         constructor() {
             super(...arguments);
             this.setIsMotionDetected = (isMotionDetected) => {

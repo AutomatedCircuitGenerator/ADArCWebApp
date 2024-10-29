@@ -332,7 +332,7 @@
 				GraphSynthInvoke.inputs.Add(d.nodeName);
 				GraphSynthInvoke.recg_apply();			//do component connection backend
 
-				//label all new nodes and connections witht the localid of the component that added them.
+				//label all new nodes and connections with the localid of the component that added them.
 				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
 				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
 				//create frontend instance

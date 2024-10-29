@@ -74,7 +74,8 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 58, new ComponentDataBuilder("Bluetooth Module", false, "Others", 1, 75, 75, paneHoverText: "HM-10", codeForGen:new(){{"include", ""},{"global", ""}, {"setup", ""}, {"loopMain", ""},{"functions", ""}, {"delayLoop", ""}, {"delayTime", ""}}, pins:["pin1","pin2","pin3","pin4"], gsNodeName: "hm-10").Finish() },
 			{ 59, new ComponentDataBuilder("resistor", true, "", 1, 75, 75, typeof(RazorResistor)).Property("ohms", 1000).Finish() },
 			{ 60, new ComponentDataBuilder("stepper driver", false, "", 1, 75, 75).Finish() },
-			{ 61, new ComponentDataBuilder("Arcade push button", true, "Input/Buttons and Switches", 1, 75, 75, typeof(RazorArcadePushButton), "Push Button", codeForGen:new(){{"include", ""},{"global", ""}, {"setup", ""}, {"loopMain", ""},{"functions", ""}, {"delayLoop", ""}, {"delayTime", ""}},pins:["digital_out", "gnd"],gsNodeName:"arcade_pushbutton").Finish()}
+			{ 61, new ComponentDataBuilder("Arcade push button", true, "Input/Buttons and Switches", 1, 75, 75, typeof(RazorArcadePushButton), "Push Button", codeForGen:new(){{"include", ""},{"global", ""}, {"setup", ""}, {"loopMain", ""},{"functions", ""}, {"delayLoop", ""}, {"delayTime", ""}},pins:["digital_out", "gnd"],gsNodeName:"arcade_pushbutton").Finish()},
+			{ 62, new ComponentDataBuilder("KY-012 Active Buzzer", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorKY012), codeForGen: new() { {"include", ""}, {"global", "const int buzzerPin = ~\"digital_out\";  // Signal pin for the buzzer"}, {"setup", "pinMode(buzzerPin, OUTPUT);  // Set buzzer pin as output"}, {"loopMain", "digitalWrite(buzzerPin, HIGH);  // Turn buzzer on\n  delay(4000);                    // Wait 4 seconds\n  digitalWrite(buzzerPin, LOW);    // Turn buzzer off\n  delay(2000);                    // Wait 2 seconds\n"}, {"functions", ""}, {"delayLoop", ""}, {"delayTime", ""} }, pins: ["digital_out", "gnd" ], gsNodeName: "ky012").Finish() }
 		};
 
 	}

@@ -1,77 +1,77 @@
-﻿@code {
-	[Parameter]
-	public bool value { get; set; } = false;
+﻿@using System.Text
+@inherits RazorComponent
 
-	ElementPin[] pinInfo
-	{
-		get
-		{
-			return new ElementPin []
-			{
-				new ElementPin(name: "S", x: 36.229, y: 104.57, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
-				new ElementPin(name: "Mid", x: 38.688, y: 104.52, signals: new PinSignalInfo[] { }, number: 2),
-				new ElementPin(name: "GND",  x: 41.397, y: 104.52, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3)
-			};
+@code {
 
-		}
-	}
+    /// <summary>
+    /// RazorKY012.razor
+    /// Defines the physical pins of the KY-012 Active Piezo-Buzzer:
+    /// - digital_out: Signal pin - when HIGH (≥3.3V), generates 2.5kHz tone - Just using ON/OFF
+    /// - +V: Not connected - this pin has no function
+    /// - gnd: Ground connection
+    /// </summary>
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                // Signal pin - controls buzzer state (ON/OFF)
+                new ElementPin(
+                    name: "digital_out",
+                    x: 60,
+                    y: 107,
+                    signals: new PinSignalInfo[] { },
+                    number: 1
+                ),
+                // Ground pin - completes the circuit
+                new ElementPin(
+                    name: "gnd",
+                    x: 42,
+                    y: 107,
+                    signals: new PinSignalInfo[] { PinSignalInfo.GND() },
+                    number: 3)
+            };
+        }
+    }
 
-	public static async void translate(ComponentInstance comp, long pinChangeCycle)
-	{
-		var data = comp.data;
-
-		if (0 == comp.getConnection("S", out InstanceConnection? conn, out List<InstanceConnection>? all))
-		{
-			comp.compParams["value"].setValue<bool>( await AvrCPU.getPinState(conn!.toId));
-		}
-		else
-		{
-			Console.WriteLine("GetConnection failed from KY012 buzzer Component!");
-		}
-
-	}
 }
 
-<svg width="18.5mm" height="19.154mm" version="1.1" viewBox="0 0 18.5 19.154" xmlns="http://www.w3.org/2000/svg">
-	<g transform="translate(-29.815 -86.004)">
-		<rect x="29.815" y="86.004" width="18.5" height="15" fill="#262626" stroke-width=".26458" />
-		<rect x="34.886" y="97.476" width="8.3788" height="3.1083" fill="#f6f6f6" stroke-width=".28714" />
-		<g fill="#4d4d4d" stroke-width=".36084">
-			<rect x="35.224" y="98.039" width="2.4326" height="2.0947" ry=".62841" />
-			<rect x="37.777" y="98.039" width="2.4326" height="2.0947" ry=".62841" />
-			<rect x="40.417" y="98.039" width="2.4326" height="2.0947" ry=".62841" />
-		</g>
-		<g fill="#989898" stroke-width=".26458">
-			<rect x="36.081" y="99.039" width=".73359" height="6.1197" />
-			<rect x="38.576" y="99.039" width=".73359" height="6.1197" />
-			<rect x="41.226" y="99.039" width=".73359" height="6.1197" />
-		</g>
-		<g fill="#ededed">
-			<rect x="44.826" y="98.803" width="2.1236" height=".30888" stroke-width=".26458" />
-			<text x="30.994492" y="100.29838" font-size="4.2333px" stroke-width=".26458" xml:space="preserve"><tspan x="30.994492" y="100.29838" font-family="Consolas" font-size="4.2333px" stroke-width=".26458">s</tspan></text>
-			<circle cx="39.04" cy="92.444" r="4.25" stroke-width=".33176" />
-			<rect x="36.795" y="86.641" width="4.3243" height="4.5329" ry="2.151" stroke-width=".20464" />
-		</g>
-		<ellipse cx="38.958" cy="88.552" rx="1.3127" ry="1.2934" fill="#4eccdf" stroke-width=".22608" />
-		<ellipse cx="38.974" cy="88.552" rx="1.1613" ry="1.0994" fill="#ededed" stroke-width=".22644" />
-		<g fill="#4eccdf">
-			<rect x="38.091" y="88.374" width="1.6493" height=".27977" stroke-width=".22192" />
-			<rect transform="matrix(-.024148 .99971 -.99984 -.01801 0 0)" x="87.097" y="-41.246" width="1.4244" height=".32396" stroke-width=".22192" />
-			<text transform="matrix(.26458 0 0 .26458 26.236 84.366)" x="10.143223" font-family="Consolas" font-size="4px" text-align="center" style="shape-inside:url(#rect7);shape-padding:4.54021;white-space:pre" xml:space="preserve"><tspan x="41.59082" y="25.140625">REMOVE
-</tspan><tspan x="43.790039" y="30.140625">SEAL
-</tspan><tspan x="42.69043" y="35.140625">AFTER
-</tspan><tspan x="40.491211" y="40.140625">WASHING</tspan></text>
-		</g>
-		<g>
-			<circle cx="31.696" cy="87.909" r="1.25" fill="#999" stroke-width=".28899" />
-			<circle cx="31.671" cy="87.879" r=".875" fill="#e5e5e5" stroke-width=".20229" />
-			<circle cx="46.346" cy="87.909" r="1.25" fill="#999" stroke-width=".28899" />
-			<circle cx="46.321" cy="87.879" r=".875" fill="#e5e5e5" stroke-width=".20229" />
-		</g>
-		<g fill="#999" stroke-width=".288">
-			<rect x="36.229" y="104.57" width=".43682" height=".38222" />
-			<rect x="38.688" y="104.52" width=".43682" height=".38222" />
-			<rect x="41.397" y="104.52" width=".43682" height=".38222" />
-		</g>
-	</g>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="10.582 6.439 53.15 86.602" width="53.15" height="86.602">
+    <g style="display:inline" transform="translate(-137.919 -242.11)">
+        <path fill="#2d2d2d" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" d="M148.5 248.55v65.551h53.15V248.55zm8.523 2.713a3.801 3.801 0 1 1 0 7.603 3.801 3.801 0 0 1 0-7.603m36.104 0a3.8 3.8 0 1 1 0 7.6 3.8 3.8 0 0 1 0-7.6"/><circle fill="none" cy="255.063" cx="157.023" style="display:inline;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.089" stroke="#8c8c8c" r="4.334"/><circle fill="none" cy="255.063" cx="193.127" style="display:inline;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.089" stroke="#8c8c8c" r="4.334"/>
+        <g fill-opacity="0" stroke="#8c8c8c" transform="translate(51.736 10.988)" fill="none">
+            <circle cy="297.018" cx="114.905" style="display:inline" r="2.388"/><circle cy="297.018" cx="123.481" style="display:inline" r="2.388"/><path style="display:inline;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.3" d="M134.638 297.085a2.39 2.39 0 0 1-2.388 2.388 2.39 2.39 0 0 1-2.388-2.388 2.39 2.39 0 0 1 2.388-2.388 2.39 2.39 0 0 1 2.388 2.388zm-4.977-2.679h5.178v5.224h-5.178z"/>
+        </g>
+        <g fill="none" fill-opacity="0" stroke="#fff" transform="translate(35.158 71.46)">
+            <rect height="8.795" width="17.5" ry="0" rx="0" x="127.085" style="display:inline" y="232.14"/><rect height="8.79" width="8.611" rx="0" x="144.492" style="display:inline" stroke-width="1.005" y="232.143"/>
+        </g>
+        <g style="font-style:normal;font-weight:400;line-height:125%;font-family:Droid Sans;letter-spacing:0;word-spacing:0;stroke-linecap:butt;stroke-linejoin:miter">
+            <text x="398.938" style="font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:8.75px;font-family:&quot;Droid Sans&quot;;fill:#fff;fill-opacity:1;white-space:pre" y="410.112" transform="translate(-245.202 -98.512)" font-size="8.75">S</text>
+        </g>
+        <g style="font-style:normal;font-weight:400;line-height:125%;font-family:Droid Sans;letter-spacing:0;word-spacing:0;stroke-linecap:butt;stroke-linejoin:miter">
+            <text x="438.93" y="404.99" style="white-space:pre" transform="translate(-245.202 -98.512)" fill="#fffbfb" font-size="7.5">_</text>
+        </g>
+        <g transform="translate(-245.202 -98.512)">
+            <circle fill="#151212" cy="378.843" cx="420.277" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" r="22.223"/><circle fill="#6a6a6a" cy="378.843" cx="420.277" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" r="4.972"/>
+            <g fill="none" stroke="#707070" transform="translate(-3.635 -.212)">
+                <circle cy="364.259" cx="423.948" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width=".821" r="4.838"/><path style="fill-rule:evenodd;stroke-linecap:butt;stroke-linejoin:miter" d="M423.948 361.134v6.25m-3.125-3.125h6.25"/>
+            </g>
+            <g fill="none" stroke="#0e0e0e" transform="translate(-3.672 -.245)">
+                <circle cy="364.259" cx="423.948" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width=".821" r="4.838"/><path style="fill-rule:evenodd;stroke-linecap:butt;stroke-linejoin:miter" d="M423.948 361.134v6.25m-3.125-3.125h6.25"/>
+            </g>
+        </g><g transform="translate(393.646 346.94)"/>
+        <g transform="translate(51.423 10.976)">
+            <path style="display:inline;fill:#404040" transform="translate(-94.547 286.88)scale(1.24408)" d="m166.327 4.526-1.561 1.535v3.995l1.561 1.532h4.062l1.56-1.532V6.061l-1.56-1.535z"/><path style="display:inline;fill:#404040" transform="translate(-85.61 286.88)scale(1.24408)" d="m171.949 6.061-1.56-1.535h-4.062l-1.561 1.535v3.995l1.561 1.532h4.062l1.56-1.532z"/><path style="display:inline;fill:#404040" transform="translate(-76.675 286.88)scale(1.24408)" d="m171.949 6.061-1.56-1.535h-4.062l-1.561 1.535v3.995l1.561 1.532h4.062l1.56-1.532z"/><rect fill="#8c8c8c" height="26.979" width="1.509" rx="0" x="114.094" style="display:inline;opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.191" y="296.605" stroke="#8c8c8c"/><rect fill="#8c8c8c" height="26.979" width="1.509" rx="0" x="123.138" style="display:inline;opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.191" y="296.601" stroke="#8c8c8c"/><rect fill="#8c8c8c" height="26.979" width="1.509" rx="0" x="132.133" style="display:inline;opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.191" y="296.6" stroke="#8c8c8c"/>
+            <g fill="#1a1a1a" stroke="#c1c1c1" transform="translate(-16.565 59.412)">
+                <rect height=".161" width="1.621" rx="0" x="130.608" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.079" y="237.134"/><rect height=".077" width="1.891" rx="0" x="130.477" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width=".809" y="264.254"/>
+            </g><path fill="none" d="M114.853 324.119h.005v.056h-.005z"/>
+            <g fill="#1a1a1a" stroke="#c1c1c1" transform="translate(-16.282 59.589)">
+                <rect height=".161" width="1.621" rx="0" x="139.366" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.079" y="236.957"/><rect height=".077" width="1.891" rx="0" x="139.235" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width=".809" y="264.078"/>
+            </g><path fill="none" d="M123.894 324.12h.005v.056h-.005z"/>
+            <g fill="#1a1a1a" stroke="#c1c1c1" transform="translate(-7.282 59.589)">
+                <rect height=".161" width="1.621" rx="0" x="139.366" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width="1.079" y="236.957"/><rect height=".077" width="1.891" rx="0" x="139.235" style="opacity:1;stroke-miterlimit:4;stroke-dasharray:none" stroke-width=".809" y="264.078"/>
+            </g><path fill="none" d="M132.894 324.12h.005v.056h-.005z"/>
+        </g>
+    </g>
 </svg>
