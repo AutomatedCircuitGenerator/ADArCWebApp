@@ -3221,29 +3221,76 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
-define("controllers/controller", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+define("controllers/pin", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Pin = exports.Port = void 0;
+    var Port;
+    (function (Port) {
+        Port["B"] = "B";
+        Port["C"] = "C";
+        Port["D"] = "D";
+        Port["Null"] = "Null";
+    })(Port || (exports.Port = Port = {}));
+    class Pin {
+        get portMap() {
+            return {
+                [Port.B]: execute_1.AVRRunner.getInstance().portB,
+                [Port.C]: execute_1.AVRRunner.getInstance().portC,
+                [Port.D]: execute_1.AVRRunner.getInstance().portD,
+                [Port.Null]: null,
+            };
+        }
+        constructor(index, port) {
+            this.listener = () => { };
+            this.index = index;
+            this.port = port;
+        }
+        setup() {
+            var _a, _b;
+            this.state = (_a = this.portMap[this.port]) === null || _a === void 0 ? void 0 : _a.pinState(this.index);
+            (_b = this.portMap[this.port]) === null || _b === void 0 ? void 0 : _b.addListener(() => {
+                let state = this.portMap[this.port].pinState(this.index);
+                if (state !== this.state) {
+                    this.listener(state);
+                }
+                this.state = state;
+            });
+        }
+        getState() {
+            return this.state;
+        }
+        setListener(listener) {
+            this.listener = listener;
+        }
+    }
+    exports.Pin = Pin;
+});
+define("controllers/controller", ["require", "exports", "lib/execute", "controllers/pin"], function (require, exports, execute_2, pin_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Controller = void 0;
     class Controller {
         constructor() {
-            execute_1.AVRRunner.getInstance().addController(this);
+            execute_2.AVRRunner.getInstance().addController(this);
         }
         delete() {
-            execute_1.AVRRunner.getInstance().removeController(this);
+            execute_2.AVRRunner.getInstance().removeController(this);
+        }
+        init() {
+            this.reset();
+            this.setup();
+            for (const pins of Object.values(this.pins)) {
+                pins.forEach((pin) => pin.setup());
+            }
         }
         static create(id, pins, component) {
             const instance = new this();
             instance.element = document.getElementById(`component-${id}`);
             const pinItems = {};
             for (const canonicalPinName in pins) {
-                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => ({
-                    absolutePort: serializedPin.item1,
-                    portRegion: serializedPin.item2,
-                    relativePort: serializedPin.item3
-                }));
+                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => (new pin_1.Pin(serializedPin.item3, serializedPin.item2)));
             }
-            console.log(pinItems);
             instance.pins = pinItems;
             instance.component = component;
             return instance;
@@ -3251,11 +3298,11 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         static item2toAVRIOPort(port) {
             switch (port) {
                 case "B":
-                    return execute_1.AVRRunner.getInstance().portB;
+                    return execute_2.AVRRunner.getInstance().portB;
                 case "C":
-                    return execute_1.AVRRunner.getInstance().portC;
+                    return execute_2.AVRRunner.getInstance().portC;
                 case "D":
-                    return execute_1.AVRRunner.getInstance().portD;
+                    return execute_2.AVRRunner.getInstance().portD;
                 default:
                     return null;
             }
@@ -3302,8 +3349,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                 this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
                 this.spi = new index_1.AVRSPI(this.cpu, index_1.spiConfig, this.MHZ);
                 for (let controller of this.controllers) {
-                    controller.reset();
-                    controller.setup();
+                    controller.init();
                 }
             });
         }
@@ -4247,7 +4293,7 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_2) {
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_3) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -4256,7 +4302,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
-                this.runner = execute_2.AVRRunner.getInstance();
+                this.runner = execute_3.AVRRunner.getInstance();
                 this.awaitResponseOn = [];
                 this.prevB = 0;
                 this.prevC = 0;
@@ -4419,7 +4465,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_3) {
+define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.fontA00 = exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
@@ -4471,7 +4517,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.updated = false;
         }
         setup() {
-            execute_3.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
+            execute_4.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
         }
         reset() {
             this.cgram.fill(0);
@@ -4924,7 +4970,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         31, 31, 31, 31, 31, 31, 31, 31,
     ]);
 });
-define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_2, execute_4) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MAX6675 = void 0;
@@ -4934,16 +4980,6 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
             this.setTemperature = (temperature) => {
                 this._temperature = temperature;
             };
-            this.shouldReadSPI = false;
-            this.csCallback = (oldValue, value) => {
-                let pinState = value & this._csPort;
-                if (pinState === 0) {
-                    this.shouldReadSPI = true;
-                }
-                else if ((oldValue & this._csPort) === 0 && (value & this._csPort) > 0) {
-                    this.shouldReadSPI = false;
-                }
-            };
             this.nextByteIsHigh = false;
             this.spiCallback = (byte) => {
                 if (!this.shouldReadSPI) {
@@ -4952,9 +4988,7 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                 if (this._temperature == undefined) {
                     console.log("Undefined\n");
                 }
-                this.dispatchSpi(Math.round(this._temperature / 0.25) << 3);
-            };
-            this.dispatchSpi = (temperature) => {
+                let temperature = Math.round((this._temperature / 0.25) << 3);
                 let byteToSend;
                 if (!this.nextByteIsHigh) {
                     byteToSend = (temperature >> 8) & 0xFF;
@@ -4963,20 +4997,114 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                     byteToSend = temperature & 0xFF;
                 }
                 this.nextByteIsHigh = !this.nextByteIsHigh;
-                execute_4.AVRRunner.getInstance().cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().spi.transferCycles);
+                execute_5.AVRRunner.getInstance().cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().spi.transferCycles);
             };
         }
         setup() {
-            execute_4.AVRRunner.getInstance().spi.addListener(this.spiCallback);
-            this._csPort = this.pins["cs"][0].relativePort;
-            MAX6675.item2toAVRIOPort(this.pins["cs"][0].portRegion).addListener(this.csCallback);
+            execute_5.AVRRunner.getInstance().spi.addListener(this.spiCallback);
         }
         reset() {
+        }
+        get shouldReadSPI() {
+            return this.pins.cs[0].getState() == avr8js_1.PinState.Low;
         }
     }
     exports.MAX6675 = MAX6675;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1) {
+define("controllers/ky012", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_3, avr8js_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ky012 = void 0;
+    class ky012 extends controller_3.Controller {
+        constructor() {
+            super(...arguments);
+            this.audioContext = null;
+            this.oscillator = null;
+            this.gainNode = null;
+            this.BUZZER_FREQUENCY = 2500;
+            this.isActive = false;
+        }
+        setup() {
+            this.initAudio();
+            const signalPins = this.pins["S"];
+            if (!(signalPins === null || signalPins === void 0 ? void 0 : signalPins.length)) {
+                console.warn("KY-012: Signal pin not connected");
+                return;
+            }
+            signalPins[0].setListener(this.handleStateChange.bind(this));
+        }
+        initAudio() {
+            try {
+                this.audioContext = new AudioContext();
+                this.gainNode = this.audioContext.createGain();
+                this.gainNode.gain.value = 0.1;
+                this.gainNode.connect(this.audioContext.destination);
+            }
+            catch (err) {
+                console.error("KY-012: Failed to initialize audio", err);
+            }
+        }
+        handleStateChange(state) {
+            switch (state) {
+                case avr8js_2.PinState.High:
+                    if (!this.isActive) {
+                        this.startBuzzer();
+                    }
+                    break;
+                case avr8js_2.PinState.Low:
+                    if (this.isActive) {
+                        this.stopBuzzer();
+                    }
+                    break;
+                default:
+                    if (this.isActive) {
+                        this.stopBuzzer();
+                    }
+            }
+        }
+        startBuzzer() {
+            try {
+                if (!this.audioContext || this.audioContext.state === 'closed') {
+                    this.initAudio();
+                }
+                this.oscillator = this.audioContext.createOscillator();
+                this.oscillator.type = 'square';
+                this.oscillator.frequency.setValueAtTime(this.BUZZER_FREQUENCY, this.audioContext.currentTime);
+                this.oscillator.connect(this.gainNode);
+                this.oscillator.start();
+                this.isActive = true;
+            }
+            catch (err) {
+                console.error("KY-012: Failed to start buzzer", err);
+            }
+        }
+        stopBuzzer() {
+            if (!this.isActive)
+                return;
+            try {
+                if (this.oscillator) {
+                    this.oscillator.stop();
+                    this.oscillator.disconnect();
+                    this.oscillator = null;
+                }
+                this.isActive = false;
+            }
+            catch (err) {
+                console.error("KY-012: Failed to stop buzzer", err);
+            }
+        }
+        reset() {
+            this.stopBuzzer();
+            if (this.audioContext) {
+                this.audioContext.close();
+                this.audioContext = null;
+                this.gainNode = null;
+            }
+        }
+    }
+    exports.ky012 = ky012;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -4984,5 +5112,6 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.MAX6675 = max6675_1.MAX6675;
+    window.KY012 = ky012_1.ky012;
 });
 //# sourceMappingURL=build.js.map
