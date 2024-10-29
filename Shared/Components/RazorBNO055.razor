@@ -6,8 +6,8 @@
     private (double magx, double magy, double magz) _magnetometer;
 
     [Parameter]
-    [SettingGroup("Acceleration")]
-    [ValueSetting("Accel X", 0, -16, 16)] // Adjust min/max as needed
+    [SettingGroup("Accelerometer")]
+    [ValueSetting("X", 0, -16, 16)] // Adjust min/max as needed
     public double accelx
     {
         get => _acceleration.accelx;
@@ -15,8 +15,8 @@
     }
 
     [Parameter]
-    [SettingGroup("Acceleration")]
-    [ValueSetting("Accel Y", 0, -16, 16)] // Adjust min/max as needed
+    [SettingGroup("Accelerometer")]
+    [ValueSetting("Y", 0, -16, 16)] // Adjust min/max as needed
     public double accely
     {
         get => _acceleration.accely;
@@ -24,8 +24,8 @@
     }
 
     [Parameter]
-    [SettingGroup("Acceleration")]
-    [ValueSetting("Accel Z", 0, -16, 16)] // Adjust min/max as needed
+    [SettingGroup("Accelerometer")]
+    [ValueSetting("Z", 0, -16, 16)] // Adjust min/max as needed
     public double accelz
     {
         get => _acceleration.accelz;
@@ -46,7 +46,7 @@
 
     [Parameter]
     [SettingGroup("Gyroscope")]
-    [ValueSetting("Gyro X", 0, -250, 250)] // Adjust min/max as needed
+    [ValueSetting("X", 0, -250, 250)] // Adjust min/max as needed
     public double gyrox
     {
         get => _gyroscope.gyrox;
@@ -55,7 +55,7 @@
 
     [Parameter]
     [SettingGroup("Gyroscope")]
-    [ValueSetting("Gyro Y", 0, -250, 250)] // Adjust min/max as needed
+    [ValueSetting("Y", 0, -250, 250)] // Adjust min/max as needed
     public double gyroy
     {
         get => _gyroscope.gyroy;
@@ -64,7 +64,7 @@
 
     [Parameter]
     [SettingGroup("Gyroscope")]
-    [ValueSetting("Gyro Z", 0, -250, 250)] // Adjust min/max as needed
+    [ValueSetting("Z", 0, -250, 250)] // Adjust min/max as needed
     public double gyroz
     {
         get => _gyroscope.gyroz;
@@ -85,7 +85,7 @@
 
     [Parameter]
     [SettingGroup("Magnetometer")]
-    [ValueSetting("Mag X", 0, -1000, 1000)] // Adjust min/max as needed
+    [ValueSetting("X", 0, -1000, 1000)] // Adjust min/max as needed
     public double magx
     {
         get => _magnetometer.magx;
@@ -94,7 +94,7 @@
 
     [Parameter]
     [SettingGroup("Magnetometer")]
-    [ValueSetting("Mag Y", 0, -1000, 1000)] // Adjust min/max as needed
+    [ValueSetting("Y", 0, -1000, 1000)] // Adjust min/max as needed
     public double magy
     {
         get => _magnetometer.magy;
@@ -103,7 +103,7 @@
 
     [Parameter]
     [SettingGroup("Magnetometer")]
-    [ValueSetting("Mag Z", 0, -1000, 1000)] // Adjust min/max as needed
+    [ValueSetting("Z", 0, -1000, 1000)] // Adjust min/max as needed
     public double magz
     {
         get => _magnetometer.magz;

@@ -87,7 +87,7 @@
                         if (valueSetting != null)
                         {
                             <div class="valueSetting" style="margin-left: 5px; margin-right: 5px">
-                                <label>@valueSetting.Label</label>
+                                <label style="display: block">@valueSetting.Label</label>
                                 <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
                                        min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
                                        @onchange="(e) => { onInput(e, prop, true); }">
