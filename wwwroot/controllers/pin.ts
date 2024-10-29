@@ -47,6 +47,10 @@ export class Pin {
         return this.state;
     }
     
+    setState(state: boolean) {
+        this.portMap[this.port].setPin(this.index, state);
+    }
+    
     setListener(listener: PinListener) {
         this.listener = listener;
     }
