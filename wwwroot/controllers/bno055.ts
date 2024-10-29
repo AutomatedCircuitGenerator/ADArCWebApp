@@ -158,7 +158,11 @@ export class BNO055 extends Controller implements I2CController {
         this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
     }
     
-    reset(): void {
+    cleanup(): void {}
+
+    setup(): void {
+        AVRRunner.getInstance().twi.eventHandler.registerController(BNO055_ADDR, this);
+        
         for (const register of Object.values(registers)) {
             if (register.default) {
                 this.memory[register.address] = register.default;
@@ -168,10 +172,6 @@ export class BNO055 extends Controller implements I2CController {
         this.sensorControls.setGravity(0.0, 0.0, 9.81);      // Sample gravity vector (m/s^2)
         this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3); // Sample linear acceleration (m/s^2)
         this.sensorControls.setTemp(75);
-    }
-
-    setup(): void {
-        AVRRunner.getInstance().twi.eventHandler.registerController(BNO055_ADDR, this);
     }
 
     i2cConnect(addr: number, write: boolean): boolean {
