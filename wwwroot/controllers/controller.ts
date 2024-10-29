@@ -26,8 +26,10 @@ export abstract class Controller {
     // this is called before the simulation is started, usually used to attach listeners to various ports/interfaces
     // and setup the controllers internal state with default values/0s
     abstract setup(): void;
-    // this is called after the simulation is stopped, usually used to clean up lingering visual/audio before each execution
-    abstract cleanup(): void;
+    // this is called after the simulation is stopped, usually used to clean up lingering visual/audio before each execution.
+    // by default, it does nothing and must be overriden, most components shouldn't need this unless they have a visual/audio
+    // component
+    cleanup(): void {};
     
     // this is called exclusively by the runner, and calls the components setup function
     // while also setting each of its pins

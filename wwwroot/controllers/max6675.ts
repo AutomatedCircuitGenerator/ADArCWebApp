@@ -14,9 +14,6 @@ export class MAX6675 extends Controller {
         AVRRunner.getInstance().spi.addListener(this.spiCallback);
     }
 
-    cleanup() {
-    }
-
     private get shouldReadSPI(): boolean {
         return this.pins.cs[0].getState() == PinState.Low;
     }

@@ -158,8 +158,6 @@ export class BNO055 extends Controller implements I2CController {
         this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
     }
     
-    cleanup(): void {}
-
     setup(): void {
         AVRRunner.getInstance().twi.eventHandler.registerController(BNO055_ADDR, this);
         

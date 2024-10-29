@@ -138,7 +138,7 @@ export class KY012 extends Controller {
      * Called when simulation resets
      * Cleans up all audio resources
      */
-    cleanup() {
+    override cleanup() {
         // Stop any active sound
         this.stopBuzzer();
 
