@@ -34,5 +34,16 @@ public class DropdownSetting : System.Attribute {
         this.dropdownList = dropdownList.ToList();
     }
 }
+
+[AttributeUsage(AttributeTargets.Property | AttributeTargets.Field)]
+public class SettingGroup : Attribute
+{
+    public string Label { get; set; }
+
+    public SettingGroup(string label)
+    {
+        Label = label;
+    }
+}
     
 

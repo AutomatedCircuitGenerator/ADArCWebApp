@@ -36,8 +36,7 @@
     justify-content: center;
     background-color: lightgray;
     padding: 5px;
-    max-height: 350px; /* Max height for scrollable container, adjusting later to fit around 3 settings */
-    width: 250px;
+    max-height: 400px; /* Max height for scrollable container, adjusting later to fit around 3 settings */
     overflow-y: auto;
     border-radius: 1rem 1rem 1rem 1rem;
     font-size: 15px;
@@ -73,6 +72,12 @@
 }
 
 .valueSetting {
+    background-color: #badbf1;
+    border-radius: 1rem 1rem 1rem 1rem;
+    margin-bottom: 7px;
+}
+
+.settingGroup {
     background-color: #badbf1;
     border-radius: 1rem 1rem 1rem 1rem;
     margin-bottom: 7px;

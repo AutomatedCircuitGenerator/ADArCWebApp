@@ -77,9 +77,13 @@ const registers: { [key: string]: Register } = {
     CALIBRATION: { address: 0x35, default: 0xFF },
 } as const;
 
+type Vector = {x: number, y: number, z: number};
 export class BNO055 extends Controller implements I2CController {
     private address : number | null = null;
     private memory = new Uint8Array(128);
+    private accelerometer: Vector = { x: 0, y: 0, z: 0 };
+    private gyroscope: Vector = { x: 0, y: 0, z: 0 };
+    private magnetometer: Vector = { x: 0, y: 0, z: 0 };
 
     private setVector(address: number, vector: number[], scalar: number) {
         let writePointer = address;
@@ -119,16 +123,22 @@ export class BNO055 extends Controller implements I2CController {
 
     public sensorControls = {
         setAcceleration: (x: number, y: number, z: number) => {
+            this.accelerometer = {x, y, z};
             this.setVector(registers.ACCEL_X_LSB.address, [x, y, z], 100);
+            this.calculateOrientation();
         },
         setGravity: (x: number, y: number, z: number) => {
             this.setVector(registers.GRAVITY_X_LSB.address, [x, y, z], 100);
         },
         setMagnetometer: (x: number, y: number, z: number) => {
+            this.magnetometer = {x, y, z};
             this.setVector(registers.MAG_X_LSB.address, [x, y, z], 16);
+            this.calculateOrientation();
         },
         setGyroscope: (x: number, y: number, z: number) => {
+            this.gyroscope = {x, y, z};
             this.setVector(registers.GYRO_X_LSB.address, [x, y, z], 16);
+            this.calculateOrientation();
         },
         setLinearAcceleration: (x: number, y: number, z: number) => {
             this.setVector(registers.LINEAR_ACCEL_X_LSB.address, [x, y, z], 100);
@@ -136,12 +146,17 @@ export class BNO055 extends Controller implements I2CController {
         setTemp: (temp: number) => {
             this.memory[registers.TEMP.address] = temp;
         },
-        setOrientation: (heading: number, roll: number, pitch: number) => {
-            this.setVector(registers.EULER_HEADING_LSB.address, [heading, roll, pitch], 16);
-            const { w, x, y, z } = this.eulerToQuaternion(heading, roll, pitch);
-            this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
-        }
     };
+    
+    private calculateOrientation() {
+        const avgX = (this.accelerometer.x + this.gyroscope.x + this.magnetometer.x) / 3;
+        const avgY = (this.accelerometer.y + this.gyroscope.y + this.magnetometer.y) / 3;
+        const avgZ = (this.accelerometer.z + this.gyroscope.z + this.magnetometer.z) / 3;
+
+        this.setVector(registers.EULER_HEADING_LSB.address, [avgX, avgY, avgZ], 16);
+        const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
+        this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
+    }
     
     reset(): void {
         for (const register of Object.values(registers)) {
@@ -150,10 +165,7 @@ export class BNO055 extends Controller implements I2CController {
             }
         }
 
-        this.sensorControls.setAcceleration(1.0, 2.0, 3.0); // Sample acceleration values (m/s^2)
         this.sensorControls.setGravity(0.0, 0.0, 9.81);      // Sample gravity vector (m/s^2)
-        this.sensorControls.setMagnetometer(30.0, 0.0, 60.0); // Sample magnetometer values (μT)
-        this.sensorControls.setGyroscope(0.5, 0.5, 0.5);      // Sample gyroscope values (°/s)
         this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3); // Sample linear acceleration (m/s^2)
         this.sensorControls.setTemp(75);
     }
