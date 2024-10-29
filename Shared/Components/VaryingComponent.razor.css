@@ -75,7 +75,9 @@
 .valueSetting {
     background-color: #badbf1;
     border-radius: 1rem 1rem 1rem 1rem;
-    margin-bottom: 7px;
+    display: flex;
+    flex-direction: column;
+    flex: 1;
 }
 
 .settingGroup {
