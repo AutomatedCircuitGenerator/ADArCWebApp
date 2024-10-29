@@ -40,7 +40,7 @@
         <h2>Environmental Settings</h2>
 
     <!-- Value Setting -->
-        @foreach(var prop in individualData.data.compType.GetProperties())
+        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<ValueSetting>())
             {
@@ -56,7 +56,7 @@
         }
         
         <!-- Dropdown Setting -->
-        @foreach(var prop in individualData.data.compType.GetProperties())
+        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
             {
@@ -71,7 +71,33 @@
                 </div>
             }
         }
-            
+
+        <!-- Grouped Settings -->
+        @foreach (var group in individualData.data.compType.GetProperties()
+        .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
+        {
+        if (group.Key != null)
+        {
+            <div class="settingGroup">
+                <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
+                <div style="display: flex; align-items: center; padding: 0 0 10px 0;">
+                    @foreach (var prop in group)
+                    {
+                        var valueSetting = prop.GetCustomAttribute<ValueSetting>();
+                        if (valueSetting != null)
+                        {
+                            <div class="valueSetting" style="margin-left: 5px; margin-right: 5px">
+                                <label>@valueSetting.Label</label>
+                                <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
+                                       min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
+                                       @onchange="(e) => { onInput(e, prop, true); }">
+                            </div>
+                        }
+                    }
+                </div>
+            </div>
+        }
+        }
     </div>
 </div>
 
