@@ -63,7 +63,20 @@ define("lib/compile-util", ["require", "exports"], function (require, exports) {
     exports.loadHex = loadHex;
     const url = 'https://hexi.wokwi.com';
     function buildHex(source) {
-        return __awaiter(this, void 0, void 0, function* () {
+        window.onload = () => {
+            console.log(window.dictionary?.placeholder_1 || "Dictionary not loaded");
+        }
+
+        const map = window.dictionary;
+
+        const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
+        console.log(`Request:\n${include}\n`);
+
+        const renameInclude = include.map(lib => map[lib]).filter(lib => lib !== undefined);
+        console.log(`Request:\n${renameInclude}\n`);
+
+        let listString = "# Wokwi Library List\n# See https://docs.wokwi.com/guides/libraries";
+        listString += renameInclude.join("\n") + "\n";        return __awaiter(this, void 0, void 0, function* () {
             const resp = yield fetch(url + '/build', {
                 method: 'POST',
                 mode: 'cors',
