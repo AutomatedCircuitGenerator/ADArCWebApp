@@ -1,4 +1,4 @@
-﻿window.dictionary = {
+﻿export const library = {
     "placeholder_1": "107-Arduino-24LCxx",
     "placeholder_2": "107-Arduino-APDS-9950",
     "placeholder_3": "107-Arduino-AS504x",
@@ -7325,7 +7325,7 @@
     "placeholder_7324": "webthing-arduino",
     "placeholder_7325": "weight",
     "placeholder_7326": "wire_asukiaaa",
-    "placeholder_7327": "wiring-timer", 
+    "placeholder_7327": "wiring-timer",
     "placeholder_7328": "wiring_analog_SAMD_TT",
     "placeholder_7329": "wm8978-esp32",
     "placeholder_7330": "wolfssl",
