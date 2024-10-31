@@ -1,19 +1,62 @@
-@* @inherits RazorComponent *@
+@inherits RazorComponent
 
 @code {
 
+    private double _isMotionDetected;
+    private double _triggerMode;
+    private double _timeDelaySeconds;
+    
+
     //https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
+    //this variable really just sends and "event". would be better as a button in the environmental settings panel
     [Parameter]
     [ValueSetting("", 0, 0, 1)]
-    public double isMotionDetected { get; set; } = 0;
+    public double ismotiondetected
+    {
+        get => _isMotionDetected;
+        set
+        {
+            var isDifferentFromLast = value != _isMotionDetected;
+            _isMotionDetected = value;
+            if (Controller is not null && isDifferentFromLast)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setIsMotionDetected", _isMotionDetected); });
+            }
+        }
+    }
 
+    //reset timer if new motion detected
+    // default is no retrigger
     [Parameter]
     [ValueSetting("", 0, 0, 1)]
-    public double triggerMode { get; set; } = 0;
+    public double triggermode
+    {
+        get => _triggerMode;
+        set
+        {
+            _triggerMode = value;
+            if (Controller is not null)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTriggerMode", _triggerMode); });
+            }
+        }
+    }
 
+    //how long to hold the pin high in seconds
     [Parameter]
-    [ValueSetting("", 0, 0, 1)]
-    public double timeDelayMs { get; set; } = 0;
+    [ValueSetting("S", 1, 1, 180)]
+    public double timedelayseconds
+    {
+        get => _timeDelaySeconds;
+        set
+        {
+            _timeDelaySeconds = value;
+            if (Controller is not null)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTimeDelaySeconds", _timeDelaySeconds); });
+            }
+        }
+    }
 
     public static ElementPin[] pinInfo
     {
@@ -30,10 +73,33 @@
 
 }
 
-
-<svg xmlns="http://www.w3.org/2000/svg" height="85.039" xml:space="preserve" width="113.386" viewBox="0 0 113.386 85.039" xmlns:xml="http://www.w3.org/XML/1998/namespace">
+<svg xmlns="http://www.w3.org/2000/svg" height="85.039" width="113.386" viewBox="0 0 113.386 85.039">
     <path fill="#008d36" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" d="M115.391 42.52a3.543 3.543 0 0 1-3.543 3.543 3.543 3.543 0 0 1-3.544-3.543 3.543 3.543 0 0 1 3.544-3.544 3.543 3.543 0 0 1 3.543 3.544m-102 0a3.543 3.543 0 0 1-3.543 3.543 3.543 3.543 0 0 1-3.544-3.543 3.543 3.543 0 0 1 3.544-3.544 3.543 3.543 0 0 1 3.543 3.544M4.232 0h113.386v85.04H4.232z" transform="translate(-4.232)"/>
     <g transform="translate(-6.266 .056)scale(1.11054)">
-        <rect height="76.475" x="18.455" width="76.475" fill="#f9f9f9" style="opacity:.93500001;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" ry="1.28"/><circle cx="56.693" fill="#f2f2f2" stroke="#9d9d9d" r="38.237" cy="38.237" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" stroke-width=".1"/><path fill="#e6e6e6" stroke="#999" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" stroke-width=".175" d="m65.464 43.185-8.67 5.122-8.771-4.948-.1-10.07 8.67-5.121 8.77 4.948zm-17.469 0-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.948zm34.937 0-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.948zM56.754 28.07l-8.67 5.121-8.77-4.947-.101-10.07 8.67-5.122L56.653 18zm17.469 0-8.67 5.121-8.771-4.947-.1-10.07 8.67-5.122L74.121 18Z"/><path fill="#e6e6e6" stroke="#999" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" stroke-width=".175" d="m56.754 58.269-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.947zm17.469 0-8.67 5.122-8.771-4.948-.1-10.07 8.67-5.121 8.77 4.947Z"/>
-    </g><path style="fill:#fd5" transform="matrix(1.25 0 0 .611 35.182 76.258)" d="M13.566 8.927V1.654L12.057.143H8.125L6.611 1.654v11.207l1.514 1.511h3.932l1.509-1.511z"/><path style="fill:#8d8c8c" transform="rotate(-90 68.431 25.07)scale(1.25)" d="M9.097 2.556h2.299v2.298H9.097z"/><path style="fill:#8c8663" transform="rotate(-90 68.43 25.069)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/><path style="fill:#b8af82" transform="translate(35.182 76.068)scale(1.25)" d="M10.839 3.107v1.18l.557.558V2.55z"/><path style="fill:#80795b" transform="translate(35.182 76.068)scale(1.25)" d="m10.839 4.287.557.558H9.099l.556-.558z"/><path style="fill:#5e5b43" transform="translate(35.182 76.068)scale(1.25)" d="m9.655 4.287-.556.558V2.55l.556.557z"/><path style="fill:#9a916c" transform="translate(35.182 76.068)scale(1.25)" d="M10.839 3.107H9.655l-.556-.557h2.297z"/><path style="fill:#fd5" transform="matrix(1.25 0 0 .611 44.094 76.258)" d="m12.057 14.372 1.509-1.511V1.654L12.057.143H8.125L6.611 1.654v11.207l1.514 1.511z"/><path style="fill:#8d8c8c" transform="matrix(0 -1.25 1.25 0 52.272 93.5)" d="M9.097 2.556h2.299v2.298H9.097z"/><path style="fill:#8c8663" transform="rotate(-90 72.885 20.613)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/><path style="fill:#b8af82" transform="translate(44.093 76.067)scale(1.25)" d="M11.396 4.845V2.55l-.557.557v1.18z"/><path style="fill:#80795b" transform="translate(44.093 76.067)scale(1.25)" d="m9.099 4.845.556-.558h1.184l.557.558z"/><path style="fill:#5e5b43" transform="translate(44.093 76.067)scale(1.25)" d="m9.099 2.55.556.557v1.18l-.556.558z"/><path style="fill:#9a916c" transform="translate(44.093 76.067)scale(1.25)" d="M9.099 2.55h2.297l-.557.557H9.655z"/><path style="fill:#fd5" transform="matrix(1.25 0 0 .611 52.982 76.258)" d="m6.611 12.861 1.514 1.511h3.932l1.509-1.511V1.654L12.057.143H8.125L6.611 1.654v7.273z"/><path style="fill:#8d8c8c" transform="rotate(-90 77.331 16.17)scale(1.25)" d="M9.097 2.556h2.299v2.298H9.097z"/><path style="fill:#8c8663" transform="rotate(-90 77.33 16.169)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/><path style="fill:#b8af82" transform="translate(52.982 76.068)scale(1.25)" d="M10.839 3.107v1.18l.557.558V2.55z"/><path style="fill:#80795b" transform="translate(52.982 76.068)scale(1.25)" d="m10.839 4.287.557.558H9.099l.556-.558z"/><path style="fill:#5e5b43" transform="translate(52.982 76.068)scale(1.25)" d="m9.655 4.287-.556.558V2.55l.556.557z"/><path style="fill:#9a916c" transform="translate(52.982 76.068)scale(1.25)" d="M10.839 3.107H9.655l-.556-.557h2.297z"/>
+        <rect height="76.475" x="18.455" width="76.475" fill="#f9f9f9" style="opacity:.93500001;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" ry="1.28"/>
+        <circle cx="56.693" fill="#f2f2f2" stroke="#9d9d9d" r="38.237" cy="38.237" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0"/>
+        <path fill="#e6e6e6" stroke="#999" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" d="m65.464 43.185-8.67 5.122-8.771-4.948-.1-10.07 8.67-5.121 8.77 4.948zm-17.469 0-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.948zm34.937 0-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.948zM56.754 28.07l-8.67 5.121-8.77-4.947-.101-10.07 8.67-5.122L56.653 18zm17.469 0-8.67 5.121-8.771-4.947-.1-10.07 8.67-5.122L74.121 18Z"/>
+        <path fill="#e6e6e6" stroke="#999" style="opacity:1;fill-rule:evenodd;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0" d="m56.754 58.269-8.67 5.122-8.77-4.948-.101-10.07 8.67-5.121 8.77 4.947zm17.469 0-8.67 5.122-8.771-4.948-.1-10.07 8.67-5.121 8.77 4.947Z"/>
+    </g>
+    <path style="fill:#fd5" transform="matrix(1.25 0 0 .611 35.182 76.258)" d="M13.566 8.927V1.654L12.057.143H8.125L6.611 1.654v11.207l1.514 1.511h3.932l1.509-1.511z"/>
+    <path style="fill:#8d8c8c" transform="rotate(-90 68.431 25.07)scale(1.25)" d="M9.097 2.556h2.299v2.298H9.097z"/>
+    <path style="fill:#8c8663" transform="rotate(-90 68.43 25.069)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/>
+    <path style="fill:#b8af82" transform="translate(35.182 76.068)scale(1.25)" d="M10.839 3.107v1.18l.557.558V2.55z"/>
+    <path style="fill:#80795b" transform="translate(35.182 76.068)scale(1.25)" d="m10.839 4.287.557.558H9.099l.556-.558z"/>
+    <path style="fill:#5e5b43" transform="translate(35.182 76.068)scale(1.25)" d="m9.655 4.287-.556.558V2.55l.556.557z"/>
+    <path style="fill:#9a916c" transform="translate(35.182 76.068)scale(1.25)" d="M10.839 3.107H9.655l-.556-.557h2.297z"/>
+    <path style="fill:#fd5" transform="matrix(1.25 0 0 .611 44.094 76.258)" d="m12.057 14.372 1.509-1.511V1.654L12.057.143H8.125L6.611 1.654v11.207l1.514 1.511z"/>
+    <path style="fill:#8d8c8c" transform="matrix(0 -1.25 1.25 0 52.272 93.5)" d="M9.097 2.556h2.299v2.298H9.097z"/>
+    <path style="fill:#8c8663" transform="rotate(-90 72.885 20.613)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/>
+    <path style="fill:#b8af82" transform="translate(44.093 76.067)scale(1.25)" d="M11.396 4.845V2.55l-.557.557v1.18z"/>
+    <path style="fill:#80795b" transform="translate(44.093 76.067)scale(1.25)" d="m9.099 4.845.556-.558h1.184l.557.558z"/>
+    <path style="fill:#5e5b43" transform="translate(44.093 76.067)scale(1.25)" d="m9.099 2.55.556.557v1.18l-.556.558z"/>
+    <path style="fill:#9a916c" transform="translate(44.093 76.067)scale(1.25)" d="M9.099 2.55h2.297l-.557.557H9.655z"/>
+    <path style="fill:#fd5" transform="matrix(1.25 0 0 .611 52.982 76.258)" d="m6.611 12.861 1.514 1.511h3.932l1.509-1.511V1.654L12.057.143H8.125L6.611 1.654v7.273z"/>
+    <path style="fill:#8d8c8c" transform="rotate(-90 77.331 16.17)scale(1.25)" d="M9.097 2.556h2.299v2.298H9.097z"/>
+    <path style="fill:#8c8663" transform="rotate(-90 77.33 16.169)scale(1.25)" d="M9.655 3.112h1.185v1.184H9.655z"/>
+    <path style="fill:#b8af82" transform="translate(52.982 76.068)scale(1.25)" d="M10.839 3.107v1.18l.557.558V2.55z"/>
+    <path style="fill:#80795b" transform="translate(52.982 76.068)scale(1.25)" d="m10.839 4.287.557.558H9.099l.556-.558z"/>
+    <path style="fill:#5e5b43" transform="translate(52.982 76.068)scale(1.25)" d="m9.655 4.287-.556.558V2.55l.556.557z"/>
+    <path style="fill:#9a916c" transform="translate(52.982 76.068)scale(1.25)" d="M10.839 3.107H9.655l-.556-.557h2.297z"/>
 </svg>

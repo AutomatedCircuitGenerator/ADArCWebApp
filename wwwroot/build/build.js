@@ -3281,8 +3281,9 @@ define("controllers/controller", ["require", "exports", "lib/execute", "controll
         delete() {
             execute_2.AVRRunner.getInstance().removeController(this);
         }
+        cleanup() { }
+        ;
         init() {
-            this.reset();
             this.setup();
             for (const pins of Object.values(this.pins)) {
                 pins.forEach((pin) => pin.setup());
@@ -3298,18 +3299,6 @@ define("controllers/controller", ["require", "exports", "lib/execute", "controll
             instance.pins = pinItems;
             instance.component = component;
             return instance;
-        }
-        static item2toAVRIOPort(port) {
-            switch (port) {
-                case "B":
-                    return execute_2.AVRRunner.getInstance().portB;
-                case "C":
-                    return execute_2.AVRRunner.getInstance().portC;
-                case "D":
-                    return execute_2.AVRRunner.getInstance().portD;
-                default:
-                    return null;
-            }
         }
     }
     exports.Controller = Controller;
@@ -3352,7 +3341,7 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                 this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
                 this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
                 this.spi = new index_1.AVRSPI(this.cpu, index_1.spiConfig, this.MHZ);
-                for (let controller of this.controllers) {
+                for (const controller of this.controllers) {
                     controller.init();
                 }
             });
@@ -3400,6 +3389,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
         }
         stop() {
             this.stopped = true;
+            for (const controller of this.controllers) {
+                controller.cleanup();
+            }
         }
     }
     exports.AVRRunner = AVRRunner;
@@ -4523,7 +4515,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         setup() {
             execute_4.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
         }
-        reset() {
+        cleanup() {
             this.cgram.fill(0);
             this.ddram.fill(0);
             this.addr = 0x00;
@@ -4982,6 +4974,7 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
         constructor() {
             super(...arguments);
             this.setTemperature = (temperature) => {
+                console.log("MAX");
                 this._temperature = temperature;
             };
             this.nextByteIsHigh = false;
@@ -5006,8 +4999,6 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
         }
         setup() {
             execute_5.AVRRunner.getInstance().spi.addListener(this.spiCallback);
-        }
-        reset() {
         }
         get shouldReadSPI() {
             return this.pins.cs[0].getState() == avr8js_1.PinState.Low;
@@ -5097,7 +5088,7 @@ define("controllers/ky012", ["require", "exports", "controllers/controller", "li
                 console.error("KY-012: Failed to stop buzzer", err);
             }
         }
-        reset() {
+        cleanup() {
             this.stopBuzzer();
             if (this.audioContext) {
                 this.audioContext.close();
@@ -5198,6 +5189,7 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             };
         }
         setVector(address, vector, scalar) {
+            console.log("BNOBNO");
             let writePointer = address;
             for (const num of vector) {
                 const scaled = Math.round(num * scalar);
@@ -5234,7 +5226,8 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
             this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
         }
-        reset() {
+        setup() {
+            execute_6.AVRRunner.getInstance().twi.eventHandler.registerController(exports.BNO055_ADDR, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
@@ -5243,9 +5236,6 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             this.sensorControls.setGravity(0.0, 0.0, 9.81);
             this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
             this.sensorControls.setTemp(75);
-        }
-        setup() {
-            execute_6.AVRRunner.getInstance().twi.eventHandler.registerController(exports.BNO055_ADDR, this);
         }
         i2cConnect(addr, write) {
             return true;
@@ -5275,7 +5265,99 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
     }
     exports.BNO055 = BNO055;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1) {
+define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_5) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HCSR501 = void 0;
+    class HCSR501 extends controller_5.Controller {
+        constructor() {
+            super(...arguments);
+            this.isInSimulation = false;
+            this.setIsMotionDetected = (isMotionDetected) => {
+                this.isMotionDetected = isMotionDetected > 0;
+                if (this.isInSimulation && this.isMotionDetected) {
+                    console.log("detected motion");
+                    this.detectMotion();
+                }
+            };
+            this.setTriggerMode = (triggerMode) => {
+                this.triggerMode = triggerMode > 0;
+            };
+            this.setTimeDelaySeconds = (timeDelaySeconds) => {
+                this.timeDelaySeconds = timeDelaySeconds;
+            };
+        }
+        setup() {
+            clearTimeout(this.motionTimeoutId);
+            this.hasInitiatedTimeDelay = false;
+            this.isInSimulation = true;
+            console.log("setup");
+        }
+        cleanup() {
+            clearTimeout(this.motionTimeoutId);
+            console.log("Clean up crew called");
+        }
+        detectMotion() {
+            if (this.triggerMode) {
+                if (this.hasInitiatedTimeDelay) {
+                    clearTimeout(this.motionTimeoutId);
+                    this.motionTimeoutId = this.motionTimeoutId = setTimeout(() => {
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.hasInitiatedTimeDelay = false;
+                    }, this.timeDelaySeconds * 1000);
+                }
+                else {
+                    this.pins.digital_out[0].setState(true);
+                    this.hasInitiatedTimeDelay = true;
+                    this.motionTimeoutId = setTimeout(() => {
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.hasInitiatedTimeDelay = false;
+                    }, this.timeDelaySeconds * 1000);
+                }
+            }
+            else {
+                if (this.hasInitiatedTimeDelay) {
+                    return;
+                }
+                else {
+                    this.hasInitiatedTimeDelay = true;
+                    this.pins.digital_out[0].setState(true);
+                    console.log("setting pin high");
+                    this.motionTimeoutId = setTimeout(() => {
+                        console.log("setting pin low");
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.hasInitiatedTimeDelay = false;
+                        this.motionTimeoutId = 0;
+                    }, this.timeDelaySeconds * 1000);
+                    console.log(`MotionTimeoutId is ${this.motionTimeoutId}`);
+                }
+            }
+        }
+    }
+    exports.HCSR501 = HCSR501;
+});
+define("controllers/arcade-push-button", ["require", "exports", "controllers/controller"], function (require, exports, controller_6) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ArcadePushButton = void 0;
+    class ArcadePushButton extends controller_6.Controller {
+        setup() {
+            this.digitalOut = this.pins.digital_out[0];
+        }
+        setPushed(pushed) {
+            const surface = this.element.querySelector(".surface");
+            if (surface) {
+                surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
+            }
+            this.digitalOut.setState(pushed);
+        }
+    }
+    exports.ArcadePushButton = ArcadePushButton;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/arcade-push-button"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, arcade_push_button_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -5285,23 +5367,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
-});
-define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_5) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.HCSR501 = void 0;
-    class HCSR501 extends controller_5.Controller {
-        constructor() {
-            super(...arguments);
-            this.setIsMotionDetected = (isMotionDetected) => {
-                this.isMotionDetected = isMotionDetected > 0;
-            };
-        }
-        setup() {
-        }
-        reset() {
-        }
-    }
-    exports.HCSR501 = HCSR501;
+    window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
+    window.HCSR501 = hcsr501_1.HCSR501;
 });
 //# sourceMappingURL=build.js.map
