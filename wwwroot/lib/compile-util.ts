@@ -6,6 +6,8 @@
 */
 
 
+import {library} from './library_dictionary';
+
 
 export function loadHex(source: string, target: Uint8Array) {
     for (const line of source.split('\n')) {
@@ -28,6 +30,14 @@ export interface IHexiResult {
 }
 
 export async function buildHex(source: string) {
+    const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
+    //console.log(`Request:\n${include}\n`);
+
+    const renameInclude = include.map(lib => library[lib]).filter(lib => lib !== undefined);
+    //console.log(`Request:\n${renameInclude}\n`);
+
+    let listString = "# Wokwi Library List\n# See https://docs.wokwi.com/guides/libraries";
+    listString += renameInclude.join("\n") + "\n";
     const resp = await fetch(url + '/build', {
         method: 'POST',
         mode: 'cors',
@@ -35,14 +45,10 @@ export async function buildHex(source: string) {
         headers: {
             'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ sketch: source, files: [{name: "libraries.txt", content: "# Wokwi Library List\n" +
-                    "# See https://docs.wokwi.com/guides/libraries\n" +
-                    "\n" +
-                    "# Automatically added based on includes:\n" +
-                    "LiquidCrystal I2C\n" +
-                    "MAX6675 with hardware SPI\n" +
-                    "Adafruit BNO055\n" +
-                    "\n"}] })
+        body: JSON.stringify({files: [{
+                name: "libraries.txt",
+                content: listString
+            }], sketch: source })
     });
     return (await resp.json()) as IHexiResult;
 }
