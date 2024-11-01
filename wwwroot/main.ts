@@ -8,6 +8,7 @@ import {MAX6675} from "@controllers/max6675";
 import {KY012} from "@controllers/ky012";
 import {BNO055} from "@controllers/bno055";
 import {HCSR501} from "@controllers/hcsr501";
+import {KY018} from "@controllers/ky018";
 import {ArcadePushButton} from "@controllers/arcade-push-button";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
@@ -21,3 +22,4 @@ import {ArcadePushButton} from "@controllers/arcade-push-button";
 (<any>window).KY012 = KY012;
 (<any>window).ArcadePushButton = ArcadePushButton;
 (<any>window).HCSR501 = HCSR501;
+(<any>window).KY018 = KY018;

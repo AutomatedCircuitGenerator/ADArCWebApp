@@ -5,7 +5,7 @@
     private double _isMotionDetected;
     private double _triggerMode;
     private double _timeDelaySeconds;
-    
+
 
     //https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
     //this variable really just sends and "event". would be better as a button in the environmental settings panel
@@ -16,9 +16,9 @@
         get => _isMotionDetected;
         set
         {
-            var isDifferentFromLast = value != _isMotionDetected;
+            var hasChanged = value != _isMotionDetected;
             _isMotionDetected = value;
-            if (Controller is not null && isDifferentFromLast)
+            if (Controller is not null && hasChanged)
             {
                 InvokeAsync(async () => { await Controller.InvokeVoidAsync("setIsMotionDetected", _isMotionDetected); });
             }

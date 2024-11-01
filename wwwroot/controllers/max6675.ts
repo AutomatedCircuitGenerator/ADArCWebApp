@@ -1,6 +1,6 @@
 import {Controller} from "./controller";
 import {AVRRunner} from "@lib/execute";
-import {AVRIOPort, PinState} from "@lib/avr8js";
+import {PinState} from "@lib/avr8js";
 
 export class MAX6675 extends Controller {
 

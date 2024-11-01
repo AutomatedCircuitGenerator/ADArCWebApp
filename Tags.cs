@@ -1,5 +1,3 @@
-using Microsoft.VisualBasic;
-
 namespace ADArCWebApp;
 
 /// <summary>
@@ -14,6 +12,22 @@ public class ValueSetting : System.Attribute  {
     public int MaxValue { get; set; }
 
     public ValueSetting(string label, int defaultValue, int minValue, int maxValue)
+    {
+        this.Label = label;
+        this.DefaultValue = defaultValue;
+        this.MinValue = minValue;
+        this.MaxValue = maxValue;
+    }
+}
+
+[System.AttributeUsage((System.AttributeTargets.Property | System.AttributeTargets.Field))]
+public class ValueSettingDouble : System.Attribute  {
+    public string Label { get; set; }
+    public double DefaultValue { get; set; }
+    public double MinValue { get; set; }
+    public double MaxValue { get; set; }
+
+    public ValueSettingDouble(string label, double defaultValue, double minValue, double maxValue)
     {
         this.Label = label;
         this.DefaultValue = defaultValue;

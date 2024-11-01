@@ -55,6 +55,22 @@
             }
         }
         
+        <!-- Value Setting Double -->
+        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        {
+            foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
+            {
+                <div class="valueSetting" style="padding: 3px 0;">
+                    <h2>@(formatTitle(prop))</h2>
+                    <div style="margin-left: 10px;">
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { onInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <span class="default-value-label">@value.Label</span>
+                    </div>
+                    <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
+                </div>
+            }
+        }
+        
         <!-- Dropdown Setting -->
         @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {

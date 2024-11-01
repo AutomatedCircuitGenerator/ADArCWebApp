@@ -3503,7 +3503,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_3451": "MAX6626",
         "placeholder_3452": "MAX6675",
         "placeholder_3453": "MAX6675 library",
-        "placeholder_3454": "MAX6675 with hardware SPI",
+        "MAX6675.h": "MAX6675 with hardware SPI",
         "placeholder_3455": "MAX6675_Thermocouple",
         "placeholder_3456": "MAX6816",
         "placeholder_3457": "MAX7219Segment",
@@ -7412,9 +7412,7 @@ define("lib/compile-util", ["require", "exports", "lib/library_dictionary"], fun
     function buildHex(source) {
         return __awaiter(this, void 0, void 0, function* () {
             const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
-            console.log(`Request:\n${include}\n`);
             const renameInclude = include.map(lib => library_dictionary_1.library[lib]).filter(lib => lib !== undefined);
-            console.log(`Request:\n${renameInclude}\n`);
             let listString = "# Wokwi Library List\n# See https://docs.wokwi.com/guides/libraries";
             listString += renameInclude.join("\n") + "\n";
             const resp = yield fetch(url + '/build', {
@@ -10592,7 +10590,8 @@ define("controllers/pin", ["require", "exports", "lib/execute"], function (requi
             };
         }
         constructor(index, port) {
-            this.listener = () => { };
+            this.listener = () => {
+            };
             this.index = index;
             this.port = port;
         }
@@ -10606,12 +10605,25 @@ define("controllers/pin", ["require", "exports", "lib/execute"], function (requi
                 }
                 this.state = state;
             });
+            this.isAnalog = this.port == Port.C;
         }
         getState() {
             return this.state;
         }
         setState(state) {
             this.portMap[this.port].setPin(this.index, state);
+        }
+        getAdcVoltage() {
+            if (!this.isAnalog) {
+                return null;
+            }
+            return execute_1.AVRRunner.getInstance().adc.channelValues[this.index];
+        }
+        setAdcVoltage(voltage) {
+            if (!this.isAnalog) {
+                return null;
+            }
+            execute_1.AVRRunner.getInstance().adc.channelValues[this.index] = voltage;
         }
         setListener(listener) {
             this.listener = listener;
@@ -12612,11 +12624,123 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
     }
     exports.BNO055 = BNO055;
 });
-define("controllers/arcade-push-button", ["require", "exports", "controllers/controller"], function (require, exports, controller_5) {
+define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_5) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HCSR501 = void 0;
+    class HCSR501 extends controller_5.Controller {
+        constructor() {
+            super(...arguments);
+            this.isInSimulation = false;
+            this.setIsMotionDetected = (isMotionDetected) => {
+                this.isMotionDetected = isMotionDetected > 0;
+                if (this.isInSimulation && this.isMotionDetected) {
+                    this.detectMotion();
+                }
+            };
+            this.setTriggerMode = (triggerMode) => {
+                this.triggerMode = triggerMode > 0;
+            };
+            this.setTimeDelaySeconds = (timeDelaySeconds) => {
+                this.timeDelaySeconds = timeDelaySeconds;
+            };
+        }
+        setup() {
+            clearTimeout(this.motionTimeoutId);
+            this.isInTimeWindow = false;
+            this.isInSimulation = true;
+            console.log("setup");
+        }
+        cleanup() {
+            clearTimeout(this.motionTimeoutId);
+        }
+        detectMotion() {
+            if (this.triggerMode) {
+                if (!this.isInTimeWindow) {
+                    this.pins.digital_out[0].setState(true);
+                    this.isInTimeWindow = true;
+                    this.motionTimeoutId = setTimeout(() => {
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.isInTimeWindow = false;
+                        this.motionTimeoutId = 0;
+                    }, this.timeDelaySeconds * 1000);
+                }
+                else {
+                    clearTimeout(this.motionTimeoutId);
+                    this.motionTimeoutId = this.motionTimeoutId = setTimeout(() => {
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.isInTimeWindow = false;
+                        this.motionTimeoutId = 0;
+                    }, this.timeDelaySeconds * 1000);
+                }
+            }
+            else {
+                if (this.isInTimeWindow) {
+                    return;
+                }
+                else {
+                    this.isInTimeWindow = true;
+                    this.pins.digital_out[0].setState(true);
+                    this.motionTimeoutId = setTimeout(() => {
+                        this.pins.digital_out[0].setState(false);
+                        this.isMotionDetected = false;
+                        this.isInTimeWindow = false;
+                        this.motionTimeoutId = 0;
+                    }, this.timeDelaySeconds * 1000);
+                }
+            }
+        }
+    }
+    exports.HCSR501 = HCSR501;
+});
+define("controllers/ky018", ["require", "exports", "controllers/controller"], function (require, exports, controller_6) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY018 = void 0;
+    class KY018 extends controller_6.Controller {
+        constructor() {
+            super(...arguments);
+            this.lux = 100;
+            this.GAMMA = .7;
+            this.RL10 = 50000;
+            this.R_FIXED = 10000;
+            this.isInSimulation = false;
+        }
+        setLux(lux) {
+            if (lux < .1) {
+                this.lux = .1;
+            }
+            else if (lux > 100000) {
+                this.lux = 100000;
+            }
+            else {
+                this.lux = lux;
+            }
+            console.log(`lux was set to ${this.lux}`);
+            if (this.isInSimulation) {
+                this.luxToVoltage(lux);
+            }
+        }
+        setup() {
+            this.isInSimulation = true;
+            this.luxToVoltage(this.lux);
+        }
+        luxToVoltage(lux) {
+            const R_PHOTO = (this.RL10 * Math.pow(10, this.GAMMA)) / Math.pow(lux, this.GAMMA);
+            const V_OUT = 5 * (R_PHOTO / (R_PHOTO + this.R_FIXED));
+            console.log(`Voltage is ${V_OUT}\nLux is ${lux}`);
+            this.pins.analog_out[0].setAdcVoltage(V_OUT);
+        }
+    }
+    exports.KY018 = KY018;
+});
+define("controllers/arcade-push-button", ["require", "exports", "controllers/controller"], function (require, exports, controller_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ArcadePushButton = void 0;
-    class ArcadePushButton extends controller_5.Controller {
+    class ArcadePushButton extends controller_7.Controller {
         setup() {
             this.digitalOut = this.pins.digital_out[0];
         }
@@ -12630,7 +12754,7 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/arcade-push-button"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, arcade_push_button_1) {
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -12641,21 +12765,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
     window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
-});
-define("controllers/hcsr501", ["require", "exports", "controllers/controller"], function (require, exports, controller_6) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.HCSR501 = void 0;
-    class HCSR501 extends controller_6.Controller {
-        constructor() {
-            super(...arguments);
-            this.setIsMotionDetected = (isMotionDetected) => {
-                this.isMotionDetected = isMotionDetected > 0;
-            };
-        }
-        setup() {
-        }
-    }
-    exports.HCSR501 = HCSR501;
+    window.HCSR501 = hcsr501_1.HCSR501;
+    window.KY018 = ky018_1.KY018;
 });
 //# sourceMappingURL=build.js.map
