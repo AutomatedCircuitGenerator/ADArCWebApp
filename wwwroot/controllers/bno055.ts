@@ -84,6 +84,9 @@ export class BNO055 extends Controller implements I2CController {
     private accelerometer: Vector = { x: 0, y: 0, z: 0 };
     private gyroscope: Vector = { x: 0, y: 0, z: 0 };
     private magnetometer: Vector = { x: 0, y: 0, z: 0 };
+    private orientation: Vector = { x: 0, y: 0, z: 0 };
+    private lastRead;
+    private rotating = false;
 
     private setVector(address: number, vector: number[], scalar: number) {
         let writePointer = address;
@@ -120,8 +123,15 @@ export class BNO055 extends Controller implements I2CController {
 
         return { x: qx, y: qy, z: qz, w: qw };
     }
+    
+    setMotion(rotating: boolean) {
+        if (rotating) {
+            this.sensorControls.setGyroscope(0, 0, 90);
+        }
+        this.rotating = rotating;
+    }
 
-    public sensorControls = {
+    sensorControls = {
         setAcceleration: (x: number, y: number, z: number) => {
             this.accelerometer = {x, y, z};
             this.setVector(registers.ACCEL_X_LSB.address, [x, y, z], 100);
@@ -181,7 +191,40 @@ export class BNO055 extends Controller implements I2CController {
     i2cReadByte(acked: boolean): number {
         let byte;
         if (this.address !== null) { // addr has been properly specified in a previous write
+            if (this.address === registers.EULER_HEADING_LSB.address && this.rotating) { 
+                const currentTime = Date.now();
+                const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0; // in seconds
+
+                if (timeDiff > 0) {
+                    // Integrate gyroscope data to update orientation
+                    const gyroX = this.gyroscope.x * timeDiff; // Angular change in degrees
+                    const gyroY = this.gyroscope.y * timeDiff;
+                    const gyroZ = this.gyroscope.z * timeDiff;
+
+                    // Update the orientation values (assuming you have `orientation` to store this)
+                    this.orientation.x += gyroZ; // Using Z-axis for heading
+                    this.orientation.y += gyroX;    // Using X-axis for pitch
+                    this.orientation.z += gyroY;     // Using Y-axis for roll
+
+                    // Normalize orientation values if necessary
+                    this.orientation.x = this.orientation.x % 360; // Keep within 0-360 degrees
+                    this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y)); // Limit pitch
+                    this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z)); // Limit roll
+
+                    // Update the last read timestamp
+                    this.lastRead = currentTime;
+
+                    // Update the euler angles in memory
+                    this.setVector(registers.EULER_HEADING_LSB.address,
+                        [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+                }
+            }
+            
             byte = this.memory[this.address]; 
+            
+            if (this.address === registers.EULER_PITCH_MSB.address && this.rotating) {
+                this.lastRead = Date.now();
+            }
         } else { // error state, addr has not been specified
             byte = 0xff;
         }
