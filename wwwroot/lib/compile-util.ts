@@ -31,12 +31,9 @@ export interface IHexiResult {
 
 export async function buildHex(source: string) {
     const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
-    //console.log(`Request:\n${include}\n`);
-
     const renameInclude = include.map(lib => library[lib]).filter(lib => lib !== undefined);
-    //console.log(`Request:\n${renameInclude}\n`);
 
-    let listString = "# Wokwi Library List\n# See https://docs.wokwi.com/guides/libraries";
+    let listString = "";
     listString += renameInclude.join("\n") + "\n";
     const resp = await fetch(url + '/build', {
         method: 'POST',
