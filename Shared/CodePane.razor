@@ -1,27 +1,37 @@
 ﻿@using BlazorMonaco
 @using BlazorMonaco.Editor
 @using BlazorMonaco.Languages
-
-<span @onclick="showCodeTooltipFn" style="font-size: 20px; color: black; display: block; text-align: center; padding-bottom: 10px; margin-top: 3px">💡 Code Panel</span>
-
-@if (showCodeTooltip) {
-			<div class="code-tooltip" style="background: #ece1be">
-                <label>Each component added to the Workbench auto-generates code in this Panel, which you can edit freely.</label><br/>
-                <label>Click the '▶️ Run' button above to compile it and start the simulation on the Workbench.</label><br/>
-                <label>All types of output after running the code will appear in the Console, right below the Code Editor.</label><br/>
-                <label>The '⬆️ Export' button above will save to a file both your code below and the components on the Workbench.</label>
-                <button @onclick="GotItClickedCode">Got it!</button>
-			</div>
-		}
+@inject IJSRuntime JSRuntime
 
 <div class="code-container">
-    
-    <div id="editor-wrapper" style="height:60%; overflow-y:hidden;">
+
+    <span @onclick="showCodeTooltipFn">💡 Code Panel</span>
+
+    @if (showCodeTooltip)
+    {
+        <div class="code-tooltip">
+            <label>Each component added to the Workbench auto-generates code in this Panel, which you can edit freely.</label><br/>
+            <label>Click the '▶️ Run' button above to compile it and start the simulation on the Workbench.</label><br/>
+            <label>All types of output after running the code will appear in the Console, right below the Code Editor.</label><br/>
+            <label>The '⬆️ Export' button above will save to a file both your code below and the components on the Workbench.</label>
+            <button @onclick="GotItClickedCode">Got it!</button>
+        </div>
+    }
+
+
+    <div id="editor-wrapper">
         <!-- Container for the Monaco Editor -->
-        <StandaloneCodeEditor  Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
+        <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
     </div>
 
     <!-- Container for the console output -->
+
+    <div id="button-row">
+        <button @onclick="ToggleLock">
+            <span>@lockIcon</span>
+            <span>@lockText</span>
+        </button>
+    </div>
     <div id="console-container">
         @foreach (string line in text)
         {
@@ -29,9 +39,24 @@
             <hr>
         }
     </div>
+
 </div>
 
 @code {
+
+    private string lockIcon = "🔓";
+    private string lockText = "Unlocked";
+    private bool isLocked = false;
+
+    private async void ToggleLock()
+    {
+        isLocked = !isLocked;
+        lockIcon = isLocked ? "🔒" : "🔓";
+        lockText = isLocked ? "Locked" : "Unlocked";
+
+        await JSRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
+    }
+
 
     /// <summary>
     /// Creates the options for the editor.
@@ -41,17 +66,17 @@
     private StandaloneEditorConstructionOptions EditorConstructionOptions(StandaloneCodeEditor editor)
     {
         return new StandaloneEditorConstructionOptions
-            {
-                AutomaticLayout = true,
-                Language = "cpp",
-                Value = "void setup() {\n" +
+        {
+            AutomaticLayout = true,
+            Language = "cpp",
+            Value = "void setup() {\n" +
                     "// put your setup code here, to run once:\n\n" +
                     "}\n\n" +
                     "void loop() {\n" +
                     "// put your main code here, to run repeatedly:\n\n" +
                     "}",
-                Minimap = new EditorMinimapOptions() { Enabled = false }
-            };
+            Minimap = new EditorMinimapOptions() { Enabled = false }
+        };
     }
 
     public CodePane()
@@ -79,7 +104,7 @@
             for (int i = 0; i < lines.Count(); i++)
             {
                 this.text[index] += lines[i];
-                if (lines.Count() > 1 && i != lines.Count()-1)
+                if (lines.Count() > 1 && i != lines.Count() - 1)
                 {
                     commitBuffer();
                 }
@@ -93,8 +118,6 @@
                 commitBuffer();
             }
         }
-
-
 
         StateHasChanged();
     }
@@ -110,13 +133,23 @@
 
 
     public bool showCodeTooltip = false;
-    void showCodeTooltipFn() { showCodeTooltip = true;  }
-    
-    public int gotItClickedCode = 0;
-    void HideCodeTooltipCode() { showCodeTooltip = false; }
 
-    void GotItClickedCode() {  
+    void showCodeTooltipFn()
+    {
+        showCodeTooltip = true;
+    }
+
+    public int gotItClickedCode = 0;
+
+    void HideCodeTooltipCode()
+    {
+        showCodeTooltip = false;
+    }
+
+    void GotItClickedCode()
+    {
         gotItClickedCode = 1; // Set to 1 when "Got it!" is clicked
         HideCodeTooltipCode(); // Hide the tooltip
     }
+
 }

@@ -57,14 +57,14 @@ export class Pin {
 
     getAdcVoltage() {
         if (!this.isAnalog) {
-            return null;
+            throw new Error("Tried to get analog voltage on a non analog port!");
         }
         return AVRRunner.getInstance().adc.channelValues[this.index];
     }
 
     setAdcVoltage(voltage: number) {
         if (!this.isAnalog) {
-            return null;
+            throw new Error("Tried to set analog voltage on a non analog port!");
         }
         AVRRunner.getInstance().adc.channelValues[this.index] = voltage;
     }

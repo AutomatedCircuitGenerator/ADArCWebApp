@@ -13,7 +13,8 @@
 }
 .sidebar,
 .sidebar-right {
-    height: 95%;
+    /*height of the top bar*/
+    height: calc(100vh - 3.125rem);
     background-color: lightgray !important;
     transition: left .3s, right .3s;
     padding: 10px;

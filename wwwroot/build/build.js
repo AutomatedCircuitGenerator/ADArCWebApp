@@ -7432,6 +7432,37 @@ define("lib/compile-util", ["require", "exports", "lib/library_dictionary"], fun
     }
     exports.buildHex = buildHex;
 });
+let observer;
+let isObserving = false;
+const config = { childList: true };
+const callback = function (mutationsList) {
+    const targetNode = document.getElementById('console-container');
+    if (!targetNode) {
+        console.log("console-container does not exist for some reason");
+        return;
+    }
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+            targetNode.scrollTop = targetNode.scrollHeight;
+        }
+    }
+};
+function toggleConsoleOutputBehavior() {
+    const targetNode = document.getElementById('console-container');
+    if (!targetNode) {
+        return;
+    }
+    if (isObserving) {
+        observer.disconnect();
+    }
+    else {
+        observer = new MutationObserver(callback);
+        if (targetNode) {
+            observer.observe(targetNode, config);
+        }
+    }
+    isObserving = !isObserving;
+}
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -10615,13 +10646,13 @@ define("controllers/pin", ["require", "exports", "lib/execute"], function (requi
         }
         getAdcVoltage() {
             if (!this.isAnalog) {
-                return null;
+                throw new Error("Tried to get analog voltage on a non analog port!");
             }
             return execute_1.AVRRunner.getInstance().adc.channelValues[this.index];
         }
         setAdcVoltage(voltage) {
             if (!this.isAnalog) {
-                return null;
+                throw new Error("Tried to set analog voltage on a non analog port!");
             }
             execute_1.AVRRunner.getInstance().adc.channelValues[this.index] = voltage;
         }
@@ -12718,7 +12749,6 @@ define("controllers/ky018", ["require", "exports", "controllers/controller"], fu
             else {
                 this.lux = lux;
             }
-            console.log(`lux was set to ${this.lux}`);
             if (this.isInSimulation) {
                 this.luxToVoltage(lux);
             }
@@ -12730,7 +12760,6 @@ define("controllers/ky018", ["require", "exports", "controllers/controller"], fu
         luxToVoltage(lux) {
             const R_PHOTO = (this.RL10 * Math.pow(10, this.GAMMA)) / Math.pow(lux, this.GAMMA);
             const V_OUT = 5 * (R_PHOTO / (R_PHOTO + this.R_FIXED));
-            console.log(`Voltage is ${V_OUT}\nLux is ${lux}`);
             this.pins.analog_out[0].setAdcVoltage(V_OUT);
         }
     }

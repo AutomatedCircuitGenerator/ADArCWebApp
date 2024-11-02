@@ -1,64 +1,70 @@
 ﻿.code-container {
-    height: 100%;
-    border: 1px solid #ccc;
-    width: 100%;
     display: flex;
     flex-direction: column;
+    height: 100%; 
+    width: 100%;
+    padding: 10px;
+    box-sizing: border-box;
+    overflow: hidden; 
 }
 
-hr {
-    margin: 5px 0;
+.code-container > span {
+    font-size: 20px;
+    color: black;
+    text-align: center;
+    padding-bottom: 10px;
+    flex-shrink: 0; 
+}
+
+.code-tooltip {
+    background-color: #ece1be;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    flex-shrink: 1; 
+    overflow-y: auto;
+}
+
+#editor-wrapper {
+    flex: 3; 
+    overflow-y: hidden;
+    height: 60%;
+}
+
+#console-container {
+    flex: 1; 
+    border: 1px solid #ccc;
+    background-color: #f4f4f4;
+    padding: 10px;
+    overflow-y: auto; 
+    user-select: text;
+    white-space: pre;
+    box-sizing: border-box;
+}
+
+#button-row {
+    display: flex;
+    justify-content: flex-end;
+    padding: 0.5rem;
+    flex-shrink: 0; 
+}
+
+#button-row button {
+    height: 1.5rem;
+    display: flex;
+    align-items: center;
+    padding: 0 0.5rem;
+    font-size: 1rem;
 }
 
 .error {
     color: orangered;
 }
 
-.code-tooltip {
-    z-index: 9999999999999;
-    border-radius: 5px;
-    flex-wrap: wrap;
-    justify-content: center;
-    text-align: start;
-    width: 100%;
-    position: static;
-    margin-bottom: 18px;
-    padding: 10px;
-    padding-left: 5%;
-    padding-right: 5%;
-    font-size: 13.5px;
+.auto {
+    color: inherit;
 }
 
-.code-tooltip button {
-    background-color: white;
-    border-radius: 5px 5px 5px 5px;
-    margin-top: 5px;
-    margin-bottom: 5px;
-    padding-left: 1px;
-    padding-right: 1px;
-    border-color: transparent;
-    justify-self: center;
-    transform: scale(100%);
-    width: 80px;
-    text-align: center;
+hr {
+    margin: 5px 0;
 }
-
-.code-tooltip label {
-    margin-bottom: 5px;
-}
-
-#console-container {
-    flex: 1; 
-    border: 1px solid #ccc; 
-    padding: 10px; 
-    background-color: #f4f4f4; 
-    overflow-y: scroll; 
-    user-select:text; 
-    white-space:pre;
-    overscroll-behavior-y: contain;
-    scroll-snap-type:y mandatory;
-}
-
-    #console-container > #console-container:last-child {
-        scroll-snap-align:start;
-    }
