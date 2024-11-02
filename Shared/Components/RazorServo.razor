@@ -1,4 +1,6 @@
-﻿@code {
+﻿@inherits RazorComponent;
+
+@code {
     /**
              * The angle of the servo"s horn
              */
@@ -44,53 +46,6 @@
             }
         }
     }
-
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        bool pin = false;
-        Console.WriteLine("servo translate");
-        if (0 == comp.getConnection("pin3", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            pin = await AvrCPU.getPinState(conn!.toId);
-        }
-
-        if (pin && comp.midSignal == 0)//if HIGH(pulse)
-        {
-            comp.timer = System.Diagnostics.Stopwatch.GetTimestamp();//start timing the pulse
-            comp.midSignal = 1;
-        }
-        if (!pin && comp.midSignal == 1)//end of pulse, back to LOW
-        {
-            comp.timer = (long)System.Diagnostics.Stopwatch.GetElapsedTime(comp.timer).TotalMilliseconds;//stop the timers
-            comp.midSignal = 2;
-            Console.WriteLine(comp.timer + " now starting servo move");
-        }
-
-        if (comp.midSignal == 2)
-        {
-            if (comp.timer > 900 && comp.timer < 1100)//if the pulse width is 1ms (1ms = 1000µs, +-50µs)
-            {
-                comp.compParams["angle"].setValue(0);//all the way to the left/-90
-            }
-            else if (comp.timer > 1400 && comp.timer < 1600)//if the pulse width is 1.5ms
-            {
-                comp.compParams["angle"].setValue(90);//in the middle/0
-            }
-            else if (comp.timer > 1900 && comp.timer < 2100)//if the pulse width is 2ms
-            {
-                comp.compParams["angle"].setValue(180);//all the way to the right/90
-            }
-            else if (comp.timer > 0)//if the timing of the simulator is not exactly 1,1.5,2 ms
-            {
-                Console.WriteLine("simulator timing error - unrecognized pulse width");
-            }
-            else//if timer did not start
-            {
-                Console.WriteLine("timer didn't start");
-            }
-            comp.midSignal = 0;
-        }
-    }
 }
 
 
@@ -125,7 +80,7 @@
     <rect fill="#666" x="64.255" y="37.911" width="90.241" height="43.725" rx="5.3331" />
     <path fill="gray" d="m110.07 50.005h-14.42v19.537h14.42a9.7684 9.7684 0 0 0 0-19.537z" />
     <circle fill="#999" cx="91.467" cy="59.773" r="18.606" />
-    <path fill=@(this.hornColor)
+    <path class="horn" fill=@(this.hornColor)
           transform="translate(91.467 59.773) rotate(@(this.angle)) translate(-91.467 -59.773)"
           d="@(this.path)" 
           />

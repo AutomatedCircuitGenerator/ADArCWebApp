@@ -1,7 +1,6 @@
 ﻿{
     "compileOnSave": true,
     "compilerOptions": {
-        "strict": true,
         "module": "amd",
         "target": "es6",
         "sourceMap": true,
