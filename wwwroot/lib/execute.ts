@@ -15,7 +15,7 @@ import {
     AVRADC,
     adcConfig,
     AVRSPI,
-    spiConfig
+    spiConfig, timer2Config, timer1Config
 } from "./avr8js/index";
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
@@ -33,7 +33,9 @@ export class AVRRunner {
 
     program = new Uint16Array(FLASH);
     cpu: CPU;
-    timer: AVRTimer;
+    timer0: AVRTimer;
+    timer1: AVRTimer;
+    timer2: AVRTimer;
     portB: AVRIOPort;
     portC: AVRIOPort;
     portD: AVRIOPort;
@@ -74,7 +76,9 @@ export class AVRRunner {
     async loadProgram(hex: string) {
         loadHex(hex, new Uint8Array(this.program.buffer));
         this.cpu = new CPU(this.program);
-        this.timer = new AVRTimer(this.cpu, timer0Config);
+        this.timer0 = new AVRTimer(this.cpu, timer0Config);
+        this.timer1 = new AVRTimer(this.cpu, timer1Config);
+        this.timer2 = new AVRTimer(this.cpu, timer2Config);
         this.portB = new AVRIOPort(this.cpu, portBConfig);
         this.portC = new AVRIOPort(this.cpu, portCConfig);
         this.portD = new AVRIOPort(this.cpu, portDConfig);

@@ -1,123 +1,19 @@
 ﻿@inherits RazorComponent;
 
 @code {
-    private (double accelx, double accely, double accelz) _acceleration;
-    private (double gyrox, double gyroy, double gyroz) _gyroscope;
-    private (double magx, double magy, double magz) _magnetometer;
-
+    private string _motion = "Static";
+    
     [Parameter]
-    [SettingGroup("Accelerometer")]
-    [ValueSetting("X", 0, -16, 16)] // Adjust min/max as needed
-    public double accelx
+    [DropdownSetting(["Static", "Rotating"])]
+    public string motion
     {
-        get => _acceleration.accelx;
-        set => SetAcceleration(value, _acceleration.accely, _acceleration.accelz);
-    }
-
-    [Parameter]
-    [SettingGroup("Accelerometer")]
-    [ValueSetting("Y", 0, -16, 16)] // Adjust min/max as needed
-    public double accely
-    {
-        get => _acceleration.accely;
-        set => SetAcceleration(_acceleration.accelx, value, _acceleration.accelz);
-    }
-
-    [Parameter]
-    [SettingGroup("Accelerometer")]
-    [ValueSetting("Z", 0, -16, 16)] // Adjust min/max as needed
-    public double accelz
-    {
-        get => _acceleration.accelz;
-        set => SetAcceleration(_acceleration.accelx, _acceleration.accely, value);
-    }
-
-    private async void SetAcceleration(double accelX, double accelY, double accelZ)
-    {
-        if (_acceleration != (accelx: accelX, accely: accelY, accelz: accelZ))
+        get => _motion;
+        set
         {
-            _acceleration = (accelx: accelX, accely: accelY, accelz: accelZ);
+            _motion = value;
             if (Controller is not null)
             {
-                await Controller.InvokeVoidAsync("sensorControls.setAcceleration", accelX, accelY, accelZ);
-            }
-        }
-    }
-
-    [Parameter]
-    [SettingGroup("Gyroscope")]
-    [ValueSetting("X", 0, -250, 250)] // Adjust min/max as needed
-    public double gyrox
-    {
-        get => _gyroscope.gyrox;
-        set => SetGyroscope(value, _gyroscope.gyroy, _gyroscope.gyroz);
-    }
-
-    [Parameter]
-    [SettingGroup("Gyroscope")]
-    [ValueSetting("Y", 0, -250, 250)] // Adjust min/max as needed
-    public double gyroy
-    {
-        get => _gyroscope.gyroy;
-        set => SetGyroscope(_gyroscope.gyrox, value, _gyroscope.gyroz);
-    }
-
-    [Parameter]
-    [SettingGroup("Gyroscope")]
-    [ValueSetting("Z", 0, -250, 250)] // Adjust min/max as needed
-    public double gyroz
-    {
-        get => _gyroscope.gyroz;
-        set => SetGyroscope(_gyroscope.gyrox, _gyroscope.gyroy, value);
-    }
-
-    private async void SetGyroscope(double gyroX, double gyroY, double gyroZ)
-    {
-        if (_gyroscope != (gyrox: gyroX, gyroy: gyroY, gyroz: gyroZ))
-        {
-            _gyroscope = (gyrox: gyroX, gyroy: gyroY, gyroz: gyroZ);
-            if (Controller is not null)
-            {
-                await Controller.InvokeVoidAsync("sensorControls.setGyroscope", gyroX, gyroY, gyroZ);
-            }
-        }
-    }
-
-    [Parameter]
-    [SettingGroup("Magnetometer")]
-    [ValueSetting("X", 0, -1000, 1000)] // Adjust min/max as needed
-    public double magx
-    {
-        get => _magnetometer.magx;
-        set => SetMagnetometer(value, _magnetometer.magy, _magnetometer.magz);
-    }
-
-    [Parameter]
-    [SettingGroup("Magnetometer")]
-    [ValueSetting("Y", 0, -1000, 1000)] // Adjust min/max as needed
-    public double magy
-    {
-        get => _magnetometer.magy;
-        set => SetMagnetometer(_magnetometer.magx, value, _magnetometer.magz);
-    }
-
-    [Parameter]
-    [SettingGroup("Magnetometer")]
-    [ValueSetting("Z", 0, -1000, 1000)] // Adjust min/max as needed
-    public double magz
-    {
-        get => _magnetometer.magz;
-        set => SetMagnetometer(_magnetometer.magx, _magnetometer.magy, value);
-    }
-
-    private async void SetMagnetometer(double magX, double magY, double magZ)
-    {
-        if (_magnetometer != (magx: magX, magy: magY, magz: magZ))
-        {
-            _magnetometer = (magx: magX, magy: magY, magz: magZ);
-            if (Controller is not null)
-            {
-                await Controller.InvokeVoidAsync("sensorControls.setMagnetometer", magX, magY, magZ);
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion == "Rotating"); });
             }
         }
     }
