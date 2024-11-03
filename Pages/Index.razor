@@ -430,8 +430,8 @@
 	{
 		//load rules.
 		//TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-		int x = await RuleSetMap.getInstance().loadRuleSet("ADD", navMan, this, 0,88);
-		await RuleSetMap.getInstance().loadRuleSet("CONNECT", navMan, this, x,88);
+		int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0,88);
+		await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x,88);
 		compPane!.releaseLockout();
 		selLockedOut = false;
 		//hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino

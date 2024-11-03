@@ -8,11 +8,11 @@ namespace ADArCWebApp
 {
     public sealed class RuleSetMap
     {
-		//Singleton Setup
-		private static RuleSetMap? instance;
-		private static readonly object padlock = new();
+        //Singleton Setup
+        private static RuleSetMap? instance;
+        private static readonly object padlock = new();
 
-		public static Dictionary<string, ruleSet> rulesets;
+        public static Dictionary<string, ruleSet> rulesets;
         private readonly ImmutableHashSet<string> modifiedRules;
         int numLoaded;
 
@@ -26,107 +26,92 @@ namespace ADArCWebApp
             this.numLoaded = 0;
         }
 
-		/// <summary>
-		/// Returns the singleton instance of the RuleSetMap
-		/// </summary>
-		/// <returns>An instance of RuleSetMap</returns>
-		public static RuleSetMap getInstance()
-		{
-			lock (padlock)
-			{
-				return instance ??= new RuleSetMap();
-			}
-		}
-		public async Task<int> loadRuleSet(string name, NavigationManager navigationManager, Pages.Index main, int current, int total)
+        /// <summary>
+        /// Returns the singleton instance of the RuleSetMap
+        /// </summary>
+        /// <returns>An instance of RuleSetMap</returns>
+        public static RuleSetMap GetInstance()
         {
-            //Ensure that we only load each rule once
+            lock (padlock)
+            {
+                return instance ??= new RuleSetMap();
+            }
+        }
+
+        public async Task<int> LoadRuleSet(string name, NavigationManager navigationManager, Pages.Index main,
+            int current, int total)
+        {
             if (rulesets.ContainsKey(name))
             {
                 Console.WriteLine("Rule " + name + " already loaded.");
                 return 0;
             }
 
-			////Setup HTTP client that we will use to load the file
-			HttpClient client = new HttpClient();
+            HttpClient client = new HttpClient();
             client.BaseAddress = new(navigationManager.BaseUri + "rules/");
-            ////Load the file as plain text from GitHub
+
+            // Load the ruleset, parse file contents rules, and save them for iteration to download individually
             HttpResponseMessage ruleSetResponse =
                 await client.GetAsync(name + ".rsxml");
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
-
-
-            //var filename = "rules/BIG1.rsxml";
-            //var filename = new Uri("pack://application:,,,/Rules/BondGraphRuleset.rsxml");
-            //var filename = FileStore.Resource1.BondGraphRuleset.ToString();
-            //System.Windows.Resources.StreamResourceInfo info = Application.GetResourceStream(filename);
-            //var filename = extractPath1 + "\\BondGraphRuleset.rsxml";
-            //var filename = Encoding.ASCII.GetString(FileStore.Resource1.BondGraphRuleset);
-            //Stream stream = new FileStream(filename,FileMode.Open);
             var ruleReader = new StreamReader(ruleSetFileContent);
-
-            //Deserialize the ruleset
             rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
-            Console.WriteLine("1");
-            //Load rules for the ruleset
+
             List<string> ruleFileNames = rulesets[name].ruleFileNames;
 
-            //Load all rules in a ruleset
             List<grammarRule> rules = new();
-            this.numLoaded = 0;
-            while (this.numLoaded < ruleFileNames.Count)
+            numLoaded = 0;
+
+            List<Task> loadTasks = new();
+
+            foreach (string rulePath in ruleFileNames)
             {
-                string rulePath = ruleFileNames[this.numLoaded];
-                Console.WriteLine(rulePath + " loaded");
-                //Get the rule files from GitHub 
-                HttpResponseMessage ruleResponse =
-                    await client.GetAsync(rulePath);
-				    //await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\") + 1));
-
-				string ruleText = await ruleResponse.Content.ReadAsStringAsync();
-                //var f = File.OpenText(rulePath);
-                //string ruleText = f.ReadToEnd();
-
-                XElement xeRule = XElement.Parse(ruleText);
-                XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
-                grammarRule openRule = new();
-                //Deserialize the rule XML using GraphSynth
-                if (temp != null)
-                {
-                    openRule = this.DeSerializeRuleFromXML(this.RemoveXAMLns(RemoveIgnorablePrefix(temp.ToString())));
-                }
-
-                this.removeNullWhiteSpaceEmptyLabels(openRule.L);
-                this.removeNullWhiteSpaceEmptyLabels(openRule.R);
-
-                object ruleObj = new object[] { openRule, rulePath };
-                switch (ruleObj)
-                {
-                    case grammarRule obj:
-                        rules.Add(obj);
-                        break;
-                    case object[] obj:
-                        {
-                            rules.AddRange(obj.OfType<grammarRule>());
-                            break;
-                        }
-                }
-                
-                this.numLoaded++;
-                main.loadingProgress = (double)(numLoaded + current) / total *100;
-                //Console.WriteLine(main.loadingProgress);
-                main.StateChanged();
+                loadTasks.Add(LoadRuleFile(client, rulePath, rules, main, current, total));
             }
 
+            await Task.WhenAll(loadTasks);
+
             rulesets[name].rules = rules;
-            
+
             return numLoaded;
         }
+
+        private async Task LoadRuleFile(HttpClient client, string rulePath, List<grammarRule> rules, Pages.Index main,
+            int current, int total)
+        {
+            HttpResponseMessage ruleResponse = await client.GetAsync(rulePath);
+            Console.WriteLine(rulePath + " Fetched");
+            string ruleText = await ruleResponse.Content.ReadAsStringAsync();
+
+            XElement xeRule = XElement.Parse(ruleText);
+            XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
+            grammarRule openRule = new();
+
+            if (temp != null)
+            {
+                openRule = DeSerializeRuleFromXML(RemoveXAMLns(RemoveIgnorablePrefix(temp.ToString())));
+            }
+
+            removeNullWhiteSpaceEmptyLabels(openRule.L);
+            removeNullWhiteSpaceEmptyLabels(openRule.R);
+
+            lock (rules)
+            {
+                rules.Add(openRule);
+            }
+
+            Console.WriteLine(rulePath + " Loaded");
+            Interlocked.Increment(ref numLoaded);
+            main.loadingProgress = (double)(numLoaded + current) / total * 100;
+            main.StateChanged();
+        }
+
         /// <summary>
         /// Returns the number of loaded rules
         /// </summary>
         /// <returns>number of loaded rules as an int</returns>
-        public int getNumRules()
+        public int GetNumRules()
         {
             return rulesets.Count;
         }
@@ -136,7 +121,7 @@ namespace ADArCWebApp
         /// </summary>
         /// <param name="name">The name of the ruleset</param>
         /// <returns>A ruleset</returns>
-        public ruleSet getRuleSet(string name)
+        public ruleSet GetRuleSet(string name)
         {
             if (!this.modifiedRules.Contains(name))
             {
@@ -148,6 +133,7 @@ namespace ADArCWebApp
                 rule.TransformNodePositions = false;
                 rule.Rotate = GraphSynth.transfromType.Prohibited;
             }
+
             return rulesets[name];
         }
 
@@ -155,8 +141,8 @@ namespace ADArCWebApp
         private grammarRule DeSerializeRuleFromXML(string xmlString)
         {
             //xmlString = xmlString.Replace("XYZIndependent", "BothIndependent");
-			//xmlString = xmlString.Replace("OnlyZ", "false");
-			StringReader stringReader = new StringReader(xmlString);
+            //xmlString = xmlString.Replace("OnlyZ", "false");
+            StringReader stringReader = new StringReader(xmlString);
             XmlSerializer ruleDeserializer = new XmlSerializer(typeof(grammarRule));
             grammarRule? newGrammarRule = (grammarRule)ruleDeserializer.Deserialize(stringReader);
             if (newGrammarRule.L == null)
@@ -213,4 +199,50 @@ namespace ADArCWebApp
     }
 }
 
-
+// while (this.numLoaded < ruleFileNames.Count)
+// {
+//     string rulePath = ruleFileNames[this.numLoaded];
+//     Console.WriteLine(rulePath + " loaded");
+//     //Get the rule files from GitHub 
+//     HttpResponseMessage ruleResponse =
+//         await client.GetAsync(rulePath);
+//     //await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\") + 1));
+//
+//     string ruleText = await ruleResponse.Content.ReadAsStringAsync();
+//     //var f = File.OpenText(rulePath);
+//     //string ruleText = f.ReadToEnd();
+//
+//     XElement xeRule = XElement.Parse(ruleText);
+//     XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
+//     grammarRule openRule = new();
+//     //Deserialize the rule XML using GraphSynth
+//     if (temp != null)
+//     {
+//         openRule = this.DeSerializeRuleFromXML(this.RemoveXAMLns(RemoveIgnorablePrefix(temp.ToString())));
+//     }
+//
+//     this.removeNullWhiteSpaceEmptyLabels(openRule.L);
+//     this.removeNullWhiteSpaceEmptyLabels(openRule.R);
+//
+//     object ruleObj = new object[] { openRule, rulePath };
+//     switch (ruleObj)
+//     {
+//         case grammarRule obj:
+//             rules.Add(obj);
+//             break;
+//         case object[] obj:
+//         {
+//             rules.AddRange(obj.OfType<grammarRule>());
+//             break;
+//         }
+//     }
+//
+//     this.numLoaded++;
+//     main.loadingProgress = (double)(numLoaded + current) / total * 100;
+//     //Console.WriteLine(main.loadingProgress);
+//     main.StateChanged();
+// }
+//
+// rulesets[name].rules = rules;
+//
+// return numLoaded;

@@ -3306,7 +3306,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_3254": "LionBit-STEM-library",
         "placeholder_3255": "Liquid Handling Robotics",
         "placeholder_3256": "LiquidCrystal",
-        "placeholder_3257": "LiquidCrystal I2C",
+        "LiquidCrystal_I2C.h": "LiquidCrystal I2C",
         "placeholder_3258": "LiquidCrystal I2C Multilingual",
         "placeholder_3259": "LiquidCrystal NKC",
         "placeholder_3260": "LiquidCrystalIO",
@@ -5298,7 +5298,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_5246": "Serial_Monitor",
         "placeholder_5247": "Serie",
         "placeholder_5248": "Series",
-        "placeholder_5249": "Servo",
+        "Servo.h": "Servo",
         "placeholder_5250": "Servo Hardware PWM",
         "placeholder_5251": "Servo328",
         "placeholder_5252": "ServoCtrl",
@@ -7413,7 +7413,7 @@ define("lib/compile-util", ["require", "exports", "lib/library_dictionary"], fun
         return __awaiter(this, void 0, void 0, function* () {
             const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
             const renameInclude = include.map(lib => library_dictionary_1.library[lib]).filter(lib => lib !== undefined);
-            let listString = "# Wokwi Library List\n# See https://docs.wokwi.com/guides/libraries";
+            let listString = "";
             listString += renameInclude.join("\n") + "\n";
             const resp = yield fetch(url + '/build', {
                 method: 'POST',
@@ -10725,7 +10725,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
             return __awaiter(this, void 0, void 0, function* () {
                 (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
                 this.cpu = new index_1.CPU(this.program);
-                this.timer = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
+                this.timer0 = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
+                this.timer1 = new index_1.AVRTimer(this.cpu, index_1.timer1Config);
+                this.timer2 = new index_1.AVRTimer(this.cpu, index_1.timer2Config);
                 this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
                 this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
                 this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
@@ -12552,6 +12554,8 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             this.accelerometer = { x: 0, y: 0, z: 0 };
             this.gyroscope = { x: 0, y: 0, z: 0 };
             this.magnetometer = { x: 0, y: 0, z: 0 };
+            this.orientation = { x: 0, y: 0, z: 0 };
+            this.rotating = false;
             this.sensorControls = {
                 setAcceleration: (x, y, z) => {
                     this.accelerometer = { x, y, z };
@@ -12608,6 +12612,12 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             const qw = cr * cp * cy + sr * sp * sy;
             return { x: qx, y: qy, z: qz, w: qw };
         }
+        setMotion(rotating) {
+            if (rotating) {
+                this.sensorControls.setGyroscope(0, 0, 90);
+            }
+            this.rotating = rotating;
+        }
         calculateOrientation() {
             const avgX = (this.accelerometer.x + this.gyroscope.x + this.magnetometer.x) / 3;
             const avgY = (this.accelerometer.y + this.gyroscope.y + this.magnetometer.y) / 3;
@@ -12634,7 +12644,27 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
         i2cReadByte(acked) {
             let byte;
             if (this.address !== null) {
+                if (this.address === registers.EULER_HEADING_LSB.address && this.rotating) {
+                    const currentTime = Date.now();
+                    const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0;
+                    if (timeDiff > 0) {
+                        const gyroX = this.gyroscope.x * timeDiff;
+                        const gyroY = this.gyroscope.y * timeDiff;
+                        const gyroZ = this.gyroscope.z * timeDiff;
+                        this.orientation.x += gyroZ;
+                        this.orientation.y += gyroX;
+                        this.orientation.z += gyroY;
+                        this.orientation.x = this.orientation.x % 360;
+                        this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+                        this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+                        this.lastRead = currentTime;
+                        this.setVector(registers.EULER_HEADING_LSB.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+                    }
+                }
                 byte = this.memory[this.address];
+                if (this.address === registers.EULER_PITCH_MSB.address && this.rotating) {
+                    this.lastRead = Date.now();
+                }
             }
             else {
                 byte = 0xff;
@@ -12783,7 +12813,57 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1) {
+define("controllers/servo", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_3, execute_7) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Servo = void 0;
+    class Servo extends controller_8.Controller {
+        setup() {
+            var _a;
+            this.fallingEdgeCycle = undefined;
+            this.risingEdgeCycle = undefined;
+            this.signal = this.pins.orange[0];
+            (_a = this.signal) === null || _a === void 0 ? void 0 : _a.setListener(this.onSignalChange.bind(this));
+        }
+        onSignalChange(state) {
+            const currentCycle = execute_7.AVRRunner.getInstance().cpu.cycles;
+            if (state === avr8js_3.PinState.High) {
+                this.risingEdgeCycle = currentCycle;
+            }
+            else if (state === avr8js_3.PinState.Low && this.risingEdgeCycle !== undefined) {
+                this.fallingEdgeCycle = currentCycle;
+                const pulseWidthCycles = this.fallingEdgeCycle - this.risingEdgeCycle;
+                const pulseWidthMs = this.cyclesToMs(pulseWidthCycles);
+                const angle = Math.round(this.msToAngle(pulseWidthMs));
+                if (this.previousAngle !== angle) {
+                    this.renderHorn(angle);
+                }
+                this.previousAngle = angle;
+            }
+        }
+        renderHorn(angle) {
+            const horn = this.element.querySelector(".horn");
+            const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
+            horn.setAttribute('transform', transformValue);
+        }
+        cyclesToMs(cycles) {
+            return (cycles * 1000) / (execute_7.AVRRunner.getInstance().MHZ / 1000);
+        }
+        msToAngle(ms) {
+            const minPulse = 544;
+            const maxPulse = 2400;
+            const minAngle = 0;
+            const maxAngle = 180;
+            if (ms <= minPulse)
+                return minAngle;
+            if (ms >= maxPulse)
+                return maxAngle;
+            return ((ms - minPulse) / (maxPulse - minPulse)) * (maxAngle - minAngle) + minAngle;
+        }
+    }
+    exports.Servo = Servo;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -12794,6 +12874,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
     window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
+    window.Servo = servo_1.Servo;
     window.HCSR501 = hcsr501_1.HCSR501;
     window.KY018 = ky018_1.KY018;
 });
