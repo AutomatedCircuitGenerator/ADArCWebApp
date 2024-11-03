@@ -6,803 +6,817 @@
 
 <PageTitle>Index</PageTitle>
 <head>
-	<link href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css" rel="stylesheet" />
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css" rel="stylesheet"/>
 </head>
 <body>
-	<script suppress-error="BL9992" type="module" src="build/build.js"></script>
-	<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-	<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
-		<div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
-			<div class="logo-and-adarc" >
-				<img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-				<span class="adarc-text">ADArC</span>
-			</div>
+<script suppress-error="BL9992" type="module" src="build/build.js"></script>
+<button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
+    <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
+        <div class="logo-and-adarc">
+            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
+            <span class="adarc-text">ADArC</span>
+        </div>
 
-			<button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
-				<!-- change -->
-				💡 Tutorial
-			</button>
-			<div class="center-toolbar">
-				<div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-					<button style="visibility:@(selLockedOut||isRunning?"hidden":"visible")" @onclick="downloadFile" class="toolbar-button">
-						<span>⬆️ Export</span>
-					</button>
-					
-					<InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile" />
-					<label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut||isRunning?"hidden":"visible")">
-						<span>⬇️️ Import</span>
-					</label>
-				</div>
-				<button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
-					<span>ℹ Help</span>
-				</button>
-					<button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
-					<span>@runStopText</span>
-				</button>
-			</div>
-		</div>
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
+            <!-- change -->
+            💡 Tutorial
+        </button>
+        <div class="center-toolbar">
+            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
+                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="downloadFile" class="toolbar-button">
+                    <span>⬆️ Export</span>
+                </button>
 
-		<div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="dragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-			<div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
-				<MainCanvas comps=@(comps) handleMouseEnter="()=>allowDrop=true" handleMouseLeave="()=>allowDrop=false"></MainCanvas>
-			</div>
-			<div class="sidebar" style="width: 25%; left: @(leftPaneAlign+"%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
-				<div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
-					@if (isLeftExpanded)
-					{
-						<span>▶</span>
-					}
-					else
-					{
-						<span>◀</span>
-					}
-				</div>
-				<ComponentPane host="@this"></ComponentPane>
-			</div>
-			<div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
-				<VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
-			</div>
-			<div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign+"%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
-				<div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
-					@if (isRightExpanded)
-					{
-						<span>▶</span>
-					}
-					else
-					{
-						<span>◀</span>
-					}
-				</div>
-				<CodePane></CodePane>
-			</div>
-		</div>
-	@if (showZoomTooltip) 
-	{
-		<div class="zoom-tooltip" style="background: #ece1be">
-			<label>Use these buttons to zoom in and out of the Canvas.</label>
-			<button @onclick="GotItClicked">Got it!</button>
-		</div>
-	}
-	
-	@if (loadingProgress == -1)
-	{
-		<div class="workbench-title">
-			<span @onclick="showRightClickTooltipFn">💡 Workbench</span>
-		</div>
-	}
-	@if (showRightClickTooltip) {
-		<div class="right-click-tooltip" style="background: #ece1be">
-			<label>This is the Workbench.</label>
-			<label style="font-size: 13.5px">Right-click components dragged from the Component Palette for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
-			<button @onclick="HideRightClickTooltip">Got it!</button>
-		</div>
-	}
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
+                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile"/>
+                <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")">
+                    <span>⬇️️ Import</span>
+                </label>
+            </div>
+            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
+                <span>ℹ Help</span>
+            </button>
+            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
+                <span>@runStopText</span>
+            </button>
+        </div>
+    </div>
+
+    <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+        <div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
+            <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
+        </div>
+        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
+            <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+                @if (isLeftExpanded)
+                {
+                    <span>▶</span>
+                }
+                else
+                {
+                    <span>◀</span>
+                }
+            </div>
+            <ComponentPane host="@this"></ComponentPane>
+        </div>
+        <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
+            <VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
+        </div>
+        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
+            <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
+                @if (isRightExpanded)
+                {
+                    <span>▶</span>
+                }
+                else
+                {
+                    <span>◀</span>
+                }
+            </div>
+            <CodePane></CodePane>
+        </div>
+    </div>
+    @if (showZoomTooltip)
+    {
+        <div class="zoom-tooltip" style="background: #ece1be">
+            <label>Use these buttons to zoom in and out of the Canvas.</label>
+            <button @onclick="GotItClicked">Got it!</button>
+        </div>
+    }
+
+    @if (loadingProgress == -1)
+    {
+        <div class="workbench-title">
+            <span @onclick="ShowRightClickTooltipFn">💡 Workbench</span>
+        </div>
+    }
+    @if (showRightClickTooltip)
+    {
+        <div class="right-click-tooltip" style="background: #ece1be">
+            <label>This is the Workbench.</label>
+            <label style="font-size: 13.5px">Right-click components dragged from the Component Palette for environmental settings, information, and deletion. Each component added auto-generates code in the Code Panel, accessible by clicking the arrow icon on the right side of the screen.</label>
+            <button @onclick="HideRightClickTooltip">Got it!</button>
+        </div>
+    }
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 
 
 </div>
 <div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-	<span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
-	<div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
+    <div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
 </div>
 </body>
 
 @code{
-	bool isLeftExpanded = true;
-	bool isRightExpanded = false;
-	/// <summary>
-	/// Percentage of screen that the left pane is pushed to the left.
-	/// Default position (0) is fully on screen.
-	/// </summary>
-	int leftPaneAlign => isLeftExpanded ? 0 : -24;
-	/// <summary>
-	/// Percentage of screen that the right pane is pushed to the right.
-	/// Default position (0) is fully on screen.
-	/// </summary>
-	int rightPaneAlign => isRightExpanded ? 0 : -39;
-	string runStopText = "▶️ Run";
-	public bool isRunning = false;
-
-	void ToggleLeftSidebar()
-	{
-		isLeftExpanded = !isLeftExpanded;
-		isRightExpanded = false;
-		StateHasChanged();
-	}
-
-	void ToggleRightSidebar()
-	{
-		isRightExpanded = !isRightExpanded;
-		isLeftExpanded = false;
-		StateHasChanged();
-	}
-
-
-	/// <summary>
-	/// Attempts to compile and run the code.
-	/// </summary>
-	/// <returns></returns>
-	async Task ToggleRunStop()
-	{
-		if (!isRunning)
-		{
-			runStopText = "Compiling...";
-			var response = await AppInterop.compileWrapper();
-
-
-			if (response.stderr != "")
-			{
-				codePane.updateConsoleOutput(response.stderr, false);
-				runStopText = "▶ Run";
-				//look for available error messages (format roughly error:linenum:columnnum:message)
-				var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
-				if (caps.Count > 0)
-				{
-					string lineSection = caps.First().Value;
-					//cut off the colons at the beginning and end
-					lineSection = lineSection[1..^1];
-					//get the index of the middle colon
-					int mid = lineSection.IndexOf(":");
-					//grab line number only
-					int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
-					//grab column number only
-					int column = int.Parse(lineSection[(mid + 1)..^0]);
-					//cut off error: to get message
-					string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
-					AppInterop.makeMonacoErrorWrapper(message, line, column);
-				}
-
-			}
-			else  //no errors
-			{
-				codePane.updateConsoleOutput(response.stdout, false);
-				AppInterop.clearMonacoErrorsWrapper();
-				AppInterop.startSimWrapper();
-				runStopText = "🟥 Stop";
-				isRunning = true;
-			}
-		}
-		else    //stop running
-		{
-			AppInterop.stopWrapper();
-			codePane!.commitBuffer();
-			codePane!.updateConsoleOutput("Stopped.\n", false);
-			runStopText = "▶ Run";
-			isRunning = false;
-		}
-	}
-
-	void OpenExternalHelp()
-	{
-		string url = "https://adarc-help.mech.website/";
-		JsRuntime.InvokeVoidAsync("window.open", url, "_blank");	
-	}
-
-
-
-
-	public Index()
-	{
-		app = this;
-	}
-
-	/// <summary>
-	/// Provides avenue for non-component classes to invoke render.
-	/// </summary>
-	public void StateChanged()
-	{
-		StateHasChanged();
-	}
-
-
-	/// <summary>
-	/// re-render is also triggered on events, so create an event with a triggered click.
-	/// generally the same as previous and should be removed if possible.
-	/// TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
-	/// </summary>
-	/// <returns></returns>
-	public async Task triggerRender()
-	{
-		await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
-	}
-
-	private int localIds = 0;
-
-
-	/// <summary>
-	/// main component storage. provides an arduino by default. The arduino is overwritten when rule loading finishes,
-	/// but does not change visually (hopefully)
-	/// </summary>
-	public static Dictionary<int, ComponentInstance> comps = new()
-	{
-		{0, new ComponentInstance(1, null, 829, 219)}
-	};
-
-
-	public int selectedComponent = -1;
-
-	public static Index? app;
-	public static MainCanvas? buildCanvas;
-	public static CodePane? codePane;
-	public static ComponentPane? compPane;
-	public static readonly int defaultScreenWidth = 1920;
-	public static double currentWidthRatio = 1;
-	public static readonly int defaultScreenHeight = 1080;
-	public static double currentHeightRatio = 1;
-
-	public static ElementReference? refresh;
-
-	/// <summary>
-	/// Does setup for javascript interop on page load.
-	/// Defined by Blazor.
-	/// </summary>
-	/// <param name="firstRender">true if this is specifically the first render, false otherwise</param>
-	/// <returns></returns>
-	protected async override Task OnAfterRenderAsync(bool firstRender)
-	{
-		if (firstRender)
-		{
-			Console.WriteLine("Blazor Load Completed!");
-
-			AppInterop.runtime = JsRuntime;
-			AppInterop.jsModule = await AppInterop.getModuleWrapper();
-
-			AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-			runTutorial();
-			//AppInterop.startSimWrapper();
-			//AppInterop.updateCodeWrapper();
-		}
-	}
-
-
-
-	#region component pane integration
-	/// <summary>
-	/// Dragged component global id. Used to transfer data out of the palette to this file.
-	/// </summary>
-	private int targetCardComponentId = -1;
-	/// <summary>
-	/// Controls what component is displayed while the drag is ongoing.
-	/// </summary>
-	private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
-	private string isVisible = "hidden";
-	private bool allowDrop = false;
-
-	private double moverOffsetTop = 0;
-	private double moverOffsetLeft = 0;
-
-	public void setTargetID(int id)
-	{
-		targetCardComponentId = id;
-	}
-
-	//functions to handle component dragged from palette to workbench
-	private void checkForCardDrag(MouseEventArgs e)
-	{
-		if (e.Button == 0 && targetCardComponentId != -1)
-		{
-			isVisible = "visible";
-			moverOffsetLeft = e.ClientX;
-			moverOffsetTop = e.ClientY;
-		}
-	}
-
-	private void dragCardIfPossible(MouseEventArgs e)
-	{
-		if (targetCardComponentId != -1)
-		{
-			moverOffsetLeft = e.ClientX;
-			moverOffsetTop = e.ClientY;
-		}
-	}
-
-	public void addToCanvasIfNecessary(MouseEventArgs e)
-	{
-		if (targetCardComponentId != -1)
-		{
-			isVisible = "hidden";
-			if (allowDrop)  //ie, cursor is over the workbench
-			{
-				++localIds;
-				var d = ComponentDeclarations.components[targetCardComponentId];
-				var n = new node();//label with localId (easy tracking)
-				n.localLabels.Add("user_" + d.nodeName);
-
-				GraphSynthInvoke.GetNodes().Add(n);
-				GraphSynthInvoke.inputs.Add(d.nodeName);
-				GraphSynthInvoke.recg_apply();			//do component connection backend
-
-				//label all new nodes and connections with the localid of the component that added them.
-				GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
-				GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-				//create frontend instance
-				var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
-				comp.localId = localIds;
-				comps.Add(localIds, buildCanvas.unZoom(comp));//50 is height of toolbar
-				BuildCode.outputPins.Clear();
-				buildCanvas!.connLines.Clear();
-				//reset the way that component pins are bound to the arduino.
-				//TODO: check for performance improvements here.
-				foreach (var c in comps.Values)
-				{
-					updatePinBindings(c);	//keep an eye on this. could be not good for performance.
-				}
-
-				//register the dht specifically to forced the arduino to pause while awaiting response from sensor
-				//TODO: improve and generalize.
-				if (comps[localIds].globalId == 20)
-				{
-					//Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-					AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
-				}
-				//create listeners for arduino pins to components.
-				//Personally, not a huge fan of this system. good place for improvement
-				setupListeners();
-
-			}
-			moverOffsetLeft = 0;
-			moverOffsetTop = 0;
-			targetCardComponentId = -1;
-		}
-	}
-
-	/// <summary>
-	/// Binds component translation functions to arduino pins through listeners.
-	/// </summary>
-	private void setupListeners()
-	{
-		if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
-		{
-			foreach (var c in comps.Values)     //iterate all components (don't know what listeners exist already)
-			{
-				if (c.globalId != 1)            //exclude the arduino
-				{
-					foreach (string listen in c.data.pinsToListen)  //add a listener for each important pin
-					{
-						int pin = -1;
-						if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
-						{
-							pin = conn!.toId;
-						}
-
-						bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
-						//hopefully the only time the list extends
-						//is on arduino, which is excluded here
-						if (!hasList || !list!.Any(el => el.actor == c))            //no list for this pin yet, or the list does not contain any connections for this component
-						{
-							int pin2 = -1;
-							if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-							{
-								pin2 = conn2!.toId;
-							}
-							//TODO: fix so that all componenents inherit from one class
-							var info = c.data.compType.GetMethod("translate");
-							if (info != null)
-							{
-								AvrCPU.addListener(pin2, c, info);
-							}
-							else
-							{
-								Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
-							}
-						}
-					}
-				}
-			}
-
-			AppInterop.updateCodeWrapper();
-		}
-	}
-
-	#endregion
-
-	private readonly List<string> ruleNames = new();
-	/// <summary>
-	/// Disables the palette until rules are loaded.
-	/// </summary>
-	private bool selLockedOut = true;
-	/// <summary>
-	/// This is triggered exactly once when blazor is loaded, but before render if I remember correctly.
-	/// In general, order is html load -> this -> render
-	/// </summary>
-	/// <returns></returns>
-	protected override async Task OnInitializedAsync()
-	{
-		//load rules.
-		//TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-		int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0,88);
-		await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x,88);
-		compPane!.releaseLockout();
-		selLockedOut = false;
-		//hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
-		setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
-		base.StateHasChanged();
-
-
-		//all else finish first
-		await Task.Delay(1000);
-		loadingProgress = -1;
-
-		// await RuleSetMap.getInstance().loadRuleSet("BIG1");
-		// foreach (string str in ruleNames)
-		// {
-		// 	await RuleSetMap.getInstance().loadRuleSet(str);
-		// 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-		// 	base.StateHasChanged();
-		// }
-
-		// // allRulesLoaded = true;
-
-
-
-	}
-	/// <summary>
-	/// sets up a components pin bindings to an arduino.
-	/// TODO: improve this function or find a way to remove it entirely.
-	/// </summary>
-	/// <param name="comp">A component instance to update the bindings on.</param>
-	public void updatePinBindings(ComponentInstance comp)
-	{
-		comp.connMap.Clear();
-		//buildCanvas!.connLines.Clear();
-
-		var compPins = getPins(comp.gsNode, comp.data.nodeName);
-		if (compPins.Count == 0)
-		{
-			return;	
-		}
-
-		var connArcs = GraphSynthInvoke.GetArcs().Where(a=>a.localLabels.Contains("connection")).ToList();
-		//List<arc> connArcs = new();
-
-		foreach (arc a in connArcs)
-		{
-			ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
-			ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
-
-
-			if (ha == hb)
-			{
-				continue;
-			}
-
-			if (ha != comp && hb != comp)
-			{
-				continue;	
-			}
-			else if (ha != comp)
-			{
-				var temp = ha;
-				ha = hb;
-				hb = temp;
-			}
-
-			var aPinName = "**NF**";
-
-			if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
-			{
-				aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-			}
-			string bPinName = "";
-
-
-			if (aPinName == "**NF**")
-			{
-				aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-				bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-			}
-			else
-			{
-				bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-			}
-
-			//if arduino and data pin being connected, register to code.
-			if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
-			{
-				BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
-				//Console.WriteLine("1: " + BuildCode.outputPins.Count);
-			}
-
-			if (aPinName == "**NF**")
-			{
-				Console.WriteLine(ha.data.name + " is missing a pin definition!");
-			}
-			if (bPinName == "**NF**")
-			{
-				Console.WriteLine(hb.data.name + " is missing a pin definition!");
-			}
-			int i1 = ha.data.pins[aPinName];
-			int i2 = hb.data.pins[bPinName];
-
-
-			comp.addConnection(i1, hb, i2, a);	//also sets up the drawn line
-		}
-	}
-
-	/// <summary>
-	/// Helper for updatePinBindings to get all pins of a component as graphsynth nodes.
-	/// </summary>
-	/// <param name="n">The node to get the pins of. Specifically, the root node, not the main node.</param>
-	/// <param name="name">The name of the root node, excluding "user_".</param>
-	/// <returns></returns>
-	public List<node> getPins(node n, string name){
-		//n is root, connected to main node but not main node.
-		string fullName = "user_" + name;
-		if (n.arcs.Count == 0)
-		{
-			return new();
-		}
-		var mainNode = ((arc)n.arcs[0]).otherNode(n);
-		//traverse arcs to get pin nodes, except the root node
-		var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
-		return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
-
-
-	}
-
-	/// <summary>
-	/// Deletes a component.
-	/// </summary>
-	public void removecomp()
-	{
-		node Comp2remove = Index.comps[selectedComponent].gsNode;
-
-		//specifically deregisters the dht pins from requiring a pause on the arduino.
-		//TODO: improve and generalize.
-		if (comps[selectedComponent].globalId == 20)
-		{
-			AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
-		}
-
-		GraphSynthInvoke.removeComp(Comp2remove);
-		comps.Remove(selectedComponent);
-		List<node> b = GraphSynthInvoke.GetNodes();
-		List<arc> c = GraphSynthInvoke.GetArcs();
-
-
-		BuildCode.outputPins.Clear();
-		buildCanvas!.connLines.Clear();
-		foreach (var comp in comps.Values)
-		{
-			updatePinBindings(comp);   //keep an eye on this. could be not good for performance.
-		}
-
-		/*int numofcon = 0;
-		for (int i = 0; i < c.Count; i++)
-			{
-			if (c[i].localLabels.Contains("connection"))
-				{
-				numofcon++;
-		}
-		}
-		Console.WriteLine("the number of nodes is " + b.Count);
-		Console.WriteLine("the number of connections is " + numofcon);*/
-	}
-
-	/// <summary>
-	/// Deletes a component when delete/backspace pressed.
-	/// </summary>
-	/// <param name="e"></param>
-	private void handleKeyPress(KeyboardEventArgs e)
-	{
-		//Console.WriteLine(e.Key);
-		if (!isRunning && ((e.Key == "Backspace" || e.Key =="Delete") && selectedComponent!=-2 && selectedComponent!=-1))
-		{
-			removecomp();
-		}
-	}
-
-	//progress bar
-	public double loadingProgress = 0;
-
-	//unused
-	private void HandleZoom(string action)
-	{
-		const double zoomStep = 0.1;
-
-		if (action == "in")
-		{
-			buildCanvas!.zoomFactor -= zoomStep;
-		}
-		else if (action == "out")
-		{
-			buildCanvas!.zoomFactor += zoomStep;
-		}
-
-		buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
-
-		StateHasChanged();
-	}
-
-	bool showZoomTooltip = false;
-	bool labelShownBefore = false;
-
-	void ShowLabel()
-	{
-		if (!labelShownBefore)
-		{
-			showZoomTooltip = true;
-		}
-	}
-
-	void HideLabel()
-	{
-		showZoomTooltip = false;
-	}
-
-	void GotItClicked() //for zoom tooltip
-	{
-		labelShownBefore = true;
-		showZoomTooltip = false;
-	}
-
-	bool showRightClickTooltip = false;
-	void HideRightClickTooltip() {
-		showRightClickTooltip = false;
-	}
-	void showRightClickTooltipFn()
-	{
-		showRightClickTooltip = true;
-
-	}
-
-
-	/// <summary>
-	/// When a file is imported, handle it.
-	/// </summary>
-	/// <param name="e"></param>
-	/// <returns></returns>
-	public async Task loadFromFile(InputFileChangeEventArgs e)
-	{
-		var file = e.File;
-		var buffer = new byte[file.Size];
-		await e.File.OpenReadStream(512000).ReadAsync(buffer);
-		var str = System.Text.Encoding.UTF8.GetString(buffer);
-		setupBenchFromJSONString(str);
-	}
-
-	/// <summary>
-	/// Handles most of the setup process of the bench after import.
-	/// </summary>
-	/// <param name="JSON">The full JSON to deserialize.</param>
-	public void setupBenchFromJSONString(string JSON){
-		Data data = DeserializeJSON(JSON);
-		//clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
-		//notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
-		foreach (var comp in comps)
-		{
-			selectedComponent = comp.Key;
-			removecomp();
-			selectedComponent = -1;
-		}
-		buildCanvas!.connLines.Clear();
-		buildCanvas!.resetTransform();
-		GraphSynthInvoke.inputs.Clear();
-		GraphSynthInvoke.destroyGraph();
-		BuildCode.outputPins.Clear();
-
-		//Console.WriteLine(ex);
-		localIds = data.LocalId;
-
-		foreach (var kv in data.Comps)
-		{
-			comps.Add(kv.Key, kv.Value);
-			var n = new node();//label with localId (easy tracking)
-			n.localLabels.Add("user_" + kv.Value.data.nodeName);
-			kv.Value.gsNode = n;
-
-			GraphSynthInvoke.GetNodes().Add(n);
-			GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
-			GraphSynthInvoke.recg_apply();
-			GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
-			GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
-
-		}
-
-		foreach (var c in comps.Values)
-		{
-			updatePinBindings(c);   //keep an eye on this. could be not good for performance.
-		}
-		setupListeners();
-
-		AppInterop.setCodeWrapper(data.Code);
-	}
-
-	/// <summary>
-	/// Create file data and send it off to JS for downloading.
-	/// </summary>
-	public async void downloadFile()
-	{
-		var stream = new MemoryStream();
-		var writer = new StreamWriter(stream);
-		writer.Write(await ExportJSON());
-		writer.Flush();
-		stream.Position = 0;
-
-		using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
-
-		AppInterop.downloadFile("adarc-circuit.adarc", streamRef);
-	}
-
-
-	class Data
-	{
-		// public List<InstanceConnection> ConnLines { get; set; }
-		public int LocalId { get; set; }
-		public string Code { get; set; }
-		public Dictionary<int, ComponentInstance> Comps { get; set; }
-	}
-	/// <summary>
-	/// Creates a JSON string representing most of the current state of the circuit.
-	/// </summary>
-	/// <returns>A JSON string of a Data object.</returns>
-	private async Task<string> ExportJSON(){
-		Data parentObject = new Data
-		{
-			// ConnLines = Index.buildCanvas.connLines,
-			Comps = comps,
-			LocalId = localIds,
-			Code = await AppInterop.getCodeWrapper()
-		};
-
-		var options = new JsonSerializerOptions { IncludeFields = true};
-		options.Converters.Add(new ParamSerializer());
-		return JsonSerializer.Serialize(parentObject,options);
-	}
-	/// <summary>
-	/// Deserializes a JSON string to Data object.
-	/// </summary>
-	/// <param name="jsonString">The JSON to deserialize.</param>
-	/// <returns>A Data object.</returns>
-	private Data DeserializeJSON(string jsonString)
-	{
-		try
-		{
-			// Deserialize JSON data into a Data object
-			var options = new JsonSerializerOptions { IncludeFields = true };
-			options.Converters.Add(new ParamSerializer());
-			Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
-
-			// Now you have access to the deserialized data as a CanvasData object
-			// Do whatever you need with this data
-
-			return canvasData;
-		}
-		catch (Exception ex)
-		{
-			Console.WriteLine($"Error during deserialization: {ex.Message}");
-		}
-
-		return null;
-	}
-
-	// runs the introjs tutorial
-	private async void runTutorial()
-	{
-		// var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
-		// ant-menu-submenu-hidden
-		await AppInterop.jsModule!.InvokeVoidAsync("runTutorial");
-		//await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
-		StateHasChanged();
-	}
+    bool isLeftExpanded = true;
+    bool isRightExpanded = false;
+
+    /// <summary>
+    /// Percentage of screen that the left pane is pushed to the left.
+    /// Default position (0) is fully on screen.
+    /// </summary>
+    int leftPaneAlign => isLeftExpanded ? 0 : -24;
+
+    /// <summary>
+    /// Percentage of screen that the right pane is pushed to the right.
+    /// Default position (0) is fully on screen.
+    /// </summary>
+    int rightPaneAlign => isRightExpanded ? 0 : -39;
+
+    string runStopText = "▶️ Run";
+    public bool isRunning = false;
+
+    void ToggleLeftSidebar()
+    {
+        isLeftExpanded = !isLeftExpanded;
+        isRightExpanded = false;
+        StateHasChanged();
+    }
+
+    void ToggleRightSidebar()
+    {
+        isRightExpanded = !isRightExpanded;
+        isLeftExpanded = false;
+        StateHasChanged();
+    }
+
+
+    /// <summary>
+    /// Attempts to compile and run the code.
+    /// </summary>
+    /// <returns></returns>
+    async Task ToggleRunStop()
+    {
+        if (!isRunning)
+        {
+            runStopText = "Compiling...";
+            var response = await AppInterop.compileWrapper();
+
+
+            if (response.stderr != "")
+            {
+                codePane.updateConsoleOutput(response.stderr, false);
+                runStopText = "▶ Run";
+                //look for available error messages (format roughly error:linenum:columnnum:message)
+                var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
+                if (caps.Count > 0)
+                {
+                    string lineSection = caps.First().Value;
+                    //cut off the colons at the beginning and end
+                    lineSection = lineSection[1..^1];
+                    //get the index of the middle colon
+                    int mid = lineSection.IndexOf(":");
+                    //grab line number only
+                    int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
+                    //grab column number only
+                    int column = int.Parse(lineSection[(mid + 1)..^0]);
+                    //cut off error: to get message
+                    string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
+                    AppInterop.makeMonacoErrorWrapper(message, line, column);
+                }
+            }
+            else //no errors
+            {
+                codePane.updateConsoleOutput(response.stdout, false);
+                AppInterop.clearMonacoErrorsWrapper();
+                AppInterop.startSimWrapper();
+                runStopText = "🟥 Stop";
+                isRunning = true;
+            }
+        }
+        else //stop running
+        {
+            AppInterop.stopWrapper();
+            codePane!.commitBuffer();
+            codePane!.updateConsoleOutput("Stopped.\n", false);
+            runStopText = "▶ Run";
+            isRunning = false;
+        }
+    }
+
+    void OpenExternalHelp()
+    {
+        string url = "https://adarc-help.mech.website/";
+        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+    }
+
+
+    public Index()
+    {
+        app = this;
+    }
+
+    /// <summary>
+    /// Provides avenue for non-component classes to invoke render.
+    /// </summary>
+    public void StateChanged()
+    {
+        StateHasChanged();
+    }
+
+
+    /// <summary>
+    /// re-render is also triggered on events, so create an event with a triggered click.
+    /// generally the same as previous and should be removed if possible.
+    /// TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
+    /// </summary>
+    /// <returns></returns>
+    public async Task triggerRender()
+    {
+        await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
+    }
+
+    private int localIds = 0;
+
+
+    /// <summary>
+    /// main component storage. provides an arduino by default. The arduino is overwritten when rule loading finishes,
+    /// but does not change visually (hopefully)
+    /// </summary>
+    public static Dictionary<int, ComponentInstance> comps = new()
+    {
+        { 0, new ComponentInstance(1, null, 829, 219) }
+    };
+
+
+    public int selectedComponent = -1;
+
+    public static Index? app;
+    public static MainCanvas? buildCanvas;
+    public static CodePane? codePane;
+    public static ComponentPane? compPane;
+    public static readonly int defaultScreenWidth = 1920;
+    public static double currentWidthRatio = 1;
+    public static readonly int defaultScreenHeight = 1080;
+    public static double currentHeightRatio = 1;
+
+    public static ElementReference? refresh;
+
+    /// <summary>
+    /// Does setup for javascript interop on page load.
+    /// Defined by Blazor.
+    /// </summary>
+    /// <param name="firstRender">true if this is specifically the first render, false otherwise</param>
+    /// <returns></returns>
+    protected async override Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            Console.WriteLine("Blazor Load Completed!");
+
+            AppInterop.runtime = JsRuntime;
+            AppInterop.jsModule = await AppInterop.getModuleWrapper();
+
+            AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+            runTutorial();
+            //AppInterop.startSimWrapper();
+            //AppInterop.updateCodeWrapper();
+        }
+    }
+
+
+    #region component pane integration
+
+    /// <summary>
+    /// Dragged component global id. Used to transfer data out of the palette to this file.
+    /// </summary>
+    private int targetCardComponentId = -1;
+
+    /// <summary>
+    /// Controls what component is displayed while the drag is ongoing.
+    /// </summary>
+    private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
+
+    private string isVisible = "hidden";
+    private bool allowDrop = false;
+
+    private double moverOffsetTop = 0;
+    private double moverOffsetLeft = 0;
+
+    public void setTargetID(int id)
+    {
+        targetCardComponentId = id;
+    }
+
+    //functions to handle component dragged from palette to workbench
+    private void checkForCardDrag(MouseEventArgs e)
+    {
+        if (e.Button == 0 && targetCardComponentId != -1)
+        {
+            isVisible = "visible";
+            moverOffsetLeft = e.ClientX;
+            moverOffsetTop = e.ClientY;
+        }
+    }
+
+    private void DragCardIfPossible(MouseEventArgs e)
+    {
+        if (targetCardComponentId == -1) return;
+        moverOffsetLeft = e.ClientX;
+        moverOffsetTop = e.ClientY;
+    }
+
+    public void addToCanvasIfNecessary(MouseEventArgs e)
+    {
+        if (targetCardComponentId != -1)
+        {
+            isVisible = "hidden";
+            if (allowDrop) //ie, cursor is over the workbench
+            {
+                ++localIds;
+                var d = ComponentDeclarations.components[targetCardComponentId];
+                var n = new node(); //label with localId (easy tracking)
+                n.localLabels.Add("user_" + d.nodeName);
+
+                GraphSynthInvoke.GetNodes().Add(n);
+                GraphSynthInvoke.inputs.Add(d.nodeName);
+                GraphSynthInvoke.recg_apply(); //do component connection backend
+
+                //label all new nodes and connections with the localid of the component that added them.
+                GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+                //create frontend instance
+                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
+                comp.localId = localIds;
+                comps.Add(localIds, buildCanvas.unZoom(comp)); //50 is height of toolbar
+                BuildCode.outputPins.Clear();
+                buildCanvas!.connLines.Clear();
+                //reset the way that component pins are bound to the arduino.
+                //TODO: check for performance improvements here.
+                foreach (var c in comps.Values)
+                {
+                    updatePinBindings(c); //keep an eye on this. could be not good for performance.
+                }
+
+                //register the dht specifically to forced the arduino to pause while awaiting response from sensor
+                //TODO: improve and generalize.
+                if (comps[localIds].globalId == 20)
+                {
+                    //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+                    AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
+                }
+
+                //create listeners for arduino pins to components.
+                //Personally, not a huge fan of this system. good place for improvement
+                setupListeners();
+            }
+
+            moverOffsetLeft = 0;
+            moverOffsetTop = 0;
+            targetCardComponentId = -1;
+        }
+    }
+
+    /// <summary>
+    /// Binds component translation functions to arduino pins through listeners.
+    /// </summary>
+    private void setupListeners()
+    {
+        if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
+        {
+            foreach (var c in comps.Values) //iterate all components (don't know what listeners exist already)
+            {
+                if (c.globalId != 1) //exclude the arduino
+                {
+                    foreach (string listen in c.data.pinsToListen) //add a listener for each important pin
+                    {
+                        int pin = -1;
+                        if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+                        {
+                            pin = conn!.toId;
+                        }
+
+                        bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+                        //hopefully the only time the list extends
+                        //is on arduino, which is excluded here
+                        if (!hasList || !list!.Any(el => el.actor == c)) //no list for this pin yet, or the list does not contain any connections for this component
+                        {
+                            int pin2 = -1;
+                            if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+                            {
+                                pin2 = conn2!.toId;
+                            }
+
+                            //TODO: fix so that all componenents inherit from one class
+                            var info = c.data.compType.GetMethod("translate");
+                            if (info != null)
+                            {
+                                AvrCPU.addListener(pin2, c, info);
+                            }
+                            else
+                            {
+                                Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
+                            }
+                        }
+                    }
+                }
+            }
+
+            AppInterop.updateCodeWrapper();
+        }
+    }
+
+    #endregion
+
+    private readonly List<string> ruleNames = new();
+
+    /// <summary>
+    /// Disables the palette until rules are loaded.
+    /// </summary>
+    private bool selLockedOut = true;
+
+    /// <summary>
+    /// This is triggered exactly once when blazor is loaded, but before render if I remember correctly.
+    /// In general, order is html load -> this -> render
+    /// </summary>
+    /// <returns></returns>
+    protected override async Task OnInitializedAsync()
+    {
+        //load rules.
+        //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
+        int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 88);
+        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 88);
+        compPane!.releaseLockout();
+        selLockedOut = false;
+        //hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
+        setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
+        base.StateHasChanged();
+
+
+        //all else finish first
+        await Task.Delay(1000);
+        loadingProgress = -1;
+
+        // await RuleSetMap.getInstance().loadRuleSet("BIG1");
+        // foreach (string str in ruleNames)
+        // {
+        // 	await RuleSetMap.getInstance().loadRuleSet(str);
+        // 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
+        // 	base.StateHasChanged();
+        // }
+
+        // // allRulesLoaded = true;
+    }
+
+    /// <summary>
+    /// sets up a components pin bindings to an arduino.
+    /// TODO: improve this function or find a way to remove it entirely.
+    /// </summary>
+    /// <param name="comp">A component instance to update the bindings on.</param>
+    public void updatePinBindings(ComponentInstance comp)
+    {
+        comp.connMap.Clear();
+        //buildCanvas!.connLines.Clear();
+
+        var compPins = getPins(comp.gsNode, comp.data.nodeName);
+        if (compPins.Count == 0)
+        {
+            return;
+        }
+
+        var connArcs = GraphSynthInvoke.GetArcs().Where(a => a.localLabels.Contains("connection")).ToList();
+        //List<arc> connArcs = new();
+
+        foreach (arc a in connArcs)
+        {
+            ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+            ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+
+
+            if (ha == hb)
+            {
+                continue;
+            }
+
+            if (ha != comp && hb != comp)
+            {
+                continue;
+            }
+            else if (ha != comp)
+            {
+                var temp = ha;
+                ha = hb;
+                hb = temp;
+            }
+
+            var aPinName = "**NF**";
+
+            if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
+            {
+                aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            }
+
+            string bPinName = "";
+
+
+            if (aPinName == "**NF**")
+            {
+                aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            }
+            else
+            {
+                bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+            }
+
+            //if arduino and data pin being connected, register to code.
+            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
+            {
+                BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
+                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
+            }
+
+            if (aPinName == "**NF**")
+            {
+                Console.WriteLine(ha.data.name + " is missing a pin definition!");
+            }
+
+            if (bPinName == "**NF**")
+            {
+                Console.WriteLine(hb.data.name + " is missing a pin definition!");
+            }
+
+            int i1 = ha.data.pins[aPinName];
+            int i2 = hb.data.pins[bPinName];
+
+
+            comp.addConnection(i1, hb, i2, a); //also sets up the drawn line
+        }
+    }
+
+    /// <summary>
+    /// Helper for updatePinBindings to get all pins of a component as graphsynth nodes.
+    /// </summary>
+    /// <param name="n">The node to get the pins of. Specifically, the root node, not the main node.</param>
+    /// <param name="name">The name of the root node, excluding "user_".</param>
+    /// <returns></returns>
+    public List<node> getPins(node n, string name)
+    {
+        //n is root, connected to main node but not main node.
+        string fullName = "user_" + name;
+        if (n.arcs.Count == 0)
+        {
+            return new();
+        }
+
+        var mainNode = ((arc)n.arcs[0]).otherNode(n);
+        //traverse arcs to get pin nodes, except the root node
+        var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
+        return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
+    }
+
+    /// <summary>
+    /// Deletes a component.
+    /// </summary>
+    public void removecomp()
+    {
+        node Comp2remove = Index.comps[selectedComponent].gsNode;
+
+        //specifically deregisters the dht pins from requiring a pause on the arduino.
+        //TODO: improve and generalize.
+        if (comps[selectedComponent].globalId == 20)
+        {
+            AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
+        }
+
+        GraphSynthInvoke.removeComp(Comp2remove);
+        comps.Remove(selectedComponent);
+        List<node> b = GraphSynthInvoke.GetNodes();
+        List<arc> c = GraphSynthInvoke.GetArcs();
+
+
+        BuildCode.outputPins.Clear();
+        buildCanvas!.connLines.Clear();
+        foreach (var comp in comps.Values)
+        {
+            updatePinBindings(comp); //keep an eye on this. could be not good for performance.
+        }
+
+        /*int numofcon = 0;
+        for (int i = 0; i < c.Count; i++)
+            {
+            if (c[i].localLabels.Contains("connection"))
+                {
+                numofcon++;
+        }
+        }
+        Console.WriteLine("the number of nodes is " + b.Count);
+        Console.WriteLine("the number of connections is " + numofcon);*/
+    }
+
+    /// <summary>
+    /// Deletes a component when delete/backspace pressed.
+    /// </summary>
+    /// <param name="e"></param>
+    private void handleKeyPress(KeyboardEventArgs e)
+    {
+        // 1 is the arduino, not sure what -2 or -1 is
+        if (!isRunning && (e.Key is "Backspace" or "Delete") && selectedComponent != -2 && selectedComponent != -1 && selectedComponent != 1)
+        {
+            removecomp();
+        }
+    }
+
+    //progress bar
+    public double loadingProgress = 0;
+
+    //unused
+    private void HandleZoom(string action)
+    {
+        const double zoomStep = 0.1;
+
+        if (action == "in")
+        {
+            buildCanvas!.zoomFactor -= zoomStep;
+        }
+        else if (action == "out")
+        {
+            buildCanvas!.zoomFactor += zoomStep;
+        }
+
+        buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
+
+        StateHasChanged();
+    }
+
+    bool showZoomTooltip = false;
+    bool labelShownBefore = false;
+
+    void ShowLabel()
+    {
+        if (!labelShownBefore)
+        {
+            showZoomTooltip = true;
+        }
+    }
+
+    void HideLabel()
+    {
+        showZoomTooltip = false;
+    }
+
+    void GotItClicked() //for zoom tooltip
+    {
+        labelShownBefore = true;
+        showZoomTooltip = false;
+    }
+
+    bool showRightClickTooltip = false;
+
+    void HideRightClickTooltip()
+    {
+        showRightClickTooltip = false;
+    }
+
+    void ShowRightClickTooltipFn()
+    {
+        showRightClickTooltip = true;
+    }
+
+
+    /// <summary>
+    /// When a file is imported, handle it.
+    /// </summary>
+    /// <param name="e"></param>
+    /// <returns></returns>
+    public async Task loadFromFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var buffer = new byte[file.Size];
+        await e.File.OpenReadStream(512000).ReadAsync(buffer);
+        var str = System.Text.Encoding.UTF8.GetString(buffer);
+        setupBenchFromJSONString(str);
+    }
+
+    /// <summary>
+    /// Handles most of the setup process of the bench after import.
+    /// </summary>
+    /// <param name="JSON">The full JSON to deserialize.</param>
+    public void setupBenchFromJSONString(string JSON)
+    {
+        Data data = DeserializeJSON(JSON);
+        //clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
+        //notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
+        foreach (var comp in comps)
+        {
+            selectedComponent = comp.Key;
+            removecomp();
+            selectedComponent = -1;
+        }
+
+        buildCanvas!.connLines.Clear();
+        buildCanvas!.resetTransform();
+        GraphSynthInvoke.inputs.Clear();
+        GraphSynthInvoke.destroyGraph();
+        BuildCode.outputPins.Clear();
+
+        //Console.WriteLine(ex);
+        localIds = data.LocalId;
+
+        foreach (var kv in data.Comps)
+        {
+            comps.Add(kv.Key, kv.Value);
+            var n = new node(); //label with localId (easy tracking)
+            n.localLabels.Add("user_" + kv.Value.data.nodeName);
+            kv.Value.gsNode = n;
+
+            GraphSynthInvoke.GetNodes().Add(n);
+            GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+            GraphSynthInvoke.recg_apply();
+            GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
+            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
+        }
+
+        foreach (var c in comps.Values)
+        {
+            updatePinBindings(c); //keep an eye on this. could be not good for performance.
+        }
+
+        setupListeners();
+
+        AppInterop.setCodeWrapper(data.Code);
+    }
+
+    /// <summary>
+    /// Create file data and send it off to JS for downloading.
+    /// </summary>
+    public async void downloadFile()
+    {
+        var stream = new MemoryStream();
+        var writer = new StreamWriter(stream);
+        writer.Write(await ExportJSON());
+        writer.Flush();
+        stream.Position = 0;
+
+        using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
+
+        AppInterop.downloadFile("adarc-circuit.adarc", streamRef);
+    }
+
+
+    class Data
+    {
+        // public List<InstanceConnection> ConnLines { get; set; }
+        public int LocalId { get; set; }
+        public string Code { get; set; }
+        public Dictionary<int, ComponentInstance> Comps { get; set; }
+    }
+
+    /// <summary>
+    /// Creates a JSON string representing most of the current state of the circuit.
+    /// </summary>
+    /// <returns>A JSON string of a Data object.</returns>
+    private async Task<string> ExportJSON()
+    {
+        Data parentObject = new Data
+        {
+            // ConnLines = Index.buildCanvas.connLines,
+            Comps = comps,
+            LocalId = localIds,
+            Code = await AppInterop.getCodeWrapper()
+        };
+
+        var options = new JsonSerializerOptions { IncludeFields = true };
+        options.Converters.Add(new ParamSerializer());
+        return JsonSerializer.Serialize(parentObject, options);
+    }
+
+    /// <summary>
+    /// Deserializes a JSON string to Data object.
+    /// </summary>
+    /// <param name="jsonString">The JSON to deserialize.</param>
+    /// <returns>A Data object.</returns>
+    private Data DeserializeJSON(string jsonString)
+    {
+        try
+        {
+            // Deserialize JSON data into a Data object
+            var options = new JsonSerializerOptions { IncludeFields = true };
+            options.Converters.Add(new ParamSerializer());
+            Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+
+            // Now you have access to the deserialized data as a CanvasData object
+            // Do whatever you need with this data
+
+            return canvasData;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during deserialization: {ex.Message}");
+        }
+
+        return null;
+    }
+
+    // runs the introjs tutorial
+    private async void runTutorial()
+    {
+        // var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
+        // ant-menu-submenu-hidden
+        await AppInterop.jsModule!.InvokeVoidAsync("runTutorial");
+        //await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
+        StateHasChanged();
+    }
+
 }
