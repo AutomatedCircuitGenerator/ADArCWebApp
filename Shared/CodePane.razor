@@ -1,33 +1,32 @@
-﻿@using BlazorMonaco
-@using BlazorMonaco.Editor
-@using BlazorMonaco.Languages
+﻿@using BlazorMonaco.Editor
 @inject IJSRuntime JSRuntime
 
 <div class="code-container">
 
-    <span @onclick="showCodeTooltipFn">💡 Code Panel</span>
+    <span @onclick="ToggleCodePanelTip" style="cursor:pointer">💡 Code Panel</span>
 
-    @if (showCodeTooltip)
+    @if (isCodePanelTipDisplayed)
     {
         <div class="code-tooltip">
             <label>Each component added to the Workbench auto-generates code in this Panel, which you can edit freely.</label><br/>
             <label>Click the '▶️ Run' button above to compile it and start the simulation on the Workbench.</label><br/>
             <label>All types of output after running the code will appear in the Console, right below the Code Editor.</label><br/>
             <label>The '⬆️ Export' button above will save to a file both your code below and the components on the Workbench.</label>
-            <button @onclick="GotItClickedCode">Got it!</button>
+            <button @onclick="HideCodePanelTip">Got it!</button>
         </div>
     }
 
 
     <div id="editor-wrapper">
-        <!-- Container for the Monaco Editor -->
         <StandaloneCodeEditor Id="monaco-editor" ConstructionOptions="EditorConstructionOptions" CssClass="editor"></StandaloneCodeEditor>
     </div>
 
-    <!-- Container for the console output -->
-
     <div id="button-row">
-        <button @onclick="ToggleLock">
+        <button @onclick="ClearConsole" style="margin-right: 0.25rem;">
+            <span>@clearIcon</span>
+            <span>@clearText</span>
+        </button>
+        <button @onclick="ToggleScrollLock">
             <span>@lockIcon</span>
             <span>@lockText</span>
         </button>
@@ -48,13 +47,28 @@
     private string lockText = "Unlocked";
     private bool isLocked = false;
 
-    private async void ToggleLock()
+    private async void ToggleScrollLock()
     {
         isLocked = !isLocked;
         lockIcon = isLocked ? "🔒" : "🔓";
         lockText = isLocked ? "Locked" : "Unlocked";
 
         await JSRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
+    }
+
+    private string clearIcon = "🧹";
+    private string clearText = "Clear Console";
+
+    List<string> text = ["This is the Console. Compiler and Serial output appears here!", ""];
+
+    int index = 1;
+
+    private void ClearConsole()
+    {
+        text.Clear();
+        text.Add("");
+        index = 0;
+        StateHasChanged();
     }
 
 
@@ -84,38 +98,33 @@
         Pages.Index.codePane = this;
     }
 
-
-    List<string> text = ["This is the Console. Compiler and Serial output appears here!", ""];
-
-    int index = 1;
-
     /// <summary>
     /// Adds text to the console output.
     /// TODO: test extremely thoroughly. Had many issues.
     /// </summary>
     /// <param name="newText">The text to add to the console.</param>
-    /// <param name="middleNewLinesMakeHR">if true, using \n in the middle of a line breaks the line. this does not happen if false.</param>
-    public void updateConsoleOutput(string newText, bool middleNewLinesMakeHR)
+    /// <param name="middleNewLinesMakeHr">if true, using \n in the middle of a line breaks the line. this does not happen if false.</param>
+    public void UpdateConsoleOutput(string newText, bool middleNewLinesMakeHr)
     {
         newText = Regex.Replace(newText, @"Â", ""); //possible utf conversion error fix. rare, good to have
-        if (middleNewLinesMakeHR)
+        if (middleNewLinesMakeHr)
         {
             var lines = newText.Split("\n");
-            for (int i = 0; i < lines.Count(); i++)
+            for (int i = 0; i < lines.Length; i++)
             {
-                this.text[index] += lines[i];
-                if (lines.Count() > 1 && i != lines.Count() - 1)
+                text[index] += lines[i];
+                if (i != lines.Length - 1)
                 {
-                    commitBuffer();
+                    CommitBuffer();
                 }
             }
         }
         else
         {
-            this.text[index] += newText;
+            text[index] += newText;
             if (newText.EndsWith("\n"))
             {
-                commitBuffer();
+                CommitBuffer();
             }
         }
 
@@ -125,31 +134,26 @@
     /// <summary>
     /// Creates a new line in the console.
     /// </summary>
-    public void commitBuffer()
+    public void CommitBuffer()
     {
-        this.text.Add("");
+        text.Add("");
         index++;
     }
 
 
-    public bool showCodeTooltip = false;
+    private bool isCodePanelTipDisplayed = false;
 
-    void showCodeTooltipFn()
+    private void ToggleCodePanelTip()
     {
-        showCodeTooltip = true;
+        isCodePanelTipDisplayed = !isCodePanelTipDisplayed;
     }
 
-    public int gotItClickedCode = 0;
-
-    void HideCodeTooltipCode()
+    /// <summary>
+    /// Hitting "got it" will always result in a hide
+    /// </summary>
+    private void HideCodePanelTip()
     {
-        showCodeTooltip = false;
-    }
-
-    void GotItClickedCode()
-    {
-        gotItClickedCode = 1; // Set to 1 when "Got it!" is clicked
-        HideCodeTooltipCode(); // Hide the tooltip
+        isCodePanelTipDisplayed = false;
     }
 
 }
