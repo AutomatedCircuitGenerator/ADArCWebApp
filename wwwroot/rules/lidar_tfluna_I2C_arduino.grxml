@@ -4,7 +4,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
 <GraphSynth:CanvasProperty AxesColor="#FF000000" AxesOpacity="0.5" AxesThick="0.5" GridColor="#FF000000" GridOpacity="0.5" GridSpacing="48" GridThick="0.25" SnapToGrid="True" ShapeOpacity="1" ShowNodeName="False" ShowNodeLabel="True" ShowArcName="False" ShowArcLabel="True" ShowHyperArcName="True" ShowHyperArcLabel="True" NodeFontSize="12" ArcFontSize="12" HyperArcFontSize="12" NodeTextDistance="0" NodeTextPosition="0" ArcTextDistance="0" ArcTextPosition="0.5" HyperArcTextDistance="0" HyperArcTextPosition="0.5" BackgroundColor="#FFFFFFFF" ScaleFactor="1.24" ZoomToFit="False" CanvasWidth="580,633,812,2037" GlobalTextSize="12" CanvasHeight="745" WindowLeft="364" WindowTop="342" extraAttributes="{x:Null}" Background="#FF93CDDD" xmlns="clr-namespace:GraphSynth.UI;assembly=GraphSynth" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sx="clr-namespace:System.Xml;assembly=System.Private.Xml" xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:gsui="clr-namespace:GraphSynth.UI;assembly=GraphSynth.CustomControls" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib"><CanvasProperty.extraData><x:Array Type="sx:XmlElement"><x:Null /></x:Array></CanvasProperty.extraData></GraphSynth:CanvasProperty>
 
 <GraphSynth:grammarRule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <name>lidar_tfluna_arduino</name>
+  <name>lidar_tfluna_I2C_arduino</name>
   <termination>false</termination>
   <embeddingRules />
   <recognizeFunctions />
