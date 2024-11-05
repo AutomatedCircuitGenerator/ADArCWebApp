@@ -1,73 +1,77 @@
 // ky022.ts
 import { Controller } from "@controllers/controller";
-import { Pin } from "@controllers/pin";
 import { PinState } from "@lib/avr8js";
+import { Pin } from "@controllers/pin";
 
-/**
- * Controller for KY-022 Infrared Receiver
- * Simulates an IR receiver detecting signals from a remote control
- * When an IR signal is detected, the DAT pin is pulled LOW
+/*
+ * Controller for KY-022 IR Receiver
+ * Simulates receiving IR codes by manually triggering them in the code.
  */
 export class KY022 extends Controller {
-    // === Component State Tracking ===
-    private DATPin: Pin; // The DAT pin of the KY-022, which outputs IR detection status
-    private isReceiving: boolean = false; // Tracks if the receiver is actively detecting an IR signal
-    private pulseTimeoutId: number | null = null; // ID for pulse timeout to simulate IR pulse duration
+    private DATPin: Pin;  // Pin to receive simulated IR signal (active low)
+    private lastCode: number = 0;  // Stores the last received IR code to prevent duplicate processing
+
+    // Static dictionary of IR codes representing buttons on the remote
+    private static readonly CODES = {
+        VOL_UP: 0xE0E0E01F,
+        VOL_DOWN: 0xE0E0D02F,
+        NUM_1: 0xE0E020DF,
+        NUM_2: 0xE0E0A05F,
+        NUM_3: 0xE0E0609F,
+        NUM_4: 0xE0E010EF,
+        NUM_5: 0xE0E0906F,
+        NUM_6: 0xE0E050AF
+    };
 
     /**
-     * Called when component is initialized
+     * Initializes the component by assigning the DAT pin and clearing any previous state.
      */
     setup(): void {
-        this.DATPin = this.pins["pin3"][0];
-        this.cleanup(); // Ensure clean initial state
+        this.DATPin = this.pins["DAT"][0];  // Assigns the pin for data signal
+        this.cleanup();  // Resets the component state
     }
 
     /**
-     * Simulates receiving an IR signal
-     * Sets signal pin to LOW when IR signal is detected, then resets to HIGH after pulse duration
+     * Simulates receiving an IR code.
+     * @param code - The IR code to simulate
      */
-    setSignal(signal: number) {
-        const hasSignal = signal > 0; // Boolean indicating if an IR signal is present
-
-        if (hasSignal === this.isReceiving) return;
-
-        this.isReceiving = hasSignal; // Update current receiving state
-
-        if (hasSignal) {
-            // Pull pin LOW to indicate IR detection (active-low logic)
-            this.DATPin.setState(false);
-
-            // Clear any active timeout to ensure only one pulse is active
-            if (this.pulseTimeoutId !== null) {
-                clearTimeout(this.pulseTimeoutId);
-            }
-
-            // Set a timeout to simulate the duration of the IR pulse
-            this.pulseTimeoutId = setTimeout(() => {
-                // Return pin to HIGH after pulse duration
-                this.DATPin.setState(true);
-                this.isReceiving = false; // Reset receiving state after pulse ends
-                this.pulseTimeoutId = null; // Clear timeout ID for next pulse
-            }, 100); // Duration of 100ms for the simulated pulse
+    simulateCode(code: number) {
+        if (this.lastCode === code) {
+            return; // Ignore repeated codes to prevent duplicate processing
         }
+
+        this.lastCode = code;  // Update lastCode to the current code
+        this.component.invokeMethodAsync('SetProperty', 'lastCode', code);  // Update property for external access
+
+        // Set DAT pin to LOW (active) to simulate IR signal detection
+        this.DATPin.setState(false);
+        this.component.invokeMethodAsync('SetProperty', 'signal', 1);
+
+        // Reset signal to HIGH after ~45ms to simulate a standard IR protocol pulse duration
+        setTimeout(() => {
+            this.DATPin.setState(true);  // Set DAT pin back to HIGH (idle)
+            this.component.invokeMethodAsync('SetProperty', 'signal', 0);
+            this.lastCode = 0;  // Clear lastCode after processing
+            this.component.invokeMethodAsync('SetProperty', 'lastCode', 0);  // Update property
+        }, 45);
     }
 
     /**
-     * Cleans up the component state, such as clearing timeouts
-     * Resets signal pin to HIGH and stops any active signal detection
+     * Resets the component state.
      */
-    override cleanup() {
-        // Clear active pulse timeout if it exists
-        if (this.pulseTimeoutId !== null) {
-            clearTimeout(this.pulseTimeoutId);
-            this.pulseTimeoutId = null;
-        }
-
-        // Reset pin to HIGH (no IR signal detected)
+    cleanup() {
+        this.lastCode = 0;  // Reset lastCode
         if (this.DATPin) {
-            this.DATPin.setState(true);
+            this.DATPin.setState(true);  // Set DAT pin to HIGH (idle)
         }
+        this.component.invokeMethodAsync('SetProperty', 'signal', 0);  // Reset signal property
+        this.component.invokeMethodAsync('SetProperty', 'lastCode', 0);  // Reset lastCode property
+    }
 
-        this.isReceiving = false;
+    /**
+     * Simulates pressing a button by triggering the corresponding IR code.
+     */
+    simulateButton(button: keyof typeof KY022.CODES) {
+        this.simulateCode(KY022.CODES[button]);  // Call simulateCode with the button’s associated IR code
     }
 }
