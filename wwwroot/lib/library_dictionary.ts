@@ -5831,7 +5831,7 @@
     "placeholder_5830": "TFA 433 Receiver",
     "placeholder_5831": "TFA 433 Receiver for Dostmann 30.3208.02",
     "placeholder_5832": "TFL-Status",
-    "placeholder_5833": "TFLI2C",
+    "TFLI2C.h": "TFLI2C",
     "placeholder_5834": "TFMPI2C",
     "placeholder_5835": "TFMPlus",
     "placeholder_5836": "TFMini",
