@@ -1,4 +1,6 @@
-﻿@code {
+﻿@inherits RazorComponent
+
+@code {
     public static ElementPin[] pinInfo
     {
         get
@@ -7,7 +9,7 @@
             {
 
                 new ElementPin(name: "GND", x: 46, y: 113, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-                new ElementPin(name: "Vin", x: 56, y: 113, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "VCC", x: 56, y: 113, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
                 new ElementPin(name: "DAT",  x: 66, y: 113, signals: new PinSignalInfo[] { }, number: 3)
             };
         }
