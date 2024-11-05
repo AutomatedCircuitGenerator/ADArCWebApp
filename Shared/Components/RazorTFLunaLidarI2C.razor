@@ -1,4 +1,24 @@
+@inherits RazorComponent
+
 @code {
+    
+    private double _distance = 50;
+
+    [Parameter]
+    [ValueSetting("(cm)", 50, 20, 800)]
+    public double distance
+    {
+        get => _distance;
+        set
+        {
+            var hasChanged = value != _distance;
+            _distance = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setRegister", "DIST", _distance); });
+            }
+        }
+    }
 
     //TODO wires dont draw. no errors tho...
     public static ElementPin[] pinInfo
