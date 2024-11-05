@@ -25,7 +25,7 @@
     <string>lcd_parallel_arduino.grxml</string>
     <string>led_arduino.grxml</string>
     <string>led_rgb_arduino.grxml</string>
-    <string>lidar_tfluna_arduino_I2C.grxml</string>
+    <string>lidar_tfluna_I2C_arduino.grxml</string>
     <string>lm386_arduino.grxml</string>
     <string>lm2596_a4988.grxml</string>
     <string>lm2596_arduino.grxml</string>
