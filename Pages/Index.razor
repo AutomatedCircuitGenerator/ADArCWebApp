@@ -1,6 +1,7 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @using System.Text.Json
+@using ADArCWebApp.Shared.UIComponents
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 
@@ -11,6 +12,7 @@
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+<BoardSelect OnSelect="HandleBoardSelect"></BoardSelect>
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
         <div class="logo-and-adarc">
@@ -41,7 +43,6 @@
             </button>
         </div>
     </div>
-
     <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
@@ -141,6 +142,19 @@
         StateHasChanged();
     }
 
+    private async Task HandleBoardSelect(BoardSelect.Board board)
+    {
+        switch (board)
+        {
+            case BoardSelect.Board.ArduinoUno:
+                setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
+                break;
+            case BoardSelect.Board.ArduinoMega:
+                setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":2,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
+                break;
+        }
+    }
+
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -236,7 +250,7 @@
     /// </summary>
     public static Dictionary<int, ComponentInstance> comps = new()
     {
-        { 0, new ComponentInstance(1, null, 829, 219) }
+        // { 0, new ComponentInstance(1, null, 829, 219) }
     };
 
 
@@ -439,10 +453,6 @@
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 88);
         compPane!.releaseLockout();
         selLockedOut = false;
-        //hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
-        setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
-        base.StateHasChanged();
-
 
         //all else finish first
         await Task.Delay(1000);
