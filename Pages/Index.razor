@@ -43,7 +43,7 @@
     </div>
 
     <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
-        <div class="main-canvas" tabindex="0" @onkeydown="handleKeyPress">
+        <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
         <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
@@ -156,7 +156,7 @@
 
             if (response.stderr != "")
             {
-                codePane.updateConsoleOutput(response.stderr, false);
+                codePane.UpdateConsoleOutput(response.stderr, false);
                 runStopText = "▶ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
@@ -178,7 +178,7 @@
             }
             else //no errors
             {
-                codePane.updateConsoleOutput(response.stdout, false);
+                codePane.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.clearMonacoErrorsWrapper();
                 AppInterop.startSimWrapper();
                 runStopText = "🟥 Stop";
@@ -188,8 +188,8 @@
         else //stop running
         {
             AppInterop.stopWrapper();
-            codePane!.commitBuffer();
-            codePane!.updateConsoleOutput("Stopped.\n", false);
+            codePane!.CommitBuffer();
+            codePane!.UpdateConsoleOutput("Stopped.\n", false);
             runStopText = "▶ Run";
             isRunning = false;
         }
@@ -609,7 +609,7 @@
     /// Deletes a component when delete/backspace pressed.
     /// </summary>
     /// <param name="e"></param>
-    private void handleKeyPress(KeyboardEventArgs e)
+    private void HandleKeyPress(KeyboardEventArgs e)
     {
         // 1 is the arduino, not sure what -2 or -1 is
         if (!isRunning && (e.Key is "Backspace" or "Delete") && selectedComponent != -2 && selectedComponent != -1 && selectedComponent != 1)

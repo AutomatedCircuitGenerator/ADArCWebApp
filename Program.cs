@@ -7,6 +7,11 @@ using Microsoft.AspNetCore.Builder;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
+//debug
+// builder.Services.AddLogging(logging =>
+// {
+//     logging.SetMinimumLevel(LogLevel.Debug);
+// });
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings.Add(".grxml", "application/grxml");

@@ -1,6 +1,6 @@
-﻿<div class="canvas-container" @onmousemove="dragMiddle" @onclick="canvasClick" @onmousedown="dragStart" @onmouseup="dragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="canvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
 	@foreach (var c in comps) {
-			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>componentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>dragComponentStart(e, c)" DragEnd="dragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+			<VaryingComponent forceBorder="c.Key==Pages.Index.app.selectedComponent" handleClick="e=>ComponentSelection(e, c)" objId=@(c.Value.globalId) individualData=@c.Value DragStart="e=>DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 	}
 
 
@@ -157,7 +157,7 @@
 
 
 	//handle the start of drags that target a specific component
-	private void dragComponentStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
+	private void DragComponentStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
 	{
 
 		if (e.Button == 0)
@@ -168,8 +168,8 @@
 		}
 	}
 
-	//generic continous drag, whether or not there is a component.
-	private void dragMiddle(MouseEventArgs e)
+	//generic continuous drag, whether or not there is a component.
+	private void DragMiddle(MouseEventArgs e)
 	{
 		if (dragging && hasTarget)	//dragging a specific component, the target
 		{
@@ -192,8 +192,8 @@
 	}
 	bool dragEndFlag = false;	//disable deselection at end of drag
 
-	//handles the end of a drag targetting a specific component, removing the target
-	private void dragComponentEnd(MouseEventArgs e)
+	//handles the end of a drag targeting a specific component, removing the target
+	private void DragComponentEnd(MouseEventArgs e)
 	{
 		dragging = false;
 		hasTarget = false;
@@ -201,7 +201,7 @@
 	}
 
 	//canvas drag start, signal that there is a drag.
-	private void dragStart(MouseEventArgs e)
+	private void DragStart(MouseEventArgs e)
 	{
 		if (e.Button == 0)
 		{
@@ -210,7 +210,7 @@
 	}
 
 	//canvas drag end, stop drag
-	private void dragEnd(MouseEventArgs e)
+	private void DragEnd(MouseEventArgs e)
 	{
 		dragging = false;
 	}
@@ -218,7 +218,7 @@
 	bool targetFound = false;
 
 	//click on a component handler. 
-	public void componentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
+	public void ComponentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
 	{
 		targetFound = true;
 		if (Pages.Index.app!.selectedComponent < 0)     //no previous selection

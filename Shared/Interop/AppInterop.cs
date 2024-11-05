@@ -60,7 +60,7 @@ namespace ADArCWebApp.Shared.Interop
 		/// <param name="text">the data sent by the arduino.</param>
 		[JSInvokable]
 		public static void sendSerial(string text) {
-			Pages.Index.codePane!.updateConsoleOutput(text, true);
+			Pages.Index.codePane!.UpdateConsoleOutput(text, true);
 		}
 		/// <summary>
 		/// Gets the window height similar for updateScreenRatios.

@@ -72,7 +72,18 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
         }
     }
 
-    private void AbsoluteUnoPinToPortAndRelativePin(int absolutePin, out string portName, out int relativePin)
+    protected override bool ShouldRender()
+    {
+        return false;
+    }
+
+    /// <summary>
+    /// Takes in a pin number on an ArduinoUno Rev3 and converts it to the port region and the relative index in this port region 
+    /// </summary>
+    /// <param name="absolutePin">The pin number on the board</param>
+    /// <param name="portName">The port region</param>
+    /// <param name="relativePin">The relative index in port region</param>
+    private static void AbsoluteUnoPinToPortAndRelativePin(int absolutePin, out string portName, out int relativePin)
     {
         switch (absolutePin)
         {
