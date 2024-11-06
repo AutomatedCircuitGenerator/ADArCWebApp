@@ -6,11 +6,11 @@ import { PinState } from "@lib/avr8js";
 /**
  * Controller for KY-022 Infrared Receiver
  * Simulates an IR receiver detecting signals from a remote control
- * When an IR signal is detected, the DAT pin is pulled LOW
+ * When an IR signal is detected, the digital_out pin is pulled LOW
  */
 export class KY022 extends Controller {
     // === Component State Tracking ===
-    private DATPin: Pin; // The DAT pin of the KY-022, which outputs IR detection status
+    private DATPin: Pin; // The digital_out pin of the KY-022, which outputs IR detection status
     private isReceiving: boolean = false; // Tracks if the receiver is actively detecting an IR signal
     private pulseTimeoutId: number | null = null; // ID for pulse timeout to simulate IR pulse duration
 
@@ -18,7 +18,7 @@ export class KY022 extends Controller {
      * Called when component is initialized
      */
     setup(): void {
-        this.DATPin = this.pins["pin3"][0];
+        this.DATPin = this.pins["pin3"][0]; // Links digital_out pin to physical pin, (pin3 on KY-022)
         this.cleanup(); // Ensure clean initial state
     }
 
@@ -48,7 +48,7 @@ export class KY022 extends Controller {
                 this.DATPin.setState(true);
                 this.isReceiving = false; // Reset receiving state after pulse ends
                 this.pulseTimeoutId = null; // Clear timeout ID for next pulse
-            }, 100); // Duration of 100ms for the simulated pulse
+            }, 1000); // Duration of 100ms for the simulated pulse
         }
     }
 
