@@ -3,6 +3,7 @@
   <ruleFileNames>
     <string>add_adxl345.grxml</string>
     <string>add_arduinoUno_rev3.grxml</string>
+    <string>add_arduino_mega.grxml</string>
     <string>add_arduinoUno_wifi_rev2.grxml</string>
     <string>add_bno055.grxml</string>
     <string>add_dc_motor_direct.grxml</string>
