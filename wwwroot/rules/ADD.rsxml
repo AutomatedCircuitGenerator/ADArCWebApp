@@ -48,6 +48,7 @@
     <string>add_uln2003.grxml</string>
     <string>add_7segment.grxml</string>
     <string>add_arcade_pushbutton.grxml</string>
+    <string>add_ky008.grxml</string>
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>

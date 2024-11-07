@@ -5882,7 +5882,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_5830": "TFA 433 Receiver",
         "placeholder_5831": "TFA 433 Receiver for Dostmann 30.3208.02",
         "placeholder_5832": "TFL-Status",
-        "placeholder_5833": "TFLI2C",
+        "TFLI2C.h": "TFLI2C",
         "placeholder_5834": "TFMPI2C",
         "placeholder_5835": "TFMPlus",
         "placeholder_5836": "TFMini",
@@ -12863,7 +12863,133 @@ define("controllers/servo", ["require", "exports", "controllers/controller", "li
     }
     exports.Servo = Servo;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1) {
+define("controllers/memory", ["require", "exports"], function (require, exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.Memory = void 0;
+    class Memory {
+        constructor(size) {
+            this.memory = new Uint8Array(size);
+            return new Proxy(this, {
+                get(target, prop) {
+                    if (prop in target) {
+                        return target[prop];
+                    }
+                    return target.memory[prop];
+                },
+                set(target, prop, value) {
+                    target.memory[prop] = value;
+                    return true;
+                }
+            });
+        }
+        clear() {
+            this.memory.fill(0);
+        }
+        get size() {
+            return this.memory.length;
+        }
+        read(register) {
+            const bytes = this.memory.subarray(register.address, register.address + register.size);
+            let value = 0;
+            for (let i = 0; i < register.size; i++) {
+                value |= bytes[i] << (i * 8);
+            }
+            return value;
+        }
+        write(register, value) {
+            const bytes = new Uint8Array(register.size);
+            for (let i = 0; i < register.size; i++) {
+                bytes[i] = (value >> (i * 8)) & 0xFF;
+            }
+            this.memory.set(bytes, register.address);
+        }
+    }
+    exports.Memory = Memory;
+});
+define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_9, execute_8, memory_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.TFLunaLidarI2C = void 0;
+    const TF_LUNA_LIDAR_ADDR = 0x10;
+    const REGISTERS = {
+        DIST: { address: 0x00, size: 2 },
+        FLUX: { address: 0x02, size: 2 },
+        TEMP: { address: 0x04, size: 2 },
+        TICK: { address: 0x06, size: 2 },
+        ERROR: { address: 0x08, size: 2 },
+    };
+    class TFLunaLidarI2C extends controller_9.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new memory_1.Memory(128);
+        }
+        setRegister(register, value) {
+            this.memory.write(REGISTERS[register], value);
+        }
+        setup() {
+            execute_8.AVRRunner.getInstance().twi.eventHandler.registerController(TF_LUNA_LIDAR_ADDR, this);
+            this.memory.clear();
+            this.address = null;
+            this.startTime = Date.now();
+            this.setRegister("DIST", 50);
+            this.setRegister("FLUX", 200);
+            this.setRegister("TEMP", 2500);
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() {
+        }
+        i2cReadByte(acked) {
+            this.updateTime();
+            let byte;
+            if (this.address !== null) {
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = acked ? (this.address + 1) % this.memory.size : null;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                this.address = null;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+        updateTime() {
+            const elapsedTime = Date.now() - this.startTime;
+            this.setRegister("TICK", elapsedTime);
+        }
+    }
+    exports.TFLunaLidarI2C = TFLunaLidarI2C;
+});
+define("controllers/ky008", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_10, avr8js_4) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY008 = void 0;
+    class KY008 extends controller_10.Controller {
+        constructor() {
+            super(...arguments);
+            this.toggleLaser = (state) => {
+                const beam = this.element.querySelector("#laser-beam");
+                beam.style.fill = state === avr8js_4.PinState.High ? "url(#a)" : "none";
+            };
+        }
+        setup() {
+            this.pins.digital_in[0].setListener(this.toggleLaser);
+        }
+    }
+    exports.KY008 = KY008;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -12877,5 +13003,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.Servo = servo_1.Servo;
     window.HCSR501 = hcsr501_1.HCSR501;
     window.KY018 = ky018_1.KY018;
+    window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
+    window.KY008 = ky008_1.KY008;
 });
 //# sourceMappingURL=build.js.map

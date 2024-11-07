@@ -12,6 +12,7 @@ import {KY018} from "@controllers/ky018";
 import {ArcadePushButton} from "@controllers/arcade-push-button";
 import {Servo} from "@controllers/servo";
 import {TFLunaLidarI2C} from "@controllers/tf-luna-lidar-i2c";
+import {KY008} from "@controllers/ky008";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -27,3 +28,4 @@ import {TFLunaLidarI2C} from "@controllers/tf-luna-lidar-i2c";
 (<any>window).HCSR501 = HCSR501;
 (<any>window).KY018 = KY018;
 (<any>window).TFLunaLidarI2C = TFLunaLidarI2C;
+(<any>window).KY008 = KY008;

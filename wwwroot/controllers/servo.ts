@@ -1,7 +1,7 @@
-﻿import { Controller } from "@controllers/controller";
-import { Pin } from "./pin";
-import { PinState } from "@lib/avr8js";
-import { AVRRunner } from "@lib/execute";
+﻿import {Controller} from "@controllers/controller";
+import {Pin} from "./pin";
+import {PinState} from "@lib/avr8js";
+import {AVRRunner} from "@lib/execute";
 
 export class Servo extends Controller {
     private signal?: Pin;
@@ -26,15 +26,15 @@ export class Servo extends Controller {
             const pulseWidthCycles = this.fallingEdgeCycle - this.risingEdgeCycle;
             const pulseWidthMs = this.cyclesToMs(pulseWidthCycles);
             const angle = Math.round(this.msToAngle(pulseWidthMs));
-            
+
             if (this.previousAngle !== angle) {
                 this.renderHorn(angle);
             }
-            
+
             this.previousAngle = angle;
         }
     }
-    
+
     private renderHorn(angle: number) {
         const horn = this.element.querySelector<HTMLElement>(".horn");
         const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
@@ -47,7 +47,7 @@ export class Servo extends Controller {
 
     private msToAngle(ms: number) {
         const minPulse = 544; // these are according to Servo.h specs for min and max pulse lengths
-        const maxPulse = 2400; 
+        const maxPulse = 2400;
         const minAngle = 0;
         const maxAngle = 180;
 
