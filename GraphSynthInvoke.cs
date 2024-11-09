@@ -20,6 +20,7 @@ namespace ADArCWebApp
 
         static designGraph seed = new();
 
+        private static List<node>? _arduinoNodes;
 
         public static void destroyGraph()
         {
@@ -46,7 +47,7 @@ namespace ADArCWebApp
         }
 
         //apply the GraphSynth rules
-        static public void recg_apply(List<string>? fInp = null)
+        public static void recg_apply(List<string>? fInp = null)
         {
             if (fInp != null)
             {
@@ -110,21 +111,44 @@ namespace ADArCWebApp
                 options[0].apply(seed, null);
                 options = rulesets["ADD"].recognize(seed, true);
             }
-            //Console.WriteLine(options.Count);
 
-            var arduinoNode = seed.nodes.Find(n => n.localLabels.Contains("arduino"));
-            var arduinoNodes = arduinoNode.arcsTo.Select(arc => arc.From)
-                .Concat(arduinoNode.arcsFrom.Select(arc => arc.To))
-                .ToList();
+            if (_arduinoNodes == null) // Arduino nodes have not been cached
+            { 
+                var arduinoNode = seed.nodes.Find(n => n.localLabels.Contains("arduino"));
 
-            var userNode = seed.nodes.Find(n =>
-                n.localLabels.Any(l => l.Contains("user_")) && !n.localLabels.Any(l => l.Contains("localId:")));
+                if (arduinoNode == null)
+                {
+                    Console.WriteLine("No arduino node was found");
+                    return;
+                }
+                _arduinoNodes = arduinoNode.arcsTo.Select(arc => arc.From)
+                    .Concat(arduinoNode.arcsFrom.Select(arc => arc.To))
+                    .ToList();
+            }
+
+            node? userNode = null;
+            // iteration is done in reverse - new components are likely to be added to the end of the nodes list
+            for (int i = seed.nodes.Count - 1; i >= 0; i--) 
+            {
+                var labels = seed.nodes[i].localLabels;
+                if  (labels.Any(l => l.Contains("user_")) && !labels.Any(l => l.Contains("localId:")))
+                {
+                    userNode = seed.nodes[i];
+                }
+            }
+
+            if (userNode == null)
+            {
+                Console.WriteLine("No user_ node for the new component was found");
+                return;
+            }
+            
             var componentNode = userNode.arcsTo.Count > 0 ? userNode.arcsTo[0].From : userNode.arcsFrom[0].To;
             var componentNodes = new List<node>();
-            var visited = new HashSet<node>();
-            var queue = new Queue<node>();
 
             // Start BFS from the component node
+            var visited = new HashSet<node>();
+            var queue = new Queue<node>();
             queue.Enqueue(componentNode);
             visited.Add(componentNode);
 
@@ -139,9 +163,8 @@ namespace ADArCWebApp
 
                 foreach (var connectedNode in connectedNodes)
                 {
-                    if (!visited.Contains(connectedNode))
+                    if (visited.Add(connectedNode))
                     {
-                        visited.Add(connectedNode);
                         queue.Enqueue(connectedNode);
                     }
                 }
@@ -151,44 +174,30 @@ namespace ADArCWebApp
             {
                 foreach (var arc in rule.R.arcs)
                 {
-                    if (arc.localLabels.Contains("connection"))
+                    if (!arc.localLabels.Contains("connection")) continue;
+                    var isFromArduino = (arc.From.arcsFrom.Any(a => a.To.localLabels.Contains("arduino")) ||
+                                         arc.From.arcsTo.Any(a => a.From.localLabels.Contains("arduino")));
+
+                    var ruleArduinoNode = isFromArduino ? arc.From : arc.To;
+                    var ruleComponentNode = isFromArduino ? arc.To : arc.From;
+
+                    var ruleArduinoNodeLabels = new HashSet<string>(ruleArduinoNode.localLabels);
+                    var ruleComponentNodeLabels = new HashSet<string>(ruleComponentNode.localLabels);
+                    ruleComponentNodeLabels.Remove("connected");
+                    ruleArduinoNodeLabels.Remove("connected");
+
+                    var matchedArduinoNode = _arduinoNodes.Find(n =>
+                        ruleArduinoNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
+                    var matchedComponentNode = componentNodes.Find(n =>
+                        ruleComponentNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
+
+                    if (matchedArduinoNode != null && matchedComponentNode != null)
                     {
-                        bool isFromArduino = (arc.From.arcsFrom.Any(a => a.To.localLabels.Contains("arduino")) ||
-                                              arc.From.arcsTo.Any(a => a.From.localLabels.Contains("arduino")));
-
-                        var ruleArduinoNode = isFromArduino ? arc.From : arc.To;
-                        var ruleComponentNode = isFromArduino ? arc.To : arc.From;
-
-                        var ruleArduinoNodeLabels = new HashSet<string>(ruleArduinoNode.localLabels);
-                        var ruleComponentNodeLabels = new HashSet<string>(ruleComponentNode.localLabels);
-                        ruleComponentNodeLabels.Remove("connected");
-                        ruleArduinoNodeLabels.Remove("connected");
-
-                        Console.WriteLine("Arduino node labels");
-                        foreach (var ruleComponentNodeLabel in ruleComponentNodeLabels)
-                        {
-                            Console.WriteLine(ruleComponentNodeLabel);
-                        }
-
-                        Console.WriteLine("Component node labels");
-                        foreach (var ruleComponentNodeLabel in ruleComponentNodeLabels)
-                        {
-                            Console.WriteLine(ruleComponentNodeLabel);
-                        }
-
-                        var matchedArduinoNode = arduinoNodes.Find(n =>
-                            ruleArduinoNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
-                        var matchedComponentNode = componentNodes.Find(n =>
-                            ruleComponentNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
-
-                        if (matchedArduinoNode != null && matchedComponentNode != null)
-                        {
-                            var newArc = new arc();
-                            newArc.From = matchedComponentNode;
-                            newArc.To = matchedArduinoNode;
-                            newArc.localLabels = arc.localLabels;
-                            seed.addArc(newArc, matchedComponentNode, matchedArduinoNode);
-                        }
+                        var newArc = new arc();
+                        newArc.From = matchedComponentNode;
+                        newArc.To = matchedArduinoNode;
+                        newArc.localLabels = arc.localLabels;
+                        seed.addArc(newArc, matchedComponentNode, matchedArduinoNode);
                     }
                 }
             }
