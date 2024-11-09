@@ -128,12 +128,13 @@ namespace ADArCWebApp
 
             node? userNode = null;
             // iteration is done in reverse - new components are likely to be added to the end of the nodes list
-            for (int i = seed.nodes.Count - 1; i >= 0; i--) 
+            for (var i = seed.nodes.Count - 1; i >= 0; i--) 
             {
                 var labels = seed.nodes[i].localLabels;
                 if  (labels.Any(l => l.Contains("user_")) && !labels.Any(l => l.Contains("localId:")))
                 {
                     userNode = seed.nodes[i];
+                    break;
                 }
             }
 
