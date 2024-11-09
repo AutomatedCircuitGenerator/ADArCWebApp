@@ -108,17 +108,62 @@ namespace ADArCWebApp
                 options = rulesets["ADD"].recognize(seed, true);
             }
             //Console.WriteLine(options.Count);
-            Console.WriteLine("adding ends");
-            options = r.recognize(seed, true);      //also overwrites the add ruleset with the connect set
-            while (options.Count > 0)
+            
+            foreach (var rule in r.rules)
             {
-                Console.WriteLine(options.Count);
-                options[0].apply(seed, null);
-				options = r.recognize(seed, true);
-                
+                foreach (var arc in rule.R.arcs)
+                {
+                    if (arc.localLabels.Contains("connection"))
+                    {
+                        bool isFromArduino = (arc.From.arcsFrom.Any(a => a.To.localLabels.Contains("arduino")) ||
+                                              arc.From.arcsTo.Any(a => a.From.localLabels.Contains("arduino")));
+
+                        var arduinoNode = isFromArduino ? arc.From : arc.To;
+                        var componentNode = isFromArduino ? arc.To : arc.From;
+                          
+                        var arduinoNodeLabels = new HashSet<string>(arduinoNode.localLabels);
+                        var componentNodeLabels = new HashSet<string>(componentNode.localLabels);
+                        componentNodeLabels.Remove("connected");
+                        arduinoNodeLabels.Remove("connected");
+                        
+                        Console.WriteLine("Arduino labels");
+                        foreach (var label in arduinoNodeLabels)
+                        {
+                            Console.WriteLine(label);
+                        }
+                        Console.WriteLine("Component labels");
+                        foreach (var label in componentNodeLabels) { Console.WriteLine(label); }
+
+                        node matchedArduinoNode = null;
+                        node matchedComponentNode = null;
+                        foreach (var node in seed.nodes)
+                        {
+                            var nodeLabels = new HashSet<string>(node.localLabels);
+                            if (nodeLabels.Contains("connected")) continue;
+                            if (arduinoNodeLabels.IsSubsetOf(nodeLabels) && matchedArduinoNode == null &&
+                                (node.arcsFrom.Any(a => a.To.localLabels.Contains("arduino")) ||
+                                 node.arcsTo.Any(a => a.From.localLabels.Contains("arduino"))))
+                            {
+                                matchedArduinoNode = node;
+                            } else if (componentNodeLabels.IsSubsetOf(nodeLabels) && matchedComponentNode == null)
+                            {
+                                matchedComponentNode = node;
+                            }
+                            
+                            if (matchedArduinoNode != null && matchedComponentNode != null)
+                            {
+                                var newArc = new arc();
+                                newArc.From = matchedComponentNode;
+                                newArc.To = matchedArduinoNode;
+                                newArc.localLabels = arc.localLabels;
+                                seed.addArc(newArc, matchedComponentNode, matchedArduinoNode);
+                                Console.WriteLine("Found one connection");
+                                break;
+                            }
+                        }
+                    }
+                }
             }
-			Console.WriteLine("connecting ends");
-            Console.WriteLine(seed.nodes.Count);
         }
 
         /// <summary>
