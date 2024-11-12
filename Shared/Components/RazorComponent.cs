@@ -14,7 +14,7 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
     protected IJSObjectReference? Controller;
     private DotNetObjectReference<RazorComponent>? _reference;
 
-    [Inject] protected IJSRuntime js { get; set; }
+    [Inject] protected IJSRuntime _js { get; set; }
 
     [Parameter] public ComponentInstance? ComponentInstance { get; set; }
 
@@ -67,7 +67,7 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
                 }
             }
 
-            Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId,
+            Controller = await _js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", ComponentInstance.localId,
                 pins, _reference);
         }
     }

@@ -1,7 +1,7 @@
 ﻿import { TimingPacket } from "./lib/TimingPacket";
 import { AVRADC, PinState, adcConfig } from "./lib/avr8js/index";
 import { buildHex } from "./lib/compile-util";
-import { AVRRunner } from "./lib/execute";
+import {AVRRunner, Board} from "./lib/execute";
 import {I2CBus} from "./lib/i2c-bus";
 
 /*declare var introJs: any;*/
@@ -293,8 +293,12 @@ export namespace interopManager {
             //intro.onexit(()=> intro.goToStep(6));
             
         }
-    }
 
+        setBoard(board: Board) {
+            console.log("set board", board);
+            AVRRunner.getInstance().board = board;
+        }
+    }
     
     export function getInteropManager(): InteropManager {
         return new InteropManager();

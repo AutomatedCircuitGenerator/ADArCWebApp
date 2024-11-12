@@ -17,13 +17,9 @@
     </div>
 }
 
-@code {
+@inject BoardService BoardService
 
-    public enum Board
-    {
-        ArduinoUno,
-        ArduinoMega,
-    }
+@code {
 
     [Parameter] public EventCallback<Board> OnSelect { get; set; }
 
@@ -31,6 +27,7 @@
 
     private async Task HandleSelect(Board board)
     {
+        BoardService.Board = board;
         await OnSelect.InvokeAsync(board);
         _isVisible = false; // Set visibility to false when a board is selected
     }

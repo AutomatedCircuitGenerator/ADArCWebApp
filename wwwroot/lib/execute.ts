@@ -15,10 +15,24 @@ import {
     AVRADC,
     adcConfig,
     AVRSPI,
-    spiConfig, timer2Config, timer1Config
+    spiConfig,
+    timer2Config,
+    timer1Config,
+    portAConfig,
+    portEConfig,
+    portFConfig,
+    portGConfig,
+    portHConfig,
+    portJConfig,
+    portKConfig, portLConfig
 } from "./avr8js/index";
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
+
+export enum Board {
+    ArduinoUno,
+    ArduinoMega,
+}
 
 // ATmega328p params
 const FLASH = 0x8000;
@@ -31,14 +45,24 @@ const FLASH = 0x8000;
 export class AVRRunner {
     private static _instance: AVRRunner | null = null;
 
+    board = Board.ArduinoUno;
+    
     program = new Uint16Array(FLASH);
     cpu: CPU;
     timer0: AVRTimer;
     timer1: AVRTimer;
     timer2: AVRTimer;
+    portA: AVRIOPort;
     portB: AVRIOPort;
     portC: AVRIOPort;
     portD: AVRIOPort;
+    portE: AVRIOPort;
+    portF: AVRIOPort;
+    portG: AVRIOPort;
+    portH: AVRIOPort;
+    portJ: AVRIOPort;
+    portK: AVRIOPort;
+    portL: AVRIOPort;
     usart: AVRUSART;
     twi: AVRTWI;
     spi: AVRSPI;
@@ -79,9 +103,18 @@ export class AVRRunner {
         this.timer0 = new AVRTimer(this.cpu, timer0Config);
         this.timer1 = new AVRTimer(this.cpu, timer1Config);
         this.timer2 = new AVRTimer(this.cpu, timer2Config);
+        this.portA = new AVRIOPort(this.cpu, portAConfig);
         this.portB = new AVRIOPort(this.cpu, portBConfig);
         this.portC = new AVRIOPort(this.cpu, portCConfig);
         this.portD = new AVRIOPort(this.cpu, portDConfig);
+        this.portE = new AVRIOPort(this.cpu, portEConfig);
+        this.portF = new AVRIOPort(this.cpu, portFConfig);
+        this.portG = new AVRIOPort(this.cpu, portGConfig);
+        this.portH = new AVRIOPort(this.cpu, portHConfig);
+        this.portJ = new AVRIOPort(this.cpu, portJConfig);
+        this.portK = new AVRIOPort(this.cpu, portKConfig);
+        this.portL = new AVRIOPort(this.cpu, portLConfig);
+
         this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
         this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
         this.adc = new AVRADC(this.cpu, adcConfig);
