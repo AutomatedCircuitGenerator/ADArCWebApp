@@ -1,13 +1,14 @@
 @inherits RazorComponent
 
 @code {
+
     public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "analog_out", x: 43, y: 130, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "analog_out", x: 43, y: 130, signals: new PinSignalInfo[] { }, number: 1), // Analog output
                 new ElementPin(name: "digital_out", x: 53, y: 130, signals: new PinSignalInfo[] { }, number: 2), // Digital output
                 new ElementPin(name: "5V", x: 63, y: 130, signals: new PinSignalInfo[] { }, number: 3),
                 new ElementPin(name: "gnd", x: 73, y: 130, signals: new PinSignalInfo[] { }, number: 4),
@@ -34,6 +35,23 @@
         }
     }
     
+    [Parameter]
+    [ValueSetting("Magnetic Field Detected", 0, 0, 1)]
+    public double ismagneticfielddetected
+    {
+        get => _isMagneticFieldDetected;
+        set
+        {
+            var hasChanged = value != _isMagneticFieldDetected;
+            _isMagneticFieldDetected = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setIsMagneticFieldDetected", _isMagneticFieldDetected); });
+            }
+        }
+    }
+}
+
     <?xml version='1.0' encoding='UTF-8' standalone='no'?>
 <svg xmlns="http://www.w3.org/2000/svg" width="14.9996mm" version="1.1" height="43.555847mm"  viewBox="0 0 53.148191 154.33174" gorn="0" id="svg4532">
     <desc >
