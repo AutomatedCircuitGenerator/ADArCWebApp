@@ -13,8 +13,6 @@ import {Memory} from "@controllers/memory";
 // grounding the SDO/ALT ADDRESS pin (Pin 12)
 export const ADXL345_ADDR = 0x53; //if SDO/ALT pin is grounded This translates to 0xA6 for a write and 0xA7 for a read.
 
-type Vector = { x: number, y: number, z: number };
-
 const REGISTERS = {
     DEVID: {address: 0x00, size: 1},
     THRESH_TAP: {address: 0x1D, size: 1},

@@ -12989,7 +12989,7 @@ define("controllers/ky008", ["require", "exports", "controllers/controller", "li
     }
     exports.KY008 = KY008;
 });
-define("controllers/ADXL345I2C", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_9, memory_2) {
+define("controllers/adxl345i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_9, memory_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ADXL345I2C = exports.ADXL345_ADDR = void 0;
@@ -13083,7 +13083,33 @@ define("controllers/ADXL345I2C", ["require", "exports", "controllers/controller"
     }
     exports.ADXL345I2C = ADXL345I2C;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/ADXL345I2C"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, ADXL345I2C_1) {
+define("controllers/mq3", ["require", "exports", "controllers/controller"], function (require, exports, controller_12) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.MQ3 = void 0;
+    class MQ3 extends controller_12.Controller {
+        setAlcohol(alcohol) {
+            if (alcohol < 0) {
+                this.alcohol = 0;
+            }
+            else if (alcohol > 1024) {
+                this.alcohol = 5;
+            }
+            else {
+                this.alcohol = alcohol * 5 / 1024;
+            }
+            if (!this.inSimulation) {
+                return;
+            }
+            this.pins.analog_out[0].setAdcVoltage(this.alcohol);
+        }
+        setup() {
+            this.inSimulation = true;
+        }
+    }
+    exports.MQ3 = MQ3;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13099,6 +13125,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY018 = ky018_1.KY018;
     window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
     window.KY008 = ky008_1.KY008;
-    window.ADXL345I2C = ADXL345I2C_1.ADXL345I2C;
+    window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
+    window.MQ3 = mq3_1.MQ3;
 });
 //# sourceMappingURL=build.js.map
