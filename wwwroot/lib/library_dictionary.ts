@@ -5523,7 +5523,7 @@
     "placeholder_5522": "SparkFun ADS1219 Arduino Library",
     "placeholder_5523": "SparkFun ADS122C04 ADC Arduino Library",
     "placeholder_5524": "SparkFun ADXL313 Arduino Library",
-    "placeholder_5525": "SparkFun ADXL345 Arduino Library",
+    "SparkFun_ADXL345.h": "SparkFun ADXL345 Arduino Library",
     "placeholder_5526": "SparkFun AK9750 Human Presence Sensor Library",
     "placeholder_5527": "SparkFun AK975X Human Presence Sensor Library",
     "placeholder_5528": "SparkFun APDS-9301 Lux Sensor",

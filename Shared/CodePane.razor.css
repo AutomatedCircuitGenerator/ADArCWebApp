@@ -19,10 +19,17 @@
 .code-tooltip {
     background-color: #ece1be;
     border-radius: 5px;
+    font-size: 0.844rem;
     padding: 10px;
     margin-bottom: 10px;
     flex-shrink: 1; 
     overflow-y: auto;
+    text-align: center;
+}
+
+.code-tooltip >button{
+    border-radius: 5px;
+    border-color: transparent;
 }
 
 #editor-wrapper {

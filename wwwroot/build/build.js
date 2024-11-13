@@ -5574,7 +5574,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_5522": "SparkFun ADS1219 Arduino Library",
         "placeholder_5523": "SparkFun ADS122C04 ADC Arduino Library",
         "placeholder_5524": "SparkFun ADXL313 Arduino Library",
-        "placeholder_5525": "SparkFun ADXL345 Arduino Library",
+        "SparkFun_ADXL345.h": "SparkFun ADXL345 Arduino Library",
         "placeholder_5526": "SparkFun AK9750 Human Presence Sensor Library",
         "placeholder_5527": "SparkFun AK975X Human Presence Sensor Library",
         "placeholder_5528": "SparkFun APDS-9301 Lux Sensor",
@@ -12989,7 +12989,101 @@ define("controllers/ky008", ["require", "exports", "controllers/controller", "li
     }
     exports.KY008 = KY008;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1) {
+define("controllers/ADXL345I2C", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_9, memory_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ADXL345I2C = exports.ADXL345_ADDR = void 0;
+    exports.ADXL345_ADDR = 0x53;
+    const REGISTERS = {
+        DEVID: { address: 0x00, size: 1 },
+        THRESH_TAP: { address: 0x1D, size: 1 },
+        OFSX: { address: 0x1E, size: 1 },
+        OFSY: { address: 0x1F, size: 1 },
+        OFSZ: { address: 0x20, size: 1 },
+        DUR: { address: 0X21, size: 1 },
+        LATENT: { address: 0x22, size: 1 },
+        WINDOW: { address: 0x23, size: 1 },
+        THRESH_ACT: { address: 0x24, size: 1 },
+        THRES_INACT: { address: 0x25, size: 1 },
+        TIME_INACT: { address: 0x26, size: 1 },
+        ACT_INACT_CTL: { address: 0x27, size: 1 },
+        THRESH_FF: { address: 0x28, size: 1 },
+        TIME_FF: { address: 0x29, size: 1 },
+        TAP_AXES: { address: 0x2A, size: 1 },
+        ACT_TAP_STATUS: { address: 0x2B, size: 1 },
+        BW_RATE: { address: 0x2C, size: 1 },
+        POWER_CTL: { address: 0x2D, size: 1 },
+        INT_ENABLE: { address: 0x2E, size: 1 },
+        INT_MAP: { address: 0x2F, size: 1 },
+        INT_SOURCE: { address: 0x30, size: 1 },
+        DATA_FORMAT: { address: 0x31, size: 1 },
+        DATAX: { address: 0x32, size: 2 },
+        DATAY: { address: 0x34, size: 2 },
+        DATAZ: { address: 0x36, size: 2 },
+        FIFO_CTL: { address: 0x38, size: 1 },
+        FIFO_STATUS: { address: 0x39, size: 1 },
+    };
+    class ADXL345I2C extends controller_11.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new memory_2.Memory(128);
+        }
+        setMotion(moving) {
+            if (moving) {
+                this.setAccel(1, 1, 1);
+            }
+            else {
+                this.setAccel(0, 1, 0);
+            }
+        }
+        setAccel(x, y, z) {
+            this.setRegister("DATAX", x);
+            this.setRegister("DATAY", y);
+            this.setRegister("DATAZ", z);
+        }
+        setup() {
+            execute_9.AVRRunner.getInstance().twi.eventHandler.registerController(exports.ADXL345_ADDR, this);
+            this.memory.clear();
+            this.address = null;
+            this.setRegister("DEVID", 0xE5);
+            this.setRegister("BW_RATE", 0xA);
+            this.setRegister("INT_SOURCE", 0x2);
+            this.setMotion(false);
+        }
+        setRegister(register, value) {
+            this.memory.write(REGISTERS[register], value);
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() {
+        }
+        i2cReadByte(acked) {
+            let byte;
+            if (this.address !== null) {
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = acked ? (this.address + 1) % this.memory.size : null;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                this.address = null;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+    }
+    exports.ADXL345I2C = ADXL345I2C;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/ADXL345I2C"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, ADXL345I2C_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13005,5 +13099,6 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY018 = ky018_1.KY018;
     window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
     window.KY008 = ky008_1.KY008;
+    window.ADXL345I2C = ADXL345I2C_1.ADXL345I2C;
 });
 //# sourceMappingURL=build.js.map
