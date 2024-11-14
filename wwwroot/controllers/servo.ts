@@ -1,10 +1,10 @@
 ﻿import { Controller } from "@controllers/controller";
-import { Pin } from "./pin";
 import { PinState } from "@lib/avr8js";
 import { AVRRunner } from "@lib/execute";
+import {Digital} from "@lib/boards/board";
 
 export class Servo extends Controller {
-    private signal?: Pin;
+    private signal?: Digital;
     private risingEdgeCycle?: number;
     private fallingEdgeCycle?: number;
     private previousAngle?: number;
@@ -12,12 +12,12 @@ export class Servo extends Controller {
     setup(): void {
         this.fallingEdgeCycle = undefined;
         this.risingEdgeCycle = undefined;
-        this.signal = this.pins.orange[0];
-        this.signal?.setListener(this.onSignalChange.bind(this)); // this is done to preserve the "this" context, since listener will be called inside Pin.ts
+        this.signal = this.pins.orange[0].digital;
+        this.signal?.addListener(this.onSignalChange.bind(this)); // this is done to preserve the "this" context, since listener will be called inside Pin.ts
     }
 
     private onSignalChange(state: PinState) {
-        const currentCycle = AVRRunner.getInstance().cpu.cycles;
+        const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
 
         if (state === PinState.High) {
             this.risingEdgeCycle = currentCycle;
@@ -42,7 +42,7 @@ export class Servo extends Controller {
     }
 
     private cyclesToMs(cycles: number) {
-        return (cycles * 1_000) / (AVRRunner.getInstance().MHZ / 1000); // Use 1000 scaling factor for finer precision
+        return (cycles * 1_000) / (AVRRunner.getInstance().board.cpu.frequency / 1000); // Use 1000 scaling factor for finer precision
     }
 
     private msToAngle(ms: number) {

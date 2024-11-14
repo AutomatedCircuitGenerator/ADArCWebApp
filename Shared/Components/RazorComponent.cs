@@ -44,8 +44,8 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
         if (IsCanvasComponent && ComponentInstance != null && firstRender)
         {
             var jsIdentifier = GetType().Name.Replace("Razor", "");
-            // Canonical pin name: "SO", to absolute pin, port, and relative pin port: 13, B, 6
-            Dictionary<string, List<Tuple<int, string, int>>> pins = new();
+            // Canonical pin name: "SO", to absolute pin indexes it is connected to
+            Dictionary<string, List<int>> pins = new();
 
             foreach (var pin in ComponentInstance.data.pins)
             {
@@ -54,23 +54,11 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
                     //one pin on a component can be connected to many pins on the arduino
                     var pinIds = connections.Select(connection => connection.toId);
 
-                    var tuples = new List<Tuple<int, string, int>>();
-                    foreach (var pinId in pinIds)
-                    {
-                        // Select the appropriate pin map based on the board type
-                        var pinMap = _boardService.Board == Board.ArduinoUno ? _arduinoUnoPinMap : _arduinoMegaPinMap;
-
-                        // Try to get the values, otherwise use default values
-                        tuples.Add(pinMap.TryGetValue(pinId, out var pinInfo)
-                            ? new Tuple<int, string, int>(pinId, pinInfo.PortName, pinInfo.RelativePin)
-                            : new Tuple<int, string, int>(pinId, "Null", -1));
-                    }
-
-                    pins[pin.Key] = tuples;
+                    pins[pin.Key] = pinIds.ToList();
                 }
                 else
                 {
-                    pins[pin.Key] = new List<Tuple<int, string, int>>();
+                    pins[pin.Key] = [];
                 }
             }
 

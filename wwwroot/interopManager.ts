@@ -1,8 +1,8 @@
-﻿import { TimingPacket } from "./lib/TimingPacket";
-import { AVRADC, PinState, adcConfig } from "./lib/avr8js/index";
-import { buildHex } from "./lib/compile-util";
-import {AVRRunner, Board} from "./lib/execute";
-import {I2CBus} from "./lib/i2c-bus";
+﻿import {TimingPacket} from "./lib/TimingPacket";
+import {PinState} from "./lib/avr8js/index";
+import {buildHex} from "./lib/compile-util";
+import {AVRRunner, BoardType} from "./lib/execute";
+import {ArduinoUno} from "@lib/boards/arduino-uno/arduino-uno";
 
 /*declare var introJs: any;*/
 
@@ -58,35 +58,9 @@ export namespace interopManager {
          * Only run by C#.
          */
         startCodeLoop() {
-
-            //TODO: implement cleanup of these listeners, as it is likely they stack up on repeated calls.
-            //Haven't noticed any issues related to this, but should be pointed out.
-
-            //each of the listeners handles a different register in the same way.
-            //checks for changed pins that have been registered as places to be paused.
-            //sends values to C#.
-            this.runner.portB.addListener(async (e) => {
-                this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
-                this.prevB = e;
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
+            this.runner.board.usarts[0].setOnByteTransmit(async (value: number) => {
+                await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
             });
-
-            this.runner.portC.addListener(async (e) => {
-                this.runner.pausedOn.concat(this.getChangedPins(e, 1).filter(e => this.awaitResponseOn.includes(e)));
-                this.prevC = e;
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
-            });
-
-            this.runner.portD.addListener(async (e) => {
-                this.runner.pausedOn.concat(this.getChangedPins(e, 2).filter(e => this.awaitResponseOn.includes(e)));
-                this.prevD = e;
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
-            });
-            //handles serial output.
-            // this.runner.usart.onByteTransmit = async (value: number) => {
-            //     await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
-            // };
-            //finish by running code.
             this.runCode();
         }
 
@@ -218,34 +192,12 @@ export namespace interopManager {
         }
 
         /**
-         * Secondary input for specific adc values that do not require timing.
-         * @param channel honestly, no idea. pretty sure this should be 0 usually, probably has something to do with which pin is changed.
-         * @param value the value to update to. I am fairly certain this is supposed to be a value between 0-5 (voltage),
-         * which is then interpolated out to the internal adc value of 0-1024. not 100% sure.
-         */
-        arduinoADCInput(channel: number, value: number) {
-            this.runner.adc.channelValues[channel] = value;
-        }
-
-        /**
          * Get the state of a pin from its absolute index as a boolean.
          * @param index the absolute index of the pin to check.
          * @returns the state of the pin as a boolean.
          */
         getPinState(index: number): boolean {
-            var state: PinState;
-            if (index < 8) {
-                state = this.runner.portD.pinState(index);
-            }
-            else if (index < 14) {
-                state = this.runner.portB.pinState(index - 8);
-            }
-            else if (index < 20) {
-                state = this.runner.portC.pinState(index - 14);
-            }
-            else {
-                console.log("getPinState received invalid index: " + index);
-            }
+            const state = this.runner.board.pins[index].digital.getState();
 
             //TODO: confirm that this is correct.
             if (state == PinState.High || state == PinState.InputPullUp) {
@@ -294,9 +246,11 @@ export namespace interopManager {
             
         }
 
-        setBoard(board: Board) {
-            console.log("set board", board);
-            AVRRunner.getInstance().board = board;
+        setBoard(board: BoardType) {
+            switch(board) {
+                case BoardType.ArduinoUno:
+                    AVRRunner.getInstance().boardConstructor = ArduinoUno;
+            }
         }
     }
     

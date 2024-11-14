@@ -1,8 +1,8 @@
 ﻿import {Controller} from "./controller";
-import {Pin} from "@controllers/pin";
+import {Interfaces} from "@lib/boards/board";
 
 export class ArcadePushButton extends Controller {
-    private digitalOut: Pin;
+    private digitalOut: Interfaces;
     setup(): void {
         this.digitalOut = this.pins.digital_out[0];
     }
@@ -13,7 +13,7 @@ export class ArcadePushButton extends Controller {
             surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
         }
 
-        this.digitalOut.setState(pushed);
+        this.digitalOut.digital.setState(pushed);
     }
 
 }

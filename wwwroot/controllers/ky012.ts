@@ -33,7 +33,7 @@ export class KY012 extends Controller {
         }
 
         // Listen for pin state changes
-        signalPins[0].setListener(this.handleStateChange.bind(this));
+        signalPins[0].digital.addListener(this.handleStateChange.bind(this));
     }
 
     /**

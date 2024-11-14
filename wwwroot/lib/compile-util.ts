@@ -7,7 +7,8 @@
 
 
 import {library} from './library_dictionary';
-import {AVRRunner, Board} from "@lib/execute";
+import {AVRRunner, BoardType} from "@lib/execute";
+import {ArduinoUno} from "@lib/boards/arduino-uno/arduino-uno";
 
 
 export function loadHex(source: string, target: Uint8Array) {
@@ -47,7 +48,7 @@ export async function buildHex(source: string) {
             files: [{
                 name: "libraries.txt",
                 content: listString
-            }], sketch: source, board: AVRRunner.getInstance().board == Board.ArduinoUno ? "" : "mega"
+            }], sketch: source, board: AVRRunner.getInstance().boardConstructor == ArduinoUno ? "" : "mega"
         })
     });
     return (await resp.json()) as IHexiResult;
