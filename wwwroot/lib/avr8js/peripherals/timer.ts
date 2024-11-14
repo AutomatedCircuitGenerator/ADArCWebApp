@@ -124,8 +124,8 @@ export const timer0Config: AVRTimerConfig = {
   compPinA: 6,
   compPortB: portDConfig.PORT,
   compPinB: 5,
-  compPortC: 0, // Not available
-  compPinC: 0,
+  compPortC: 0, // not available
+  compPinC: 0, // not available
   externalClockPort: portDConfig.PORT,
   externalClockPin: 4,
   ...defaultTimerBits,

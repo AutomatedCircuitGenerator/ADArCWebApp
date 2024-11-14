@@ -4,9 +4,17 @@ import {AVRRunner} from "@lib/execute";
 export type PinListener = (state: PinState) => void;
 
 export enum Port {
+    A = "A",
     B = "B",
     C = "C",
     D = "D",
+    E = "E",
+    F = "F",
+    G = "G",
+    H = "H",
+    J = "J",
+    K = "K",
+    L = "L",
     Null = "Null",
 }
 
@@ -20,9 +28,17 @@ export class Pin {
 
     private get portMap(): Record<Port, null | AVRIOPort> {
         return {
+            [Port.A]: AVRRunner.getInstance().portA,
             [Port.B]: AVRRunner.getInstance().portB,
-            [Port.C]: AVRRunner.getInstance().portC, //also analog pins
+            [Port.C]: AVRRunner.getInstance().portC,
             [Port.D]: AVRRunner.getInstance().portD,
+            [Port.E]: AVRRunner.getInstance().portE,
+            [Port.F]: AVRRunner.getInstance().portF,
+            [Port.G]: AVRRunner.getInstance().portG,
+            [Port.H]: AVRRunner.getInstance().portH,
+            [Port.J]: AVRRunner.getInstance().portJ,
+            [Port.K]: AVRRunner.getInstance().portK,
+            [Port.L]: AVRRunner.getInstance().portL,
             [Port.Null]: null,
         };
     }

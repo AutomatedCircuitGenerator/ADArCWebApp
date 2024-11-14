@@ -387,11 +387,11 @@
     /// </summary>
     private void setupListeners()
     {
-        if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
+        if (comps.Values.Any(c => c.isArduino())) //set has an arduino uno
         {
             foreach (var c in comps.Values) //iterate all components (don't know what listeners exist already)
             {
-                if (c.globalId != 1) //exclude the arduino
+                if (!c.isArduino()) //exclude the arduino
                 {
                     foreach (string listen in c.data.pinsToListen) //add a listener for each important pin
                     {

@@ -83,9 +83,9 @@ export namespace interopManager {
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
             });
             //handles serial output.
-            this.runner.usart.onByteTransmit = async (value: number) => {
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
-            };
+            // this.runner.usart.onByteTransmit = async (value: number) => {
+            //     await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+            // };
             //finish by running code.
             this.runCode();
         }

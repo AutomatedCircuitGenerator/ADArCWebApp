@@ -3,7 +3,6 @@ import {
     avrInstruction,
     AVRTimer,
     CPU,
-    timer0Config,
     AVRIOPort,
     portBConfig,
     portCConfig,
@@ -28,14 +27,12 @@ import {
 } from "./avr8js/index";
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
+import {timer0Config} from "@lib/avr8js/peripherals/timer-atmega2560";
 
 export enum Board {
     ArduinoUno,
     ArduinoMega,
 }
-
-// ATmega328p params
-const FLASH = 0x8000;
 
 /**
  *
@@ -46,8 +43,8 @@ export class AVRRunner {
     private static _instance: AVRRunner | null = null;
 
     board = Board.ArduinoUno;
-    
-    program = new Uint16Array(FLASH);
+
+    program = new Uint16Array(this.board == Board.ArduinoUno ? 0x8000 : 0x40000);
     cpu: CPU;
     timer0: AVRTimer;
     timer1: AVRTimer;
@@ -99,10 +96,10 @@ export class AVRRunner {
 
     async loadProgram(hex: string) {
         loadHex(hex, new Uint8Array(this.program.buffer));
-        this.cpu = new CPU(this.program);
+        this.cpu = this.board == Board.ArduinoUno ? new CPU(this.program) : new CPU(this.program, 0x2200);
         this.timer0 = new AVRTimer(this.cpu, timer0Config);
-        this.timer1 = new AVRTimer(this.cpu, timer1Config);
-        this.timer2 = new AVRTimer(this.cpu, timer2Config);
+        // this.timer1 = new AVRTimer(this.cpu, timer1Config);
+        // this.timer2 = new AVRTimer(this.cpu, timer2Config);
         this.portA = new AVRIOPort(this.cpu, portAConfig);
         this.portB = new AVRIOPort(this.cpu, portBConfig);
         this.portC = new AVRIOPort(this.cpu, portCConfig);
@@ -114,13 +111,7 @@ export class AVRRunner {
         this.portJ = new AVRIOPort(this.cpu, portJConfig);
         this.portK = new AVRIOPort(this.cpu, portKConfig);
         this.portL = new AVRIOPort(this.cpu, portLConfig);
-
-        this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
-        this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
-        this.adc = new AVRADC(this.cpu, adcConfig);
-        this.spi = new AVRSPI(this.cpu, spiConfig, this.MHZ);
-
-
+        
         for (const controller of this.controllers) {
             controller.init();
         }
@@ -178,7 +169,7 @@ export class AVRRunner {
 
     stop() {
         this.stopped = true;
-        
+
         for (const controller of this.controllers) {
             controller.cleanup();
         }
