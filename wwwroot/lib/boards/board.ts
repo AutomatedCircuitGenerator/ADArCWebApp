@@ -41,18 +41,18 @@ export interface Timer {
 }
 
 export interface Digital {
-    getState(): PinState;
-    setState(state: boolean): void;
+    get state(): PinState;
+    set state(state: boolean);
     addListener(listener: PinListener): void;
 }
 
 export interface Analog {
-    getVoltage(): number;
-    setVoltage(voltage: number): void;
+    get voltage(): number;
+    set voltage(voltage: number);
 }
 
 export interface USART {
-    setOnByteTransmit: (listener: ByteTransmitListener) => void;
+    set onByteTransmit(listener: ByteTransmitListener);
 }
 
 export interface TWI {

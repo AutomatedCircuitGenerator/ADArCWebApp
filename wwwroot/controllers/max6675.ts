@@ -15,7 +15,7 @@ export class MAX6675 extends Controller {
     }
 
     private get shouldReadSPI(): boolean {
-        return this.pins.cs[0].digital.getState() == PinState.Low;
+        return this.pins.cs[0].digital.state == PinState.Low;
     }
 
     private nextByteIsHigh = false;

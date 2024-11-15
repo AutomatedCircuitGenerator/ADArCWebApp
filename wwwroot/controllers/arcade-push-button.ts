@@ -13,7 +13,7 @@ export class ArcadePushButton extends Controller {
             surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
         }
 
-        this.digitalOut.digital.setState(pushed);
+        this.digitalOut.digital.state = pushed;
     }
 
 }

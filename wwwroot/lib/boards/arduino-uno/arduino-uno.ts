@@ -153,7 +153,7 @@ export class ArduinoUnoUSART implements USART {
         this.usart = usart;
     }
 
-    setOnByteTransmit(listener: ByteTransmitListener) {
+    set onByteTransmit(listener: ByteTransmitListener) {
         this.usart.onByteTransmit = listener;
     }
 }
@@ -161,25 +161,25 @@ export class ArduinoUnoUSART implements USART {
 export class ArduinoUnoDigital implements Digital {
     private port: AVRIOPort;
     private readonly index: number;
-    private state: PinState;
+    private previousState: PinState;
 
-    getState(): PinState {
-        return this.state;
+    get state(): PinState {
+        return this.port.pinState(this.index);
     }
 
     addListener(listener: PinListener): void {
         this.port.addListener(() => {
             let state = this.port.pinState(this.index);
 
-            if (state !== this.state) {
+            if (state !== this.previousState) {
                 listener(state);
             }
 
-            this.state = state;
+            this.previousState = state;
         });
     }
 
-    setState(state: boolean): void {
+    set state(state: boolean) {
         this.port.setPin(this.index, state);
     }
 
@@ -193,11 +193,11 @@ export class ArduinoUnoAnalog implements Analog {
     private adc: AVRADC;
     private readonly channel: number;
 
-    getVoltage(): number {
+    get voltage(): number {
         return this.adc.channelValues[this.channel];
     }
 
-    setVoltage(voltage: number): void {
+    set voltage(voltage: number) {
         this.adc.channelValues[this.channel] = voltage;
     }
 
