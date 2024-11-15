@@ -1,7 +1,7 @@
 ﻿import { Controller } from "@controllers/controller";
 import { PinState } from "@lib/avr8js";
 import { AVRRunner } from "@lib/execute";
-import {Digital} from "@lib/boards/board";
+import {Digital} from "../boards/board";
 
 export class Servo extends Controller {
     private signal?: Digital;

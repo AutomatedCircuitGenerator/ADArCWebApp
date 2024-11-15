@@ -1,8 +1,8 @@
 ﻿import {TimingPacket} from "./TimingPacket";
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
-import {Board, BoardConstructor, CPU} from "@lib/boards/board";
-import {ArduinoUno} from "@lib/boards/arduino-uno/arduino-uno";
+import {Board, BoardConstructor, CPU} from "../boards/board";
+import {ArduinoUno} from "../boards/arduino-uno/arduino-uno";
 
 export enum BoardType {
     ArduinoUno,

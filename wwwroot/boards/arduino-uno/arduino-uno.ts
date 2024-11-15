@@ -22,9 +22,9 @@ import {
     CPU as AVRCPU, PinState, portBConfig, portCConfig, portDConfig,
     spiConfig,
     SPIConfig, timer0Config, timer1Config, timer2Config, twiConfig, usart0Config
-} from "../../avr8js";
-import {SPIByteTransferCallback} from "../../avr8js/peripherals/spi";
-import {I2CController} from "../../i2c-bus";
+} from "@lib/avr8js";
+import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
+import {I2CController} from "@lib/i2c-bus";
 
 const MHZ = 16e6;
 

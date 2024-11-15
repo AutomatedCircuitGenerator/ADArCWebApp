@@ -1,7 +1,7 @@
 ﻿// abstract class to define shared behavior for components
 import {AVRRunner} from "@lib/execute";
 import {DotNetObjectReference} from "@type-declarations/dotnet";
-import {Interfaces} from "@lib/boards/board";
+import {Interfaces} from "../boards/board";
 
 type SerializedPinItem = {
     item1: number,

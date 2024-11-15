@@ -1,6 +1,5 @@
 ﻿import {Controller} from "./controller";
-import {Interfaces} from "@lib/boards/board";
-
+import {Interfaces} from "../boards/board";
 export class ArcadePushButton extends Controller {
     private digitalOut: Interfaces;
     setup(): void {

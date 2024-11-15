@@ -8,7 +8,7 @@
 
 import {library} from './library_dictionary';
 import {AVRRunner, BoardType} from "@lib/execute";
-import {ArduinoUno} from "@lib/boards/arduino-uno/arduino-uno";
+import {ArduinoUno} from "../boards/arduino-uno/arduino-uno";
 
 
 export function loadHex(source: string, target: Uint8Array) {

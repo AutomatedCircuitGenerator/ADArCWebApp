@@ -2,8 +2,7 @@
 import {PinState} from "./lib/avr8js/index";
 import {buildHex} from "./lib/compile-util";
 import {AVRRunner, BoardType} from "./lib/execute";
-import {ArduinoUno} from "@lib/boards/arduino-uno/arduino-uno";
-
+import {ArduinoUno} from "./boards/arduino-uno/arduino-uno";
 /*declare var introJs: any;*/
 
 export namespace interopManager {
