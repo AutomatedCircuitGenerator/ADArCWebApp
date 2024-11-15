@@ -48,7 +48,7 @@ export class AVRRunner {
     }
 
     async loadProgram(hex: string) {
-        const program = new Uint16Array(0x8000);
+        const program = new Uint16Array(this.boardConstructor.FLASH);
         loadHex(hex, new Uint8Array(program.buffer));
         this.board = new this.boardConstructor(program);
         

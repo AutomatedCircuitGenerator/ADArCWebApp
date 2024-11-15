@@ -36,6 +36,8 @@ export class ArduinoUno implements Board {
     usarts: USART[];
 
     pins: Interfaces[];
+    
+    static readonly FLASH = 0x8000;
 
     constructor(program: Uint16Array) {
         const avrCPU = new AVRCPU(program);

@@ -28,6 +28,7 @@ export type Interfaces = {
 
 export interface BoardConstructor {
     new(program: Uint16Array): Board;
+    readonly FLASH: number;
 }
 
 export interface CPU {
