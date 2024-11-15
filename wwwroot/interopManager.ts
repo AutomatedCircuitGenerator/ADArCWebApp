@@ -58,7 +58,7 @@ export namespace interopManager {
          * Only run by C#.
          */
         startCodeLoop() {
-            this.runner.board.usarts[0].setOnByteTransmit(async (value: number) => {
+            this.runner.board.usarts[0].onByteTransmit = (async (value: number) => {
                 await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
             });
             this.runCode();
@@ -197,7 +197,7 @@ export namespace interopManager {
          * @returns the state of the pin as a boolean.
          */
         getPinState(index: number): boolean {
-            const state = this.runner.board.pins[index].digital.getState();
+            const state = this.runner.board.pins[index].digital.state;
 
             //TODO: confirm that this is correct.
             if (state == PinState.High || state == PinState.InputPullUp) {
