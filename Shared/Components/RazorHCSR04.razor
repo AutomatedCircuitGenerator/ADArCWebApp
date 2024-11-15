@@ -1,7 +1,24 @@
-﻿@code {
+﻿@inherits RazorComponent
+
+@code {
+    private double _distance;
+
     [Parameter]
-    [ValueSetting("cm", 2, 2, 400)]
-    public double distance { get; set; } = 20;
+    [ValueSetting("cm", 20, 2, 400)]
+    public double distance
+    {
+        get => _distance;
+        set
+        {
+            var hasChanged = value != _distance;
+            _distance = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setDistance", _distance); });
+            }
+        }
+    }
+
 
     public static ElementPin[] pinInfo
     {
@@ -9,59 +26,14 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 96.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "TRIG", x: 106.3, y: 118, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "ECHO", x: 116.3, y: 118, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "GND", x: 126.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
+                new ElementPin(name: "vcc", x: 96.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "trigger", x: 106.3, y: 118, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "echo", x: 116.3, y: 118, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "gnd", x: 126.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
             };
         }
     }
 
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        bool trig = false;
-        bool echo = false;
-        if (0 == comp.getConnection("pin2", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            trig = await AvrCPU.getPinState(conn!.toId);
-        }
-        if (0 == comp.getConnection("pin3", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-        {
-            echo = await AvrCPU.getPinState(conn2!.toId);
-        }
-
-        if (trig && comp.midSignal == 0)//LOW until trigger pulse
-        {
-            comp.midSignal = 1;
-        }
-        if (trig && comp.midSignal == 1)//HIGH during trigger pulse(10us)
-        {
-            comp.midSignal = 2;
-            sendSignal(pinChangeCycle, comp, conn2!.toId);
-        }
-    }
-    async static void sendSignal(long originCyc, ComponentInstance comp, int id)
-    {
-        //Test distance = (high level time×velocity of sound (340M/S) / 2
-        //high level = (Test distance * 2)/velocity of sound
-        double distance = (double)comp.compParams["distance"].getValue();
-        int pulsewidth = Convert.ToInt32(distance * 2 / 0.0343);
-
-        TimingPacket pkt = new(originCyc);
-        pkt.addInstruction(new PinInstruction(id, true, 0));//HIGH, sending a ECHO pulse
-        
-       
-        if (distance >= 2 && distance <= 400)//min and max range of HC-SR04
-        {
-            pkt.addInstruction(new PinInstruction(id, false, pulsewidth));  //read as set false (pulsewidth us) after trigger cycle
-        }
-        else//nothing detected, probably will never be here
-        {
-            pkt.addInstruction(new PinInstruction(id, false, 38000));
-        }
-        //end of ECHO pulse
-        comp.midSignal = 0;
-    }
 }
 
 <svg xmlns="http://www.w3.org/2000/svg"
@@ -72,34 +44,34 @@
      font-family="monospace">
     <defs>
         <pattern patternUnits="userSpaceOnUse" width="2" height="2" id="checkerboard">
-            <path d="M0 0h1v1H0zM1 1h1v1H1z" />
+            <path d="M0 0h1v1H0zM1 1h1v1H1z"/>
         </pattern>
         <radialGradient id="grad1" cx="8.96" cy="10.04" r="3.58" gradientUnits="userSpaceOnUse">
-            <stop stop-color="#777" offset="0" />
-            <stop stop-color="#b9b9b9" offset="1" />
+            <stop stop-color="#777" offset="0"/>
+            <stop stop-color="#b9b9b9" offset="1"/>
         </radialGradient>
         <g id="sensor-unit">
-            <circle cx="8.98" cy="10" r="8.61" fill="#dcdcdc" />
-            <circle cx="8.98" cy="10" r="7.17" fill="#222" />
-            <circle cx="8.98" cy="10" r="5.53" fill="#777" fill-opacity=".992" />
-            <circle cx="8.98" cy="10" r="3.59" fill="url(#grad1)" />
-            <circle cx="8.99" cy="10" r=".277" fill="#777" fill-opacity=".818" />
-            <circle cx="8.98" cy="10" r="5.53" fill="url(#checkerboard)" opacity=".397" />
+            <circle cx="8.98" cy="10" r="8.61" fill="#dcdcdc"/>
+            <circle cx="8.98" cy="10" r="7.17" fill="#222"/>
+            <circle cx="8.98" cy="10" r="5.53" fill="#777" fill-opacity=".992"/>
+            <circle cx="8.98" cy="10" r="3.59" fill="url(#grad1)"/>
+            <circle cx="8.99" cy="10" r=".277" fill="#777" fill-opacity=".818"/>
+            <circle cx="8.98" cy="10" r="5.53" fill="url(#checkerboard)" opacity=".397"/>
         </g>
     </defs>
     <path d="M0 0v20.948h45V0zm1.422.464a1 1 0 01.004 0 1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 01.996-1zm41.956 0a1 1 0 01.004 0 1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 01.996-1zM1.422 18.484a1 1 0 01.004 0 1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 01.996-1zm41.956 0a1 1 0 01.004 0 1 1 0 011 1 1 1 0 01-1 1 1 1 0 01-1-1 1 1 0 01.996-1z"
-          fill="#456f93" />
+          fill="#456f93"/>
     <path d="M15.293 5.888l2.934-2.934v3.124l2.944 2.943v10.143M23.269 19.037v-2.473l-.966-.965v-12.5l2.577 1.488 4.741 4.741"
           fill="none"
           stroke="#355a7c"
-          stroke-width=".858" />
-    <use xlink:href="#sensor-unit" />
-    <use xlink:href="#sensor-unit" x="27.12" />
+          stroke-width=".858"/>
+    <use xlink:href="#sensor-unit"/>
+    <use xlink:href="#sensor-unit" x="27.12"/>
     <g fill="none" stroke="#505132" stroke-width=".368">
-        <circle cx="43.4" cy="1.46" r="1" />
-        <circle cx="43.4" cy="19.5" r="1" />
-        <circle cx="1.43" cy="1.46" r="1" />
-        <circle cx="1.43" cy="19.5" r="1" />
+        <circle cx="43.4" cy="1.46" r="1"/>
+        <circle cx="43.4" cy="19.5" r="1"/>
+        <circle cx="1.43" cy="1.46" r="1"/>
+        <circle cx="1.43" cy="19.5" r="1"/>
     </g>
     <rect ry="2.07"
           y=".626"
@@ -108,18 +80,18 @@
           width="10.272"
           fill="#878787"
           stroke="#424242"
-          stroke-width=".368" />
+          stroke-width=".368"/>
     <g fill="black">
-        <rect x="17.87" y="18" ry=".568" width="2.25" height="2.271" />
-        <rect x="20.41" y="18" ry=".568" width="2.25" height="2.271" />
-        <rect x="22.95" y="18" ry=".568" width="2.25" height="2.271" />
-        <rect x="25.49" y="18" ry=".568" width="2.25" height="2.271" />
+        <rect x="17.87" y="18" ry=".568" width="2.25" height="2.271"/>
+        <rect x="20.41" y="18" ry=".568" width="2.25" height="2.271"/>
+        <rect x="22.95" y="18" ry=".568" width="2.25" height="2.271"/>
+        <rect x="25.49" y="18" ry=".568" width="2.25" height="2.271"/>
     </g>
     <g fill="#ccc" stroke-linecap="round" stroke-width=".21">
-        <rect x="18.61" y="19" width=".75" height="7" rx=".2" />
-        <rect x="21.15" y="19" width=".75" height="7" rx=".2" />
-        <rect x="23.69" y="19" width=".75" height="7" rx=".2" />
-        <rect x="26.23" y="19" width=".75" height="7" rx=".2" />
+        <rect x="18.61" y="19" width=".75" height="7" rx=".2"/>
+        <rect x="21.15" y="19" width=".75" height="7" rx=".2"/>
+        <rect x="23.69" y="19" width=".75" height="7" rx=".2"/>
+        <rect x="26.23" y="19" width=".75" height="7" rx=".2"/>
     </g>
     <text font-weight="400" font-size="2.2" fill="#e6e6e6" stroke-width=".055">
         <tspan y="8" x="17.6">HC-SR04</tspan>
