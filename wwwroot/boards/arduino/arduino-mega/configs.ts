@@ -4,7 +4,7 @@
     portDConfig, portEConfig,
     portGConfig,
     portHConfig, portLConfig,
-    spiConfig as unoSpiConfig
+    spiConfig as unoSpiConfig, TWIConfig
 } from "@lib/avr8js";
 import {USARTConfig} from "@lib/avr8js/peripherals/usart";
 
@@ -233,3 +233,49 @@ export const usart0Config: USARTConfig = {
     UBRRH: 0xc5,
     UDR: 0xc6,
 }
+
+export const usart1Config: USARTConfig = {
+    rxCompleteInterrupt: 0x48,
+    dataRegisterEmptyInterrupt: 0x4A,
+    txCompleteInterrupt: 0x4C,
+    UCSRA: 0xc8,
+    UCSRB: 0xc9,
+    UCSRC: 0xca,
+    UBRRL: 0xcc,
+    UBRRH: 0xcd,
+    UDR: 0xce,
+}
+
+export const usart2Config: USARTConfig = {
+    rxCompleteInterrupt: 0x66,
+    dataRegisterEmptyInterrupt: 0x68,
+    txCompleteInterrupt: 0x6A,
+    UCSRA: 0xD0,
+    UCSRB: 0xD1,
+    UCSRC: 0xD2,
+    UBRRL: 0xD4,
+    UBRRH: 0xD5,
+    UDR: 0xD6,
+}
+
+export const usart3Config: USARTConfig = {
+    rxCompleteInterrupt: 0x6C,
+    dataRegisterEmptyInterrupt: 0x6E,
+    txCompleteInterrupt: 0x70,
+    UCSRA: 0x130,
+    UCSRB: 0x131,
+    UCSRC: 0x132,
+    UBRRL: 0x134,
+    UBRRH: 0x135,
+    UDR: 0x136,
+}
+
+export const twiConfig: TWIConfig = {
+    twiInterrupt: 0x4E,
+    TWBR: 0xb8,
+    TWSR: 0xb9,
+    TWAR: 0xba,
+    TWDR: 0xbb,
+    TWCR: 0xbc,
+    TWAMR: 0xbd,
+};

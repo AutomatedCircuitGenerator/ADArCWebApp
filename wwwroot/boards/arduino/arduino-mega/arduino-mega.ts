@@ -20,7 +20,7 @@ import {
     AVRSPI,
     AVRTimer, AVRTWI, AVRUSART,
     CPU as AVRCPU, PinState, portBConfig, portCConfig, portDConfig, portKConfig,
-    spiConfig as unoSpiConfig, twiConfig,
+    spiConfig as unoSpiConfig,
     portJConfig, portHConfig, portEConfig, portFConfig, portGConfig, portLConfig, portAConfig
 } from "@lib/avr8js";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
@@ -32,8 +32,8 @@ import {
     timer2Config,
     timer3Config,
     timer4Config,
-    timer5Config,
-    usart0Config
+    timer5Config, twiConfig,
+    usart0Config, usart1Config, usart2Config, usart3Config
 } from "./configs";
 import {
     ArduinoCPU,
@@ -81,7 +81,12 @@ export class ArduinoMega implements Board {
             new ArduinoTimer(new AVRTimer(avrCPU, timer5Config))
         ];
         this.twis = [new ArduinoTWI(new AVRTWI(avrCPU, twiConfig, MHZ))];
-        this.usarts = [new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ))];
+        this.usarts = [
+            new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ)),
+            new ArduinoUSART(new AVRUSART(avrCPU, usart1Config, MHZ)),
+            new ArduinoUSART(new AVRUSART(avrCPU, usart2Config, MHZ)),
+            new ArduinoUSART(new AVRUSART(avrCPU, usart3Config, MHZ)),
+        ];
 
         this.pins = [
             {digital: new ArduinoDigital(portE, 0)},  // Pin 0
