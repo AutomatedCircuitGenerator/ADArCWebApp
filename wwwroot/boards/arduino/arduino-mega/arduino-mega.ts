@@ -13,7 +13,6 @@
     USART
 } from "../../board";
 import {
-    adcConfig,
     ADCConfig,
     AVRADC,
     avrInstruction, AVRIOPort,
@@ -26,6 +25,7 @@ import {
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {I2CController} from "@lib/i2c-bus";
 import {
+    adcConfig,
     spiConfig,
     timer0Config,
     timer1Config,
@@ -36,6 +36,7 @@ import {
     usart0Config, usart1Config, usart2Config, usart3Config
 } from "./configs";
 import {
+    ArduinoAnalog,
     ArduinoCPU,
     ArduinoDigital,
     ArduinoSPI,
@@ -57,7 +58,7 @@ export class ArduinoMega implements Board {
 
     constructor(program: Uint16Array) {
         const avrCPU = new AVRCPU(program, 0x2200);
-        // const adc = new AVRADC(avrCPU, adcConfig);
+        const adc = new AVRADC(avrCPU, adcConfig);
         const portA = new AVRIOPort(avrCPU, portAConfig);
         const portB = new AVRIOPort(avrCPU, portBConfig);
         const portC = new AVRIOPort(avrCPU, portCConfig);
@@ -71,7 +72,7 @@ export class ArduinoMega implements Board {
         const portL = new AVRIOPort(avrCPU, portLConfig);
 
         this.cpu = new ArduinoCPU(avrCPU);
-        // this.spis = [new ArduinoSPI(new AVRSPI(avrCPU, spiConfig, MHZ))];
+        this.spis = [new ArduinoSPI(new AVRSPI(avrCPU, spiConfig, MHZ))];
         this.timers = [
             new ArduinoTimer(new AVRTimer(avrCPU, timer0Config)),
             new ArduinoTimer(new AVRTimer(avrCPU, timer1Config)),
@@ -89,8 +90,8 @@ export class ArduinoMega implements Board {
         ];
 
         this.pins = [
-            {digital: new ArduinoDigital(portE, 0)},  // Pin 0
-            {digital: new ArduinoDigital(portE, 1)},  // Pin 1
+            {digital: new ArduinoDigital(portE, 0), usart: this.usarts[0]},  // Pin 0
+            {digital: new ArduinoDigital(portE, 1), usart: this.usarts[0]},  // Pin 1
             {digital: new ArduinoDigital(portE, 4)},  // Pin 2
             {digital: new ArduinoDigital(portE, 5)},  // Pin 3
             {digital: new ArduinoDigital(portG, 5)},  // Pin 4
@@ -103,14 +104,14 @@ export class ArduinoMega implements Board {
             {digital: new ArduinoDigital(portB, 5)},  // Pin 11
             {digital: new ArduinoDigital(portB, 6)},  // Pin 12
             {digital: new ArduinoDigital(portB, 7)},  // Pin 13
-            {digital: new ArduinoDigital(portJ, 1)},  // Pin 14
-            {digital: new ArduinoDigital(portJ, 0)},  // Pin 15
-            {digital: new ArduinoDigital(portH, 1)},  // Pin 16
-            {digital: new ArduinoDigital(portH, 0)},  // Pin 17
-            {digital: new ArduinoDigital(portD, 3)},  // Pin 18
-            {digital: new ArduinoDigital(portD, 2)},  // Pin 19
-            {digital: new ArduinoDigital(portD, 1)},  // Pin 20
-            {digital: new ArduinoDigital(portD, 0)},  // Pin 21
+            {digital: new ArduinoDigital(portJ, 1), usart: this.usarts[3]},  // Pin 14
+            {digital: new ArduinoDigital(portJ, 0), usart: this.usarts[3]},  // Pin 15
+            {digital: new ArduinoDigital(portH, 1), usart: this.usarts[2]},  // Pin 16
+            {digital: new ArduinoDigital(portH, 0), usart: this.usarts[2]},  // Pin 17
+            {digital: new ArduinoDigital(portD, 3), usart: this.usarts[1]},  // Pin 18
+            {digital: new ArduinoDigital(portD, 2), usart: this.usarts[1]},  // Pin 19
+            {digital: new ArduinoDigital(portD, 1), twi: this.twis[0]},  // Pin 20
+            {digital: new ArduinoDigital(portD, 0), twi: this.twis[0]},  // Pin 21
             {digital: new ArduinoDigital(portA, 0)},  // Pin 22
             {digital: new ArduinoDigital(portA, 1)},  // Pin 23
             {digital: new ArduinoDigital(portA, 2)},  // Pin 24
@@ -139,26 +140,26 @@ export class ArduinoMega implements Board {
             {digital: new ArduinoDigital(portL, 2)},  // Pin 47
             {digital: new ArduinoDigital(portL, 1)},  // Pin 48
             {digital: new ArduinoDigital(portL, 0)},  // Pin 49
-            {digital: new ArduinoDigital(portB, 3)},  // Pin 50
-            {digital: new ArduinoDigital(portB, 2)},  // Pin 51
-            {digital: new ArduinoDigital(portB, 1)},  // Pin 52
-            {digital: new ArduinoDigital(portB, 0)},  // Pin 53
-            {digital: new ArduinoDigital(portF, 0)},  // Pin 54
-            {digital: new ArduinoDigital(portF, 1)},  // Pin 55
-            {digital: new ArduinoDigital(portF, 2)},  // Pin 56
-            {digital: new ArduinoDigital(portF, 3)},  // Pin 57
-            {digital: new ArduinoDigital(portF, 4)},  // Pin 58
-            {digital: new ArduinoDigital(portF, 5)},  // Pin 59
-            {digital: new ArduinoDigital(portF, 6)},  // Pin 60
-            {digital: new ArduinoDigital(portF, 7)},  // Pin 61
-            {digital: new ArduinoDigital(portK, 0)},  // Pin 62
-            {digital: new ArduinoDigital(portK, 1)},  // Pin 63
-            {digital: new ArduinoDigital(portK, 2)},  // Pin 64
-            {digital: new ArduinoDigital(portK, 3)},  // Pin 65
-            {digital: new ArduinoDigital(portK, 4)},  // Pin 66
-            {digital: new ArduinoDigital(portK, 5)},  // Pin 67
-            {digital: new ArduinoDigital(portK, 6)},  // Pin 68
-            {digital: new ArduinoDigital(portK, 7)},  // Pin 69
+            {digital: new ArduinoDigital(portB, 3), spi: this.spis[0]},  // Pin 50
+            {digital: new ArduinoDigital(portB, 2), spi: this.spis[0]},  // Pin 51
+            {digital: new ArduinoDigital(portB, 1), spi: this.spis[0]},  // Pin 52
+            {digital: new ArduinoDigital(portB, 0), spi: this.spis[0]},  // Pin 53
+            {digital: new ArduinoDigital(portF, 0), analog: new ArduinoAnalog(adc, 0)},  // Pin 54
+            {digital: new ArduinoDigital(portF, 1), analog: new ArduinoAnalog(adc, 1)},  // Pin 55
+            {digital: new ArduinoDigital(portF, 2), analog: new ArduinoAnalog(adc, 2)},  // Pin 56
+            {digital: new ArduinoDigital(portF, 3), analog: new ArduinoAnalog(adc, 3)},  // Pin 57
+            {digital: new ArduinoDigital(portF, 4), analog: new ArduinoAnalog(adc, 4)},  // Pin 58
+            {digital: new ArduinoDigital(portF, 5), analog: new ArduinoAnalog(adc, 5)},  // Pin 59
+            {digital: new ArduinoDigital(portF, 6), analog: new ArduinoAnalog(adc, 6)},  // Pin 60
+            {digital: new ArduinoDigital(portF, 7), analog: new ArduinoAnalog(adc, 7)},  // Pin 61
+            {digital: new ArduinoDigital(portK, 0), analog: new ArduinoAnalog(adc, 8)},  // Pin 62
+            {digital: new ArduinoDigital(portK, 1), analog: new ArduinoAnalog(adc, 9)},  // Pin 63
+            {digital: new ArduinoDigital(portK, 2), analog: new ArduinoAnalog(adc, 10)},  // Pin 64
+            {digital: new ArduinoDigital(portK, 3), analog: new ArduinoAnalog(adc, 11)},  // Pin 65
+            {digital: new ArduinoDigital(portK, 4), analog: new ArduinoAnalog(adc, 12)},  // Pin 66
+            {digital: new ArduinoDigital(portK, 5), analog: new ArduinoAnalog(adc, 13)},  // Pin 67
+            {digital: new ArduinoDigital(portK, 6), analog: new ArduinoAnalog(adc, 14)},  // Pin 68
+            {digital: new ArduinoDigital(portK, 7), analog: new ArduinoAnalog(adc, 15)},  // Pin 69
         ];
     }
 }

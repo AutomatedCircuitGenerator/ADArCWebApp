@@ -1,4 +1,5 @@
 ﻿import {
+    ADCConfig, ADCReference, atmega328Channels,
     AVRTimerConfig,
     portBConfig,
     portDConfig, portEConfig,
@@ -278,4 +279,23 @@ export const twiConfig: TWIConfig = {
     TWDR: 0xbb,
     TWCR: 0xbc,
     TWAMR: 0xbd,
+};
+
+export const adcConfig: ADCConfig = {
+    ADMUX: 0x7c,
+    ADCSRA: 0x7a,
+    ADCSRB: 0x7b,
+    ADCL: 0x78,
+    ADCH: 0x79,
+    DIDR0: 0x7e,
+    adcInterrupt: 0x3a,
+    numChannels: 16,
+    muxInputMask: 0xf,
+    muxChannels: atmega328Channels,
+    adcReferences: [
+        ADCReference.AREF,
+        ADCReference.AVCC,
+        ADCReference.Reserved,
+        ADCReference.Internal1V1,
+    ],
 };
