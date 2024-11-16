@@ -20,12 +20,12 @@ import {
     AVRSPI,
     AVRTimer, AVRTWI, AVRUSART,
     CPU as AVRCPU, PinState, portBConfig, portCConfig, portDConfig, portKConfig,
-    spiConfig as unoSpiConfig, timer1Config, timer2Config, twiConfig, usart0Config,
+    spiConfig as unoSpiConfig, twiConfig, usart0Config,
     portJConfig, portHConfig, portEConfig, portFConfig, portGConfig, portLConfig, portAConfig
 } from "@lib/avr8js";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {I2CController} from "@lib/i2c-bus";
-import {spiConfig, timer0Config} from "./configs";
+import {spiConfig, timer0Config, timer1Config, timer2Config} from "./configs";
 import {
     ArduinoCPU,
     ArduinoDigital,
@@ -47,8 +47,8 @@ export class ArduinoMega implements Board {
     static readonly FLASH = 0x40000;
 
     constructor(program: Uint16Array) {
-        const avrCPU = new AVRCPU(program);
-        const adc = new AVRADC(avrCPU, adcConfig);
+        const avrCPU = new AVRCPU(program, 0x2200);
+        // const adc = new AVRADC(avrCPU, adcConfig);
         const portA = new AVRIOPort(avrCPU, portAConfig);
         const portB = new AVRIOPort(avrCPU, portBConfig);
         const portC = new AVRIOPort(avrCPU, portCConfig);
@@ -62,12 +62,11 @@ export class ArduinoMega implements Board {
         const portL = new AVRIOPort(avrCPU, portLConfig);
 
         this.cpu = new ArduinoCPU(avrCPU);
-        this.spis = [new ArduinoSPI(new AVRSPI(avrCPU, spiConfig, MHZ))];
+        // this.spis = [new ArduinoSPI(new AVRSPI(avrCPU, spiConfig, MHZ))];
         this.timers = [new ArduinoTimer(new AVRTimer(avrCPU, timer0Config)),
-            new ArduinoTimer(new AVRTimer(avrCPU, timer1Config)),
-            new ArduinoTimer(new AVRTimer(avrCPU, timer2Config))];
-        this.twis = [new ArduinoTWI(new AVRTWI(avrCPU, twiConfig, MHZ))];
-        this.usarts = [new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ))];
+            new ArduinoTimer(new AVRTimer(avrCPU, timer1Config)), new ArduinoTimer(new AVRTimer(avrCPU, timer2Config))];
+        // this.twis = [new ArduinoTWI(new AVRTWI(avrCPU, twiConfig, MHZ))];
+        // this.usarts = [new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ))];
 
         this.pins = [
             {digital: new ArduinoDigital(portE, 0)},  // Pin 0
