@@ -2,7 +2,9 @@
 import {PinState} from "./lib/avr8js/index";
 import {buildHex} from "./lib/compile-util";
 import {AVRRunner, BoardType} from "./lib/execute";
-import {ArduinoUno} from "./boards/arduino-uno/arduino-uno";
+import {ArduinoUno} from "./boards/arduino/arduino-uno/arduino-uno";
+import {ArduinoMega} from "./boards/arduino/arduino-mega/arduino-mega";
+import {Board, BoardConstructor} from "./boards/board";
 /*declare var introJs: any;*/
 
 export namespace interopManager {
@@ -20,7 +22,7 @@ export namespace interopManager {
          * Returns an array of absolute (0-19?) pin indices that have changed "recently."
          * Recently generally means since the last pin change, so in most cases this should not
          * have more than one value in it. However, this accounts for more cases.
-         * 
+         *
          * @param newReg the new state of a pin register as an int.
          * @param regIndex an int representing which register we are using. 0=b, 1=c, else=d.
          * @returns number[] of absolute pin indices that changed since the last check.
@@ -32,13 +34,11 @@ export namespace interopManager {
                 //b
                 diff = newReg ^ this.prevB;     //get diff as int (prevB set on pin change AFTER this function called)
                 delta = 8;                      //number to add to get absolute index
-            }
-            else if (regIndex === 1) {
+            } else if (regIndex === 1) {
                 //c
                 diff = newReg ^ this.prevC;
                 delta = 14;
-            }
-            else {
+            } else {
                 //d
                 diff = newReg ^ this.prevD;
                 delta = 0;
@@ -48,12 +48,13 @@ export namespace interopManager {
             //remove 0s, representing pin indices that did not change.
             //the state of the array is not a set of 1-indexed array positions if changed values
             //subtract 1 to return to 0-indexed, then add the absolute pin adjustment to get return value.
-            return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta-1));
+            return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta - 1));
         }
+
         /**
          * this function handles setting up the arduino output and sending it to C#.
          * Also starts the code.
-         * 
+         *
          * Only run by C#.
          */
         startCodeLoop() {
@@ -70,6 +71,7 @@ export namespace interopManager {
         getWindowWidth(): number {
             return window.innerWidth;
         }
+
         /**
          * Gets the height of the window, up to the bottom of the browser task bar (address/bookmark area)
          * @returns the height of the window.
@@ -77,20 +79,23 @@ export namespace interopManager {
         getWindowHeight(): number {
             return window.innerHeight;
         }
+
         /**
          * Gets the monaco model. Used internally in monaco related functions.
          * @returns the monaco model.
          */
-        private getModel(){
+        private getModel() {
             return (<any>window).monaco.editor.getModels()[0];
         }
+
         /**
-         * Overwrites the code in the monaco instance. 
+         * Overwrites the code in the monaco instance.
          * @param code The complete code to populate monaco with.
          */
         updateCodeInPane(code: string) {
             this.getModel().setValue(code);
         }
+
         /**
          * Gets the entire text of the code in the monaco editor.
          * @returns the entire text in the monaco editor.
@@ -125,6 +130,7 @@ export namespace interopManager {
         clearMonacoErrors() {
             (<any>window).monaco.editor.setModelMarkers(this.getModel(), "owner", []);
         }
+
         /**
          * Compiles the code currently present in the pane.
          * @returns the compiler output (stdout and stderr) as an anonymous object.
@@ -132,13 +138,15 @@ export namespace interopManager {
         async compile(): Promise<object> {
             var res = await buildHex(this.getCodeInPane());
             await this.runner.loadProgram(res.hex);
-            return { stdout: res.stdout, stderr: res.stderr }
+            return {stdout: res.stdout, stderr: res.stderr}
         }
+
         /**
          * Tells the runner to execute the code.
          */
         runCode() {
-            this.runner.execute(cpu => { });
+            this.runner.execute(cpu => {
+            });
         }
 
         /**
@@ -201,8 +209,7 @@ export namespace interopManager {
             //TODO: confirm that this is correct.
             if (state == PinState.High || state == PinState.InputPullUp) {
                 return true;
-            }
-            else {
+            } else {
                 return false;
             }
         }
@@ -230,26 +237,32 @@ export namespace interopManager {
 
         // runs the tutorial using Intro.js
         public runTutorial() {
-            
-            const intro = (<any>window).introJs().setOption('keyboardNavigation', false);;
+
+            const intro = (<any>window).introJs().setOption('keyboardNavigation', false);
+            ;
             if (intro) {
                 console.log("intro is a valid object")
-            }
-            else {
+            } else {
                 console.log("intro not valid")
             }
             //this.closeMenu("Help");
-            
+
             intro.start();
             //intro.onexit(()=> intro.goToStep(6));
-            
+
         }
 
         setBoard(board: BoardType) {
+            let boardConstructor: BoardConstructor;
             switch(board) {
                 case BoardType.ArduinoUno:
-                    AVRRunner.getInstance().boardConstructor = ArduinoUno;
+                    boardConstructor = ArduinoUno;
+                    break;
+                case BoardType.ArduinoMega:
+                    boardConstructor = ArduinoMega;
+                    break;
             }
+            this.runner.boardConstructor = boardConstructor;
         }
     }
     

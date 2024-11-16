@@ -2,7 +2,7 @@
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
 import {Board, BoardConstructor, CPU} from "../boards/board";
-import {ArduinoUno} from "../boards/arduino-uno/arduino-uno";
+import {ArduinoUno} from "../boards/arduino/arduino-uno/arduino-uno";
 
 export enum BoardType {
     ArduinoUno,
