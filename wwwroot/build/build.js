@@ -13122,7 +13122,6 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
             this.distance = distance;
         }
         setup() {
-            console.log("hcsr04 setup");
             console.log(JSON.stringify(this.pins.trigger));
             this.pins.trigger[0].setListener(this.trigger.bind(this));
         }
@@ -13132,17 +13131,31 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
             }
         }
         echo() {
-            console.log("echo() high");
             this.pins.echo[0].setState(true);
             execute_10.AVRRunner.getInstance().cpu.addClockEvent(() => {
                 this.pins.echo[0].setState(false);
-                console.log("echo() low");
             }, this.distance * 58 * (execute_10.AVRRunner.getInstance().MHZ / 1e6));
         }
     }
     exports.HCSR04 = HCSR04;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1) {
+define("controllers/ky003", ["require", "exports", "controllers/controller"], function (require, exports, controller_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY003 = void 0;
+    class KY003 extends controller_14.Controller {
+        setup() {
+            this.inSimulation = true;
+        }
+        setFieldDetected(isFieldDetected) {
+            if (!this.inSimulation)
+                return;
+            isFieldDetected ? this.pins.digital_out[0].setState(true) : this.pins.digital_out[0].setState(false);
+        }
+    }
+    exports.KY003 = KY003;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13161,5 +13174,6 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
     window.MQ3 = mq3_1.MQ3;
     window.HCSR04 = hcsr04_1.HCSR04;
+    window.KY003 = ky003_1.KY003;
 });
 //# sourceMappingURL=build.js.map
