@@ -20,12 +20,21 @@ import {
     AVRSPI,
     AVRTimer, AVRTWI, AVRUSART,
     CPU as AVRCPU, PinState, portBConfig, portCConfig, portDConfig, portKConfig,
-    spiConfig as unoSpiConfig, twiConfig, usart0Config,
+    spiConfig as unoSpiConfig, twiConfig,
     portJConfig, portHConfig, portEConfig, portFConfig, portGConfig, portLConfig, portAConfig
 } from "@lib/avr8js";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {I2CController} from "@lib/i2c-bus";
-import {spiConfig, timer0Config, timer1Config, timer2Config} from "./configs";
+import {
+    spiConfig,
+    timer0Config,
+    timer1Config,
+    timer2Config,
+    timer3Config,
+    timer4Config,
+    timer5Config,
+    usart0Config
+} from "./configs";
 import {
     ArduinoCPU,
     ArduinoDigital,
@@ -63,10 +72,16 @@ export class ArduinoMega implements Board {
 
         this.cpu = new ArduinoCPU(avrCPU);
         // this.spis = [new ArduinoSPI(new AVRSPI(avrCPU, spiConfig, MHZ))];
-        this.timers = [new ArduinoTimer(new AVRTimer(avrCPU, timer0Config)),
-            new ArduinoTimer(new AVRTimer(avrCPU, timer1Config)), new ArduinoTimer(new AVRTimer(avrCPU, timer2Config))];
-        // this.twis = [new ArduinoTWI(new AVRTWI(avrCPU, twiConfig, MHZ))];
-        // this.usarts = [new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ))];
+        this.timers = [
+            new ArduinoTimer(new AVRTimer(avrCPU, timer0Config)),
+            new ArduinoTimer(new AVRTimer(avrCPU, timer1Config)),
+            new ArduinoTimer(new AVRTimer(avrCPU, timer2Config)),
+            new ArduinoTimer(new AVRTimer(avrCPU, timer3Config)),
+            new ArduinoTimer(new AVRTimer(avrCPU, timer4Config)),
+            new ArduinoTimer(new AVRTimer(avrCPU, timer5Config))
+        ];
+        this.twis = [new ArduinoTWI(new AVRTWI(avrCPU, twiConfig, MHZ))];
+        this.usarts = [new ArduinoUSART(new AVRUSART(avrCPU, usart0Config, MHZ))];
 
         this.pins = [
             {digital: new ArduinoDigital(portE, 0)},  // Pin 0
