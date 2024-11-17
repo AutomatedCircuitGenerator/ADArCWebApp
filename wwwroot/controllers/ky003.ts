@@ -9,6 +9,6 @@ export class KY003 extends Controller {
 
     setFieldDetected(isFieldDetected: boolean) {
         if (!this.inSimulation) return;
-        isFieldDetected ? this.pins.digital_out[0].setState(true) : this.pins.digital_out[0].setState(false);
+        isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
     }
 }

@@ -87,6 +87,7 @@ namespace GraphSynth.Representation
         public List<string> localLabels
         {
             get { return _localLabels ?? (_localLabels = new List<string>()); }
+            set { _localLabels = value; }
         }
 
         /// <summary>

@@ -1,27 +1,13 @@
-﻿import {PinInstruction, TimingPacket} from "./TimingPacket";
-import {
-    avrInstruction,
-    AVRTimer,
-    CPU,
-    timer0Config,
-    AVRIOPort,
-    portBConfig,
-    portCConfig,
-    portDConfig,
-    AVRUSART,
-    usart0Config,
-    AVRTWI,
-    twiConfig,
-    AVRADC,
-    adcConfig,
-    AVRSPI,
-    spiConfig, timer2Config, timer1Config
-} from "./avr8js/index";
+﻿import {TimingPacket} from "./TimingPacket";
 import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
+import {Board, BoardConstructor, CPU} from "../boards/board";
+import {ArduinoUno} from "../boards/arduino/arduino-uno/arduino-uno";
 
-// ATmega328p params
-const FLASH = 0x8000;
+export enum BoardType {
+    ArduinoUno,
+    ArduinoMega,
+}
 
 /**
  *
@@ -30,20 +16,8 @@ const FLASH = 0x8000;
  */
 export class AVRRunner {
     private static _instance: AVRRunner | null = null;
-
-    program = new Uint16Array(FLASH);
-    cpu: CPU;
-    timer0: AVRTimer;
-    timer1: AVRTimer;
-    timer2: AVRTimer;
-    portB: AVRIOPort;
-    portC: AVRIOPort;
-    portD: AVRIOPort;
-    usart: AVRUSART;
-    twi: AVRTWI;
-    spi: AVRSPI;
-    adc: AVRADC;
-    MHZ = 16e6; //i think this should be static
+    boardConstructor: BoardConstructor = ArduinoUno;
+    board: Board;
 
     public instructions: TimingPacket[] = [];
     public pausedOn: number[] = [];
@@ -74,20 +48,10 @@ export class AVRRunner {
     }
 
     async loadProgram(hex: string) {
-        loadHex(hex, new Uint8Array(this.program.buffer));
-        this.cpu = new CPU(this.program);
-        this.timer0 = new AVRTimer(this.cpu, timer0Config);
-        this.timer1 = new AVRTimer(this.cpu, timer1Config);
-        this.timer2 = new AVRTimer(this.cpu, timer2Config);
-        this.portB = new AVRIOPort(this.cpu, portBConfig);
-        this.portC = new AVRIOPort(this.cpu, portCConfig);
-        this.portD = new AVRIOPort(this.cpu, portDConfig);
-        this.usart = new AVRUSART(this.cpu, usart0Config, this.MHZ);
-        this.twi = new AVRTWI(this.cpu, twiConfig, this.MHZ);
-        this.adc = new AVRADC(this.cpu, adcConfig);
-        this.spi = new AVRSPI(this.cpu, spiConfig, this.MHZ);
-
-
+        const program = new Uint16Array(this.boardConstructor.FLASH);
+        loadHex(hex, new Uint8Array(program.buffer));
+        this.board = new this.boardConstructor(program);
+        
         for (const controller of this.controllers) {
             controller.init();
         }
@@ -98,43 +62,15 @@ export class AVRRunner {
         for (; ;) {
             if (this.pausedOn.length == 0) {//do not tick if waiting for a response. Essentially stops arduino time
                 //do instruction and update cycles
-                avrInstruction(this.cpu);
-                this.cpu.tick();
+                this.board.cpu.clock();
             } else {
                 //release thread while waiting for instructions
                 await new Promise(resolve => setTimeout(resolve, 0));
             }
 
-            let markDel: TimingPacket[] = [];//setup deletion list
-
-            //check each active instruction and see if their next instruction can be executed.
-            this.instructions.forEach(t => {
-                var next = t.instructions[0];//get next instruction. 
-                if (this.cpu.cycles >= t.originCycle + next.cyclesSinceOrigin) {
-
-                    t.instructions.shift();//removes 'next' (first element)
-                    if (t.instructions.length === 0) {
-                        markDel.push(t);            //if packet empty(no instructions left), mark it for deletion
-                    }                               //(avoids concurrent modification exception)
-
-                    //modify pins
-                    if (next.pin < 8) {
-                        this.portD.setPin(next.pin, next.isOn);
-                    } else if (next.pin < 14) {
-                        this.portB.setPin(next.pin - 8, next.isOn);
-                        //console.log("theoretical state of 13: " + this.portB.pinState(5));
-                        //console.log("Execution cycle: " + this.cpu.cycles + " set to: " + next.isOn);
-                    } else if (next.pin < 20) {
-                        this.portC.setPin(next.pin - 14, next.isOn);
-                    }
-                }
-            });
-            //finish removal of empty packets, do not check empty timing packets
-            this.instructions = this.instructions.filter(i => !markDel.includes(i));
-
             //proceed with standard cpu loop
-            if (this.cpu.cycles % 50000 === 0) {
-                callback(this.cpu);
+            if (this.board.cpu.cycles % 50000 === 0) {
+                callback(this.board.cpu);
                 await new Promise(resolve => setTimeout(resolve, 0));
                 if (this.stopped) {
                     break;
@@ -149,14 +85,5 @@ export class AVRRunner {
         for (const controller of this.controllers) {
             controller.cleanup();
         }
-    }
-
-    /**
-     * Convert microseconds to cycles
-     * @param us - microseconds
-     */
-    usToCycles(us: number): number {
-        //should be static but i dont want to change references
-        return us * this.MHZ / 1e6;
     }
 }

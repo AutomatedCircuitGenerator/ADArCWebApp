@@ -1,19 +1,13 @@
 ﻿// abstract class to define shared behavior for components
 import {AVRRunner} from "@lib/execute";
 import {DotNetObjectReference} from "@type-declarations/dotnet";
-import {AVRIOPort} from "@lib/avr8js";
-import {Pin, Port} from "@controllers/pin";
-
-type SerializedPinItem = {
-    item1: number,
-    item2: string,
-    item3: number,
-}
+import {Interfaces} from "../boards/board";
     
 export abstract class Controller {
     protected component: DotNetObjectReference;
-    protected pins: { [canonicalPinName: string]: Pin[] }; // GraphSynth names as defined in ComponentNamespace.cs
+    protected pins: { [canonicalPinName: string]: Interfaces[] } = {};
     protected element: HTMLDivElement;
+    private pinIndices: { [canonicalPinName: string]: number[] };
     
     protected constructor() {
         AVRRunner.getInstance().addController(this);
@@ -34,25 +28,19 @@ export abstract class Controller {
     // this is called exclusively by the runner, and calls the components setup function
     // while also setting each of its pins
     init() {
-        this.setup();
-        
-        for (const pins of Object.values(this.pins)) {
-            pins.forEach((pin) => pin.setup());
+        for (const [canonicalPinName, indices] of Object.entries(this.pinIndices)) {
+            this.pins[canonicalPinName] = indices.map(index => AVRRunner.getInstance().board.pins[index]);
         }
+        
+        this.setup();
     }
     
-    static create<T extends Controller>(this: new () => T, id: number, pins: { [canonicalPinName: string]: SerializedPinItem[] }, component: DotNetObjectReference): T {
+    static create<T extends Controller>(this: new () => T, id: number, pins: { [canonicalPinName: string]: number[] }, component: DotNetObjectReference): T {
         const instance = new this();
         instance.element = document.getElementById(`component-${id}`) as HTMLDivElement;
-        
-        const pinItems: { [canonicalPinName: string]: Pin[] } = {};
-
-        for (const canonicalPinName in pins) {
-            pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => (new Pin(serializedPin.item3, serializedPin.item2 as Port)));
-        }
-        
-        instance.pins = pinItems;
+        instance.pinIndices = pins;
         instance.component = component;
+        
         return instance;
     }
 

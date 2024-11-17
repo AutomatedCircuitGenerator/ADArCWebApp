@@ -4,7 +4,7 @@ import {PinState} from "@lib/avr8js";
 export class KY008 extends Controller {
 
     setup() {
-        this.pins.digital_in[0].setListener(this.toggleLaser);
+        this.pins.digital_in[0].digital.addListener(this.toggleLaser);
     }
 
     toggleLaser = (state: PinState) => {

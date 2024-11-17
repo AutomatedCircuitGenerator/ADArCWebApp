@@ -23,7 +23,7 @@ export class TFLunaLidarI2C extends Controller implements I2CController {
     }
     
     setup(): void {
-        AVRRunner.getInstance().twi.eventHandler.registerController(TF_LUNA_LIDAR_ADDR, this);
+        AVRRunner.getInstance().board.twis[0].registerController(TF_LUNA_LIDAR_ADDR, this);
         this.memory.clear();
         this.address = null;
         this.startTime = Date.now();

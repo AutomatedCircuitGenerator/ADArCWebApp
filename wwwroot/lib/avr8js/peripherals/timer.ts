@@ -512,9 +512,9 @@ export class AVRTimer {
     this.tovUpdateMode = tovUpdateMode;
 
     const pwmMode =
-      timerMode === FastPWM ||
-      timerMode === PWMPhaseCorrect ||
-      timerMode === PWMPhaseFrequencyCorrect;
+        timerMode === FastPWM ||
+        timerMode === PWMPhaseCorrect ||
+        timerMode === PWMPhaseFrequencyCorrect;
 
     const prevCompA = this.compA;
     this.compA = ((TCCRA >> 6) & 0x3) as CompBitsValue;
@@ -557,8 +557,8 @@ export class AVRTimer {
       const { timerMode, TOP } = this;
       const phasePwm = timerMode === PWMPhaseCorrect || timerMode === PWMPhaseFrequencyCorrect;
       const newVal = phasePwm
-        ? this.phasePwmCount(val, counterDelta)
-        : (val + counterDelta) % (TOP + 1);
+          ? this.phasePwmCount(val, counterDelta)
+          : (val + counterDelta) % (TOP + 1);
       const overflow = val + counterDelta > TOP;
       // A CPU write overrides (has priority over) all counter clear or count operations.
       if (!this.tcntUpdated) {
@@ -597,8 +597,8 @@ export class AVRTimer {
       this.tcnt = this.tcntNext;
       this.tcntUpdated = false;
       if (
-        (this.tcnt === 0 && this.ocrUpdateMode === OCRUpdateMode.Bottom) ||
-        (this.tcnt === this.TOP && this.ocrUpdateMode === OCRUpdateMode.Top)
+          (this.tcnt === 0 && this.ocrUpdateMode === OCRUpdateMode.Bottom) ||
+          (this.tcnt === this.TOP && this.ocrUpdateMode === OCRUpdateMode.Top)
       ) {
         this.ocrA = this.nextOcrA;
         this.ocrB = this.nextOcrB;
@@ -621,11 +621,11 @@ export class AVRTimer {
       if (newDivider) {
         cpu.addClockEvent(this.count, this.lastCycle + newDivider - cpu.cycles);
       } else if (
-        this.externalClockPort &&
-        (CS === ExternalClockMode.FallingEdge || CS === ExternalClockMode.RisingEdge)
+          this.externalClockPort &&
+          (CS === ExternalClockMode.FallingEdge || CS === ExternalClockMode.RisingEdge)
       ) {
         this.externalClockPort.externalClockListeners[externalClockPin] =
-          this.externalClockCallback;
+            this.externalClockCallback;
         this.externalClockRisingEdge = CS === ExternalClockMode.RisingEdge;
       }
       return;
@@ -715,8 +715,8 @@ export class AVRTimer {
       }
     }
     if (
-      hasOCRC &&
-      (((prevValue < ocrC || overflow) && value >= ocrC) || (prevValue < ocrC && overflow))
+        hasOCRC &&
+        (((prevValue < ocrC || overflow) && value >= ocrC) || (prevValue < ocrC && overflow))
     ) {
       this.cpu.setInterruptFlag(this.OCFC);
       if (this.compC) {
@@ -727,9 +727,9 @@ export class AVRTimer {
 
   private checkForceCompare(value: number) {
     if (
-      this.timerMode == TimerMode.FastPWM ||
-      this.timerMode == TimerMode.PWMPhaseCorrect ||
-      this.timerMode == TimerMode.PWMPhaseFrequencyCorrect
+        this.timerMode == TimerMode.FastPWM ||
+        this.timerMode == TimerMode.PWMPhaseCorrect ||
+        this.timerMode == TimerMode.PWMPhaseFrequencyCorrect
     ) {
       // The FOCnA/FOCnB/FOCnC bits are only active when the WGMn3:0 bits specifies a non-PWM mode
       return;

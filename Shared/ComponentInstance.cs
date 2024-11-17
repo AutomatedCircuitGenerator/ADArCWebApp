@@ -144,6 +144,11 @@ namespace ADArCWebApp.Shared
 				return 1;
 			}
 		}
+
+		public bool isArduino()
+		{
+			return this.globalId == 1 || this.globalId == 2;
+		}
 	}
 
 

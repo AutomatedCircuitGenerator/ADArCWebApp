@@ -212,5 +212,9 @@ namespace ADArCWebApp.Shared.Interop
 			content.Dispose();
 		}
 
+		public static async void setBoard(Board board)
+		{
+			await jsModule!.InvokeVoidAsync("setBoard", board);
+		}
     }
 }
