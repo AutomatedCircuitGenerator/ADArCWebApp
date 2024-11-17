@@ -51,7 +51,7 @@ export class AVRRunner {
         const program = new Uint16Array(this.boardConstructor.FLASH);
         loadHex(hex, new Uint8Array(program.buffer));
         this.board = new this.boardConstructor(program);
-        
+
         for (const controller of this.controllers) {
             controller.init();
         }
@@ -85,5 +85,12 @@ export class AVRRunner {
         for (const controller of this.controllers) {
             controller.cleanup();
         }
+    }
+
+    usToCycles(us: number) {
+        if (!(this.board.cpu.frequency > 0)) {
+            throw new Error("Board does not have a frequency. This should never happen");
+        }
+        return us * this.board.cpu.frequency / 1e6;
     }
 }
