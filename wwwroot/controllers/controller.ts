@@ -12,7 +12,7 @@ type SerializedPinItem = {
     
 export abstract class Controller {
     protected component: DotNetObjectReference;
-    protected pins: { [canonicalPinName: string]: Pin[] };
+    protected pins: { [canonicalPinName: string]: Pin[] }; // GraphSynth names as defined in ComponentNamespace.cs
     protected element: HTMLDivElement;
     
     protected constructor() {
