@@ -15,14 +15,14 @@ import { u16 } from '../types';
 
 function isTwoWordInstruction(opcode: u16) {
   return (
-    /* LDS */
-    (opcode & 0xfe0f) === 0x9000 ||
-    /* STS */
-    (opcode & 0xfe0f) === 0x9200 ||
-    /* CALL */
-    (opcode & 0xfe0e) === 0x940e ||
-    /* JMP */
-    (opcode & 0xfe0e) === 0x940c
+      /* LDS */
+      (opcode & 0xfe0f) === 0x9000 ||
+      /* STS */
+      (opcode & 0xfe0f) === 0x9200 ||
+      /* CALL */
+      (opcode & 0xfe0e) === 0x940e ||
+      /* JMP */
+      (opcode & 0xfe0e) === 0x940c
   );
 }
 
@@ -243,7 +243,7 @@ export function avrInstruction(cpu: CPU) {
     /* ELPM(REG), 1001 000d dddd 0110 */
     const rampz = cpu.data[0x5b];
     cpu.data[(opcode & 0x1f0) >> 4] =
-      cpu.progBytes[(rampz << 16) | cpu.dataView.getUint16(30, true)];
+        cpu.progBytes[(rampz << 16) | cpu.dataView.getUint16(30, true)];
     cpu.cycles += 2;
   } else if ((opcode & 0xfe0f) === 0x9007) {
     /* ELPM(INC), 1001 000d dddd 0111 */
@@ -386,13 +386,13 @@ export function avrInstruction(cpu: CPU) {
     cpu.cycles++;
     cpu.data[(opcode & 0x1f0) >> 4] = cpu.readData(y);
   } else if (
-    (opcode & 0xd208) === 0x8008 &&
-    (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
+      (opcode & 0xd208) === 0x8008 &&
+      (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
   ) {
     /* LDDY, 10q0 qq0d dddd 1qqq */
     cpu.cycles++;
     cpu.data[(opcode & 0x1f0) >> 4] = cpu.readData(
-      cpu.dataView.getUint16(28, true) +
+        cpu.dataView.getUint16(28, true) +
         ((opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8))
     );
   } else if ((opcode & 0xfe0f) === 0x8000) {
@@ -412,13 +412,13 @@ export function avrInstruction(cpu: CPU) {
     cpu.cycles++;
     cpu.data[(opcode & 0x1f0) >> 4] = cpu.readData(z);
   } else if (
-    (opcode & 0xd208) === 0x8000 &&
-    (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
+      (opcode & 0xd208) === 0x8000 &&
+      (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
   ) {
     /* LDDZ, 10q0 qq0d dddd 0qqq */
     cpu.cycles++;
     cpu.data[(opcode & 0x1f0) >> 4] = cpu.readData(
-      cpu.dataView.getUint16(30, true) +
+        cpu.dataView.getUint16(30, true) +
         ((opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8))
     );
   } else if (opcode === 0x95c8) {
@@ -464,7 +464,7 @@ export function avrInstruction(cpu: CPU) {
   } else if ((opcode & 0xff00) === 0x200) {
     /* MULS, 0000 0010 dddd rrrr */
     const R =
-      cpu.dataView.getInt8(((opcode & 0xf0) >> 4) + 16) * cpu.dataView.getInt8((opcode & 0xf) + 16);
+        cpu.dataView.getInt8(((opcode & 0xf0) >> 4) + 16) * cpu.dataView.getInt8((opcode & 0xf) + 16);
     cpu.dataView.setInt16(0, R, true);
     cpu.data[95] = (cpu.data[95] & 0xfc) | (0xffff & R ? 0 : 2) | (0x8000 & R ? 1 : 0);
     cpu.cycles++;
@@ -709,14 +709,14 @@ export function avrInstruction(cpu: CPU) {
     cpu.writeData(y, i);
     cpu.cycles++;
   } else if (
-    (opcode & 0xd208) === 0x8208 &&
-    (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
+      (opcode & 0xd208) === 0x8208 &&
+      (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
   ) {
     /* STDY, 10q0 qq1r rrrr 1qqq */
     cpu.writeData(
-      cpu.dataView.getUint16(28, true) +
+        cpu.dataView.getUint16(28, true) +
         ((opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)),
-      cpu.data[(opcode & 0x1f0) >> 4]
+        cpu.data[(opcode & 0x1f0) >> 4]
     );
     cpu.cycles++;
   } else if ((opcode & 0xfe0f) === 0x8200) {
@@ -737,14 +737,14 @@ export function avrInstruction(cpu: CPU) {
     cpu.writeData(z, i);
     cpu.cycles++;
   } else if (
-    (opcode & 0xd208) === 0x8200 &&
-    (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
+      (opcode & 0xd208) === 0x8200 &&
+      (opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)
   ) {
     /* STDZ, 10q0 qq1r rrrr 0qqq */
     cpu.writeData(
-      cpu.dataView.getUint16(30, true) +
+        cpu.dataView.getUint16(30, true) +
         ((opcode & 7) | ((opcode & 0xc00) >> 7) | ((opcode & 0x2000) >> 8)),
-      cpu.data[(opcode & 0x1f0) >> 4]
+        cpu.data[(opcode & 0x1f0) >> 4]
     );
     cpu.cycles++;
   } else if ((opcode & 0xfc00) === 0x1800) {

@@ -36,6 +36,6 @@ export class KY018 extends Controller {
         // R_10 and Gamma are properties of the LDR on the ky018. Honestly, these are just good guesses without knowing the SKU
         const R_PHOTO = (this.RL10 * Math.pow(10, this.GAMMA)) / Math.pow(lux, this.GAMMA);
         const V_OUT = 5 * (R_PHOTO / (R_PHOTO + this.R_FIXED));
-        this.pins.analog_out[0].setAdcVoltage(V_OUT);
+        this.pins.analog_out[0].analog.voltage = V_OUT;
     }
 }

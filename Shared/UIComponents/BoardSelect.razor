@@ -1,0 +1,35 @@
+﻿@if (_isVisible)
+{
+    <div style="padding: 20px; border-radius: 5px; position: absolute; left: 50%; top: 50%; transform: translate(-50%, -50%); min-width: 250px; max-width: 300px; box-shadow: 0 3px 30px rgba(33, 33, 33, .3); z-index: 1000000">
+        <h1 style="font-size: 18px; font-weight: 700; margin-bottom: 20px">What project are you building?</h1>
+        <div style="display: flex; gap: 20px">
+            <div style="width: 140px; padding: 5px; display: flex; justify-content: center; align-items: center; flex-direction: column" @onclick="() => HandleSelect(Board.ArduinoUno)">
+                <RazorArduinoUno Width="120px" Height="80px"></RazorArduinoUno>
+                <h2 style="font-size: 16px; text-align: center; font-weight: bold; margin-bottom: 0px">Arduino Uno</h2>
+                <p style="text-align: center">Great for beginners and small projects</p>
+            </div>
+            <div style="width: 140px; padding: 5px; display: flex; justify-content: center; align-items: center; flex-direction: column" @onclick="() => HandleSelect(Board.ArduinoMega)">
+                <RazorArduinoMega Width="120px" Height="80px"></RazorArduinoMega>
+                <h2 style="font-size: 16px; text-align: center; font-weight: bold; margin-bottom: 0px">Arduino Mega</h2>
+                <p style="text-align: center">Ideal for bigger, more complex projects</p>
+            </div>
+        </div>
+    </div>
+}
+
+@inject BoardService BoardService
+
+@code {
+
+    [Parameter] public EventCallback<Board> OnSelect { get; set; }
+
+    private bool _isVisible = true; // Visibility state variable
+
+    private async Task HandleSelect(Board board)
+    {
+        BoardService.Board = board;
+        await OnSelect.InvokeAsync(board);
+        _isVisible = false; // Set visibility to false when a board is selected
+    }
+
+}
