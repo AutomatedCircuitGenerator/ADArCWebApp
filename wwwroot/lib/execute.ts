@@ -43,7 +43,7 @@ export class AVRRunner {
     twi: AVRTWI;
     spi: AVRSPI;
     adc: AVRADC;
-    MHZ = 16e6;
+    MHZ = 16e6; //i think this should be static
 
     public instructions: TimingPacket[] = [];
     public pausedOn: number[] = [];
@@ -145,9 +145,18 @@ export class AVRRunner {
 
     stop() {
         this.stopped = true;
-        
+
         for (const controller of this.controllers) {
             controller.cleanup();
         }
+    }
+
+    /**
+     * Convert microseconds to cycles
+     * @param us - microseconds
+     */
+    usToCycles(us: number): number {
+        //should be static but i dont want to change references
+        return us * this.MHZ / 1e6;
     }
 }

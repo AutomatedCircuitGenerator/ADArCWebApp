@@ -85,7 +85,4 @@ export class HCSR501 extends Controller {
             }
         }
     }
-
-    //we dont care about the user setting the isMotionDetected to 0 because the timer is how the behavior works
-
 }

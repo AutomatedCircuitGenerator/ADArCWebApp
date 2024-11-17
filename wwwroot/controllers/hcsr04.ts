@@ -27,6 +27,6 @@ export class HCSR04 extends Controller {
         this.pins.echo[0].setState(true);
         AVRRunner.getInstance().cpu.addClockEvent(() => {
             this.pins.echo[0].setState(false);
-        }, this.distance * 58 * (AVRRunner.getInstance().MHZ / 1e6));
+        }, this.distance * AVRRunner.getInstance().usToCycles(58.4));
     }
 }

@@ -55,4 +55,15 @@ export abstract class Controller {
         instance.component = component;
         return instance;
     }
+
+    /**
+     * Pauses execution, when awaited, until the specified number of cycles have passed.
+     * @param {number} cycles - The number of cycles to wait.
+     * @returns {Promise} A promise that resolves once the specified number of cycles have elapsed.
+     */
+    sleep(cycles: number): Promise<any> {
+        return new Promise(resolve => {
+            AVRRunner.getInstance().cpu.addClockEvent(() => resolve(void 0), cycles);
+        });
+    }
 }
