@@ -16,7 +16,7 @@ export class MQ3 extends Controller {
         if (!this.inSimulation) {
             return;
         }
-        this.pins.analog_out[0].setAdcVoltage(this.alcohol);
+        this.pins.analog_out[0].analog.voltage = this.alcohol;
     }
 
     setup() {

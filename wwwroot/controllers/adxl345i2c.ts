@@ -63,7 +63,7 @@ export class ADXL345I2C extends Controller implements I2CController {
     }
 
     setup() {
-        AVRRunner.getInstance().twi.eventHandler.registerController(ADXL345_ADDR, this);
+        AVRRunner.getInstance().board.twis[0].registerController(ADXL345_ADDR, this);
         this.memory.clear()
         this.address = null;
         this.setRegister("DEVID", 0xE5);

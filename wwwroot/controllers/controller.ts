@@ -2,12 +2,6 @@
 import {AVRRunner} from "@lib/execute";
 import {DotNetObjectReference} from "@type-declarations/dotnet";
 import {Interfaces} from "../boards/board";
-
-type SerializedPinItem = {
-    item1: number,
-    item2: string,
-    item3: number,
-}
     
 export abstract class Controller {
     protected component: DotNetObjectReference;

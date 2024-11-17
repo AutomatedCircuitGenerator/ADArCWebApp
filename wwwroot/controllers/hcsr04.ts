@@ -11,7 +11,7 @@ export class HCSR04 extends Controller {
 
     setup() {
         console.log(JSON.stringify(this.pins.trigger));
-        this.pins.trigger[0].setListener(this.trigger.bind(this));
+        this.pins.trigger[0].digital.addListener(this.trigger.bind(this));
     }
 
     trigger(state: PinState) {
@@ -24,9 +24,9 @@ export class HCSR04 extends Controller {
 
     echo() {
         // Echo pin stays high for about 58 us per cm to the target
-        this.pins.echo[0].setState(true);
-        AVRRunner.getInstance().cpu.addClockEvent(() => {
-            this.pins.echo[0].setState(false);
-        }, this.distance * 58 * (AVRRunner.getInstance().MHZ / 1e6));
+        this.pins.echo[0].digital.state = true;
+        AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+            this.pins.echo[0].digital.state = false;
+        }, this.distance * 58 * (AVRRunner.getInstance().board.cpu.frequency / 1e6));
     }
 }
