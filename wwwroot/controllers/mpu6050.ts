@@ -3,7 +3,7 @@ import {Memory} from "@controllers/memory";
 import {I2CController} from "@lib/i2c-bus";
 import {AVRRunner} from "@lib/execute";
 
-export const I2C_MST_CTRL = 36;
+export const I2C_MST_CTRL = 0x68; //68 if ad0 is low, els 69
 
 type Register = {
     address: number;
@@ -60,6 +60,7 @@ const registers: { [key: string]: Register } = {
     MPU6050_LINEAR_ACCY_L: { address: 0x5A},
     MPU6050_LINEAR_ACCZ_H: { address: 0x5B},
     MPU6050_LINEAR_ACCZ_L: { address: 0x5C},
+    WHO_AM_I: {address: 0x75,default:0x68}
     
 } as const;
 

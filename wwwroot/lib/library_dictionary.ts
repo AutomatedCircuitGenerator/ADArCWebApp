@@ -387,7 +387,7 @@
     "placeholder_386": "Adafruit MPL3115A2 Library",
     "placeholder_387": "Adafruit MPR121",
     "placeholder_388": "Adafruit MPRLS Library",
-    "placeholder_389": "Adafruit MPU6050",
+    "Adafruit_MPU6050.h": "Adafruit MPU6050",
     "placeholder_390": "Adafruit MQTT Library",
     "placeholder_391": "Adafruit MS8607",
     "placeholder_392": "Adafruit MSA301",

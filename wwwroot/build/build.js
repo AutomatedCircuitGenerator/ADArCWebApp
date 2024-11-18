@@ -438,7 +438,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_386": "Adafruit MPL3115A2 Library",
         "placeholder_387": "Adafruit MPR121",
         "placeholder_388": "Adafruit MPRLS Library",
-        "placeholder_389": "Adafruit MPU6050",
+        "Adafruit_MPU6050.h": "Adafruit MPU6050",
         "placeholder_390": "Adafruit MQTT Library",
         "placeholder_391": "Adafruit MS8607",
         "placeholder_392": "Adafruit MSA301",
@@ -13594,7 +13594,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
-    exports.I2C_MST_CTRL = 36;
+    exports.I2C_MST_CTRL = 0x68;
     const registers = {
         CONFIG: { address: 0x1A },
         GYRO_CONFIG: { address: 0x1B },
@@ -13633,6 +13633,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         MPU6050_LINEAR_ACCY_L: { address: 0x5A },
         MPU6050_LINEAR_ACCZ_H: { address: 0x5B },
         MPU6050_LINEAR_ACCZ_L: { address: 0x5C },
+        WHO_AM_I: { address: 0x75, default: 0x68 }
     };
     class MPU6050 extends controller_18.Controller {
         constructor() {
