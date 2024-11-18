@@ -4,6 +4,7 @@
 @using ADArCWebApp.Shared.UIComponents
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
+@inject BoardService BoardService
 
 <PageTitle>Index</PageTitle>
 <head>
@@ -113,6 +114,8 @@
     bool isLeftExpanded = true;
     bool isRightExpanded = false;
 
+    private bool _scheduleBenchSetup = false;
+
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
@@ -144,17 +147,18 @@
 
     private void HandleBoardSelect(Board board)
     {
-        switch (board)
+        if (loadingProgress == -1)
         {
-            case Board.ArduinoUno:
-                SetupBenchFromJsonString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
-                break;
-            case Board.ArduinoMega:
-                SetupBenchFromJsonString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":2,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
-                break;
-            default:
-                throw new ArgumentOutOfRangeException(nameof(board), board, null);
+            SetupBenchFromJsonString(BoardService.GetJson());
+            compPane!.releaseLockout();
+            selLockedOut = false;
         }
+        else
+        {
+            _scheduleBenchSetup = true;
+        }
+        
+        comps[0] = BoardService.GetComponentInstance();
     }
 
 
@@ -452,9 +456,12 @@
         //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 90);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 90);
-        compPane!.releaseLockout();
-        selLockedOut = false;
-
+        if (_scheduleBenchSetup)
+        {
+            SetupBenchFromJsonString(BoardService.GetJson());
+            compPane!.releaseLockout();
+            selLockedOut = false;
+        }
         //all else finish first
         await Task.Delay(1000);
         loadingProgress = -1;
