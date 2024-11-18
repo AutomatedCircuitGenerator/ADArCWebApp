@@ -285,7 +285,6 @@
             AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
             AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-            RunTutorial();
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
         }
@@ -822,7 +821,7 @@
     }
 
     // runs the introjs tutorial
-    private async void RunTutorial()
+    public async void RunTutorial()
     {
         // var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
         // ant-menu-submenu-hidden
