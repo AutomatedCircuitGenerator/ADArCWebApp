@@ -2948,7 +2948,7 @@
     "placeholder_2947": "IRProxSensor",
     "placeholder_2948": "IRRemoteControl",
     "placeholder_2949": "IRRemoteESP32",
-    "placeholder_2950": "IRremote",
+    "IRremote.hpp": "IRremote",
     "placeholder_2951": "IRremoteESP8266",
     "placeholder_2952": "IRsmallDecoder",
     "placeholder_2953": "IS31FL3729_LED_Matrix",

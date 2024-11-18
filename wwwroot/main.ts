@@ -17,6 +17,7 @@ import {ADXL345I2C} from "@controllers/adxl345i2c";
 import {MQ3} from "@controllers/mq3";
 import {HCSR04} from "@controllers/hcsr04";
 import {KY003} from "@controllers/ky003";
+import {KY022} from "@controllers/ky022";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -37,3 +38,4 @@ import {KY003} from "@controllers/ky003";
 (<any>window).MQ3 = MQ3;
 (<any>window).HCSR04 = HCSR04;
 (<any>window).KY003 = KY003;
+(<any>window).KY022 = KY022;

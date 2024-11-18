@@ -20,13 +20,13 @@
             <span class="adarc-text">ADArC</span>
         </div>
 
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial">
             <!-- change -->
             💡 Tutorial
         </button>
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="downloadFile" class="toolbar-button">
+                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
 
@@ -142,15 +142,15 @@
         StateHasChanged();
     }
 
-    private async Task HandleBoardSelect(Board board)
+    private Task HandleBoardSelect(Board board)
     {
         switch (board)
         {
             case Board.ArduinoUno:
-                setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
+                SetupBenchFromJsonString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
                 break;
             case Board.ArduinoMega:
-                setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":2,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
+                SetupBenchFromJsonString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":2,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
                 break;
         }
     }
@@ -170,7 +170,7 @@
 
             if (response.stderr != "")
             {
-                codePane.UpdateConsoleOutput(response.stderr, false);
+                codePane?.UpdateConsoleOutput(response.stderr, false);
                 runStopText = "▶ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
@@ -192,7 +192,7 @@
             }
             else //no errors
             {
-                codePane.UpdateConsoleOutput(response.stdout, false);
+                codePane?.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.clearMonacoErrorsWrapper();
                 AppInterop.startSimWrapper();
                 runStopText = "🟥 Stop";
@@ -283,6 +283,7 @@
             AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
             AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+            RunTutorial();
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
         }
@@ -343,16 +344,16 @@
                 n.localLabels.Add("user_" + d.nodeName);
 
                 GraphSynthInvoke.GetNodes().Add(n);
-                GraphSynthInvoke.inputs.Add(d.nodeName);
+                if (d.nodeName != null) GraphSynthInvoke.inputs.Add(d.nodeName);
                 GraphSynthInvoke.recg_apply(); //do component connection backend
 
                 //label all new nodes and connections with the localid of the component that added them.
-                GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
                 GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
                 //create frontend instance
                 var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
                 comp.localId = localIds;
-                comps.Add(localIds, buildCanvas.unZoom(comp)); //50 is height of toolbar
+                comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
                 BuildCode.outputPins.Clear();
                 buildCanvas!.connLines.Clear();
                 //reset the way that component pins are bound to the arduino.
@@ -695,16 +696,16 @@
         var buffer = new byte[file.Size];
         await e.File.OpenReadStream(512000).ReadAsync(buffer);
         var str = System.Text.Encoding.UTF8.GetString(buffer);
-        setupBenchFromJSONString(str);
+        SetupBenchFromJsonString(str);
     }
 
     /// <summary>
     /// Handles most of the setup process of the bench after import.
     /// </summary>
     /// <param name="JSON">The full JSON to deserialize.</param>
-    public void setupBenchFromJSONString(string JSON)
+    public void SetupBenchFromJsonString(string JSON)
     {
-        Data data = DeserializeJSON(JSON);
+        Data? data = DeserializeJson(JSON);
         //clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
         //notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
         foreach (var comp in comps)
@@ -715,7 +716,7 @@
         }
 
         buildCanvas!.connLines.Clear();
-        buildCanvas!.resetTransform();
+        buildCanvas.resetTransform();
         GraphSynthInvoke.inputs.Clear();
         GraphSynthInvoke.destroyGraph();
         BuildCode.outputPins.Clear();
@@ -731,9 +732,9 @@
             kv.Value.gsNode = n;
 
             GraphSynthInvoke.GetNodes().Add(n);
-            GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+            if (kv.Value.data.nodeName != null) GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
             GraphSynthInvoke.recg_apply();
-            GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
+            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + kv.Key));
             GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
         }
 
@@ -750,12 +751,12 @@
     /// <summary>
     /// Create file data and send it off to JS for downloading.
     /// </summary>
-    public async void downloadFile()
+    public async void DownloadFile()
     {
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);
-        writer.Write(await ExportJSON());
-        writer.Flush();
+        await writer.WriteAsync(await ExportJson());
+        await writer.FlushAsync();
         stream.Position = 0;
 
         using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
@@ -776,7 +777,7 @@
     /// Creates a JSON string representing most of the current state of the circuit.
     /// </summary>
     /// <returns>A JSON string of a Data object.</returns>
-    private async Task<string> ExportJSON()
+    private async Task<string> ExportJson()
     {
         Data parentObject = new Data
         {
@@ -796,14 +797,14 @@
     /// </summary>
     /// <param name="jsonString">The JSON to deserialize.</param>
     /// <returns>A Data object.</returns>
-    private Data DeserializeJSON(string jsonString)
+    private static Data? DeserializeJson(string jsonString)
     {
         try
         {
             // Deserialize JSON data into a Data object
             var options = new JsonSerializerOptions { IncludeFields = true };
             options.Converters.Add(new ParamSerializer());
-            Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options) ?? throw new InvalidOperationException("Deserialization failed: 'canvasData' is null. Check if 'jsonString' is in the correct format.");
 
             // Now you have access to the deserialized data as a CanvasData object
             // Do whatever you need with this data
@@ -819,7 +820,7 @@
     }
 
     // runs the introjs tutorial
-    public async void runTutorial()
+    private async void RunTutorial()
     {
         // var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
         // ant-menu-submenu-hidden
