@@ -46,23 +46,11 @@
                     break;
 
                 case Step.Complexity:
-                    <button @onclick="() => _step = Step.Budget">
-                        <h2>Minimal memory (simple logic and basic data)</h2>
-                    </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                        <h2>High memory (complex programs, large libraries)</h2>
-                    </button>
-                    <button @onclick="() => _step = Step.Budget">
-                        <h2>I don't know</h2>
-                    </button>
-                    break;
-
-                case Step.Budget:
                     <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                        <h2>I prefer a lower-cost option</h2>
+                        <h2>Simple, small programs</h2>
                     </button>
                     <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                        <h2>I’m okay with spending more for extra capabilities</h2>
+                        <h2>Complex programs with large libraries</h2>
                     </button>
                     <button @onclick="() => HandleSelect(Board.ArduinoMega)">
                         <h2>I don't know</h2>
@@ -89,7 +77,6 @@
         IoPins,
         Serial,
         Complexity,
-        Budget
     }
 
     private string GetHeading()
@@ -100,72 +87,8 @@
             Step.IoPins => "How many input/output (I/O) pins will you need?",
             Step.Serial => "Will you be using multiple serial devices (e.g. GPS, GSM, or Bluetooth)?",
             Step.Complexity => "How complex is your project in terms of memory usage (e.g., libraries, large datasets, or graphical displays)?",
-            Step.Budget => "What is your budget?",
         };
     }
-
-    private RenderFragment GetContent() => _step switch
-    {
-        Step.Initial => @<div>
-                            <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                                <RazorArduinoUno Width="120px" Height="80px"></RazorArduinoUno>
-                                <h2>Arduino Uno</h2>
-                                <p>Great for beginners and small projects</p>
-                            </button>
-                            <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                                <RazorArduinoMega Width="120px" Height="80px"></RazorArduinoMega>
-                                <h2>Arduino Mega</h2>
-                                <p>Ideal for bigger, more complex projects</p>
-                            </button>
-                            <button @onclick="() => _step = Step.IoPins">
-                                <h2>Help me choose!</h2>
-                            </button>
-                        </div>,
-        Step.IoPins => @<div>
-                           <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                               <h2>Less than 20</h2>
-                           </button>
-                           <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                               <h2>More than 20</h2>
-                           </button>
-                           <button @onclick="() => _step = Step.IoPins">
-                               <h2>I don't know</h2>
-                           </button>
-                       </div>,
-        Step.Serial => @<div>
-                           <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                               <h2>No</h2>
-                           </button>
-                           <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                               <h2>Yes</h2>
-                           </button>
-                           <button @onclick="() => _step = Step.IoPins">
-                               <h2>I don't know</h2>
-                           </button>
-                       </div>,
-        Step.Complexity => @<div>
-                               <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                                   <h2>Minimal memory (simple logic and basic data)</h2>
-                               </button>
-                               <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                                   <h2>High memory (complex programs, large libraries)</h2>
-                               </button>
-                               <button @onclick="() => _step = Step.IoPins">
-                                   <h2>I don't know</h2>
-                               </button>
-                           </div>,
-        Step.Budget => @<div>
-                           <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                               <h2>I prefer a lower-cost option</h2>
-                           </button>
-                           <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                               <h2>I’m okay with spending more for extra capabilities</h2>
-                           </button>
-                           <button @onclick="() => _step = Step.IoPins">
-                               <h2>I don't know</h2>
-                           </button>
-                       </div>
-    };
 
     private async Task HandleSelect(Board board)
     {
