@@ -172,7 +172,7 @@
         BoardService.Board = board;
         await OnSelect.InvokeAsync(board);
         _isVisible = false; // Set visibility to false when a board is selected
-        Pages.Index.app.runTutorial();
+        Pages.Index.app!.RunTutorial();
     }
 
 }
