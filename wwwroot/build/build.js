@@ -10545,7 +10545,8 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         delete() {
             execute_1.AVRRunner.getInstance().removeController(this);
         }
-        cleanup() { }
+        cleanup() {
+        }
         ;
         init() {
             for (const [canonicalPinName, indices] of Object.entries(this.pinIndices)) {
@@ -13513,12 +13514,54 @@ define("controllers/ky022", ["require", "exports", "controllers/controller", "li
     }
     exports.KY022 = KY022;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1) {
+define("controllers/led", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_16, avr8js_10) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.LED = void 0;
+    class LED extends controller_16.Controller {
+        constructor() {
+            super(...arguments);
+            this.color = "#ff8080";
+            this.lightColors = {
+                "red": "#ff8080",
+                "green": "#80ff80",
+                "blue": "#8080ff",
+                "yellow": "#ffff80",
+                "orange": "#ffcf80",
+                "white": "#ffffff",
+                "purple": "#ff80ff"
+            };
+        }
+        setup() {
+            this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));
+        }
+        cleanup() {
+            this.element.querySelector("#ledDisplay").style.display = "none";
+        }
+        setColor(color) {
+            this.color = this.lightColors[color];
+        }
+        toggleLed(state) {
+            this.element.querySelector("#ledColor").style.fill = this.color;
+            this.element.querySelector("#ledColorBrightness").style.fill = this.color;
+            if (state == avr8js_10.PinState.Low) {
+                this.element.querySelector("#ledDisplay").style.display = "none";
+            }
+            else if (state == avr8js_10.PinState.High || state === avr8js_10.PinState.InputPullUp) {
+                this.element.querySelector("#ledDisplay").style.display = "";
+            }
+        }
+    }
+    exports.LED = LED;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+    }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
@@ -13534,19 +13577,20 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.HCSR04 = hcsr04_1.HCSR04;
     window.KY003 = ky003_1.KY003;
     window.KY022 = ky022_1.KY022;
+    window.LED = led_1.LED;
 });
-define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_16) {
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_17) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY001 = void 0;
-    class KY001 extends controller_16.Controller {
+    class KY001 extends controller_17.Controller {
         setTemperature(temperature) {
         }
         setup() { }
     }
     exports.KY001 = KY001;
 });
-define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_17, execute_12) {
+define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_18, execute_12) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
@@ -13590,7 +13634,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         MPU6050_LINEAR_ACCZ_H: { address: 0x5B },
         MPU6050_LINEAR_ACCZ_L: { address: 0x5C },
     };
-    class MPU6050 extends controller_17.Controller {
+    class MPU6050 extends controller_18.Controller {
         constructor() {
             super(...arguments);
             this.address = null;

@@ -2,7 +2,7 @@
 "use strict";
 
 import getInteropManager = interopManager.getInteropManager;
-import { interopManager } from "./interopManager";
+import {interopManager} from "./interopManager";
 import {LCD1602I2C} from "@controllers/lcd1602i2c";
 import {MAX6675} from "@controllers/max6675";
 import {KY012} from "@controllers/ky012";
@@ -18,11 +18,14 @@ import {MQ3} from "@controllers/mq3";
 import {HCSR04} from "@controllers/hcsr04";
 import {KY003} from "@controllers/ky003";
 import {KY022} from "@controllers/ky022";
+import {LED} from "@controllers/led";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
 //send a request to C# to resize palette elements on window resize.
-(<any>window).addEventListener("resize", async (e) => { await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()) });
+(<any>window).addEventListener("resize", async (e) => {
+    await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight())
+});
 //components
 (<any>window).LCD1602I2C = LCD1602I2C;
 (<any>window).BNO055 = BNO055;
@@ -39,3 +42,4 @@ import {KY022} from "@controllers/ky022";
 (<any>window).HCSR04 = HCSR04;
 (<any>window).KY003 = KY003;
 (<any>window).KY022 = KY022;
+(<any>window).LED = LED;
