@@ -21,11 +21,11 @@
     <string>ky024_arduino.grxml</string>
     <string>ky035_arduino.grxml</string>
     <string>l298n_arduino.grxml</string>
-    <string>lcd_i2c_arduino.grxml</string>
+    <string>lcd_1602_i2c_arduino.grxml</string>
     <string>lcd_parallel_arduino.grxml</string>
     <string>led_arduino.grxml</string>
     <string>led_rgb_arduino.grxml</string>
-    <string>lidar_tfluna_arduino_I2C.grxml</string>
+    <string>lidar_tfluna_I2C_arduino.grxml</string>
     <string>lm386_arduino.grxml</string>
     <string>lm2596_a4988.grxml</string>
     <string>lm2596_arduino.grxml</string>
@@ -41,6 +41,8 @@
     <string>servo_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
 	<string>7segment_arduino.grxml</string>
+	<string>arcade_pushbutton_arduino.grxml</string>
+	<string>ky008_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>

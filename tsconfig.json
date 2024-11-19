@@ -1,13 +1,21 @@
 ﻿{
     "compileOnSave": true,
     "compilerOptions": {
+        "strict": false,
         "module": "amd",
         "target": "es6",
         "sourceMap": true,
         "lib": [ "es2021", "dom" ],
         "esModuleInterop": true,
         "removeComments": true,
-        "outFile": "./build/build.js"
+        "outFile": "./build/build.js",
+        "typeRoots": ["./type-declarations/*"],
+        "moduleResolution": "node",
+        "paths": {
+            "@type-declarations/*": ["./type-declarations/*"],
+            "@controllers/*": ["./controllers/*"],
+            "@lib/*": ["./lib/*"]
+        }
     },
     "include": [ "lib/**/*.ts", "." ],
     "exclude": [

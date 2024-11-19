@@ -3,11 +3,12 @@
   <ruleFileNames>
     <string>add_adxl345.grxml</string>
     <string>add_arduinoUno_rev3.grxml</string>
+    <string>add_arduino_mega.grxml</string>
     <string>add_arduinoUno_wifi_rev2.grxml</string>
     <string>add_bno055.grxml</string>
     <string>add_dc_motor_direct.grxml</string>
     <string>add_dc_motor_l298n.grxml</string>
-	<string>add_dht22.grxml</string>
+    <string>add_dht22.grxml</string>
     <string>add_drv8825.grxml</string>
     <string>add_drv8833.grxml</string>
     <string>add_ds18b20.grxml</string>
@@ -46,7 +47,9 @@
     <string>add_stepper_nema_a4988.grxml</string>
     <string>add_stepper_nema_l298n.grxml</string>
     <string>add_uln2003.grxml</string>
-	<string>add_7segment.grxml</string>
+    <string>add_7segment.grxml</string>
+    <string>add_arcade_pushbutton.grxml</string>
+    <string>add_ky008.grxml</string>
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>
