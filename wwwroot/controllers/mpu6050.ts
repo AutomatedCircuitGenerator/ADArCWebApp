@@ -1,4 +1,4 @@
-﻿import {Controller} from "@controllers/controller";
+import {Controller} from "@controllers/controller";
 import {Memory} from "@controllers/memory";
 import {I2CController} from "@lib/i2c-bus";
 import {AVRRunner} from "@lib/execute";
@@ -14,54 +14,54 @@ const registers: { [key: string]: Register } = {
     CONFIG: { address: 0x1A},
     GYRO_CONFIG: { address: 0x1B},
     ACCEL_CONFIG: { address: 0x1C},
-    
+
     //Acceleration data registers
-    MPU6050_ACCX_H: { address: 0x3B},
-    MPU6050_ACCX_L: { address: 0x3C},
-    MPU6050_ACCY_H: { address: 0x3D},
-    MPU6050_ACCY_L: { address: 0x3E},
-    MPU6050_ACCZ_H: { address: 0x3F},
-    MPU6050_ACCZ_L: { address: 0x40},
+    ACCEL_XOUT_H: { address: 0x3B},
+    ACCEL_XOUT_L: { address: 0x3C},
+    ACCEL_YOUT_H: { address: 0x3D},
+    ACCEL_YOUT_L: { address: 0x3E},
+    ACCEL_ZOUT_H: { address: 0x3F},
+    ACCEL_ZOUT_L: { address: 0x40},
 
     // Temperature registers
-    TEMP_H: { address: 0x41 },
-    TEMP_L: { address: 0x42 },
-    
+    TEMP_OUT_H: { address: 0x41 },
+    TEMP_OUT_L: { address: 0x42 },
+
     //Gyroscope data registers
-    MPU6050_GYROX_H: { address: 0x43},
-    MPU6050_GYROX_L: { address: 0x44},
-    MPU6050_GYROY_H: { address: 0x45},
-    MPU6050_GYROY_L: { address: 0x46},
-    MPU6050_GYROZ_H: { address: 0x47},
-    MPU6050_GYROZ_L: { address: 0x48},
-    
+    GYRO_XOUT_H: { address: 0x43},
+    GYRO_XOUT_L: { address: 0x44},
+    GYRO_YOUT_H: { address: 0x45},
+    GYRO_YOUT_L: { address: 0x46},
+    GYRO_ZOUT_H: { address: 0x47},
+    GYRO_ZOUT_L: { address: 0x48},
+
     //Euler Angle registers (no official euler angle registers)
-    MPU6050_HEADING_H: { address: 0x49 },
-    MPU6050_HEADING_L: { address: 0x4A },
-    MPU6050_EULERX_H: { address: 0x4B },
-    MPU6050_EULERX_L: { address: 0x4C },
-    MPU6050_EULERY_H: { address: 0x4D },
-    MPU6050_EULERY_L: { address: 0x4E },
-    
+    EULER_HEADING_H: { address: 0x49 },
+    EULER_HEADING_L: { address: 0x4A },
+    EULER_ROLL_H: { address: 0x4B },
+    EULER_ROLL_L: { address: 0x4C },
+    EULER_PITCH_H: { address: 0x4D },
+    EULER_PITCH_L: { address: 0x4E },
+
     //Quaternion registers (no official quaternion registers)
-    MPU6050_QUATERNIONW_H: { address: 0x4F },
-    MPU6050_QUATERNIONW_L: { address: 0x50 },
-    MPU6050_QUATERNIONX_H: { address: 0x51 },
-    MPU6050_QUATERNIONX_L: { address: 0x52 },
-    MPU6050_QUATERNIONY_H: { address: 0x53 },
-    MPU6050_QUATERNIONY_L: { address: 0x54 },
-    MPU6050_QUATERNIONZ_H: { address: 0x55 },
-    MPU6050_QUATERNIONZ_L: { address: 0x56 },
-    
+    QUATERNIONW_H: { address: 0x4F },
+    QUATERNIONW_L: { address: 0x50 },
+    QUATERNIONX_H: { address: 0x51 },
+    QUATERNIONX_L: { address: 0x52 },
+    QUATERNIONY_H: { address: 0x53 },
+    QUATERNIONY_L: { address: 0x54 },
+    QUATERNIONZ_H: { address: 0x55 },
+    QUATERNIONZ_L: { address: 0x56 },
+
     //Linear Acceleration data registers
-    MPU6050_LINEAR_ACCX_H: { address: 0x57},
-    MPU6050_LINEAR_ACCX_L: { address: 0x58},
-    MPU6050_LINEAR_ACCY_H: { address: 0x59},
-    MPU6050_LINEAR_ACCY_L: { address: 0x5A},
-    MPU6050_LINEAR_ACCZ_H: { address: 0x5B},
-    MPU6050_LINEAR_ACCZ_L: { address: 0x5C},
+    LINEAR_ACCEL_X_H: { address: 0x57},
+    LINEAR_ACCEL_X_L: { address: 0x58},
+    LINEAR_ACCEL_Y_H: { address: 0x59},
+    LINEAR_ACCEL_Y_L: { address: 0x5A},
+    LINEAR_ACCEL_Z_H: { address: 0x5B},
+    LINEAR_ACCEL_Z_L: { address: 0x5C},
     WHO_AM_I: {address: 0x75,default:0x68}
-    
+
 } as const;
 
 type Vector = {x: number, y: number, z: number};
@@ -113,19 +113,19 @@ export class MPU6050 extends Controller implements I2CController {
     sensorControls = {
         setAcceleration: (x: number, y: number, z: number) => {
             this.accelerometer = {x, y, z};
-            this.setVector(registers.MPU6050_ACCELX_H.address, [x, y, z], 100);
+            this.setVector(registers.ACCEL_XOUT_H.address, [x, y, z], 100);
             this.calculateOrientation();
         },
         setGyroscope: (x: number, y: number, z: number) => {
             this.gyroscope = {x, y, z};
-            this.setVector(registers.MPU6050_GYROX_H.address, [x, y, z], 16);
+            this.setVector(registers.GYRO_XOUT_H.address, [x, y, z], 16);
             this.calculateOrientation();
         },
         setTemp: (temp: number) => {
-            this.memory[registers.TEMP_H.address] = temp;
+            this.memory[registers.TEMP_OUT_H.address] = temp;
         },
         setLinearAcceleration: (x: number, y: number, z: number) => {
-            this.setVector(registers.MPU6050_LINEAR_ACCELX_H.address, [x, y, z], 100);
+            this.setVector(registers.LINEAR_ACCEL_X_H.address, [x, y, z], 100);
         },
     };
 
@@ -136,7 +136,7 @@ export class MPU6050 extends Controller implements I2CController {
 
         this.setVector(registers.EULER_HEADING_H.address, [avgX, avgY, avgZ], 16);
         const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
-        this.setVector(registers.MPU6050_QUATERNIONW_H.address, [w, x, y, z], 16384);
+        this.setVector(registers.QUATERNIONW_H.address, [w, x, y, z], 16384);
     }
 
 
@@ -163,7 +163,7 @@ export class MPU6050 extends Controller implements I2CController {
     i2cReadByte(acked: boolean): number {
         let byte;
         if (this.address !== null) { // addr has been properly specified in a previous write
-            if (this.address === registers.MPU6050_HEADING_H.address && this.rotating) {
+            if (this.address === registers.EULER_HEADING_H.address && this.rotating) {
                 const currentTime = Date.now();
                 const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0; // in seconds
 
@@ -187,14 +187,14 @@ export class MPU6050 extends Controller implements I2CController {
                     this.lastRead = currentTime;
 
                     // Update the euler angles in memory
-                    this.setVector(registers.MPU6050_HEADING_H.address,
+                     this.setVector(registers.EULER_HEADING_H.address,
                         [this.orientation.x, this.orientation.y, this.orientation.z], 16);
                 }
             }
 
             byte = this.memory[this.address];
 
-            if (this.address === registers.MPU6050_EULERY_L.address && this.rotating) {
+            if (this.address === registers.EULER_PITCH_L.address && this.rotating) {
                 this.lastRead = Date.now();
             }
         } else { // error state, addr has not been specified
