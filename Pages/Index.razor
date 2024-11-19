@@ -147,6 +147,8 @@
 
     private void HandleBoardSelect(Board board)
     {
+        comps[0] = BoardService.GetComponentInstance();
+
         if (loadingProgress == -1)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
@@ -157,8 +159,6 @@
         {
             _scheduleBenchSetup = true;
         }
-        
-        comps[0] = BoardService.GetComponentInstance();
     }
 
 
