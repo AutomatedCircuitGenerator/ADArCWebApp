@@ -13554,43 +13554,7 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
     }
     exports.LED = LED;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    var getInteropManager = interopManager_1.interopManager.getInteropManager;
-    window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
-    }));
-    window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
-    window.BNO055 = bno055_1.BNO055;
-    window.MAX6675 = max6675_1.MAX6675;
-    window.KY012 = ky012_1.KY012;
-    window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
-    window.Servo = servo_1.Servo;
-    window.HCSR501 = hcsr501_1.HCSR501;
-    window.KY018 = ky018_1.KY018;
-    window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
-    window.KY008 = ky008_1.KY008;
-    window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
-    window.MQ3 = mq3_1.MQ3;
-    window.HCSR04 = hcsr04_1.HCSR04;
-    window.KY003 = ky003_1.KY003;
-    window.KY022 = ky022_1.KY022;
-    window.LED = led_1.LED;
-});
-define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_17) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.KY001 = void 0;
-    class KY001 extends controller_17.Controller {
-        setTemperature(temperature) {
-        }
-        setup() { }
-    }
-    exports.KY001 = KY001;
-});
-define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_18, execute_12) {
+define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_17, execute_12) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
@@ -13635,7 +13599,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         MPU6050_LINEAR_ACCZ_L: { address: 0x5C },
         WHO_AM_I: { address: 0x75, default: 0x68 }
     };
-    class MPU6050 extends controller_18.Controller {
+    class MPU6050 extends controller_17.Controller {
         constructor() {
             super(...arguments);
             this.address = null;
@@ -13757,5 +13721,42 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         }
     }
     exports.MPU6050 = MPU6050;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    var getInteropManager = interopManager_1.interopManager.getInteropManager;
+    window.interopManager = interopManager_1.interopManager;
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+    }));
+    window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
+    window.BNO055 = bno055_1.BNO055;
+    window.MAX6675 = max6675_1.MAX6675;
+    window.KY012 = ky012_1.KY012;
+    window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
+    window.Servo = servo_1.Servo;
+    window.HCSR501 = hcsr501_1.HCSR501;
+    window.KY018 = ky018_1.KY018;
+    window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
+    window.KY008 = ky008_1.KY008;
+    window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
+    window.MQ3 = mq3_1.MQ3;
+    window.HCSR04 = hcsr04_1.HCSR04;
+    window.KY003 = ky003_1.KY003;
+    window.KY022 = ky022_1.KY022;
+    window.LED = led_1.LED;
+    window.MPU6050 = mpu6050_1.MPU6050;
+});
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY001 = void 0;
+    class KY001 extends controller_18.Controller {
+        setTemperature(temperature) {
+        }
+        setup() { }
+    }
+    exports.KY001 = KY001;
 });
 //# sourceMappingURL=build.js.map
