@@ -3,7 +3,7 @@ namespace ADArCWebApp.Shared.Exceptions;
 [Serializable]
 public class NoConnectionsException : Exception
 {
-    public NoConnectionsException() : base("No connections were found.")
+    public NoConnectionsException() : base("No connections were found for that component.")
     {
     }
 

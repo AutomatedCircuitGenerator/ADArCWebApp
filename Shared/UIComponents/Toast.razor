@@ -1,29 +1,38 @@
-<div class="@errorClass">
-    <p><b>Error: </b>No available connections</p>
-    <button @onclick="CloseError">&#x2715;</button>
+<div class="@GetVariantClass()">
+    @switch (Variant)
+    {
+        case Variant.Warning:
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126ZM12 15.75h.007v.008H12v-.008Z"/>
+            </svg>
+            break;
+        case Variant.Error:
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 0 0 5.636 5.636m12.728 12.728A9 9 0 0 1 5.636 5.636m12.728 12.728L5.636 5.636"/>
+            </svg>
+            break;
+        default:
+            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="size-6">
+                <path stroke-linecap="round" stroke-linejoin="round" d="m11.25 11.25.041-.02a.75.75 0 0 1 1.063.852l-.708 2.836a.75.75 0 0 0 1.063.853l.041-.021M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Zm-9-3.75h.008v.008H12V8.25Z"/>
+            </svg>
+            break;
+    }
+    @ChildContent
+    <button class="@GetVariantClass()" @onclick="OnClose">&#x2715;</button>
 </div>
 
 @code {
-    private string errorClass = "";
-
-    protected override async Task OnInitializedAsync()
+    [Parameter] public Variant Variant { get; set; }
+    [Parameter] public RenderFragment? ChildContent { get; set; }
+    [Parameter] public EventCallback OnClose { get; set; }
+    
+    private string GetVariantClass()
     {
-        // Delay for 3 seconds
-        await Task.Delay(3000);
-
-        // Add the fade-out class
-        errorClass = "fade-out";
-
-        // Wait for the fade-out animation to complete (1s)
-        await Task.Delay(1000);
-
-        // Optionally hide the element completely
-        errorClass = "hidden";
-    }
-
-    private void CloseError()
-    {
-        // Immediately hide the element when the close button is clicked
-        errorClass = "hidden";
+        return Variant switch
+        {
+            Variant.Warning => "warning",
+            Variant.Error => "error",
+            _ => ""
+        };
     }
 }

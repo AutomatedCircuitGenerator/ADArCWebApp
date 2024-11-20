@@ -20,4 +20,5 @@ provider.Mappings.Add(".rsxml", "application/rsxml");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.Configure<StaticFileOptions>(options => { options.ContentTypeProvider = provider; });
 builder.Services.AddSingleton<BoardService>();
+builder.Services.AddSingleton<ToastService>();
 await builder.Build().RunAsync();

@@ -1,0 +1,39 @@
+﻿@inject ToastService ToastService
+
+<div style="position: absolute; left: 50%; bottom: 10%;">
+    @foreach (var (toast, _) in _toasts.AsEnumerable().Reverse())
+    {
+        <Toast Variant="@toast.Variant" OnClose="() => RemoveToast(toast)">@toast.Message</Toast>
+    }
+</div>
+
+@code {
+    private List<(Shared.Toast Toast, Timer Timer)> _toasts = []; // Store toasts and their timeouts
+
+    protected override void OnInitialized()
+    {
+        ToastService.ToastAdded += OnToastAdded;
+    }
+
+    private void OnToastAdded(Shared.Toast toast)
+    {
+        var timer = new Timer(RemoveToast, toast, 5000, Timeout.Infinite);
+        _toasts.Add((toast, timer));
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveToast(object? state)
+    {
+        if (state is not Shared.Toast toast) return;
+        
+        var entry = _toasts.FirstOrDefault(t => t.Toast == toast);
+        if (entry != default)
+        {
+            entry.Timer.Dispose(); // Dispose the timer to free resources
+            _toasts.Remove(entry); // Remove the timer entry from the list
+        }
+
+        // Trigger a UI update
+        InvokeAsync(StateHasChanged);
+    }
+}
