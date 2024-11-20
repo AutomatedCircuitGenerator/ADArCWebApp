@@ -1,106 +1,112 @@
-﻿@code {
-	[Parameter] public bool magfield { get; set; } = false;
-	public static ElementPin[] pinInfo
-	{
-		get
-		{
-			return new ElementPin[]
-			{
-				new ElementPin(name: "GND", x: 45, y: 135, signals: new PinSignalInfo[]{ }, number: 1),
-				new ElementPin(name: "+V", x: 54, y: 135, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-				new ElementPin(name: "Signal",  x: 63, y: 135, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3)
-			};
+﻿@inherits RazorComponent;
 
-		}
-	}
-	public static async void translate(ComponentInstance comp, long pinChangeCycle)
-	{
-		bool sig = false;
-		if (0 == comp.getConnection("Signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
-		{
-			sig = await AvrCPU.getPinState(conn!.toId);
-		}
-		
-		if ((bool)comp.compParams["magfield"].getValue())//set signal to low when a magnetic field is present
-		{
-			AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
-		}
-		else//set signal to low when a magnetic field is present
-		{
-			AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
-		}
-	}
+@code {
+
+    private string _magField;
+
+    [DropdownSetting(["Detected", "Not detected"])]
+    [Parameter]
+    public string magfield
+    {
+        get => _magField;
+        set
+        {
+            var hasChanged = value != _magField;
+            _magField = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setFieldDetected", _magField == "Detected"); });
+            }
+        }
+    }
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "gnd", x: 45, y: 135, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "5V", x: 54, y: 135, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
+                new ElementPin(name: "digital_out", x: 63, y: 135, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3)
+            };
+        }
+    }
 
 }
 
 <svg width="15mm" height="30mm" version="1.1" viewBox="0 0 15 30" xmlns="http://www.w3.org/2000/svg">
-	<g>
-		<rect x="-1.3878e-17" y="5.7938" width="15" height="20.503" fill="#1a1a1a" stroke-width=".22247" />
-		<rect x="5.1354" width="4.9327" height="3.818" fill="#333" stroke-width=".4601" />
-		<rect x="3.7164" y="22.907" width="7.9058" height="2.365" fill="#ccc" stroke-width=".41308" />
-		<rect x="3.8002" y="17.795" width="7.9058" height="2.365" fill="#f2f2f2" stroke-width=".41308" />
-		<g fill="#666" stroke-width=".3006">
-			<rect x="4.221" y="23.109" width="2.0185" height="1.892" ry=".49523" />
-			<rect x="6.5185" y="23.146" width="2.0185" height="1.892" ry=".473" />
-			<rect x="8.8775" y="23.157" width="2.0185" height="1.892" ry=".44277" />
-		</g>
-		<rect x=".69384" y="17.913" width="2.044" height="4.3699" ry="0" fill="#f2f2f2" stroke-width=".27598" />
-		<rect x=".82564" y="18.379" width="1.6596" height="3.5482" ry="0" fill="#bfbfbf" stroke-width=".22409" />
-		<rect x=".82528" y="18.867" width="1.6596" height="2.747" ry="0" fill="#4d4d4d" stroke-width=".19717" />
-		<rect x=".673" y="11.366" width="2.044" height="4.3699" ry="0" fill="#f2f2f2" stroke-width=".27598" />
-		<rect x=".80479" y="11.832" width="1.6596" height="3.5482" ry="0" fill="#bfbfbf" stroke-width=".22409" />
-		<rect x=".80443" y="12.32" width="1.6596" height="2.747" ry="0" fill="#e5e5e5" stroke-width=".19717" />
-		<rect x="4.1478" y="18.015" width="4.9951" height="2.0011" fill="#333" stroke-width=".24575" />
-		<rect x="9.5117" y="18.038" width="2.0017" height="2.0011" fill="#666" stroke-width=".15556" />
-		<rect x="3.8" y="14.746" width="7.906" height="2.365" fill="#f2f2f2" stroke-width=".41308" />
-		<rect x="4.1476" y="14.967" width="4.9952" height="2.0011" fill="#333" stroke-width=".24575" />
-		<rect x="9.5116" y="14.99" width="2.0017" height="2.0011" fill="#666" stroke-width=".15557" />
-		<rect x="3.7042" y="11.671" width="7.9058" height="2.365" fill="#f2f2f2" stroke-width=".41308" />
-		<rect x="4.0517" y="11.892" width="4.9951" height="2.0011" fill="#333" stroke-width=".24575" />
-		<g fill="#666">
-			<rect x="9.4156" y="11.915" width="2.0017" height="2.0011" stroke-width=".15556" />
-			<circle cx="5.0885" cy="12.87" r=".75" stroke-width=".22049" />
-			<circle cx="7.2857" cy="12.87" r=".75" stroke-width=".22049" />
-		</g>
-		<g fill="#e5e5e5" stroke-width=".19109">
-			<circle cx="10.44" cy="12.885" r=".65" />
-			<circle cx="7.265" cy="12.885" r=".65" />
-			<circle cx="5.1" cy="12.885" r=".65" />
-		</g>
-		<circle cx="5.1322" cy="19.006" r=".75" fill="#666" stroke-width=".22049" />
-		<circle cx="7.3294" cy="19.006" r=".75" fill="#666" stroke-width=".22049" />
-		<g fill="#e5e5e5" stroke-width=".19109">
-			<circle cx="10.484" cy="19.021" r=".65" />
-			<circle cx="7.3087" cy="19.021" r=".65" />
-			<circle cx="5.1437" cy="19.021" r=".65" />
-		</g>
-		<circle cx="5.1487" cy="15.997" r=".75" fill="#666" stroke-width=".22049" />
-		<circle cx="7.3459" cy="15.997" r=".75" fill="#666" stroke-width=".22049" />
-		<g fill="#808080">
-			<rect transform="matrix(.98593 .16717 -.063477 .99798 0 0)" x="6.1103" y="2.1382" width=".46061" height="12.916" stroke-width=".17916" />
-			<rect transform="matrix(.99409 .10859 -.0022485 1 0 0)" x="7.1842" y="2.2471" width=".46071" height="13.196" stroke-width=".18111" />
-			<rect transform="matrix(-.97561 .2195 .10816 .99413 0 0)" x="-8.7736" y="4.9142" width=".46118" height="13.259" stroke-width=".18163" />
-		</g>
-		<rect x="5.7435" y="-4.3666e-9" width="3.5137" height="3.3786" fill="#4d4d4d" stroke-width=".29653" />
-		<g fill="#808080" stroke-width=".26458">
-			<rect x="5" y="24" width=".5" height="6" />
-			<rect x="7.2" y="24" width=".5" height="6" />
-			<rect x="9.6" y="24" width=".5" height="6" />
-		</g>
-		<rect x="1.0914" y="24.094" width="1.0914" height=".29766" fill="#e5e5e5" stroke-width=".26458" />
-		<rect x="11.939" y="12.849" width="1.0914" height=".29766" fill="#e5e5e5" stroke-width=".26458" />
-		<circle cx="2.75" cy="8.25" r="1.75" fill="#666" stroke-width=".51447" />
-		<circle cx="2.7769" cy="8.285" r="1.5167" fill="#e5e5e5" stroke-width=".44587" />
-		<circle cx="12.563" cy="8.25" r="1.75" fill="#666" stroke-width=".51447" />
-		<g fill="#e5e5e5">
-			<circle cx="12.59" cy="8.285" r="1.5167" stroke-width=".44587" />
-			<text x="0.9425782" y="23.117968" font-size="1.0583px" stroke-width=".26458" xml:space="preserve"><tspan x="0.9425782" y="23.117968" font-family="Consolas" font-size="1.0583px" stroke-width=".26458">R1</tspan></text>
-			<text x="12.512932" y="24.970568" font-size="2.8222px" stroke-width=".26458" xml:space="preserve"><tspan x="12.512932" y="24.970568" font-family="Consolas" font-size="2.8222px" stroke-width=".26458">S</tspan></text>
-		</g>
-		<g fill="#808080" stroke-width=".26458">
-			<circle cx="5.2502" cy="29.817" r=".1" />
-			<circle cx="7.4499" cy="29.803" r=".1" />
-			<circle cx="9.8311" cy="29.815" r=".1" />
-		</g>
-	</g>
+    <g>
+        <rect x="-1.3878e-17" y="5.7938" width="15" height="20.503" fill="#1a1a1a" stroke-width=".22247"/>
+        <rect x="5.1354" width="4.9327" height="3.818" fill="#333" stroke-width=".4601"/>
+        <rect x="3.7164" y="22.907" width="7.9058" height="2.365" fill="#ccc" stroke-width=".41308"/>
+        <rect x="3.8002" y="17.795" width="7.9058" height="2.365" fill="#f2f2f2" stroke-width=".41308"/>
+        <g fill="#666" stroke-width=".3006">
+            <rect x="4.221" y="23.109" width="2.0185" height="1.892" ry=".49523"/>
+            <rect x="6.5185" y="23.146" width="2.0185" height="1.892" ry=".473"/>
+            <rect x="8.8775" y="23.157" width="2.0185" height="1.892" ry=".44277"/>
+        </g>
+        <rect x=".69384" y="17.913" width="2.044" height="4.3699" ry="0" fill="#f2f2f2" stroke-width=".27598"/>
+        <rect x=".82564" y="18.379" width="1.6596" height="3.5482" ry="0" fill="#bfbfbf" stroke-width=".22409"/>
+        <rect x=".82528" y="18.867" width="1.6596" height="2.747" ry="0" fill="#4d4d4d" stroke-width=".19717"/>
+        <rect x=".673" y="11.366" width="2.044" height="4.3699" ry="0" fill="#f2f2f2" stroke-width=".27598"/>
+        <rect x=".80479" y="11.832" width="1.6596" height="3.5482" ry="0" fill="#bfbfbf" stroke-width=".22409"/>
+        <rect x=".80443" y="12.32" width="1.6596" height="2.747" ry="0" fill="#e5e5e5" stroke-width=".19717"/>
+        <rect x="4.1478" y="18.015" width="4.9951" height="2.0011" fill="#333" stroke-width=".24575"/>
+        <rect x="9.5117" y="18.038" width="2.0017" height="2.0011" fill="#666" stroke-width=".15556"/>
+        <rect x="3.8" y="14.746" width="7.906" height="2.365" fill="#f2f2f2" stroke-width=".41308"/>
+        <rect x="4.1476" y="14.967" width="4.9952" height="2.0011" fill="#333" stroke-width=".24575"/>
+        <rect x="9.5116" y="14.99" width="2.0017" height="2.0011" fill="#666" stroke-width=".15557"/>
+        <rect x="3.7042" y="11.671" width="7.9058" height="2.365" fill="#f2f2f2" stroke-width=".41308"/>
+        <rect x="4.0517" y="11.892" width="4.9951" height="2.0011" fill="#333" stroke-width=".24575"/>
+        <g fill="#666">
+            <rect x="9.4156" y="11.915" width="2.0017" height="2.0011" stroke-width=".15556"/>
+            <circle cx="5.0885" cy="12.87" r=".75" stroke-width=".22049"/>
+            <circle cx="7.2857" cy="12.87" r=".75" stroke-width=".22049"/>
+        </g>
+        <g fill="#e5e5e5" stroke-width=".19109">
+            <circle cx="10.44" cy="12.885" r=".65"/>
+            <circle cx="7.265" cy="12.885" r=".65"/>
+            <circle cx="5.1" cy="12.885" r=".65"/>
+        </g>
+        <circle cx="5.1322" cy="19.006" r=".75" fill="#666" stroke-width=".22049"/>
+        <circle cx="7.3294" cy="19.006" r=".75" fill="#666" stroke-width=".22049"/>
+        <g fill="#e5e5e5" stroke-width=".19109">
+            <circle cx="10.484" cy="19.021" r=".65"/>
+            <circle cx="7.3087" cy="19.021" r=".65"/>
+            <circle cx="5.1437" cy="19.021" r=".65"/>
+        </g>
+        <circle cx="5.1487" cy="15.997" r=".75" fill="#666" stroke-width=".22049"/>
+        <circle cx="7.3459" cy="15.997" r=".75" fill="#666" stroke-width=".22049"/>
+        <g fill="#808080">
+            <rect transform="matrix(.98593 .16717 -.063477 .99798 0 0)" x="6.1103" y="2.1382" width=".46061" height="12.916" stroke-width=".17916"/>
+            <rect transform="matrix(.99409 .10859 -.0022485 1 0 0)" x="7.1842" y="2.2471" width=".46071" height="13.196" stroke-width=".18111"/>
+            <rect transform="matrix(-.97561 .2195 .10816 .99413 0 0)" x="-8.7736" y="4.9142" width=".46118" height="13.259" stroke-width=".18163"/>
+        </g>
+        <rect x="5.7435" y="-4.3666e-9" width="3.5137" height="3.3786" fill="#4d4d4d" stroke-width=".29653"/>
+        <g fill="#808080" stroke-width=".26458">
+            <rect x="5" y="24" width=".5" height="6"/>
+            <rect x="7.2" y="24" width=".5" height="6"/>
+            <rect x="9.6" y="24" width=".5" height="6"/>
+        </g>
+        <rect x="1.0914" y="24.094" width="1.0914" height=".29766" fill="#e5e5e5" stroke-width=".26458"/>
+        <rect x="11.939" y="12.849" width="1.0914" height=".29766" fill="#e5e5e5" stroke-width=".26458"/>
+        <circle cx="2.75" cy="8.25" r="1.75" fill="#666" stroke-width=".51447"/>
+        <circle cx="2.7769" cy="8.285" r="1.5167" fill="#e5e5e5" stroke-width=".44587"/>
+        <circle cx="12.563" cy="8.25" r="1.75" fill="#666" stroke-width=".51447"/>
+        <g fill="#e5e5e5">
+            <circle cx="12.59" cy="8.285" r="1.5167" stroke-width=".44587"/>
+            <text x="0.9425782" y="23.117968" font-size="1.0583px" stroke-width=".26458" xml:space="preserve">
+                <tspan x="0.9425782" y="23.117968" font-family="Consolas" font-size="1.0583px" stroke-width=".26458">R1</tspan>
+            </text>
+            <text x="12.512932" y="24.970568" font-size="2.8222px" stroke-width=".26458" xml:space="preserve">
+                <tspan x="12.512932" y="24.970568" font-family="Consolas" font-size="2.8222px" stroke-width=".26458">S</tspan>
+            </text>
+        </g>
+        <g fill="#808080" stroke-width=".26458">
+            <circle cx="5.2502" cy="29.817" r=".1"/>
+            <circle cx="7.4499" cy="29.803" r=".1"/>
+            <circle cx="9.8311" cy="29.815" r=".1"/>
+        </g>
+    </g>
 </svg>

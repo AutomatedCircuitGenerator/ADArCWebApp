@@ -1,0 +1,29 @@
+<div class="@errorClass">
+    <p><b>Error: </b>No available connections</p>
+    <button @onclick="CloseError">&#x2715;</button>
+</div>
+
+@code {
+    private string errorClass = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Delay for 3 seconds
+        await Task.Delay(3000);
+
+        // Add the fade-out class
+        errorClass = "fade-out";
+
+        // Wait for the fade-out animation to complete (1s)
+        await Task.Delay(1000);
+
+        // Optionally hide the element completely
+        errorClass = "hidden";
+    }
+
+    private void CloseError()
+    {
+        // Immediately hide the element when the close button is clicked
+        errorClass = "hidden";
+    }
+}

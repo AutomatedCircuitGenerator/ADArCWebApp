@@ -85,7 +85,7 @@ export class BNO055 extends Controller implements I2CController {
     private gyroscope: Vector = { x: 0, y: 0, z: 0 };
     private magnetometer: Vector = { x: 0, y: 0, z: 0 };
     private orientation: Vector = { x: 0, y: 0, z: 0 };
-    private lastRead;
+    private lastRead: number;
     private rotating = false;
 
     private setVector(address: number, vector: number[], scalar: number) {
@@ -169,7 +169,7 @@ export class BNO055 extends Controller implements I2CController {
     }
     
     setup(): void {
-        AVRRunner.getInstance().twi.eventHandler.registerController(BNO055_ADDR, this);
+        AVRRunner.getInstance().board.twis[0].registerController(BNO055_ADDR, this);
         
         for (const register of Object.values(registers)) {
             if (register.default) {

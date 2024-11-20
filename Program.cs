@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 using ADArCWebApp;
+using ADArCWebApp.Shared;
 using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.AspNetCore.Builder;
 
@@ -18,4 +19,5 @@ provider.Mappings.Add(".grxml", "application/grxml");
 provider.Mappings.Add(".rsxml", "application/rsxml");
 builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.HostEnvironment.BaseAddress) });
 builder.Services.Configure<StaticFileOptions>(options => { options.ContentTypeProvider = provider; });
+builder.Services.AddSingleton<BoardService>();
 await builder.Build().RunAsync();

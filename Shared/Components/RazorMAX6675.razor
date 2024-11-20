@@ -23,10 +23,10 @@
     [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
     public double temperature
     {
-        get => this._temperature;
+        get => _temperature;
         set
         {
-            this._temperature = value;
+            _temperature = value;
             if (Controller is not null)
             {
                 InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTemperature", _temperature); });

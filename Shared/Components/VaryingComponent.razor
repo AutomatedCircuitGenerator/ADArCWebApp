@@ -2,12 +2,13 @@
 @using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="rightClick" @onmouseenter="()=>enableBorder=true" @onmouseleave="()=>enableBorder=false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute":"relative"); transform: scale(@(zoomFactor))">
+<div class="comp-wrapper @(borderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="rightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
     @if (!forceBorder)
     {
         rightClickable = false;
     }
-    @if (forceBorder) {
+    @if (forceBorder)
+    {
         @if (rightClickable)
         {
             <div class="right-click-container">
@@ -20,17 +21,20 @@
                     <span style="padding-left: 3px">𝗶</span>
                     <span style="padding-left: 7px">￨ Component Information</span>
                 </button>
-            @if(!Pages.Index.app!.isRunning && individualData.globalId != 1){
-                <button id="deletebutton" @onclick="remove">
-                    <span>x</span>
-                    <span style="padding-left: 6px">￨ Delete Component</span>
-                </button>
-            }
+                @if (!Pages.Index.app!.isRunning && individualData.globalId != 1)
+                {
+                    <button id="deletebutton" @onclick="remove">
+                        <span>x</span>
+                        <span style="padding-left: 6px">￨ Delete Component</span>
+                    </button>
+                }
             </div>
         }
     }
 
-    <div id="component-@individualData.localId"> <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent></div>
+    <div id="component-@individualData.localId">
+        <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent>
+    </div>
 </div>
 
 <!-- ignore scaling -->
@@ -39,8 +43,8 @@
         <button class="close-button" @onclick="CloseEnvrSettings">❌</button>
         <h2>Environmental Settings</h2>
 
-    <!-- Value Setting -->
-        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        <!-- Value Setting -->
+        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<ValueSetting>())
             {
@@ -54,9 +58,9 @@
                 </div>
             }
         }
-        
+
         <!-- Value Setting Double -->
-        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
             {
@@ -70,9 +74,9 @@
                 </div>
             }
         }
-        
+
         <!-- Dropdown Setting -->
-        @foreach(var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
             {
@@ -90,34 +94,35 @@
 
         <!-- Grouped Settings -->
         @foreach (var group in individualData.data.compType.GetProperties()
-        .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
+                      .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
         {
-        if (group.Key != null)
-        {
-            <div class="settingGroup">
-                <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
-                <div style="display: flex; align-items: center;">
-                    @foreach (var prop in group)
-                    {
-                        var valueSetting = prop.GetCustomAttribute<ValueSetting>();
-                        if (valueSetting != null)
+            if (group.Key != null)
+            {
+                <div class="settingGroup">
+                    <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
+                    <div style="display: flex; align-items: center;">
+                        @foreach (var prop in group)
                         {
-                            <div class="valueSetting" style="margin-left: 5px; margin-right: 5px">
-                                <label style="display: block">@valueSetting.Label</label>
-                                <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
-                                       min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
-                                       @onchange="(e) => { onInput(e, prop, true); }">
-                            </div>
+                            var valueSetting = prop.GetCustomAttribute<ValueSetting>();
+                            if (valueSetting != null)
+                            {
+                                <div class="valueSetting" style="margin-left: 5px; margin-right: 5px">
+                                    <label style="display: block">@valueSetting.Label</label>
+                                    <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
+                                           min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
+                                           @onchange="(e) => { onInput(e, prop, true); }">
+                                </div>
+                            }
                         }
-                    }
+                    </div>
                 </div>
-            </div>
-        }
+            }
         }
     </div>
 </div>
 
 @code {
+
     /// <summary>
     /// Formats a property name for display in the environmental settings.
     /// </summary>
@@ -179,6 +184,7 @@
             return "";
         }
     }
+
     /// <summary>
     /// Updates the component's data when the environmental settings are used.
     /// </summary>
@@ -187,9 +193,7 @@
     /// <param name="convert">true if the property is a number, else false.</param>
     public void onInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
-
-
-        if (convert)//theoretically number data has convert true, -> double, whereas strings have convert false.
+        if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
         {
             individualData.compParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
         }
@@ -198,11 +202,12 @@
             individualData.compParams[prop.Name.ToLower()].setValue((string)e.Value);
         }
 
-        if (individualData.compParams.ContainsKey("translateOnInput"))//certain components send data on their own without request. handle these cases.
+        if (individualData.compParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
         {
             individualData.data.compType.GetMethod("translate").Invoke(individualData, [individualData]);
         }
     }
+
     /// <summary>
     /// Removes a component. Provided for convenience when using the delete button in the menus.
     /// </summary>
@@ -251,9 +256,10 @@
         }
     }
 
-    string GenerateLink(string nodeName) {
+    string GenerateLink(string nodeName)
+    {
         Console.WriteLine($"nodeName: {nodeName}");
-        switch (nodeName)//no breaks needed as return ends.
+        switch (nodeName) //no breaks needed as return ends.
         {
             case "Rev 3":
                 return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
@@ -266,7 +272,7 @@
             case "Switch":
                 return ""; // Add link for Switch here
             case "ADXL345":
-                return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520"; 
+                return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "MPU6050":
                 return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
             case "BNO-055":
@@ -278,21 +284,21 @@
             case "Ultrasonic":
                 return ""; // Add link for Ultrasonic here
             case "IR Distance":
-                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1"; 
+                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
             case "MQ-3":
-                return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1"; 
+                return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1";
             case "SGP41":
-                return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1"; 
+                return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
             case "KY-018 LDR":
-            return ""; // Add link for KY-018 LDR here
+                return ""; // Add link for KY-018 LDR here
             case "Ambient Light":
                 return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "Luminosity":
-                return "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1"; 
+                return "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1";
             case "Alt - Ambient Light":
-                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1"; 
+                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "DHT11 / DHT22":
-                return "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1"; 
+                return "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1";
             case "SHT31":
                 return "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1";
             case "DS18B20":
@@ -302,25 +308,25 @@
             case "K-Thermocouple":
                 return "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1";
             case "PIR motion sensor":
-            return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
+                return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
             case "IR receiver":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
             case "SD Card Reader":
-                return "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1"; 
+                return "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1";
             case "Load Cell(HX711)":
-                return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1"; 
+                return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1";
             case "LED":
-                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1"; 
+                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
             case "7 - segment":
-                return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1"; 
+                return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1";
             case "Bar":
-                return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B"; 
+                return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B";
             case "Matrix":
                 return "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B";
             case "RGB":
-                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018"; 
+                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
             case "RGB module":
-            return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
+                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
             case "Laser LED":
                 return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
             case "LCD2004":
@@ -336,19 +342,19 @@
             case "SH1106 OLED - I2C":
                 return "https://adarc-help.mech.website";
             case "Direct - SG90":
-                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1"; 
+                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
             case "Direct - DS-7001HV":
-            return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1"; 
+                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
             case "Driver - SG90":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; 
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
             case "Driver - DS-7001HV":
                 return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
             case "Direct - Motor":
                 return "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1";
             case "Driver - Motor":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; 
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
             case "Brushless ESC - Motor":
-                return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1"; 
+                return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1";
             case "28BYJ-48":
                 return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
             case "Nema-17":
@@ -356,7 +362,7 @@
             case "Speaker":
                 return ""; // Add link for Speaker here
             case "Buzzer":
-            return ""; // Add link for Buzzer here
+                return ""; // Add link for Buzzer here
             case "Encoder":
                 return ""; // Add link for Encoder here
             case "Voltage regulator":
@@ -372,12 +378,10 @@
         }
     }
 
-        
+
     void OpenLink(string url)
     {
         JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
     }
 
 }
-
-

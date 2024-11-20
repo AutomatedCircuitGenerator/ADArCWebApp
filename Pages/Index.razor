@@ -1,8 +1,10 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @using System.Text.Json
+@using ADArCWebApp.Shared.UIComponents
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
+@inject BoardService BoardService
 
 <PageTitle>Index</PageTitle>
 <head>
@@ -11,6 +13,7 @@
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+<BoardSelect OnSelect="HandleBoardSelect"></BoardSelect>
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
         <div class="logo-and-adarc">
@@ -18,13 +21,13 @@
             <span class="adarc-text">ADArC</span>
         </div>
 
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="runTutorial">
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial">
             <!-- change -->
             💡 Tutorial
         </button>
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="downloadFile" class="toolbar-button">
+                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
 
@@ -41,7 +44,6 @@
             </button>
         </div>
     </div>
-
     <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
@@ -112,6 +114,8 @@
     bool isLeftExpanded = true;
     bool isRightExpanded = false;
 
+    private bool _scheduleBenchSetup = false;
+
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
@@ -141,6 +145,22 @@
         StateHasChanged();
     }
 
+    private void HandleBoardSelect(Board board)
+    {
+        comps[0] = BoardService.GetComponentInstance();
+
+        if (loadingProgress == -1)
+        {
+            SetupBenchFromJsonString(BoardService.GetJson());
+            compPane!.releaseLockout();
+            selLockedOut = false;
+        }
+        else
+        {
+            _scheduleBenchSetup = true;
+        }
+    }
+
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -156,7 +176,7 @@
 
             if (response.stderr != "")
             {
-                codePane.UpdateConsoleOutput(response.stderr, false);
+                codePane?.UpdateConsoleOutput(response.stderr, false);
                 runStopText = "▶ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
@@ -178,7 +198,7 @@
             }
             else //no errors
             {
-                codePane.UpdateConsoleOutput(response.stdout, false);
+                codePane?.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.clearMonacoErrorsWrapper();
                 AppInterop.startSimWrapper();
                 runStopText = "🟥 Stop";
@@ -236,7 +256,7 @@
     /// </summary>
     public static Dictionary<int, ComponentInstance> comps = new()
     {
-        { 0, new ComponentInstance(1, null, 829, 219) }
+        // { 0, new ComponentInstance(1, null, 829, 219) }
     };
 
 
@@ -269,7 +289,6 @@
             AppInterop.jsModule = await AppInterop.getModuleWrapper();
 
             AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
-            runTutorial();
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
         }
@@ -330,16 +349,16 @@
                 n.localLabels.Add("user_" + d.nodeName);
 
                 GraphSynthInvoke.GetNodes().Add(n);
-                GraphSynthInvoke.inputs.Add(d.nodeName);
+                if (d.nodeName != null) GraphSynthInvoke.inputs.Add(d.nodeName);
                 GraphSynthInvoke.recg_apply(); //do component connection backend
 
                 //label all new nodes and connections with the localid of the component that added them.
-                GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
                 GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
                 //create frontend instance
                 var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
                 comp.localId = localIds;
-                comps.Add(localIds, buildCanvas.unZoom(comp)); //50 is height of toolbar
+                comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
                 BuildCode.outputPins.Clear();
                 buildCanvas!.connLines.Clear();
                 //reset the way that component pins are bound to the arduino.
@@ -373,11 +392,11 @@
     /// </summary>
     private void setupListeners()
     {
-        if (comps.Values.Any(c => c.globalId == 1)) //set has an arduino uno
+        if (comps.Values.Any(c => c.isArduino())) //set has an arduino uno
         {
             foreach (var c in comps.Values) //iterate all components (don't know what listeners exist already)
             {
-                if (c.globalId != 1) //exclude the arduino
+                if (!c.isArduino()) //exclude the arduino
                 {
                     foreach (string listen in c.data.pinsToListen) //add a listener for each important pin
                     {
@@ -437,13 +456,12 @@
         //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 90);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 90);
-        compPane!.releaseLockout();
-        selLockedOut = false;
-        //hack way to setup bench with an arduino. "load from file" it, where there is no file, and it contains only an arduino
-        setupBenchFromJSONString("{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"globalId\":1,\"x\":829,\"y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"compParams\":{}}}}");
-        base.StateHasChanged();
-
-
+        if (_scheduleBenchSetup)
+        {
+            SetupBenchFromJsonString(BoardService.GetJson());
+            compPane!.releaseLockout();
+            selLockedOut = false;
+        }
         //all else finish first
         await Task.Delay(1000);
         loadingProgress = -1;
@@ -502,7 +520,7 @@
 
             var aPinName = "**NF**";
 
-            if ((ha.globalId == 1 && a.To.localLabels.Contains("localId:1")) || (ha.globalId != 1 && !a.To.localLabels.Contains("localId:1")))
+            if ((ha.isArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.isArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
             {
                 aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
             }
@@ -521,7 +539,7 @@
             }
 
             //if arduino and data pin being connected, register to code.
-            if ((ha.globalId == 1) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
+            if ((ha.isArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
                 BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
                 //Console.WriteLine("1: " + BuildCode.outputPins.Count);
@@ -686,16 +704,16 @@
         var buffer = new byte[file.Size];
         await e.File.OpenReadStream(512000).ReadAsync(buffer);
         var str = System.Text.Encoding.UTF8.GetString(buffer);
-        setupBenchFromJSONString(str);
+        SetupBenchFromJsonString(str);
     }
 
     /// <summary>
     /// Handles most of the setup process of the bench after import.
     /// </summary>
     /// <param name="JSON">The full JSON to deserialize.</param>
-    public void setupBenchFromJSONString(string JSON)
+    public void SetupBenchFromJsonString(string JSON)
     {
-        Data data = DeserializeJSON(JSON);
+        Data? data = DeserializeJson(JSON);
         //clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
         //notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
         foreach (var comp in comps)
@@ -706,7 +724,7 @@
         }
 
         buildCanvas!.connLines.Clear();
-        buildCanvas!.resetTransform();
+        buildCanvas.resetTransform();
         GraphSynthInvoke.inputs.Clear();
         GraphSynthInvoke.destroyGraph();
         BuildCode.outputPins.Clear();
@@ -722,9 +740,9 @@
             kv.Value.gsNode = n;
 
             GraphSynthInvoke.GetNodes().Add(n);
-            GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+            if (kv.Value.data.nodeName != null) GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
             GraphSynthInvoke.recg_apply();
-            GraphSynthInvoke.GetNodes().FindAll(n => n.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(n => n.localLabels.Add("localId:" + kv.Key));
+            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + kv.Key));
             GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
         }
 
@@ -741,12 +759,12 @@
     /// <summary>
     /// Create file data and send it off to JS for downloading.
     /// </summary>
-    public async void downloadFile()
+    public async void DownloadFile()
     {
         var stream = new MemoryStream();
         var writer = new StreamWriter(stream);
-        writer.Write(await ExportJSON());
-        writer.Flush();
+        await writer.WriteAsync(await ExportJson());
+        await writer.FlushAsync();
         stream.Position = 0;
 
         using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
@@ -767,7 +785,7 @@
     /// Creates a JSON string representing most of the current state of the circuit.
     /// </summary>
     /// <returns>A JSON string of a Data object.</returns>
-    private async Task<string> ExportJSON()
+    private async Task<string> ExportJson()
     {
         Data parentObject = new Data
         {
@@ -787,14 +805,14 @@
     /// </summary>
     /// <param name="jsonString">The JSON to deserialize.</param>
     /// <returns>A Data object.</returns>
-    private Data DeserializeJSON(string jsonString)
+    private static Data? DeserializeJson(string jsonString)
     {
         try
         {
             // Deserialize JSON data into a Data object
             var options = new JsonSerializerOptions { IncludeFields = true };
             options.Converters.Add(new ParamSerializer());
-            Data canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options) ?? throw new InvalidOperationException("Deserialization failed: 'canvasData' is null. Check if 'jsonString' is in the correct format.");
 
             // Now you have access to the deserialized data as a CanvasData object
             // Do whatever you need with this data
@@ -810,7 +828,7 @@
     }
 
     // runs the introjs tutorial
-    private async void runTutorial()
+    public async void RunTutorial()
     {
         // var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
         // ant-menu-submenu-hidden

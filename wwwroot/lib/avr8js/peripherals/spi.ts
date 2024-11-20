@@ -39,11 +39,11 @@ const bitsPerByte = 8;
 export class AVRSPI {
   /** @deprecated Use onByte() instead */
   public onTransfer: SPITransferCallback = () => 0;
-  
+
   /**
    * SPI byte transfer callback. Invoked whenever the user code starts an SPI transaction.
    * You can override this with your own SPI handler logic.
-   * 
+   *
    * ADArC: SHOULD NOT BE OVERRIDEN
    *
    * The callback receives a argument: the byte sent over the SPI MOSI line.
@@ -96,7 +96,7 @@ export class AVRSPI {
       this.cpu.clearInterruptByFlag(this.SPI, value);
     };
   }
-  
+
   addListener(listener:SPIByteTransferCallback){
     this.listeners.push(listener);
   }
