@@ -13759,4 +13759,58 @@ define("controllers/ky001", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY001 = KY001;
 });
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RPLidarA1M9 = void 0;
+    const RPLIDAR_CMD_STOP = 0x25;
+    const RPLIDAR_CMD_SCAN = 0x20;
+    const RPLIDAR_CMD_FORCE_SCAN = 0x21;
+    const RPLIDAR_CMD_RESET = 0x40;
+    const RPLIDAR_CMD_GET_DEVICE_INFO = 0x50;
+    const RPLIDAR_CMD_GET_DEVICE_HEALTH = 0x52;
+    const RPLIDAR_ANS_TYPE_MEASUREMENT = 0x81;
+    const RPLIDAR_ANS_TYPE_DEVINFO = 0x4;
+    const RPLIDAR_ANS_TYPE_DEVHEALTH = 0x6;
+    const RPLIDAR_STATUS_OK = 0x0;
+    const RPLIDAR_STATUS_WARNING = 0x1;
+    const RPLIDAR_STATUS_ERROR = 0x2;
+    const RPLIDAR_RESP_MEASUREMENT_SYNCBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_QUALITY_SHIFT = 2;
+    const RPLIDAR_RESP_MEASUREMENT_CHECKBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT = 1;
+    const RPLIDAR_CMD_SYNC_BYTE = 0xA5;
+    const RPLIDAR_CMDFLAG_HAS_PAYLOAD = 0x80;
+    const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
+    const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
+    const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
+    class RPLidarA1M9 extends controller_19.Controller {
+        constructor() {
+            super(...arguments);
+            this.distance = 0;
+            this.angle = 0;
+            this.serialNumber = 1;
+            this.currentCmd = null;
+            this.inSync = false;
+        }
+        setup() {
+            this.pins.rx[0].usart.onByteTransmit = this.rxListener.bind(this);
+        }
+        rxListener(value) {
+            if (value === RPLIDAR_CMD_SYNC_BYTE) {
+                this.inSync = true;
+            }
+            while (this.inSync) {
+                if (this.currentCmd == null) {
+                    this.currentCmd = value;
+                }
+            }
+            this.inSync = false;
+            this.currentCmd = null;
+        }
+        getDeviceHealth() {
+        }
+    }
+    exports.RPLidarA1M9 = RPLidarA1M9;
+});
 //# sourceMappingURL=build.js.map
