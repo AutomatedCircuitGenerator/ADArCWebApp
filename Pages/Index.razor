@@ -1,10 +1,12 @@
 ﻿@page "/"
 @using GraphSynth.Representation
 @using System.Text.Json
+@using ADArCWebApp.Shared.Exceptions
 @using ADArCWebApp.Shared.UIComponents
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject BoardService BoardService
+@inject ToastService ToastService
 
 <PageTitle>Index</PageTitle>
 <head>
@@ -77,6 +79,7 @@
             </div>
             <CodePane></CodePane>
         </div>
+        <ToastQueue></ToastQueue>
     </div>
     @if (showZoomTooltip)
     {
@@ -350,7 +353,17 @@
 
                 GraphSynthInvoke.GetNodes().Add(n);
                 if (d.nodeName != null) GraphSynthInvoke.inputs.Add(d.nodeName);
-                GraphSynthInvoke.recg_apply(); //do component connection backend
+
+                try
+                {
+                    GraphSynthInvoke.Add();
+                    GraphSynthInvoke.Connect(d.nodeName);
+                }
+                catch (NoConnectionsException exception)
+                {
+                    ToastService.AddToast(exception.Message, Variant.Error);
+                    return;
+                }
 
                 //label all new nodes and connections with the localid of the component that added them.
                 GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));

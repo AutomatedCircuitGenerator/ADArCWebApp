@@ -88,7 +88,7 @@ namespace ADArCWebApp.Shared
 
 			if (connMap.ContainsKey(i1)) {
 
-				if (globalId != 1)
+				if (!isArduino())
 				{
 					if (connMap[i1].Contains(toAdd)) {
 						Console.WriteLine("Connection already exists from " + data.name + " pin " + i1 + " to external pin id " + i2 + ". Ignoring...");
@@ -98,7 +98,7 @@ namespace ADArCWebApp.Shared
 				}
 				connMap[i1].Add(toAdd);
 
-				if (globalId != 1)
+				if (!isArduino())
 				{
 					Pages.Index.buildCanvas!.connLines.Add(toAdd);
 
@@ -108,7 +108,7 @@ namespace ADArCWebApp.Shared
 			{
 				connMap[i1] = new() { toAdd };
 
-				if (globalId != 1)
+				if (!isArduino())
 				{
 					Pages.Index.buildCanvas!.connLines.Add(toAdd);
 
