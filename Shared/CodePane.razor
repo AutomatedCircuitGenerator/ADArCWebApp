@@ -43,15 +43,15 @@
 
 @code {
 
-    private string lockIcon = "🔓";
-    private string lockText = "Unlocked";
+    private string lockIcon = "🔒";
+    private string lockText = "Follow Latest Messages";
     private bool isLocked = false;
 
     private async void ToggleScrollLock()
     {
         isLocked = !isLocked;
-        lockIcon = isLocked ? "🔒" : "🔓";
-        lockText = isLocked ? "Locked" : "Unlocked";
+        lockIcon = isLocked ? "🔓" : "🔒";
+        lockText = isLocked ? "Scroll Freely" : "Follow Latest Messages";
 
         await JSRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
     }
