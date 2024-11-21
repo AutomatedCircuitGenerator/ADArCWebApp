@@ -60,8 +60,12 @@ const registers: { [key: string]: Register } = {
     LINEAR_ACCEL_Y_L: { address: 0x5A},
     LINEAR_ACCEL_Z_H: { address: 0x5B},
     LINEAR_ACCEL_Z_L: { address: 0x5C},
+    
+    //Other
+    PWR_MGMT_1: { address: 0x6B,default:0x40},
+    PWR_MGMT_2: {address: 0X6C,default:0x00},
     WHO_AM_I: {address: 0x75,default:0x68}
-
+    
 } as const;
 
 type Vector = {x: number, y: number, z: number};
@@ -187,7 +191,7 @@ export class MPU6050 extends Controller implements I2CController {
                     this.lastRead = currentTime;
 
                     // Update the euler angles in memory
-                     this.setVector(registers.EULER_HEADING_H.address,
+                    this.setVector(registers.EULER_HEADING_H.address,
                         [this.orientation.x, this.orientation.y, this.orientation.z], 16);
                 }
             }
