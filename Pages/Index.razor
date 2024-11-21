@@ -30,7 +30,7 @@
                 @if (isUrlBoxVisible)
                 {
                 <div class="url-modal">
-                    <input type="text" class="url-textbox" placeholder="Generated URL will appear here" readonly />
+                    <input type="text" class="url-textbox" value="@generatedUrl" readonly />
                 </div>
                 }
 
@@ -121,6 +121,7 @@
 @code{
     bool isLeftExpanded = true;
     bool isRightExpanded = false;
+	private string generatedUrl = string.Empty;
 
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
@@ -829,12 +830,109 @@
         StateHasChanged();
     }
 
+
 	private bool isUrlBoxVisible = false;
 
-    private void ToggleUrlDisplay()
+    private async Task ToggleUrlDisplay()
     {
-        isUrlBoxVisible = !isUrlBoxVisible;
-        StateHasChanged();
-    }	
+    isUrlBoxVisible = !isUrlBoxVisible;
+    
+    if (isUrlBoxVisible)
+    {
+        try
+        {
+            // Get circuit data as JSON
+            var json = await ExportJSON();
+            
+            // Convert to Base64
+            var encodedData = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
+            
+            // Generate the URL using NavigationManager's base URI
+            var baseUrl = navMan.BaseUri;
+            generatedUrl = $"{baseUrl}?data={encodedData}";
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error generating URL: {ex.Message}");
+            generatedUrl = "Error generating URL";
+        }
+    }
+    
+    StateHasChanged();
+    }
 
+
+
+    [JSInvokable]
+    public static async Task LoadFromUrl(string json)
+    {
+        try
+        {
+            if (app == null || app.selLockedOut)
+            {
+                Console.WriteLine("App not ready or rules not loaded yet");
+                return;
+            }
+    
+            await Task.Run(() => app.setupBenchFromJSONString(json));
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error loading from URL: {ex.Message}");
+        }
+    }
+
+
+
+
+
+
+
+
+
+/**
+	private string generatedUrl = string.Empty;
+
+	private async Task GenerateUrl()
+	{
+ 	  // Step 1: Export the JSON
+ 	  var json = await ExportJSON();
+
+ 	  // Step 2: Encode the JSON
+ 	  var encodedJson = Convert.ToBase64String(System.Text.Encoding.UTF8.GetBytes(json));
+
+  	  // Step 3: Append it to the base URL
+  	  var baseUrl = "https://adarcsystem.com/load";
+  	  generatedUrl = $"{baseUrl}?data={encodedJson}";
+
+  	  // Optional: Display the URL to the user
+  	  isUrlBoxVisible = true;
+  	  StateHasChanged();
+	}
+
+	[JSInvokable]
+public static async Task LoadFromUrl(string json)
+{
+    try
+    {
+        // Deserialize the diagram from the JSON
+        var data = JsonSerializer.Deserialize<Data>(json);
+        if (data != null)
+        {
+            // Load the diagram into the app
+            await Task.Run(() => setupBenchFromJSONString(json));
+        }
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Error loading from URL: {ex.Message}");
+    }
+}
+
+	<script>
+    window.onload = () => {
+        window.loadFromUrl();
+    };
+	</script>	
+**/
 }
