@@ -652,6 +652,7 @@
         if (!isRunning && (e.Key is "Backspace" or "Delete") && selectedComponent != -2 && selectedComponent != -1 && selectedComponent != 1)
         {
             removecomp();
+            selectedComponent = -1;
         }
     }
 

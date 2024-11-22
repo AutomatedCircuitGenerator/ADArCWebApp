@@ -3,7 +3,7 @@
     flex-direction: column;
     height: 100%; 
     width: 100%;
-    padding: 10px;
+    padding: 0 10px 10px 10px;
     box-sizing: border-box;
     overflow: hidden; 
 }
@@ -35,11 +35,10 @@
 #editor-wrapper {
     flex: 3; 
     overflow-y: hidden;
-    height: 60%;
 }
 
 #console-container {
-    flex: 1; 
+    flex: 1.5; 
     border: 1px solid #ccc;
     background-color: #f4f4f4;
     padding: 10px;
@@ -62,6 +61,7 @@
     align-items: center;
     padding: 0 0.5rem;
     font-size: 1rem;
+    border-radius: 5px;
 }
 
 .error {

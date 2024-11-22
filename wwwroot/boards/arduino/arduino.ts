@@ -14,6 +14,7 @@ import {I2CController} from "@lib/i2c-bus";
 import {Analog, ByteTransmitListener, ClockEvent, CPU, Digital, PinListener, SPI, Timer, TWI, USART} from "../board";
 
 export const MHZ = 16e6;
+
 export class ArduinoCPU implements CPU {
     private readonly cpu: AVRCPU;
 
@@ -92,6 +93,10 @@ export class ArduinoUSART implements USART {
 
     set onByteTransmit(listener: ByteTransmitListener) {
         this.usart.onByteTransmit = listener;
+    }
+
+    writeByte(value: number, immediate: boolean = false): boolean {
+        return this.usart.writeByte(value, immediate);
     }
 }
 

@@ -20,6 +20,7 @@ import {KY003} from "@controllers/ky003";
 import {KY022} from "@controllers/ky022";
 import {LED} from "@controllers/led";
 import {MPU6050} from "@controllers/mpu6050";
+import {KY024} from "@controllers/ky024";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -45,3 +46,4 @@ import {MPU6050} from "@controllers/mpu6050";
 (<any>window).KY022 = KY022;
 (<any>window).LED = LED;
 (<any>window).MPU6050 = MPU6050;
+(<any>window).KY024 = KY024;

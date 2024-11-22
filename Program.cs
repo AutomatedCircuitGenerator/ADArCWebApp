@@ -8,11 +8,19 @@ using Microsoft.AspNetCore.Builder;
 var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
-//debug
-// builder.Services.AddLogging(logging =>
+//maybe prevent caching? idk why the thing in js doesnt work but oh well.
+// builder.Services.Configure<StaticFileOptions>(options =>
 // {
-//     logging.SetMinimumLevel(LogLevel.Debug);
+//     options.ContentTypeProvider = new FileExtensionContentTypeProvider();
+//     options.OnPrepareResponse = ctx =>
+//     {
+//         // Set headers to prevent caching
+//         ctx.Context.Response.Headers.Add("Cache-Control", "no-store, no-cache, must-revalidate, max-age=0");
+//         ctx.Context.Response.Headers.Add("Pragma", "no-cache");
+//         ctx.Context.Response.Headers.Add("Expires", "0");
+//     };
 // });
+
 
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings.Add(".grxml", "application/grxml");
