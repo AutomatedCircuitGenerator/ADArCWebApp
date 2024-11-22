@@ -135,7 +135,7 @@ namespace ADArCWebApp
 
             if (rule == null)
             {
-                throw new RuleNotFoundException();
+                throw new RuleNotFoundException(ruleName);
             }
 
             node? fromNode = null;
@@ -158,7 +158,8 @@ namespace ADArCWebApp
             var toNodes = toNode?.arcsTo.Select(arc => arc.From)
                 .Concat(toNode.arcsFrom.Select(arc => arc.To))
                 .ToList();
-            
+
+            List<arc> connections = [];
             foreach (var arc in rule.R.arcs)
             {
                 // only look at arcs that represent new connections
@@ -200,12 +201,66 @@ namespace ADArCWebApp
                         To = matchedToNode,
                         localLabels = arc.localLabels
                     };
-                    seed.addArc(newArc, matchedFromNode, matchedToNode);
+                    
+                    connections.Add(newArc);
                 }
                 else
                 {
                     throw new NoConnectionsException(ruleFromNode, ruleToNode);
                 }
+            }
+
+            foreach (var connection in connections)
+            {
+                seed.addArc(connection, connection.From, connection.To);
+            }
+        }
+
+        public static void RemoveConnectedComponent(node n)
+        {
+            var visitedNodes = new HashSet<node>(); // Keeps track of visited nodes
+            var queue = new Queue<node>();         // Queue for BFS
+            var arcsToRemove = new HashSet<arc>(); // Collect arcs to delete
+
+            queue.Enqueue(n);
+            visitedNodes.Add(n);
+
+            while (queue.Count > 0)
+            {
+                var currentNode = queue.Dequeue();
+
+                // Collect arcsTo and arcsFrom
+                var outgoingArcs = currentNode.arcsTo;
+                var incomingArcs = currentNode.arcsFrom;
+
+                // Add all arcs to the set of arcs to remove
+                arcsToRemove.UnionWith(outgoingArcs);
+                arcsToRemove.UnionWith(incomingArcs);
+
+                // Get connected nodes
+                var connectedNodes = outgoingArcs.Select(arc => arc.To)
+                    .Concat(incomingArcs.Select(arc => arc.From));
+
+                // Visit all unvisited connected nodes
+                foreach (var connectedNode in connectedNodes)
+                {
+                    if (visitedNodes.Add(connectedNode))
+                    {
+                        queue.Enqueue(connectedNode);
+                    }
+                }
+            }
+
+            // Remove all arcs in the connected component
+            foreach (var arc in arcsToRemove)
+            {
+                seed.removeArc(arc);
+            }
+
+            // Remove all nodes in the connected component
+            foreach (var node in visitedNodes)
+            {
+                seed.removeNode(node);
             }
         }
 
