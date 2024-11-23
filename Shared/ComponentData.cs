@@ -106,7 +106,7 @@ namespace ADArCWebApp.Shared
 
 		public ComponentDataBuilder Property<T>(string name, T data)
 		{
-			properties[name] = new ComponentParameter<T>(data);
+			properties[name] = new ComponentParameter<T?>(data);
 			return this;
 		}
 

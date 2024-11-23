@@ -152,7 +152,7 @@
         value[6] = await AvrCPU.getPinState(g) ? 1 : 0;
         value[7] = await AvrCPU.getPinState(dp) ? 1 : 0;
 
-        comp.CompParams["values"].setValue(value);
+        comp.CompParams["values"].SetValue(value);
     }
 
 }

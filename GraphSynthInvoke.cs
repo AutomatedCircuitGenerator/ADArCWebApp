@@ -14,7 +14,7 @@ namespace ADArCWebApp
         //    {"add", null },
         //    {"connect1", null}
         //};
-        static Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
+        static Dictionary<string, ruleSet> rulesets = RuleSetMap.Rulesets;
 
         //inputs from user selecting components
         public static List<string> inputs = new();

@@ -54,7 +54,7 @@
                 int freq = 490;
                 int cycle = 1000000 / freq;
                 int value = 255 * (int)comp.timer / cycle;
-                comp.CompParams["ledRed"].setValue(value);
+                comp.CompParams["ledRed"].SetValue(value);
             }
             else if (conn.ToId == 5 || conn.ToId == 6)
             {
@@ -62,7 +62,7 @@
                 int cycle = 1000000 / freq;
                 int value = 255 * (int)comp.timer / cycle;
 
-                comp.CompParams["ledRed"].setValue(value);
+                comp.CompParams["ledRed"].SetValue(value);
             }
         }
 

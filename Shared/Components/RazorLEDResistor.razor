@@ -49,7 +49,7 @@
 
 		if (0 == comp.GetConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			comp.CompParams["value"].setValue(AvrCPU.getPinState(conn!.ToId));
+			comp.CompParams["value"].SetValue(AvrCPU.getPinState(conn!.ToId));
 		}
 		else
 		{

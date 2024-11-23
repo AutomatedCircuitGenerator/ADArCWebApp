@@ -1,7 +1,7 @@
 ﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="canvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
     @foreach (var c in comps)
     {
-        <VaryingComponent forceBorder="c.Key == Pages.Index.app.selectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        <VaryingComponent forceBorder="c.Key == Pages.Index.app.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
 
 
@@ -221,22 +221,22 @@
     public void ComponentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
     {
         targetFound = true;
-        if (Pages.Index.app!.selectedComponent < 0) //no previous selection
+        if (Pages.Index.app!.SelectedComponent < 0) //no previous selection
         {
-            Pages.Index.app!.selectedComponent = c.Key;
+            Pages.Index.app!.SelectedComponent = c.Key;
         }
-        else if (Pages.Index.app!.selectedComponent != c.Key) //selection is not the previously selected component. Could be || with prev, readability.
+        else if (Pages.Index.app!.SelectedComponent != c.Key) //selection is not the previously selected component. Could be || with prev, readability.
         {
-            Pages.Index.app!.selectedComponent = c.Key;
+            Pages.Index.app!.SelectedComponent = c.Key;
         }
         else if (dragEndFlag) //avoid deselects at the end of drags
         {
             dragEndFlag = false;
-            Pages.Index.app!.selectedComponent = c.Key;
+            Pages.Index.app!.SelectedComponent = c.Key;
         }
         else //catch weird stuff with deselect
         {
-            Pages.Index.app!.selectedComponent = -1;
+            Pages.Index.app!.SelectedComponent = -1;
         }
     }
 
@@ -245,7 +245,7 @@
     {
         if (!targetFound)
         {
-            Pages.Index.app!.selectedComponent = -2;
+            Pages.Index.app!.SelectedComponent = -2;
         }
 
         targetFound = false;

@@ -1,7 +1,4 @@
-﻿using ADArCWebApp.ComponentNamespace;
-using GraphSynth.Representation;
-using System.Numerics;
-using System.Text.Json;
+﻿using GraphSynth.Representation;
 using System.Text.Json.Serialization;
 using ADArCWebApp.Shared.Components;
 
@@ -42,7 +39,7 @@ namespace ADArCWebApp.Shared
             Data = ComponentDeclarations.Components[globalId];
             foreach (var kv in Data.templateParams)
             {
-                CompParams.Add(kv.Key, kv.Value.copy());
+                CompParams.Add(kv.Key, kv.Value.Copy());
             }
 
             X = x;
@@ -56,13 +53,13 @@ namespace ADArCWebApp.Shared
         /// Transfers the property array to the format needed by DynamicComponent in VaryingComponent.razor.
         /// </summary>
         /// <returns>The property dictionary as <string, object>.</returns>
-        public Dictionary<string, object> GetPropsAsParams()
+        public Dictionary<string, object?> GetPropsAsParams()
         {
-            Dictionary<string, object> ret = [];
+            Dictionary<string, object?> ret = [];
 
             foreach (var kv in CompParams)
             {
-                ret.Add(kv.Key, kv.Value.getValue());
+                ret.Add(kv.Key, kv.Value.GetValue());
             }
 
             if (Data.compType.IsSubclassOf(typeof(RazorComponent)))

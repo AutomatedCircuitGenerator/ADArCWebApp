@@ -25,7 +25,7 @@ public class BoardService(IJSRuntime js)
         {
             if (value != _board)
             {
-                AppInterop.setBoard(value);
+                AppInterop.SetBoard(value);
             }
 
             _board = value;

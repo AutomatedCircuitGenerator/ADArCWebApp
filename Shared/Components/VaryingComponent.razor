@@ -1,8 +1,7 @@
 ﻿@using System.Reflection
-@using System.Text.RegularExpressions
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(borderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="rightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
     @if (!forceBorder)
     {
         rightClickable = false;
@@ -12,7 +11,7 @@
         @if (rightClickable)
         {
             <div class="right-click-container">
-                <button id="environmental-settings-button" @onclick="HandleEnvrSettingsMenu">
+                <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
                     <span>⚙</span>
                     <span style="padding-left: 5px">￨ Environmental Settings</span>
                 </button>
@@ -23,7 +22,7 @@
                 </button>
                 @if (!Pages.Index.app!.isRunning && individualData.GlobalId != 1)
                 {
-                    <button id="deletebutton" @onclick="remove">
+                    <button id="deletebutton" @onclick="Remove">
                         <span>x</span>
                         <span style="padding-left: 6px">￨ Delete Component</span>
                     </button>
@@ -40,7 +39,7 @@
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
     <div class="settingsContainer">
-        <button class="close-button" @onclick="CloseEnvrSettings">❌</button>
+        <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
         <h2>Environmental Settings</h2>
 
         <!-- Value Setting -->
@@ -49,9 +48,9 @@
             foreach (var value in prop.GetCustomAttributes<ValueSetting>())
             {
                 <div class="valueSetting" style="padding: 3px 0;">
-                    <h2>@(formatTitle(prop))</h2>
+                    <h2>@(FormatTitle(prop))</h2>
                     <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { onInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
                         <span class="default-value-label">@value.Label</span>
                     </div>
                     <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
@@ -65,9 +64,9 @@
             foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
             {
                 <div class="valueSetting" style="padding: 3px 0;">
-                    <h2>@(formatTitle(prop))</h2>
+                    <h2>@(FormatTitle(prop))</h2>
                     <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { onInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
                         <span class="default-value-label">@value.Label</span>
                     </div>
                     <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
@@ -81,8 +80,8 @@
             foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
             {
                 <div class="dropdownSetting" style="padding: 10px 0;">
-                    <h2>@(formatTitle(prop))</h2>
-                    <select @onchange="(e) => { onInput(e, prop, false); }">
+                    <h2>@(FormatTitle(prop))</h2>
+                    <select @onchange="(e) => { OnInput(e, prop, false); }">
                         @foreach (var s in value.dropdownList)
                         {
                             <option value="@s">@s</option>
@@ -110,7 +109,7 @@
                                     <label style="display: block">@valueSetting.Label</label>
                                     <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
                                            min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
-                                           @onchange="(e) => { onInput(e, prop, true); }">
+                                           @onchange="(e) => { OnInput(e, prop, true); }">
                                 </div>
                             }
                         }
@@ -128,7 +127,7 @@
     /// </summary>
     /// <param name="prop">The property to format.</param>
     /// <returns>A properly formatted title fit for display.</returns>
-    private string formatTitle(PropertyInfo prop)
+    private string FormatTitle(PropertyInfo prop)
     {
         var addSpace = Regex.Replace(prop.Name, "[A-Z]", (m) => " " + m.Captures[0].Value);
         var firstCapital = Regex.Replace(addSpace, "^[a-z]", (m) => m.Captures[0].Value.ToUpper());
@@ -138,7 +137,7 @@
 
     [Parameter] public int objId { get; set; }
 
-    [Parameter] public bool posAbolute { get; set; } = true;
+    [Parameter] public bool posAbsolute { get; set; } = true;
 
     [Parameter] public EventCallback<MouseEventArgs> DragStart { get; set; }
 
@@ -148,7 +147,7 @@
 
     [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
 
-    [Parameter] public ComponentInstance individualData { get; set; }
+    [Parameter] public ComponentInstance? individualData { get; set; }
 
     [Parameter] public double zoomFactor { get; set; } = 1;
 
@@ -162,27 +161,15 @@
     /// Handles the dashed and solid borders.
     /// </summary>
     /// <returns>A css class for which border to display.</returns>
-    private string borderClasses()
+    private string BorderClasses()
     {
-        if (!disableBorder)
+        if (disableBorder) return "";
+        if (forceBorder)
         {
-            if (forceBorder)
-            {
-                return "a-border";
-            }
-            else if (enableBorder)
-            {
-                return "b-border";
-            }
-            else
-            {
-                return "";
-            }
+            return "a-border";
         }
-        else
-        {
-            return "";
-        }
+
+        return enableBorder ? "b-border" : "";
     }
 
     /// <summary>
@@ -191,35 +178,35 @@
     /// <param name="e">The change provided by the language.</param>
     /// <param name="prop">the property to affect.</param>
     /// <param name="convert">true if the property is a number, else false.</param>
-    public void onInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
+    private void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
         {
-            individualData.CompParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
+            individualData?.CompParams[prop.Name.ToLower()].SetValue(Convert.ToDouble(e.Value));
         }
         else
         {
-            individualData.CompParams[prop.Name.ToLower()].setValue((string)e.Value);
+            individualData?.CompParams[prop.Name.ToLower()].SetValue((string)e.Value);
         }
 
-        if (individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
+        if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
         {
-            individualData.Data.compType.GetMethod("translate").Invoke(individualData, [individualData]);
+            individualData.Data.compType.GetMethod("translate")?.Invoke(individualData, [individualData]);
         }
     }
 
     /// <summary>
     /// Removes a component. Provided for convenience when using the delete button in the menus.
     /// </summary>
-    public void remove()
+    private static void Remove()
     {
-        Pages.Index.app!.removecomp();
+        Pages.Index.app!.RemoveComp();
     }
 
     private bool showMenu = false;
 
     [JSInvokable]
-    public void CloseEnvrSettings()
+    public void CloseEnvironmentalSettings()
     {
         showMenu = false;
         StateHasChanged();
@@ -229,7 +216,7 @@
     private double menuTop = 0;
     private double menuLeft = 0;
 
-    public void HandleEnvrSettingsMenu(MouseEventArgs args)
+    private void HandleEnvironmentalSettingsMenu(MouseEventArgs args)
     {
         // Set the envr settings menu to be visible
         showMenu = true;
@@ -243,7 +230,7 @@
     private bool rightClickable = false;
     private bool rightClick2 = false;
 
-    private void rightClick()
+    private void RightClick()
     {
         rightClickable = true;
         if (rightClickable && forceBorder)

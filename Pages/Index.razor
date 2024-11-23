@@ -34,7 +34,7 @@
                     <span>⬆️ Export</span>
                 </button>
 
-                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="loadFromFile"/>
+                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="LoadFromFile"/>
                 <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")">
                     <span>⬇️️ Import</span>
                 </label>
@@ -47,9 +47,9 @@
             </button>
         </div>
     </div>
-    <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="AddToCanvasIfNecessary">
+    <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="AddToCanvasIfNecessary">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
-            <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
+            <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
         <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
             <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
@@ -65,7 +65,7 @@
             <ComponentPane host="@this"></ComponentPane>
         </div>
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverID].rightOffset)px; height:@(ComponentDeclarations.Components[moverID].bottomOffset)px;">
-            <VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
+            <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
         <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
@@ -90,7 +90,7 @@
         </div>
     }
 
-    @if (loadingProgress == -1)
+    @if (LoadingProgress == -1)
     {
         <div class="workbench-title">
             <span @onclick="ShowRightClickTooltipFn">💡 Workbench</span>
@@ -108,9 +108,9 @@
 
 
 </div>
-<div class="progress-container" style="display: @(loadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(loadingProgress, 0))% component rules loaded</span>
-    <div class="progress-bar" style="width: @(loadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+<div class="progress-container" style="display: @(LoadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(LoadingProgress, 0))% component rules loaded</span>
+    <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
 </div>
 </body>
 
@@ -151,12 +151,12 @@
 
     private void HandleBoardSelect(Board board)
     {
-        comps[0] = BoardService.GetComponentInstance();
+        Comps[0] = BoardService.GetComponentInstance();
 
-        if (loadingProgress == -1)
+        if (LoadingProgress == -1)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
-            compPane!.releaseLockout();
+            compPane!.ReleaseLockout();
             selLockedOut = false;
         }
         else
@@ -175,13 +175,13 @@
         if (!isRunning)
         {
             runStopText = "Compiling...";
-            var response = await AppInterop.compileWrapper();
+            var response = await AppInterop.CompileWrapper();
 
 
             if (response.stderr != "")
             {
                 codePane?.UpdateConsoleOutput(response.stderr, false);
-                runStopText = "▶ Run";
+                runStopText = "▶️ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
                 if (caps.Count > 0)
@@ -197,31 +197,31 @@
                     int column = int.Parse(lineSection[(mid + 1)..^0]);
                     //cut off error: to get message
                     string message = Regex.Match(response.stderr, "error:.*").Captures.First().Value[7..^0];
-                    AppInterop.makeMonacoErrorWrapper(message, line, column);
+                    AppInterop.MakeMonacoErrorWrapper(message, line, column);
                 }
             }
             else //no errors
             {
                 codePane?.UpdateConsoleOutput(response.stdout, false);
-                AppInterop.clearMonacoErrorsWrapper();
-                AppInterop.startSimWrapper();
+                AppInterop.ClearMonacoErrorsWrapper();
+                AppInterop.StartSimWrapper();
                 runStopText = "🟥 Stop";
                 isRunning = true;
             }
         }
         else //stop running
         {
-            AppInterop.stopWrapper();
+            AppInterop.StopWrapper();
             codePane!.CommitBuffer();
             codePane!.UpdateConsoleOutput("Stopped.\n", false);
-            runStopText = "▶ Run";
+            runStopText = "▶️ Run";
             isRunning = false;
         }
     }
 
     void OpenExternalHelp()
     {
-        string url = "https://adarc-help.mech.website/";
+        const string url = "https://adarc-help.mech.website/";
         JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
     }
 
@@ -246,25 +246,25 @@
     /// TODO: remove this function and associated objects (element in this file, mini-script that declares triggerClick in index.html)
     /// </summary>
     /// <returns></returns>
-    public async Task triggerRender()
+    public async Task TriggerRender()
     {
         await JsRuntime.InvokeAsync<object>("triggerClick", refresh);
     }
 
-    private int localIds = 0;
+    private int localIds;
 
 
     /// <summary>
     /// main component storage. provides an arduino by default. The arduino is overwritten when rule loading finishes,
     /// but does not change visually (hopefully)
     /// </summary>
-    public static Dictionary<int, ComponentInstance> comps = new()
+    public static readonly Dictionary<int, ComponentInstance> Comps = new()
     {
         // { 0, new ComponentInstance(1, null, 829, 219) }
     };
 
 
-    public int selectedComponent = -1;
+    public int SelectedComponent = -1;
 
     public static Index? app;
     public static MainCanvas? buildCanvas;
@@ -283,16 +283,16 @@
     /// </summary>
     /// <param name="firstRender">true if this is specifically the first render, false otherwise</param>
     /// <returns></returns>
-    protected async override Task OnAfterRenderAsync(bool firstRender)
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
         if (firstRender)
         {
             Console.WriteLine("Blazor Load Completed!");
 
-            AppInterop.runtime = JsRuntime;
-            AppInterop.jsModule = await AppInterop.getModuleWrapper();
+            AppInterop.Runtime = JsRuntime;
+            AppInterop.JsModule = await AppInterop.GetModuleWrapper();
 
-            AppInterop.updateScreenRatios(await AppInterop.getWindowWidth(), await AppInterop.getWindowHeight());
+            AppInterop.UpdateScreenRatios(await AppInterop.GetWindowWidth(), await AppInterop.GetWindowHeight());
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
         }
@@ -317,20 +317,18 @@
     private double moverOffsetTop = 0;
     private double moverOffsetLeft = 0;
 
-    public void setTargetID(int id)
+    public void SetTargetId(int id)
     {
         targetCardComponentId = id;
     }
 
     //functions to handle component dragged from palette to workbench
-    private void checkForCardDrag(MouseEventArgs e)
+    private void CheckForCardDrag(MouseEventArgs e)
     {
-        if (e.Button == 0 && targetCardComponentId != -1)
-        {
-            isVisible = "visible";
-            moverOffsetLeft = e.ClientX;
-            moverOffsetTop = e.ClientY;
-        }
+        if (e.Button != 0 || targetCardComponentId == -1) return;
+        isVisible = "visible";
+        moverOffsetLeft = e.ClientX;
+        moverOffsetTop = e.ClientY;
     }
 
     private void DragCardIfPossible(MouseEventArgs e)
@@ -340,70 +338,68 @@
         moverOffsetTop = e.ClientY;
     }
 
-    public void AddToCanvasIfNecessary(MouseEventArgs e)
+    private void AddToCanvasIfNecessary(MouseEventArgs e)
     {
-        if (targetCardComponentId != -1)
+        if (targetCardComponentId == -1) return;
+        isVisible = "hidden";
+        if (allowDrop) //ie, cursor is over the workbench
         {
-            isVisible = "hidden";
-            if (allowDrop) //ie, cursor is over the workbench
+            ++localIds;
+            var componentData = ComponentDeclarations.Components[targetCardComponentId];
+            var n = new node(); //label with localId (easy tracking)
+            n.localLabels.Add("user_" + componentData.nodeName);
+
+            GraphSynthInvoke.GetNodes().Add(n);
+            if (componentData.nodeName != null) GraphSynthInvoke.inputs.Add(componentData.nodeName);
+
+            try
             {
-                ++localIds;
-                var componentData = ComponentDeclarations.Components[targetCardComponentId];
-                var n = new node(); //label with localId (easy tracking)
-                n.localLabels.Add("user_" + componentData.nodeName);
-
-                GraphSynthInvoke.GetNodes().Add(n);
-                if (componentData.nodeName != null) GraphSynthInvoke.inputs.Add(componentData.nodeName);
-
-                try
-                {
-                    GraphSynthInvoke.Add();
-                    GraphSynthInvoke.Connect(componentData.nodeName);
-                }
-                catch (NoConnectionsException exception)
-                {
-                    moverOffsetLeft = 0;
-                    moverOffsetTop = 0;
-                    targetCardComponentId = -1;
-                    GraphSynthInvoke.RemoveConnectedComponent(n);
-                    Logger.LogError(exception.Message);
-                    ToastService.AddToast($"No more pins are available. Try removing a component!", Variant.Error);
-                    return;
-                }
-
-                //label all new nodes and connections with the localid of the component that added them.
-                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
-                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-                //create frontend instance
-                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
-                comp.localId = localIds;
-                comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
-                BuildCode.outputPins.Clear();
-                buildCanvas!.connLines.Clear();
-                //reset the way that component pins are bound to the arduino.
-                //TODO: check for performance improvements here.
-                foreach (var c in comps.Values)
-                {
-                    updatePinBindings(c); //keep an eye on this. could be not good for performance.
-                }
-
-                //register the dht specifically to forced the arduino to pause while awaiting response from sensor
-                //TODO: improve and generalize.
-                if (comps[localIds].GlobalId == 20)
-                {
-                    //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                    AppInterop.registerResponseRequired(comps[localIds].ConnMap[1][0].ToId);
-                }
-
-                //create listeners for arduino pins to components.
-                //Personally, not a huge fan of this system. good place for improvement
-                setupListeners();
+                GraphSynthInvoke.Add();
+                GraphSynthInvoke.Connect(componentData.nodeName);
+            }
+            catch (NoConnectionsException exception)
+            {
+                moverOffsetLeft = 0;
+                moverOffsetTop = 0;
+                targetCardComponentId = -1;
+                GraphSynthInvoke.RemoveConnectedComponent(n);
+                Logger.LogError(exception.Message);
+                ToastService.AddToast($"No more pins are available. Try removing a component!", Variant.Error);
+                return;
             }
 
-            moverOffsetLeft = 0;
-            moverOffsetTop = 0;
-            targetCardComponentId = -1;
+            //label all new nodes and connections with the localid of the component that added them.
+            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
+            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+            //create frontend instance
+            var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
+            comp.localId = localIds;
+            Comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
+            BuildCode.outputPins.Clear();
+            buildCanvas!.connLines.Clear();
+            //reset the way that component pins are bound to the arduino.
+            //TODO: check for performance improvements here.
+            foreach (var c in Comps.Values)
+            {
+                UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
+            }
+
+            //register the dht specifically to forced the arduino to pause while awaiting response from sensor
+            //TODO: improve and generalize.
+            if (Comps[localIds].GlobalId == 20)
+            {
+                //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+                AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+            }
+
+            //create listeners for arduino pins to components.
+            //Personally, not a huge fan of this system. good place for improvement
+            setupListeners();
         }
+
+        moverOffsetLeft = 0;
+        moverOffsetTop = 0;
+        targetCardComponentId = -1;
     }
 
     /// <summary>
@@ -411,48 +407,43 @@
     /// </summary>
     private void setupListeners()
     {
-        if (comps.Values.Any(c => c.IsArduino())) //set has an arduino uno
+        if (!Comps.Values.Any(c => c.IsArduino())) return; //set has an arduino uno
+
+        foreach (var c in Comps.Values) //iterate all components (don't know what listeners exist already)
         {
-            foreach (var c in comps.Values) //iterate all components (don't know what listeners exist already)
+            if (c.IsArduino()) continue; //exclude the arduino
+            foreach (var listen in c.Data.pinsToListen) //add a listener for each important pin
             {
-                if (!c.IsArduino()) //exclude the arduino
+                var pin = -1;
+                if (0 == c.GetConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
                 {
-                    foreach (string listen in c.Data.pinsToListen) //add a listener for each important pin
-                    {
-                        int pin = -1;
-                        if (0 == c.GetConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
-                        {
-                            pin = conn!.ToId;
-                        }
+                    pin = conn!.ToId;
+                }
 
-                        bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
-                        //hopefully the only time the list extends
-                        //is on arduino, which is excluded here
-                        if (!hasList || !list!.Any(el => el.actor == c)) //no list for this pin yet, or the list does not contain any connections for this component
-                        {
-                            int pin2 = -1;
-                            if (0 == c.GetConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-                            {
-                                pin2 = conn2!.ToId;
-                            }
+                bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
+                //hopefully the only time the list extends
+                //is on arduino, which is excluded here
+                if (hasList && list!.Any(el => el.actor == c)) continue; //no list for this pin yet, or the list does not contain any connections for this component
+                var pin2 = -1;
+                if (0 == c.GetConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+                {
+                    pin2 = conn2!.ToId;
+                }
 
-                            //TODO: fix so that all componenents inherit from one class
-                            var info = c.Data.compType.GetMethod("translate");
-                            if (info != null)
-                            {
-                                AvrCPU.addListener(pin2, c, info);
-                            }
-                            else
-                            {
-                                Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
-                            }
-                        }
-                    }
+                //TODO: fix so that all componenents inherit from one class
+                var info = c.Data.compType.GetMethod("translate");
+                if (info != null)
+                {
+                    AvrCPU.addListener(pin2, c, info);
+                }
+                else
+                {
+                    Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
                 }
             }
-
-            AppInterop.updateCodeWrapper();
         }
+
+        AppInterop.UpdateCodeWrapper();
     }
 
     #endregion
@@ -479,12 +470,13 @@
         if (_scheduleBenchSetup)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
-            compPane!.releaseLockout();
+            compPane!.ReleaseLockout();
             selLockedOut = false;
         }
+
         //all else finish first
         await Task.Delay(1000);
-        loadingProgress = -1;
+        LoadingProgress = -1;
 
         // await RuleSetMap.getInstance().loadRuleSet("BIG1");
         // foreach (string str in ruleNames)
@@ -502,12 +494,12 @@
     /// TODO: improve this function or find a way to remove it entirely.
     /// </summary>
     /// <param name="comp">A component instance to update the bindings on.</param>
-    public void updatePinBindings(ComponentInstance comp)
+    private void UpdatePinBindings(ComponentInstance comp)
     {
         comp.ConnMap.Clear();
         //buildCanvas!.connLines.Clear();
 
-        var compPins = getPins(comp.GsNode, comp.Data.nodeName);
+        var compPins = GetPins(comp.GsNode, comp.Data.nodeName);
         if (compPins.Count == 0)
         {
             return;
@@ -518,8 +510,8 @@
 
         foreach (arc a in connArcs)
         {
-            ComponentInstance ha = comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
-            ComponentInstance hb = comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+            ComponentInstance ha = Comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
+            ComponentInstance hb = Comps[Convert.ToInt32(a.From.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
 
 
             if (ha == hb)
@@ -531,11 +523,10 @@
             {
                 continue;
             }
-            else if (ha != comp)
+
+            if (ha != comp)
             {
-                var temp = ha;
-                ha = hb;
-                hb = temp;
+                (ha, hb) = (hb, ha);
             }
 
             var aPinName = "**NF**";
@@ -589,46 +580,46 @@
     /// <param name="n">The node to get the pins of. Specifically, the root node, not the main node.</param>
     /// <param name="name">The name of the root node, excluding "user_".</param>
     /// <returns></returns>
-    public List<node> getPins(node n, string name)
+    private static List<node> GetPins(node n, string name)
     {
         //n is root, connected to main node but not main node.
-        string fullName = "user_" + name;
+        var fullName = "user_" + name;
         if (n.arcs.Count == 0)
         {
-            return new();
+            return [];
         }
 
         var mainNode = ((arc)n.arcs[0]).otherNode(n);
         //traverse arcs to get pin nodes, except the root node
         var potential = mainNode.arcs.Select(a => ((arc)a).otherNode(mainNode)).ToList();
-        return potential.Where(n => !n.localLabels.Contains(fullName)).ToList();
+        return potential.Where(node => !node.localLabels.Contains(fullName)).ToList();
     }
 
     /// <summary>
     /// Deletes a component.
     /// </summary>
-    public void removecomp()
+    public void RemoveComp()
     {
-        node Comp2remove = Index.comps[selectedComponent].GsNode;
+        node Comp2remove = Index.Comps[SelectedComponent].GsNode;
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
         //TODO: improve and generalize.
-        if (comps[selectedComponent].GlobalId == 20)
+        if (Comps[SelectedComponent].GlobalId == 20)
         {
-            AppInterop.unregisterResponseRequired(comps[selectedComponent].ConnMap[1][0].ToId);
+            AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
         }
 
         GraphSynthInvoke.removeComp(Comp2remove);
-        comps.Remove(selectedComponent);
+        Comps.Remove(SelectedComponent);
         List<node> b = GraphSynthInvoke.GetNodes();
         List<arc> c = GraphSynthInvoke.GetArcs();
 
 
         BuildCode.outputPins.Clear();
         buildCanvas!.connLines.Clear();
-        foreach (var comp in comps.Values)
+        foreach (var comp in Comps.Values)
         {
-            updatePinBindings(comp); //keep an eye on this. could be not good for performance.
+            UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
 
         /*int numofcon = 0;
@@ -650,15 +641,13 @@
     private void HandleKeyPress(KeyboardEventArgs e)
     {
         // 1 is the arduino, not sure what -2 or -1 is
-        if (!isRunning && (e.Key is "Backspace" or "Delete") && selectedComponent != -2 && selectedComponent != -1 && selectedComponent != 1)
-        {
-            removecomp();
-            selectedComponent = -1;
-        }
+        if (isRunning || (e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        RemoveComp();
+        SelectedComponent = -1;
     }
 
     //progress bar
-    public double loadingProgress = 0;
+    public double LoadingProgress;
 
     //unused
     private void HandleZoom(string action)
@@ -719,11 +708,11 @@
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-    public async Task loadFromFile(InputFileChangeEventArgs e)
+    public async Task LoadFromFile(InputFileChangeEventArgs e)
     {
         var file = e.File;
         var buffer = new byte[file.Size];
-        await e.File.OpenReadStream(512000).ReadAsync(buffer);
+        await e.File.OpenReadStream().ReadAsync(buffer);
         var str = System.Text.Encoding.UTF8.GetString(buffer);
         SetupBenchFromJsonString(str);
     }
@@ -731,17 +720,17 @@
     /// <summary>
     /// Handles most of the setup process of the bench after import.
     /// </summary>
-    /// <param name="JSON">The full JSON to deserialize.</param>
-    public void SetupBenchFromJsonString(string JSON)
+    /// <param name="json">The full JSON to deserialize.</param>
+    public void SetupBenchFromJsonString(string json)
     {
-        Data? data = DeserializeJson(JSON);
+        Data? data = DeserializeJson(json);
         //clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
         //notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
-        foreach (var comp in comps)
+        foreach (var comp in Comps)
         {
-            selectedComponent = comp.Key;
-            removecomp();
-            selectedComponent = -1;
+            SelectedComponent = comp.Key;
+            RemoveComp();
+            SelectedComponent = -1;
         }
 
         buildCanvas!.connLines.Clear();
@@ -755,7 +744,7 @@
 
         foreach (var kv in data.Comps)
         {
-            comps.Add(kv.Key, kv.Value);
+            Comps.Add(kv.Key, kv.Value);
             var n = new node(); //label with localId (easy tracking)
             n.localLabels.Add("user_" + kv.Value.Data.nodeName);
             kv.Value.GsNode = n;
@@ -767,14 +756,14 @@
             GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
         }
 
-        foreach (var c in comps.Values)
+        foreach (var c in Comps.Values)
         {
-            updatePinBindings(c); //keep an eye on this. could be not good for performance.
+            UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
         }
 
         setupListeners();
 
-        AppInterop.setCodeWrapper(data.Code);
+        AppInterop.SetCodeWrapper(data.Code);
     }
 
     /// <summary>
@@ -790,7 +779,7 @@
 
         using var streamRef = new DotNetStreamReference(stream: stream, leaveOpen: true);
 
-        AppInterop.downloadFile("adarc-circuit.adarc", streamRef);
+        AppInterop.DownloadFile("adarc-circuit.adarc", streamRef);
     }
 
 
@@ -811,9 +800,9 @@
         Data parentObject = new Data
         {
             // ConnLines = Index.buildCanvas.connLines,
-            Comps = comps,
+            Comps = Comps,
             LocalId = localIds,
-            Code = await AppInterop.getCodeWrapper()
+            Code = await AppInterop.GetCodeWrapper()
         };
 
         var options = new JsonSerializerOptions { IncludeFields = true };
@@ -853,7 +842,7 @@
     {
         // var module = await JS.InvokeAsync<IJSObjectReference>("window.backendManager.getBackendManager");
         // ant-menu-submenu-hidden
-        await AppInterop.jsModule!.InvokeVoidAsync("runTutorial");
+        await AppInterop.JsModule!.InvokeVoidAsync("runTutorial");
         //await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
         StateHasChanged();
     }

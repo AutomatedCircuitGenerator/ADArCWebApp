@@ -1,7 +1,6 @@
-﻿using ADArCWebApp.Shared;
-using ADArCWebApp.Shared.Components;
+﻿using ADArCWebApp.Shared.Components;
 
-namespace ADArCWebApp.ComponentNamespace
+namespace ADArCWebApp.Shared
 {
 
 	/// <summary>
@@ -46,6 +45,5 @@ namespace ADArCWebApp.ComponentNamespace
 			{ 30, new ComponentDataBuilder("Active buzzer", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorKY012),paneHoverText:"KY-012", codeForGen: new() { {"include", ""}, {"global", "const int buzzerPin = ~\"digital_out\";  // Signal pin for the buzzer"}, {"setup", "pinMode(buzzerPin, OUTPUT);  // Set buzzer pin as output"}, {"loopMain", "digitalWrite(buzzerPin, HIGH);  // Turn buzzer on\n  delay(4000);                    // Wait 4 seconds\n  digitalWrite(buzzerPin, LOW);    // Turn buzzer off\n  delay(2000);                    // Wait 2 seconds\n"}, {"functions", ""}, {"delayLoop", ""}, {"delayTime", ""} }, pins: ["digital_out", "gnd" ], gsNodeName: "ky012").Finish() },
 			{ 31, new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorKY001),paneHoverText:"DS18B20", codeForGen: new() { {"include", ""}, {"global", ""}, {"setup", ""}, {"loopMain", ""}, {"functions", ""}, {"delayLoop", ""}, {"delayTime", ""} }, pins: ["gnd","5V", "DQ" ], gsNodeName: "ds18b20").Finish() }
 		};
-
 	}
 }

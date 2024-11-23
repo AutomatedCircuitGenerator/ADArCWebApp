@@ -12018,7 +12018,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             }
             startCodeLoop() {
                 this.runner.board.usarts[0].onByteTransmit = ((value) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "SendSerial", String.fromCharCode(value));
                 }));
                 this.runCode();
             }
@@ -13769,7 +13769,18 @@ define("controllers/ky024", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY024 = KY024;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1) {
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY001 = void 0;
+    class KY001 extends controller_19.Controller {
+        setTemperature(temperature) {
+        }
+        setup() { }
+    }
+    exports.KY001 = KY001;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13795,17 +13806,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.LED = led_1.LED;
     window.MPU6050 = mpu6050_1.MPU6050;
     window.KY024 = ky024_1.KY024;
-});
-define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.KY001 = void 0;
-    class KY001 extends controller_19.Controller {
-        setTemperature(temperature) {
-        }
-        setup() { }
-    }
-    exports.KY001 = KY001;
+    window.KY001 = ky001_1.KY001;
 });
 define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_20) {
     "use strict";

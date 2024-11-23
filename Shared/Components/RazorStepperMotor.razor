@@ -77,11 +77,11 @@
         {
             if (dir)
             {
-                comp.CompParams["angle"].setValue(Convert.ToDouble(comp.CompParams["angle"]) + 1.8);
+                comp.CompParams["angle"].SetValue(Convert.ToDouble(comp.CompParams["angle"]) + 1.8);
             }
             else
             {
-                comp.CompParams["angle"].setValue(Convert.ToDouble(comp.CompParams["angle"]) - 1.8);
+                comp.CompParams["angle"].SetValue(Convert.ToDouble(comp.CompParams["angle"]) - 1.8);
             }
             comp.midSignal = 2;
         }
