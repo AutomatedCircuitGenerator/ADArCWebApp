@@ -2,6 +2,7 @@ import {Controller} from "@controllers/controller";
 
 export class KY003 extends Controller {
     private inSimulation: boolean;
+    //change this so it starts off
 
     setup() {
         this.inSimulation = true

@@ -3,112 +3,113 @@
 
     [Parameter] public double width { get; set; } = 507;
     [Parameter] public double height { get; set; } = 269;
+
     public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 33, y: 80, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "DT",  x: 33, y: 60, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "VCC", x: 33, y: 80, signals: new PinSignalInfo[] {  }, number: 1),
+                new ElementPin(name: "DT", x: 33, y: 60, signals: new PinSignalInfo[] { }, number: 2),
                 new ElementPin(name: "SCK", x: 33, y: 70, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "GND", x: 33, y: 50, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
+                new ElementPin(name: "GND", x: 33, y: 50, signals: new PinSignalInfo[] {  }, number: 4)
             };
         }
     }
 
-    //24 bits 2's complement; min:800000h, max:7FFFFFh
-    static List<bool> getSignal(ComponentInstance comp)
-    {
-        //8388607 = +50kg up (assumption here, values defined by the actual physical loadcell)
-        //-8388608 = -50kg down
-        double step = 16777215 / 1000;//one decimal place
-        long number = Convert.ToInt64((double)comp.compParams["weight"].getValue() * 10 * step);
-        List<bool> bits = new List<bool>();
-        bool isNegative = number < 0;
-        number = Math.Abs(number);
-
-        // Convert the long integer to binary representation
-        while (number != 0)
-        {
-            bits.Insert(0, (number % 2 == 0) ? false : true);
-            number /= 2;
-        }
-
-        if (isNegative)
-        {
-            // Find 1's complement
-            for (int i = 0; i < bits.Count; i++)
-            {
-                bits[i] = !bits[i];
-            }
-
-            // Add 1 to 1's complement
-            int carry = 1;
-            for (int i = bits.Count - 1; i >= 0; i--)
-            {
-                int bitValue = (bits[i] ? 1 : 0) + carry;
-                bits[i] = (bitValue % 2 == 0) ? false : true;
-                carry = bitValue / 2;
-            }
-        }
-
-        // Truncate to a fixed number of bits (e.g., 24 bits)
-        int numberOfBitsToKeep = 24;
-        if (bits.Count > numberOfBitsToKeep)
-        {
-            bits.RemoveRange(0, bits.Count - numberOfBitsToKeep);
-        }
-
-        return bits;
-    }
-
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        bool dt = false;
-        bool sck = false;
-        if (0 == comp.getConnection("DT", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            dt = await AvrCPU.getPinState(conn!.toId);
-        }
-        if (0 == comp.getConnection("SCK", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-        {
-            sck = await AvrCPU.getPinState(conn2!.toId);
-        }
-
-        //if data ready, 25-27 pulses will be sent through SCK, each pulse shifts out 1 bit, starting from msb
-        //the 25th pulse bring DOUT to HIGH
-        //10Hz sampling rate
-        if (!sck && comp.midSignal == 0)//starting state
-        {
-            comp.midSignal = 1;
-            comp.compParams["counter"].setValue(0);
-            AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//DOUT goes to LOW indicating data is ready
-        }
-        if (sck && comp.midSignal == 1)//trigger pulse HIGH
-        {
-            comp.midSignal = 2;
-            if ((int)comp.compParams["counter"].getValue() == 24)
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);//set DOUT to high after 25th pulse
-                comp.midSignal = 0;
-                comp.compParams["counter"].setValue(0);
-            }
-            else if (getSignal(comp)[23 - (int)comp.compParams["counter"].getValue()])
-    {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
-            }
-            else
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
-            }
-        }
-        if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
-        {
-            comp.compParams["counter"].setValue( (int)comp.compParams["counter"].getValue() + 1);
-            comp.midSignal = 0;
-        }
-    }
+    // //24 bits 2's complement; min:800000h, max:7FFFFFh
+    // static List<bool> getSignal(ComponentInstance comp)
+    // {
+    //     //8388607 = +50kg up (assumption here, values defined by the actual physical loadcell)
+    //     //-8388608 = -50kg down
+    //     double step = 16777215 / 1000;//one decimal place
+    //     long number = Convert.ToInt64((double)comp.compParams["weight"].getValue() * 10 * step);
+    //     List<bool> bits = new List<bool>();
+    //     bool isNegative = number < 0;
+    //     number = Math.Abs(number);
+    //
+    //     // Convert the long integer to binary representation
+    //     while (number != 0)
+    //     {
+    //         bits.Insert(0, (number % 2 == 0) ? false : true);
+    //         number /= 2;
+    //     }
+    //
+    //     if (isNegative)
+    //     {
+    //         // Find 1's complement
+    //         for (int i = 0; i < bits.Count; i++)
+    //         {
+    //             bits[i] = !bits[i];
+    //         }
+    //
+    //         // Add 1 to 1's complement
+    //         int carry = 1;
+    //         for (int i = bits.Count - 1; i >= 0; i--)
+    //         {
+    //             int bitValue = (bits[i] ? 1 : 0) + carry;
+    //             bits[i] = (bitValue % 2 == 0) ? false : true;
+    //             carry = bitValue / 2;
+    //         }
+    //     }
+    //
+    //     // Truncate to a fixed number of bits (e.g., 24 bits)
+    //     int numberOfBitsToKeep = 24;
+    //     if (bits.Count > numberOfBitsToKeep)
+    //     {
+    //         bits.RemoveRange(0, bits.Count - numberOfBitsToKeep);
+    //     }
+    //
+    //     return bits;
+    // }
+    //
+    // public static async void translate(ComponentInstance comp, long pinChangeCycle)
+    // {
+    //     bool dt = false;
+    //     bool sck = false;
+    //     if (0 == comp.getConnection("DT", out InstanceConnection? conn, out List<InstanceConnection>? all))
+    //     {
+    //         dt = await AvrCPU.getPinState(conn!.toId);
+    //     }
+    //     if (0 == comp.getConnection("SCK", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+    //     {
+    //         sck = await AvrCPU.getPinState(conn2!.toId);
+    //     }
+    //
+    //     //if data ready, 25-27 pulses will be sent through SCK, each pulse shifts out 1 bit, starting from msb
+    //     //the 25th pulse bring DOUT to HIGH
+    //     //10Hz sampling rate
+    //     if (!sck && comp.midSignal == 0)//starting state
+    //     {
+    //         comp.midSignal = 1;
+    //         comp.compParams["counter"].setValue(0);
+    //         AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//DOUT goes to LOW indicating data is ready
+    //     }
+    //     if (sck && comp.midSignal == 1)//trigger pulse HIGH
+    //     {
+    //         comp.midSignal = 2;
+    //         if ((int)comp.compParams["counter"].getValue() == 24)
+    //         {
+    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);//set DOUT to high after 25th pulse
+    //             comp.midSignal = 0;
+    //             comp.compParams["counter"].setValue(0);
+    //         }
+    //         else if (getSignal(comp)[23 - (int)comp.compParams["counter"].getValue()])
+    // {
+    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
+    //         }
+    //         else
+    //         {
+    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
+    //         }
+    //     }
+    //     if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
+    //     {
+    //         comp.compParams["counter"].setValue( (int)comp.compParams["counter"].getValue() + 1);
+    //         comp.midSignal = 0;
+    //     }
+    // }
 }
 
 <style>
@@ -116,6 +117,7 @@
         user-select: none;
     }
 </style>
+@* if you get weird styling behavior it may be because of id conflicts. if this is the case consider using a namespace or adjusting all `id` fields to have some prefix like id="HxA"*@
 <svg width="@(width / 10)mm"
      height="@(height / 10)mm"
      viewBox="0 0 @(width) @(height)"
@@ -124,29 +126,29 @@
      xmlns:xlink="http://www.w3.org/1999/xlink">
     <defs>
         <path id="f"
-              d="m317 74c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 25c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 23c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-120c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm-298 98c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-25c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm9.5 115c-6.3513 0-11.5-5.1487-11.5-11.5s5.1487-11.5 11.5-11.5 11.5 5.1487 11.5 11.5-5.1487 11.5-11.5 11.5zm0-156c-6.3513 0-11.5-5.1487-11.5-11.5s5.1487-11.5 11.5-11.5 11.5 5.1487 11.5 11.5-5.1487 11.5-11.5 11.5zm-28.5-34h340v200h-340v-200z" />
-        <path id="d" d="m0 0h340v200h-340v-200z" />
+              d="m317 74c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 25c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 23c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0 24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-120c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm-298 98c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-25c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm0-24c-3.866 0-7-3.134-7-7s3.134-7 7-7 7 3.134 7 7-3.134 7-7 7zm9.5 115c-6.3513 0-11.5-5.1487-11.5-11.5s5.1487-11.5 11.5-11.5 11.5 5.1487 11.5 11.5-5.1487 11.5-11.5 11.5zm0-156c-6.3513 0-11.5-5.1487-11.5-11.5s5.1487-11.5 11.5-11.5 11.5 5.1487 11.5 11.5-5.1487 11.5-11.5 11.5zm-28.5-34h340v200h-340v-200z"/>
+        <path id="d" d="m0 0h340v200h-340v-200z"/>
         <mask id="g" x="0" y="0" width="340" height="200" fill="white">
-            <use xlink:href="#d" />
+            <use xlink:href="#d"/>
         </mask>
         <linearGradient id="a" y1="50%" y2="50%">
-            <stop stop-color="#767676" offset="0" />
-            <stop stop-color="#FFFEDF" offset="1" />
+            <stop stop-color="#767676" offset="0"/>
+            <stop stop-color="#FFFEDF" offset="1"/>
         </linearGradient>
         <radialGradient id="b" r="100%">
-            <stop stop-color="#8A8A8A" offset="0" />
-            <stop offset="1" />
+            <stop stop-color="#8A8A8A" offset="0"/>
+            <stop offset="1"/>
         </radialGradient>
         <radialGradient id="e"
                         r="100%"
                         gradientTransform="translate(.5 .5) scale(.58621 1) rotate(90) translate(-.5 -.5)">
-            <stop stop-color="#fff" offset="0" />
-            <stop stop-color="#E7E7E7" offset="1" />
+            <stop stop-color="#fff" offset="0"/>
+            <stop stop-color="#E7E7E7" offset="1"/>
         </radialGradient>
     </defs>
     <g fill="none" fill-rule="evenodd">
         <mask id="c" fill="white">
-            <use xlink:href="#f" />
+            <use xlink:href="#f"/>
         </mask>
         <g fill="#1C8944"
            mask="url(#c)"
@@ -154,18 +156,18 @@
            stroke-dasharray="1,1"
            stroke-opacity=".53643"
            stroke-width="4">
-            <use mask="url(#g)" xlink:href="#d" />
+            <use mask="url(#g)" xlink:href="#d"/>
         </g>
         <g fill="#D2CDC3" mask="url(#c)">
             <g transform="translate(10 34)">
-                <rect y="25" width="17" height="18" />
-                <rect x="298" width="17" height="18" />
+                <rect y="25" width="17" height="18"/>
+                <rect x="298" width="17" height="18"/>
             </g>
         </g>
         <g mask="url(#c)">
             <g transform="translate(6 27)">
-                <rect x="298" y="1" width="26" height="147" stroke="#fff" stroke-width="2" />
-                <rect x="1" y="25" width="25" height="102" stroke="#fff" stroke-width="2" />
+                <rect x="298" y="1" width="26" height="147" stroke="#fff" stroke-width="2"/>
+                <rect x="1" y="25" width="25" height="102" stroke="#fff" stroke-width="2"/>
                 <text font-family="Arial-BoldItalicMT, Arial"
                       font-size="14"
                       font-style="italic"
@@ -193,70 +195,70 @@
                       height="98"
                       fill="#434341"
                       fill-rule="evenodd"
-                      stroke="#3B3939" />
-                <rect x="51" y="2" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="15" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="27" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="40" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="52" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="65" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="77" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
-                <rect x="51" y="90" width="14" height="6" fill="url(#a)" fill-rule="evenodd" />
+                      stroke="#3B3939"/>
+                <rect x="51" y="2" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="15" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="27" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="40" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="52" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="65" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="77" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
+                <rect x="51" y="90" width="14" height="6" fill="url(#a)" fill-rule="evenodd"/>
                 <rect transform="translate(7 5) scale(-1 1) translate(-7 -5)"
                       y="2"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 18) scale(-1 1) translate(-7 -18)"
                       y="15"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 31) scale(-1 1) translate(-7 -31)"
                       y="28"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 43) scale(-1 1) translate(-7 -43)"
                       y="40"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 56) scale(-1 1) translate(-7 -56)"
                       y="53"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 68) scale(-1 1) translate(-7 -68)"
                       y="65"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 80) scale(-1 1) translate(-7 -80)"
                       y="77"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <rect transform="translate(7 93) scale(-1 1) translate(-7 -93)"
                       y="90"
                       width="14"
                       height="6"
                       fill="url(#a)"
-                      fill-rule="evenodd" />
+                      fill-rule="evenodd"/>
                 <circle cx="20"
                         cy="5"
                         r="3"
                         fill="#211919"
                         fill-opacity=".54978"
                         fill-rule="evenodd"
-                        stroke="#000" />
+                        stroke="#000"/>
                 <text transform="translate(27 52) rotate(-90) translate(-27 -52)"
                       fill="none"
                       font-family="Arial-BoldItalicMT, Arial"
@@ -271,12 +273,12 @@
         <g transform="translate(413 133.5) scale(-1 1) translate(-94 -133.5)">
             <path d="m0.5 0.5v266h62v-266h-62zm31 123c-12.698 0-23-9.8445-23-22 0-12.155 10.302-22 23-22s23 9.8445 23 22c0 12.155-10.302 22-23 22zm0 57c-12.698 0-23-9.8445-23-22s10.302-22 23-22 23 9.8445 23 22-10.302 22-23 22z"
                   fill="#D8D8D8"
-                  stroke="#979797" />
-            <path d="m53.5 51.5l133-10" stroke="#F01919" stroke-linecap="square" stroke-width="3" />
-            <path d="m54.5 57.5l131 8" stroke="#000" stroke-linecap="square" stroke-width="3" />
-            <path d="m55.5 64.5l130 27" stroke="#C8C8C8" stroke-linecap="square" stroke-width="3" />
-            <path d="m56.5 71.5l131 43" stroke="#24C22B" stroke-linecap="square" stroke-width="3" />
-            <rect x="3.5" y="43.5" width="57" height="33" rx="11" fill="url(#e)" stroke="#979797" />
+                  stroke="#979797"/>
+            <path d="m53.5 51.5l133-10" stroke="#F01919" stroke-linecap="square" stroke-width="3"/>
+            <path d="m54.5 57.5l131 8" stroke="#000" stroke-linecap="square" stroke-width="3"/>
+            <path d="m55.5 64.5l130 27" stroke="#C8C8C8" stroke-linecap="square" stroke-width="3"/>
+            <path d="m56.5 71.5l131 43" stroke="#24C22B" stroke-linecap="square" stroke-width="3"/>
+            <rect x="3.5" y="43.5" width="57" height="33" rx="11" fill="url(#e)" stroke="#979797"/>
             <text transform="translate(28.5 245) scale(-1 1) translate(-28.5 -245)"
                   fill="#FBFBFB"
                   font-family="Arial-ItalicMT, Arial"

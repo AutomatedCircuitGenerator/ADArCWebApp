@@ -10633,6 +10633,9 @@ define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], fun
         set onByteTransmit(listener) {
             this.usart.onByteTransmit = listener;
         }
+        writeByte(value, immediate = false) {
+            return this.usart.writeByte(value, immediate);
+        }
     }
     exports.ArduinoUSART = ArduinoUSART;
     class ArduinoDigital {
@@ -13597,6 +13600,8 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         LINEAR_ACCEL_Y_L: { address: 0x5A },
         LINEAR_ACCEL_Z_H: { address: 0x5B },
         LINEAR_ACCEL_Z_L: { address: 0x5C },
+        PWR_MGMT_1: { address: 0x6B, default: 0x40 },
+        PWR_MGMT_2: { address: 0X6C, default: 0x00 },
         WHO_AM_I: { address: 0x75, default: 0x68 }
     };
     class MPU6050 extends controller_17.Controller {
@@ -13722,7 +13727,49 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
     }
     exports.MPU6050 = MPU6050;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1) {
+define("controllers/ky024", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY024 = void 0;
+    class KY024 extends controller_18.Controller {
+        constructor() {
+            super(...arguments);
+            this.gauss = 0;
+            this.isInSimulation = false;
+            this.isMagneticFieldDetected = false;
+        }
+        setGauss(gauss) {
+            if (gauss < -1000) {
+                this.gauss = -1000;
+            }
+            else if (gauss > 1000) {
+                this.gauss = 1000;
+            }
+            else {
+                this.gauss = gauss;
+            }
+            if (this.isInSimulation) {
+                this.gaussToVoltage(this.gauss);
+            }
+        }
+        setIsMagneticFieldDetected(isDetected) {
+            this.isMagneticFieldDetected = isDetected > 0;
+            if (this.isInSimulation) {
+                this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
+            }
+        }
+        setup() {
+            this.isInSimulation = true;
+            this.gaussToVoltage(this.gauss);
+        }
+        gaussToVoltage(gauss) {
+            const V_OUT = 1.0 + ((gauss + 1000) / 2000) * 3.0;
+            this.pins.analog_out[0].analog.voltage = V_OUT;
+        }
+    }
+    exports.KY024 = KY024;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13747,19 +13794,20 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY022 = ky022_1.KY022;
     window.LED = led_1.LED;
     window.MPU6050 = mpu6050_1.MPU6050;
+    window.KY024 = ky024_1.KY024;
 });
-define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY001 = void 0;
-    class KY001 extends controller_18.Controller {
+    class KY001 extends controller_19.Controller {
         setTemperature(temperature) {
         }
         setup() { }
     }
     exports.KY001 = KY001;
 });
-define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_20) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RPLidarA1M9 = void 0;
@@ -13784,7 +13832,7 @@ define("controllers/rplidar", ["require", "exports", "controllers/controller"], 
     const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
     const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
     const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
-    class RPLidarA1M9 extends controller_19.Controller {
+    class RPLidarA1M9 extends controller_20.Controller {
         constructor() {
             super(...arguments);
             this.distance = 0;
@@ -13792,23 +13840,67 @@ define("controllers/rplidar", ["require", "exports", "controllers/controller"], 
             this.serialNumber = 1;
             this.currentCmd = null;
             this.inSync = false;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
         }
         setup() {
             this.pins.rx[0].usart.onByteTransmit = this.rxListener.bind(this);
         }
         rxListener(value) {
-            if (value === RPLIDAR_CMD_SYNC_BYTE) {
+            if (value === RPLIDAR_CMD_SYNC_BYTE && !this.inSync) {
                 this.inSync = true;
+                return;
             }
-            while (this.inSync) {
+            if (this.inSync) {
                 if (this.currentCmd == null) {
                     this.currentCmd = value;
+                    if (this.currentCmd == RPLIDAR_CMD_STOP ||
+                        this.currentCmd == RPLIDAR_CMD_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_FORCE_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_RESET ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_INFO ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_HEALTH) {
+                    }
+                    return;
+                }
+                else if (this.payloadSize == null) {
+                    this.payloadSize = value;
+                    return;
+                }
+                else if (this.payload.length < this.payloadSize) {
+                    this.payload.push(value);
+                    return;
+                }
+                else {
+                    this.checksum = value;
+                    return;
                 }
             }
+            return this.notOk();
+        }
+        afterCmdFinishSelfReset() {
             this.inSync = false;
             this.currentCmd = null;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
         }
-        getDeviceHealth() {
+        notOk() {
+        }
+        cmdStop() {
+        }
+        cmdScan() {
+        }
+        cmdForceScan() {
+        }
+        cmdReset() {
+        }
+        cmdGetDeviceInfo() {
+        }
+        cmdGetDeviceHealth() {
+        }
+        writeBack() {
         }
     }
     exports.RPLidarA1M9 = RPLidarA1M9;

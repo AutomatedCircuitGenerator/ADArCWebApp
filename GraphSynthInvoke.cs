@@ -135,7 +135,7 @@ namespace ADArCWebApp
 
             if (rule == null)
             {
-                throw new RuleNotFoundException();
+                throw new RuleNotFoundException(ruleName);
             }
 
             node? fromNode = null;

@@ -6,7 +6,7 @@ public class RuleNotFoundException : Exception
     {
     }
 
-    public RuleNotFoundException(string message) : base(message)
+    public RuleNotFoundException(string message) : base($"No connection rule for {message}")
     {
     }
 

@@ -51,10 +51,10 @@ export class RPLidarA1M9 extends Controller {
     //state
     private currentCmd: u8 | null = null;
     private inSync: boolean = false;
-    private payloadSize:number;
-    private payload:number;
-    private checksum:number;//i dont think this matters
-    //bytesRecv?
+    //optinal 
+    private payloadSize: u8 | null = null;
+    private payload: u8[] | null = null;
+    private checksum: u8 | null = null;//i dont think this matters
 
     setup() {
         this.pins.rx[0].usart.onByteTransmit = this.rxListener.bind(this);
@@ -63,22 +63,73 @@ export class RPLidarA1M9 extends Controller {
 
     //we will always get u8 sync and u8 cmd. will sometimes get u8 size of payload, (max 2^8) payload, and u8 checksum
     rxListener(value: u8) {
-        if (value === RPLIDAR_CMD_SYNC_BYTE) {
+        if (value === RPLIDAR_CMD_SYNC_BYTE && !this.inSync) {
             this.inSync = true;
+            return;
         }
-        while (this.inSync) {
-            if (this.currentCmd == null){
+        if (this.inSync) {
+            if (this.currentCmd == null) {
                 this.currentCmd = value;
+                if (this.currentCmd == RPLIDAR_CMD_STOP ||
+                    this.currentCmd == RPLIDAR_CMD_SCAN ||
+                    this.currentCmd == RPLIDAR_CMD_FORCE_SCAN ||
+                    this.currentCmd == RPLIDAR_CMD_RESET ||
+                    this.currentCmd == RPLIDAR_CMD_GET_DEVICE_INFO ||
+                    this.currentCmd == RPLIDAR_CMD_GET_DEVICE_HEALTH) {
+                    //clear everything here. next rx is new command
+                }
+                return
+            } else if (this.payloadSize == null) {
+                //if we are a command that has a payload
+                this.payloadSize = value;
+                return;
+            } else if (this.payload.length < this.payloadSize) {
+                this.payload.push(value);
+                return;
+            } else {
+                this.checksum = value;
+                //run cmd function here
+                return;
             }
+
         }
-        //completetransfer
-//reset func
+        //not in sync and not sync byte, something isnot ok
+        return this.notOk()        
+    }
+    
+    afterCmdFinishSelfReset(){
         this.inSync = false;
         this.currentCmd = null;
+        this.payloadSize = null;
+        this.payload = null;
+        this.checksum = null;
     }
 
+    notOk() {
+        //tx.writebyte (not ok)
+    }
 
-    getDeviceHealth() {
+    cmdStop() {
+    }
 
+    cmdScan() {
+    }
+
+    cmdForceScan() {
+    }
+
+    cmdReset() {
+    }
+
+    cmdGetDeviceInfo() {
+    }
+
+    cmdGetDeviceHealth() {
+    }
+    
+    writeBack(){
+        //    _u8    sync_quality;      // syncbit:1;syncbit_inverse:1;quality:6;
+        //     _u16   angle_q6_checkbit; // check_bit:1;angle_q6:15;
+        // 	_u16   distance_q2;
     }
 }
