@@ -1,4 +1,5 @@
 ﻿@code {
+
     /** The color of a lit segment */
     [Parameter]
     public string color { get; set; } = "red";
@@ -12,7 +13,7 @@
     public string background { get; set; } = "black";
 
     /** Number of digits to display (1, 2 or 4 are common values) */
-    [Parameter] 
+    [Parameter]
     public int digits { get; set; } = 1;
 
     /** Whether to show a colon (clock mode) */
@@ -40,107 +41,56 @@
     [Parameter]
     public int[] values { get; set; } = { 0, 0, 0, 0, 0, 0, 0, 0 };
 
-    public static ElementPin[] pinInfo {
-        get {
-            // Func<int, (int number, double x, double y)> pinXY = (n) => {
-            //     var pins = pinPositions;
-            //     double startX = pins.startX;
-            //     int cols = pins.cols;
-            //     int bottomY = pins.bottomY;
-            //     int col = (n - 1) % cols;
-            //     int row = 1 - (int)Math.Floor((double)(n - 1) / cols);
-            //     double xOffset = 1.27;
-            //     double x = startX + xOffset + (row > 0 ? col : cols - col - 1) * 2.54;
-            //     double y = pins == "top" ? (row > 0 ? bottomY + 1 : 1) : row > 0 ? bottomY + 2 : 0;
-            //     return (number: n, x: x * 3.78, y: y * 3.78 );
-            // };
-
-            //         switch (digits) {
-            //             case 4:
-            //                 // Pinout based on KW4-56NALB model
-            //                 return new ElementPin[] {
-            //             new ElementPin( name: "A", number: pinXY(13).number, x: pinXY(13).x, y: pinXY(13).y, signals: new PinSignalInfo[]{}, description: "Segment A" ),
-            // new ElementPin( name: "B", number: pinXY(9).number, x: pinXY(9).x, y: pinXY(9).y, signals: new PinSignalInfo[]{}, description: "Segment B" ),
-            // new ElementPin( name: "C", number: pinXY(4).number, x: pinXY(4).x, y: pinXY(4).y, signals: new PinSignalInfo[]{}, description: "Segment C" ),
-            // new ElementPin( name: "D", number: pinXY(2).number, x: pinXY(2).x, y: pinXY(2).y, signals: new PinSignalInfo[]{}, description: "Segment D" ),
-            // new ElementPin( name: "E", number: pinXY(1).number, x: pinXY(1).x, y: pinXY(1).y, signals: new PinSignalInfo[]{}, description: "Segment E" ),
-            // new ElementPin( name: "F", number: pinXY(12).number, x: pinXY(12).x, y: pinXY(12).y, signals: new PinSignalInfo[]{}, description: "Segment F" ),
-            // new ElementPin( name: "G", number: pinXY(5).number, x: pinXY(5).x, y: pinXY(5).y, signals: new PinSignalInfo[]{}, description: "Segment G" ),
-            // new ElementPin( name: "DP", number: pinXY(3).number, x: pinXY(3).x, y: pinXY(3).y, signals: new PinSignalInfo[]{}, description: "Decimal Point" ),
-            // new ElementPin( name: "DIG1", number: pinXY(14).number, x: pinXY(14).x, y: pinXY(14).y, signals: new PinSignalInfo[]{}, description: "Digit 1 Common" ),
-            // new ElementPin( name: "DIG2", number: pinXY(11).number, x: pinXY(11).x, y: pinXY(11).y, signals: new PinSignalInfo[]{}, description: "Digit 2 Common" ),
-            // new ElementPin( name: "DIG3", number: pinXY(10).number, x: pinXY(10).x, y: pinXY(10).y, signals: new PinSignalInfo[]{}, description: "Digit 3 Common" ),
-            // new ElementPin( name: "DIG4", number: pinXY(6).number, x: pinXY(6).x, y: pinXY(6).y, signals: new PinSignalInfo[]{}, description: "Digit 4 Common" ),
-            // new ElementPin( name: "COM", number: pinXY(7).number, x: pinXY(7).x, y: pinXY(7).y, signals: new PinSignalInfo[]{}, description: "Common pin" ),
-            // new ElementPin( name: "CLN", number: pinXY(8).number, x: pinXY(8).x, y: pinXY(8).y, signals: new PinSignalInfo[]{}, description: "Colon" ),
-            // };
-
-            //             case 3:
-            //                 // Pinout based on SP420281N model
-            //                 return new ElementPin[] {
-            //             new ElementPin( name: "A", number: pinXY(11).number, x: pinXY(11).x, y: pinXY(11).y, signals: new PinSignalInfo[]{}, description: "Segment A" ),
-            // new ElementPin( name: "B", number: pinXY(7).number, x: pinXY(7).x, y: pinXY(7).y, signals: new PinSignalInfo[]{}, description: "Segment B" ),
-            // new ElementPin( name: "C", number: pinXY(4).number, x: pinXY(4).x, y: pinXY(4).y, signals: new PinSignalInfo[]{}, description: "Segment C" ),
-            // new ElementPin( name: "D", number: pinXY(2).number, x: pinXY(2).x, y: pinXY(2).y, signals: new PinSignalInfo[]{}, description: "Segment D" ),
-            // new ElementPin( name: "E", number: pinXY(1).number, x: pinXY(1).x, y: pinXY(1).y, signals: new PinSignalInfo[]{}, description: "Segment E" ),
-            // new ElementPin( name: "F", number: pinXY(10).number, x: pinXY(10).x, y: pinXY(10).y, signals: new PinSignalInfo[]{}, description: "Segment F" ),
-            // new ElementPin( name: "G", number: pinXY(5).number, x: pinXY(5).x, y: pinXY(5).y, signals: new PinSignalInfo[]{}, description: "Segment G" ),
-            // new ElementPin( name: "DP", number: pinXY(3).number, x: pinXY(3).x, y: pinXY(3).y, signals: new PinSignalInfo[]{}, description: "Decimal Point" ),
-            // new ElementPin( name: "DIG1", number: pinXY(12).number, x: pinXY(12).x, y: pinXY(12).y, signals: new PinSignalInfo[]{}, description: "Digit 1 Common" ),
-            // new ElementPin( name: "DIG2", number: pinXY(9).number, x: pinXY(9).x, y: pinXY(9).y, signals: new PinSignalInfo[]{}, description: "Digit 2 Common" ),
-            // new ElementPin( name: "DIG3", number: pinXY(8).number, x: pinXY(8).x, y: pinXY(8).y, signals: new PinSignalInfo[]{}, description: "Digit 3 Common" ),
-            //         };
-
-            //             case 2:
-            //                 // Pinout based on CL5621C model
-            //                 return new ElementPin[] {
-            //             new ElementPin( name: "DIG1", number: pinXY(8).number, x: pinXY(8).x, y: pinXY(8).y, signals: new PinSignalInfo[]{}, description: "Digit 1 Common" ),
-            // new ElementPin( name: "DIG2", number: pinXY(7).number, x: pinXY(7).x, y: pinXY(7).y, signals: new PinSignalInfo[]{}, description: "Digit 2 Common" ),
-            // new ElementPin( name: "A", number: pinXY(10).number, x: pinXY(10).x, y: pinXY(10).y, signals: new PinSignalInfo[]{}, description: "Segment A" ),
-            //   new ElementPin( name: "B", number: pinXY(9).number, x: pinXY(9).x, y: pinXY(9).y, signals: new PinSignalInfo[]{}, description: "Segment B" ),
-            // new ElementPin( name: "C", number: pinXY(1).number, x: pinXY(1).x, y: pinXY(1).y, signals: new PinSignalInfo[]{}, description: "Segment C" ),
-            //   new ElementPin( name: "D", number: pinXY(4).number, x: pinXY(4).x, y: pinXY(4).y, signals: new PinSignalInfo[]{}, description: "Segment D" ),
-            // new ElementPin( name: "E", number: pinXY(3).number, x: pinXY(3).x, y: pinXY(3).y, signals: new PinSignalInfo[]{}, description: "Segment E" ),
-            // new ElementPin( name: "F", number: pinXY(6).number, x: pinXY(6).x, y: pinXY(6).y, signals: new PinSignalInfo[]{}, description: "Segment F" ),
-            // new ElementPin( name: "G", number: pinXY(5).number, x: pinXY(5).x, y: pinXY(5).y, signals: new PinSignalInfo[]{}, description: "Segment G" ),
-            // new ElementPin( name: "DP", number: pinXY(2).number, x: pinXY(2).x, y: pinXY(2).y, signals: new PinSignalInfo[]{}, description: "Decimal Point" ),
-            //             };
-
-            //             case 1:
-            //             default:
-            //                 // Pinout based on 5611BH model
-            return new ElementPin[] {
-                new ElementPin( name: "COM.1", number: 1, x: 49.5, y: 30, signals: new PinSignalInfo[]{}, description: "Common" ),
-                new ElementPin( name: "COM.2", number: 2, x: 49.5, y: 100, signals: new PinSignalInfo[]{}, description: "Common" ),
-                new ElementPin( name: "A", number: 3, x: 69, y: 30, signals: new PinSignalInfo[]{}, description: "Segment A" ),
-                new ElementPin( name: "B", number: 4, x: 59, y: 30, signals: new PinSignalInfo[]{}, description: "Segment B" ),
-                new ElementPin( name: "C", number: 5, x: 69, y: 100, signals: new PinSignalInfo[]{}, description: "Segment C" ),
-                new ElementPin( name: "D", number: 6, x: 39, y: 100, signals: new PinSignalInfo[]{}, description: "Segment D" ),
-                new ElementPin( name: "E", number: 7, x: 28, y: 100, signals: new PinSignalInfo[]{}, description: "Segment E" ),
-                new ElementPin( name: "F", number: 8, x: 39, y: 30, signals: new PinSignalInfo[]{}, description: "Segment F" ),
-                new ElementPin( name: "G", number: 9, x: 28, y: 30, signals: new PinSignalInfo[]{}, description: "Segment G" ),
-                new ElementPin( name: "DP", number: 10, x: 69, y: 100, signals: new PinSignalInfo[]{}, description: "Decimal Point" ),
-        };
-
-        } 
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "COM1", number: 1, x: 49.5, y: 30, signals: new PinSignalInfo[] { }, description: "Common"),
+                new ElementPin(name: "A", number: 2, x: 69, y: 30, signals: new PinSignalInfo[] { }, description: "Segment A"),
+                new ElementPin(name: "B", number: 3, x: 59, y: 30, signals: new PinSignalInfo[] { }, description: "Segment B"),
+                new ElementPin(name: "C", number: 4, x: 59, y: 100, signals: new PinSignalInfo[] { }, description: "Segment C"),
+                new ElementPin(name: "D", number: 5, x: 39, y: 100, signals: new PinSignalInfo[] { }, description: "Segment D"),
+                new ElementPin(name: "E", number: 6, x: 28, y: 100, signals: new PinSignalInfo[] { }, description: "Segment E"),
+                new ElementPin(name: "F", number: 7, x: 39, y: 30, signals: new PinSignalInfo[] { }, description: "Segment F"),
+                new ElementPin(name: "G", number: 8, x: 28, y: 30, signals: new PinSignalInfo[] { }, description: "Segment G"),
+                new ElementPin(name: "DP", number: 9, x: 69, y: 100, signals: new PinSignalInfo[] { }, description: "Decimal Point"),
+            };
+        }
     }
 
-    int yOffset { get {
-            return this.pins == "extend" ? 2 : 0;
-        } 
+    int yOffset
+    {
+        get { return this.pins == "extend" ? 2 : 0; }
     }
 
-    (double startX, int bottomY, int cols) pinPositions { get {
+    (double startX, int bottomY, int cols) pinPositions
+    {
+        get
+        {
             int numPins = digits == 4 ? 14 : digits == 3 ? 12 : 10;
             int cols = (int)Math.Ceiling((double)numPins / 2);
             return (startX: (12.55 * digits - cols * 2.54) / 2, bottomY: pins == "extend" ? 21 : 18, cols);
-        } }
+        }
+    }
 
 
+    double width
+    {
+        get { return 12.55 * digits; }
+    }
 
-    double width { get { return 12.55 * digits; } }
-    int height { get { return pins == "extend" ? 23 : 22; } }
-    double colonPosition { get { return 1.5 + 12.7 * Math.Round((double)digits / 2); } }
+    int height
+    {
+        get { return pins == "extend" ? 23 : 22; }
+    }
+
+    double colonPosition
+    {
+        get { return 1.5 + 12.7 * Math.Round((double)digits / 2); }
+    }
+
     Func<int, double> x = i => 3.5 + i * 12.7;
 
 
@@ -152,37 +102,44 @@
     public static async void translate(ComponentInstance comp, long pinChangeCycle)
     {
         int a = -1, b = -1, c = -1, d = -1, e = -1, f = -1, g = -1, dp = -1;
-        if (0 == comp.getConnection("a", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.GetConnection("a", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            a = conn!.toId;
+            a = conn!.ToId;
         }
-        if (0 == comp.getConnection("b", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+
+        if (0 == comp.GetConnection("b", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            b = conn2!.toId;
+            b = conn2!.ToId;
         }
-        if (0 == comp.getConnection("c", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+
+        if (0 == comp.GetConnection("c", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
         {
-            c = conn3!.toId;
+            c = conn3!.ToId;
         }
-        if (0 == comp.getConnection("d", out InstanceConnection? conn4, out List<InstanceConnection>? all4))
+
+        if (0 == comp.GetConnection("d", out InstanceConnection? conn4, out List<InstanceConnection>? all4))
         {
-            d = conn4!.toId;
+            d = conn4!.ToId;
         }
-        if (0 == comp.getConnection("e", out InstanceConnection? conn5, out List<InstanceConnection>? all5))
+
+        if (0 == comp.GetConnection("e", out InstanceConnection? conn5, out List<InstanceConnection>? all5))
         {
-            e = conn5!.toId;
+            e = conn5!.ToId;
         }
-        if (0 == comp.getConnection("f", out InstanceConnection? conn6, out List<InstanceConnection>? all6))
+
+        if (0 == comp.GetConnection("f", out InstanceConnection? conn6, out List<InstanceConnection>? all6))
         {
-            f = conn6!.toId;
+            f = conn6!.ToId;
         }
-        if (0 == comp.getConnection("g", out InstanceConnection? conn7, out List<InstanceConnection>? all7))
+
+        if (0 == comp.GetConnection("g", out InstanceConnection? conn7, out List<InstanceConnection>? all7))
         {
-            g = conn7!.toId;
+            g = conn7!.ToId;
         }
-        if (0 == comp.getConnection("dp", out InstanceConnection? conn8, out List<InstanceConnection>? all8))
+
+        if (0 == comp.GetConnection("dp", out InstanceConnection? conn8, out List<InstanceConnection>? all8))
         {
-            dp = conn8!.toId;
+            dp = conn8!.ToId;
         }
 
         int[] value = { 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -195,9 +152,9 @@
         value[6] = await AvrCPU.getPinState(g) ? 1 : 0;
         value[7] = await AvrCPU.getPinState(dp) ? 1 : 0;
 
-        comp.compParams["values"].setValue(value);
-
+        comp.CompParams["values"].setValue(value);
     }
+
 }
 
 <svg width="@(width)mm"
@@ -207,49 +164,47 @@
      xmlns="http://www.w3.org/2000/svg">
     <defs>
         <pattern id="pin-pattern" height="2" width="2.54" patternUnits="userSpaceOnUse">
-            @if(pins == "extend")
+            @if (pins == "extend")
             {
-                <rect x="1.02" y="0" height="2" width="0.5" fill="#aaa" />
+                <rect x="1.02" y="0" height="2" width="0.5" fill="#aaa"/>
             }
             else
             {
-                <circle cx="1.27" cy="1" r=0.5 fill="#aaa" />
+                <circle cx="1.27" cy="1" r=0.5 fill="#aaa"/>
             }
         </pattern>
     </defs>
-    <rect x="0" y="@(yOffset)" width="@(width)" height="20.5" />
+    <rect x="0" y="@(yOffset)" width="@(width)" height="20.5"/>
 
 
-
-    @for(int i = 0; i < digits; i++)
+    @for (int i = 0; i < digits; i++)
     {
         <g transform="skewX(-8) translate(@(x(i)), @(yOffset + 2.4)) scale(0.81)">
-            <polygon points="2 0 8 0 9 1 8 2 2 2 1 1" fill="@(fill(0,i*8))"/>
-            <polygon points="10 2 10 8 9 9 8 8 8 2 9 1" fill="@(fill(1,i*8))"/>
-            <polygon points="10 10 10 16 9 17 8 16 8 10 9 9" fill="@(fill(2,i*8))"/>
-            <polygon points="8 18 2 18 1 17 2 16 8 16 9 17" fill="@(fill(3,i*8))"/>
-            <polygon points="0 16 0 10 1 9 2 10 2 16 1 17" fill="@(fill(4,i*8))"/>
-            <polygon points="0 8 0 2 1 1 2 2 2 8 1 9" fill=@(fill(5,i*8))/>
-            <polygon points="2 8 8 8 9 9 8 10 2 10 1 9" fill=@(fill(6,i*8))/>
+            <polygon points="2 0 8 0 9 1 8 2 2 2 1 1" fill="@(fill(0, i * 8))"/>
+            <polygon points="10 2 10 8 9 9 8 8 8 2 9 1" fill="@(fill(1, i * 8))"/>
+            <polygon points="10 10 10 16 9 17 8 16 8 10 9 9" fill="@(fill(2, i * 8))"/>
+            <polygon points="8 18 2 18 1 17 2 16 8 16 9 17" fill="@(fill(3, i * 8))"/>
+            <polygon points="0 16 0 10 1 9 2 10 2 16 1 17" fill="@(fill(4, i * 8))"/>
+            <polygon points="0 8 0 2 1 1 2 2 2 8 1 9" fill=@(fill(5, i * 8))/>
+            <polygon points="2 8 8 8 9 9 8 10 2 10 1 9" fill=@(fill(6, i * 8))/>
         </g>
-        <circle cx="@(x(i) + 7.4)" cy="@(yOffset + 16)" r="0.89" fill="@(fill(7,i*8))"/>
+        <circle cx="@(x(i) + 7.4)" cy="@(yOffset + 16)" r="0.89" fill="@(fill(7, i * 8))"/>
     }
-
 
 
     @if (colon)
     {
         <g transform="skewX(-8)" fill="@(colonValue ? color : offColor)">
-            <circle cx="@(colonPosition)" cy="@(yOffset + 5.75)" r="0.89" />
-            <circle cx="@(colonPosition)" cy="@(yOffset + 13.25)" r="0.89" />
+            <circle cx="@(colonPosition)" cy="@(yOffset + 5.75)" r="0.89"/>
+            <circle cx="@(colonPosition)" cy="@(yOffset + 13.25)" r="0.89"/>
         </g>
     }
 
     @if (pins != "none")
     {
         <g fill="url(#pin-pattern)" transform="translate(@pinPositions.startX, 0)">
-            <rect height="2" width=@(pinPositions.cols * 2.54) />
-            <rect height="2" width=@(pinPositions.cols * 2.54) transform="translate(0, @pinPositions.bottomY)" />
+            <rect height="2" width=@(pinPositions.cols * 2.54)/>
+            <rect height="2" width=@(pinPositions.cols * 2.54) transform="translate(0, @pinPositions.bottomY)"/>
         </g>
     }
 </svg>

@@ -51,13 +51,13 @@
     {
         bool dir = false;
         bool step = false;
-        if (0 == comp.getConnection("DIR", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.GetConnection("DIR", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            dir = await AvrCPU.getPinState(conn!.toId);
+            dir = await AvrCPU.getPinState(conn!.ToId);
         }
-        if (0 == comp.getConnection("STEP", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        if (0 == comp.GetConnection("STEP", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            step = await AvrCPU.getPinState(conn2!.toId);
+            step = await AvrCPU.getPinState(conn2!.ToId);
         }
 
 
@@ -77,11 +77,11 @@
         {
             if (dir)
             {
-                comp.compParams["angle"].setValue(Convert.ToDouble(comp.compParams["angle"]) + 1.8);
+                comp.CompParams["angle"].setValue(Convert.ToDouble(comp.CompParams["angle"]) + 1.8);
             }
             else
             {
-                comp.compParams["angle"].setValue(Convert.ToDouble(comp.compParams["angle"]) - 1.8);
+                comp.CompParams["angle"].setValue(Convert.ToDouble(comp.CompParams["angle"]) - 1.8);
             }
             comp.midSignal = 2;
         }

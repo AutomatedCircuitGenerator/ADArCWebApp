@@ -121,17 +121,17 @@ namespace ADArCWebApp.Shared.Simulation
 			string prePin = "";
 			try
 			{
-				prePin = c.data.codeForGen[codeField];
+				prePin = c.Data.codeForGen[codeField];
 			}
 			catch (NullReferenceException)
 			{
-				Console.WriteLine("Warn: " + c.data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
+				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
 			}
 
 			ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
 			{
-				c.getConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-				return conn!.toId.ToString();
+				c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+				return conn!.ToId.ToString();
 			}); //2..^1 is substring from 3rd char to end-1 char. This is because the format is ~"pinName", so this extracts the pin properly.
 
 			if (ret != "")

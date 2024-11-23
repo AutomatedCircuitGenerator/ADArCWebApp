@@ -27,8 +27,8 @@
     static byte[] getSignal(ComponentInstance comp)
     {
         byte[] ret = new byte[5];
-        int rh = Convert.ToInt32((double)comp.compParams["humidity"].getValue() * 10);
-        int t = Convert.ToInt32((double)comp.compParams["temperature"].getValue() * 10);
+        int rh = Convert.ToInt32((double)comp.CompParams["humidity"].getValue() * 10);
+        int t = Convert.ToInt32((double)comp.CompParams["temperature"].getValue() * 10);
         byte orig1 = (byte)((rh & 0b1111111100000000) >>> 8);
         byte orig2 = (byte)(rh & 0b0000000011111111);
         byte orig3 = (byte)((t & 0b1111111100000000) >>> 8);
@@ -86,25 +86,25 @@
     public static async void translate(ComponentInstance comp, long pinChangeCycle)
     {
         bool pin = false;
-        if (0 == comp.getConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.GetConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            pin = await AvrCPU.getPinState(conn!.toId);
+            pin = await AvrCPU.getPinState(conn!.ToId);
         }
         //pullup
         if (pin && comp.midSignal == 0)
         {
-            AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);//dummy response
+            AvrCPU.setPinState(pinChangeCycle, conn!.ToId, true);//dummy response
         }
         //pulldown
         if (!pin && comp.midSignal == 0)
         {
             comp.midSignal = 1;
-            AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//dummy response
+            AvrCPU.setPinState(pinChangeCycle, conn!.ToId, false);//dummy response
         }
         if (pin && comp.midSignal == 1)//pullup
         {
             comp.midSignal = 2;
-            sendSignal(pinChangeCycle, comp, conn!.toId);
+            sendSignal(pinChangeCycle, comp, conn!.ToId);
         }
         // false 1ms+ -> true (20-40us) trigger
         //then send

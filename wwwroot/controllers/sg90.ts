@@ -3,7 +3,7 @@ import {PinState} from "@lib/avr8js";
 import {AVRRunner} from "@lib/execute";
 import {Digital} from "../boards/board";
 
-export class Servo extends Controller {
+export class SG90 extends Controller {
     private signal?: Digital;
     private risingEdgeCycle?: number;
     private fallingEdgeCycle?: number;

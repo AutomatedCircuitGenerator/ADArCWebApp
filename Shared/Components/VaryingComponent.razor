@@ -17,11 +17,11 @@
                     <span style="padding-left: 5px">￨ Environmental Settings</span>
                 </button>
 
-                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.data.name)))">
+                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
                     <span style="padding-left: 3px">𝗶</span>
                     <span style="padding-left: 7px">￨ Component Information</span>
                 </button>
-                @if (!Pages.Index.app!.isRunning && individualData.globalId != 1)
+                @if (!Pages.Index.app!.isRunning && individualData.GlobalId != 1)
                 {
                     <button id="deletebutton" @onclick="remove">
                         <span>x</span>
@@ -33,7 +33,7 @@
     }
 
     <div id="component-@individualData.localId">
-        <DynamicComponent Type="individualData.data.compType" Parameters="individualData.getPropsAsParams()"></DynamicComponent>
+        <DynamicComponent Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
 
@@ -44,7 +44,7 @@
         <h2>Environmental Settings</h2>
 
         <!-- Value Setting -->
-        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<ValueSetting>())
             {
@@ -60,7 +60,7 @@
         }
 
         <!-- Value Setting Double -->
-        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
             {
@@ -76,7 +76,7 @@
         }
 
         <!-- Dropdown Setting -->
-        @foreach (var prop in individualData.data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
             foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
             {
@@ -93,7 +93,7 @@
         }
 
         <!-- Grouped Settings -->
-        @foreach (var group in individualData.data.compType.GetProperties()
+        @foreach (var group in individualData.Data.compType.GetProperties()
                       .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
         {
             if (group.Key != null)
@@ -195,16 +195,16 @@
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
         {
-            individualData.compParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
+            individualData.CompParams[prop.Name.ToLower()].setValue<double>(Convert.ToDouble(e.Value));
         }
         else
         {
-            individualData.compParams[prop.Name.ToLower()].setValue((string)e.Value);
+            individualData.CompParams[prop.Name.ToLower()].setValue((string)e.Value);
         }
 
-        if (individualData.compParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
+        if (individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
         {
-            individualData.data.compType.GetMethod("translate").Invoke(individualData, [individualData]);
+            individualData.Data.compType.GetMethod("translate").Invoke(individualData, [individualData]);
         }
     }
 

@@ -18,22 +18,22 @@
     }
     public static async void translate(ComponentInstance comp, long pinChangeCycle)
     {
-        var data = comp.data;
+        var data = comp.Data;
 
         bool R = false;
         bool G = false;
         bool B = false;
-        if (0 == comp.getConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        if (0 == comp.GetConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
         {
-            R = await AvrCPU.getPinState(conn!.toId);
+            R = await AvrCPU.getPinState(conn!.ToId);
         }
-        if (0 == comp.getConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+        if (0 == comp.GetConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
         {
-            G = await AvrCPU.getPinState(conn2!.toId);
+            G = await AvrCPU.getPinState(conn2!.ToId);
         }
-        if (0 == comp.getConnection("B", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+        if (0 == comp.GetConnection("B", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
         {
-            B = await AvrCPU.getPinState(conn3!.toId);
+            B = await AvrCPU.getPinState(conn3!.ToId);
         }
         // var pkt = new TimingPacket(pinChangeCycle);
 
@@ -49,20 +49,20 @@
             comp.timer = (pinChangeCycle - comp.timer) / 16;
             comp.midSignal = 0;
             
-            if (conn.toId == 3 || conn.toId == 9 || conn.toId == 10 || conn.toId == 11)
+            if (conn.ToId == 3 || conn.ToId == 9 || conn.ToId == 10 || conn.ToId == 11)
             {
                 int freq = 490;
                 int cycle = 1000000 / freq;
                 int value = 255 * (int)comp.timer / cycle;
-                comp.compParams["ledRed"].setValue(value);
+                comp.CompParams["ledRed"].setValue(value);
             }
-            else if (conn.toId == 5 || conn.toId == 6)
+            else if (conn.ToId == 5 || conn.ToId == 6)
             {
                 int freq = 980;
                 int cycle = 1000000 / freq;
                 int value = 255 * (int)comp.timer / cycle;
 
-                comp.compParams["ledRed"].setValue(value);
+                comp.CompParams["ledRed"].setValue(value);
             }
         }
 

@@ -47,7 +47,7 @@
             </button>
         </div>
     </div>
-    <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="addToCanvasIfNecessary">
+    <div class="page-content" @onmousedown="checkForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="AddToCanvasIfNecessary">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
@@ -64,7 +64,7 @@
             </div>
             <ComponentPane host="@this"></ComponentPane>
         </div>
-        <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.components[moverID].rightOffset)px; height:@(ComponentDeclarations.components[moverID].bottomOffset)px;">
+        <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverID].rightOffset)px; height:@(ComponentDeclarations.Components[moverID].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
         <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
@@ -340,7 +340,7 @@
         moverOffsetTop = e.ClientY;
     }
 
-    public void addToCanvasIfNecessary(MouseEventArgs e)
+    public void AddToCanvasIfNecessary(MouseEventArgs e)
     {
         if (targetCardComponentId != -1)
         {
@@ -348,17 +348,17 @@
             if (allowDrop) //ie, cursor is over the workbench
             {
                 ++localIds;
-                var d = ComponentDeclarations.components[targetCardComponentId];
+                var componentData = ComponentDeclarations.Components[targetCardComponentId];
                 var n = new node(); //label with localId (easy tracking)
-                n.localLabels.Add("user_" + d.nodeName);
+                n.localLabels.Add("user_" + componentData.nodeName);
 
                 GraphSynthInvoke.GetNodes().Add(n);
-                if (d.nodeName != null) GraphSynthInvoke.inputs.Add(d.nodeName);
+                if (componentData.nodeName != null) GraphSynthInvoke.inputs.Add(componentData.nodeName);
 
                 try
                 {
                     GraphSynthInvoke.Add();
-                    GraphSynthInvoke.Connect(d.nodeName);
+                    GraphSynthInvoke.Connect(componentData.nodeName);
                 }
                 catch (NoConnectionsException exception)
                 {
@@ -375,7 +375,7 @@
                 GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
                 GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
                 //create frontend instance
-                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * d.rightOffset), e.ClientY - (.5 * d.bottomOffset) - 50);
+                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
                 comp.localId = localIds;
                 comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
                 BuildCode.outputPins.Clear();
@@ -389,10 +389,10 @@
 
                 //register the dht specifically to forced the arduino to pause while awaiting response from sensor
                 //TODO: improve and generalize.
-                if (comps[localIds].globalId == 20)
+                if (comps[localIds].GlobalId == 20)
                 {
                     //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                    AppInterop.registerResponseRequired(comps[localIds].connMap[1][0].toId);
+                    AppInterop.registerResponseRequired(comps[localIds].ConnMap[1][0].ToId);
                 }
 
                 //create listeners for arduino pins to components.
@@ -411,18 +411,18 @@
     /// </summary>
     private void setupListeners()
     {
-        if (comps.Values.Any(c => c.isArduino())) //set has an arduino uno
+        if (comps.Values.Any(c => c.IsArduino())) //set has an arduino uno
         {
             foreach (var c in comps.Values) //iterate all components (don't know what listeners exist already)
             {
-                if (!c.isArduino()) //exclude the arduino
+                if (!c.IsArduino()) //exclude the arduino
                 {
-                    foreach (string listen in c.data.pinsToListen) //add a listener for each important pin
+                    foreach (string listen in c.Data.pinsToListen) //add a listener for each important pin
                     {
                         int pin = -1;
-                        if (0 == c.getConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
+                        if (0 == c.GetConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
                         {
-                            pin = conn!.toId;
+                            pin = conn!.ToId;
                         }
 
                         bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
@@ -431,13 +431,13 @@
                         if (!hasList || !list!.Any(el => el.actor == c)) //no list for this pin yet, or the list does not contain any connections for this component
                         {
                             int pin2 = -1;
-                            if (0 == c.getConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+                            if (0 == c.GetConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
                             {
-                                pin2 = conn2!.toId;
+                                pin2 = conn2!.ToId;
                             }
 
                             //TODO: fix so that all componenents inherit from one class
-                            var info = c.data.compType.GetMethod("translate");
+                            var info = c.Data.compType.GetMethod("translate");
                             if (info != null)
                             {
                                 AvrCPU.addListener(pin2, c, info);
@@ -471,10 +471,11 @@
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        //load rules.
         //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-        int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 90);
-        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 90);
+        // ^^ Hard to do because it downloads the rule set inside of the function, yet needs knowledge of next ruleset which hasnt been downloaded
+        // can request just one file?
+        int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
+        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
         if (_scheduleBenchSetup)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
@@ -503,10 +504,10 @@
     /// <param name="comp">A component instance to update the bindings on.</param>
     public void updatePinBindings(ComponentInstance comp)
     {
-        comp.connMap.Clear();
+        comp.ConnMap.Clear();
         //buildCanvas!.connLines.Clear();
 
-        var compPins = getPins(comp.gsNode, comp.data.nodeName);
+        var compPins = getPins(comp.GsNode, comp.Data.nodeName);
         if (compPins.Count == 0)
         {
             return;
@@ -539,9 +540,9 @@
 
             var aPinName = "**NF**";
 
-            if ((ha.isArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.isArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
+            if ((ha.IsArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.IsArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
             {
-                aPinName = (from df in ha.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                aPinName = (from df in ha.Data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
             }
 
             string bPinName = "";
@@ -549,16 +550,16 @@
 
             if (aPinName == "**NF**")
             {
-                aPinName = (from df in ha.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
-                bPinName = (from df in hb.data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                aPinName = (from df in ha.Data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                bPinName = (from df in hb.Data.pins.Keys where a.To.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
             }
             else
             {
-                bPinName = (from df in hb.data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
+                bPinName = (from df in hb.Data.pins.Keys where a.From.localLabels.Contains(df) select df).FirstOrDefault("**NF**");
             }
 
             //if arduino and data pin being connected, register to code.
-            if ((ha.isArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
+            if ((ha.IsArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
                 BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
                 //Console.WriteLine("1: " + BuildCode.outputPins.Count);
@@ -566,19 +567,19 @@
 
             if (aPinName == "**NF**")
             {
-                Console.WriteLine(ha.data.name + " is missing a pin definition!");
+                Console.WriteLine(ha.Data.name + " is missing a pin definition!");
             }
 
             if (bPinName == "**NF**")
             {
-                Console.WriteLine(hb.data.name + " is missing a pin definition!");
+                Console.WriteLine(hb.Data.name + " is missing a pin definition!");
             }
 
-            int i1 = ha.data.pins[aPinName];
-            int i2 = hb.data.pins[bPinName];
+            int i1 = ha.Data.pins[aPinName];
+            int i2 = hb.Data.pins[bPinName];
 
 
-            comp.addConnection(i1, hb, i2, a); //also sets up the drawn line
+            comp.AddConnection(i1, hb, i2, a); //also sets up the drawn line
         }
     }
 
@@ -608,13 +609,13 @@
     /// </summary>
     public void removecomp()
     {
-        node Comp2remove = Index.comps[selectedComponent].gsNode;
+        node Comp2remove = Index.comps[selectedComponent].GsNode;
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
         //TODO: improve and generalize.
-        if (comps[selectedComponent].globalId == 20)
+        if (comps[selectedComponent].GlobalId == 20)
         {
-            AppInterop.unregisterResponseRequired(comps[selectedComponent].connMap[1][0].toId);
+            AppInterop.unregisterResponseRequired(comps[selectedComponent].ConnMap[1][0].ToId);
         }
 
         GraphSynthInvoke.removeComp(Comp2remove);
@@ -756,11 +757,11 @@
         {
             comps.Add(kv.Key, kv.Value);
             var n = new node(); //label with localId (easy tracking)
-            n.localLabels.Add("user_" + kv.Value.data.nodeName);
-            kv.Value.gsNode = n;
+            n.localLabels.Add("user_" + kv.Value.Data.nodeName);
+            kv.Value.GsNode = n;
 
             GraphSynthInvoke.GetNodes().Add(n);
-            if (kv.Value.data.nodeName != null) GraphSynthInvoke.inputs.Add(kv.Value.data.nodeName);
+            if (kv.Value.Data.nodeName != null) GraphSynthInvoke.inputs.Add(kv.Value.Data.nodeName);
             GraphSynthInvoke.recg_apply();
             GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + kv.Key));
             GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));

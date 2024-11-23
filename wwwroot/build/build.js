@@ -13097,11 +13097,11 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("controllers/servo", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_7) {
+define("controllers/sg90", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Servo = void 0;
-    class Servo extends controller_8.Controller {
+    exports.SG90 = void 0;
+    class SG90 extends controller_8.Controller {
         setup() {
             var _a;
             this.fallingEdgeCycle = undefined;
@@ -13145,7 +13145,7 @@ define("controllers/servo", ["require", "exports", "controllers/controller", "li
             return ((ms - minPulse) / (maxPulse - minPulse)) * (maxAngle - minAngle) + minAngle;
         }
     }
-    exports.Servo = Servo;
+    exports.SG90 = SG90;
 });
 define("controllers/memory", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -13769,7 +13769,7 @@ define("controllers/ky024", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY024 = KY024;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1) {
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13782,7 +13782,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
     window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
-    window.Servo = servo_1.Servo;
+    window.SG90 = sg90_1.SG90;
     window.HCSR501 = hcsr501_1.HCSR501;
     window.KY018 = ky018_1.KY018;
     window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;

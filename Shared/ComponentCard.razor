@@ -15,11 +15,11 @@
             </div>
     }
     <div class="card-img-container">
-        <VaryingComponent disableBorder="true" posAbolute="false" individualData="new(globalId, new(), 0, 0)" objId="@globalId" zoomFactor="@(ComponentDeclarations.components[globalId].cardScaleFactor * ADArCWebApp.Pages.Index.currentWidthRatio)" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+        <VaryingComponent disableBorder="true" posAbolute="false" individualData="new(globalId, new(), 0, 0)" objId="@globalId" zoomFactor="@(ComponentDeclarations.Components[globalId].cardScaleFactor * ADArCWebApp.Pages.Index.currentWidthRatio)" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
     </div>
 
     <div class="altContainer" @oncontextmenu="showPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick" @oncontextmenu:preventDefault="true">
-        @ComponentDeclarations.components[globalId].paneHoverText
+        @ComponentDeclarations.Components[globalId].paneHoverText
     </div>
     <div class="card-name">
         @name
@@ -37,7 +37,7 @@
         public ComponentCard(int id)
         {
             this.globalId = id;
-            this.name = ComponentDeclarations.components[id].name;
+            this.name = ComponentDeclarations.Components[id].name;
         }
 
         public ComponentCard()

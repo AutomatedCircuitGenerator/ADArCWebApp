@@ -21,7 +21,7 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
     [Parameter] public ComponentInstance? ComponentInstance { get; set; }
 
     // this must be checked before setting up a controller/listeners, otherwise all the card components will create a controller
-    private bool IsCanvasComponent => ComponentInstance?.gsNode.localLabels.Count > 0;
+    private bool IsCanvasComponent => ComponentInstance?.GsNode.localLabels.Count > 0;
 
     public async ValueTask DisposeAsync()
     {
@@ -47,12 +47,12 @@ public abstract class RazorComponent : ComponentBase, IAsyncDisposable
             // Canonical pin name: "SO", to absolute pin indexes it is connected to
             Dictionary<string, List<int>> pins = new();
 
-            foreach (var pin in ComponentInstance.data.pins)
+            foreach (var pin in ComponentInstance.Data.pins)
             {
-                if (ComponentInstance.connMap.TryGetValue(pin.Value, out var connections))
+                if (ComponentInstance.ConnMap.TryGetValue(pin.Value, out var connections))
                 {
                     //one pin on a component can be connected to many pins on the arduino
-                    var pinIds = connections.Select(connection => connection.toId);
+                    var pinIds = connections.Select(connection => connection.ToId);
 
                     pins[pin.Key] = pinIds.ToList();
                 }
