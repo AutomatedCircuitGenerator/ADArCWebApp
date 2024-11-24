@@ -6,9 +6,14 @@
 
 
     <svg viewBox="0 0 @(Pages.Index.defaultScreenWidth * Pages.Index.currentWidthRatio) @(Pages.Index.defaultScreenHeight * Pages.Index.currentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
-        @foreach (var line in connLines)
+        @foreach (var line in connLines.Select((line, index) => (line, index)))
         {
-            <line x1="@(getConnectionCoord(0, line))" y1="@(getConnectionCoord(1, line))" x2="@(getConnectionCoord(2, line))" y2="@(getConnectionCoord(3, line))" stroke="@line.color" stroke-width="@(3 * zoomFactor)"></line>
+            var gridLines = getGridLines(line.line, 50, line.index * 5); // Example stepSize = 50 pixels
+
+            foreach (var segment in gridLines)
+            {
+                <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.line.color" stroke-width="@(3 * zoomFactor)"></line>
+            }
         }
     </svg>
 
@@ -63,36 +68,51 @@
     /// <param name="coord">0-3 to get each coordinate of the line.</param>
     /// <param name="conn">Connection to display.</param>
     /// <returns>The requested coordinate.</returns>
-    private double getConnectionCoord(int coord, InstanceConnection conn)
+    private List<(double x1, double y1, double x2, double y2)> getGridLines(InstanceConnection conn, double stepSize, double offset)
     {
-        //var canvasHeight = (Pages.Index.currentHeightRatio * Pages.Index.defaultScreenHeight)-50;
-        //var canvasWidth = Pages.Index.currentWidthRatio * Pages.Index.defaultScreenWidth;
+        ElementPin[] toPins = conn.to.data.pinInfo;
+        ElementPin[] fromPins = conn.from.data.pinInfo;
 
-        ElementPin[] arr = conn.to.data.pinInfo;
-        var pin = arr[conn.toId];
+        var toPin = toPins[conn.toId];
+        var fromPin = fromPins[conn.fromId];
 
-        ElementPin[] arr1 = conn.from.data.pinInfo;
+        var start = zoomCoord((conn.from.x + fromPin.x, conn.from.y + fromPin.y));
+        var end = zoomCoord((conn.to.x + toPin.x, conn.to.y + toPin.y));
 
-        var pin1 = arr1[conn.fromId];
+        var lines = new List<(double x1, double y1, double x2, double y2)>();
 
+        double currentX = start.x;
+        double currentY = start.y;
 
-        var crd = zoomCoord((conn.to.x + pin.x, conn.to.y + pin.y));
-        var crd1 = zoomCoord((conn.from.x + pin1.x, conn.from.y + pin1.y));
+        // 1. Diagonal Start Segment
+        double diagonalX = end.x > start.x ? currentX + stepSize + offset : currentX - stepSize - offset;
+        double diagonalY = end.y > start.y ? currentY + stepSize + offset : currentY - stepSize - offset;
 
-        switch (coord)
+        lines.Add((currentX, currentY, diagonalX, diagonalY));
+        currentX = diagonalX;
+        currentY = diagonalY;
+
+        // 2. Grid Path (align with target X, then target Y)
+        while (Math.Abs(currentX - end.x) > stepSize)
         {
-            case 0:
-                return crd.x;
-            case 1:
-                return crd.y;
-            case 2:
-                return crd1.x;
-            case 3:
-                return crd1.y;
-            default:
-                return -1;
+            double nextX = currentX + Math.Sign(end.x - currentX) * stepSize;
+            lines.Add((currentX, currentY, nextX, currentY));
+            currentX = nextX;
         }
+
+        while (Math.Abs(currentY - end.y) > stepSize)
+        {
+            double nextY = currentY + Math.Sign(end.y - currentY) * stepSize;
+            lines.Add((currentX, currentY, currentX, nextY));
+            currentY = nextY;
+        }
+
+        // 3. Diagonal End Segment
+        lines.Add((currentX, currentY, end.x, end.y));
+
+        return lines;
     }
+
 
 
     /// <summary>

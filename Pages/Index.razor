@@ -8,6 +8,7 @@
 @inject BoardService BoardService
 @inject ToastService ToastService
 @inject ILogger<Index> Logger
+@inject GraphSynthInvoke GraphSynthInvoke
 
 <PageTitle>Index</PageTitle>
 <head>
@@ -355,19 +356,14 @@
                 GraphSynthInvoke.GetNodes().Add(n);
                 if (d.nodeName != null) GraphSynthInvoke.inputs.Add(d.nodeName);
 
-                try
-                {
-                    GraphSynthInvoke.Add();
-                    GraphSynthInvoke.Connect(d.nodeName);
-                }
-                catch (NoConnectionsException exception)
+
+                GraphSynthInvoke.Add();
+                if (!GraphSynthInvoke.Connect(d.nodeName, "arduino", SelectArduinoNode))
                 {
                     moverOffsetLeft = 0;
                     moverOffsetTop = 0;
                     targetCardComponentId = -1;
                     GraphSynthInvoke.RemoveConnectedComponent(n);
-                    Logger.LogError(exception.Message);
-                    ToastService.AddToast($"No more pins are available. Try removing a component!", Variant.Error);
                     return;
                 }
 
@@ -404,6 +400,137 @@
             moverOffsetTop = 0;
             targetCardComponentId = -1;
         }
+    }
+
+    private node? SelectArduinoNode(List<node> nodes, HashSet<string> labels)
+    {
+        List<node> i2cNodes = [];
+        List<node> pwmNodes = [];
+        List<node> analogNodes = [];
+        List<node> usartNodes = [];
+        List<node> spiNodes = [];
+        List<node> connectedCandidates = [];
+
+        bool isSpecial = labels.Contains("sda") || labels.Contains("scl") || labels.Contains("rx") ||
+                         labels.Contains("tx") || labels.Contains("pwm") || labels.Contains("analog") ||
+                         labels.Contains("sck") || labels.Contains("cipo") || labels.Contains("copi");
+
+        foreach (var node in nodes)
+        {
+            var localLabels = new HashSet<string>(node.localLabels);
+            // if this is the case, this is definetly not the node we are looking for.
+            if (!labels.IsSubsetOf(localLabels)) continue;
+            // this node is correct, but already has a connection. we mark this for error reporting.
+            if (localLabels.Contains("connected"))
+            {
+                connectedCandidates.Add(node);
+                continue;
+            }
+
+            // if we are looking for a special node, stop here
+            if (isSpecial)
+            {
+                return node;
+            }
+
+            // if we are looking for a GPIO pin, try to protect special pins
+            if (localLabels.Contains("sda") || localLabels.Contains("scl"))
+            {
+                i2cNodes.Add(node);
+            }
+            else if (localLabels.Contains("pwm"))
+            {
+                pwmNodes.Add(node);
+            }
+            else if (localLabels.Contains("analog"))
+            {
+                analogNodes.Add(node);
+            }
+            else if (localLabels.Contains("tx") || localLabels.Contains("rx"))
+            {
+                usartNodes.Add(node);
+            }
+            else if (localLabels.Contains("copi") || localLabels.Contains("cipo") || localLabels.Contains("sck"))
+            {
+                spiNodes.Add(node);
+            }
+            else // if we have found a non-reserved node
+            {
+                return node;
+            }
+        }
+
+        // Fallback priority: PWM -> USART -> Analog -> SPI -> I2C
+        node? selectedNode = null;
+        if (pwmNodes.Count > 0)
+        {
+            selectedNode = pwmNodes.First();
+        }
+        else if (usartNodes.Count > 0)
+        {
+            selectedNode = usartNodes.First();
+        }
+        else if (analogNodes.Count > 0)
+        {
+            selectedNode = analogNodes.First();
+        }
+        else if (spiNodes.Count > 0)
+        {
+            selectedNode = spiNodes.First();
+        }
+        else if (i2cNodes.Count > 0)
+        {
+            selectedNode = i2cNodes.First();
+        }
+
+        // Return the selected fallback node or null if no match was found
+        if (selectedNode == null)
+        {
+            List<string> connectedComponentNames = [];
+            List<string> connectedPinNames = [];
+            foreach (var candidate in connectedCandidates)
+            {
+                var pinName = "";
+                foreach (var label in candidate.localLabels)
+                {
+                    if (Regex.IsMatch(label,  @"a\d+"))
+                    {
+                        pinName = label;
+                        break;
+                    }
+
+                    if (Regex.IsMatch(label,  @"d\d+"))
+                    {
+                        pinName = label;
+                    }
+                }
+                connectedPinNames.Add(pinName);
+                var componentPin = candidate.arcsFrom.Find(a => a.localLabels.Contains("connection"))?.To ?? candidate.arcsTo.Find(a => a.localLabels.Contains("connection"))?.From;
+                var componentNode = componentPin?.arcsFrom.Find(a => !a.localLabels.Contains("connection"))?.To ?? componentPin?.arcsTo.Find(a => !a.localLabels.Contains("connection"))?.From;
+                connectedComponentNames.Add(componentNode.localLabels.First());
+            }
+
+            var message = "No more pins are available. Try removing ";
+
+            for (int i = 0; i < Math.Min(3, connectedComponentNames.Count); i++)
+            {
+                if (i == Math.Min(3, connectedComponentNames.Count) - 2)
+                {
+                    message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]} or ";
+                }
+                else if (i < Math.Min(3, connectedComponentNames.Count) - 1)
+                {
+                    message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]}, ";
+                }
+                else
+                {
+                    message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]}.";
+                }
+            }
+            
+            ToastService.AddToast(message, Variant.Error);
+        }
+        return selectedNode;
     }
 
     /// <summary>
@@ -475,12 +602,14 @@
         //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 90);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 90);
+        GraphSynthInvoke.rulesets = RuleSetMap.rulesets;
         if (_scheduleBenchSetup)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
             compPane!.releaseLockout();
             selLockedOut = false;
         }
+
         //all else finish first
         await Task.Delay(1000);
         loadingProgress = -1;
