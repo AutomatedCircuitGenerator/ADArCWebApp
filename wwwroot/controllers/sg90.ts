@@ -8,12 +8,22 @@ export class SG90 extends Controller {
     private risingEdgeCycle?: number;
     private fallingEdgeCycle?: number;
     private previousAngle?: number;
+    
+    private hornAngle:number|null;
+    private animationFrameId:number|null;
 
     setup(): void {
         this.fallingEdgeCycle = undefined;
         this.risingEdgeCycle = undefined;
+        this.animationFrameId = null;
         this.signal = this.pins.orange[0].digital;
         this.signal?.addListener(this.onSignalChange.bind(this)); // this is done to preserve the "this" context, since listener will be called inside Pin.ts
+    }
+    cleanup() {
+        if (this.animationFrameId) {
+            cancelAnimationFrame(this.animationFrameId);
+        }
+        this.hornAngle= null;
     }
 
     private onSignalChange(state: PinState) {
@@ -28,17 +38,21 @@ export class SG90 extends Controller {
             const angle = Math.round(this.msToAngle(pulseWidthMs));
 
             if (this.previousAngle !== angle) {
-                this.renderHorn(angle);
+                this.hornAngle = angle;
+                if (!this.animationFrameId) {
+                    this.animationFrameId = requestAnimationFrame(this.renderHorn.bind(this));
+                }
             }
 
             this.previousAngle = angle;
         }
     }
 
-    private renderHorn(angle: number) {
+    private renderHorn() {
         const horn = this.element.querySelector<HTMLElement>(".horn");
-        const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
+        const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle}) translate(-91.467 -59.773)`;
         horn.setAttribute('transform', transformValue);
+        this.animationFrameId = null;
     }
 
     private cyclesToMs(cycles: number) {
