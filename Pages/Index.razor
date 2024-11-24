@@ -1,13 +1,11 @@
 ﻿@page "/"
 @using GraphSynth.Representation
-@using System.Text.Json
-@using ADArCWebApp.Shared.Exceptions
 @using ADArCWebApp.Shared.UIComponents
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject BoardService BoardService
 @inject ToastService ToastService
-@inject ILogger<Index> Logger
+@inject GraphSynthInvoke GraphSynthInvoke
 
 <PageTitle>Index</PageTitle>
 <head>
@@ -30,12 +28,12 @@
         </button>
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
+                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
 
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="LoadFromFile"/>
-                <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")">
+                <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")">
                     <span>⬇️️ Import</span>
                 </label>
             </div>
@@ -64,8 +62,8 @@
             </div>
             <ComponentPane host="@this"></ComponentPane>
         </div>
-        <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverID].rightOffset)px; height:@(ComponentDeclarations.Components[moverID].bottomOffset)px;">
-            <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverID, new(), 0, 0)" objId="@moverID" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
+        <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
+            <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
         <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
@@ -116,9 +114,9 @@
 
 @code{
     bool isLeftExpanded = true;
-    bool isRightExpanded = false;
+    bool isRightExpanded ;
 
-    private bool _scheduleBenchSetup = false;
+    private bool _scheduleBenchSetup ;
 
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
@@ -133,7 +131,7 @@
     int rightPaneAlign => isRightExpanded ? 0 : -39;
 
     string runStopText = "▶️ Run";
-    public bool isRunning = false;
+    public bool IsRunning;
 
     void ToggleLeftSidebar()
     {
@@ -156,7 +154,7 @@
         if (LoadingProgress == -1)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
-            compPane!.ReleaseLockout();
+            CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
         else
@@ -172,7 +170,7 @@
     /// <returns></returns>
     async Task ToggleRunStop()
     {
-        if (!isRunning)
+        if (!IsRunning)
         {
             runStopText = "Compiling...";
             var response = await AppInterop.CompileWrapper();
@@ -180,7 +178,7 @@
 
             if (response.stderr != "")
             {
-                codePane?.UpdateConsoleOutput(response.stderr, false);
+                CodePane?.UpdateConsoleOutput(response.stderr, false);
                 runStopText = "▶️ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
@@ -190,7 +188,7 @@
                     //cut off the colons at the beginning and end
                     lineSection = lineSection[1..^1];
                     //get the index of the middle colon
-                    int mid = lineSection.IndexOf(":");
+                    int mid = lineSection.IndexOf(":", StringComparison.Ordinal);
                     //grab line number only
                     int line = int.Parse(lineSection[0..^(lineSection.Length - mid)]);
                     //grab column number only
@@ -202,20 +200,20 @@
             }
             else //no errors
             {
-                codePane?.UpdateConsoleOutput(response.stdout, false);
+                CodePane?.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.ClearMonacoErrorsWrapper();
                 AppInterop.StartSimWrapper();
                 runStopText = "🟥 Stop";
-                isRunning = true;
+                IsRunning = true;
             }
         }
         else //stop running
         {
             AppInterop.StopWrapper();
-            codePane!.CommitBuffer();
-            codePane!.UpdateConsoleOutput("Stopped.\n", false);
+            CodePane!.CommitBuffer();
+            CodePane!.UpdateConsoleOutput("Stopped.\n", false);
             runStopText = "▶️ Run";
-            isRunning = false;
+            IsRunning = false;
         }
     }
 
@@ -228,7 +226,7 @@
 
     public Index()
     {
-        app = this;
+        App = this;
     }
 
     /// <summary>
@@ -266,14 +264,14 @@
 
     public int SelectedComponent = -1;
 
-    public static Index? app;
-    public static MainCanvas? buildCanvas;
-    public static CodePane? codePane;
-    public static ComponentPane? compPane;
-    public static readonly int defaultScreenWidth = 1920;
-    public static double currentWidthRatio = 1;
-    public static readonly int defaultScreenHeight = 1080;
-    public static double currentHeightRatio = 1;
+    public static Index? App;
+    public static MainCanvas? BuildCanvas;
+    public static CodePane? CodePane;
+    public static ComponentPane? CompPane;
+    public const int DefaultScreenWidth = 1920;
+    public static double CurrentWidthRatio = 1;
+    public const int DefaultScreenHeight = 1080;
+    public static double CurrentHeightRatio = 1;
 
     public static ElementReference? refresh;
 
@@ -309,7 +307,7 @@
     /// <summary>
     /// Controls what component is displayed while the drag is ongoing.
     /// </summary>
-    private int moverID => targetCardComponentId == -1 ? 1 : targetCardComponentId;
+    private int moverId => targetCardComponentId == -1 ? 1 : targetCardComponentId;
 
     private string isVisible = "hidden";
     private bool allowDrop = false;
@@ -352,19 +350,13 @@
             GraphSynthInvoke.GetNodes().Add(n);
             if (componentData.nodeName != null) GraphSynthInvoke.inputs.Add(componentData.nodeName);
 
-            try
-            {
-                GraphSynthInvoke.Add();
-                GraphSynthInvoke.Connect(componentData.nodeName);
-            }
-            catch (NoConnectionsException exception)
+            GraphSynthInvoke.Add();
+            if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
             {
                 moverOffsetLeft = 0;
                 moverOffsetTop = 0;
                 targetCardComponentId = -1;
                 GraphSynthInvoke.RemoveConnectedComponent(n);
-                Logger.LogError(exception.Message);
-                ToastService.AddToast($"No more pins are available. Try removing a component!", Variant.Error);
                 return;
             }
 
@@ -374,9 +366,9 @@
             //create frontend instance
             var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
             comp.localId = localIds;
-            Comps.Add(localIds, buildCanvas?.unZoom(comp)); //50 is height of toolbar
+            Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
             BuildCode.outputPins.Clear();
-            buildCanvas!.connLines.Clear();
+            BuildCanvas!.ConnLines.Clear();
             //reset the way that component pins are bound to the arduino.
             //TODO: check for performance improvements here.
             foreach (var c in Comps.Values)
@@ -402,6 +394,126 @@
         targetCardComponentId = -1;
     }
 
+    private node? SelectArduinoNode(List<node> nodes, HashSet<string> labels)
+    {
+        List<node> i2cNodes = [];
+        List<node> pwmNodes = [];
+        List<node> analogNodes = [];
+        List<node> usartNodes = [];
+        List<node> spiNodes = [];
+        List<node> connectedCandidates = [];
+        bool isSpecial = labels.Contains("sda") || labels.Contains("scl") || labels.Contains("rx") ||
+                         labels.Contains("tx") || labels.Contains("pwm") || labels.Contains("analog") ||
+                         labels.Contains("sck") || labels.Contains("cipo") || labels.Contains("copi");
+        foreach (var node in nodes)
+        {
+            var localLabels = new HashSet<string>(node.localLabels);
+            // if this is the case, this is definetly not the node we are looking for.
+            if (!labels.IsSubsetOf(localLabels)) continue;
+            // this node is correct, but already has a connection. we mark this for error reporting.
+            if (localLabels.Contains("connected"))
+            {
+                connectedCandidates.Add(node);
+                continue;
+            }
+            // if we are looking for a special node, stop here
+            if (isSpecial)
+            {
+                return node;
+            }
+            // if we are looking for a GPIO pin, try to protect special pins
+            if (localLabels.Contains("sda") || localLabels.Contains("scl"))
+            {
+                i2cNodes.Add(node);
+            }
+            else if (localLabels.Contains("pwm"))
+            {
+                pwmNodes.Add(node);
+            }
+            else if (localLabels.Contains("analog"))
+            {
+                analogNodes.Add(node);
+            }
+            else if (localLabels.Contains("tx") || localLabels.Contains("rx"))
+            {
+                usartNodes.Add(node);
+            }
+            else if (localLabels.Contains("copi") || localLabels.Contains("cipo") || localLabels.Contains("sck"))
+            {
+                spiNodes.Add(node);
+            }
+            else // if we have found a non-reserved node
+            {
+                return node;
+            }
+        }
+        // Fallback priority: PWM -> USART -> Analog -> SPI -> I2C
+        node? selectedNode = null;
+        if (pwmNodes.Count > 0)
+        {
+            selectedNode = pwmNodes.First();
+        }
+        else if (usartNodes.Count > 0)
+        {
+            selectedNode = usartNodes.First();
+        }
+        else if (analogNodes.Count > 0)
+        {
+            selectedNode = analogNodes.First();
+        }
+        else if (spiNodes.Count > 0)
+        {
+            selectedNode = spiNodes.First();
+        }
+        else if (i2cNodes.Count > 0)
+        {
+            selectedNode = i2cNodes.First();
+        }
+        // Return the selected fallback node or null if no match was found
+        if (selectedNode != null) return selectedNode;
+        List<string> connectedComponentNames = [];
+        List<string> connectedPinNames = [];
+        foreach (var candidate in connectedCandidates)
+        {
+            var pinName = "";
+            foreach (var label in candidate.localLabels)
+            {
+                if (Regex.IsMatch(label,  @"a\d+"))
+                {
+                    pinName = label;
+                    break;
+                }
+                if (Regex.IsMatch(label,  @"d\d+"))
+                {
+                    pinName = label;
+                }
+            }
+            connectedPinNames.Add(pinName);
+            var componentPin = candidate.arcsFrom.Find(a => a.localLabels.Contains("connection"))?.To ?? candidate.arcsTo.Find(a => a.localLabels.Contains("connection"))?.From;
+            var componentNode = componentPin?.arcsFrom.Find(a => !a.localLabels.Contains("connection"))?.To ?? componentPin?.arcsTo.Find(a => !a.localLabels.Contains("connection"))?.From;
+            connectedComponentNames.Add(componentNode.localLabels.First());
+        }
+        var message = "No more pins are available. Try removing ";
+        for (int i = 0; i < Math.Min(3, connectedComponentNames.Count); i++)
+        {
+            if (i == Math.Min(3, connectedComponentNames.Count) - 2)
+            {
+                message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]} or ";
+            }
+            else if (i < Math.Min(3, connectedComponentNames.Count) - 1)
+            {
+                message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]}, ";
+            }
+            else
+            {
+                message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]}.";
+            }
+        }
+            
+        ToastService.AddToast(message, Variant.Error);
+        return selectedNode;
+    }
+    
     /// <summary>
     /// Binds component translation functions to arduino pins through listeners.
     /// </summary>
@@ -467,10 +579,11 @@
         // can request just one file?
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
+        GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
         if (_scheduleBenchSetup)
         {
             SetupBenchFromJsonString(BoardService.GetJson());
-            compPane!.ReleaseLockout();
+            CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
 
@@ -616,7 +729,7 @@
 
 
         BuildCode.outputPins.Clear();
-        buildCanvas!.connLines.Clear();
+        BuildCanvas!.ConnLines.Clear();
         foreach (var comp in Comps.Values)
         {
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
@@ -641,7 +754,7 @@
     private void HandleKeyPress(KeyboardEventArgs e)
     {
         // 1 is the arduino, not sure what -2 or -1 is
-        if (isRunning || (e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        if (IsRunning || (e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
         RemoveComp();
         SelectedComponent = -1;
     }
@@ -656,14 +769,14 @@
 
         if (action == "in")
         {
-            buildCanvas!.zoomFactor -= zoomStep;
+            BuildCanvas!.zoomFactor -= zoomStep;
         }
         else if (action == "out")
         {
-            buildCanvas!.zoomFactor += zoomStep;
+            BuildCanvas!.zoomFactor += zoomStep;
         }
 
-        buildCanvas!.zoomFactor = Math.Clamp(buildCanvas!.zoomFactor, .4, 3);
+        BuildCanvas!.zoomFactor = Math.Clamp(BuildCanvas!.zoomFactor, .4, 3);
 
         StateHasChanged();
     }
@@ -733,8 +846,8 @@
             SelectedComponent = -1;
         }
 
-        buildCanvas!.connLines.Clear();
-        buildCanvas.resetTransform();
+        BuildCanvas!.ConnLines.Clear();
+        BuildCanvas.ResetTransform();
         GraphSynthInvoke.inputs.Clear();
         GraphSynthInvoke.destroyGraph();
         BuildCode.outputPins.Clear();

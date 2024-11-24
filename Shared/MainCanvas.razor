@@ -1,14 +1,18 @@
-﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="canvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
     @foreach (var c in comps)
     {
-        <VaryingComponent forceBorder="c.Key == Pages.Index.app.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        <VaryingComponent forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
 
 
-    <svg viewBox="0 0 @(Pages.Index.defaultScreenWidth * Pages.Index.currentWidthRatio) @(Pages.Index.defaultScreenHeight * Pages.Index.currentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
-        @foreach (var line in connLines)
+    <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
+        @foreach (var line in ConnLines.Select((line, index) => (line, index)))
         {
-            <line x1="@(getConnectionCoord(0, line))" y1="@(getConnectionCoord(1, line))" x2="@(getConnectionCoord(2, line))" y2="@(getConnectionCoord(3, line))" stroke="@line.Color" stroke-width="@(3 * zoomFactor)"></line>
+            var gridLines = GetGridLines(line.line, 50, line.index * 5); // Example stepSize = 50 pixels
+            foreach (var segment in gridLines)
+            {
+                <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.line.Color" stroke-width="@(3 * zoomFactor)"></line>
+            }
         }
     </svg>
 
@@ -19,12 +23,12 @@
 
     public MainCanvas()
     {
-        ADArCWebApp.Pages.Index.buildCanvas = this;
+        Pages.Index.BuildCanvas = this;
     }
 
-    public List<InstanceConnection> connLines = new List<InstanceConnection>();
+    public readonly List<InstanceConnection> ConnLines = [];
 
-    [Parameter] public Dictionary<int, ComponentInstance> comps { get; set; }
+    [Parameter] public required Dictionary<int, ComponentInstance> comps { get; set; }
 
 
     [Parameter] public EventCallback<MouseEventArgs> handleMouseLeave { get; set; }
@@ -32,18 +36,18 @@
     [Parameter] public EventCallback<MouseEventArgs> handleMouseEnter { get; set; }
 
 
-    private bool dragging = false;
-    private bool hasTarget = false; //refers to whether or not a drag process has a target, meaning that a component is dragged
-    private KeyValuePair<int, ComponentInstance> target;
+    private bool _dragging = false;
+    private bool _hasTarget = false; //refers to whether or not a drag process has a target, meaning that a component is dragged
+    private KeyValuePair<int, ComponentInstance> _target;
 
-    private Transform transform = new Transform();
+    private Transform transform = new();
 
     /// <summary>
     /// Transform refers to the combination of fullscreen drag and zoom.
-    /// Zoom is currectly disabled.
+    /// Zoom is currently disabled.
     /// This function resets both.
     /// </summary>
-    public void resetTransform()
+    public void ResetTransform()
     {
         transform = new Transform();
     }
@@ -60,38 +64,49 @@
     /// <summary>
     /// Gets 1 of 4 coordinates of a connection line.
     /// </summary>
-    /// <param name="coord">0-3 to get each coordinate of the line.</param>
     /// <param name="conn">Connection to display.</param>
+    /// <param name="stepSize"></param>
+    /// <param name="offset"></param>
     /// <returns>The requested coordinate.</returns>
-    private double getConnectionCoord(int coord, InstanceConnection conn)
+    private List<(double x1, double y1, double x2, double y2)> GetGridLines(InstanceConnection conn, double stepSize, double offset)
     {
-        //var canvasHeight = (Pages.Index.currentHeightRatio * Pages.Index.defaultScreenHeight)-50;
-        //var canvasWidth = Pages.Index.currentWidthRatio * Pages.Index.defaultScreenWidth;
+        ElementPin[] toPins = conn.To.Data.pinInfo;
+        ElementPin[] fromPins = conn.From.Data.pinInfo;
+        var toPin = toPins[conn.ToId];
+        var fromPin = fromPins[conn.FromId];
+        var start = ZoomCoord((conn.From.X + fromPin.x, conn.From.Y + fromPin.y));
+        var end = ZoomCoord((conn.To.X + toPin.x, conn.To.Y + toPin.y));
 
-        ElementPin[] arr = conn.To.Data.pinInfo;
-        var pin = arr[conn.ToId];
+        var lines = new List<(double x1, double y1, double x2, double y2)>();
 
-        ElementPin[] arr1 = conn.From.Data.pinInfo;
+        double currentX = start.x;
+        double currentY = start.y;
 
-        var pin1 = arr1[conn.FromId];
+        // 1. Diagonal Start Segment
+        double diagonalX = end.x > start.x ? currentX + stepSize + offset : currentX - stepSize - offset;
+        double diagonalY = end.y > start.y ? currentY + stepSize + offset : currentY - stepSize - offset;
+        lines.Add((currentX, currentY, diagonalX, diagonalY));
+        currentX = diagonalX;
+        currentY = diagonalY;
 
-
-        var crd = zoomCoord((conn.To.X + pin.x, conn.To.Y + pin.y));
-        var crd1 = zoomCoord((conn.From.X + pin1.x, conn.From.Y + pin1.y));
-
-        switch (coord)
+        // 2. Grid Path (align with target X, then target Y)
+        while (Math.Abs(currentX - end.x) > stepSize)
         {
-            case 0:
-                return crd.x;
-            case 1:
-                return crd.y;
-            case 2:
-                return crd1.x;
-            case 3:
-                return crd1.y;
-            default:
-                return -1;
+            double nextX = currentX + Math.Sign(end.x - currentX) * stepSize;
+            lines.Add((currentX, currentY, nextX, currentY));
+            currentX = nextX;
         }
+
+        while (Math.Abs(currentY - end.y) > stepSize)
+        {
+            double nextY = currentY + Math.Sign(end.y - currentY) * stepSize;
+            lines.Add((currentX, currentY, currentX, nextY));
+            currentY = nextY;
+        }
+
+        // 3. Diagonal End Segment
+        lines.Add((currentX, currentY, end.x, end.y));
+        return lines;
     }
 
 
@@ -99,7 +114,7 @@
     /// Currently unused. Handles scrollwheel zooming.
     /// </summary>
     /// <param name="e">Provided scrollwheel event.</param>
-    private void updZoom(WheelEventArgs e)
+    private void UpdZoom(WheelEventArgs e)
     {
         zoomFactor += e.DeltaY / -1000;
 
@@ -108,7 +123,7 @@
 
         foreach (var comp in comps.Values)
         {
-            adjustCompToZoom(comp);
+            AdjustCompToZoom(comp);
         }
     }
 
@@ -117,11 +132,11 @@
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    public ComponentInstance adjustCompToZoom(ComponentInstance comp)
+    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
-        var z = zoomCoord(coord);
+        var z = ZoomCoord(coord);
 
         comp.zoomedX = z.x;
         comp.zoomedY = z.y;
@@ -134,7 +149,7 @@
     /// </summary>
     /// <param name="coord">a coordinate to zoom</param>
     /// <returns>the zoomed coordinate.</returns>
-    public (double x, double y) zoomCoord((double x, double y) coord)
+    private (double x, double y) ZoomCoord((double x, double y) coord)
     {
         coord.x = (coord.x + (transform.translate.x * (1 / zoomFactor)) - zoomOrigin.x) * zoomFactor + zoomOrigin.x;
         coord.y = (coord.y + (transform.translate.y * (1 / zoomFactor)) - zoomOrigin.y) * zoomFactor + zoomOrigin.y;
@@ -147,7 +162,7 @@
     /// </summary>
     /// <param name="comp">the component in question.</param>
     /// <returns>the component, now returned to normal.</returns>
-    public ComponentInstance unZoom(ComponentInstance comp)
+    public ComponentInstance UnZoom(ComponentInstance comp)
     {
         comp.X = (comp.X - zoomOrigin.x) / zoomFactor + zoomOrigin.x - (transform.translate.x * (1 / zoomFactor));
         comp.Y = (comp.Y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - (transform.translate.y * (1 / zoomFactor));
@@ -160,32 +175,36 @@
     //handle the start of drags that target a specific component
     private void DragComponentStart(MouseEventArgs e, KeyValuePair<int, ComponentInstance> target)
     {
-        if (e.Button == 0)
-        {
-            dragging = true; //start drag, signal that there is a selected component, and remember it
-            hasTarget = true;
-            this.target = target;
-        }
+        if (e.Button != 0) return;
+        _dragging = true; //start drag, signal that there is a selected component, and remember it
+        _hasTarget = true;
+        this._target = target;
     }
 
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
-        if (dragging && hasTarget) //dragging a specific component, the target
+        switch (_dragging)
         {
-            target.Value.X += (e.MovementX / zoomFactor);
-            target.Value.Y += (e.MovementY / zoomFactor);
-            adjustCompToZoom(target.Value);
-        }
-        else if (dragging) //dragging the canvas, all components
-        {
-            transform.translate.x += e.MovementX;
-            transform.translate.y += e.MovementY;
-            foreach (var t in comps)
+            //dragging a specific component, the target
+            case true when _hasTarget:
+                _target.Value.X += (e.MovementX / zoomFactor);
+                _target.Value.Y += (e.MovementY / zoomFactor);
+                AdjustCompToZoom(_target.Value);
+                break;
+            //dragging the canvas, all components
+            case true:
             {
-                //t.Value.x += (e.MovementX / zoomFactor);
-                //t.Value.y += (e.MovementY / zoomFactor);
-                adjustCompToZoom(t.Value);
+                transform.translate.x += e.MovementX;
+                transform.translate.y += e.MovementY;
+                foreach (var t in comps)
+                {
+                    //t.Value.x += (e.MovementX / zoomFactor);
+                    //t.Value.y += (e.MovementY / zoomFactor);
+                    AdjustCompToZoom(t.Value);
+                }
+
+                break;
             }
         }
     }
@@ -195,8 +214,8 @@
     //handles the end of a drag targeting a specific component, removing the target
     private void DragComponentEnd(MouseEventArgs e)
     {
-        dragging = false;
-        hasTarget = false;
+        _dragging = false;
+        _hasTarget = false;
         dragEndFlag = true;
     }
 
@@ -205,14 +224,14 @@
     {
         if (e.Button == 0)
         {
-            dragging = true;
+            _dragging = true;
         }
     }
 
     //canvas drag end, stop drag
     private void DragEnd(MouseEventArgs e)
     {
-        dragging = false;
+        _dragging = false;
     }
 
     bool targetFound = false;
@@ -221,31 +240,31 @@
     public void ComponentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
     {
         targetFound = true;
-        if (Pages.Index.app!.SelectedComponent < 0) //no previous selection
+        if (Pages.Index.App!.SelectedComponent < 0) //no previous selection
         {
-            Pages.Index.app!.SelectedComponent = c.Key;
+            Pages.Index.App.SelectedComponent = c.Key;
         }
-        else if (Pages.Index.app!.SelectedComponent != c.Key) //selection is not the previously selected component. Could be || with prev, readability.
+        else if (Pages.Index.App.SelectedComponent != c.Key) //selection is not the previously selected component. Could be || with prev, readability.
         {
-            Pages.Index.app!.SelectedComponent = c.Key;
+            Pages.Index.App.SelectedComponent = c.Key;
         }
         else if (dragEndFlag) //avoid deselects at the end of drags
         {
             dragEndFlag = false;
-            Pages.Index.app!.SelectedComponent = c.Key;
+            Pages.Index.App.SelectedComponent = c.Key;
         }
         else //catch weird stuff with deselect
         {
-            Pages.Index.app!.SelectedComponent = -1;
+            Pages.Index.App.SelectedComponent = -1;
         }
     }
 
     //click on the canvas handler.
-    private void canvasClick()
+    private void CanvasClick()
     {
         if (!targetFound)
         {
-            Pages.Index.app!.SelectedComponent = -2;
+            Pages.Index.App!.SelectedComponent = -2;
         }
 
         targetFound = false;

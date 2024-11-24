@@ -20,7 +20,7 @@
                     <span style="padding-left: 3px">𝗶</span>
                     <span style="padding-left: 7px">￨ Component Information</span>
                 </button>
-                @if (!Pages.Index.app!.isRunning && individualData.GlobalId != 1)
+                @if (!Pages.Index.App!.IsRunning && individualData.GlobalId != 1)
                 {
                     <button id="deletebutton" @onclick="Remove">
                         <span>x</span>
@@ -200,7 +200,7 @@
     /// </summary>
     private static void Remove()
     {
-        Pages.Index.app!.RemoveComp();
+        Pages.Index.App!.RemoveComp();
     }
 
     private bool showMenu = false;

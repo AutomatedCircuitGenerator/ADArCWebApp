@@ -117,7 +117,7 @@ namespace ADArCWebApp.Shared
 
             if (!IsArduino())
             {
-                Pages.Index.buildCanvas!.connLines.Add(toAdd);
+                Pages.Index.BuildCanvas!.ConnLines.Add(toAdd);
             }
         }
 

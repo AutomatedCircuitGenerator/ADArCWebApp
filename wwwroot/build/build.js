@@ -13798,13 +13798,13 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.gHighCycles = 0;
             this.gFirstCallCycles = 0;
             this.gBrightness = 0;
-            this.gSeenFallingEdge = false;
+            this.gSeenRisingEdge = false;
             this.bLastState = avr8js_11.PinState.Input;
             this.bLastStateCycles = 0;
             this.bHighCycles = 0;
             this.bFirstCallCycles = 0;
             this.bBrightness = 0;
-            this.bSeenFallingEdge = false;
+            this.bSeenRisingEdge = false;
             this.rIsFirstCall = true;
             this.gIsFirstCall = true;
             this.bIsFirstCall = true;
@@ -13821,17 +13821,19 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.gHighCycles = 0;
             this.gFirstCallCycles = 0;
             this.gBrightness = 0;
-            this.gSeenFallingEdge = false;
+            this.gSeenRisingEdge = false;
             this.bLastState = avr8js_11.PinState.Input;
             this.bLastStateCycles = 0;
             this.bHighCycles = 0;
             this.bFirstCallCycles = 0;
             this.bBrightness = 0;
-            this.bSeenFallingEdge = false;
+            this.bSeenRisingEdge = false;
             this.rIsFirstCall = true;
             this.gIsFirstCall = true;
             this.bIsFirstCall = true;
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
+            this.pins.G[0].digital.addListener(this.gListener.bind(this));
+            this.pins.B[0].digital.addListener(this.bListener.bind(this));
         }
         rListener(state) {
             if (this.rIsFirstCall) {
@@ -13856,7 +13858,54 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             else {
                 this.rBrightness = Math.min(this.rHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles), 1);
             }
-            console.log(`High cycles out of total cycles ${this.rBrightness}\nHigh cycle ${this.rHighCycles}\nCur cycles ${execute_13.AVRRunner.getInstance().board.cpu.cycles}`);
+        }
+        gListener(state) {
+            if (this.gIsFirstCall) {
+                this.gFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.gIsFirstCall = false;
+            }
+            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gLastStateCycles;
+            if (this.gLastState === avr8js_11.PinState.High) {
+                this.gHighCycles += delta;
+            }
+            if (this.gLastState === avr8js_11.PinState.Low) {
+                this.gSeenRisingEdge = true;
+            }
+            this.gLastState = state;
+            this.gLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles;
+            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles)) {
+                this.gBrightness = 0;
+            }
+            else if (this.gBrightness == 0 && this.gSeenRisingEdge) {
+                this.gBrightness = 1;
+            }
+            else {
+                this.gBrightness = Math.min(this.gHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles), 1);
+            }
+        }
+        bListener(state) {
+            if (this.bIsFirstCall) {
+                this.bFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.bIsFirstCall = false;
+            }
+            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bLastStateCycles;
+            if (this.bLastState === avr8js_11.PinState.High) {
+                this.bHighCycles += delta;
+            }
+            if (this.bLastState === avr8js_11.PinState.Low) {
+                this.bSeenRisingEdge = true;
+            }
+            this.bLastState = state;
+            this.bLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles;
+            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles)) {
+                this.bBrightness = 0;
+            }
+            else if (this.bBrightness == 0 && this.bSeenRisingEdge) {
+                this.bBrightness = 1;
+            }
+            else {
+                this.bBrightness = Math.min(this.bHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles), 1);
+            }
         }
     }
     exports.RGBLED = RGBLED;

@@ -1,6 +1,5 @@
 ﻿@inject ToastService ToastService
-
-<div style="position: absolute; left: 50%; bottom: 10%;">
+<div style="position: absolute; left: 50%; bottom: 10%;" @onmouseover="HandleMouseOver" @onmouseleave="HandleMouseLeave">
     @foreach (var (toast, _) in _toasts.AsEnumerable().Reverse())
     {
         <Toast Variant="@toast.Variant" OnClose="() => RemoveToast(toast)">@toast.Message</Toast>
@@ -17,7 +16,8 @@
 
     private void OnToastAdded(Shared.Toast toast)
     {
-        var timer = new Timer(RemoveToast, toast, 5000, Timeout.Infinite);
+        var timeout = Math.Min(Math.Max(toast.Message.Length * 50, 2000), 8000);
+        var timer = new Timer(RemoveToast, toast, timeout, Timeout.Infinite);
         _toasts.Add((toast, timer));
         InvokeAsync(StateHasChanged);
     }
@@ -25,7 +25,7 @@
     private void RemoveToast(object? state)
     {
         if (state is not Shared.Toast toast) return;
-        
+
         var entry = _toasts.FirstOrDefault(t => t.Toast == toast);
         if (entry != default)
         {
@@ -36,4 +36,21 @@
         // Trigger a UI update
         InvokeAsync(StateHasChanged);
     }
+
+    private void HandleMouseOver()
+    {
+        foreach (var toast in _toasts)
+        {
+            toast.Timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+    }
+
+    private void HandleMouseLeave()
+    {
+        foreach (var toast in _toasts)
+        {
+            toast.Timer.Change(3000, Timeout.Infinite);
+        }
+    }
+
 }

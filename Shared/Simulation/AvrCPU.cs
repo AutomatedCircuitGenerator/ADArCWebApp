@@ -38,7 +38,7 @@ namespace ADArCWebApp.Shared.Simulation
 				//bitshift magic to check if a pin has changed.
 				if ((((1 << i) & oldMask) ^ ((1 << i) & maskable)) > 0) {
 					updateComponents(i, currCycles);
-                    Pages.Index.app!.TriggerRender();
+                    Pages.Index.App!.TriggerRender();
                 }
 			}
 		}

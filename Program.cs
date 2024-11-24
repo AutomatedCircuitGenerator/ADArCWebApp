@@ -29,4 +29,5 @@ builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri(builder.
 builder.Services.Configure<StaticFileOptions>(options => { options.ContentTypeProvider = provider; });
 builder.Services.AddSingleton<BoardService>();
 builder.Services.AddSingleton<ToastService>();
+builder.Services.AddSingleton<GraphSynthInvoke>();
 await builder.Build().RunAsync();

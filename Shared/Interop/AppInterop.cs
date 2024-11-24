@@ -17,13 +17,13 @@ namespace ADArCWebApp.Shared.Interop
 		[JSInvokable]
 		public static void UpdateScreenRatios(int screenWidth, int screenHeight)
 		{
-			var r = ((double)screenWidth) / Pages.Index.defaultScreenWidth;
+			var r = ((double)screenWidth) / Pages.Index.DefaultScreenWidth;
 
-			Pages.Index.currentWidthRatio = r;
+			Pages.Index.CurrentWidthRatio = r;
 
-			var r2 = ((double)screenHeight) / Pages.Index.defaultScreenHeight;
+			var r2 = ((double)screenHeight) / Pages.Index.DefaultScreenHeight;
 
-			Pages.Index.currentHeightRatio = r2;
+			Pages.Index.CurrentHeightRatio = r2;
 		}
 
 		/// <summary>
@@ -59,7 +59,7 @@ namespace ADArCWebApp.Shared.Interop
 		/// <param name="text">the data sent by the arduino.</param>
 		[JSInvokable]
 		public static void SendSerial(string text) {
-			Pages.Index.codePane!.UpdateConsoleOutput(text, true);
+			Pages.Index.CodePane!.UpdateConsoleOutput(text, true);
 		}
 		/// <summary>
 		/// Gets the window height similar for updateScreenRatios.
