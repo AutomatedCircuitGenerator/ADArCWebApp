@@ -13780,7 +13780,88 @@ define("controllers/ky001", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY001 = KY001;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1) {
+define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_13) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RGBLED = void 0;
+    class RGBLED extends controller_20.Controller {
+        constructor() {
+            super(...arguments);
+            this.rLastState = avr8js_11.PinState.Input;
+            this.rLastStateCycles = 0;
+            this.rHighCycles = 0;
+            this.rFirstCallCycles = 0;
+            this.rBrightness = 0;
+            this.rSeenRisingEdge = false;
+            this.gLastState = avr8js_11.PinState.Input;
+            this.gLastStateCycles = 0;
+            this.gHighCycles = 0;
+            this.gFirstCallCycles = 0;
+            this.gBrightness = 0;
+            this.gSeenFallingEdge = false;
+            this.bLastState = avr8js_11.PinState.Input;
+            this.bLastStateCycles = 0;
+            this.bHighCycles = 0;
+            this.bFirstCallCycles = 0;
+            this.bBrightness = 0;
+            this.bSeenFallingEdge = false;
+            this.rIsFirstCall = true;
+            this.gIsFirstCall = true;
+            this.bIsFirstCall = true;
+        }
+        setup() {
+            this.rLastState = avr8js_11.PinState.Input;
+            this.rLastStateCycles = 0;
+            this.rHighCycles = 0;
+            this.rFirstCallCycles = 0;
+            this.rBrightness = 0;
+            this.rSeenRisingEdge = false;
+            this.gLastState = avr8js_11.PinState.Input;
+            this.gLastStateCycles = 0;
+            this.gHighCycles = 0;
+            this.gFirstCallCycles = 0;
+            this.gBrightness = 0;
+            this.gSeenFallingEdge = false;
+            this.bLastState = avr8js_11.PinState.Input;
+            this.bLastStateCycles = 0;
+            this.bHighCycles = 0;
+            this.bFirstCallCycles = 0;
+            this.bBrightness = 0;
+            this.bSeenFallingEdge = false;
+            this.rIsFirstCall = true;
+            this.gIsFirstCall = true;
+            this.bIsFirstCall = true;
+            this.pins.R[0].digital.addListener(this.rListener.bind(this));
+        }
+        rListener(state) {
+            if (this.rIsFirstCall) {
+                this.rFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.rIsFirstCall = false;
+            }
+            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rLastStateCycles;
+            if (this.rLastState === avr8js_11.PinState.High) {
+                this.rHighCycles += delta;
+            }
+            if (this.rLastState === avr8js_11.PinState.Low) {
+                this.rSeenRisingEdge = true;
+            }
+            this.rLastState = state;
+            this.rLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles;
+            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles)) {
+                this.rBrightness = 0;
+            }
+            else if (this.rBrightness == 0 && this.rSeenRisingEdge) {
+                this.rBrightness = 1;
+            }
+            else {
+                this.rBrightness = Math.min(this.rHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles), 1);
+            }
+            console.log(`High cycles out of total cycles ${this.rBrightness}\nHigh cycle ${this.rHighCycles}\nCur cycles ${execute_13.AVRRunner.getInstance().board.cpu.cycles}`);
+        }
+    }
+    exports.RGBLED = RGBLED;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -13807,8 +13888,59 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.MPU6050 = mpu6050_1.MPU6050;
     window.KY024 = ky024_1.KY024;
     window.KY001 = ky001_1.KY001;
+    window.RGBLED = rgbled_1.RGBLED;
 });
-define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_20) {
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_21, execute_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DCMotorL298N = void 0;
+    var MotorDirection;
+    (function (MotorDirection) {
+        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
+        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
+        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
+    })(MotorDirection || (MotorDirection = {}));
+    class DCMotorL298N extends controller_21.Controller {
+        constructor() {
+            super(...arguments);
+            this.motorDirection = MotorDirection.OFF;
+        }
+        setup() {
+            this.pins.in1[0].digital.addListener(this.in1Listener);
+            this.pins.in2[0].digital.addListener(this.in2Listener);
+            this.signal = this.pins.ena[0].digital;
+            this.signalState = this.signal.state;
+            this.signal.addListener(this.onSignalChange.bind(this));
+        }
+        in1Listener(state) {
+            this.setMotorDirection();
+        }
+        in2Listener(state) {
+            this.setMotorDirection();
+        }
+        setMotorDirection() {
+            const in1 = this.pins.in1[0].digital.state;
+            const in2 = this.pins.in2[0].digital.state;
+            if (in1 === in2) {
+                this.motorDirection = MotorDirection.OFF;
+            }
+            else if (in1) {
+                this.motorDirection = MotorDirection.FORWARD;
+            }
+            else {
+                this.motorDirection = MotorDirection.REVERSE;
+            }
+        }
+        onSignalChange(state) {
+            this.signalState = state;
+        }
+        cyclesToMs(cycles) {
+            return (cycles * 1000) / (execute_14.AVRRunner.getInstance().board.cpu.frequency / 1000);
+        }
+    }
+    exports.DCMotorL298N = DCMotorL298N;
+});
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_22) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RPLidarA1M9 = void 0;
@@ -13833,7 +13965,7 @@ define("controllers/rplidar", ["require", "exports", "controllers/controller"], 
     const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
     const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
     const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
-    class RPLidarA1M9 extends controller_20.Controller {
+    class RPLidarA1M9 extends controller_22.Controller {
         constructor() {
             super(...arguments);
             this.distance = 0;

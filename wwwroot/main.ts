@@ -22,6 +22,7 @@ import {LED} from "@controllers/led";
 import {MPU6050} from "@controllers/mpu6050";
 import {KY024} from "@controllers/ky024";
 import {KY001} from "@controllers/ky001";
+import {RGBLED} from "@controllers/rgbled";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -49,3 +50,4 @@ import {KY001} from "@controllers/ky001";
 (<any>window).MPU6050 = MPU6050;
 (<any>window).KY024 = KY024;
 (<any>window).KY001 = KY001;
+(<any>window).RGBLED = RGBLED;
