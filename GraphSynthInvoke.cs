@@ -300,7 +300,11 @@ namespace ADArCWebApp
                 {
                     var arcToRemove = (arc)graphElement;
                     arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
-                    arcToRemove.otherNode(nodeToRemove).localLabels.Remove("bus");
+                    if (arcToRemove.otherNode(nodeToRemove).degree == 2)
+                    {
+                        arcToRemove.otherNode(nodeToRemove).localLabels.Remove("bus");
+                    }
+
                     seed.removeArc(arcToRemove);
                 }
 
