@@ -13106,8 +13106,15 @@ define("controllers/sg90", ["require", "exports", "controllers/controller", "lib
             var _a;
             this.fallingEdgeCycle = undefined;
             this.risingEdgeCycle = undefined;
+            this.animationFrameId = null;
             this.signal = this.pins.orange[0].digital;
             (_a = this.signal) === null || _a === void 0 ? void 0 : _a.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.hornAngle = null;
         }
         onSignalChange(state) {
             const currentCycle = execute_7.AVRRunner.getInstance().board.cpu.cycles;
@@ -13120,15 +13127,19 @@ define("controllers/sg90", ["require", "exports", "controllers/controller", "lib
                 const pulseWidthMs = this.cyclesToMs(pulseWidthCycles);
                 const angle = Math.round(this.msToAngle(pulseWidthMs));
                 if (this.previousAngle !== angle) {
-                    this.renderHorn(angle);
+                    this.hornAngle = angle;
+                    if (!this.animationFrameId) {
+                        this.animationFrameId = requestAnimationFrame(this.renderHorn.bind(this));
+                    }
                 }
                 this.previousAngle = angle;
             }
         }
-        renderHorn(angle) {
+        renderHorn() {
             const horn = this.element.querySelector(".horn");
-            const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
+            const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle}) translate(-91.467 -59.773)`;
             horn.setAttribute('transform', transformValue);
+            this.animationFrameId = null;
         }
         cyclesToMs(cycles) {
             return (cycles * 1000) / (execute_7.AVRRunner.getInstance().board.cpu.frequency / 1000);
@@ -13792,22 +13803,26 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.rHighCycles = 0;
             this.rFirstCallCycles = 0;
             this.rBrightness = 0;
-            this.rSeenRisingEdge = false;
+            this.rPeriod = 0;
+            this.rIsFirstCall = true;
+            this.rRisingEdgeTime = 0;
             this.gLastState = avr8js_11.PinState.Input;
             this.gLastStateCycles = 0;
             this.gHighCycles = 0;
             this.gFirstCallCycles = 0;
             this.gBrightness = 0;
-            this.gSeenRisingEdge = false;
+            this.gPeriod = 0;
+            this.gIsFirstCall = true;
+            this.gRisingEdgeTime = 0;
             this.bLastState = avr8js_11.PinState.Input;
             this.bLastStateCycles = 0;
             this.bHighCycles = 0;
             this.bFirstCallCycles = 0;
             this.bBrightness = 0;
-            this.bSeenRisingEdge = false;
-            this.rIsFirstCall = true;
-            this.gIsFirstCall = true;
+            this.bPeriod = 0;
             this.bIsFirstCall = true;
+            this.bRisingEdgeTime = 0;
+            this.animationFrameId = null;
         }
         setup() {
             this.rLastState = avr8js_11.PinState.Input;
@@ -13815,97 +13830,168 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.rHighCycles = 0;
             this.rFirstCallCycles = 0;
             this.rBrightness = 0;
-            this.rSeenRisingEdge = false;
+            this.rPeriod = 0;
+            this.rIsFirstCall = true;
+            this.rRisingEdgeTime = 0;
             this.gLastState = avr8js_11.PinState.Input;
             this.gLastStateCycles = 0;
             this.gHighCycles = 0;
             this.gFirstCallCycles = 0;
             this.gBrightness = 0;
-            this.gSeenRisingEdge = false;
+            this.gPeriod = 0;
+            this.gIsFirstCall = true;
+            this.gRisingEdgeTime = 0;
             this.bLastState = avr8js_11.PinState.Input;
             this.bLastStateCycles = 0;
             this.bHighCycles = 0;
             this.bFirstCallCycles = 0;
             this.bBrightness = 0;
-            this.bSeenRisingEdge = false;
-            this.rIsFirstCall = true;
-            this.gIsFirstCall = true;
+            this.bPeriod = 0;
             this.bIsFirstCall = true;
+            this.bRisingEdgeTime = 0;
+            this.animationFrameId = null;
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
             this.pins.B[0].digital.addListener(this.bListener.bind(this));
         }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.rBrightness = 0;
+            this.gBrightness = 0;
+            this.bBrightness = 0;
+            this.renderSvg();
+        }
         rListener(state) {
+            const avrInstance = execute_13.AVRRunner.getInstance();
+            const cpuCycles = avrInstance.board.cpu.cycles;
             if (this.rIsFirstCall) {
-                this.rFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.rFirstCallCycles = cpuCycles;
                 this.rIsFirstCall = false;
             }
-            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rLastStateCycles;
+            const delta = cpuCycles - this.rLastStateCycles;
             if (this.rLastState === avr8js_11.PinState.High) {
-                this.rHighCycles += delta;
+                this.rHighCycles = delta;
             }
             if (this.rLastState === avr8js_11.PinState.Low) {
-                this.rSeenRisingEdge = true;
+                if (this.rRisingEdgeTime > 0) {
+                    this.rPeriod = cpuCycles - this.rRisingEdgeTime;
+                }
+                this.rRisingEdgeTime = cpuCycles;
             }
             this.rLastState = state;
-            this.rLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles;
+            this.rLastStateCycles = cpuCycles - this.rFirstCallCycles;
             if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles)) {
                 this.rBrightness = 0;
             }
-            else if (this.rBrightness == 0 && this.rSeenRisingEdge) {
+            else if (this.rBrightness == 0 && this.rRisingEdgeTime) {
                 this.rBrightness = 1;
             }
+            else if (!this.rPeriod) {
+                this.rBrightness = 0;
+            }
             else {
-                this.rBrightness = Math.min(this.rHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles), 1);
+                this.rBrightness = Math.min(this.rHighCycles / this.rPeriod, 1);
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
         }
         gListener(state) {
+            const avrInstance = execute_13.AVRRunner.getInstance();
+            const cpuCycles = avrInstance.board.cpu.cycles;
             if (this.gIsFirstCall) {
-                this.gFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.gFirstCallCycles = cpuCycles;
                 this.gIsFirstCall = false;
             }
-            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gLastStateCycles;
+            const delta = cpuCycles - this.gLastStateCycles;
             if (this.gLastState === avr8js_11.PinState.High) {
-                this.gHighCycles += delta;
+                this.gHighCycles = delta;
             }
             if (this.gLastState === avr8js_11.PinState.Low) {
-                this.gSeenRisingEdge = true;
+                if (this.gRisingEdgeTime > 0) {
+                    this.gPeriod = cpuCycles - this.gRisingEdgeTime;
+                }
+                this.gRisingEdgeTime = cpuCycles;
             }
             this.gLastState = state;
-            this.gLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles;
+            this.gLastStateCycles = cpuCycles - this.gFirstCallCycles;
             if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles)) {
                 this.gBrightness = 0;
             }
-            else if (this.gBrightness == 0 && this.gSeenRisingEdge) {
+            else if (this.gBrightness == 0 && this.gRisingEdgeTime > 0) {
                 this.gBrightness = 1;
             }
+            else if (!this.gPeriod) {
+                this.gBrightness = 0;
+            }
             else {
-                this.gBrightness = Math.min(this.gHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles), 1);
+                this.gBrightness = Math.min(this.gHighCycles / this.gPeriod, 1);
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
         }
         bListener(state) {
+            const avrInstance = execute_13.AVRRunner.getInstance();
+            const cpuCycles = avrInstance.board.cpu.cycles;
             if (this.bIsFirstCall) {
-                this.bFirstCallCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+                this.bFirstCallCycles = cpuCycles;
                 this.bIsFirstCall = false;
             }
-            const delta = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bLastStateCycles;
+            const delta = cpuCycles - this.bLastStateCycles;
             if (this.bLastState === avr8js_11.PinState.High) {
-                this.bHighCycles += delta;
+                this.bHighCycles = delta;
             }
             if (this.bLastState === avr8js_11.PinState.Low) {
-                this.bSeenRisingEdge = true;
+                if (this.bRisingEdgeTime > 0) {
+                    this.bPeriod = cpuCycles - this.bRisingEdgeTime;
+                }
+                this.bRisingEdgeTime = cpuCycles;
             }
             this.bLastState = state;
-            this.bLastStateCycles = execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles;
+            this.bLastStateCycles = cpuCycles - this.bFirstCallCycles;
             if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles)) {
                 this.bBrightness = 0;
             }
-            else if (this.bBrightness == 0 && this.bSeenRisingEdge) {
+            else if (this.bBrightness == 0 && this.bRisingEdgeTime > 0) {
                 this.bBrightness = 1;
             }
-            else {
-                this.bBrightness = Math.min(this.bHighCycles / (execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles), 1);
+            else if (!this.bPeriod) {
+                this.bBrightness = 0;
             }
+            else {
+                this.bBrightness = Math.min(this.bHighCycles / this.bPeriod, 1);
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+            const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
+            const redBlur = this.element.querySelector("#rgbRedBlur");
+            redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);
+            const greenBlur = this.element.querySelector("#rgbGreenBlur");
+            greenBlur.setAttribute("stdDeviation", `${this.gBrightness * 3}`);
+            const blueBlur = this.element.querySelector("#rgbBlueBlur");
+            blueBlur.setAttribute("stdDeviation", `${this.bBrightness * 3}`);
+            const redCircle = this.element.querySelector("#rgbRedCircle");
+            redCircle.setAttribute("r", `${this.rBrightness * 5 + 2}`);
+            redCircle.setAttribute("opacity", `${Math.min(this.rBrightness * 20, 0.3)}`);
+            const greenCircle = this.element.querySelector("#rgbGreenCircle");
+            greenCircle.setAttribute("r", `${this.gBrightness * 5 + 2}`);
+            greenCircle.setAttribute("opacity", `${Math.min(this.gBrightness * 20, 0.3)}`);
+            const blueCircle = this.element.querySelector("#rgbBlueCircle");
+            blueCircle.setAttribute("r", `${this.bBrightness * 5 + 2}`);
+            blueCircle.setAttribute("opacity", `${Math.min(this.bBrightness * 20, 0.3)}`);
+            const mixedCircle = this.element.querySelector("#rgbMixedCircle");
+            mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255 + this.bBrightness * 90}, ${this.bBrightness * 255})`);
+            mixedCircle.setAttribute("opacity", `${totalOpacity}`);
+            const hollowCircle = this.element.querySelector("#rgbHollowCircle");
+            hollowCircle.setAttribute("opacity", `${totalOpacity}`);
+            this.animationFrameId = null;
         }
     }
     exports.RGBLED = RGBLED;
