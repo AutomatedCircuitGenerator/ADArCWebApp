@@ -188,10 +188,17 @@ namespace ADArCWebApp
                 ruleFromNodeLabels.Remove("connected");
 
                 // finding the equivalent nodes in the actual graph
-                var matchedToNode = selector?.Invoke(toNodes, ruleToNodeLabels)
-                                    ?? toNodes.Find(n =>
-                                        ruleToNodeLabels.IsSubsetOf(n.localLabels) &&
-                                        !n.localLabels.Contains("connected"));
+                node? matchedToNode;
+                if (selector != null)
+                {
+                    matchedToNode = selector.Invoke(toNodes, ruleToNodeLabels);
+                }
+                else
+                {
+                    matchedToNode = toNodes.Find(n =>
+                        ruleToNodeLabels.IsSubsetOf(n.localLabels) &&
+                        !n.localLabels.Contains("connected"));
+                }
                 var matchedFromNode = fromNodes.Find(n =>
                     ruleFromNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
 
@@ -293,6 +300,7 @@ namespace ADArCWebApp
                 {
                     var arcToRemove = (arc)graphElement;
                     arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
+                    arcToRemove.otherNode(nodeToRemove).localLabels.Remove("bus");
                     seed.removeArc(arcToRemove);
                 }
 
