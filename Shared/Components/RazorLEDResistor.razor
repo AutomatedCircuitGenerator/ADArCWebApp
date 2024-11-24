@@ -45,11 +45,11 @@
 	//static int count = 0;
 	public static void translate(ComponentInstance comp, long pinChangeCycle)
 	{
-		var data = comp.data;
+		var data = comp.Data;
 
-		if (0 == comp.getConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
+		if (0 == comp.GetConnection("anode", out InstanceConnection? conn, out List<InstanceConnection>? all))
 		{
-			comp.compParams["value"].setValue(AvrCPU.getPinState(conn!.toId));
+			comp.CompParams["value"].SetValue(AvrCPU.getPinState(conn!.ToId));
 		}
 		else
 		{

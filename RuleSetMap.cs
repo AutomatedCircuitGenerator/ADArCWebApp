@@ -9,16 +9,16 @@ namespace ADArCWebApp
     public sealed class RuleSetMap
     {
         //Singleton Setup
-        private static RuleSetMap? instance;
-        private static readonly object padlock = new();
+        private static RuleSetMap? _instance;
+        private static readonly object Padlock = new();
 
-        public static Dictionary<string, ruleSet> rulesets;
+        public static Dictionary<string, ruleSet> Rulesets;
         private readonly ImmutableHashSet<string> modifiedRules;
         int numLoaded;
 
         RuleSetMap()
         {
-            rulesets = new Dictionary<string, ruleSet>();
+            Rulesets = new Dictionary<string, ruleSet>();
             //Setup set of rules which need to be modified
             //Inherited from BOGLWeb, probably not necessary
             this.modifiedRules = ImmutableHashSet.Create(
@@ -32,16 +32,16 @@ namespace ADArCWebApp
         /// <returns>An instance of RuleSetMap</returns>
         public static RuleSetMap GetInstance()
         {
-            lock (padlock)
+            lock (Padlock)
             {
-                return instance ??= new RuleSetMap();
+                return _instance ??= new RuleSetMap();
             }
         }
 
         public async Task<int> LoadRuleSet(string name, NavigationManager navigationManager, Pages.Index main,
             int current, int total)
         {
-            if (rulesets.ContainsKey(name))
+            if (Rulesets.ContainsKey(name))
             {
                 Console.WriteLine("Rule " + name + " already loaded.");
                 return 0;
@@ -56,9 +56,9 @@ namespace ADArCWebApp
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
             var ruleReader = new StreamReader(ruleSetFileContent);
-            rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
+            Rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
 
-            List<string> ruleFileNames = rulesets[name].ruleFileNames;
+            List<string> ruleFileNames = Rulesets[name].ruleFileNames;
 
             List<grammarRule> rules = new();
             numLoaded = 0;
@@ -72,7 +72,7 @@ namespace ADArCWebApp
 
             await Task.WhenAll(loadTasks);
 
-            rulesets[name].rules = rules;
+            Rulesets[name].rules = rules;
 
             return numLoaded;
         }
@@ -90,11 +90,11 @@ namespace ADArCWebApp
 
             if (temp != null)
             {
-                openRule = DeSerializeRuleFromXML(RemoveXAMLns(RemoveIgnorablePrefix(temp.ToString())));
+                openRule = DeSerializeRuleFromXml(RemoveXamLns(RemoveIgnorablePrefix(temp.ToString())));
             }
 
-            removeNullWhiteSpaceEmptyLabels(openRule.L);
-            removeNullWhiteSpaceEmptyLabels(openRule.R);
+            RemoveNullWhiteSpaceEmptyLabels(openRule.L);
+            RemoveNullWhiteSpaceEmptyLabels(openRule.R);
 
             lock (rules)
             {
@@ -103,7 +103,7 @@ namespace ADArCWebApp
 
             Console.WriteLine(rulePath + " Loaded");
             Interlocked.Increment(ref numLoaded);
-            main.loadingProgress = (double)(numLoaded + current) / total * 100;
+            main.LoadingProgress = (double)(numLoaded + current) / total * 100;
             main.StateChanged();
         }
 
@@ -113,7 +113,7 @@ namespace ADArCWebApp
         /// <returns>number of loaded rules as an int</returns>
         public int GetNumRules()
         {
-            return rulesets.Count;
+            return Rulesets.Count;
         }
 
         /// <summary>
@@ -125,20 +125,20 @@ namespace ADArCWebApp
         {
             if (!this.modifiedRules.Contains(name))
             {
-                return rulesets[name];
+                return Rulesets[name];
             }
 
-            foreach (grammarRule rule in rulesets[name].rules)
+            foreach (grammarRule rule in Rulesets[name].rules)
             {
                 rule.TransformNodePositions = false;
                 rule.Rotate = GraphSynth.transfromType.Prohibited;
             }
 
-            return rulesets[name];
+            return Rulesets[name];
         }
 
         //Helper methods from BoGL Desktop
-        private grammarRule DeSerializeRuleFromXML(string xmlString)
+        private static grammarRule DeSerializeRuleFromXml(string xmlString)
         {
             //xmlString = xmlString.Replace("XYZIndependent", "BothIndependent");
             //xmlString = xmlString.Replace("OnlyZ", "false");
@@ -167,7 +167,7 @@ namespace ADArCWebApp
         }
 
         //Start functions for cleaning up rule/ruleset xml
-        private string RemoveXAMLns(string str)
+        private static string RemoveXamLns(string str)
         {
             return str.Replace("xmlns=\"http://schemas.microsoft.com/winfx/2006/xaml/presentation\"", "");
         }
@@ -177,7 +177,7 @@ namespace ADArCWebApp
             return str.Replace("GraphSynth:", "").Replace("xmlns=\"ignorableUri\"", "");
         }
 
-        private void removeNullWhiteSpaceEmptyLabels(designGraph g)
+        private static void RemoveNullWhiteSpaceEmptyLabels(designGraph g)
         {
             g.globalLabels.RemoveAll(string.IsNullOrWhiteSpace);
             foreach (arc a in g.arcs)
@@ -198,51 +198,3 @@ namespace ADArCWebApp
         //End functions for cleaning up rule/ruleset xml
     }
 }
-
-// while (this.numLoaded < ruleFileNames.Count)
-// {
-//     string rulePath = ruleFileNames[this.numLoaded];
-//     Console.WriteLine(rulePath + " loaded");
-//     //Get the rule files from GitHub 
-//     HttpResponseMessage ruleResponse =
-//         await client.GetAsync(rulePath);
-//     //await client.GetAsync(rulePath.Substring(rulePath.LastIndexOf("\\") + 1));
-//
-//     string ruleText = await ruleResponse.Content.ReadAsStringAsync();
-//     //var f = File.OpenText(rulePath);
-//     //string ruleText = f.ReadToEnd();
-//
-//     XElement xeRule = XElement.Parse(ruleText);
-//     XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
-//     grammarRule openRule = new();
-//     //Deserialize the rule XML using GraphSynth
-//     if (temp != null)
-//     {
-//         openRule = this.DeSerializeRuleFromXML(this.RemoveXAMLns(RemoveIgnorablePrefix(temp.ToString())));
-//     }
-//
-//     this.removeNullWhiteSpaceEmptyLabels(openRule.L);
-//     this.removeNullWhiteSpaceEmptyLabels(openRule.R);
-//
-//     object ruleObj = new object[] { openRule, rulePath };
-//     switch (ruleObj)
-//     {
-//         case grammarRule obj:
-//             rules.Add(obj);
-//             break;
-//         case object[] obj:
-//         {
-//             rules.AddRange(obj.OfType<grammarRule>());
-//             break;
-//         }
-//     }
-//
-//     this.numLoaded++;
-//     main.loadingProgress = (double)(numLoaded + current) / total * 100;
-//     //Console.WriteLine(main.loadingProgress);
-//     main.StateChanged();
-// }
-//
-// rulesets[name].rules = rules;
-//
-// return numLoaded;

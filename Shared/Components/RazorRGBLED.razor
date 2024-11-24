@@ -1,7 +1,8 @@
-﻿@code {
-    [Parameter] public int ledRed { get; set; } = 0;
-    [Parameter] public int ledGreen { get; set; } = 0;
-    [Parameter] public int ledBlue { get; set; } = 0;
+﻿@inherits RazorComponent
+@code {
+    // [Parameter] public int ledRed { get; set; } = 0;
+    // [Parameter] public int ledGreen { get; set; } = 0;
+    // [Parameter] public int ledBlue { get; set; } = 0;
 
     public static ElementPin[] pinInfo
     {
@@ -16,68 +17,67 @@
             };
         }
     }
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        var data = comp.data;
-
-        bool R = false;
-        bool G = false;
-        bool B = false;
-        if (0 == comp.getConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            R = await AvrCPU.getPinState(conn!.toId);
-        }
-        if (0 == comp.getConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-        {
-            G = await AvrCPU.getPinState(conn2!.toId);
-        }
-        if (0 == comp.getConnection("B", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
-        {
-            B = await AvrCPU.getPinState(conn3!.toId);
-        }
-        // var pkt = new TimingPacket(pinChangeCycle);
-
-        //too many cases with 3 PWM signals and 2 options for frequency(490Hz & 980Hz)
-        //only red is done here
-        if (R && comp.midSignal==0)
-        {
-            comp.timer = pinChangeCycle;
-            comp.midSignal = 1;
-        }
-        if (!R && comp.midSignal==1)
-        {
-            comp.timer = (pinChangeCycle - comp.timer) / 16;
-            comp.midSignal = 0;
-            
-            if (conn.toId == 3 || conn.toId == 9 || conn.toId == 10 || conn.toId == 11)
-            {
-                int freq = 490;
-                int cycle = 1000000 / freq;
-                int value = 255 * (int)comp.timer / cycle;
-                comp.compParams["ledRed"].setValue(value);
-            }
-            else if (conn.toId == 5 || conn.toId == 6)
-            {
-                int freq = 980;
-                int cycle = 1000000 / freq;
-                int value = 255 * (int)comp.timer / cycle;
-
-                comp.compParams["ledRed"].setValue(value);
-            }
-        }
+    // public static async void translate(ComponentInstance comp, long pinChangeCycle)
+    // {
+    //     var data = comp.Data;
+    //
+    //     bool R = false;
+    //     bool G = false;
+    //     bool B = false;
+    //     if (0 == comp.GetConnection("R", out InstanceConnection? conn, out List<InstanceConnection>? all))
+    //     {
+    //         R = await AvrCPU.getPinState(conn!.ToId);
+    //     }
+    //     if (0 == comp.GetConnection("G", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
+    //     {
+    //         G = await AvrCPU.getPinState(conn2!.ToId);
+    //     }
+    //     if (0 == comp.GetConnection("B", out InstanceConnection? conn3, out List<InstanceConnection>? all3))
+    //     {
+    //         B = await AvrCPU.getPinState(conn3!.ToId);
+    //     }
+    //     // var pkt = new TimingPacket(pinChangeCycle);
+    //
+    //     //too many cases with 3 PWM signals and 2 options for frequency(490Hz & 980Hz)
+    //     //only red is done here
+    //     if (R && comp.midSignal==0)
+    //     {
+    //         comp.timer = pinChangeCycle;
+    //         comp.midSignal = 1;
+    //     }
+    //     if (!R && comp.midSignal==1)
+    //     {
+    //         comp.timer = (pinChangeCycle - comp.timer) / 16;
+    //         comp.midSignal = 0;
+    //         
+    //         if (conn.ToId == 3 || conn.ToId == 9 || conn.ToId == 10 || conn.ToId == 11)
+    //         {
+    //             int freq = 490;
+    //             int cycle = 1000000 / freq;
+    //             int value = 255 * (int)comp.timer / cycle;
+    //             comp.CompParams["ledRed"].SetValue(value);
+    //         }
+    //         else if (conn.ToId == 5 || conn.ToId == 6)
+    //         {
+    //             int freq = 980;
+    //             int cycle = 1000000 / freq;
+    //             int value = 255 * (int)comp.timer / cycle;
+    //
+    //             comp.CompParams["ledRed"].SetValue(value);
+    //         }
+    //     }
 
         
 
         //AvrCPU.setPinState(conn!.toId, true);
 
 
-    }
+    @* } *@
 
-    private int brightness => new List<int>() { ledBlue, ledGreen, ledRed }.Max();
-    private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0;
+    @* private int brightness => new List<int>() { ledBlue, ledGreen, ledRed }.Max(); *@
+    @* private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0; *@
 }
 
-<?xml version="1.0" encoding="UTF-8" ?>
 <svg width="42.129"
      height="72.582"
      version="1.2"
@@ -129,40 +129,44 @@
         <feGaussianBlur stdDeviation="4" />
     </filter>
     <filter id="ledFilterRed" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="@(ledRed * 3)" />
+        @* <feGaussianBlur stdDeviation="@(ledRed * 3)" /> *@
     </filter>
     <filter id="ledFilterGreen" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="@(ledGreen * 3)" />
+        @* <feGaussianBlur stdDeviation="@(ledGreen * 3)" /> *@
     </filter>
     <filter id="ledFilterBlue" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="@(ledBlue * 3)" />
+        @* <feGaussianBlur stdDeviation="@(ledBlue * 3)" /> *@
     </filter>
 
     <circle cx="1.7"
             cy="3"
-            r="@(ledRed * 5 + 2)"
+            r="2"
+            @* r="@(ledRed * 5 + 2)" *@
             fill="rgb(255, 0, 0)"
-            opacity="@(Math.Min(ledRed * 20, 0.3))"
+            @* opacity="@(Math.Min(ledRed * 20, 0.3))" *@
             filter="url(#ledFilterRed)" />
     <circle cx="2.7"
             cy="5"
-            r="@(ledGreen * 5 + 2)"
+            r="2"
+            @* r="@(ledGreen * 5 + 2)" *@
             fill="rgb(0, 255, 0)"
-            opacity="@(Math.Min(ledGreen * 20, 0.3))"
+            @* opacity="@(Math.Min(ledGreen * 20, 0.3))" *@
             filter="url(#ledFilterGreen)" />
     <circle cx="0.7"
             cy="5"
-            r="@(ledBlue * 5 + 2)"
+            r="2"
+            @* r="@(ledBlue * 5 + 2)" *@
             fill="rgb(1,85,253)"
-            opacity="@(Math.Min(ledBlue * 20, 0.3))"
+            @* opacity="@(Math.Min(ledBlue * 20, 0.3))" *@
             filter="url(#ledFilterBlue)" />
 
     <circle cx="1.7"
             cy="4"
             r="10"
-            fill="rgb(@(ledRed * 255), @(ledGreen * 255 + ledBlue * 90), @(ledBlue * 255))"
+            @* fill="rgb(@(ledRed * 255), @(ledGreen * 255 + ledBlue * 90), @(ledBlue * 255))" *@
             filter="url(#ledFilter)"
-            opacity="@(opacity)" />
+            @* opacity="@(opacity)"  *@
+            />
 
     <!-- Grey hollow around the LED -->
     <circle cx="1.7"
@@ -172,5 +176,6 @@
             stroke-width="1"
             fill="none"
             filter="url(#ledFilter)"
-            opacity="@(opacity)" />
+            @* opacity="@(opacity)"  *@
+            />
 </svg>

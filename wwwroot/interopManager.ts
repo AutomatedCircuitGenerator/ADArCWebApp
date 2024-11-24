@@ -59,7 +59,7 @@ export namespace interopManager {
          */
         startCodeLoop() {
             this.runner.board.usarts[0].onByteTransmit = (async (value: number) => {
-                await DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                await DotNet.invokeMethodAsync(this.interopLoc, "SendSerial", String.fromCharCode(value));
             });
             this.runCode();
         }

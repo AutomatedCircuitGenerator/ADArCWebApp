@@ -57,7 +57,7 @@ namespace ADArCWebApp
         {
             writer.WriteStartObject();
             writer.WritePropertyName("type");
-            var (type, obj) = value.getValWithType();
+            var (type, obj) = value.GetValWithType();
             writer.WriteStringValue(type.ToString());
             writer.WritePropertyName("value");
             JsonSerializer.Serialize(writer, obj, type, options);
