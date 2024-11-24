@@ -1,9 +1,5 @@
-﻿using ADArCWebApp;
-using GraphSynth.Representation;
-using GraphSynth.Search;
+﻿using GraphSynth.Representation;
 using Microsoft.AspNetCore.Components;
-using System.Linq;
-using System.Xml.Linq;
 using ADArCWebApp.Shared.Exceptions;
 using ADArCWebApp.Shared;
 
@@ -18,14 +14,14 @@ namespace ADArCWebApp
         public Dictionary<string, ruleSet> rulesets { get; set; }
 
         //inputs from user selecting components
-        public List<string> inputs = [];
+        public readonly List<string> Inputs = [];
 
         private designGraph seed = new();
 
         [Inject] private ToastService? ToastService { get; set; }
 
 
-        public void destroyGraph()
+        public void DestroyGraph()
         {
             seed = new designGraph();
         }
@@ -36,10 +32,10 @@ namespace ADArCWebApp
         /// TODO: improve.
         /// </summary>
         /// <param name="Inputs">A list of graphsynth node names with their "user_" prefix missing.</param>
-        private void makeGraph(List<string> Inputs)
+        private void MakeGraph(List<string> Inputs)
         {
             //designGraph Graph = new designGraph();
-            inputs.AddRange(Inputs);
+            this.Inputs.AddRange(Inputs);
             foreach (var t in Inputs)
             {
                 node n = new();
@@ -50,57 +46,53 @@ namespace ADArCWebApp
         }
 
         //apply the GraphSynth rules
-        public void recg_apply(List<string>? fInp = null)
+        public void RecgApply(List<string>? fInp = null)
         {
             if (fInp != null)
             {
-                makeGraph(fInp);
+                MakeGraph(fInp);
             }
 
             if (seed.nodes.Count == 0)
             {
-                makeGraph(inputs);
+                MakeGraph(Inputs);
             }
 
             ruleSet r = new();
             ruleSet connect = rulesets["CONNECT"];
-            for (int i = 0; i < connect.rules.Count; i++)
+            foreach (var t in connect.rules)
             {
-                var j = inputs.Count - 1;
+                var j = Inputs.Count - 1;
                 //edit the names to avoid adding rules that have common words in their name
-                if (inputs[j].Contains("servo") && inputs[j].Contains("direct"))
+                if (Inputs[j].Contains("servo") && Inputs[j].Contains("direct"))
                 {
-                    inputs[j] = "servo";
+                    Inputs[j] = "servo";
                 }
-                else if (inputs[j].Contains("pca9685"))
+                else if (Inputs[j].Contains("pca9685"))
                 {
-                    inputs[j] = "pca9685";
+                    Inputs[j] = "pca9685";
                 }
-                else if (inputs[j].Contains("l298n"))
+                else if (Inputs[j].Contains("l298n"))
                 {
-                    inputs[j] = "l298n";
+                    Inputs[j] = "l298n";
                 }
-                else if (inputs[j].Contains("a4988"))
+                else if (Inputs[j].Contains("a4988"))
                 {
-                    inputs[j] = "a4988";
+                    Inputs[j] = "a4988";
                 }
-                else if (inputs[j].Contains("lm386"))
+                else if (Inputs[j].Contains("lm386"))
                 {
-                    inputs[j] = "lm386";
+                    Inputs[j] = "lm386";
                 }
-                else if (inputs[j].Contains("hx711"))
+                else if (Inputs[j].Contains("hx711"))
                 {
-                    inputs[j] = "hx711";
+                    Inputs[j] = "hx711";
                 }
 
-                if (connect.rules[i].name.Contains(inputs[j]))
-                {
-                    if (!r.rules.Contains(connect.rules[i]))
-                    {
-                        r.Add(connect.rules[i]);
-                        Console.WriteLine(connect.rules[i].name);
-                    }
-                }
+                if (!t.name.Contains(Inputs[j])) continue;
+                if (r.rules.Contains(t)) continue;
+                r.Add(t);
+                Console.WriteLine(t.name);
             }
 
             //Console.WriteLine(r.rules.Count);
@@ -287,7 +279,7 @@ namespace ADArCWebApp
         /// This function removes the component from the seed graph.
         /// </summary>
         /// <param name="n">A node that belongs to the component being removed.</param>
-        public  void removeComp(node n)
+        public  void RemoveComp(node n)
         {
             if (n == null)
             {
@@ -297,8 +289,9 @@ namespace ADArCWebApp
             string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
             foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
             {
-                foreach (arc arcToRemove in nodeToRemove.arcs.ToList())
+                foreach (var graphElement in nodeToRemove.arcs.ToList())
                 {
+                    var arcToRemove = (arc)graphElement;
                     arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
                     seed.removeArc(arcToRemove);
                 }

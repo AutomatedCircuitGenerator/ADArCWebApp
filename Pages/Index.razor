@@ -348,7 +348,7 @@
             n.localLabels.Add("user_" + componentData.nodeName);
 
             GraphSynthInvoke.GetNodes().Add(n);
-            if (componentData.nodeName != null) GraphSynthInvoke.inputs.Add(componentData.nodeName);
+            if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
 
             GraphSynthInvoke.Add();
             if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
@@ -722,7 +722,7 @@
             AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
         }
 
-        GraphSynthInvoke.removeComp(Comp2remove);
+        GraphSynthInvoke.RemoveComp(Comp2remove);
         Comps.Remove(SelectedComponent);
         List<node> b = GraphSynthInvoke.GetNodes();
         List<arc> c = GraphSynthInvoke.GetArcs();
@@ -848,8 +848,8 @@
 
         BuildCanvas!.ConnLines.Clear();
         BuildCanvas.ResetTransform();
-        GraphSynthInvoke.inputs.Clear();
-        GraphSynthInvoke.destroyGraph();
+        GraphSynthInvoke.Inputs.Clear();
+        GraphSynthInvoke.DestroyGraph();
         BuildCode.outputPins.Clear();
 
         //Console.WriteLine(ex);
@@ -863,8 +863,8 @@
             kv.Value.GsNode = n;
 
             GraphSynthInvoke.GetNodes().Add(n);
-            if (kv.Value.Data.nodeName != null) GraphSynthInvoke.inputs.Add(kv.Value.Data.nodeName);
-            GraphSynthInvoke.recg_apply();
+            if (kv.Value.Data.nodeName != null) GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
+            GraphSynthInvoke.RecgApply();
             GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + kv.Key));
             GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
         }

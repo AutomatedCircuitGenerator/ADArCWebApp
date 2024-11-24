@@ -21,9 +21,9 @@ namespace ADArCWebApp
             Rulesets = new Dictionary<string, ruleSet>();
             //Setup set of rules which need to be modified
             //Inherited from BOGLWeb, probably not necessary
-            this.modifiedRules = ImmutableHashSet.Create(
+            modifiedRules = ImmutableHashSet.Create(
                 "BIG1");
-            this.numLoaded = 0;
+            numLoaded = 0;
         }
 
         /// <summary>
