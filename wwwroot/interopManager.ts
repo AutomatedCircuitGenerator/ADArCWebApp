@@ -320,17 +320,16 @@ export namespace interopManager {
 
         private tryLoadFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            const data = params.get('data');
+            const data = params.get('c'); // Changed from 'data' to 'c'
 
             if (data) {
                 try {
-                    const decodedJson = atob(data);
-                    DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", decodedJson)
+                    DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data)
                         .catch((error) => {
                             console.error("Error loading from URL:", error);
                         });
                 } catch (error) {
-                    console.error("Error decoding URL data:", error);
+                    console.error("Error loading URL data:", error);
                 }
             }
         }
