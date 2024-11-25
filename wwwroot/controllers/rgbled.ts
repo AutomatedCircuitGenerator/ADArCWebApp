@@ -12,68 +12,53 @@ export class RGBLED extends Controller {
         9: 16320,
         10: 16320
     };
-    private rLastState: PinState = PinState.Input;
-    private rLastStateCycles: number = 0;
-    private rHighCycles: number = 0;
-    private rFirstCallCycles: number = 0;
-    private rBrightness: number = 0;
+
+    private rBrightness: number;
     private rPeriod: number;
-    private rIsFirstCall: boolean = true;
-    private rRisingEdgeTime: number = 0;
+    private rRisingEdgeCycle: number;
+    private rFallingEdgeCycle: number;
+    private rFirstHigh: boolean;
+    private rLastPinState: PinState;
 
-    private gLastState: PinState = PinState.Input;
-    private gLastStateCycles: number = 0;
-    private gHighCycles: number = 0;
-    private gFirstCallCycles: number = 0;
-    private gBrightness: number = 0;
+
+    private gBrightness: number;
     private gPeriod: number;
-    private gIsFirstCall: boolean = true;
-    private gRisingEdgeTime: number = 0;
+    private gRisingEdgeCycle: number;
+    private gFallingEdgeCycle: number;
+    private gFirstHigh: boolean;
+    private gLastPinState: PinState;
 
-    private bLastState: PinState = PinState.Input;
-    private bLastStateCycles: number = 0;
-    private bHighCycles: number = 0;
-    private bFirstCallCycles: number = 0;
-    private bBrightness: number = 0;
+
+    private bBrightness: number;
     private bPeriod: number;
-    private bIsFirstCall: boolean = true;
-    private bRisingEdgeTime: number = 0;
-
+    private bRisingEdgeCycle: number;
+    private bFallingEdgeCycle: number;
+    private bFirstHigh: boolean;
+    private bLastPinState: PinState;
 
     private animationFrameId: number | null = null;
 
-    private rSeenRisingEdge: boolean;
-    private gSeenRisingEdge: boolean;
-    private bSeenRisingEdge: boolean;
-
-
     setup() {
-        this.rLastState = this.pins.R[0].digital.state;
-        this.rLastStateCycles = 0;
-        this.rHighCycles = 0;
-        this.rFirstCallCycles = 0;
         this.rBrightness = 0;
-        this.rIsFirstCall = true;
-        this.rRisingEdgeTime = 0;
-        this.rSeenRisingEdge = false;
+        this.rPeriod = 0;
+        this.rRisingEdgeCycle = 0;
+        this.rFallingEdgeCycle = 0;
+        this.rFirstHigh = false;
+        this.rLastPinState = this.pins.R[0].digital.state;
 
-        this.gLastState = this.pins.G[0].digital.state;
-        this.gLastStateCycles = 0;
-        this.gHighCycles = 0;
-        this.gFirstCallCycles = 0;
         this.gBrightness = 0;
-        this.gIsFirstCall = true;
-        this.gRisingEdgeTime = 0;
-        this.gSeenRisingEdge = false;
+        this.gPeriod = 0;
+        this.gRisingEdgeCycle = 0;
+        this.gFallingEdgeCycle = 0;
+        this.gFirstHigh = false;
+        this.gLastPinState = this.pins.G[0].digital.state;
 
-        this.bLastState = this.pins.B[0].digital.state;
-        this.bLastStateCycles = 0;
-        this.bHighCycles = 0;
-        this.bFirstCallCycles = 0;
         this.bBrightness = 0;
-        this.bIsFirstCall = true;
-        this.bRisingEdgeTime = 0;
-        this.bSeenRisingEdge = false;
+        this.bPeriod = 0;
+        this.bRisingEdgeCycle = 0;
+        this.bFallingEdgeCycle = 0;
+        this.bFirstHigh = false;
+        this.bLastPinState = this.pins.B[0].digital.state;
 
         this.animationFrameId = null;
 
@@ -97,133 +82,76 @@ export class RGBLED extends Controller {
     }
 
     rListener(state: PinState) {
-        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
+        const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
 
-        if (this.rIsFirstCall) {
-            this.rFirstCallCycles = cpuCycles;
-            this.rIsFirstCall = false;
+        if (state === PinState.High) {
+            this.rRisingEdgeCycle = currentCycle;
+            if (this.rFirstHigh) {
+                this.rBrightness = 0;
+                this.rFirstHigh = false;
+            } else {
+                this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rFallingEdgeCycle)) / this.rPeriod, 0);
+            }
+
+        } else if (state === PinState.Low) {
+            if (this.rLastPinState === PinState.High) {
+                this.rFallingEdgeCycle = currentCycle;
+                this.rBrightness = Math.min((currentCycle - this.rRisingEdgeCycle) / this.rPeriod, 1);
+
+            }
         }
+        this.rLastPinState = state;
 
-        const delta = cpuCycles - this.rLastStateCycles;
-
-        if (this.rLastState === PinState.High) {
-            this.rHighCycles = delta;
-        }
-
-        if (this.rLastState === PinState.Low) {
-            this.rSeenRisingEdge = true
-            // if (this.rPeriod == 0) {
-            //     if (this.rRisingEdgeTime > 0) {
-            //         this.rPeriod = cpuCycles - this.rRisingEdgeTime;
-            //         console.log(`rperiod ${this.rPeriod}`);
-            //     }
-            // }
-
-            this.rRisingEdgeTime = cpuCycles;
-        }
-
-        this.rLastState = state;
-        this.rLastStateCycles = cpuCycles - this.rFirstCallCycles;
-
-        // This is extremely rubbish but like what ya gonna do
-        if (!(AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles)) {
-            //on our first call we will be here. dont want to make two if statements and this is better protection, but if this somehow gets to be 0 during the run the brightness will get messed up, cause next branch relies on it
-            this.rBrightness = 0;
-        } else if (this.rBrightness == 0 && this.rRisingEdgeTime) {
-            this.rBrightness = 1;
-        } else if (!this.rSeenRisingEdge) {
-            this.rBrightness = 0;
-        } else {
-            this.rBrightness = Math.min(this.rHighCycles / this.rPeriod, 1);
-        }
         if (!this.animationFrameId) {
             this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
         }
     }
 
     gListener(state: PinState) {
-        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
+        const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
 
-        if (this.gIsFirstCall) {
-            this.gFirstCallCycles = cpuCycles;
-            this.gIsFirstCall = false;
+        if (state === PinState.High) {
+            this.gRisingEdgeCycle = currentCycle;
+            if (this.gFirstHigh) {
+                this.gBrightness = 0;
+                this.gFirstHigh = false
+            } else {
+                this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gFallingEdgeCycle)) / this.gPeriod, 0);
+            }
+
+        } else if (state === PinState.Low) {
+            if (this.gLastPinState === PinState.High) {
+                this.gFallingEdgeCycle = currentCycle;
+                this.gBrightness = Math.min((currentCycle - this.gRisingEdgeCycle) / this.gPeriod, 1);
+            }
         }
+        this.gLastPinState = state;
 
-        const delta = cpuCycles - this.gLastStateCycles;
-
-        if (this.gLastState === PinState.High) {
-            this.gHighCycles = delta;
-        }
-
-        if (this.gLastState === PinState.Low) {
-            this.gSeenRisingEdge = true;
-            // if (this.gPeriod === 0) {
-            //     if (this.gRisingEdgeTime > 0) {
-            //         this.gPeriod = cpuCycles - this.gRisingEdgeTime;
-            //     }
-            // }
-
-            this.gRisingEdgeTime = cpuCycles;
-        }
-
-        this.gLastState = state;
-        this.gLastStateCycles = cpuCycles - this.gFirstCallCycles;
-
-        // This is extremely cancerous but like what ya gonna do
-        if (!(AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles)) {
-            //on our first call we will be here. dont want to make two if statements and this is better protection, but if this somehow gets to be 0 during the run the brightness will get messed up, cause next branch relies on it
-            this.gBrightness = 0;
-        } else if (this.gBrightness == 0 && this.gRisingEdgeTime > 0) {
-            this.gBrightness = 1;
-        } else if (!this.gSeenRisingEdge) {
-            this.gBrightness = 0;
-        } else {
-            this.gBrightness = Math.min(this.gHighCycles / this.gPeriod, 1);
-        }
         if (!this.animationFrameId) {
             this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
         }
     }
 
     bListener(state: PinState) {
-        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
+        const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
 
-        if (this.bIsFirstCall) {
-            this.bFirstCallCycles = cpuCycles;
-            this.bIsFirstCall = false;
+        if (state === PinState.High) {
+            this.bRisingEdgeCycle = currentCycle;
+            if (this.bFirstHigh) {
+                this.bBrightness = 0;
+                this.bFirstHigh = false
+            } else {
+                this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bFallingEdgeCycle)) / this.bPeriod, 0);
+            }
+
+        } else if (state === PinState.Low) {
+            if (this.bLastPinState === PinState.High) {
+                this.bFallingEdgeCycle = currentCycle;
+                this.bBrightness = Math.min((currentCycle - this.bRisingEdgeCycle) / this.bPeriod, 1);
+            }
         }
+        this.bLastPinState = state;
 
-        const delta = cpuCycles - this.bLastStateCycles;
-
-        if (this.bLastState === PinState.High) {
-            this.bHighCycles = delta;
-        }
-
-        if (this.bLastState === PinState.Low) {
-            this.bSeenRisingEdge = true;
-            // if (this.bPeriod === 0) {
-            //     if (this.bRisingEdgeTime > 0) {
-            //         this.bPeriod = cpuCycles - this.bRisingEdgeTime;
-            //     }
-            // }
-
-            this.bRisingEdgeTime = cpuCycles;
-        }
-
-        this.bLastState = state;
-        this.bLastStateCycles = cpuCycles - this.bFirstCallCycles;
-
-        // This is extremely cancerous but like what ya gonna do
-        if (!(AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles)) {
-            //on our first call we will be here. dont want to make two if statements and this is better protection, but if this somehow gets to be 0 during the run the brightness will get messed up, cause next branch relies on it
-            this.bBrightness = 0;
-        } else if (this.bBrightness == 0 && this.bRisingEdgeTime > 0) {
-            this.bBrightness = 1;
-        } else if (!this.bSeenRisingEdge) {
-            this.bBrightness = 0;
-        } else {
-            this.bBrightness = Math.min(this.bHighCycles / this.bPeriod, 1);
-        }
         if (!this.animationFrameId) {
             this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
         }
@@ -232,6 +160,7 @@ export class RGBLED extends Controller {
 
     private renderSvg() {
         const totalBrightness: number = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+        console.log(this.rBrightness, this.gBrightness, this.bBrightness)
         const totalOpacity: number = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
 
         const redBlur: Element = this.element.querySelector("#rgbRedBlur");
@@ -254,7 +183,7 @@ export class RGBLED extends Controller {
         blueCircle.setAttribute("opacity", `${Math.min(this.bBrightness * 20, 0.3)}`);
 
         const mixedCircle = this.element.querySelector("#rgbMixedCircle");
-        mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255 + this.bBrightness * 90}, ${this.bBrightness * 255})`);
+        mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255}, ${this.bBrightness * 255})`); //green had + this.bBrightness * 90
         mixedCircle.setAttribute("opacity", `${totalOpacity}`);
 
         const hollowCircle = this.element.querySelector("#rgbHollowCircle");
@@ -263,3 +192,39 @@ export class RGBLED extends Controller {
         this.animationFrameId = null;
     }
 }
+
+
+
+// const int bluePin = 5;
+// const int greenPin = 6;
+// const int redPin= 3;
+// // *Interfacing RGB LED with Arduino 
+// // * Author: Osama Ahmed 
+//
+//
+// void setup() {
+//     //Defining the pins as OUTPUT
+//     pinMode(redPin,  OUTPUT);
+//     pinMode(greenPin, OUTPUT);
+//     pinMode(bluePin, OUTPUT);
+// }
+// void  loop() {
+//     setColor(0, 255, 0); // Red Color
+//     delay(1000);
+//     setColor(0,  0, 0); // Green Color
+//     delay(1000);
+//     setColor(255,  0, 0); // Green Color
+//     delay(1000);
+//     setColor(0,  0, 0); // Green Color
+//     delay(1000);
+//     setColor(0,  0, 255); // Green Color
+//     delay(1000);
+//     setColor(0,  0, 0); // Green Color
+//     delay(1000);
+//
+// }
+// void setColor(int redValue, int greenValue,  int blueValue) {
+//     analogWrite(redPin, redValue);
+//     analogWrite(greenPin,  greenValue);
+//     analogWrite(bluePin, blueValue);
+// }
