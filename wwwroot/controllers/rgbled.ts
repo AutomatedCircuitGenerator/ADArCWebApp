@@ -3,12 +3,21 @@ import {PinState} from "@lib/avr8js";
 import {AVRRunner} from "@lib/execute";
 
 export class RGBLED extends Controller {
+
+    private pwmPeriods = {
+        3: 32640,
+        11: 32640,
+        5: 16320,
+        6: 16320,
+        9: 16320,
+        10: 16320
+    };
     private rLastState: PinState = PinState.Input;
     private rLastStateCycles: number = 0;
     private rHighCycles: number = 0;
     private rFirstCallCycles: number = 0;
     private rBrightness: number = 0;
-    private rPeriod: number = 0;
+    private rPeriod: number;
     private rIsFirstCall: boolean = true;
     private rRisingEdgeTime: number = 0;
 
@@ -17,7 +26,7 @@ export class RGBLED extends Controller {
     private gHighCycles: number = 0;
     private gFirstCallCycles: number = 0;
     private gBrightness: number = 0;
-    private gPeriod: number = 0;
+    private gPeriod: number;
     private gIsFirstCall: boolean = true;
     private gRisingEdgeTime: number = 0;
 
@@ -26,44 +35,52 @@ export class RGBLED extends Controller {
     private bHighCycles: number = 0;
     private bFirstCallCycles: number = 0;
     private bBrightness: number = 0;
-    private bPeriod: number = 0;
+    private bPeriod: number;
     private bIsFirstCall: boolean = true;
     private bRisingEdgeTime: number = 0;
 
 
     private animationFrameId: number | null = null;
 
+    private rSeenRisingEdge: boolean;
+    private gSeenRisingEdge: boolean;
+    private bSeenRisingEdge: boolean;
+
 
     setup() {
-        this.rLastState = PinState.Input;
+        this.rLastState = this.pins.R[0].digital.state;
         this.rLastStateCycles = 0;
         this.rHighCycles = 0;
         this.rFirstCallCycles = 0;
         this.rBrightness = 0;
-        this.rPeriod = 0;
         this.rIsFirstCall = true;
         this.rRisingEdgeTime = 0;
+        this.rSeenRisingEdge = false;
 
-        this.gLastState = PinState.Input;
+        this.gLastState = this.pins.G[0].digital.state;
         this.gLastStateCycles = 0;
         this.gHighCycles = 0;
         this.gFirstCallCycles = 0;
         this.gBrightness = 0;
-        this.gPeriod = 0;
         this.gIsFirstCall = true;
         this.gRisingEdgeTime = 0;
+        this.gSeenRisingEdge = false;
 
-        this.bLastState = PinState.Input;
+        this.bLastState = this.pins.B[0].digital.state;
         this.bLastStateCycles = 0;
         this.bHighCycles = 0;
         this.bFirstCallCycles = 0;
         this.bBrightness = 0;
-        this.bPeriod = 0;
         this.bIsFirstCall = true;
         this.bRisingEdgeTime = 0;
+        this.bSeenRisingEdge = false;
 
         this.animationFrameId = null;
 
+        //this should be calculated with real register checks, but like who has time for that.
+        this.rPeriod = this.pwmPeriods[this.pinIndices.R[0].valueOf()];
+        this.gPeriod = this.pwmPeriods[this.pinIndices.G[0].valueOf()];
+        this.bPeriod = this.pwmPeriods[this.pinIndices.B[0].valueOf()];
         this.pins.R[0].digital.addListener(this.rListener.bind(this));
         this.pins.G[0].digital.addListener(this.gListener.bind(this));
         this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -80,8 +97,7 @@ export class RGBLED extends Controller {
     }
 
     rListener(state: PinState) {
-        const avrInstance = AVRRunner.getInstance();
-        const cpuCycles = avrInstance.board.cpu.cycles;
+        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
 
         if (this.rIsFirstCall) {
             this.rFirstCallCycles = cpuCycles;
@@ -95,11 +111,13 @@ export class RGBLED extends Controller {
         }
 
         if (this.rLastState === PinState.Low) {
-            // this.rSeenRisingEdge = true;
-
-            if (this.rRisingEdgeTime > 0) {
-                this.rPeriod = cpuCycles - this.rRisingEdgeTime;
-            }
+            this.rSeenRisingEdge = true
+            // if (this.rPeriod == 0) {
+            //     if (this.rRisingEdgeTime > 0) {
+            //         this.rPeriod = cpuCycles - this.rRisingEdgeTime;
+            //         console.log(`rperiod ${this.rPeriod}`);
+            //     }
+            // }
 
             this.rRisingEdgeTime = cpuCycles;
         }
@@ -113,7 +131,7 @@ export class RGBLED extends Controller {
             this.rBrightness = 0;
         } else if (this.rBrightness == 0 && this.rRisingEdgeTime) {
             this.rBrightness = 1;
-        } else if (!this.rPeriod) {
+        } else if (!this.rSeenRisingEdge) {
             this.rBrightness = 0;
         } else {
             this.rBrightness = Math.min(this.rHighCycles / this.rPeriod, 1);
@@ -124,8 +142,7 @@ export class RGBLED extends Controller {
     }
 
     gListener(state: PinState) {
-        const avrInstance = AVRRunner.getInstance();
-        const cpuCycles = avrInstance.board.cpu.cycles;
+        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
 
         if (this.gIsFirstCall) {
             this.gFirstCallCycles = cpuCycles;
@@ -139,11 +156,12 @@ export class RGBLED extends Controller {
         }
 
         if (this.gLastState === PinState.Low) {
-            // this.gSeenRisingEdge = true;
-
-            if (this.gRisingEdgeTime > 0) {
-                this.gPeriod = cpuCycles - this.gRisingEdgeTime;
-            }
+            this.gSeenRisingEdge = true;
+            // if (this.gPeriod === 0) {
+            //     if (this.gRisingEdgeTime > 0) {
+            //         this.gPeriod = cpuCycles - this.gRisingEdgeTime;
+            //     }
+            // }
 
             this.gRisingEdgeTime = cpuCycles;
         }
@@ -157,7 +175,7 @@ export class RGBLED extends Controller {
             this.gBrightness = 0;
         } else if (this.gBrightness == 0 && this.gRisingEdgeTime > 0) {
             this.gBrightness = 1;
-        } else if (!this.gPeriod) {
+        } else if (!this.gSeenRisingEdge) {
             this.gBrightness = 0;
         } else {
             this.gBrightness = Math.min(this.gHighCycles / this.gPeriod, 1);
@@ -168,8 +186,7 @@ export class RGBLED extends Controller {
     }
 
     bListener(state: PinState) {
-        const avrInstance = AVRRunner.getInstance();
-        const cpuCycles = avrInstance.board.cpu.cycles;
+        const cpuCycles = AVRRunner.getInstance().board.cpu.cycles;
 
         if (this.bIsFirstCall) {
             this.bFirstCallCycles = cpuCycles;
@@ -183,11 +200,12 @@ export class RGBLED extends Controller {
         }
 
         if (this.bLastState === PinState.Low) {
-            // this.rSeenRisingEdge = true;
-
-            if (this.bRisingEdgeTime > 0) {
-                this.bPeriod = cpuCycles - this.bRisingEdgeTime;
-            }
+            this.bSeenRisingEdge = true;
+            // if (this.bPeriod === 0) {
+            //     if (this.bRisingEdgeTime > 0) {
+            //         this.bPeriod = cpuCycles - this.bRisingEdgeTime;
+            //     }
+            // }
 
             this.bRisingEdgeTime = cpuCycles;
         }
@@ -201,7 +219,7 @@ export class RGBLED extends Controller {
             this.bBrightness = 0;
         } else if (this.bBrightness == 0 && this.bRisingEdgeTime > 0) {
             this.bBrightness = 1;
-        } else if (!this.bPeriod) {
+        } else if (!this.bSeenRisingEdge) {
             this.bBrightness = 0;
         } else {
             this.bBrightness = Math.min(this.bHighCycles / this.bPeriod, 1);
@@ -213,8 +231,8 @@ export class RGBLED extends Controller {
 
 
     private renderSvg() {
-        const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
-        const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
+        const totalBrightness: number = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+        const totalOpacity: number = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
 
         const redBlur: Element = this.element.querySelector("#rgbRedBlur");
         redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);

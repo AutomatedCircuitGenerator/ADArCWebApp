@@ -7,7 +7,7 @@ export abstract class Controller {
     protected component: DotNetObjectReference;
     protected pins: { [canonicalPinName: string]: Interfaces[] } = {};
     protected element: HTMLDivElement;
-    private pinIndices: { [canonicalPinName: string]: number[] };
+    protected pinIndices: { [canonicalPinName: string]: number[] };
 
     protected constructor() {
         AVRRunner.getInstance().addController(this);
