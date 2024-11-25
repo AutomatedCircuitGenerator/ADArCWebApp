@@ -29,9 +29,12 @@
                 </button>
                 @if (isUrlBoxVisible)
                 {
-                <div class="url-modal">
-                    <input type="text" class="url-textbox" value="@generatedUrl" readonly />
-                </div>
+                    <div class="url-modal">
+                        <input type="text" class="url-textbox" value="@generatedUrl" readonly />
+                        <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                            <span>@copyButtonText</span>
+                        </button>
+                    </div>
                 }
 
 				<button style="visibility:@(selLockedOut || isRunning ? "hidden" : "visible")" @onclick="downloadFile" class="toolbar-button">
@@ -831,11 +834,27 @@
     }
 
 
+	private string copyButtonText = "📋 Copy";
+
+    private async Task CopyUrlToClipboard()
+    {
+        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", generatedUrl);
+        copyButtonText = "✓ Copied!";
+        StateHasChanged();
+        
+        // Reset button text after 2 seconds
+        await Task.Delay(2000);
+        copyButtonText = "📋 Copy";
+        StateHasChanged();
+    }
+
+
 	private bool isUrlBoxVisible = false;
 
     private async Task ToggleUrlDisplay()
     {
         isUrlBoxVisible = !isUrlBoxVisible;
+		copyButtonText = "📋 Copy";  // Reset text
         
         if (isUrlBoxVisible)
         {

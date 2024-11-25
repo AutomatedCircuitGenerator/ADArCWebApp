@@ -283,27 +283,48 @@ div, span {
 
 }
 
-/* URL Modal styling to appear as an overlay */
 .url-modal {
     position: fixed;
-    top: 10%;  /* Adjust to change vertical position */
+    top: 10%;
     left: 50%;
     transform: translate(-50%, -20%);
-    width: 350px;
+    width: 450px;
     padding: 10px;
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     z-index: 1001;
     display: flex;
-    justify-content: center;
+    justify-content: space-between;
+    gap: 10px;
 }
 
-/* Textbox styling */
 .url-textbox {
-    width: 100%;
+    flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
     font-size: 14px;
+}
+
+.copy-button {
+    height: auto !important;
+    margin: 0 !important;
+    padding: 8px 15px;
+    display: flex;
+    align-items: center;
+    background-color: #f0f0f0;  /* Light grey background */
+    border: 1px solid #d0d0d0;  /* Slightly darker grey border */
+    border-radius: 4px;         /* Rounded corners */
+    transition: all 0.2s ease;  /* Smooth transition for hover */
+    cursor: pointer;
+}
+
+.copy-button:hover {
+    background-color: #e0e0e0;  /* Darker grey on hover */
+}
+
+.copy-button:active {
+    background-color: #d0d0d0;  /* Even darker when clicked */
+    transform: scale(0.98);     /* Slight scale effect when clicked */
 }
