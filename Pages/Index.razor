@@ -933,40 +933,129 @@
 	
 	private static readonly Dictionary<string, string> CompressionMap = new()
     {
-        // Component parameters - using unique characters unlikely to appear in values
-        {"\"localId\"", "\"@a"},
-        {"\"globalId\"", "\"@b"},
-        {"\"x\"", "\"@c"},
-        {"\"y\"", "\"@d"},
-        {"\"zoomedX\"", "\"@e"},
-        {"\"zoomedY\"", "\"@f"},
-        {"\"midSignal\"", "\"@g"},
-        {"\"counter\"", "\"@h"},
-        {"\"Wbuffer\"", "\"@i"},
-        {"\"RegAddr\"", "\"@j"},
-        {"\"byteIndex\"", "\"@k"},
-        {"\"timer\"", "\"@l"},
-        {"\"compParams\"", "\"@m"},
+        // Component Structure
+        {"new ComponentDataBuilder(", "@n("},
+        {"), codeForGen:new(){", "@c{"},
+        {".Property(", "@p("},
+        {".Finish()", "@f1"},
+        {"typeof(Razor", "@r1"},
+        {"codeForGen:new()", "@cg"},
         
-        // Common Arduino patterns - preserve string boundaries
-        {" void setup()", " @n"},
-        {" void loop()", " @o"},
-        {" digitalWrite", " @p"},
-        {" digitalRead", " @q"},
-        {" pinMode", " @r"},
-        {" delay", " @s"},
-        {" HIGH", " @t"},
-        {" LOW", " @u"},
-        {" INPUT", " @v"},
-        {" OUTPUT", " @w"},
+        // JSON Structure
+        {"\"localId\":", "\"@a:"},
+        {"\"globalId\":", "\"@b:"},
+        {"\"x\":", "\"@c:"},
+        {"\"y\":", "\"@d:"},
+        {"\"zoomedX\":", "\"zx:"},
+        {"\"zoomedY\":", "\"zy:"},
+        {"\"midSignal\":", "\"@g:"},
+        {"\"compParams\":", "\"@h:"},
+        {"\"type\":", "\"@t:"},
+        {"\"value\":", "\"@v:"},
+        {"\"text\":", "\"tx:"},
+        {"\"backlight\":", "\"bl:"},
+        {"\"blink\":", "\"bk:"},
+        {"\"cursor\":", "\"cr:"},
+        {"\"cursorX\":", "\"cx:"},
+        {"\"cursorY\":", "\"cy:"},
         
-        // JSON structure - preserve quotes
-        {"\"Code\"", "\"@x"},
-        {"\"Comps\"", "\"@y"},
-        {"\"LocalId\"", "\"@z"},
-        {"\"System.Double\"", "\"@0"},
-        {"\"value\"", "\"@1"}
+        // Code Section Markers
+        {"\",\"include\",\"", "@i1"},
+        {"\",\"global\",\"", "@g1"},
+        {"\",\"setup\",\"", "@s1"},
+        {"\",\"loopMain\",\"", "@l1"},
+        {"\",\"functions\",\"", "@fn"},
+        {"\",\"delayLoop\",\"", "@dl1"},
+        {"\",\"delayTime\",\"", "@dt"},
+        
+        // Common Arduino Framework Elements
+        {"Serial.begin(9600);", "@sb"},
+        {"void setup() {", "@vs{"},
+        {"void loop() {", "@vl{"},
+        {".begin()", "@b()"},
+        {"Wire.begin();", "@wb"},
+        {"pinMode(", "@pm"},
+        {"digitalWrite(", "@dw"},
+        {"digitalRead(", "@dr"},
+        {"delay(", "@d("},
+        {"Serial.println(\"", "@sp\""},
+        
+        // Common Pin Names
+        {"\"digital_out\"", "\"do\""},
+        {"\"digital_in\"", "\"di\""},
+        {"\"analog_out\"", "\"ao\""},
+        {"\"analog_in\"", "\"ai\""},
+        {"\"gnd\"", "\"g\""},
+        {"\"5V\"", "\"5v\""},
+        {"\"3V3\"", "\"3v\""},
+        {"\"sda\"", "\"sd\""},
+        {"\"scl\"", "\"sc\""},
+        
+        // Common Constants
+        {"HIGH", "@hi"},
+        {"LOW", "@lo"},
+        {"OUTPUT", "@out"},
+        {"INPUT", "@in"},
+        
+        // Basic Syntax
+        {"#include", "@inc"},
+        {"void ", "@vo"},
+        {"return;", "@rt"},
+        {"const ", "@co"},
+        
+        // Type Declarations
+        {"const int ", "@ci"},
+        {"int ", "@int"},
+        {"float ", "@fl"},
+        {"bool ", "@bo"},
+        {"String ", "@str"},
+        
+        // LCD Specific
+        {"lcd.clear();", "@lc"},
+        {"lcd.print(\"", "@lp\""},
+        {"lcd.setCursor(", "@ls"},
+        {"lcd.setBacklight(", "@lb"},
+        
+        // System Types
+        {"\"System.String\"", "\"@ss\""},
+        {"\"System.Boolean\"", "\"@sb\""},
+        {"\"System.Int32\"", "\"@si\""},
+        {"\"System.Double\"", "\"@sd\""},
+        
+        // Common Property Values
+        {"{\"type\":\"System.Double\",\"value\":0}", "@d0"},
+        {"{\"type\":\"System.String\",\"value\":\"\"}", "@s0"},
+        {"{\"type\":\"System.Boolean\",\"value\":false}", "@bf"},
+        {"{\"type\":\"System.Int32\",\"value\":0}", "@i0"},
+        {"\"value\":0", "\"v0"},
+        {"\"value\":1", "\"v1"},
+        {"\"value\":false", "\"vf"},
+        
+        // Component States
+        {"\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0", "@def"},
+        {"{\"localId\":0,\"globalId\":1,", "@c1,"},
+        {"\"compParams\":{}", "@cp0"},
+        {"\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,", "@st0,"},
+        {"\"ismotiondetected\":{\"type\":\"System.Double\",\"value\":0},\"triggermode\":{\"type\":\"System.Double\",\"value\":0},\"timedelayseconds\":{\"type\":\"System.Double\",\"value\":1}", "@pir0"},
+        
+        // Control Flow & Whitespace
+        {" else if ", "@ei"},
+        {"while (", "@w("},
+        {"if (", "@i"},
+        {") {", "}{"},
+        {"} else {", "}e{"},
+        {" {", "{"},
+        {"{ ", "{"},
+        {" }", "}"},
+        {" ;", ";"},
+        {", ", ","},
+        {": ", ":"},
+        {" = ", "="},
+        {" == ", "="},
+        {"\n\n", "\n"},
+        {" // ", "//"}
     };
+    
 
 
 }
