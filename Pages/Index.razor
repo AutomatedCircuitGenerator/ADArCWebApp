@@ -860,6 +860,13 @@
 
     private static async Task<string> CompressCircuitData(string json)
     {
+        // First apply pattern replacement
+        foreach (var kvp in CompressionMap)
+        {
+            json = json.Replace(kvp.Key, kvp.Value);
+        }
+    
+        // Then apply GZip compression
         byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
         using var msi = new MemoryStream(jsonBytes);
         using var mso = new MemoryStream();
@@ -876,6 +883,7 @@
     
     private static string DecompressCircuitData(string compressed)
     {
+        // First decompress from Base64 + GZip
         compressed = compressed.Replace('-', '+').Replace('_', '/');
         switch (compressed.Length % 4)
         {
@@ -891,7 +899,15 @@
             gs.CopyTo(mso);
         }
     
-        return System.Text.Encoding.UTF8.GetString(mso.ToArray());
+        string json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+    
+        // Then reverse pattern replacement
+        foreach (var kvp in CompressionMap.Reverse())
+        {
+            json = json.Replace(kvp.Value, kvp.Key);
+        }
+    
+        return json;
     }
     
     [JSInvokable]
@@ -913,6 +929,44 @@
             Console.WriteLine($"Error loading from URL: {ex.Message}");
         }
     }
+
+	
+	private static readonly Dictionary<string, string> CompressionMap = new()
+    {
+        // Component parameters - using unique characters unlikely to appear in values
+        {"\"localId\"", "\"@a"},
+        {"\"globalId\"", "\"@b"},
+        {"\"x\"", "\"@c"},
+        {"\"y\"", "\"@d"},
+        {"\"zoomedX\"", "\"@e"},
+        {"\"zoomedY\"", "\"@f"},
+        {"\"midSignal\"", "\"@g"},
+        {"\"counter\"", "\"@h"},
+        {"\"Wbuffer\"", "\"@i"},
+        {"\"RegAddr\"", "\"@j"},
+        {"\"byteIndex\"", "\"@k"},
+        {"\"timer\"", "\"@l"},
+        {"\"compParams\"", "\"@m"},
+        
+        // Common Arduino patterns - preserve string boundaries
+        {" void setup()", " @n"},
+        {" void loop()", " @o"},
+        {" digitalWrite", " @p"},
+        {" digitalRead", " @q"},
+        {" pinMode", " @r"},
+        {" delay", " @s"},
+        {" HIGH", " @t"},
+        {" LOW", " @u"},
+        {" INPUT", " @v"},
+        {" OUTPUT", " @w"},
+        
+        // JSON structure - preserve quotes
+        {"\"Code\"", "\"@x"},
+        {"\"Comps\"", "\"@y"},
+        {"\"LocalId\"", "\"@z"},
+        {"\"System.Double\"", "\"@0"},
+        {"\"value\"", "\"@1"}
+    };
 
 
 }
