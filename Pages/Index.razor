@@ -405,13 +405,14 @@
         bool isSpecial = labels.Contains("sda") || labels.Contains("scl") || labels.Contains("rx") ||
                          labels.Contains("tx") || labels.Contains("pwm") || labels.Contains("analog") ||
                          labels.Contains("sck") || labels.Contains("cipo") || labels.Contains("copi");
+        bool sharedConnection = labels.Contains("sda") || labels.Contains("scl") || labels.Contains("sck") || labels.Contains("copi") || labels.Contains("cipo");
         foreach (var node in nodes)
         {
             var localLabels = new HashSet<string>(node.localLabels);
             // if this is the case, this is definetly not the node we are looking for.
             if (!labels.IsSubsetOf(localLabels)) continue;
             // this node is correct, but already has a connection. we mark this for error reporting.
-            if (localLabels.Contains("connected"))
+            if (localLabels.Contains("connected") || (localLabels.Contains("bus") && !sharedConnection))
             {
                 connectedCandidates.Add(node);
                 continue;
@@ -419,6 +420,10 @@
             // if we are looking for a special node, stop here
             if (isSpecial)
             {
+                if (sharedConnection && !localLabels.Contains("bus"))
+                {
+                    node.localLabels.Add("bus");
+                }
                 return node;
             }
             // if we are looking for a GPIO pin, try to protect special pins
