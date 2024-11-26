@@ -15,50 +15,51 @@ export class RGBLED extends Controller {
 
     private rBrightness: number;
     private rPeriod: number;
-    private rRisingEdgeCycle: number;
-    private rFallingEdgeCycle: number;
     private rFirstHigh: boolean;
     private rLastPinState: PinState;
-
+    private rPreviousFallingEdgeCycle: number;
+    private rPreviousRisingEdgeCycle: number;
 
     private gBrightness: number;
     private gPeriod: number;
-    private gRisingEdgeCycle: number;
-    private gFallingEdgeCycle: number;
     private gFirstHigh: boolean;
     private gLastPinState: PinState;
-
+    private gPreviousFallingEdgeCycle: number;
+    private gPreviousRisingEdgeCycle: number;
 
     private bBrightness: number;
     private bPeriod: number;
-    private bRisingEdgeCycle: number;
-    private bFallingEdgeCycle: number;
     private bFirstHigh: boolean;
     private bLastPinState: PinState;
+    private bPreviousFallingEdgeCycle: number;
+    private bPreviousRisingEdgeCycle: number;
+
 
     private animationFrameId: number | null = null;
 
+
     setup() {
+        this.rLastPinState = this.pins.R[0].digital.state;
+        this.rFirstHigh = true;
         this.rBrightness = 0;
         this.rPeriod = 0;
-        this.rRisingEdgeCycle = 0;
-        this.rFallingEdgeCycle = 0;
-        this.rFirstHigh = false;
-        this.rLastPinState = this.pins.R[0].digital.state;
+        this.rPreviousFallingEdgeCycle = 0;
+        this.rPreviousRisingEdgeCycle = 0;
 
+        this.gLastPinState = this.pins.G[0].digital.state;
+        this.gFirstHigh = true;
         this.gBrightness = 0;
         this.gPeriod = 0;
-        this.gRisingEdgeCycle = 0;
-        this.gFallingEdgeCycle = 0;
-        this.gFirstHigh = false;
-        this.gLastPinState = this.pins.G[0].digital.state;
+        this.gPreviousFallingEdgeCycle = 0;
+        this.gPreviousRisingEdgeCycle = 0;
 
+        this.bLastPinState = this.pins.B[0].digital.state;
+        this.bFirstHigh = true;
         this.bBrightness = 0;
         this.bPeriod = 0;
-        this.bRisingEdgeCycle = 0;
-        this.bFallingEdgeCycle = 0;
-        this.bFirstHigh = false;
-        this.bLastPinState = this.pins.B[0].digital.state;
+        this.bPreviousFallingEdgeCycle = 0;
+        this.bPreviousRisingEdgeCycle = 0;
+
 
         this.animationFrameId = null;
 
@@ -81,25 +82,62 @@ export class RGBLED extends Controller {
         this.renderSvg();
     }
 
+    rWatchDog(lastState: PinState, lastStateCycle: number) {
+        if (lastState === PinState.High && this.rPreviousFallingEdgeCycle <= lastStateCycle) {
+            this.rBrightness = 1;
+        } else if (lastState === PinState.Low && this.rPreviousRisingEdgeCycle <= lastStateCycle) {
+            this.rBrightness = 0;
+        }
+        if (!this.animationFrameId) {
+            this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+        }
+    }
+
+    gWatchDog(lastState: PinState, lastStateCycle: number) {
+        if (lastState === PinState.High && this.gPreviousFallingEdgeCycle <= lastStateCycle) {
+            this.gBrightness = 1;
+        } else if (lastState === PinState.Low && this.gPreviousRisingEdgeCycle <= lastStateCycle) {
+            this.gBrightness = 0;
+        }
+        if (!this.animationFrameId) {
+            this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+        }
+    }
+
+    bWatchDog(lastState: PinState, lastStateCycle: number) {
+        if (lastState === PinState.High && this.bPreviousFallingEdgeCycle <= lastStateCycle) {
+            this.bBrightness = 1;
+        } else if (lastState === PinState.Low && this.bPreviousRisingEdgeCycle <= lastStateCycle) {
+            this.bBrightness = 0;
+        }
+        if (!this.animationFrameId) {
+            this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+        }
+    }
+
+
     rListener(state: PinState) {
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
-
         if (state === PinState.High) {
-            this.rRisingEdgeCycle = currentCycle;
+            this.rPreviousRisingEdgeCycle = currentCycle;
+
             if (this.rFirstHigh) {
                 this.rBrightness = 0;
                 this.rFirstHigh = false;
             } else {
-                this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rFallingEdgeCycle)) / this.rPeriod, 0);
+                this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rPreviousFallingEdgeCycle)) / this.rPeriod, 0);
             }
+            // want watch dog to run before next cycle so states dont get corrupted
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
 
         } else if (state === PinState.Low) {
             if (this.rLastPinState === PinState.High) {
-                this.rFallingEdgeCycle = currentCycle;
-                this.rBrightness = Math.min((currentCycle - this.rRisingEdgeCycle) / this.rPeriod, 1);
-
+                this.rPreviousFallingEdgeCycle = currentCycle;
+                this.rBrightness = Math.min((currentCycle - this.rPreviousRisingEdgeCycle) / this.rPeriod, 1)
+                AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
             }
         }
+
         this.rLastPinState = state;
 
         if (!this.animationFrameId) {
@@ -109,22 +147,26 @@ export class RGBLED extends Controller {
 
     gListener(state: PinState) {
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
-
         if (state === PinState.High) {
-            this.gRisingEdgeCycle = currentCycle;
+            this.gPreviousRisingEdgeCycle = currentCycle;
+
             if (this.gFirstHigh) {
                 this.gBrightness = 0;
-                this.gFirstHigh = false
+                this.gFirstHigh = false;
             } else {
-                this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gFallingEdgeCycle)) / this.gPeriod, 0);
+                this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gPreviousFallingEdgeCycle)) / this.gPeriod, 0);
             }
+            // want watch dog to run before next cycle so states dont get corrupted
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
 
         } else if (state === PinState.Low) {
             if (this.gLastPinState === PinState.High) {
-                this.gFallingEdgeCycle = currentCycle;
-                this.gBrightness = Math.min((currentCycle - this.gRisingEdgeCycle) / this.gPeriod, 1);
+                this.gPreviousFallingEdgeCycle = currentCycle;
+                this.gBrightness = Math.min((currentCycle - this.gPreviousRisingEdgeCycle) / this.gPeriod, 1)
+                AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
             }
         }
+
         this.gLastPinState = state;
 
         if (!this.animationFrameId) {
@@ -134,22 +176,26 @@ export class RGBLED extends Controller {
 
     bListener(state: PinState) {
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
-
         if (state === PinState.High) {
-            this.bRisingEdgeCycle = currentCycle;
+            this.bPreviousRisingEdgeCycle = currentCycle;
+
             if (this.bFirstHigh) {
                 this.bBrightness = 0;
-                this.bFirstHigh = false
+                this.bFirstHigh = false;
             } else {
-                this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bFallingEdgeCycle)) / this.bPeriod, 0);
+                this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bPreviousFallingEdgeCycle)) / this.bPeriod, 0);
             }
+            // want watch dog to run before next cycle so states dont get corrupted
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
 
         } else if (state === PinState.Low) {
             if (this.bLastPinState === PinState.High) {
-                this.bFallingEdgeCycle = currentCycle;
-                this.bBrightness = Math.min((currentCycle - this.bRisingEdgeCycle) / this.bPeriod, 1);
+                this.bPreviousFallingEdgeCycle = currentCycle;
+                this.bBrightness = Math.min((currentCycle - this.bPreviousRisingEdgeCycle) / this.bPeriod, 1)
+                AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
             }
         }
+
         this.bLastPinState = state;
 
         if (!this.animationFrameId) {
@@ -160,7 +206,6 @@ export class RGBLED extends Controller {
 
     private renderSvg() {
         const totalBrightness: number = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
-        console.log(this.rBrightness, this.gBrightness, this.bBrightness)
         const totalOpacity: number = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
 
         const redBlur: Element = this.element.querySelector("#rgbRedBlur");
@@ -192,7 +237,6 @@ export class RGBLED extends Controller {
         this.animationFrameId = null;
     }
 }
-
 
 
 // const int bluePin = 5;
