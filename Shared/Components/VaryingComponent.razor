@@ -163,6 +163,10 @@
     /// <returns>A css class for which border to display.</returns>
     private string BorderClasses()
     {
+        if (individualData.Highlight == Variant.Error)
+        {
+            return "error-border";
+        }
         if (disableBorder) return "";
         if (forceBorder)
         {

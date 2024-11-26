@@ -19,6 +19,15 @@
         var timeout = Math.Min(Math.Max(toast.Message.Length * 50, 2000), 8000);
         var timer = new Timer(RemoveToast, toast, timeout, Timeout.Infinite);
         _toasts.Add((toast, timer));
+        
+        if (toast.Components != null)
+        {
+            foreach (var component in toast.Components)
+            {
+                component.Highlight = toast.Variant;
+            }
+        }
+        
         InvokeAsync(StateHasChanged);
     }
 
@@ -31,6 +40,14 @@
         {
             entry.Timer.Dispose(); // Dispose the timer to free resources
             _toasts.Remove(entry); // Remove the timer entry from the list
+        }
+
+        if (toast.Components != null)
+        {
+            foreach (var component in toast.Components)
+            {
+                component.Highlight = null;
+            }
         }
 
         // Trigger a UI update

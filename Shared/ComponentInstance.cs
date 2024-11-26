@@ -17,6 +17,8 @@ namespace ADArCWebApp.Shared
         public readonly int GlobalId;
         public double X;
         public double Y;
+        
+        public Variant? Highlight {get; set;}
 
         public double zoomedX;
         public double zoomedY;
@@ -33,7 +35,7 @@ namespace ADArCWebApp.Shared
         public long timer;
         public readonly Dictionary<string, IComponentParameter> CompParams = new();
 
-        public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0)
+        public ComponentInstance(int globalId, node gsNode, double x = 829.0, double y = 219.0)
         {
             GlobalId = globalId;
             Data = ComponentDeclarations.Components[globalId];
