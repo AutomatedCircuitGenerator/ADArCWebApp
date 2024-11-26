@@ -3,39 +3,43 @@ import {Memory} from "@controllers/memory";
 import {I2CController} from "@lib/i2c-bus";
 import {AVRRunner} from "@lib/execute";
 
-export const I2C_MST_CTRL = 0x68; //68 if ad0 is low, els 69
+// I2C address for the MPU6050 (0x68 when AD0 pin is low, 0x69 when high)
+export const I2C_MST_CTRL = 0x68;
 
+// Define the structure for register information
 type Register = {
     address: number;
     default?: number;
 };
 
+// Complete register map matching the real MPU6050 sensor
 const registers: { [key: string]: Register } = {
-    CONFIG: { address: 0x1A},
-    GYRO_CONFIG: { address: 0x1B},
-    ACCEL_CONFIG: { address: 0x1C},
+    // Configuration registers
+    CONFIG: { address: 0x1A },
+    GYRO_CONFIG: { address: 0x1B },
+    ACCEL_CONFIG: { address: 0x1C },
 
-    //Acceleration data registers
-    ACCEL_XOUT_H: { address: 0x3B},
-    ACCEL_XOUT_L: { address: 0x3C},
-    ACCEL_YOUT_H: { address: 0x3D},
-    ACCEL_YOUT_L: { address: 0x3E},
-    ACCEL_ZOUT_H: { address: 0x3F},
-    ACCEL_ZOUT_L: { address: 0x40},
+    // Acceleration data registers
+    ACCEL_XOUT_H: { address: 0x3B },
+    ACCEL_XOUT_L: { address: 0x3C },
+    ACCEL_YOUT_H: { address: 0x3D },
+    ACCEL_YOUT_L: { address: 0x3E },
+    ACCEL_ZOUT_H: { address: 0x3F },
+    ACCEL_ZOUT_L: { address: 0x40 },
 
     // Temperature registers
     TEMP_OUT_H: { address: 0x41 },
     TEMP_OUT_L: { address: 0x42 },
 
-    //Gyroscope data registers
-    GYRO_XOUT_H: { address: 0x43},
-    GYRO_XOUT_L: { address: 0x44},
-    GYRO_YOUT_H: { address: 0x45},
-    GYRO_YOUT_L: { address: 0x46},
-    GYRO_ZOUT_H: { address: 0x47},
-    GYRO_ZOUT_L: { address: 0x48},
+    // Gyroscope data registers
+    GYRO_XOUT_H: { address: 0x43 },
+    GYRO_XOUT_L: { address: 0x44 },
+    GYRO_YOUT_H: { address: 0x45 },
+    GYRO_YOUT_L: { address: 0x46 },
+    GYRO_ZOUT_H: { address: 0x47 },
+    GYRO_ZOUT_L: { address: 0x48 },
 
-    //Euler Angle registers (no official euler angle registers)
+    // Extended functionality - Euler angle registers (simulated)
     EULER_HEADING_H: { address: 0x49 },
     EULER_HEADING_L: { address: 0x4A },
     EULER_ROLL_H: { address: 0x4B },
@@ -43,7 +47,7 @@ const registers: { [key: string]: Register } = {
     EULER_PITCH_H: { address: 0x4D },
     EULER_PITCH_L: { address: 0x4E },
 
-    //Quaternion registers (no official quaternion registers)
+    // Extended functionality - Quaternion registers (simulated)
     QUATERNIONW_H: { address: 0x4F },
     QUATERNIONW_L: { address: 0x50 },
     QUATERNIONX_H: { address: 0x51 },
@@ -53,45 +57,60 @@ const registers: { [key: string]: Register } = {
     QUATERNIONZ_H: { address: 0x55 },
     QUATERNIONZ_L: { address: 0x56 },
 
-    //Linear Acceleration data registers
-    LINEAR_ACCEL_X_H: { address: 0x57},
-    LINEAR_ACCEL_X_L: { address: 0x58},
-    LINEAR_ACCEL_Y_H: { address: 0x59},
-    LINEAR_ACCEL_Y_L: { address: 0x5A},
-    LINEAR_ACCEL_Z_H: { address: 0x5B},
-    LINEAR_ACCEL_Z_L: { address: 0x5C},
-    
-    //Other
-    PWR_MGMT_1: { address: 0x6B,default:0x40},
-    PWR_MGMT_2: {address: 0X6C,default:0x00},
-    WHO_AM_I: {address: 0x75,default:0x68}
-    
+    // Extended functionality - Linear acceleration registers (simulated)
+    LINEAR_ACCEL_X_H: { address: 0x57 },
+    LINEAR_ACCEL_X_L: { address: 0x58 },
+    LINEAR_ACCEL_Y_H: { address: 0x59 },
+    LINEAR_ACCEL_Y_L: { address: 0x5A },
+    LINEAR_ACCEL_Z_H: { address: 0x5B },
+    LINEAR_ACCEL_Z_L: { address: 0x5C },
+
+    // Power management and device identification
+    PWR_MGMT_1: { address: 0x6B, default: 0x40 },
+    PWR_MGMT_2: { address: 0x6C, default: 0x00 },
+    WHO_AM_I: { address: 0x75, default: 0x68 }
 } as const;
 
+// Define vector type for 3D measurements
 type Vector = {x: number, y: number, z: number};
+
 export class MPU6050 extends Controller implements I2CController {
-    private address : number | null = null;
+    private address: number | null = null;
     private memory = new Uint8Array(128);
-    private accelerometer: Vector = { x: 0, y: 0, z: 0 };
+    private accelerometer: Vector = { x: 0, y: 0, z: 9.81 };  // Initialize with gravity on Z-axis
     private gyroscope: Vector = { x: 0, y: 0, z: 0 };
     private orientation: Vector = { x: 0, y: 0, z: 0 };
-    private lastRead: number;
+    private lastRead: number = Date.now();
     private rotating = false;
+    private temperature = 25.0;  // Start at room temperature (25°C)
 
+    // Add realistic sensor noise
+    private addSensorNoise(value: number, magnitude: number = 0.01): number {
+        return value + (Math.random() - 0.5) * magnitude;
+    }
+
+    // Convert temperature to MPU6050 format
+    private encodeTemperature(celsius: number): number {
+        return Math.round((celsius - 36.53) * 340);
+    }
+
+    // Write vector data to memory with proper byte ordering
     private setVector(address: number, vector: number[], scalar: number) {
         let writePointer = address;
 
         for (const num of vector) {
-            const scaled = Math.round(num * scalar);
-            const lsb = scaled & 0xFF;
+            const noisyValue = this.addSensorNoise(num);
+            const scaled = Math.round(noisyValue * scalar);
             const msb = (scaled >> 8) & 0xFF;
-            this.memory[writePointer] = lsb;
-            writePointer++;
+            const lsb = scaled & 0xFF;
             this.memory[writePointer] = msb;
+            writePointer++;
+            this.memory[writePointer] = lsb;
             writePointer++;
         }
     }
 
+    // Calculate quaternion from Euler angles
     private eulerToQuaternion(heading: number, roll: number, pitch: number) {
         const toRadians = (degrees) => degrees * (Math.PI / 180);
 
@@ -106,58 +125,107 @@ export class MPU6050 extends Controller implements I2CController {
         const cp = Math.cos(pitch * 0.5);
         const sp = Math.sin(pitch * 0.5);
 
+        const qw = cr * cp * cy + sr * sp * sy;
         const qx = sr * cp * cy - cr * sp * sy;
         const qy = cr * sp * cy + sr * cp * sy;
         const qz = cr * cp * sy - sr * sp * cy;
-        const qw = cr * cp * cy + sr * sp * sy;
 
-        return { x: qx, y: qy, z: qz, w: qw };
+        return { w: qw, x: qx, y: qy, z: qz };
     }
 
+    // Calculate and update sensor orientation and readings
+    private calculateOrientation() {
+        const currentTime = Date.now();
+        const timeDiff = (currentTime - this.lastRead) / 1000;
+        this.lastRead = currentTime;
+
+        if (this.rotating && timeDiff > 0) {
+            // Update orientation based on gyroscope readings
+            this.orientation.x += this.gyroscope.z * timeDiff;
+            this.orientation.y += this.gyroscope.x * timeDiff;
+            this.orientation.z += this.gyroscope.y * timeDiff;
+
+            // Normalize angles to valid ranges
+            this.orientation.x = this.orientation.x % 360;
+            this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+            this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+
+            // Calculate gravity distribution based on orientation
+            const gravityX = Math.sin(this.orientation.y * Math.PI / 180) * 9.81;
+            const gravityY = -Math.sin(this.orientation.z * Math.PI / 180) * 9.81;
+            const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
+                Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
+
+            this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+        }
+
+        // Update all sensor registers
+        this.setVector(registers.ACCEL_XOUT_H.address,
+            [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z],
+            16384/9.81);  // Convert to sensor units (16384 = 1g)
+
+        this.setVector(registers.GYRO_XOUT_H.address,
+            [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z],
+            131);  // Convert to sensor units (131 = 1 degree/sec)
+
+        this.setVector(registers.EULER_HEADING_H.address,
+            [this.orientation.x, this.orientation.y, this.orientation.z],
+            16);
+
+        // Update quaternion
+        const quaternion = this.eulerToQuaternion(
+            this.orientation.x,
+            this.orientation.z,
+            this.orientation.y
+        );
+        this.setVector(registers.QUATERNIONW_H.address,
+            [quaternion.w, quaternion.x, quaternion.y, quaternion.z],
+            16384);
+    }
+
+    // Public interface for controlling sensor behavior
     sensorControls = {
         setAcceleration: (x: number, y: number, z: number) => {
             this.accelerometer = {x, y, z};
-            this.setVector(registers.ACCEL_XOUT_H.address, [x, y, z], 100);
             this.calculateOrientation();
         },
+
         setGyroscope: (x: number, y: number, z: number) => {
             this.gyroscope = {x, y, z};
-            this.setVector(registers.GYRO_XOUT_H.address, [x, y, z], 16);
+            this.rotating = (x !== 0 || y !== 0 || z !== 0);
             this.calculateOrientation();
         },
+
         setTemp: (temp: number) => {
-            this.memory[registers.TEMP_OUT_H.address] = temp;
+            this.temperature = temp;
+            const encoded = this.encodeTemperature(temp);
+            this.memory[registers.TEMP_OUT_H.address] = (encoded >> 8) & 0xFF;
+            this.memory[registers.TEMP_OUT_L.address] = encoded & 0xFF;
         },
-        setLinearAcceleration: (x: number, y: number, z: number) => {
-            this.setVector(registers.LINEAR_ACCEL_X_H.address, [x, y, z], 100);
-        },
+
+        setOrientation: (pitch: number, roll: number, yaw: number) => {
+            this.orientation = {x: yaw, y: pitch, z: roll};
+            this.calculateOrientation();
+        }
     };
 
-    private calculateOrientation() {
-        const avgX = (this.accelerometer.x + this.gyroscope.x) / 2;
-        const avgY = (this.accelerometer.y + this.gyroscope.y) / 2;
-        const avgZ = (this.accelerometer.z + this.gyroscope.z) / 2;
-
-        this.setVector(registers.EULER_HEADING_H.address, [avgX, avgY, avgZ], 16);
-        const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
-        this.setVector(registers.QUATERNIONW_H.address, [w, x, y, z], 16384);
-    }
-
-
+    // Initialize the sensor
     setup(): void {
         AVRRunner.getInstance().board.twis[0].registerController(I2C_MST_CTRL, this);
 
+        // Set default register values
         for (const register of Object.values(registers)) {
             if (register.default) {
                 this.memory[register.address] = register.default;
             }
         }
 
-        //this.sensorControls.setGravity(0.0, 0.0, 9.81);      // Sample gravity vector (m/s^2)
-        this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3); // Sample linear acceleration (m/s^2)
-        this.sensorControls.setTemp(75);
+        // Initialize sensor state
+        this.sensorControls.setTemp(25);
+        this.calculateOrientation();
     }
 
+    // I2C communication interface
     i2cConnect(addr: number, write: boolean): boolean {
         return true;
     }
@@ -166,58 +234,24 @@ export class MPU6050 extends Controller implements I2CController {
 
     i2cReadByte(acked: boolean): number {
         let byte;
-        if (this.address !== null) { // addr has been properly specified in a previous write
-            if (this.address === registers.EULER_HEADING_H.address && this.rotating) {
-                const currentTime = Date.now();
-                const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0; // in seconds
-
-                if (timeDiff > 0) {
-                    // Integrate gyroscope data to update orientation
-                    const gyroX = this.gyroscope.x * timeDiff; // Angular change in degrees
-                    const gyroY = this.gyroscope.y * timeDiff;
-                    const gyroZ = this.gyroscope.z * timeDiff;
-
-                    // Update the orientation values (assuming you have `orientation` to store this)
-                    this.orientation.x += gyroZ; // Using Z-axis for heading
-                    this.orientation.y += gyroX;    // Using X-axis for pitch
-                    this.orientation.z += gyroY;     // Using Y-axis for roll
-
-                    // Normalize orientation values if necessary
-                    this.orientation.x = this.orientation.x % 360; // Keep within 0-360 degrees
-                    this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y)); // Limit pitch
-                    this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z)); // Limit roll
-
-                    // Update the last read timestamp
-                    this.lastRead = currentTime;
-
-                    // Update the euler angles in memory
-                    this.setVector(registers.EULER_HEADING_H.address,
-                        [this.orientation.x, this.orientation.y, this.orientation.z], 16);
-                }
-            }
-
+        if (this.address !== null) {
+            this.calculateOrientation();  // Update sensor state
             byte = this.memory[this.address];
-
-            if (this.address === registers.EULER_PITCH_L.address && this.rotating) {
-                this.lastRead = Date.now();
-            }
-        } else { // error state, addr has not been specified
+        } else {
             byte = 0xff;
         }
 
-        // if we get an ack, we increment the address for a sequential read, otherwise, we are done and clear the address
         this.address = acked ? (this.address + 1) % this.memory.length : null;
         return byte;
     }
 
     i2cWriteByte(value: number): boolean {
-        if (this.address !== null) { // addr has been specified in a previous write, time to write to memory
+        if (this.address !== null) {
             this.memory[this.address] = value;
             this.address = null;
-        } else { // we are setting the addr to prepare for a read/write
+        } else {
             this.address = value;
         }
         return true;
     }
-
 }
