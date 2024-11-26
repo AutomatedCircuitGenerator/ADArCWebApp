@@ -12,14 +12,14 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 101, y: 32.78, number: 13, signals: new PinSignalInfo[] { PinSignalInfo.GND() }),
-                new ElementPin(name: "GND", x: 91, y: 32.78, number: 12, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }),
-                new ElementPin(name: "SCL", x: 81, y: 32.78, number: 11, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }),
-                new ElementPin(name: "SDA", x: 71, y: 32.78, number: 10, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }),
-                new ElementPin(name: "XDA", x: 36.0, y: 5.78, number: 10, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "5V", x: 100, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "gnd", x: 90, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
+                new ElementPin(name: "scl", x: 80, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, number: 3),
+                new ElementPin(name: "sda", x: 70, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, number: 4),
+                new ElementPin(name: "xda", x: 60, y: 30, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "xcl", x: 50, y: 30, signals: new PinSignalInfo[] { }, number: 6),
+                new ElementPin(name: "add", x: 40, y: 30, signals: new PinSignalInfo[] { }, number: 7),
+                new ElementPin(name: "int", x: 30, y: 30, signals: new PinSignalInfo[] { }, number: 8),
             };
         }
     }
