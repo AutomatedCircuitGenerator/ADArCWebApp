@@ -13798,13 +13798,30 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     class RGBLED extends controller_20.Controller {
         constructor() {
             super(...arguments);
-            this.pwmPeriods = {
+            this.unoPwmPeriods = {
                 3: 32640,
                 11: 32640,
                 5: 16320,
                 6: 16320,
                 9: 16320,
                 10: 16320
+            };
+            this.megaPwmPeriods = {
+                2: 32640,
+                3: 32640,
+                4: 16320,
+                5: 32640,
+                6: 32640,
+                7: 32640,
+                8: 32640,
+                9: 32640,
+                10: 32640,
+                11: 32640,
+                12: 32640,
+                13: 16320,
+                44: 32640,
+                45: 32640,
+                46: 32640,
             };
             this.animationFrameId = null;
         }
@@ -13828,9 +13845,19 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.bPreviousFallingEdgeCycle = 0;
             this.bPreviousRisingEdgeCycle = 0;
             this.animationFrameId = null;
-            this.rPeriod = this.pwmPeriods[this.pinIndices.R[0].valueOf()];
-            this.gPeriod = this.pwmPeriods[this.pinIndices.G[0].valueOf()];
-            this.bPeriod = this.pwmPeriods[this.pinIndices.B[0].valueOf()];
+            if (execute_13.AVRRunner.getInstance().board.timers.length === 3) {
+                this.rPeriod = this.unoPwmPeriods[this.pinIndices.R[0].valueOf()];
+                this.gPeriod = this.unoPwmPeriods[this.pinIndices.G[0].valueOf()];
+                this.bPeriod = this.unoPwmPeriods[this.pinIndices.B[0].valueOf()];
+            }
+            else if (execute_13.AVRRunner.getInstance().board.timers.length === 6) {
+                this.rPeriod = this.megaPwmPeriods[this.pinIndices.R[0].valueOf()];
+                this.gPeriod = this.megaPwmPeriods[this.pinIndices.G[0].valueOf()];
+                this.bPeriod = this.megaPwmPeriods[this.pinIndices.B[0].valueOf()];
+            }
+            else {
+                throw new Error("Unknown board. cannot create pwm component");
+            }
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
             this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -13954,7 +13981,6 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         }
         renderSvg() {
             const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
-            console.log(this.rBrightness, this.gBrightness, this.bBrightness);
             const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
             const redBlur = this.element.querySelector("#rgbRedBlur");
             redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);
