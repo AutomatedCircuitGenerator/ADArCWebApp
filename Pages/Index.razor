@@ -114,9 +114,9 @@
 
 @code{
     bool isLeftExpanded = true;
-    bool isRightExpanded ;
+    bool isRightExpanded;
 
-    private bool _scheduleBenchSetup ;
+    private bool _scheduleBenchSetup;
 
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
@@ -417,6 +417,7 @@
                 connectedCandidates.Add(node);
                 continue;
             }
+
             // if we are looking for a special node, stop here
             if (isSpecial)
             {
@@ -424,8 +425,10 @@
                 {
                     node.localLabels.Add("bus");
                 }
+
                 return node;
             }
+
             // if we are looking for a GPIO pin, try to protect special pins
             if (localLabels.Contains("sda") || localLabels.Contains("scl"))
             {
@@ -452,6 +455,7 @@
                 return node;
             }
         }
+
         // Fallback priority: PWM -> USART -> Analog -> SPI -> I2C
         node? selectedNode = null;
         if (pwmNodes.Count > 0)
@@ -474,30 +478,44 @@
         {
             selectedNode = i2cNodes.First();
         }
+
         // Return the selected fallback node or null if no match was found
         if (selectedNode != null) return selectedNode;
         List<string> connectedComponentNames = [];
         List<string> connectedPinNames = [];
+        List<ComponentInstance> connectedComponents = [];
         foreach (var candidate in connectedCandidates)
         {
             var pinName = "";
             foreach (var label in candidate.localLabels)
             {
-                if (Regex.IsMatch(label,  @"a\d+"))
+                if (Regex.IsMatch(label, @"a\d+"))
                 {
                     pinName = label;
                     break;
                 }
-                if (Regex.IsMatch(label,  @"d\d+"))
+
+                if (Regex.IsMatch(label, @"d\d+"))
                 {
                     pinName = label;
                 }
             }
-            connectedPinNames.Add(pinName);
+
             var componentPin = candidate.arcsFrom.Find(a => a.localLabels.Contains("connection"))?.To ?? candidate.arcsTo.Find(a => a.localLabels.Contains("connection"))?.From;
             var componentNode = componentPin?.arcsFrom.Find(a => !a.localLabels.Contains("connection"))?.To ?? componentPin?.arcsTo.Find(a => !a.localLabels.Contains("connection"))?.From;
-            connectedComponentNames.Add(componentNode.localLabels.First());
+            if (componentNode != null)
+            {
+                var componentIdLabel = componentNode.localLabels.Find(l => l.Contains("localId:"));
+                if (componentIdLabel != null)
+                {
+                    var connectedComponentId = int.Parse(componentIdLabel[8..]);
+                    connectedPinNames.Add(pinName);
+                    connectedComponentNames.Add(componentNode.localLabels.First());
+                    connectedComponents.Add(Comps[connectedComponentId]);
+                }
+            }
         }
+
         var message = "No more pins are available. Try removing ";
         for (int i = 0; i < Math.Min(3, connectedComponentNames.Count); i++)
         {
@@ -514,11 +532,11 @@
                 message += $"{connectedComponentNames[i]} on pin {connectedPinNames[i]}.";
             }
         }
-            
-        ToastService.AddToast(message, Variant.Error);
+
+        ToastService.AddToast(message, Variant.Error, connectedComponents.Take(3));
         return selectedNode;
     }
-    
+
     /// <summary>
     /// Binds component translation functions to arduino pins through listeners.
     /// </summary>
