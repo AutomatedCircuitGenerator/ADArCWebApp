@@ -7,17 +7,17 @@
             {
                 case Step.Initial:
                     <button @onclick="() => HandleSelect(Board.ArduinoUno)">
-                        <RazorArduinoUno Width="120px" Height="80px"></RazorArduinoUno>
+                        <RazorArduinoUno Width="85px" Height="80px"></RazorArduinoUno>
                         <h2>Arduino Uno</h2>
-                        <p>Great for beginners and small projects</p>
+                        <p>Great for simple, small projects</p>
                     </button>
                     <button @onclick="() => HandleSelect(Board.ArduinoMega)">
-                        <RazorArduinoMega Width="120px" Height="80px"></RazorArduinoMega>
+                        <RazorArduinoMega Width="120" Height="80px"></RazorArduinoMega>
                         <h2>Arduino Mega</h2>
-                        <p>Ideal for bigger, more complex projects</p>
+                        <p>Ideal for bigger, complex projects</p>
                     </button>
                     <button @onclick="() => _step = Step.IoPins">
-                        <h2>Help me choose!</h2>
+                        <h2>Help me choose</h2>
                     </button>
                     break;
 
@@ -83,7 +83,7 @@
     {
         return _step switch
         {
-            Step.Initial => "What project are you building?",
+            Step.Initial => "What board are you using for your project?",
             Step.IoPins => "How many input/output (I/O) pins will you need?",
             Step.Serial => "Will you be using multiple serial devices (e.g. GPS, GSM, or Bluetooth)?",
             Step.Complexity => "How complex is your project in terms of memory usage (e.g., libraries, large datasets, or graphical displays)?",
