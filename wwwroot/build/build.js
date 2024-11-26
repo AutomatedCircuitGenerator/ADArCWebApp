@@ -13798,58 +13798,39 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     class RGBLED extends controller_20.Controller {
         constructor() {
             super(...arguments);
-            this.rLastState = avr8js_11.PinState.Input;
-            this.rLastStateCycles = 0;
-            this.rHighCycles = 0;
-            this.rFirstCallCycles = 0;
-            this.rBrightness = 0;
-            this.rPeriod = 0;
-            this.rIsFirstCall = true;
-            this.rRisingEdgeTime = 0;
-            this.gLastState = avr8js_11.PinState.Input;
-            this.gLastStateCycles = 0;
-            this.gHighCycles = 0;
-            this.gFirstCallCycles = 0;
-            this.gBrightness = 0;
-            this.gPeriod = 0;
-            this.gIsFirstCall = true;
-            this.gRisingEdgeTime = 0;
-            this.bLastState = avr8js_11.PinState.Input;
-            this.bLastStateCycles = 0;
-            this.bHighCycles = 0;
-            this.bFirstCallCycles = 0;
-            this.bBrightness = 0;
-            this.bPeriod = 0;
-            this.bIsFirstCall = true;
-            this.bRisingEdgeTime = 0;
+            this.pwmPeriods = {
+                3: 32640,
+                11: 32640,
+                5: 16320,
+                6: 16320,
+                9: 16320,
+                10: 16320
+            };
             this.animationFrameId = null;
         }
         setup() {
-            this.rLastState = avr8js_11.PinState.Input;
-            this.rLastStateCycles = 0;
-            this.rHighCycles = 0;
-            this.rFirstCallCycles = 0;
+            this.rLastPinState = this.pins.R[0].digital.state;
+            this.rFirstHigh = true;
             this.rBrightness = 0;
             this.rPeriod = 0;
-            this.rIsFirstCall = true;
-            this.rRisingEdgeTime = 0;
-            this.gLastState = avr8js_11.PinState.Input;
-            this.gLastStateCycles = 0;
-            this.gHighCycles = 0;
-            this.gFirstCallCycles = 0;
+            this.rPreviousFallingEdgeCycle = 0;
+            this.rPreviousRisingEdgeCycle = 0;
+            this.gLastPinState = this.pins.G[0].digital.state;
+            this.gFirstHigh = true;
             this.gBrightness = 0;
             this.gPeriod = 0;
-            this.gIsFirstCall = true;
-            this.gRisingEdgeTime = 0;
-            this.bLastState = avr8js_11.PinState.Input;
-            this.bLastStateCycles = 0;
-            this.bHighCycles = 0;
-            this.bFirstCallCycles = 0;
+            this.gPreviousFallingEdgeCycle = 0;
+            this.gPreviousRisingEdgeCycle = 0;
+            this.bLastPinState = this.pins.B[0].digital.state;
+            this.bFirstHigh = true;
             this.bBrightness = 0;
             this.bPeriod = 0;
-            this.bIsFirstCall = true;
-            this.bRisingEdgeTime = 0;
+            this.bPreviousFallingEdgeCycle = 0;
+            this.bPreviousRisingEdgeCycle = 0;
             this.animationFrameId = null;
+            this.rPeriod = this.pwmPeriods[this.pinIndices.R[0].valueOf()];
+            this.gPeriod = this.pwmPeriods[this.pinIndices.G[0].valueOf()];
+            this.bPeriod = this.pwmPeriods[this.pinIndices.B[0].valueOf()];
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
             this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -13863,113 +13844,117 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.bBrightness = 0;
             this.renderSvg();
         }
-        rListener(state) {
-            const avrInstance = execute_13.AVRRunner.getInstance();
-            const cpuCycles = avrInstance.board.cpu.cycles;
-            if (this.rIsFirstCall) {
-                this.rFirstCallCycles = cpuCycles;
-                this.rIsFirstCall = false;
-            }
-            const delta = cpuCycles - this.rLastStateCycles;
-            if (this.rLastState === avr8js_11.PinState.High) {
-                this.rHighCycles = delta;
-            }
-            if (this.rLastState === avr8js_11.PinState.Low) {
-                if (this.rRisingEdgeTime > 0) {
-                    this.rPeriod = cpuCycles - this.rRisingEdgeTime;
-                }
-                this.rRisingEdgeTime = cpuCycles;
-            }
-            this.rLastState = state;
-            this.rLastStateCycles = cpuCycles - this.rFirstCallCycles;
-            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.rFirstCallCycles)) {
-                this.rBrightness = 0;
-            }
-            else if (this.rBrightness == 0 && this.rRisingEdgeTime) {
+        rWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.rPreviousFallingEdgeCycle <= lastStateCycle) {
                 this.rBrightness = 1;
             }
-            else if (!this.rPeriod) {
+            else if (lastState === avr8js_11.PinState.Low && this.rPreviousRisingEdgeCycle <= lastStateCycle) {
                 this.rBrightness = 0;
             }
-            else {
-                this.rBrightness = Math.min(this.rHighCycles / this.rPeriod, 1);
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
+        }
+        gWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.gPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.gPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        bWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.bPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.bPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        rListener(state) {
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.rPreviousRisingEdgeCycle = currentCycle;
+                if (this.rFirstHigh) {
+                    this.rBrightness = 0;
+                    this.rFirstHigh = false;
+                }
+                else {
+                    this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rPreviousFallingEdgeCycle)) / this.rPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.rLastPinState === avr8js_11.PinState.High) {
+                    this.rPreviousFallingEdgeCycle = currentCycle;
+                    this.rBrightness = Math.min((currentCycle - this.rPreviousRisingEdgeCycle) / this.rPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+                }
+            }
+            this.rLastPinState = state;
             if (!this.animationFrameId) {
                 this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
         }
         gListener(state) {
-            const avrInstance = execute_13.AVRRunner.getInstance();
-            const cpuCycles = avrInstance.board.cpu.cycles;
-            if (this.gIsFirstCall) {
-                this.gFirstCallCycles = cpuCycles;
-                this.gIsFirstCall = false;
-            }
-            const delta = cpuCycles - this.gLastStateCycles;
-            if (this.gLastState === avr8js_11.PinState.High) {
-                this.gHighCycles = delta;
-            }
-            if (this.gLastState === avr8js_11.PinState.Low) {
-                if (this.gRisingEdgeTime > 0) {
-                    this.gPeriod = cpuCycles - this.gRisingEdgeTime;
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.gPreviousRisingEdgeCycle = currentCycle;
+                if (this.gFirstHigh) {
+                    this.gBrightness = 0;
+                    this.gFirstHigh = false;
                 }
-                this.gRisingEdgeTime = cpuCycles;
+                else {
+                    this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gPreviousFallingEdgeCycle)) / this.gPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
             }
-            this.gLastState = state;
-            this.gLastStateCycles = cpuCycles - this.gFirstCallCycles;
-            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.gFirstCallCycles)) {
-                this.gBrightness = 0;
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.gLastPinState === avr8js_11.PinState.High) {
+                    this.gPreviousFallingEdgeCycle = currentCycle;
+                    this.gBrightness = Math.min((currentCycle - this.gPreviousRisingEdgeCycle) / this.gPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+                }
             }
-            else if (this.gBrightness == 0 && this.gRisingEdgeTime > 0) {
-                this.gBrightness = 1;
-            }
-            else if (!this.gPeriod) {
-                this.gBrightness = 0;
-            }
-            else {
-                this.gBrightness = Math.min(this.gHighCycles / this.gPeriod, 1);
-            }
+            this.gLastPinState = state;
             if (!this.animationFrameId) {
                 this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
         }
         bListener(state) {
-            const avrInstance = execute_13.AVRRunner.getInstance();
-            const cpuCycles = avrInstance.board.cpu.cycles;
-            if (this.bIsFirstCall) {
-                this.bFirstCallCycles = cpuCycles;
-                this.bIsFirstCall = false;
-            }
-            const delta = cpuCycles - this.bLastStateCycles;
-            if (this.bLastState === avr8js_11.PinState.High) {
-                this.bHighCycles = delta;
-            }
-            if (this.bLastState === avr8js_11.PinState.Low) {
-                if (this.bRisingEdgeTime > 0) {
-                    this.bPeriod = cpuCycles - this.bRisingEdgeTime;
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.bPreviousRisingEdgeCycle = currentCycle;
+                if (this.bFirstHigh) {
+                    this.bBrightness = 0;
+                    this.bFirstHigh = false;
                 }
-                this.bRisingEdgeTime = cpuCycles;
+                else {
+                    this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bPreviousFallingEdgeCycle)) / this.bPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
             }
-            this.bLastState = state;
-            this.bLastStateCycles = cpuCycles - this.bFirstCallCycles;
-            if (!(execute_13.AVRRunner.getInstance().board.cpu.cycles - this.bFirstCallCycles)) {
-                this.bBrightness = 0;
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.bLastPinState === avr8js_11.PinState.High) {
+                    this.bPreviousFallingEdgeCycle = currentCycle;
+                    this.bBrightness = Math.min((currentCycle - this.bPreviousRisingEdgeCycle) / this.bPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+                }
             }
-            else if (this.bBrightness == 0 && this.bRisingEdgeTime > 0) {
-                this.bBrightness = 1;
-            }
-            else if (!this.bPeriod) {
-                this.bBrightness = 0;
-            }
-            else {
-                this.bBrightness = Math.min(this.bHighCycles / this.bPeriod, 1);
-            }
+            this.bLastPinState = state;
             if (!this.animationFrameId) {
                 this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
             }
         }
         renderSvg() {
             const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+            console.log(this.rBrightness, this.gBrightness, this.bBrightness);
             const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
             const redBlur = this.element.querySelector("#rgbRedBlur");
             redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);
@@ -13987,7 +13972,7 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             blueCircle.setAttribute("r", `${this.bBrightness * 5 + 2}`);
             blueCircle.setAttribute("opacity", `${Math.min(this.bBrightness * 20, 0.3)}`);
             const mixedCircle = this.element.querySelector("#rgbMixedCircle");
-            mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255 + this.bBrightness * 90}, ${this.bBrightness * 255})`);
+            mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255}, ${this.bBrightness * 255})`);
             mixedCircle.setAttribute("opacity", `${totalOpacity}`);
             const hollowCircle = this.element.querySelector("#rgbHollowCircle");
             hollowCircle.setAttribute("opacity", `${totalOpacity}`);
