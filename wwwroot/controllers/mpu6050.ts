@@ -108,7 +108,7 @@ export class MPU6050 extends Controller implements I2CController {
     }
 
     private eulerToQuaternion(heading: number, roll: number, pitch: number) {
-        const toRadians = (degrees) => degrees * (Math.PI / 180);
+        const toRadians = (degrees: number) => degrees * (Math.PI / 180);
 
         heading = toRadians(heading);
         roll = toRadians(roll);

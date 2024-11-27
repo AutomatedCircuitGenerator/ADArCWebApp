@@ -13733,8 +13733,6 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         i2cDisconnect() {
         }
         i2cReadByte(acked) {
-            console.log(`read ack ${acked}`);
-            console.log(`read addr ${this.address}`);
             let byte;
             if (this.address !== null) {
                 this.calculateOrientation();
@@ -13747,7 +13745,6 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             return byte;
         }
         i2cWriteByte(value) {
-            console.log(`Write ${value}`);
             if (this.address !== null) {
                 this.memory[this.address] = value;
                 if (this.address === registers.PWR_MGMT_1.address) {
