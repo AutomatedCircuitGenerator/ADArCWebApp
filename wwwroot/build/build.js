@@ -13612,7 +13612,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         LINEAR_ACCEL_Z_H: { address: 0x5B },
         LINEAR_ACCEL_Z_L: { address: 0x5C },
         PWR_MGMT_1: { address: 0x6B, default: 0x40 },
-        PWR_MGMT_2: { address: 0X6C, default: 0x00 },
+        PWR_MGMT_2: { address: 0x6C, default: 0x00 },
         WHO_AM_I: { address: 0x75, default: 0x68 }
     };
     class MPU6050 extends controller_17.Controller {
@@ -13620,38 +13620,50 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             super(...arguments);
             this.address = null;
             this.memory = new Uint8Array(128);
-            this.accelerometer = { x: 0, y: 0, z: 0 };
+            this.accelerometer = { x: 0, y: 0, z: 9.81 };
             this.gyroscope = { x: 0, y: 0, z: 0 };
             this.orientation = { x: 0, y: 0, z: 0 };
+            this.lastRead = Date.now();
             this.rotating = false;
+            this.temperature = 25.0;
             this.sensorControls = {
                 setAcceleration: (x, y, z) => {
                     this.accelerometer = { x, y, z };
-                    this.setVector(registers.ACCEL_XOUT_H.address, [x, y, z], 100);
                     this.calculateOrientation();
                 },
                 setGyroscope: (x, y, z) => {
                     this.gyroscope = { x, y, z };
-                    this.setVector(registers.GYRO_XOUT_H.address, [x, y, z], 16);
+                    this.rotating = (x !== 0 || y !== 0 || z !== 0);
                     this.calculateOrientation();
                 },
                 setTemp: (temp) => {
-                    this.memory[registers.TEMP_OUT_H.address] = temp;
+                    this.temperature = temp;
+                    const encoded = this.encodeTemperature(temp);
+                    this.memory[registers.TEMP_OUT_H.address] = (encoded >> 8) & 0xFF;
+                    this.memory[registers.TEMP_OUT_L.address] = encoded & 0xFF;
                 },
-                setLinearAcceleration: (x, y, z) => {
-                    this.setVector(registers.LINEAR_ACCEL_X_H.address, [x, y, z], 100);
-                },
+                setOrientation: (pitch, roll, yaw) => {
+                    this.orientation = { x: yaw, y: pitch, z: roll };
+                    this.calculateOrientation();
+                }
             };
+        }
+        addSensorNoise(value, magnitude = 0.01) {
+            return value + (Math.random() - 0.5) * magnitude;
+        }
+        encodeTemperature(celsius) {
+            return Math.round((celsius - 36.53) * 340);
         }
         setVector(address, vector, scalar) {
             let writePointer = address;
             for (const num of vector) {
-                const scaled = Math.round(num * scalar);
-                const lsb = scaled & 0xFF;
+                const noisyValue = this.addSensorNoise(num);
+                const scaled = Math.round(noisyValue * scalar);
                 const msb = (scaled >> 8) & 0xFF;
-                this.memory[writePointer] = lsb;
-                writePointer++;
+                const lsb = scaled & 0xFF;
                 this.memory[writePointer] = msb;
+                writePointer++;
+                this.memory[writePointer] = lsb;
                 writePointer++;
             }
         }
@@ -13666,19 +13678,40 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             const sr = Math.sin(roll * 0.5);
             const cp = Math.cos(pitch * 0.5);
             const sp = Math.sin(pitch * 0.5);
+            const qw = cr * cp * cy + sr * sp * sy;
             const qx = sr * cp * cy - cr * sp * sy;
             const qy = cr * sp * cy + sr * cp * sy;
             const qz = cr * cp * sy - sr * sp * cy;
-            const qw = cr * cp * cy + sr * sp * sy;
-            return { x: qx, y: qy, z: qz, w: qw };
+            return { w: qw, x: qx, y: qy, z: qz };
         }
         calculateOrientation() {
-            const avgX = (this.accelerometer.x + this.gyroscope.x) / 2;
-            const avgY = (this.accelerometer.y + this.gyroscope.y) / 2;
-            const avgZ = (this.accelerometer.z + this.gyroscope.z) / 2;
-            this.setVector(registers.EULER_HEADING_H.address, [avgX, avgY, avgZ], 16);
-            const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
-            this.setVector(registers.QUATERNIONW_H.address, [w, x, y, z], 16384);
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - this.lastRead) / 1000;
+            this.lastRead = currentTime;
+            if (this.rotating && timeDiff > 0) {
+                this.orientation.x += this.gyroscope.z * timeDiff;
+                this.orientation.y += this.gyroscope.x * timeDiff;
+                this.orientation.z += this.gyroscope.y * timeDiff;
+                this.orientation.x = this.orientation.x % 360;
+                this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+                this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+                const gravityX = Math.sin(this.orientation.y * Math.PI / 180) * 9.81;
+                const gravityY = -Math.sin(this.orientation.z * Math.PI / 180) * 9.81;
+                const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
+                    Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
+                this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+            }
+            this.setVector(registers.ACCEL_XOUT_H.address, [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z], 16384 / 9.81);
+            this.setVector(registers.GYRO_XOUT_H.address, [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z], 131);
+            this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+            const quaternion = this.eulerToQuaternion(this.orientation.x, this.orientation.z, this.orientation.y);
+            this.setVector(registers.QUATERNIONW_H.address, [quaternion.w, quaternion.x, quaternion.y, quaternion.z], 16384);
+        }
+        setMotion(rotating) {
+            if (rotating) {
+                this.sensorControls.setGyroscope(0, 0, 90);
+            }
+            this.rotating = rotating;
         }
         setup() {
             execute_12.AVRRunner.getInstance().board.twis[0].registerController(exports.I2C_MST_CTRL, this);
@@ -13687,37 +13720,25 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
                     this.memory[register.address] = register.default;
                 }
             }
-            this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
-            this.sensorControls.setTemp(75);
+            this.sensorControls.setTemp(25);
+            this.calculateOrientation();
+            this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
+        }
+        cleanup() {
+            this.element.querySelector("#mpuLed").setAttribute("fill", "none");
         }
         i2cConnect(addr, write) {
             return true;
         }
-        i2cDisconnect() { }
+        i2cDisconnect() {
+        }
         i2cReadByte(acked) {
+            console.log(`read ack ${acked}`);
+            console.log(`read addr ${this.address}`);
             let byte;
             if (this.address !== null) {
-                if (this.address === registers.EULER_HEADING_H.address && this.rotating) {
-                    const currentTime = Date.now();
-                    const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0;
-                    if (timeDiff > 0) {
-                        const gyroX = this.gyroscope.x * timeDiff;
-                        const gyroY = this.gyroscope.y * timeDiff;
-                        const gyroZ = this.gyroscope.z * timeDiff;
-                        this.orientation.x += gyroZ;
-                        this.orientation.y += gyroX;
-                        this.orientation.z += gyroY;
-                        this.orientation.x = this.orientation.x % 360;
-                        this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
-                        this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
-                        this.lastRead = currentTime;
-                        this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
-                    }
-                }
+                this.calculateOrientation();
                 byte = this.memory[this.address];
-                if (this.address === registers.EULER_PITCH_L.address && this.rotating) {
-                    this.lastRead = Date.now();
-                }
             }
             else {
                 byte = 0xff;
@@ -13726,14 +13747,32 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             return byte;
         }
         i2cWriteByte(value) {
+            console.log(`Write ${value}`);
             if (this.address !== null) {
                 this.memory[this.address] = value;
+                if (this.address === registers.PWR_MGMT_1.address) {
+                    const isResetBitSet = ((value >> 7) & 0xFF) == 1;
+                    if (isResetBitSet) {
+                        this.reset();
+                    }
+                }
                 this.address = null;
             }
             else {
                 this.address = value;
             }
             return true;
+        }
+        reset() {
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+                else {
+                    this.memory[register.address] = 0;
+                }
+            }
+            this.memory[registers.PWR_MGMT_1.address] = 0;
         }
     }
     exports.MPU6050 = MPU6050;

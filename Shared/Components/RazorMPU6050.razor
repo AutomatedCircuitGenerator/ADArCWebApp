@@ -1,10 +1,23 @@
 ﻿@inherits RazorComponent
 
 @code {
-    [Parameter] public bool led1 { get; set; } = false;
-    [Parameter] public int x { get; set; }
-    [Parameter] public int y { get; set; }
-    [Parameter] public int z { get; set; }
+    private string _motion = "Static";
+
+    [Parameter]
+    [DropdownSetting(["Static", "Rotating"])]
+    public string motion
+    {
+        get => _motion;
+        set
+        {
+            var hasChanged = !_motion.Equals(value);
+            _motion = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion == "Rotating"); });
+            }
+        }
+    }
 
     public static ElementPin[] pinInfo
     {
@@ -115,10 +128,7 @@
     <filter id="ledFilter" x="-0.8" y="-0.8" height="5.2" width="5.8">
         <feGaussianBlur stdDeviation="2"/>
     </filter>
-    @if (led1)
-    {
-        <circle cx="13.9" cy="25.5" r="3.5" fill="#80ff80" filter="url(#ledFilter)"/>
-    }
+    <circle id="mpuLed" cx="13.9" cy="25.5" r="3.5" fill="none" filter="url(#ledFilter)"/>
 
     <!-- PCB Pins-->
     <g fill="none" stroke="#d0ae88" stroke-width=".648px">

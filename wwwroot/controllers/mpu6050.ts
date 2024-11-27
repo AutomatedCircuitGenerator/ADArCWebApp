@@ -3,10 +3,9 @@ import {Memory} from "@controllers/memory";
 import {I2CController} from "@lib/i2c-bus";
 import {AVRRunner} from "@lib/execute";
 
-// I2C address for the MPU6050 (0x68 when AD0 pin is low, 0x69 when high)
+// I2C address for the MPU6050 (0x68 when AD0 pin is low, 0x69 when high), *not functional*
 export const I2C_MST_CTRL = 0x68;
 
-// Define the structure for register information
 type Register = {
     address: number;
     default?: number;
@@ -15,71 +14,70 @@ type Register = {
 // Complete register map matching the real MPU6050 sensor
 const registers: { [key: string]: Register } = {
     // Configuration registers
-    CONFIG: { address: 0x1A },
-    GYRO_CONFIG: { address: 0x1B },
-    ACCEL_CONFIG: { address: 0x1C },
+    CONFIG: {address: 0x1A},
+    GYRO_CONFIG: {address: 0x1B},
+    ACCEL_CONFIG: {address: 0x1C},
 
     // Acceleration data registers
-    ACCEL_XOUT_H: { address: 0x3B },
-    ACCEL_XOUT_L: { address: 0x3C },
-    ACCEL_YOUT_H: { address: 0x3D },
-    ACCEL_YOUT_L: { address: 0x3E },
-    ACCEL_ZOUT_H: { address: 0x3F },
-    ACCEL_ZOUT_L: { address: 0x40 },
+    ACCEL_XOUT_H: {address: 0x3B},
+    ACCEL_XOUT_L: {address: 0x3C},
+    ACCEL_YOUT_H: {address: 0x3D},
+    ACCEL_YOUT_L: {address: 0x3E},
+    ACCEL_ZOUT_H: {address: 0x3F},
+    ACCEL_ZOUT_L: {address: 0x40},
 
     // Temperature registers
-    TEMP_OUT_H: { address: 0x41 },
-    TEMP_OUT_L: { address: 0x42 },
+    TEMP_OUT_H: {address: 0x41},
+    TEMP_OUT_L: {address: 0x42},
 
     // Gyroscope data registers
-    GYRO_XOUT_H: { address: 0x43 },
-    GYRO_XOUT_L: { address: 0x44 },
-    GYRO_YOUT_H: { address: 0x45 },
-    GYRO_YOUT_L: { address: 0x46 },
-    GYRO_ZOUT_H: { address: 0x47 },
-    GYRO_ZOUT_L: { address: 0x48 },
+    GYRO_XOUT_H: {address: 0x43},
+    GYRO_XOUT_L: {address: 0x44},
+    GYRO_YOUT_H: {address: 0x45},
+    GYRO_YOUT_L: {address: 0x46},
+    GYRO_ZOUT_H: {address: 0x47},
+    GYRO_ZOUT_L: {address: 0x48},
 
     // Extended functionality - Euler angle registers (simulated)
-    EULER_HEADING_H: { address: 0x49 },
-    EULER_HEADING_L: { address: 0x4A },
-    EULER_ROLL_H: { address: 0x4B },
-    EULER_ROLL_L: { address: 0x4C },
-    EULER_PITCH_H: { address: 0x4D },
-    EULER_PITCH_L: { address: 0x4E },
+    EULER_HEADING_H: {address: 0x49},
+    EULER_HEADING_L: {address: 0x4A},
+    EULER_ROLL_H: {address: 0x4B},
+    EULER_ROLL_L: {address: 0x4C},
+    EULER_PITCH_H: {address: 0x4D},
+    EULER_PITCH_L: {address: 0x4E},
 
     // Extended functionality - Quaternion registers (simulated)
-    QUATERNIONW_H: { address: 0x4F },
-    QUATERNIONW_L: { address: 0x50 },
-    QUATERNIONX_H: { address: 0x51 },
-    QUATERNIONX_L: { address: 0x52 },
-    QUATERNIONY_H: { address: 0x53 },
-    QUATERNIONY_L: { address: 0x54 },
-    QUATERNIONZ_H: { address: 0x55 },
-    QUATERNIONZ_L: { address: 0x56 },
+    QUATERNIONW_H: {address: 0x4F},
+    QUATERNIONW_L: {address: 0x50},
+    QUATERNIONX_H: {address: 0x51},
+    QUATERNIONX_L: {address: 0x52},
+    QUATERNIONY_H: {address: 0x53},
+    QUATERNIONY_L: {address: 0x54},
+    QUATERNIONZ_H: {address: 0x55},
+    QUATERNIONZ_L: {address: 0x56},
 
     // Extended functionality - Linear acceleration registers (simulated)
-    LINEAR_ACCEL_X_H: { address: 0x57 },
-    LINEAR_ACCEL_X_L: { address: 0x58 },
-    LINEAR_ACCEL_Y_H: { address: 0x59 },
-    LINEAR_ACCEL_Y_L: { address: 0x5A },
-    LINEAR_ACCEL_Z_H: { address: 0x5B },
-    LINEAR_ACCEL_Z_L: { address: 0x5C },
+    LINEAR_ACCEL_X_H: {address: 0x57},
+    LINEAR_ACCEL_X_L: {address: 0x58},
+    LINEAR_ACCEL_Y_H: {address: 0x59},
+    LINEAR_ACCEL_Y_L: {address: 0x5A},
+    LINEAR_ACCEL_Z_H: {address: 0x5B},
+    LINEAR_ACCEL_Z_L: {address: 0x5C},
 
     // Power management and device identification
-    PWR_MGMT_1: { address: 0x6B, default: 0x40 },
-    PWR_MGMT_2: { address: 0x6C, default: 0x00 },
-    WHO_AM_I: { address: 0x75, default: 0x68 }
+    PWR_MGMT_1: {address: 0x6B, default: 0x40},
+    PWR_MGMT_2: {address: 0x6C, default: 0x00},
+    WHO_AM_I: {address: 0x75, default: 0x68}
 } as const;
 
-// Define vector type for 3D measurements
-type Vector = {x: number, y: number, z: number};
+type Vector = { x: number, y: number, z: number };
 
 export class MPU6050 extends Controller implements I2CController {
     private address: number | null = null;
     private memory = new Uint8Array(128);
-    private accelerometer: Vector = { x: 0, y: 0, z: 9.81 };  // Initialize with gravity on Z-axis
-    private gyroscope: Vector = { x: 0, y: 0, z: 0 };
-    private orientation: Vector = { x: 0, y: 0, z: 0 };
+    private accelerometer: Vector = {x: 0, y: 0, z: 9.81};  // Initialize with gravity on Z-axis
+    private gyroscope: Vector = {x: 0, y: 0, z: 0};
+    private orientation: Vector = {x: 0, y: 0, z: 0};
     private lastRead: number = Date.now();
     private rotating = false;
     private temperature = 25.0;  // Start at room temperature (25°C)
@@ -94,7 +92,6 @@ export class MPU6050 extends Controller implements I2CController {
         return Math.round((celsius - 36.53) * 340);
     }
 
-    // Write vector data to memory with proper byte ordering
     private setVector(address: number, vector: number[], scalar: number) {
         let writePointer = address;
 
@@ -110,7 +107,6 @@ export class MPU6050 extends Controller implements I2CController {
         }
     }
 
-    // Calculate quaternion from Euler angles
     private eulerToQuaternion(heading: number, roll: number, pitch: number) {
         const toRadians = (degrees) => degrees * (Math.PI / 180);
 
@@ -130,10 +126,9 @@ export class MPU6050 extends Controller implements I2CController {
         const qy = cr * sp * cy + sr * cp * sy;
         const qz = cr * cp * sy - sr * sp * cy;
 
-        return { w: qw, x: qx, y: qy, z: qz };
+        return {w: qw, x: qx, y: qy, z: qz};
     }
 
-    // Calculate and update sensor orientation and readings
     private calculateOrientation() {
         const currentTime = Date.now();
         const timeDiff = (currentTime - this.lastRead) / 1000;
@@ -156,13 +151,13 @@ export class MPU6050 extends Controller implements I2CController {
             const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
                 Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
 
-            this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+            this.accelerometer = {x: gravityX, y: gravityY, z: gravityZ};
         }
 
         // Update all sensor registers
         this.setVector(registers.ACCEL_XOUT_H.address,
             [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z],
-            16384/9.81);  // Convert to sensor units (16384 = 1g)
+            16384 / 9.81);  // Convert to sensor units (16384 = 1g)
 
         this.setVector(registers.GYRO_XOUT_H.address,
             [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z],
@@ -172,7 +167,6 @@ export class MPU6050 extends Controller implements I2CController {
             [this.orientation.x, this.orientation.y, this.orientation.z],
             16);
 
-        // Update quaternion
         const quaternion = this.eulerToQuaternion(
             this.orientation.x,
             this.orientation.z,
@@ -183,7 +177,13 @@ export class MPU6050 extends Controller implements I2CController {
             16384);
     }
 
-    // Public interface for controlling sensor behavior
+    setMotion(rotating: boolean) {
+        if (rotating) {
+            this.sensorControls.setGyroscope(0, 0, 90);
+        }
+        this.rotating = rotating;
+    }
+
     sensorControls = {
         setAcceleration: (x: number, y: number, z: number) => {
             this.accelerometer = {x, y, z};
@@ -209,33 +209,35 @@ export class MPU6050 extends Controller implements I2CController {
         }
     };
 
-    // Initialize the sensor
     setup(): void {
         AVRRunner.getInstance().board.twis[0].registerController(I2C_MST_CTRL, this);
 
-        // Set default register values
         for (const register of Object.values(registers)) {
             if (register.default) {
                 this.memory[register.address] = register.default;
             }
         }
-
-        // Initialize sensor state
+        
         this.sensorControls.setTemp(25);
         this.calculateOrientation();
+        this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
     }
 
-    // I2C communication interface
+    cleanup() {
+        this.element.querySelector("#mpuLed").setAttribute("fill", "none");
+    }
+
     i2cConnect(addr: number, write: boolean): boolean {
         return true;
     }
 
-    i2cDisconnect(): void {}
+    i2cDisconnect(): void {
+    }
 
     i2cReadByte(acked: boolean): number {
-        let byte;
+        let byte: number;
         if (this.address !== null) {
-            this.calculateOrientation();  // Update sensor state
+            this.calculateOrientation();  
             byte = this.memory[this.address];
         } else {
             byte = 0xff;
@@ -248,10 +250,27 @@ export class MPU6050 extends Controller implements I2CController {
     i2cWriteByte(value: number): boolean {
         if (this.address !== null) {
             this.memory[this.address] = value;
+            if (this.address === registers.PWR_MGMT_1.address) {
+                const isResetBitSet: boolean = ((value >> 7) & 0xFF) == 1;
+                if (isResetBitSet) {
+                    this.reset();
+                }
+            }
             this.address = null;
         } else {
             this.address = value;
         }
         return true;
+    }
+
+    private reset() {
+        for (const register of Object.values(registers)) {
+            if (register.default) {
+                this.memory[register.address] = register.default;
+            } else {
+                this.memory[register.address] = 0;
+            }
+        }
+        this.memory[registers.PWR_MGMT_1.address] = 0; // Default value is 1 in msb, lib expects 0 after reset
     }
 }
