@@ -13553,16 +13553,17 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
             this.element.querySelector("#ledDisplay").style.display = "none";
         }
         setColor(color) {
-            this.color = this.lightColors[color];
+            const _color = this.lightColors[color] ? this.lightColors[color] : "red";
+            this.element.querySelector("#ledColor").style.fill = _color;
+            this.element.querySelector("#ledColorBrightness").style.fill = _color;
         }
         toggleLed(state) {
-            this.element.querySelector("#ledColor").style.fill = this.color;
-            this.element.querySelector("#ledColorBrightness").style.fill = this.color;
+            console.log(`led on pin ${this.pinIndices.anode[0].valueOf()}`);
             if (state == avr8js_10.PinState.Low) {
                 this.element.querySelector("#ledDisplay").style.display = "none";
             }
-            else if (state == avr8js_10.PinState.High || state === avr8js_10.PinState.InputPullUp) {
-                this.element.querySelector("#ledDisplay").style.display = "";
+            else if (state == avr8js_10.PinState.High) {
+                this.element.querySelector("#ledDisplay").style.display = "inherit";
             }
         }
     }
