@@ -3,6 +3,7 @@ import {Controller} from "@controllers/controller";
 import {I2CController} from "@lib/i2c-bus";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {u8} from "@lib/avr8js/types";
+import {TimerMode} from "@lib/avr8js/peripherals/timer";
 
 export type PinListener = (state: PinState) => void;
 export type ClockEvent = () => void;
@@ -42,6 +43,25 @@ export interface CPU {
 }
 
 export interface Timer {
+    //this is for an arduino, not sure what would need to be exposed here. just a function that calculates pwm period?
+    get TCCRA(): number;
+
+    get TCCRB(): number;
+
+    get TIMSK(): number;
+
+    get CS(): 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7;
+
+    get WGM(): number;
+
+    get TOP(): number;
+
+    get ocrMask(): 255 | 511 | 1023 | 65535;
+
+    getDivider(): number;
+
+    getTimerMode(): TimerMode;
+
 }
 
 export interface Digital {

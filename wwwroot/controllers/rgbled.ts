@@ -1,6 +1,7 @@
 import {Controller} from "@controllers/controller";
 import {PinState} from "@lib/avr8js";
 import {AVRRunner} from "@lib/execute";
+import {TimerMode} from "@lib/avr8js/peripherals/timer";
 
 
 //https://docs.arduino.cc/tutorials/generic/secrets-of-arduino-pwm/
@@ -58,9 +59,17 @@ export class RGBLED extends Controller {
 
 
     private animationFrameId: number | null = null;
+    private rPeriodCreated: boolean;
+    private bPeriodCreated: boolean;
+    private gPeriodCreated: boolean;
 
 
     setup() {
+
+        this.rPeriodCreated = true;
+        this.gPeriodCreated = true;
+        this.bPeriodCreated = true;
+
         this.rLastPinState = this.pins.R[0].digital.state;
         this.rFirstHigh = true;
         this.rBrightness = 0;
@@ -100,6 +109,9 @@ export class RGBLED extends Controller {
         this.pins.R[0].digital.addListener(this.rListener.bind(this));
         this.pins.G[0].digital.addListener(this.gListener.bind(this));
         this.pins.B[0].digital.addListener(this.bListener.bind(this));
+        //https://deepbluembedded.com/arduino-timers/
+
+
     }
 
     cleanup() {
@@ -147,6 +159,22 @@ export class RGBLED extends Controller {
 
 
     rListener(state: PinState) {
+        if (this.rPeriodCreated) {
+            const timerMode = this.pins.R[0].timer.getTimerMode();
+            console.log(`getTimerMode : ${timerMode}`);
+            let period = 1;
+            if (timerMode === TimerMode.FastPWM) {
+                period = ((this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
+            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
+                period = (2 * (this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
+
+            }
+            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
+
+            console.log(`theoretical period ${period}`)
+
+            this.rPeriodCreated = false;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.rPreviousRisingEdgeCycle = currentCycle;
@@ -176,6 +204,22 @@ export class RGBLED extends Controller {
     }
 
     gListener(state: PinState) {
+        if (this.gPeriodCreated) {
+            const timerMode = this.pins.G[0].timer.getTimerMode();
+            console.log(`getTimerMode : ${timerMode}`);
+            let period = 1;
+            if (timerMode === TimerMode.FastPWM) {
+                period = ((this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider()) ;
+            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
+                period = (2 * (this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider());
+
+            }
+            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
+
+            console.log(`theoretical period ${period}`)
+
+            this.gPeriodCreated = false;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.gPreviousRisingEdgeCycle = currentCycle;
@@ -205,6 +249,22 @@ export class RGBLED extends Controller {
     }
 
     bListener(state: PinState) {
+        if (this.bPeriodCreated) {
+            const timerMode = this.pins.B[0].timer.getTimerMode();
+            console.log(`getTimerMode : ${timerMode}`);
+            let period = 1;
+            if (timerMode === TimerMode.FastPWM) {
+                period = ((this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider()) ;
+            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
+                period = (2 * (this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider());
+
+            }
+            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
+
+            console.log(`theoretical period ${period}`)
+
+            this.bPeriodCreated = false;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.bPreviousRisingEdgeCycle = currentCycle;

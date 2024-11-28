@@ -9,6 +9,7 @@
     CPU as AVRCPU,
     PinState
 } from "@lib/avr8js";
+import {TimerMode} from "@lib/avr8js/peripherals/timer";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {I2CController} from "@lib/i2c-bus";
 import {Analog, ByteTransmitListener, ClockEvent, CPU, Digital, PinListener, SPI, Timer, TWI, USART} from "../board";
@@ -69,6 +70,42 @@ export class ArduinoTimer implements Timer {
 
     constructor(timer: AVRTimer) {
         this.timer = timer;
+    }
+
+    get TCCRA(): number {
+        return this.timer.TCCRA;
+    }
+
+    get TCCRB(): number {
+        return this.timer.TCCRB;
+    }
+
+    get TIMSK(): number {
+        return this.timer.TIMSK;
+    }
+
+    get CS(): 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 {
+        return this.timer.CS;
+    }
+
+    get WGM(): number {
+        return this.timer.WGM;
+    }
+
+    get TOP(): number {
+        return this.timer.TOP;
+    }
+
+    get ocrMask(): 255 | 511 | 1023 | 65535 {
+        return this.timer.ocrMask;
+    }
+
+    getDivider(): number {
+        return this.timer.getDivider();
+    }
+
+    getTimerMode(): TimerMode {
+        return this.timer.getTimerMode();
     }
 }
 

@@ -44,7 +44,7 @@ export class ArduinoUno implements Board {
     usarts: USART[];
 
     pins: Interfaces[];
-    
+
     static readonly FLASH = 0x8000;
 
     constructor(program: Uint16Array) {
@@ -66,15 +66,15 @@ export class ArduinoUno implements Board {
             {digital: new ArduinoDigital(portD, 0), usart: this.usarts[0]},  // Pin 0 (RX)
             {digital: new ArduinoDigital(portD, 1), usart: this.usarts[0]},  // Pin 1 (TX)
             {digital: new ArduinoDigital(portD, 2)},  // Pin 2
-            {digital: new ArduinoDigital(portD, 3)},  // Pin 3
+            {digital: new ArduinoDigital(portD, 3), timer: this.timers[2]},  // Pin 3
             {digital: new ArduinoDigital(portD, 4)},  // Pin 4
-            {digital: new ArduinoDigital(portD, 5)},  // Pin 5
-            {digital: new ArduinoDigital(portD, 6)},  // Pin 6
+            {digital: new ArduinoDigital(portD, 5), timer: this.timers[0]},  // Pin 5
+            {digital: new ArduinoDigital(portD, 6), timer: this.timers[0]},  // Pin 6
             {digital: new ArduinoDigital(portD, 7)},  // Pin 7
             {digital: new ArduinoDigital(portB, 0)},  // Pin 8
-            {digital: new ArduinoDigital(portB, 1)},  // Pin 9
-            {digital: new ArduinoDigital(portB, 2)},  // Pin 10
-            {digital: new ArduinoDigital(portB, 3)},  // Pin 11
+            {digital: new ArduinoDigital(portB, 1), timer: this.timers[1]},  // Pin 9
+            {digital: new ArduinoDigital(portB, 2), timer: this.timers[1]},  // Pin 10
+            {digital: new ArduinoDigital(portB, 3), timer: this.timers[2]},  // Pin 11
             {digital: new ArduinoDigital(portB, 4)},  // Pin 12
             {digital: new ArduinoDigital(portB, 5)},  // Pin 13
             {analog: new ArduinoAnalog(adc, 0), digital: new ArduinoDigital(portC, 0)},  // Pin A0 / Pin 14
