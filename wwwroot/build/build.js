@@ -10575,7 +10575,7 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
     }
     exports.Controller = Controller;
 });
-define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], function (require, exports, avr8js_1) {
+define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index", "lib/avr8js/peripherals/timer"], function (require, exports, avr8js_1, timer_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ArduinoAnalog = exports.ArduinoDigital = exports.ArduinoUSART = exports.ArduinoTWI = exports.ArduinoTimer = exports.ArduinoSPI = exports.ArduinoCPU = exports.MHZ = void 0;
@@ -10621,32 +10621,17 @@ define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], fun
         constructor(timer) {
             this.timer = timer;
         }
-        get TCCRA() {
-            return this.timer.TCCRA;
-        }
-        get TCCRB() {
-            return this.timer.TCCRB;
-        }
-        get TIMSK() {
-            return this.timer.TIMSK;
-        }
-        get CS() {
-            return this.timer.CS;
-        }
-        get WGM() {
-            return this.timer.WGM;
-        }
-        get TOP() {
-            return this.timer.TOP;
-        }
-        get ocrMask() {
-            return this.timer.ocrMask;
-        }
-        getDivider() {
-            return this.timer.getDivider();
-        }
-        getTimerMode() {
-            return this.timer.getTimerMode();
+        getPwmPeriod() {
+            const { timer } = this;
+            const timerMode = timer.getTimerMode();
+            let period = 0;
+            if (timerMode === timer_2.TimerMode.FastPWM) {
+                period = ((timer.TOP + 1) * timer.getDivider());
+            }
+            else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
+                period = (2 * (timer.TOP + 1) * timer.getDivider());
+            }
+            return period;
         }
     }
     exports.ArduinoTimer = ArduinoTimer;
@@ -11943,18 +11928,18 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
             this.pins = [
                 { digital: new arduino_2.ArduinoDigital(portE, 0), usart: this.usarts[0] },
                 { digital: new arduino_2.ArduinoDigital(portE, 1), usart: this.usarts[0] },
-                { digital: new arduino_2.ArduinoDigital(portE, 4) },
-                { digital: new arduino_2.ArduinoDigital(portE, 5) },
-                { digital: new arduino_2.ArduinoDigital(portG, 5) },
-                { digital: new arduino_2.ArduinoDigital(portE, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 4) },
-                { digital: new arduino_2.ArduinoDigital(portH, 5) },
-                { digital: new arduino_2.ArduinoDigital(portH, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 4) },
-                { digital: new arduino_2.ArduinoDigital(portB, 5) },
-                { digital: new arduino_2.ArduinoDigital(portB, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 7) },
+                { digital: new arduino_2.ArduinoDigital(portE, 4), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portE, 5), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portG, 5), timer: this.timers[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 3), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portH, 3), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 4), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 5), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 6), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 4), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 5), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 6), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 7), timer: this.timers[0] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 1), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 0), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portH, 1), usart: this.usarts[2] },
@@ -11985,9 +11970,9 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
                 { digital: new arduino_2.ArduinoDigital(portG, 0) },
                 { digital: new arduino_2.ArduinoDigital(portL, 7) },
                 { digital: new arduino_2.ArduinoDigital(portL, 6) },
-                { digital: new arduino_2.ArduinoDigital(portL, 5) },
-                { digital: new arduino_2.ArduinoDigital(portL, 4) },
-                { digital: new arduino_2.ArduinoDigital(portL, 3) },
+                { digital: new arduino_2.ArduinoDigital(portL, 5), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 4), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 3), timer: this.timers[5] },
                 { digital: new arduino_2.ArduinoDigital(portL, 2) },
                 { digital: new arduino_2.ArduinoDigital(portL, 1) },
                 { digital: new arduino_2.ArduinoDigital(portL, 0) },
@@ -13859,76 +13844,38 @@ define("controllers/ky001", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY001 = KY001;
 });
-define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute", "lib/avr8js/peripherals/timer"], function (require, exports, controller_20, avr8js_11, execute_13, timer_2) {
+define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_13) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RGBLED = void 0;
     class RGBLED extends controller_20.Controller {
         constructor() {
             super(...arguments);
-            this.unoPwmPeriods = {
-                3: 32640,
-                11: 32640,
-                5: 16320,
-                6: 16320,
-                9: 16320,
-                10: 16320
-            };
-            this.megaPwmPeriods = {
-                2: 32640,
-                3: 32640,
-                4: 16320,
-                5: 32640,
-                6: 32640,
-                7: 32640,
-                8: 32640,
-                9: 32640,
-                10: 32640,
-                11: 32640,
-                12: 32640,
-                13: 16320,
-                44: 32640,
-                45: 32640,
-                46: 32640,
-            };
             this.animationFrameId = null;
         }
         setup() {
-            this.rPeriodCreated = true;
-            this.gPeriodCreated = true;
-            this.bPeriodCreated = true;
             this.rLastPinState = this.pins.R[0].digital.state;
             this.rFirstHigh = true;
             this.rBrightness = 0;
             this.rPeriod = 0;
             this.rPreviousFallingEdgeCycle = 0;
             this.rPreviousRisingEdgeCycle = 0;
+            this.rPeriodCreated = true;
             this.gLastPinState = this.pins.G[0].digital.state;
             this.gFirstHigh = true;
             this.gBrightness = 0;
             this.gPeriod = 0;
             this.gPreviousFallingEdgeCycle = 0;
             this.gPreviousRisingEdgeCycle = 0;
+            this.gPeriodCreated = true;
             this.bLastPinState = this.pins.B[0].digital.state;
             this.bFirstHigh = true;
             this.bBrightness = 0;
             this.bPeriod = 0;
             this.bPreviousFallingEdgeCycle = 0;
             this.bPreviousRisingEdgeCycle = 0;
+            this.bPeriodCreated = true;
             this.animationFrameId = null;
-            if (execute_13.AVRRunner.getInstance().board.timers.length === 3) {
-                this.rPeriod = this.unoPwmPeriods[this.pinIndices.R[0].valueOf()];
-                this.gPeriod = this.unoPwmPeriods[this.pinIndices.G[0].valueOf()];
-                this.bPeriod = this.unoPwmPeriods[this.pinIndices.B[0].valueOf()];
-            }
-            else if (execute_13.AVRRunner.getInstance().board.timers.length === 6) {
-                this.rPeriod = this.megaPwmPeriods[this.pinIndices.R[0].valueOf()];
-                this.gPeriod = this.megaPwmPeriods[this.pinIndices.G[0].valueOf()];
-                this.bPeriod = this.megaPwmPeriods[this.pinIndices.B[0].valueOf()];
-            }
-            else {
-                throw new Error("Unknown board. cannot create pwm component");
-            }
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
             this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -13977,16 +13924,8 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         }
         rListener(state) {
             if (this.rPeriodCreated) {
-                const timerMode = this.pins.R[0].timer.getTimerMode();
-                console.log(`getTimerMode : ${timerMode}`);
-                let period = 1;
-                if (timerMode === timer_2.TimerMode.FastPWM) {
-                    period = ((this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
-                }
-                else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
-                    period = (2 * (this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
-                }
-                console.log(`theoretical period ${period}`);
+                this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
+                console.log("red", this.rPeriod);
                 this.rPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
@@ -14015,16 +13954,8 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         }
         gListener(state) {
             if (this.gPeriodCreated) {
-                const timerMode = this.pins.G[0].timer.getTimerMode();
-                console.log(`getTimerMode : ${timerMode}`);
-                let period = 1;
-                if (timerMode === timer_2.TimerMode.FastPWM) {
-                    period = ((this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider());
-                }
-                else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
-                    period = (2 * (this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider());
-                }
-                console.log(`theoretical period ${period}`);
+                this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
+                console.log("green", this.gPeriod);
                 this.gPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
@@ -14053,16 +13984,8 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         }
         bListener(state) {
             if (this.bPeriodCreated) {
-                const timerMode = this.pins.B[0].timer.getTimerMode();
-                console.log(`getTimerMode : ${timerMode}`);
-                let period = 1;
-                if (timerMode === timer_2.TimerMode.FastPWM) {
-                    period = ((this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider());
-                }
-                else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
-                    period = (2 * (this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider());
-                }
-                console.log(`theoretical period ${period}`);
+                this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
+                console.log("blue", this.bPeriod);
                 this.bPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;

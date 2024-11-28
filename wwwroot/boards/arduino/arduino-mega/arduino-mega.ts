@@ -92,18 +92,18 @@ export class ArduinoMega implements Board {
         this.pins = [
             {digital: new ArduinoDigital(portE, 0), usart: this.usarts[0]},  // Pin 0
             {digital: new ArduinoDigital(portE, 1), usart: this.usarts[0]},  // Pin 1
-            {digital: new ArduinoDigital(portE, 4)},  // Pin 2
-            {digital: new ArduinoDigital(portE, 5)},  // Pin 3
-            {digital: new ArduinoDigital(portG, 5)},  // Pin 4
-            {digital: new ArduinoDigital(portE, 3)},  // Pin 5
-            {digital: new ArduinoDigital(portH, 3)},  // Pin 6
-            {digital: new ArduinoDigital(portH, 4)},  // Pin 7
-            {digital: new ArduinoDigital(portH, 5)},  // Pin 8
-            {digital: new ArduinoDigital(portH, 6)},  // Pin 9
-            {digital: new ArduinoDigital(portB, 4)},  // Pin 10
-            {digital: new ArduinoDigital(portB, 5)},  // Pin 11
-            {digital: new ArduinoDigital(portB, 6)},  // Pin 12
-            {digital: new ArduinoDigital(portB, 7)},  // Pin 13
+            {digital: new ArduinoDigital(portE, 4), timer: this.timers[3]},  // Pin 2
+            {digital: new ArduinoDigital(portE, 5), timer: this.timers[3]},  // Pin 3
+            {digital: new ArduinoDigital(portG, 5), timer: this.timers[0]},  // Pin 4
+            {digital: new ArduinoDigital(portE, 3), timer: this.timers[3]},  // Pin 5
+            {digital: new ArduinoDigital(portH, 3), timer: this.timers[4]},  // Pin 6
+            {digital: new ArduinoDigital(portH, 4), timer: this.timers[4]},  // Pin 7
+            {digital: new ArduinoDigital(portH, 5), timer: this.timers[4]},  // Pin 8
+            {digital: new ArduinoDigital(portH, 6), timer: this.timers[2]},  // Pin 9
+            {digital: new ArduinoDigital(portB, 4), timer: this.timers[2]},  // Pin 10
+            {digital: new ArduinoDigital(portB, 5), timer: this.timers[1]},  // Pin 11
+            {digital: new ArduinoDigital(portB, 6), timer: this.timers[1]},  // Pin 12
+            {digital: new ArduinoDigital(portB, 7), timer: this.timers[0]},  // Pin 13
             {digital: new ArduinoDigital(portJ, 1), usart: this.usarts[3]},  // Pin 14
             {digital: new ArduinoDigital(portJ, 0), usart: this.usarts[3]},  // Pin 15
             {digital: new ArduinoDigital(portH, 1), usart: this.usarts[2]},  // Pin 16
@@ -134,9 +134,9 @@ export class ArduinoMega implements Board {
             {digital: new ArduinoDigital(portG, 0)},  // Pin 41
             {digital: new ArduinoDigital(portL, 7)},  // Pin 42
             {digital: new ArduinoDigital(portL, 6)},  // Pin 43
-            {digital: new ArduinoDigital(portL, 5)},  // Pin 44
-            {digital: new ArduinoDigital(portL, 4)},  // Pin 45
-            {digital: new ArduinoDigital(portL, 3)},  // Pin 46
+            {digital: new ArduinoDigital(portL, 5), timer: this.timers[5]},  // Pin 44
+            {digital: new ArduinoDigital(portL, 4), timer: this.timers[5]},  // Pin 45
+            {digital: new ArduinoDigital(portL, 3), timer: this.timers[5]},  // Pin 46
             {digital: new ArduinoDigital(portL, 2)},  // Pin 47
             {digital: new ArduinoDigital(portL, 1)},  // Pin 48
             {digital: new ArduinoDigital(portL, 0)},  // Pin 49

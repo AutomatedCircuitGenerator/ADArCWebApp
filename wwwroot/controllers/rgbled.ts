@@ -1,40 +1,13 @@
 import {Controller} from "@controllers/controller";
 import {PinState} from "@lib/avr8js";
 import {AVRRunner} from "@lib/execute";
-import {TimerMode} from "@lib/avr8js/peripherals/timer";
 
 
 //https://docs.arduino.cc/tutorials/generic/secrets-of-arduino-pwm/
 //https://serval.mythic-beasts.com/~markt/ATmega-timers.html
 //https://forum.arduino.cc/t/arduino-mega-pwm-generation/643026/3
+//https://deepbluembedded.com/arduino-timers/
 export class RGBLED extends Controller {
-    //fpwm = clock/(prescaler*top)
-
-    private unoPwmPeriods = {
-        3: 32640, // 1/(16000000/64/255/2) [490.1960784314] = 0.00204
-        11: 32640,
-        5: 16320, //1/(16000000/64/256) [976.5625] = 0.001024 
-        6: 16320,
-        9: 16320,
-        10: 16320
-    };
-    private megaPwmPeriods = {
-        2: 32640,
-        3: 32640,
-        4: 16320,
-        5: 32640,
-        6: 32640,
-        7: 32640,
-        8: 32640,
-        9: 32640,
-        10: 32640,
-        11: 32640,
-        12: 32640,
-        13: 16320,
-        44: 32640,
-        45: 32640,
-        46: 32640,
-    }
 
     private rBrightness: number;
     private rPeriod: number;
@@ -42,6 +15,7 @@ export class RGBLED extends Controller {
     private rLastPinState: PinState;
     private rPreviousFallingEdgeCycle: number;
     private rPreviousRisingEdgeCycle: number;
+    private rPeriodCreated: boolean;
 
     private gBrightness: number;
     private gPeriod: number;
@@ -49,6 +23,7 @@ export class RGBLED extends Controller {
     private gLastPinState: PinState;
     private gPreviousFallingEdgeCycle: number;
     private gPreviousRisingEdgeCycle: number;
+    private gPeriodCreated: boolean;
 
     private bBrightness: number;
     private bPeriod: number;
@@ -56,26 +31,18 @@ export class RGBLED extends Controller {
     private bLastPinState: PinState;
     private bPreviousFallingEdgeCycle: number;
     private bPreviousRisingEdgeCycle: number;
-
+    private bPeriodCreated: boolean;
 
     private animationFrameId: number | null = null;
-    private rPeriodCreated: boolean;
-    private bPeriodCreated: boolean;
-    private gPeriodCreated: boolean;
-
 
     setup() {
-
-        this.rPeriodCreated = true;
-        this.gPeriodCreated = true;
-        this.bPeriodCreated = true;
-
         this.rLastPinState = this.pins.R[0].digital.state;
         this.rFirstHigh = true;
         this.rBrightness = 0;
         this.rPeriod = 0;
         this.rPreviousFallingEdgeCycle = 0;
         this.rPreviousRisingEdgeCycle = 0;
+        this.rPeriodCreated = true;
 
         this.gLastPinState = this.pins.G[0].digital.state;
         this.gFirstHigh = true;
@@ -83,6 +50,7 @@ export class RGBLED extends Controller {
         this.gPeriod = 0;
         this.gPreviousFallingEdgeCycle = 0;
         this.gPreviousRisingEdgeCycle = 0;
+        this.gPeriodCreated = true;
 
         this.bLastPinState = this.pins.B[0].digital.state;
         this.bFirstHigh = true;
@@ -90,28 +58,13 @@ export class RGBLED extends Controller {
         this.bPeriod = 0;
         this.bPreviousFallingEdgeCycle = 0;
         this.bPreviousRisingEdgeCycle = 0;
-
+        this.bPeriodCreated = true;
 
         this.animationFrameId = null;
 
-        //this should be calculated with real register checks, but like who has time for that.
-        if (AVRRunner.getInstance().board.timers.length === 3) {
-            this.rPeriod = this.unoPwmPeriods[this.pinIndices.R[0].valueOf()];
-            this.gPeriod = this.unoPwmPeriods[this.pinIndices.G[0].valueOf()];
-            this.bPeriod = this.unoPwmPeriods[this.pinIndices.B[0].valueOf()];
-        } else if (AVRRunner.getInstance().board.timers.length === 6) {
-            this.rPeriod = this.megaPwmPeriods[this.pinIndices.R[0].valueOf()];
-            this.gPeriod = this.megaPwmPeriods[this.pinIndices.G[0].valueOf()];
-            this.bPeriod = this.megaPwmPeriods[this.pinIndices.B[0].valueOf()];
-        } else {
-            throw new Error("Unknown board. cannot create pwm component")
-        }
         this.pins.R[0].digital.addListener(this.rListener.bind(this));
         this.pins.G[0].digital.addListener(this.gListener.bind(this));
         this.pins.B[0].digital.addListener(this.bListener.bind(this));
-        //https://deepbluembedded.com/arduino-timers/
-
-
     }
 
     cleanup() {
@@ -160,19 +113,7 @@ export class RGBLED extends Controller {
 
     rListener(state: PinState) {
         if (this.rPeriodCreated) {
-            const timerMode = this.pins.R[0].timer.getTimerMode();
-            console.log(`getTimerMode : ${timerMode}`);
-            let period = 1;
-            if (timerMode === TimerMode.FastPWM) {
-                period = ((this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
-            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
-                period = (2 * (this.pins.R[0].timer.TOP + 1) * this.pins.R[0].timer.getDivider());
-
-            }
-            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
-
-            console.log(`theoretical period ${period}`)
-
+            this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
             this.rPeriodCreated = false;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
@@ -205,19 +146,7 @@ export class RGBLED extends Controller {
 
     gListener(state: PinState) {
         if (this.gPeriodCreated) {
-            const timerMode = this.pins.G[0].timer.getTimerMode();
-            console.log(`getTimerMode : ${timerMode}`);
-            let period = 1;
-            if (timerMode === TimerMode.FastPWM) {
-                period = ((this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider()) ;
-            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
-                period = (2 * (this.pins.G[0].timer.TOP + 1) * this.pins.G[0].timer.getDivider());
-
-            }
-            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
-
-            console.log(`theoretical period ${period}`)
-
+            this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
             this.gPeriodCreated = false;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
@@ -250,19 +179,7 @@ export class RGBLED extends Controller {
 
     bListener(state: PinState) {
         if (this.bPeriodCreated) {
-            const timerMode = this.pins.B[0].timer.getTimerMode();
-            console.log(`getTimerMode : ${timerMode}`);
-            let period = 1;
-            if (timerMode === TimerMode.FastPWM) {
-                period = ((this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider()) ;
-            } else if (timerMode === TimerMode.PWMPhaseCorrect) {
-                period = (2 * (this.pins.B[0].timer.TOP + 1) * this.pins.B[0].timer.getDivider());
-
-            }
-            // const period = (this.pins.B[0].timer.TOP + 1) / (AVRRunner.getInstance().board.cpu.frequency / this.pins.B[0].timer.getDivider())
-
-            console.log(`theoretical period ${period}`)
-
+            this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
             this.bPeriodCreated = false;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;

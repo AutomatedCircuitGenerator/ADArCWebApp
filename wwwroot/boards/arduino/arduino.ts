@@ -72,40 +72,17 @@ export class ArduinoTimer implements Timer {
         this.timer = timer;
     }
 
-    get TCCRA(): number {
-        return this.timer.TCCRA;
-    }
+    getPwmPeriod(): number {
+        const {timer} = this;
+        const timerMode = timer.getTimerMode();
+        let period = 0;
 
-    get TCCRB(): number {
-        return this.timer.TCCRB;
-    }
-
-    get TIMSK(): number {
-        return this.timer.TIMSK;
-    }
-
-    get CS(): 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 {
-        return this.timer.CS;
-    }
-
-    get WGM(): number {
-        return this.timer.WGM;
-    }
-
-    get TOP(): number {
-        return this.timer.TOP;
-    }
-
-    get ocrMask(): 255 | 511 | 1023 | 65535 {
-        return this.timer.ocrMask;
-    }
-
-    getDivider(): number {
-        return this.timer.getDivider();
-    }
-
-    getTimerMode(): TimerMode {
-        return this.timer.getTimerMode();
+        if (timerMode === TimerMode.FastPWM) {
+            period = ((timer.TOP + 1) * timer.getDivider());
+        } else if (timerMode === TimerMode.PWMPhaseCorrect) {
+            period = (2 * (timer.TOP + 1) * timer.getDivider());
+        }
+        return period;
     }
 }
 
