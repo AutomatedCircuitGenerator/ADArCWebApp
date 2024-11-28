@@ -13925,7 +13925,6 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         rListener(state) {
             if (this.rPeriodCreated) {
                 this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
-                console.log("red", this.rPeriod);
                 this.rPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
@@ -13955,7 +13954,6 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         gListener(state) {
             if (this.gPeriodCreated) {
                 this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
-                console.log("green", this.gPeriod);
                 this.gPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
@@ -13985,7 +13983,6 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
         bListener(state) {
             if (this.bPeriodCreated) {
                 this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
-                console.log("blue", this.bPeriod);
                 this.bPeriodCreated = false;
             }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
@@ -14040,7 +14037,134 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     }
     exports.RGBLED = RGBLED;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1) {
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DCMotorL298N = void 0;
+    var MotorDirection;
+    (function (MotorDirection) {
+        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
+        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
+        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
+    })(MotorDirection || (MotorDirection = {}));
+    class DCMotorL298N extends controller_21.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.motorDirection = MotorDirection.OFF;
+            this.dutyCycle = 0;
+            this.previousFallingEdgeCycle = 0;
+            this.period = 0;
+            this.lastPinState = avr8js_12.PinState.Input;
+            this.previousRisingEdgeCycle = 0;
+            this.isFirstRisingEdge = true;
+            this.isPeriodCreated = false;
+            this.animationFrameId = null;
+            this.pins.in1[0].digital.addListener(this.in1Listener.bind(this));
+            this.pins.in2[0].digital.addListener(this.in2Listener.bind(this));
+            this.pins.ena[0].digital.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.dutyCycle = 0;
+            this.renderSvg();
+        }
+        in1Listener(state) {
+            this.setMotorDirection();
+        }
+        in2Listener(state) {
+            this.setMotorDirection();
+        }
+        setMotorDirection() {
+            const in1 = this.pins.in1[0].digital.state;
+            const in2 = this.pins.in2[0].digital.state;
+            if (in1 === in2) {
+                this.motorDirection = MotorDirection.OFF;
+            }
+            else if (in1) {
+                this.motorDirection = MotorDirection.FORWARD;
+            }
+            else {
+                this.motorDirection = MotorDirection.REVERSE;
+            }
+        }
+        watchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_12.PinState.High && this.previousFallingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 1;
+            }
+            else if (lastState === avr8js_12.PinState.Low && this.previousRisingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        onSignalChange(state) {
+            if (!this.isPeriodCreated) {
+                this.period = this.pins.ena[0].timer.getPwmPeriod();
+                console.log("period");
+                this.isPeriodCreated = true;
+            }
+            const currentCycle = execute_14.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_12.PinState.High) {
+                this.previousRisingEdgeCycle = currentCycle;
+                if (this.isFirstRisingEdge) {
+                    this.dutyCycle = 0;
+                    this.isFirstRisingEdge = false;
+                }
+                else {
+                    this.dutyCycle = Math.max((this.period - (currentCycle - this.previousFallingEdgeCycle)) / this.period, 0);
+                }
+                execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+            }
+            else if (state === avr8js_12.PinState.Low) {
+                if (this.lastPinState === avr8js_12.PinState.High) {
+                    this.previousFallingEdgeCycle = currentCycle;
+                    this.dutyCycle = Math.min((currentCycle - this.previousRisingEdgeCycle) / this.period, 1);
+                    execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                }
+            }
+            this.lastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            let dcMotor = this.element.querySelector("#shakeAnimation");
+            if (!dcMotor) {
+                const dcMotorGroup = this.element.querySelector("#dcMotorGroup");
+                const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                animateTransform.setAttribute('id', 'shakeAnimation');
+                animateTransform.setAttribute('attributeName', 'transform');
+                animateTransform.setAttribute('type', 'translate');
+                animateTransform.setAttribute('additive', 'sum');
+                animateTransform.setAttribute('from', '0 0');
+                animateTransform.setAttribute('to', '0 5');
+                animateTransform.setAttribute('dur', '0s');
+                animateTransform.setAttribute('repeatCount', '0');
+                animateTransform.setAttribute('keyTimes', '0;0.5;1');
+                animateTransform.setAttribute('values', '0 0; 0 5; 0 0');
+                dcMotorGroup.appendChild(animateTransform);
+                dcMotor = this.element.querySelector("#shakeAnimation");
+            }
+            if (this.dutyCycle === 0 || this.motorDirection === MotorDirection.OFF) {
+                dcMotor.remove();
+                this.animationFrameId = null;
+                return;
+            }
+            const speed = (1 - (0.1 + this.dutyCycle * (1 - .1))) + 0.1;
+            dcMotor.setAttribute("dur", `${speed}s`);
+            dcMotor.setAttribute("repeatCount", "indefinite");
+            this.animationFrameId = null;
+        }
+    }
+    exports.DCMotorL298N = DCMotorL298N;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -14068,56 +14192,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY024 = ky024_1.KY024;
     window.KY001 = ky001_1.KY001;
     window.RGBLED = rgbled_1.RGBLED;
-});
-define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_21, execute_14) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DCMotorL298N = void 0;
-    var MotorDirection;
-    (function (MotorDirection) {
-        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
-        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
-        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
-    })(MotorDirection || (MotorDirection = {}));
-    class DCMotorL298N extends controller_21.Controller {
-        constructor() {
-            super(...arguments);
-            this.motorDirection = MotorDirection.OFF;
-        }
-        setup() {
-            this.pins.in1[0].digital.addListener(this.in1Listener);
-            this.pins.in2[0].digital.addListener(this.in2Listener);
-            this.signal = this.pins.ena[0].digital;
-            this.signalState = this.signal.state;
-            this.signal.addListener(this.onSignalChange.bind(this));
-        }
-        in1Listener(state) {
-            this.setMotorDirection();
-        }
-        in2Listener(state) {
-            this.setMotorDirection();
-        }
-        setMotorDirection() {
-            const in1 = this.pins.in1[0].digital.state;
-            const in2 = this.pins.in2[0].digital.state;
-            if (in1 === in2) {
-                this.motorDirection = MotorDirection.OFF;
-            }
-            else if (in1) {
-                this.motorDirection = MotorDirection.FORWARD;
-            }
-            else {
-                this.motorDirection = MotorDirection.REVERSE;
-            }
-        }
-        onSignalChange(state) {
-            this.signalState = state;
-        }
-        cyclesToMs(cycles) {
-            return (cycles * 1000) / (execute_14.AVRRunner.getInstance().board.cpu.frequency / 1000);
-        }
-    }
-    exports.DCMotorL298N = DCMotorL298N;
+    window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
 });
 define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_22) {
     "use strict";

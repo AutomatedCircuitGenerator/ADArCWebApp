@@ -15,7 +15,7 @@ export class RGBLED extends Controller {
     private rLastPinState: PinState;
     private rPreviousFallingEdgeCycle: number;
     private rPreviousRisingEdgeCycle: number;
-    private rPeriodCreated: boolean;
+    private rIsPeriodCreated: boolean;
 
     private gBrightness: number;
     private gPeriod: number;
@@ -23,7 +23,7 @@ export class RGBLED extends Controller {
     private gLastPinState: PinState;
     private gPreviousFallingEdgeCycle: number;
     private gPreviousRisingEdgeCycle: number;
-    private gPeriodCreated: boolean;
+    private gIsPeriodCreated: boolean;
 
     private bBrightness: number;
     private bPeriod: number;
@@ -31,7 +31,7 @@ export class RGBLED extends Controller {
     private bLastPinState: PinState;
     private bPreviousFallingEdgeCycle: number;
     private bPreviousRisingEdgeCycle: number;
-    private bPeriodCreated: boolean;
+    private bIsPeriodCreated: boolean;
 
     private animationFrameId: number | null = null;
 
@@ -42,7 +42,7 @@ export class RGBLED extends Controller {
         this.rPeriod = 0;
         this.rPreviousFallingEdgeCycle = 0;
         this.rPreviousRisingEdgeCycle = 0;
-        this.rPeriodCreated = true;
+        this.rIsPeriodCreated = false;
 
         this.gLastPinState = this.pins.G[0].digital.state;
         this.gFirstHigh = true;
@@ -50,7 +50,7 @@ export class RGBLED extends Controller {
         this.gPeriod = 0;
         this.gPreviousFallingEdgeCycle = 0;
         this.gPreviousRisingEdgeCycle = 0;
-        this.gPeriodCreated = true;
+        this.gIsPeriodCreated = false;
 
         this.bLastPinState = this.pins.B[0].digital.state;
         this.bFirstHigh = true;
@@ -58,7 +58,7 @@ export class RGBLED extends Controller {
         this.bPeriod = 0;
         this.bPreviousFallingEdgeCycle = 0;
         this.bPreviousRisingEdgeCycle = 0;
-        this.bPeriodCreated = true;
+        this.bIsPeriodCreated = false;
 
         this.animationFrameId = null;
 
@@ -112,9 +112,9 @@ export class RGBLED extends Controller {
 
 
     rListener(state: PinState) {
-        if (this.rPeriodCreated) {
+        if (!this.rIsPeriodCreated) {
             this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
-            this.rPeriodCreated = false;
+            this.rIsPeriodCreated = true;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
@@ -145,9 +145,9 @@ export class RGBLED extends Controller {
     }
 
     gListener(state: PinState) {
-        if (this.gPeriodCreated) {
+        if (!this.gIsPeriodCreated) {
             this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
-            this.gPeriodCreated = false;
+            this.gIsPeriodCreated = true;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
@@ -178,9 +178,9 @@ export class RGBLED extends Controller {
     }
 
     bListener(state: PinState) {
-        if (this.bPeriodCreated) {
+        if (!this.bIsPeriodCreated) {
             this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
-            this.bPeriodCreated = false;
+            this.bIsPeriodCreated = true;
         }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
@@ -244,38 +244,3 @@ export class RGBLED extends Controller {
         this.animationFrameId = null;
     }
 }
-
-
-// const int bluePin = 5;
-// const int greenPin = 6;
-// const int redPin= 3;
-// // *Interfacing RGB LED with Arduino 
-// // * Author: Osama Ahmed 
-//
-//
-// void setup() {
-//     //Defining the pins as OUTPUT
-//     pinMode(redPin,  OUTPUT);
-//     pinMode(greenPin, OUTPUT);
-//     pinMode(bluePin, OUTPUT);
-// }
-// void  loop() {
-//     setColor(0, 255, 0); // Red Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(255,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 255); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//
-// }
-// void setColor(int redValue, int greenValue,  int blueValue) {
-//     analogWrite(redPin, redValue);
-//     analogWrite(greenPin,  greenValue);
-//     analogWrite(bluePin, blueValue);
-// }
