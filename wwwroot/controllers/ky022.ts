@@ -14,6 +14,7 @@ export class KY022 extends Controller {
     setup() {
         this.signal = this.pins.digital_out[0].digital;
         this.cpu = AVRRunner.getInstance().board.cpu;
+        this.signal.state = true;
     }
     
     setNecCommand(message: number) {
@@ -47,14 +48,16 @@ export class KY022 extends Controller {
     }
     
     private pulse(ms: number) {
-        this.cpu.addClockEvent(() => {
-            console.log("Setting state high at " + this.cyclesToMs(this.cpu.cycles));
-            this.signal.state = true;
-        }, this.counter);
+        if (this.counter === 0) {
+            this.signal.state = false;
+        } else {
+            this.cpu.addClockEvent(() => {
+                this.signal.state = false;
+            }, this.counter);
+        }
         this.counter += this.msToCycles(ms);
         this.cpu.addClockEvent(() => {
-            this.signal.state = false;
-            console.log("Setting state low at " + this.cyclesToMs(this.cpu.cycles));
+            this.signal.state = true;
         }, this.counter);
     }
     
@@ -68,9 +71,5 @@ export class KY022 extends Controller {
     
     private msToCycles(ms: number) {
         return ms * (this.cpu.frequency / 1000);
-    }
-    
-    private cyclesToMs(cycles: number) {
-        return (cycles * 1000) / this.cpu.frequency;
     }
 }
