@@ -9242,7 +9242,7 @@ define("lib/avr8js/peripherals/spi", ["require", "exports"], function (require, 
 define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/peripherals/gpio"], function (require, exports, gpio_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRTimer = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
+    exports.AVRTimer = exports.TimerMode = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
     const timer01Dividers = {
         0: 0,
         1: 1,
@@ -9288,7 +9288,7 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
         TimerMode[TimerMode["FastPWM"] = 3] = "FastPWM";
         TimerMode[TimerMode["PWMPhaseFrequencyCorrect"] = 4] = "PWMPhaseFrequencyCorrect";
         TimerMode[TimerMode["Reserved"] = 5] = "Reserved";
-    })(TimerMode || (TimerMode = {}));
+    })(TimerMode || (exports.TimerMode = TimerMode = {}));
     var TOVUpdateMode;
     (function (TOVUpdateMode) {
         TOVUpdateMode[TOVUpdateMode["Max"] = 0] = "Max";
@@ -9591,6 +9591,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
             this.countingUp = false;
             this.updateDivider = true;
         }
+        getDivider() {
+            return this.config.dividers[this.CS];
+        }
         get TCCRA() {
             return this.cpu.data[this.config.TCCRA];
         }
@@ -9616,6 +9619,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
                 default:
                     return this.topValue;
             }
+        }
+        getTimerMode() {
+            return this.timerMode;
         }
         get ocrMask() {
             switch (this.topValue) {
@@ -10569,7 +10575,7 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
     }
     exports.Controller = Controller;
 });
-define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], function (require, exports, avr8js_1) {
+define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index", "lib/avr8js/peripherals/timer"], function (require, exports, avr8js_1, timer_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ArduinoAnalog = exports.ArduinoDigital = exports.ArduinoUSART = exports.ArduinoTWI = exports.ArduinoTimer = exports.ArduinoSPI = exports.ArduinoCPU = exports.MHZ = void 0;
@@ -10614,6 +10620,18 @@ define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], fun
     class ArduinoTimer {
         constructor(timer) {
             this.timer = timer;
+        }
+        getPwmPeriod() {
+            const { timer } = this;
+            const timerMode = timer.getTimerMode();
+            let period = 0;
+            if (timerMode === timer_2.TimerMode.FastPWM) {
+                period = ((timer.TOP + 1) * timer.getDivider());
+            }
+            else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
+                period = (2 * (timer.TOP + 1) * timer.getDivider());
+            }
+            return period;
         }
     }
     exports.ArduinoTimer = ArduinoTimer;
@@ -10696,15 +10714,15 @@ define("boards/arduino/arduino-uno/arduino-uno", ["require", "exports", "lib/avr
                 { digital: new arduino_1.ArduinoDigital(portD, 0), usart: this.usarts[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 1), usart: this.usarts[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 2) },
-                { digital: new arduino_1.ArduinoDigital(portD, 3) },
+                { digital: new arduino_1.ArduinoDigital(portD, 3), timer: this.timers[2] },
                 { digital: new arduino_1.ArduinoDigital(portD, 4) },
-                { digital: new arduino_1.ArduinoDigital(portD, 5) },
-                { digital: new arduino_1.ArduinoDigital(portD, 6) },
+                { digital: new arduino_1.ArduinoDigital(portD, 5), timer: this.timers[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 6), timer: this.timers[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 7) },
                 { digital: new arduino_1.ArduinoDigital(portB, 0) },
-                { digital: new arduino_1.ArduinoDigital(portB, 1) },
-                { digital: new arduino_1.ArduinoDigital(portB, 2) },
-                { digital: new arduino_1.ArduinoDigital(portB, 3) },
+                { digital: new arduino_1.ArduinoDigital(portB, 1), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 2), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 3), timer: this.timers[2] },
                 { digital: new arduino_1.ArduinoDigital(portB, 4) },
                 { digital: new arduino_1.ArduinoDigital(portB, 5) },
                 { analog: new arduino_1.ArduinoAnalog(adc, 0), digital: new arduino_1.ArduinoDigital(portC, 0) },
@@ -11910,18 +11928,18 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
             this.pins = [
                 { digital: new arduino_2.ArduinoDigital(portE, 0), usart: this.usarts[0] },
                 { digital: new arduino_2.ArduinoDigital(portE, 1), usart: this.usarts[0] },
-                { digital: new arduino_2.ArduinoDigital(portE, 4) },
-                { digital: new arduino_2.ArduinoDigital(portE, 5) },
-                { digital: new arduino_2.ArduinoDigital(portG, 5) },
-                { digital: new arduino_2.ArduinoDigital(portE, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 4) },
-                { digital: new arduino_2.ArduinoDigital(portH, 5) },
-                { digital: new arduino_2.ArduinoDigital(portH, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 4) },
-                { digital: new arduino_2.ArduinoDigital(portB, 5) },
-                { digital: new arduino_2.ArduinoDigital(portB, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 7) },
+                { digital: new arduino_2.ArduinoDigital(portE, 4), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portE, 5), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portG, 5), timer: this.timers[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 3), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portH, 3), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 4), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 5), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 6), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 4), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 5), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 6), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 7), timer: this.timers[0] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 1), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 0), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portH, 1), usart: this.usarts[2] },
@@ -11952,9 +11970,9 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
                 { digital: new arduino_2.ArduinoDigital(portG, 0) },
                 { digital: new arduino_2.ArduinoDigital(portL, 7) },
                 { digital: new arduino_2.ArduinoDigital(portL, 6) },
-                { digital: new arduino_2.ArduinoDigital(portL, 5) },
-                { digital: new arduino_2.ArduinoDigital(portL, 4) },
-                { digital: new arduino_2.ArduinoDigital(portL, 3) },
+                { digital: new arduino_2.ArduinoDigital(portL, 5), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 4), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 3), timer: this.timers[5] },
                 { digital: new arduino_2.ArduinoDigital(portL, 2) },
                 { digital: new arduino_2.ArduinoDigital(portL, 1) },
                 { digital: new arduino_2.ArduinoDigital(portL, 0) },
@@ -13535,7 +13553,6 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
     class LED extends controller_16.Controller {
         constructor() {
             super(...arguments);
-            this.color = "#ff8080";
             this.lightColors = {
                 "red": "#ff8080",
                 "green": "#80ff80",
@@ -13553,16 +13570,16 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
             this.element.querySelector("#ledDisplay").style.display = "none";
         }
         setColor(color) {
-            this.color = this.lightColors[color];
+            const _color = this.lightColors[color] ? this.lightColors[color] : "red";
+            this.element.querySelector("#ledColor").style.fill = _color;
+            this.element.querySelector("#ledColorBrightness").style.fill = _color;
         }
         toggleLed(state) {
-            this.element.querySelector("#ledColor").style.fill = this.color;
-            this.element.querySelector("#ledColorBrightness").style.fill = this.color;
             if (state == avr8js_10.PinState.Low) {
                 this.element.querySelector("#ledDisplay").style.display = "none";
             }
-            else if (state == avr8js_10.PinState.High || state === avr8js_10.PinState.InputPullUp) {
-                this.element.querySelector("#ledDisplay").style.display = "";
+            else if (state == avr8js_10.PinState.High) {
+                this.element.querySelector("#ledDisplay").style.display = "inherit";
             }
         }
     }
@@ -13612,7 +13629,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         LINEAR_ACCEL_Z_H: { address: 0x5B },
         LINEAR_ACCEL_Z_L: { address: 0x5C },
         PWR_MGMT_1: { address: 0x6B, default: 0x40 },
-        PWR_MGMT_2: { address: 0X6C, default: 0x00 },
+        PWR_MGMT_2: { address: 0x6C, default: 0x00 },
         WHO_AM_I: { address: 0x75, default: 0x68 }
     };
     class MPU6050 extends controller_17.Controller {
@@ -13620,38 +13637,50 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             super(...arguments);
             this.address = null;
             this.memory = new Uint8Array(128);
-            this.accelerometer = { x: 0, y: 0, z: 0 };
+            this.accelerometer = { x: 0, y: 0, z: 9.81 };
             this.gyroscope = { x: 0, y: 0, z: 0 };
             this.orientation = { x: 0, y: 0, z: 0 };
+            this.lastRead = Date.now();
             this.rotating = false;
+            this.temperature = 25.0;
             this.sensorControls = {
                 setAcceleration: (x, y, z) => {
                     this.accelerometer = { x, y, z };
-                    this.setVector(registers.ACCEL_XOUT_H.address, [x, y, z], 100);
                     this.calculateOrientation();
                 },
                 setGyroscope: (x, y, z) => {
                     this.gyroscope = { x, y, z };
-                    this.setVector(registers.GYRO_XOUT_H.address, [x, y, z], 16);
+                    this.rotating = (x !== 0 || y !== 0 || z !== 0);
                     this.calculateOrientation();
                 },
                 setTemp: (temp) => {
-                    this.memory[registers.TEMP_OUT_H.address] = temp;
+                    this.temperature = temp;
+                    const encoded = this.encodeTemperature(temp);
+                    this.memory[registers.TEMP_OUT_H.address] = (encoded >> 8) & 0xFF;
+                    this.memory[registers.TEMP_OUT_L.address] = encoded & 0xFF;
                 },
-                setLinearAcceleration: (x, y, z) => {
-                    this.setVector(registers.LINEAR_ACCEL_X_H.address, [x, y, z], 100);
-                },
+                setOrientation: (pitch, roll, yaw) => {
+                    this.orientation = { x: yaw, y: pitch, z: roll };
+                    this.calculateOrientation();
+                }
             };
+        }
+        addSensorNoise(value, magnitude = 0.01) {
+            return value + (Math.random() - 0.5) * magnitude;
+        }
+        encodeTemperature(celsius) {
+            return Math.round((celsius - 36.53) * 340);
         }
         setVector(address, vector, scalar) {
             let writePointer = address;
             for (const num of vector) {
-                const scaled = Math.round(num * scalar);
-                const lsb = scaled & 0xFF;
+                const noisyValue = this.addSensorNoise(num);
+                const scaled = Math.round(noisyValue * scalar);
                 const msb = (scaled >> 8) & 0xFF;
-                this.memory[writePointer] = lsb;
-                writePointer++;
+                const lsb = scaled & 0xFF;
                 this.memory[writePointer] = msb;
+                writePointer++;
+                this.memory[writePointer] = lsb;
                 writePointer++;
             }
         }
@@ -13666,19 +13695,40 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             const sr = Math.sin(roll * 0.5);
             const cp = Math.cos(pitch * 0.5);
             const sp = Math.sin(pitch * 0.5);
+            const qw = cr * cp * cy + sr * sp * sy;
             const qx = sr * cp * cy - cr * sp * sy;
             const qy = cr * sp * cy + sr * cp * sy;
             const qz = cr * cp * sy - sr * sp * cy;
-            const qw = cr * cp * cy + sr * sp * sy;
-            return { x: qx, y: qy, z: qz, w: qw };
+            return { w: qw, x: qx, y: qy, z: qz };
         }
         calculateOrientation() {
-            const avgX = (this.accelerometer.x + this.gyroscope.x) / 2;
-            const avgY = (this.accelerometer.y + this.gyroscope.y) / 2;
-            const avgZ = (this.accelerometer.z + this.gyroscope.z) / 2;
-            this.setVector(registers.EULER_HEADING_H.address, [avgX, avgY, avgZ], 16);
-            const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
-            this.setVector(registers.QUATERNIONW_H.address, [w, x, y, z], 16384);
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - this.lastRead) / 1000;
+            this.lastRead = currentTime;
+            if (this.rotating && timeDiff > 0) {
+                this.orientation.x += this.gyroscope.z * timeDiff;
+                this.orientation.y += this.gyroscope.x * timeDiff;
+                this.orientation.z += this.gyroscope.y * timeDiff;
+                this.orientation.x = this.orientation.x % 360;
+                this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+                this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+                const gravityX = Math.sin(this.orientation.y * Math.PI / 180) * 9.81;
+                const gravityY = -Math.sin(this.orientation.z * Math.PI / 180) * 9.81;
+                const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
+                    Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
+                this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+            }
+            this.setVector(registers.ACCEL_XOUT_H.address, [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z], 16384 / 9.81);
+            this.setVector(registers.GYRO_XOUT_H.address, [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z], 131);
+            this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+            const quaternion = this.eulerToQuaternion(this.orientation.x, this.orientation.z, this.orientation.y);
+            this.setVector(registers.QUATERNIONW_H.address, [quaternion.w, quaternion.x, quaternion.y, quaternion.z], 16384);
+        }
+        setMotion(rotating) {
+            if (rotating) {
+                this.sensorControls.setGyroscope(0, 0, 90);
+            }
+            this.rotating = rotating;
         }
         setup() {
             execute_12.AVRRunner.getInstance().board.twis[0].registerController(exports.I2C_MST_CTRL, this);
@@ -13687,37 +13737,23 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
                     this.memory[register.address] = register.default;
                 }
             }
-            this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
-            this.sensorControls.setTemp(75);
+            this.sensorControls.setTemp(25);
+            this.calculateOrientation();
+            this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
+        }
+        cleanup() {
+            this.element.querySelector("#mpuLed").setAttribute("fill", "none");
         }
         i2cConnect(addr, write) {
             return true;
         }
-        i2cDisconnect() { }
+        i2cDisconnect() {
+        }
         i2cReadByte(acked) {
             let byte;
             if (this.address !== null) {
-                if (this.address === registers.EULER_HEADING_H.address && this.rotating) {
-                    const currentTime = Date.now();
-                    const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0;
-                    if (timeDiff > 0) {
-                        const gyroX = this.gyroscope.x * timeDiff;
-                        const gyroY = this.gyroscope.y * timeDiff;
-                        const gyroZ = this.gyroscope.z * timeDiff;
-                        this.orientation.x += gyroZ;
-                        this.orientation.y += gyroX;
-                        this.orientation.z += gyroY;
-                        this.orientation.x = this.orientation.x % 360;
-                        this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
-                        this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
-                        this.lastRead = currentTime;
-                        this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
-                    }
-                }
+                this.calculateOrientation();
                 byte = this.memory[this.address];
-                if (this.address === registers.EULER_PITCH_L.address && this.rotating) {
-                    this.lastRead = Date.now();
-                }
             }
             else {
                 byte = 0xff;
@@ -13728,12 +13764,29 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         i2cWriteByte(value) {
             if (this.address !== null) {
                 this.memory[this.address] = value;
+                if (this.address === registers.PWR_MGMT_1.address) {
+                    const isResetBitSet = ((value >> 7) & 0xFF) == 1;
+                    if (isResetBitSet) {
+                        this.reset();
+                    }
+                }
                 this.address = null;
             }
             else {
                 this.address = value;
             }
             return true;
+        }
+        reset() {
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+                else {
+                    this.memory[register.address] = 0;
+                }
+            }
+            this.memory[registers.PWR_MGMT_1.address] = 0;
         }
     }
     exports.MPU6050 = MPU6050;
@@ -13798,31 +13851,6 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     class RGBLED extends controller_20.Controller {
         constructor() {
             super(...arguments);
-            this.unoPwmPeriods = {
-                3: 32640,
-                11: 32640,
-                5: 16320,
-                6: 16320,
-                9: 16320,
-                10: 16320
-            };
-            this.megaPwmPeriods = {
-                2: 32640,
-                3: 32640,
-                4: 16320,
-                5: 32640,
-                6: 32640,
-                7: 32640,
-                8: 32640,
-                9: 32640,
-                10: 32640,
-                11: 32640,
-                12: 32640,
-                13: 16320,
-                44: 32640,
-                45: 32640,
-                46: 32640,
-            };
             this.animationFrameId = null;
         }
         setup() {
@@ -13832,32 +13860,22 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.rPeriod = 0;
             this.rPreviousFallingEdgeCycle = 0;
             this.rPreviousRisingEdgeCycle = 0;
+            this.rPeriodCreated = true;
             this.gLastPinState = this.pins.G[0].digital.state;
             this.gFirstHigh = true;
             this.gBrightness = 0;
             this.gPeriod = 0;
             this.gPreviousFallingEdgeCycle = 0;
             this.gPreviousRisingEdgeCycle = 0;
+            this.gPeriodCreated = true;
             this.bLastPinState = this.pins.B[0].digital.state;
             this.bFirstHigh = true;
             this.bBrightness = 0;
             this.bPeriod = 0;
             this.bPreviousFallingEdgeCycle = 0;
             this.bPreviousRisingEdgeCycle = 0;
+            this.bPeriodCreated = true;
             this.animationFrameId = null;
-            if (execute_13.AVRRunner.getInstance().board.timers.length === 3) {
-                this.rPeriod = this.unoPwmPeriods[this.pinIndices.R[0].valueOf()];
-                this.gPeriod = this.unoPwmPeriods[this.pinIndices.G[0].valueOf()];
-                this.bPeriod = this.unoPwmPeriods[this.pinIndices.B[0].valueOf()];
-            }
-            else if (execute_13.AVRRunner.getInstance().board.timers.length === 6) {
-                this.rPeriod = this.megaPwmPeriods[this.pinIndices.R[0].valueOf()];
-                this.gPeriod = this.megaPwmPeriods[this.pinIndices.G[0].valueOf()];
-                this.bPeriod = this.megaPwmPeriods[this.pinIndices.B[0].valueOf()];
-            }
-            else {
-                throw new Error("Unknown board. cannot create pwm component");
-            }
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
             this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -13905,6 +13923,10 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         rListener(state) {
+            if (this.rPeriodCreated) {
+                this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
+                this.rPeriodCreated = false;
+            }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.rPreviousRisingEdgeCycle = currentCycle;
@@ -13930,6 +13952,10 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         gListener(state) {
+            if (this.gPeriodCreated) {
+                this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
+                this.gPeriodCreated = false;
+            }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.gPreviousRisingEdgeCycle = currentCycle;
@@ -13955,6 +13981,10 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         bListener(state) {
+            if (this.bPeriodCreated) {
+                this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
+                this.bPeriodCreated = false;
+            }
             const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.bPreviousRisingEdgeCycle = currentCycle;
@@ -14007,7 +14037,134 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     }
     exports.RGBLED = RGBLED;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1) {
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DCMotorL298N = void 0;
+    var MotorDirection;
+    (function (MotorDirection) {
+        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
+        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
+        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
+    })(MotorDirection || (MotorDirection = {}));
+    class DCMotorL298N extends controller_21.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.motorDirection = MotorDirection.OFF;
+            this.dutyCycle = 0;
+            this.previousFallingEdgeCycle = 0;
+            this.period = 0;
+            this.lastPinState = avr8js_12.PinState.Input;
+            this.previousRisingEdgeCycle = 0;
+            this.isFirstRisingEdge = true;
+            this.isPeriodCreated = false;
+            this.animationFrameId = null;
+            this.pins.in1[0].digital.addListener(this.in1Listener.bind(this));
+            this.pins.in2[0].digital.addListener(this.in2Listener.bind(this));
+            this.pins.ena[0].digital.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.dutyCycle = 0;
+            this.renderSvg();
+        }
+        in1Listener(state) {
+            this.setMotorDirection();
+        }
+        in2Listener(state) {
+            this.setMotorDirection();
+        }
+        setMotorDirection() {
+            const in1 = this.pins.in1[0].digital.state;
+            const in2 = this.pins.in2[0].digital.state;
+            if (in1 === in2) {
+                this.motorDirection = MotorDirection.OFF;
+            }
+            else if (in1) {
+                this.motorDirection = MotorDirection.FORWARD;
+            }
+            else {
+                this.motorDirection = MotorDirection.REVERSE;
+            }
+        }
+        watchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_12.PinState.High && this.previousFallingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 1;
+            }
+            else if (lastState === avr8js_12.PinState.Low && this.previousRisingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        onSignalChange(state) {
+            if (!this.isPeriodCreated) {
+                this.period = this.pins.ena[0].timer.getPwmPeriod();
+                console.log("period");
+                this.isPeriodCreated = true;
+            }
+            const currentCycle = execute_14.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_12.PinState.High) {
+                this.previousRisingEdgeCycle = currentCycle;
+                if (this.isFirstRisingEdge) {
+                    this.dutyCycle = 0;
+                    this.isFirstRisingEdge = false;
+                }
+                else {
+                    this.dutyCycle = Math.max((this.period - (currentCycle - this.previousFallingEdgeCycle)) / this.period, 0);
+                }
+                execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+            }
+            else if (state === avr8js_12.PinState.Low) {
+                if (this.lastPinState === avr8js_12.PinState.High) {
+                    this.previousFallingEdgeCycle = currentCycle;
+                    this.dutyCycle = Math.min((currentCycle - this.previousRisingEdgeCycle) / this.period, 1);
+                    execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                }
+            }
+            this.lastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            let dcMotor = this.element.querySelector("#shakeAnimation");
+            if (!dcMotor) {
+                const dcMotorGroup = this.element.querySelector("#dcMotorGroup");
+                const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                animateTransform.setAttribute('id', 'shakeAnimation');
+                animateTransform.setAttribute('attributeName', 'transform');
+                animateTransform.setAttribute('type', 'translate');
+                animateTransform.setAttribute('additive', 'sum');
+                animateTransform.setAttribute('from', '0 0');
+                animateTransform.setAttribute('to', '0 5');
+                animateTransform.setAttribute('dur', '0s');
+                animateTransform.setAttribute('repeatCount', '0');
+                animateTransform.setAttribute('keyTimes', '0;0.5;1');
+                animateTransform.setAttribute('values', '0 0; 0 5; 0 0');
+                dcMotorGroup.appendChild(animateTransform);
+                dcMotor = this.element.querySelector("#shakeAnimation");
+            }
+            if (this.dutyCycle === 0 || this.motorDirection === MotorDirection.OFF) {
+                dcMotor.remove();
+                this.animationFrameId = null;
+                return;
+            }
+            const speed = (1 - (0.1 + this.dutyCycle * (1 - .1))) + 0.1;
+            dcMotor.setAttribute("dur", `${speed}s`);
+            dcMotor.setAttribute("repeatCount", "indefinite");
+            this.animationFrameId = null;
+        }
+    }
+    exports.DCMotorL298N = DCMotorL298N;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
@@ -14035,56 +14192,7 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY024 = ky024_1.KY024;
     window.KY001 = ky001_1.KY001;
     window.RGBLED = rgbled_1.RGBLED;
-});
-define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_21, execute_14) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.DCMotorL298N = void 0;
-    var MotorDirection;
-    (function (MotorDirection) {
-        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
-        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
-        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
-    })(MotorDirection || (MotorDirection = {}));
-    class DCMotorL298N extends controller_21.Controller {
-        constructor() {
-            super(...arguments);
-            this.motorDirection = MotorDirection.OFF;
-        }
-        setup() {
-            this.pins.in1[0].digital.addListener(this.in1Listener);
-            this.pins.in2[0].digital.addListener(this.in2Listener);
-            this.signal = this.pins.ena[0].digital;
-            this.signalState = this.signal.state;
-            this.signal.addListener(this.onSignalChange.bind(this));
-        }
-        in1Listener(state) {
-            this.setMotorDirection();
-        }
-        in2Listener(state) {
-            this.setMotorDirection();
-        }
-        setMotorDirection() {
-            const in1 = this.pins.in1[0].digital.state;
-            const in2 = this.pins.in2[0].digital.state;
-            if (in1 === in2) {
-                this.motorDirection = MotorDirection.OFF;
-            }
-            else if (in1) {
-                this.motorDirection = MotorDirection.FORWARD;
-            }
-            else {
-                this.motorDirection = MotorDirection.REVERSE;
-            }
-        }
-        onSignalChange(state) {
-            this.signalState = state;
-        }
-        cyclesToMs(cycles) {
-            return (cycles * 1000) / (execute_14.AVRRunner.getInstance().board.cpu.frequency / 1000);
-        }
-    }
-    exports.DCMotorL298N = DCMotorL298N;
+    window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
 });
 define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_22) {
     "use strict";

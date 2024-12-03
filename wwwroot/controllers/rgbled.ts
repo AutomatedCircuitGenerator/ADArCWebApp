@@ -6,34 +6,8 @@ import {AVRRunner} from "@lib/execute";
 //https://docs.arduino.cc/tutorials/generic/secrets-of-arduino-pwm/
 //https://serval.mythic-beasts.com/~markt/ATmega-timers.html
 //https://forum.arduino.cc/t/arduino-mega-pwm-generation/643026/3
+//https://deepbluembedded.com/arduino-timers/
 export class RGBLED extends Controller {
-    //fpwm = clock/(prescaler*top)
-
-    private unoPwmPeriods = {
-        3: 32640, // 1/(16000000/64/255/2) [490.1960784314] = 0.00204
-        11: 32640,
-        5: 16320, //1/(16000000/64/256) [976.5625] = 0.001024 
-        6: 16320,
-        9: 16320,
-        10: 16320
-    };
-    private megaPwmPeriods = {
-        2: 32640,
-        3: 32640,
-        4: 16320,
-        5: 32640,
-        6: 32640,
-        7: 32640,
-        8: 32640,
-        9: 32640,
-        10: 32640,
-        11: 32640,
-        12: 32640,
-        13: 16320,
-        44: 32640,
-        45: 32640,
-        46: 32640,
-    }
 
     private rBrightness: number;
     private rPeriod: number;
@@ -41,6 +15,7 @@ export class RGBLED extends Controller {
     private rLastPinState: PinState;
     private rPreviousFallingEdgeCycle: number;
     private rPreviousRisingEdgeCycle: number;
+    private rIsPeriodCreated: boolean;
 
     private gBrightness: number;
     private gPeriod: number;
@@ -48,6 +23,7 @@ export class RGBLED extends Controller {
     private gLastPinState: PinState;
     private gPreviousFallingEdgeCycle: number;
     private gPreviousRisingEdgeCycle: number;
+    private gIsPeriodCreated: boolean;
 
     private bBrightness: number;
     private bPeriod: number;
@@ -55,10 +31,9 @@ export class RGBLED extends Controller {
     private bLastPinState: PinState;
     private bPreviousFallingEdgeCycle: number;
     private bPreviousRisingEdgeCycle: number;
-
+    private bIsPeriodCreated: boolean;
 
     private animationFrameId: number | null = null;
-
 
     setup() {
         this.rLastPinState = this.pins.R[0].digital.state;
@@ -67,6 +42,7 @@ export class RGBLED extends Controller {
         this.rPeriod = 0;
         this.rPreviousFallingEdgeCycle = 0;
         this.rPreviousRisingEdgeCycle = 0;
+        this.rIsPeriodCreated = false;
 
         this.gLastPinState = this.pins.G[0].digital.state;
         this.gFirstHigh = true;
@@ -74,6 +50,7 @@ export class RGBLED extends Controller {
         this.gPeriod = 0;
         this.gPreviousFallingEdgeCycle = 0;
         this.gPreviousRisingEdgeCycle = 0;
+        this.gIsPeriodCreated = false;
 
         this.bLastPinState = this.pins.B[0].digital.state;
         this.bFirstHigh = true;
@@ -81,22 +58,10 @@ export class RGBLED extends Controller {
         this.bPeriod = 0;
         this.bPreviousFallingEdgeCycle = 0;
         this.bPreviousRisingEdgeCycle = 0;
-
+        this.bIsPeriodCreated = false;
 
         this.animationFrameId = null;
 
-        //this should be calculated with real register checks, but like who has time for that.
-        if (AVRRunner.getInstance().board.timers.length === 3) {
-            this.rPeriod = this.unoPwmPeriods[this.pinIndices.R[0].valueOf()];
-            this.gPeriod = this.unoPwmPeriods[this.pinIndices.G[0].valueOf()];
-            this.bPeriod = this.unoPwmPeriods[this.pinIndices.B[0].valueOf()];
-        } else if (AVRRunner.getInstance().board.timers.length === 6) {
-            this.rPeriod = this.megaPwmPeriods[this.pinIndices.R[0].valueOf()];
-            this.gPeriod = this.megaPwmPeriods[this.pinIndices.G[0].valueOf()];
-            this.bPeriod = this.megaPwmPeriods[this.pinIndices.B[0].valueOf()];
-        } else {
-            throw new Error("Unknown board. cannot create pwm component")
-        }
         this.pins.R[0].digital.addListener(this.rListener.bind(this));
         this.pins.G[0].digital.addListener(this.gListener.bind(this));
         this.pins.B[0].digital.addListener(this.bListener.bind(this));
@@ -147,6 +112,10 @@ export class RGBLED extends Controller {
 
 
     rListener(state: PinState) {
+        if (!this.rIsPeriodCreated) {
+            this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
+            this.rIsPeriodCreated = true;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.rPreviousRisingEdgeCycle = currentCycle;
@@ -176,6 +145,10 @@ export class RGBLED extends Controller {
     }
 
     gListener(state: PinState) {
+        if (!this.gIsPeriodCreated) {
+            this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
+            this.gIsPeriodCreated = true;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.gPreviousRisingEdgeCycle = currentCycle;
@@ -205,6 +178,10 @@ export class RGBLED extends Controller {
     }
 
     bListener(state: PinState) {
+        if (!this.bIsPeriodCreated) {
+            this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
+            this.bIsPeriodCreated = true;
+        }
         const currentCycle = AVRRunner.getInstance().board.cpu.cycles;
         if (state === PinState.High) {
             this.bPreviousRisingEdgeCycle = currentCycle;
@@ -267,38 +244,3 @@ export class RGBLED extends Controller {
         this.animationFrameId = null;
     }
 }
-
-
-// const int bluePin = 5;
-// const int greenPin = 6;
-// const int redPin= 3;
-// // *Interfacing RGB LED with Arduino 
-// // * Author: Osama Ahmed 
-//
-//
-// void setup() {
-//     //Defining the pins as OUTPUT
-//     pinMode(redPin,  OUTPUT);
-//     pinMode(greenPin, OUTPUT);
-//     pinMode(bluePin, OUTPUT);
-// }
-// void  loop() {
-//     setColor(0, 255, 0); // Red Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(255,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 255); // Green Color
-//     delay(1000);
-//     setColor(0,  0, 0); // Green Color
-//     delay(1000);
-//
-// }
-// void setColor(int redValue, int greenValue,  int blueValue) {
-//     analogWrite(redPin, redValue);
-//     analogWrite(greenPin,  greenValue);
-//     analogWrite(bluePin, blueValue);
-// }

@@ -1,5 +1,4 @@
-﻿import {AVRUSART, PinState} from "@lib/avr8js";
-import {Controller} from "@controllers/controller";
+﻿import {PinState} from "@lib/avr8js";
 import {I2CController} from "@lib/i2c-bus";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {u8} from "@lib/avr8js/types";
@@ -42,6 +41,8 @@ export interface CPU {
 }
 
 export interface Timer {
+    // Returns the number of cycles per pwm period. Value of 0 indicates a pwm mode that hasnt been implimented yet
+    getPwmPeriod(): number;
 }
 
 export interface Digital {

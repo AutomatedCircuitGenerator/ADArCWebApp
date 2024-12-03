@@ -9,6 +9,7 @@
     CPU as AVRCPU,
     PinState
 } from "@lib/avr8js";
+import {TimerMode} from "@lib/avr8js/peripherals/timer";
 import {SPIByteTransferCallback} from "@lib/avr8js/peripherals/spi";
 import {I2CController} from "@lib/i2c-bus";
 import {Analog, ByteTransmitListener, ClockEvent, CPU, Digital, PinListener, SPI, Timer, TWI, USART} from "../board";
@@ -69,6 +70,19 @@ export class ArduinoTimer implements Timer {
 
     constructor(timer: AVRTimer) {
         this.timer = timer;
+    }
+
+    getPwmPeriod(): number {
+        const {timer} = this;
+        const timerMode = timer.getTimerMode();
+        let period = 0;
+
+        if (timerMode === TimerMode.FastPWM) {
+            period = ((timer.TOP + 1) * timer.getDivider());
+        } else if (timerMode === TimerMode.PWMPhaseCorrect) {
+            period = (2 * (timer.TOP + 1) * timer.getDivider());
+        }
+        return period;
     }
 }
 
