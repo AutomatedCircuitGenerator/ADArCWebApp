@@ -388,6 +388,8 @@
             //Personally, not a huge fan of this system. good place for improvement
             setupListeners();
         }
+        
+        ToastService.AddToast("Code panel updated.", Variant.Info);
 
         moverOffsetLeft = 0;
         moverOffsetTop = 0;
@@ -757,6 +759,8 @@
         {
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
+        
+        ToastService.AddToast("Code panel updated.", Variant.Info);
 
         /*int numofcon = 0;
         for (int i = 0; i < c.Count; i++)
