@@ -1,43 +1,6 @@
 ﻿@inherits RazorComponent
 
 @code {
-
-    private double _address;
-
-    [Parameter]
-    [ValueSetting("", 0, 0, 65536)]
-    public double address
-    {
-        get => _address;
-        set
-        {
-            var hasChanged = value != _address;
-            _address = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setNecAddress", _address); });
-            }
-        }
-    }
-
-    private double _command;
-
-    [Parameter]
-    [ValueSetting("", 0, 0, 65536)]
-    public double command
-    {
-        get => _command;
-        set
-        {
-            var hasChanged = value != _command;
-            _command = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setNecCommand", _command); });
-            }
-        }
-    }
-
     public static ElementPin[] pinInfo
     {
         get

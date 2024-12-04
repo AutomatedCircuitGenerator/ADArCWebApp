@@ -22,6 +22,7 @@ namespace ADArCWebApp.Shared
 		public string? nodeName;
 		public ElementPin[] pinInfo;
         public Type compType;
+        public Type? EnvironmentalSettingsType;
 
         public Dictionary<string,IComponentParameter> templateParams = new Dictionary<string,IComponentParameter>();
 		public List<string> pinsToListen = new();
@@ -38,6 +39,7 @@ namespace ADArCWebApp.Shared
 			cardScaleFactor = builder.cardScaleFactor;
 			bottomOffset = builder.bottomOffset;
 			compType = builder.compType;
+			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
 			pins = builder.pins;
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
@@ -59,19 +61,21 @@ namespace ADArCWebApp.Shared
 		public double bottomOffset;
 
 		public Type compType;
+		public Type? EnvironmentalSettingsType;
 		public Dictionary<string, int> pins = new();
 		public List<string> pinsToListen = new();
 		public string? nodeName;
 
 		public ElementPin[] pinInfo;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "") {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null) {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
 			this.paneHoverText = paneHoverText;
 			this.codeForGen = codeForGen;
 			this.compType = compType ?? typeof(InvalidComponent);
+			this.EnvironmentalSettingsType = environmentalSettingsType;
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;

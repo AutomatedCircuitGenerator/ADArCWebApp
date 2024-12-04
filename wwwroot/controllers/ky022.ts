@@ -17,15 +17,15 @@ export class KY022 extends Controller {
         this.signal.state = true;
     }
     
-    setNecCommand(message: number) {
+    setCommand(command: number) {
         this.counter = 0;
         this.pulse(9);
         this.space(4.5);
         
         this.writeByte(ADDRESS);
         this.writeByte(this.invert(ADDRESS));
-        this.writeByte(message);
-        this.writeByte(this.invert(message));
+        this.writeByte(command);
+        this.writeByte(this.invert(command));
         
         this.pulse(0.5625);
     }

@@ -1,13 +1,14 @@
 ﻿using GraphSynth.Representation;
 using System.Text.Json.Serialization;
 using ADArCWebApp.Shared.Components;
+using Microsoft.JSInterop;
 
 namespace ADArCWebApp.Shared
 {
     /// <summary>
     /// Stores actual data about a single, specific component.
     /// </summary>
-    public class ComponentInstance
+    public class ComponentInstance : IAsyncDisposable
     {
         // Note: any changes here need to be reflected in unserialized strings, like in BoardService
         [JsonIgnore] public readonly ComponentData Data;
@@ -34,6 +35,12 @@ namespace ADArCWebApp.Shared
         public int byteIndex;
         public long timer;
         public readonly Dictionary<string, IComponentParameter> CompParams = new();
+        
+        private DotNetObjectReference<ComponentInstance>? _reference;
+        public IJSObjectReference? Controller { get; set; }
+        
+        // this must be checked before setting up a controller/listeners, otherwise all the card components will create a controller
+        public bool IsCanvasComponent => ConnMap.Count > 0;
 
         public ComponentInstance(int globalId, node gsNode, double x = 829.0, double y = 219.0)
         {
@@ -49,7 +56,48 @@ namespace ADArCWebApp.Shared
             zoomedX = x;
             zoomedY = y;
             GsNode = gsNode;
+
+            if (IsCanvasComponent) return; 
+            
+            _reference = DotNetObjectReference.Create(this);
         }
+
+        public async Task LinkController(IJSRuntime js)
+        {
+            var jsIdentifier = Data.compType.Name.Replace("Razor", "");
+            // Canonical pin name: "SO", to absolute pin indexes it is connected to
+            Dictionary<string, List<int>> pins = new();
+
+            foreach (var pin in Data.pins)
+            {
+                if (ConnMap.TryGetValue(pin.Value, out var connections))
+                {
+                    //one pin on a component can be connected to many pins on the arduino
+                    var pinIds = connections.Select(connection => connection.ToId);
+
+                    pins[pin.Key] = pinIds.ToList();
+                }
+                else
+                {
+                    pins[pin.Key] = [];
+                }
+            }
+
+            Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", localId,
+                pins, _reference);
+        }
+        
+        public async ValueTask DisposeAsync()
+        {
+            if (IsCanvasComponent)
+                if (Controller is not null)
+                {
+                    await Controller.InvokeVoidAsync("delete");
+                    await Controller.DisposeAsync();
+                    _reference?.Dispose();
+                }
+        }
+        
 
         /// <summary>
         /// Transfers the property array to the format needed by DynamicComponent in VaryingComponent.razor.
@@ -66,7 +114,7 @@ namespace ADArCWebApp.Shared
 
             if (Data.compType.IsSubclassOf(typeof(RazorComponent)))
             {
-                ret.Add("ComponentInstance", this);
+                ret.Add("Controller", Controller);
             }
 
             return ret;

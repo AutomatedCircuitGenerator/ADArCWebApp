@@ -42,6 +42,16 @@
         <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
         <h2>Environmental Settings</h2>
 
+        @if (individualData.Data.EnvironmentalSettingsType != null)
+        {
+            var parameters = new Dictionary<string, object>
+            {
+                { "Controller", individualData.Controller }
+            };
+
+            <DynamicComponent Type="individualData.Data.EnvironmentalSettingsType" Parameters="parameters"/>
+        }
+
         <!-- Value Setting -->
         @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
@@ -73,7 +83,6 @@
                 </div>
             }
         }
-
         <!-- Dropdown Setting -->
         @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
@@ -99,13 +108,13 @@
             {
                 <div class="settingGroup">
                     <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
-                    <div style="display: flex; align-items: center;">
+                    <div>
                         @foreach (var prop in group)
                         {
                             var valueSetting = prop.GetCustomAttribute<ValueSetting>();
                             if (valueSetting != null)
                             {
-                                <div class="valueSetting" style="margin-left: 5px; margin-right: 5px">
+                                <div class="valueSetting" style="flex: 1;">
                                     <label style="display: block">@valueSetting.Label</label>
                                     <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
                                            min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
@@ -121,6 +130,12 @@
 </div>
 
 @code {
+
+    protected override async Task OnInitializedAsync()
+    {
+        if (individualData != null && individualData.IsCanvasComponent)
+            await individualData.LinkController(JsRuntime);
+    }
 
     /// <summary>
     /// Formats a property name for display in the environmental settings.
@@ -167,6 +182,7 @@
         {
             return "error-border";
         }
+
         if (disableBorder) return "";
         if (forceBorder)
         {
