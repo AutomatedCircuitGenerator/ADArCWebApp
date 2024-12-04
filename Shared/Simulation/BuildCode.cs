@@ -1,5 +1,4 @@
-﻿using ADArCWebApp.ComponentNamespace;
-using ADArCWebApp.Pages;
+﻿using ADArCWebApp.Pages;
 using System.Text;
 using System.Text.RegularExpressions;
 
@@ -14,7 +13,7 @@ namespace ADArCWebApp.Shared.Simulation
 		private static string includeCode()
 		{
             StringBuilder b = new StringBuilder();
-            foreach (ComponentInstance c in Pages.Index.comps.Values)
+            foreach (ComponentInstance c in Pages.Index.Comps.Values)
             {
                 b.Append(parseProvidedCode(c, "include", true));
 
@@ -34,7 +33,7 @@ namespace ADArCWebApp.Shared.Simulation
 
 
 			//insert global vars from components
-			foreach (ComponentInstance c in Pages.Index.comps.Values)
+			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
 				b.Append(parseProvidedCode(c, "global", true));
 
@@ -53,7 +52,7 @@ namespace ADArCWebApp.Shared.Simulation
 			// b.AppendLine("  }");
 
             //insert global vars from components
-            foreach (ComponentInstance c in Pages.Index.comps.Values)
+            foreach (ComponentInstance c in Pages.Index.Comps.Values)
             {
                 b.Append(parseProvidedCode(c, "setup", true));
 
@@ -70,7 +69,7 @@ namespace ADArCWebApp.Shared.Simulation
 			Dictionary<string, List<ComponentInstance>> usedTimes = new();
 
 			//setup varying delay times in global var
-			foreach (ComponentInstance c in Pages.Index.comps.Values)
+			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
 				var time = parseProvidedCode(c, "delayTime", false);
 				if (time != "" && !usedTimes.Keys.Contains(time))
@@ -88,7 +87,7 @@ namespace ADArCWebApp.Shared.Simulation
 
 
 			b.AppendLine("void loop() {");
-			foreach (ComponentInstance c in Pages.Index.comps.Values) {
+			foreach (ComponentInstance c in Pages.Index.Comps.Values) {
 				b.Append(parseProvidedCode(c, "loopMain", false));
 			}
 
@@ -121,17 +120,17 @@ namespace ADArCWebApp.Shared.Simulation
 			string prePin = "";
 			try
 			{
-				prePin = c.data.codeForGen[codeField];
+				prePin = c.Data.codeForGen[codeField];
 			}
 			catch (NullReferenceException)
 			{
-				Console.WriteLine("Warn: " + c.data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
+				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
 			}
 
 			ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
 			{
-				c.getConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-				return conn!.toId.ToString();
+				c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+				return conn!.ToId.ToString();
 			}); //2..^1 is substring from 3rd char to end-1 char. This is because the format is ~"pinName", so this extracts the pin properly.
 
 			if (ret != "")

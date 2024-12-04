@@ -8,11 +8,11 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 94, y: 168, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 86, y: 168, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "SO", x: 116, y: 168, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "CS", x: 109, y: 168, signals: new PinSignalInfo[] { }, number: 6), //chip select. pull low to enable serial interface
-                new ElementPin(name: "SCK", x: 101, y: 168, signals: new PinSignalInfo[] { }, number: 7),
+                new ElementPin(name: "VCC", x: 44, y: 181, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "GND", x: 37, y: 181, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "SO", x: 67, y: 181, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "CS", x: 60, y: 181, signals: new PinSignalInfo[] { }, number: 6), //chip select. pull low to enable serial interface
+                new ElementPin(name: "SCK", x: 52, y: 181, signals: new PinSignalInfo[] { }, number: 7),
             };
         }
     }
@@ -23,60 +23,69 @@
     [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
     public double temperature
     {
-        get => this._temperature;
+        get => _temperature;
         set
         {
-            this._temperature = value;
+            _temperature = value;
             if (Controller is not null)
             {
                 InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTemperature", _temperature); });
             }
         }
     }
-
-    // [JSInvokable]
-    // public double GetMax6675Temperature()
-    // {
-    //     return temperature;
-    // }
-
 }
 
-<svg data-bx-workspace="master" xmlns="http://www.w3.org/2000/svg" viewBox="150 100 200 260" width="40mm" height="40mm">
-    <defs>
-        <clipPath id="a">
-            <circle style="stroke:#000;fill:silver" cx="226.9" cy="160.5" r="15"/>
-        </clipPath>
-        <clipPath id="b">
-            <circle style="stroke:#000;fill:silver" cx="273" cy="160.541" r="15"/>
-        </clipPath>
-    </defs>
-    <path d="M205 179.38h90v140.048h-90zm45 20.655c-8.558 0-15.495 6.937-15.495 15.495s6.937 15.495 15.495 15.495 15.495-6.937 15.495-15.495-6.937-15.495-15.495-15.495Z" style="stroke:#000;fill:#16619d" transform="translate(0 11.988)"/>
-    <path style="fill:#16eab2;stroke:#000" d="M202.768 0h45v60h-45zm45.464 0h45v60h-45z" transform="translate(2 131.078)"/>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="205.304" y="161.651" transform="translate(4.768 48.937)">+</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="279.057" y="159.737" transform="matrix(1.86792 0 0 1.15426 -243.489 23.75)">-</text>
-    <path style="stroke:#fff;fill:transparent" d="M216.329 313.675h67.342v14.303h-67.342z"/>
-    <path style="stroke:#000;fill:#252020" d="M347 303.487h24.434v29.797H347z" transform="matrix(.67973 0 0 .72701 15.713 43.957)"/>
-    <path style="fill:silver;stroke:silver" d="M330 307.5h16v1.3h-16zm0 7.744h16v1.3h-16zm0 7.215h16v1.3h-16zm0 5.734h16v1.3h-16zm42.4-20.693h16v1.3h-16zm0 7.744h16v1.3h-16zm0 7.215h16v1.3h-16zm0 5.734h16v1.3h-16z" transform="matrix(.67973 0 0 .72701 15.713 43.957)"/>
-    <path style="paint-order:fill;stroke:#fff;fill:transparent" d="M209.104 266.834h11.919v29.582h-11.919z"/>
-    <path style="fill:silver;stroke:silver" d="M211.82 270.012h6.334v23.154h-6.334z"/>
-    <rect x="219" y="315.484" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
-    <path style="stroke:#c9a645;fill:#c9a645" d="M211.8 274.716h6.3v13.707h-6.3z"/>
-    <path style="stroke:#ccc;fill:#ccc" d="M223 320h2.641v28.413H223z"/>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:5.5px;white-space:pre" transform="rotate(-90 208.655 92.17)" x="41.329" y="100.486">HW-550</text>
-    <rect x="231.959" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
-    <rect x="245" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
-    <rect x="258" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
-    <rect x="271" y="315.5" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
-    <path style="stroke:#ccc;fill:#ccc" d="M236.645 320h2.641v28.413h-2.641zm12.231 0h2.641v28.413h-2.641zm13.775 0h2.641v28.413h-2.641zm12.541 0h2.641v28.413h-2.641z"/>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="219.929" y="311" data-bx-origin="0.482154 0.586267">GND</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="233.59" y="311" data-bx-origin="-0.918895 0.573658">VCC</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="247.042" y="311" data-bx-origin="-2.525539 0.674562">SCK</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="260.671" y="311" data-bx-origin="-6.322073 0.674562">CS</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="273.589" y="311" data-bx-origin="-9.032106 0.556843">SO</text>
-    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.6px;white-space:pre" x="47.477" y="311" transform="rotate(-90 265.846 65.048)">MAX6675</text>
-    <circle style="stroke:#000;fill:silver" cx="226.9" cy="160.5" r="15"/>
-    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#a)" d="M222.626 144.826h8.845v31.744h-8.845z"/>
-    <circle style="stroke:#000;fill:silver" cx="272.9" cy="160.5" r="15"/>
-    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#b)" d="M268.626 144.826h8.845v31.744h-8.845z"/>
+<svg xmlns="http://www.w3.org/2000/svg" width="120" height="160" viewBox="0 50 200 160">
+  <defs>
+    <clipPath id="a">
+      <circle style="stroke:#000;fill:silver" cx="170.453" cy="113.438" r="15"/>
+    </clipPath>
+    <clipPath id="b">
+      <circle style="stroke:#000;fill:silver" cx="216.553" cy="113.479" r="15"/>
+    </clipPath>
+  </defs>
+  <g transform="translate(-148.321 -44.12)">
+    <path d="M148.553 144.306h90v140.048h-90V144.306Zm45 20.655c-8.558 0-15.495 6.937-15.495 15.495s6.937 15.495 15.495 15.495 15.495-6.937 15.495-15.495-6.937-15.495-15.495-15.495Z" style="stroke:#000;fill:#16619d"/>
+    <path style="fill:#16eab2;stroke:#000" d="M148.321 84.016h45v60h-45v-60Zm45.464 0h45v60h-45v-60Z"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="153.625" y="163.526">+</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:20.9px;paint-order:stroke;white-space:pre" x="279.057" y="159.737" transform="matrix(1.86792 0 0 1.15426 -299.936 -23.312)">-</text>
+    <path style="stroke:#fff;fill:transparent" d="M159.882 266.613h67.342v14.303h-67.342v-14.303Z"/>
+    <path style="stroke:#000;fill:#252020" d="M195.133 217.533h16.608v21.663h-16.608v-21.663Z"/>
+    <path style="fill:silver;stroke:silver" d="M183.577 220.451h10.876v.945h-10.876v-.945Zm0 5.63h10.876v.945h-10.876v-.945Zm0 5.245h10.876v.945h-10.876v-.945Zm0 4.169h10.876v.945h-10.876v-.945Zm28.821-15.044h10.876v.945h-10.876v-.945Zm0 5.63h10.876v.945h-10.876v-.945Zm0 5.245h10.876v.945h-10.876v-.945Zm0 4.169h10.876v.945h-10.876v-.945Z"/>
+    <path style="paint-order:fill;stroke:#fff;fill:transparent" d="M152.657 219.772h11.919v29.582h-11.919v-29.582Z"/>
+    <path style="fill:silver;stroke:silver" d="M155.373 222.95h6.334v23.154h-6.334V222.95Z"/>
+    <rect x="162.553" y="268.422" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <path style="stroke:#c9a645;fill:#c9a645" d="M155.353 227.654h6.3v13.707h-6.3v-13.707Z"/>
+    <path style="stroke:#ccc;fill:#ccc" d="M166.553 272.938h2.641v28.413h-2.641v-28.413Z"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:5.5px;white-space:pre" transform="rotate(-90 156.9 96.862)" x="41.329" y="100.486">HW-550</text>
+    <rect x="175.512" y="268.438" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="188.553" y="268.438" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="201.553" y="268.438" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <rect x="214.553" y="268.438" width="10.481" height="10.524" style="stroke:#000" rx="2.823" ry="2.823"/>
+    <path style="stroke:#ccc;fill:#ccc" d="M180.198 272.938h2.641v28.413h-2.641v-28.413Zm12.231 0h2.641v28.413h-2.641v-28.413Zm13.775 0h2.641v28.413h-2.641v-28.413Zm12.541 0h2.641v28.413h-2.641v-28.413Z"/>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="163.482" y="263.938" data-bx-origin="0.482154 0.586267">GND</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="177.143" y="263.938" data-bx-origin="-0.918895 0.573658">VCC</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="190.595" y="263.938" data-bx-origin="-2.525539 0.674562">SCK</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="204.224" y="263.938" data-bx-origin="-6.322073 0.674562">CS</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.8px;white-space:pre" x="217.142" y="263.938" data-bx-origin="-9.032106 0.556843">SO</text>
+    <text style="fill:#fff;font-family:Arial,sans-serif;font-size:3.6px;white-space:pre" x="47.477" y="311" transform="rotate(-90 88.722 195.11)">MAX6675</text>
+    <circle style="stroke:#000;fill:silver" cx="170.453" cy="113.438" r="15"/>
+    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#a)" d="M166.179 97.764h8.845v31.744h-8.845V97.764Z"/>
+    <circle style="stroke:#000;fill:silver" cx="216.453" cy="113.438" r="15"/>
+    <path style="fill:#d8d8d8;stroke:#000;clip-path:url(#b)" d="M212.179 97.764h8.845v31.744h-8.845V97.764Z"/>
+    <g transform="matrix(0 -.07176 -.07176 0 -1235.284 -76.493)" style="transform-origin:1553.75px 266.158px">
+      <path fill="#beb7c8" d="M669.466 0h187.876v532.316H669.466z"/>
+      <path fill="#beb7c8" stroke="#9d93ac" stroke-linecap="round" stroke-width="20" d="M675.365 256.373h175.421"/>
+      <path d="M99.797 140.446h492.197v233.77H99.797L0 260.287Z" fill="#ccc"/>
+      <path fill="#dedbe3" d="M586.942 170.263h82.196v178.091h-82.196z"/>
+      <path fill="#beb7c8" stroke="#9d93ac" stroke-linecap="round" stroke-width="10" d="m130.155 385.648 9.42-258.749M153.758 385.648l9.42-258.749M177.38 385.648l9.421-258.749M201.002 385.648l9.421-258.749M224.624 385.648l9.421-258.749M248.246 385.648l9.42-258.749M271.868 385.648l9.421-258.749M295.49 385.648l9.421-258.749M319.112 385.648l9.421-258.749M342.734 385.648l9.421-258.749M366.356 385.648l9.421-258.749M389.978 385.648l9.421-258.749M413.6 385.648l9.421-258.749M437.222 385.648l9.421-258.749M460.844 385.648l9.421-258.749M484.466 385.648l9.421-258.749M508.088 385.648l9.421-258.749M531.71 385.648l9.421-258.749M555.332 385.648l9.421-258.749"/>
+      <path fill="red" stroke="#00f" stroke-linecap="round" stroke-width="10" d="M2830.048 276.391 3105 311.305"/>
+      <path fill="red" stroke="red" stroke-linecap="round" stroke-width="10" d="m2830.052 237.471 274.951-28.304"/>
+      <path fill="#1a1a1a" d="M2224.987 183.962h626.254v148.735h-626.254z"/>
+      <path d="M857.413 122.694c476.165 4.986 938.074-32.794 1392.141-94.101v476.04c-449.348-59.166-910.53-97.622-1389.374-105.172Z" fill="#4d4d4d"/>
+      <path fill="none" d="M3097.5 205.917h10v10h-10zM3097.5 306h10v10h-10z"/>
+    </g>
+    <path style="stroke:#00f;fill:transparent;stroke-linecap:round" d="M214.385 84.195c-7.794-26.926 93.111-32.008 100.905-5.082"/>
+    <path style="fill:none;stroke-linecap:round;stroke:red;stroke-width:.75px" d="M168.79 83.389s66.275-84.699 153.678-5.314"/>
+  </g>
 </svg>

@@ -11,6 +11,12 @@
     public bool resetPressed { get; set; } = false;
 
     private string resetStroke = "#777";
+    
+    [Parameter]
+    public string Width { get; set; } = "72.58mm"; // Default width
+    
+    [Parameter]
+    public string Height { get; set; } = "53.34mm"; // Default height
 
     public static ElementPin[] pinInfo
     {
@@ -89,8 +95,8 @@
 
 
 
-<svg width="72.58mm"
-     height="53.34mm"
+<svg width="@Width"
+     height="@Height"
      version="1.1"
      viewBox="-4 0 72.58 53.34"
      xmlns="http://www.w3.org/2000/svg">

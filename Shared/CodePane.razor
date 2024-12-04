@@ -43,15 +43,15 @@
 
 @code {
 
-    private string lockIcon = "🔓";
-    private string lockText = "Unlocked";
+    private string lockIcon = "🔒";
+    private string lockText = "Follow Latest Messages";
     private bool isLocked = false;
 
     private async void ToggleScrollLock()
     {
         isLocked = !isLocked;
-        lockIcon = isLocked ? "🔒" : "🔓";
-        lockText = isLocked ? "Locked" : "Unlocked";
+        lockIcon = isLocked ? "🔓" : "🔒";
+        lockText = isLocked ? "Scroll Freely" : "Follow Latest Messages";
 
         await JSRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
     }
@@ -89,13 +89,19 @@
                     "void loop() {\n" +
                     "// put your main code here, to run repeatedly:\n\n" +
                     "}",
+            TabSize = 2,
+            InsertSpaces = true,
+            DetectIndentation = true,
+            TrimAutoWhitespace = true,
+            WordBasedSuggestions = true,
+            WordBasedSuggestionsOnlySameLanguage = true,
             Minimap = new EditorMinimapOptions() { Enabled = false }
         };
     }
 
     public CodePane()
     {
-        Pages.Index.codePane = this;
+        Pages.Index.CodePane = this;
     }
 
     /// <summary>

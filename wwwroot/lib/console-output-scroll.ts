@@ -6,7 +6,7 @@ const config: MutationObserverInit = {childList: true};
 const callback = function (mutationsList: MutationRecord[]) {
     const targetNode: HTMLElement | null = document.getElementById('console-container');
     if (!targetNode) {
-        console.log("console-container does not exist for some reason");
+        console.warn("console-container does not exist for some reason");
         return;
     }
     for (const mutation of mutationsList) {

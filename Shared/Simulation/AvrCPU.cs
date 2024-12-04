@@ -38,7 +38,7 @@ namespace ADArCWebApp.Shared.Simulation
 				//bitshift magic to check if a pin has changed.
 				if ((((1 << i) & oldMask) ^ ((1 << i) & maskable)) > 0) {
 					updateComponents(i, currCycles);
-                    Pages.Index.app!.triggerRender();
+                    Pages.Index.App!.TriggerRender();
                 }
 			}
 		}
@@ -79,7 +79,7 @@ namespace ADArCWebApp.Shared.Simulation
 		/// <param name="index">the absolute pin index to get the state of.</param>
 		/// <returns>true if the pin is high, else false.</returns>
 		public static async Task<bool> getPinState(int index) {
-			return await AppInterop.getPinValue(index);
+			return await AppInterop.GetPinValue(index);
 		}
 		
 		/// <summary>
@@ -132,7 +132,7 @@ namespace ADArCWebApp.Shared.Simulation
 
 			//appinterop
 			//dont update components, bad for important performance
-			AppInterop.sendIntructionsToArduino(new (originCycle, new PinInstruction(index, state, 0)));//do it now
+			AppInterop.SendInstructionsToArduino(new (originCycle, new PinInstruction(index, state, 0)));//do it now
 
 		}
 	}

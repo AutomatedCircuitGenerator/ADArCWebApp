@@ -1,184 +1,217 @@
-﻿using ADArCWebApp.ComponentNamespace;
-using GraphSynth.Representation;
-using System.Numerics;
-using System.Text.Json;
+﻿using GraphSynth.Representation;
 using System.Text.Json.Serialization;
 using ADArCWebApp.Shared.Components;
+using Microsoft.JSInterop;
 
 namespace ADArCWebApp.Shared
 {
-	/// <summary>
-	/// Stores actual data about a single, specific component.
-	/// </summary>
-	public class ComponentInstance
-	{
-		[JsonIgnore] public ComponentData data;
+    /// <summary>
+    /// Stores actual data about a single, specific component.
+    /// </summary>
+    public class ComponentInstance : IAsyncDisposable
+    {
+        // Note: any changes here need to be reflected in unserialized strings, like in BoardService
+        [JsonIgnore] public readonly ComponentData Data;
 
-		public int localId { get; set; }
+        public int localId { get; set; }
 
-		public int globalId;
-		public double x;
-		public double y;
+        public readonly int GlobalId;
+        public double X;
+        public double Y;
+        
+        public Variant? Highlight {get; set;}
 
-		public double zoomedX;
-		public double zoomedY;
+        public double zoomedX;
+        public double zoomedY;
 
-		[JsonIgnore]public Dictionary<int, List<InstanceConnection>> connMap = new(); //this.pinId -> connection
-		[JsonIgnore]public node gsNode;
-		public int midSignal;
-		public int counter;
-		public int Wbuffer;
-		public int RegAddr;
-		public int byteIndex;
-		public long timer;
-		public Dictionary<string, IComponentParameter> compParams = new();
+        [JsonIgnore]
+        public readonly Dictionary<int, List<InstanceConnection>> ConnMap = new(); //this.pinId -> connection
 
-		public ComponentInstance(int globalId, node gsNode, double x = 10.0, double y = 10.0) {
-			this.globalId = globalId;
-			data = ComponentDeclarations.components[globalId];
-            foreach (var kv in data.templateParams)
+        [JsonIgnore] public node GsNode;
+        public int midSignal;
+        public int counter;
+        public int Wbuffer;
+        public int RegAddr;
+        public int byteIndex;
+        public long timer;
+        public readonly Dictionary<string, IComponentParameter> CompParams = new();
+        
+        private DotNetObjectReference<ComponentInstance>? _reference;
+        public IJSObjectReference? Controller { get; set; }
+        
+        // this must be checked before setting up a controller/listeners, otherwise all the card components will create a controller
+        public bool IsCanvasComponent => ConnMap.Count > 0;
+
+        public ComponentInstance(int globalId, node gsNode, double x = 829.0, double y = 219.0)
+        {
+            GlobalId = globalId;
+            Data = ComponentDeclarations.Components[globalId];
+            foreach (var kv in Data.templateParams)
             {
-				compParams.Add(kv.Key, kv.Value.copy());
+                CompParams.Add(kv.Key, kv.Value.Copy());
             }
-            this.x = x;
-			this.y = y;
-			zoomedX = x;
-			zoomedY = y;
-			this.gsNode = gsNode;
-		}
-		/// <summary>
-		/// Transfers the property array to the format needed by DynamicComponent in VaryingComponent.razor.
-		/// </summary>
-		/// <returns>The property dictionary as <string, object>.</returns>
-		public Dictionary<string, object> getPropsAsParams() {
-			Dictionary<string, object> ret = [];
 
-			foreach (var kv in compParams) { 
-				ret.Add(kv.Key, kv.Value.getValue());
-			}
+            X = x;
+            Y = y;
+            zoomedX = x;
+            zoomedY = y;
+            GsNode = gsNode;
 
-			if (data.compType.IsSubclassOf(typeof(RazorComponent)))
-			{
-				ret.Add("ComponentInstance", this);
-			}
+            if (IsCanvasComponent) return; 
+            
+            _reference = DotNetObjectReference.Create(this);
+        }
 
-			return ret;
-		}
+        public async Task LinkController(IJSRuntime js)
+        {
+            var jsIdentifier = Data.compType.Name.Replace("Razor", "");
+            // Canonical pin name: "SO", to absolute pin indexes it is connected to
+            Dictionary<string, List<int>> pins = new();
 
-		private static Dictionary<string, string> colorMap = new()
-		{
-			{ "BK", "black" },
-			{ "RD", "red"},
-			{ "LB", "lightblue"},
-			{ "DB", "#000435"},
-			{ "GN", "green"},
-			{ "VT", "violet"},
-			{ "OG", "orange"}
-		};
+            foreach (var pin in Data.pins)
+            {
+                if (ConnMap.TryGetValue(pin.Value, out var connections))
+                {
+                    //one pin on a component can be connected to many pins on the arduino
+                    var pinIds = connections.Select(connection => connection.ToId);
 
-		/// <summary>
-		/// Creates visual lines and sets up the connection map for this component.
-		/// </summary>
-		/// <param name="i1">my localId.</param>
-		/// <param name="to">the component to connect to to.</param>
-		/// <param name="i2">the localID of to.</param>
-		/// <param name="arc">the Graphsynth arc between the two components.</param>
-		public void addConnection(int i1, ComponentInstance to, int i2, arc arc) {
-			InstanceConnection toAdd = new(this, i1, i2, to, colorMap[arc.localLabels.Find(colorMap.ContainsKey) ?? "BK"]);
+                    pins[pin.Key] = pinIds.ToList();
+                }
+                else
+                {
+                    pins[pin.Key] = [];
+                }
+            }
 
-			if (connMap.ContainsKey(i1)) {
+            Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", localId,
+                pins, _reference);
+        }
+        
+        public async ValueTask DisposeAsync()
+        {
+            if (IsCanvasComponent)
+                if (Controller is not null)
+                {
+                    await Controller.InvokeVoidAsync("delete");
+                    await Controller.DisposeAsync();
+                    _reference?.Dispose();
+                }
+        }
+        
 
-				if (globalId != 1)
-				{
-					if (connMap[i1].Contains(toAdd)) {
-						Console.WriteLine("Connection already exists from " + data.name + " pin " + i1 + " to external pin id " + i2 + ". Ignoring...");
-						return;
-					}
-					Console.WriteLine("WARNING: Pin list extended for " + data.name + " component. This is probably an error!");
-				}
-				connMap[i1].Add(toAdd);
+        /// <summary>
+        /// Transfers the property array to the format needed by DynamicComponent in VaryingComponent.razor.
+        /// </summary>
+        /// <returns>The property dictionary as <string, object>.</returns>
+        public Dictionary<string, object?> GetPropsAsParams()
+        {
+            Dictionary<string, object?> ret = [];
 
-				if (globalId != 1)
-				{
-					Pages.Index.buildCanvas!.connLines.Add(toAdd);
+            foreach (var kv in CompParams)
+            {
+                ret.Add(kv.Key, kv.Value.GetValue());
+            }
 
-				}
-			}
-			else
-			{
-				connMap[i1] = new() { toAdd };
+            if (Data.compType.IsSubclassOf(typeof(RazorComponent)))
+            {
+                ret.Add("Controller", Controller);
+            }
 
-				if (globalId != 1)
-				{
-					Pages.Index.buildCanvas!.connLines.Add(toAdd);
+            return ret;
+        }
 
-				}
-			}
-		}
+        private static readonly Dictionary<string, string> ColorMap = new()
+        {
+            { "BK", "black" },
+            { "RD", "red" },
+            { "LB", "lightblue" },
+            { "DB", "#000435" },
+            { "GN", "green" },
+            { "VT", "violet" },
+            { "OG", "orange" }
+        };
 
-		/// <summary>
-		/// Gets the pin id of the (Arduino?) pin connected to the given pin name.
-		/// </summary>
-		/// <param name="pinName">the name of the pin to get a connection of.</param>
-		/// <param name="conn">a place to store a connection if there is exactly one.</param>
-		/// <param name="all">A place to store connections if there are more than one.</param>
-		/// <returns>-1 if unconnected, 0 if exactly one connection, 1 if more than 1.</returns>
-		public int getConnection(string pinName, out InstanceConnection? conn, out List<InstanceConnection>? all) {
-			var conns = connMap[data.pins[pinName]];
+        /// <summary>
+        /// Creates visual lines and sets up the connection map for this component.
+        /// </summary>
+        /// <param name="i1">my localId.</param>
+        /// <param name="to">the component to connect to.</param>
+        /// <param name="i2">the localID of to.</param>
+        /// <param name="arc">the Graphsynth arc between the two components.</param>
+        public void AddConnection(int i1, ComponentInstance to, int i2, arc arc)
+        {
+            InstanceConnection toAdd = new(this, i1, i2, to,
+                ColorMap[arc.localLabels.Find(ColorMap.ContainsKey) ?? "BK"]);
 
-			if (conns == null)
-			{
-				conn = null;
-				all = null;
-				return -1;
-			}
-			else if (conns.Count == 1)
-			{
-				conn = conns[0];
-				all = null;
-				return 0;
-			}
-			else {
-				conn = null;
-				all = conns;
-				return 1;
-			}
-		}
-	}
+            if (ConnMap.TryGetValue(i1, out List<InstanceConnection>? value))
+            {
+                if (!IsArduino())
+                {
+                    if (value.Contains(toAdd))
+                    {
+                        Console.WriteLine("Connection already exists from " + Data.name + " pin " + i1 +
+                                          " to external pin id " + i2 + ". Ignoring...");
+                        return;
+                    }
+
+                    Console.WriteLine("WARNING: Pin list extended for " + Data.name +
+                                      " component. This is probably an error!");
+                }
+
+                value.Add(toAdd);
+            }
+            else
+            {
+                ConnMap[i1] = [toAdd];
+            }
+
+            if (!IsArduino())
+            {
+                Pages.Index.BuildCanvas!.ConnLines.Add(toAdd);
+            }
+        }
+
+        /// <summary>
+        /// Gets the pin id of the (Arduino?) pin connected to the given pin name.
+        /// </summary>
+        /// <param name="pinName">the name of the pin to get a connection of.</param>
+        /// <param name="conn">a place to store a connection if there is exactly one.</param>
+        /// <param name="all">A place to store connections if there are more than one.</param>
+        /// <returns>-1 if unconnected, 0 if exactly one connection, 1 if more than 1.</returns>
+        public int GetConnection(string pinName, out InstanceConnection? conn, out List<InstanceConnection>? all)
+        {
+            var instanceConnections = ConnMap[Data.pins[pinName]];
+
+            if (instanceConnections.Count == 1)
+            {
+                conn = instanceConnections[0];
+                all = null;
+                return 0;
+            }
+
+            conn = null;
+            all = instanceConnections;
+            return 1;
+        }
+
+        public bool IsArduino()
+        {
+            return GlobalId is 1 or 2;
+        }
+    }
 
 
-	public class InstanceConnection {
+    public class InstanceConnection(ComponentInstance from, int fromId, int toId, ComponentInstance to, string color)
+    {
+        public readonly ComponentInstance From = from;
+        public readonly int FromId = fromId;
+        public readonly int ToId = toId;
+        public readonly ComponentInstance To = to;
+        public readonly string Color = color;
 
-		public ComponentInstance from;
-		public int fromId;
-		public int toId;
-		public ComponentInstance to;
-		public string color;
-
-		public InstanceConnection(ComponentInstance from, int fromId, int toId, ComponentInstance to, string color) { 
-			this.from = from;
-			this.fromId = fromId;
-			this.to = to;
-			this.toId = toId;
-			this.color = color;
-		}
-
-
-		public override bool Equals(object? obj)
-		{
-			if (obj is not InstanceConnection c)
-			{
-				return false;
-			}
-			else if (c == null)
-			{
-				return false;
-			}
-			else { 
-				return from.Equals(c.from) && to.Equals(c.to) & fromId == c.fromId && toId == c.toId;
-			}
-		}
-	}
-
-
+        protected bool Equals(InstanceConnection other)
+        {
+            return From.Equals(other.From) && FromId == other.FromId && ToId == other.ToId && To.Equals(other.To);
+        }
+    }
 }

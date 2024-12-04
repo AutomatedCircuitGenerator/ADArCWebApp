@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     var desc = Object.getOwnPropertyDescriptor(m, k);
@@ -20,6 +11,15 @@ var __createBinding = (this && this.__createBinding) || (Object.create ? (functi
 }));
 var __exportStar = (this && this.__exportStar) || function(m, exports) {
     for (var p in m) if (p !== "default" && !Object.prototype.hasOwnProperty.call(exports, p)) __createBinding(exports, m, p);
+};
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
 define("lib/TimingPacket", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -438,7 +438,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_386": "Adafruit MPL3115A2 Library",
         "placeholder_387": "Adafruit MPR121",
         "placeholder_388": "Adafruit MPRLS Library",
-        "placeholder_389": "Adafruit MPU6050",
+        "Adafruit_MPU6050.h": "Adafruit MPU6050",
         "placeholder_390": "Adafruit MQTT Library",
         "placeholder_391": "Adafruit MS8607",
         "placeholder_392": "Adafruit MSA301",
@@ -2999,7 +2999,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_2947": "IRProxSensor",
         "placeholder_2948": "IRRemoteControl",
         "placeholder_2949": "IRRemoteESP32",
-        "placeholder_2950": "IRremote",
+        "IRremote.hpp": "IRremote",
         "placeholder_2951": "IRremoteESP8266",
         "placeholder_2952": "IRsmallDecoder",
         "placeholder_2953": "IS31FL3729_LED_Matrix",
@@ -7392,77 +7392,6 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_7340": "zlib_turbo",
     };
 });
-define("lib/compile-util", ["require", "exports", "lib/library_dictionary"], function (require, exports, library_dictionary_1) {
-    "use strict";
-    Object.defineProperty(exports, "__esModule", { value: true });
-    exports.buildHex = exports.loadHex = void 0;
-    function loadHex(source, target) {
-        for (const line of source.split('\n')) {
-            if (line[0] === ':' && line.substr(7, 2) === '00') {
-                const bytes = parseInt(line.substr(1, 2), 16);
-                const addr = parseInt(line.substr(3, 4), 16);
-                for (let i = 0; i < bytes; i++) {
-                    target[addr + i] = parseInt(line.substr(9 + i * 2, 2), 16);
-                }
-            }
-        }
-    }
-    exports.loadHex = loadHex;
-    const url = 'https://hexi.wokwi.com';
-    function buildHex(source) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
-            const renameInclude = include.map(lib => library_dictionary_1.library[lib]).filter(lib => lib !== undefined);
-            let listString = "";
-            listString += renameInclude.join("\n") + "\n";
-            const resp = yield fetch(url + '/build', {
-                method: 'POST',
-                mode: 'cors',
-                cache: 'no-cache',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify({ files: [{
-                            name: "libraries.txt",
-                            content: listString
-                        }], sketch: source })
-            });
-            return (yield resp.json());
-        });
-    }
-    exports.buildHex = buildHex;
-});
-let observer;
-let isObserving = false;
-const config = { childList: true };
-const callback = function (mutationsList) {
-    const targetNode = document.getElementById('console-container');
-    if (!targetNode) {
-        console.log("console-container does not exist for some reason");
-        return;
-    }
-    for (const mutation of mutationsList) {
-        if (mutation.type === 'childList') {
-            targetNode.scrollTop = targetNode.scrollHeight;
-        }
-    }
-};
-function toggleConsoleOutputBehavior() {
-    const targetNode = document.getElementById('console-container');
-    if (!targetNode) {
-        return;
-    }
-    if (isObserving) {
-        observer.disconnect();
-    }
-    else {
-        observer = new MutationObserver(callback);
-        if (targetNode) {
-            observer.observe(targetNode, config);
-        }
-    }
-    isObserving = !isObserving;
-}
 define("lib/avr8js/types", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -9313,7 +9242,7 @@ define("lib/avr8js/peripherals/spi", ["require", "exports"], function (require, 
 define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/peripherals/gpio"], function (require, exports, gpio_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRTimer = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
+    exports.AVRTimer = exports.TimerMode = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
     const timer01Dividers = {
         0: 0,
         1: 1,
@@ -9359,7 +9288,7 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
         TimerMode[TimerMode["FastPWM"] = 3] = "FastPWM";
         TimerMode[TimerMode["PWMPhaseFrequencyCorrect"] = 4] = "PWMPhaseFrequencyCorrect";
         TimerMode[TimerMode["Reserved"] = 5] = "Reserved";
-    })(TimerMode || (TimerMode = {}));
+    })(TimerMode || (exports.TimerMode = TimerMode = {}));
     var TOVUpdateMode;
     (function (TOVUpdateMode) {
         TOVUpdateMode[TOVUpdateMode["Max"] = 0] = "Max";
@@ -9662,6 +9591,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
             this.countingUp = false;
             this.updateDivider = true;
         }
+        getDivider() {
+            return this.config.dividers[this.CS];
+        }
         get TCCRA() {
             return this.cpu.data[this.config.TCCRA];
         }
@@ -9687,6 +9619,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
                 default:
                     return this.topValue;
             }
+        }
+        getTimerMode() {
+            return this.timerMode;
         }
         get ocrMask() {
             switch (this.topValue) {
@@ -10600,110 +10535,220 @@ define("lib/avr8js/index", ["require", "exports", "lib/avr8js/cpu/cpu", "lib/avr
     Object.defineProperty(exports, "AVRWatchdog", { enumerable: true, get: function () { return watchdog_1.AVRWatchdog; } });
     Object.defineProperty(exports, "watchdogConfig", { enumerable: true, get: function () { return watchdog_1.watchdogConfig; } });
 });
-define("controllers/pin", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
+define("boards/board", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Pin = exports.Port = void 0;
-    var Port;
-    (function (Port) {
-        Port["B"] = "B";
-        Port["C"] = "C";
-        Port["D"] = "D";
-        Port["Null"] = "Null";
-    })(Port || (exports.Port = Port = {}));
-    class Pin {
-        get portMap() {
-            return {
-                [Port.B]: execute_1.AVRRunner.getInstance().portB,
-                [Port.C]: execute_1.AVRRunner.getInstance().portC,
-                [Port.D]: execute_1.AVRRunner.getInstance().portD,
-                [Port.Null]: null,
-            };
-        }
-        constructor(index, port) {
-            this.listener = () => {
-            };
-            this.index = index;
-            this.port = port;
-        }
-        setup() {
-            var _a, _b;
-            this.state = (_a = this.portMap[this.port]) === null || _a === void 0 ? void 0 : _a.pinState(this.index);
-            (_b = this.portMap[this.port]) === null || _b === void 0 ? void 0 : _b.addListener(() => {
-                let state = this.portMap[this.port].pinState(this.index);
-                if (state !== this.state) {
-                    this.listener(state);
-                }
-                this.state = state;
-            });
-            this.isAnalog = this.port == Port.C;
-        }
-        getState() {
-            return this.state;
-        }
-        setState(state) {
-            this.portMap[this.port].setPin(this.index, state);
-        }
-        getAdcVoltage() {
-            if (!this.isAnalog) {
-                throw new Error("Tried to get analog voltage on a non analog port!");
-            }
-            return execute_1.AVRRunner.getInstance().adc.channelValues[this.index];
-        }
-        setAdcVoltage(voltage) {
-            if (!this.isAnalog) {
-                throw new Error("Tried to set analog voltage on a non analog port!");
-            }
-            execute_1.AVRRunner.getInstance().adc.channelValues[this.index] = voltage;
-        }
-        setListener(listener) {
-            this.listener = listener;
-        }
-    }
-    exports.Pin = Pin;
 });
-define("controllers/controller", ["require", "exports", "lib/execute", "controllers/pin"], function (require, exports, execute_2, pin_1) {
+define("controllers/controller", ["require", "exports", "lib/execute"], function (require, exports, execute_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Controller = void 0;
     class Controller {
         constructor() {
-            execute_2.AVRRunner.getInstance().addController(this);
+            this.pins = {};
+            execute_1.AVRRunner.getInstance().addController(this);
         }
         delete() {
-            execute_2.AVRRunner.getInstance().removeController(this);
+            execute_1.AVRRunner.getInstance().removeController(this);
         }
-        cleanup() { }
+        cleanup() {
+        }
         ;
         init() {
-            this.setup();
-            for (const pins of Object.values(this.pins)) {
-                pins.forEach((pin) => pin.setup());
+            for (const [canonicalPinName, indices] of Object.entries(this.pinIndices)) {
+                this.pins[canonicalPinName] = indices.map(index => execute_1.AVRRunner.getInstance().board.pins[index]);
             }
+            this.setup();
         }
         static create(id, pins, component) {
             const instance = new this();
             instance.element = document.getElementById(`component-${id}`);
-            const pinItems = {};
-            for (const canonicalPinName in pins) {
-                pinItems[canonicalPinName] = pins[canonicalPinName].map(serializedPin => (new pin_1.Pin(serializedPin.item3, serializedPin.item2)));
-            }
-            instance.pins = pinItems;
+            instance.pinIndices = pins;
             instance.component = component;
             return instance;
+        }
+        sleep(cycles) {
+            return new Promise(resolve => {
+                execute_1.AVRRunner.getInstance().board.cpu.addClockEvent(() => resolve(void 0), cycles);
+            });
         }
     }
     exports.Controller = Controller;
 });
-define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-util"], function (require, exports, index_1, compile_util_1) {
+define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index", "lib/avr8js/peripherals/timer"], function (require, exports, avr8js_1, timer_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRRunner = void 0;
-    const FLASH = 0x8000;
+    exports.ArduinoAnalog = exports.ArduinoDigital = exports.ArduinoUSART = exports.ArduinoTWI = exports.ArduinoTimer = exports.ArduinoSPI = exports.ArduinoCPU = exports.MHZ = void 0;
+    exports.MHZ = 16e6;
+    class ArduinoCPU {
+        constructor(cpu) {
+            this.cpu = cpu;
+        }
+        clock() {
+            (0, avr8js_1.avrInstruction)(this.cpu);
+            this.cpu.tick();
+        }
+        get cycles() {
+            return this.cpu.cycles;
+        }
+        get frequency() {
+            return exports.MHZ;
+        }
+        addClockEvent(callback, cycles) {
+            this.cpu.addClockEvent(callback, cycles);
+        }
+    }
+    exports.ArduinoCPU = ArduinoCPU;
+    class ArduinoSPI {
+        constructor(spi) {
+            this.spi = spi;
+        }
+        addListener(listener) {
+            this.spi.addListener(listener);
+        }
+        removeListener(listener) {
+            this.spi.removeListener(listener);
+        }
+        completeTransfer(receivedByte) {
+            this.spi.completeTransfer(receivedByte);
+        }
+        get transferCycles() {
+            return this.spi.transferCycles;
+        }
+    }
+    exports.ArduinoSPI = ArduinoSPI;
+    class ArduinoTimer {
+        constructor(timer) {
+            this.timer = timer;
+        }
+        getPwmPeriod() {
+            const { timer } = this;
+            const timerMode = timer.getTimerMode();
+            let period = 0;
+            if (timerMode === timer_2.TimerMode.FastPWM) {
+                period = ((timer.TOP + 1) * timer.getDivider());
+            }
+            else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
+                period = (2 * (timer.TOP + 1) * timer.getDivider());
+            }
+            return period;
+        }
+    }
+    exports.ArduinoTimer = ArduinoTimer;
+    class ArduinoTWI {
+        constructor(twi) {
+            this.twi = twi;
+        }
+        registerController(addr, device) {
+            this.twi.eventHandler.registerController(addr, device);
+        }
+    }
+    exports.ArduinoTWI = ArduinoTWI;
+    class ArduinoUSART {
+        constructor(usart) {
+            this.usart = usart;
+        }
+        set onByteTransmit(listener) {
+            this.usart.onByteTransmit = listener;
+        }
+        writeByte(value, immediate = false) {
+            return this.usart.writeByte(value, immediate);
+        }
+    }
+    exports.ArduinoUSART = ArduinoUSART;
+    class ArduinoDigital {
+        get state() {
+            return this.port.pinState(this.index);
+        }
+        addListener(listener) {
+            this.port.addListener(() => {
+                let state = this.port.pinState(this.index);
+                if (state !== this.previousState) {
+                    listener(state);
+                }
+                this.previousState = state;
+            });
+        }
+        set state(state) {
+            this.port.setPin(this.index, state);
+        }
+        constructor(port, index) {
+            this.port = port;
+            this.index = index;
+        }
+    }
+    exports.ArduinoDigital = ArduinoDigital;
+    class ArduinoAnalog {
+        get voltage() {
+            return this.adc.channelValues[this.channel];
+        }
+        set voltage(voltage) {
+            this.adc.channelValues[this.channel] = voltage;
+        }
+        constructor(adc, channel) {
+            this.adc = adc;
+            this.channel = channel;
+        }
+    }
+    exports.ArduinoAnalog = ArduinoAnalog;
+});
+define("boards/arduino/arduino-uno/arduino-uno", ["require", "exports", "lib/avr8js/index", "boards/arduino/arduino"], function (require, exports, avr8js_2, arduino_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ArduinoUno = void 0;
+    class ArduinoUno {
+        constructor(program) {
+            const avrCPU = new avr8js_2.CPU(program);
+            const adc = new avr8js_2.AVRADC(avrCPU, avr8js_2.adcConfig);
+            const portB = new avr8js_2.AVRIOPort(avrCPU, avr8js_2.portBConfig);
+            const portC = new avr8js_2.AVRIOPort(avrCPU, avr8js_2.portCConfig);
+            const portD = new avr8js_2.AVRIOPort(avrCPU, avr8js_2.portDConfig);
+            this.cpu = new arduino_1.ArduinoCPU(avrCPU);
+            this.spis = [new arduino_1.ArduinoSPI(new avr8js_2.AVRSPI(avrCPU, avr8js_2.spiConfig, arduino_1.MHZ))];
+            this.timers = [new arduino_1.ArduinoTimer(new avr8js_2.AVRTimer(avrCPU, avr8js_2.timer0Config)),
+                new arduino_1.ArduinoTimer(new avr8js_2.AVRTimer(avrCPU, avr8js_2.timer1Config)),
+                new arduino_1.ArduinoTimer(new avr8js_2.AVRTimer(avrCPU, avr8js_2.timer2Config))];
+            this.twis = [new arduino_1.ArduinoTWI(new avr8js_2.AVRTWI(avrCPU, avr8js_2.twiConfig, arduino_1.MHZ))];
+            this.usarts = [new arduino_1.ArduinoUSART(new avr8js_2.AVRUSART(avrCPU, avr8js_2.usart0Config, arduino_1.MHZ))];
+            this.pins = [
+                { digital: new arduino_1.ArduinoDigital(portD, 0), usart: this.usarts[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 1), usart: this.usarts[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 2) },
+                { digital: new arduino_1.ArduinoDigital(portD, 3), timer: this.timers[2] },
+                { digital: new arduino_1.ArduinoDigital(portD, 4) },
+                { digital: new arduino_1.ArduinoDigital(portD, 5), timer: this.timers[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 6), timer: this.timers[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 7) },
+                { digital: new arduino_1.ArduinoDigital(portB, 0) },
+                { digital: new arduino_1.ArduinoDigital(portB, 1), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 2), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 3), timer: this.timers[2] },
+                { digital: new arduino_1.ArduinoDigital(portB, 4) },
+                { digital: new arduino_1.ArduinoDigital(portB, 5) },
+                { analog: new arduino_1.ArduinoAnalog(adc, 0), digital: new arduino_1.ArduinoDigital(portC, 0) },
+                { analog: new arduino_1.ArduinoAnalog(adc, 1), digital: new arduino_1.ArduinoDigital(portC, 1) },
+                { analog: new arduino_1.ArduinoAnalog(adc, 2), digital: new arduino_1.ArduinoDigital(portC, 2) },
+                { analog: new arduino_1.ArduinoAnalog(adc, 3), digital: new arduino_1.ArduinoDigital(portC, 3) },
+                { analog: new arduino_1.ArduinoAnalog(adc, 4), digital: new arduino_1.ArduinoDigital(portC, 4), twi: this.twis[0] },
+                { analog: new arduino_1.ArduinoAnalog(adc, 5), digital: new arduino_1.ArduinoDigital(portC, 5), twi: this.twis[0] },
+            ];
+        }
+    }
+    exports.ArduinoUno = ArduinoUno;
+    ArduinoUno.FLASH = 0x8000;
+});
+define("lib/execute", ["require", "exports", "lib/compile-util", "boards/arduino/arduino-uno/arduino-uno"], function (require, exports, compile_util_1, arduino_uno_1) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.AVRRunner = exports.BoardType = void 0;
+    var BoardType;
+    (function (BoardType) {
+        BoardType[BoardType["ArduinoUno"] = 0] = "ArduinoUno";
+        BoardType[BoardType["ArduinoMega"] = 1] = "ArduinoMega";
+    })(BoardType || (exports.BoardType = BoardType = {}));
     class AVRRunner {
         constructor() {
-            this.program = new Uint16Array(FLASH);
-            this.MHZ = 16e6;
+            this.boardConstructor = arduino_uno_1.ArduinoUno;
             this.instructions = [];
             this.pausedOn = [];
             this.stopped = false;
@@ -10723,18 +10768,9 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
         }
         loadProgram(hex) {
             return __awaiter(this, void 0, void 0, function* () {
-                (0, compile_util_1.loadHex)(hex, new Uint8Array(this.program.buffer));
-                this.cpu = new index_1.CPU(this.program);
-                this.timer0 = new index_1.AVRTimer(this.cpu, index_1.timer0Config);
-                this.timer1 = new index_1.AVRTimer(this.cpu, index_1.timer1Config);
-                this.timer2 = new index_1.AVRTimer(this.cpu, index_1.timer2Config);
-                this.portB = new index_1.AVRIOPort(this.cpu, index_1.portBConfig);
-                this.portC = new index_1.AVRIOPort(this.cpu, index_1.portCConfig);
-                this.portD = new index_1.AVRIOPort(this.cpu, index_1.portDConfig);
-                this.usart = new index_1.AVRUSART(this.cpu, index_1.usart0Config, this.MHZ);
-                this.twi = new index_1.AVRTWI(this.cpu, index_1.twiConfig, this.MHZ);
-                this.adc = new index_1.AVRADC(this.cpu, index_1.adcConfig);
-                this.spi = new index_1.AVRSPI(this.cpu, index_1.spiConfig, this.MHZ);
+                const program = new Uint16Array(this.boardConstructor.FLASH);
+                (0, compile_util_1.loadHex)(hex, new Uint8Array(program.buffer));
+                this.board = new this.boardConstructor(program);
                 for (const controller of this.controllers) {
                     controller.init();
                 }
@@ -10745,34 +10781,13 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                 this.stopped = false;
                 for (;;) {
                     if (this.pausedOn.length == 0) {
-                        (0, index_1.avrInstruction)(this.cpu);
-                        this.cpu.tick();
+                        this.board.cpu.clock();
                     }
                     else {
                         yield new Promise(resolve => setTimeout(resolve, 0));
                     }
-                    let markDel = [];
-                    this.instructions.forEach(t => {
-                        var next = t.instructions[0];
-                        if (this.cpu.cycles >= t.originCycle + next.cyclesSinceOrigin) {
-                            t.instructions.shift();
-                            if (t.instructions.length === 0) {
-                                markDel.push(t);
-                            }
-                            if (next.pin < 8) {
-                                this.portD.setPin(next.pin, next.isOn);
-                            }
-                            else if (next.pin < 14) {
-                                this.portB.setPin(next.pin - 8, next.isOn);
-                            }
-                            else if (next.pin < 20) {
-                                this.portC.setPin(next.pin - 14, next.isOn);
-                            }
-                        }
-                    });
-                    this.instructions = this.instructions.filter(i => !markDel.includes(i));
-                    if (this.cpu.cycles % 50000 === 0) {
-                        callback(this.cpu);
+                    if (this.board.cpu.cycles % 50000 === 0) {
+                        callback(this.board.cpu);
                         yield new Promise(resolve => setTimeout(resolve, 0));
                         if (this.stopped) {
                             break;
@@ -10787,10 +10802,89 @@ define("lib/execute", ["require", "exports", "lib/avr8js/index", "lib/compile-ut
                 controller.cleanup();
             }
         }
+        usToCycles(us) {
+            if (!(this.board.cpu.frequency > 0)) {
+                throw new Error("Board does not have a frequency. This should never happen");
+            }
+            return us * this.board.cpu.frequency / 1e6;
+        }
     }
     exports.AVRRunner = AVRRunner;
     AVRRunner._instance = null;
 });
+define("lib/compile-util", ["require", "exports", "lib/library_dictionary", "lib/execute", "boards/arduino/arduino-uno/arduino-uno"], function (require, exports, library_dictionary_1, execute_2, arduino_uno_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.buildHex = exports.loadHex = void 0;
+    function loadHex(source, target) {
+        for (const line of source.split('\n')) {
+            if (line[0] === ':' && line.substr(7, 2) === '00') {
+                const bytes = parseInt(line.substr(1, 2), 16);
+                const addr = parseInt(line.substr(3, 4), 16);
+                for (let i = 0; i < bytes; i++) {
+                    target[addr + i] = parseInt(line.substr(9 + i * 2, 2), 16);
+                }
+            }
+        }
+    }
+    exports.loadHex = loadHex;
+    const url = 'https://hexi.wokwi.com';
+    function buildHex(source) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const include = Array.from(source.matchAll(/#include <([^>]+)>/g)).map(match => match[1]);
+            const renameInclude = include.map(lib => library_dictionary_1.library[lib]).filter(lib => lib !== undefined);
+            let listString = "";
+            listString += renameInclude.join("\n") + "\n";
+            const resp = yield fetch(url + '/build', {
+                method: 'POST',
+                mode: 'cors',
+                cache: 'no-cache',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({
+                    files: [{
+                            name: "libraries.txt",
+                            content: listString
+                        }], sketch: source, board: execute_2.AVRRunner.getInstance().boardConstructor == arduino_uno_2.ArduinoUno ? "" : "mega"
+                })
+            });
+            return (yield resp.json());
+        });
+    }
+    exports.buildHex = buildHex;
+});
+let observer;
+let isObserving = false;
+const config = { childList: true };
+const callback = function (mutationsList) {
+    const targetNode = document.getElementById('console-container');
+    if (!targetNode) {
+        console.warn("console-container does not exist for some reason");
+        return;
+    }
+    for (const mutation of mutationsList) {
+        if (mutation.type === 'childList') {
+            targetNode.scrollTop = targetNode.scrollHeight;
+        }
+    }
+};
+function toggleConsoleOutputBehavior() {
+    const targetNode = document.getElementById('console-container');
+    if (!targetNode) {
+        return;
+    }
+    if (isObserving) {
+        observer.disconnect();
+    }
+    else {
+        observer = new MutationObserver(callback);
+        if (targetNode) {
+            observer.observe(targetNode, config);
+        }
+    }
+    isObserving = !isObserving;
+}
 define("lib/avr8js/utils/assembler", ["require", "exports"], function (require, exports) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
@@ -11683,7 +11777,232 @@ define("lib/avr8js/utils/test-utils", ["require", "exports", "lib/avr8js/utils/a
     }
     exports.TestProgramRunner = TestProgramRunner;
 });
-define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute"], function (require, exports, TimingPacket_1, index_2, compile_util_2, execute_3) {
+define("boards/arduino/arduino-mega/configs", ["require", "exports", "lib/avr8js/index"], function (require, exports, avr8js_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.adcConfig = exports.twiConfig = exports.usart3Config = exports.usart2Config = exports.usart1Config = exports.usart0Config = exports.timer5Config = exports.timer4Config = exports.timer3Config = exports.timer2Config = exports.timer1Config = exports.timer0Config = exports.spiConfig = void 0;
+    exports.spiConfig = Object.assign(Object.assign({}, avr8js_3.spiConfig), { spiInterrupt: 0x30 });
+    const defaultTimerBits = {
+        TOV: 1,
+        OCFA: 2,
+        OCFB: 4,
+        OCFC: 0,
+        TOIE: 1,
+        OCIEA: 2,
+        OCIEB: 4,
+        OCIEC: 0,
+    };
+    const timer01Dividers = {
+        0: 0,
+        1: 1,
+        2: 8,
+        3: 64,
+        4: 256,
+        5: 1024,
+        6: 0,
+        7: 0,
+    };
+    exports.timer0Config = Object.assign({ ICR: 0, OCRA: 0x47, OCRB: 0x48, OCRC: 0, TCCRA: 0x44, TCCRB: 0x45, TCCRC: 0, TCNT: 0x46, TIFR: 0x35, TIMSK: 0x6E, bits: 8, captureInterrupt: 0, compAInterrupt: 0x2A, compBInterrupt: 0x2C, compCInterrupt: 0, compPinA: 7, compPinB: 5, compPinC: 0, compPortA: avr8js_3.portBConfig.PORT, compPortB: avr8js_3.portGConfig.PORT, compPortC: 0, dividers: timer01Dividers, externalClockPin: 7, externalClockPort: avr8js_3.portDConfig.PORT, ovfInterrupt: 0x2E }, defaultTimerBits);
+    exports.timer1Config = Object.assign({ ICR: 0x86, OCRA: 0x88, OCRB: 0x8A, OCRC: 0x8C, TCCRA: 0x80, TCCRB: 0x81, TCCRC: 0x82, TCNT: 0x84, TIFR: 0x36, TIMSK: 0x6F, bits: 16, captureInterrupt: 0x20, compAInterrupt: 0x22, compBInterrupt: 0x24, compCInterrupt: 0x26, compPinA: 5, compPinB: 6, compPinC: 7, compPortA: avr8js_3.portBConfig.PORT, compPortB: avr8js_3.portBConfig.PORT, compPortC: avr8js_3.portBConfig.PORT, dividers: timer01Dividers, externalClockPin: 6, externalClockPort: avr8js_3.portDConfig.PORT, ovfInterrupt: 0x28 }, defaultTimerBits);
+    exports.timer2Config = Object.assign({ ICR: 0, OCRA: 0xB3, OCRB: 0xB4, OCRC: 0, TCCRA: 0xB0, TCCRB: 0xB1, TCCRC: 0, TCNT: 0xB2, TIFR: 0x37, TIMSK: 0x70, bits: 8, captureInterrupt: 0, compAInterrupt: 0x1A, compBInterrupt: 0x1C, compCInterrupt: 0x1E, compPinA: 4, compPinB: 6, compPinC: 0, compPortA: avr8js_3.portBConfig.PORT, compPortB: avr8js_3.portHConfig.PORT, compPortC: 0, dividers: {
+            0: 0,
+            1: 1,
+            2: 8,
+            3: 32,
+            4: 64,
+            5: 128,
+            6: 256,
+            7: 1024,
+        }, externalClockPin: 0, externalClockPort: 0, ovfInterrupt: 0x12 }, defaultTimerBits);
+    exports.timer3Config = Object.assign({ ICR: 0x96, OCRA: 0x98, OCRB: 0x9A, OCRC: 0x9C, TCCRA: 0x90, TCCRB: 0x91, TCCRC: 0x92, TCNT: 0x94, TIFR: 0x38, TIMSK: 0x71, bits: 16, captureInterrupt: 0x3E, compAInterrupt: 0x40, compBInterrupt: 0x42, compCInterrupt: 0x44, compPinA: 3, compPinB: 4, compPinC: 5, compPortA: avr8js_3.portEConfig.PORT, compPortB: avr8js_3.portEConfig.PORT, compPortC: avr8js_3.portEConfig.PORT, dividers: timer01Dividers, externalClockPin: 6, externalClockPort: avr8js_3.portEConfig.PORT, ovfInterrupt: 0x46 }, defaultTimerBits);
+    exports.timer4Config = Object.assign({ ICR: 0xA6, OCRA: 0xA8, OCRB: 0xAB, OCRC: 0xAC, TCCRA: 0xA0, TCCRB: 0xA1, TCCRC: 0xA2, TCNT: 0xA4, TIFR: 0x39, TIMSK: 0x72, bits: 16, captureInterrupt: 0x52, compAInterrupt: 0x54, compBInterrupt: 0x56, compCInterrupt: 0x58, compPinA: 3, compPinB: 4, compPinC: 5, compPortA: avr8js_3.portHConfig.PORT, compPortB: avr8js_3.portHConfig.PORT, compPortC: avr8js_3.portHConfig.PORT, dividers: timer01Dividers, externalClockPin: 7, externalClockPort: avr8js_3.portHConfig.PORT, ovfInterrupt: 0x5A }, defaultTimerBits);
+    exports.timer5Config = Object.assign({ ICR: 0x126, OCRA: 0x128, OCRB: 0x12A, OCRC: 0x12C, TCCRA: 0x120, TCCRB: 0x121, TCCRC: 0x122, TCNT: 0x124, TIFR: 0x3A, TIMSK: 0x73, bits: 16, captureInterrupt: 0x5C, compAInterrupt: 0x5E, compBInterrupt: 0x60, compCInterrupt: 0x62, compPinA: 3, compPinB: 4, compPinC: 5, compPortA: avr8js_3.portLConfig.PORT, compPortB: avr8js_3.portLConfig.PORT, compPortC: avr8js_3.portLConfig.PORT, dividers: timer01Dividers, externalClockPin: 2, externalClockPort: avr8js_3.portLConfig.PORT, ovfInterrupt: 0x64 }, defaultTimerBits);
+    exports.usart0Config = {
+        rxCompleteInterrupt: 0x32,
+        dataRegisterEmptyInterrupt: 0x34,
+        txCompleteInterrupt: 0x36,
+        UCSRA: 0xc0,
+        UCSRB: 0xc1,
+        UCSRC: 0xc2,
+        UBRRL: 0xc4,
+        UBRRH: 0xc5,
+        UDR: 0xc6,
+    };
+    exports.usart1Config = {
+        rxCompleteInterrupt: 0x48,
+        dataRegisterEmptyInterrupt: 0x4A,
+        txCompleteInterrupt: 0x4C,
+        UCSRA: 0xc8,
+        UCSRB: 0xc9,
+        UCSRC: 0xca,
+        UBRRL: 0xcc,
+        UBRRH: 0xcd,
+        UDR: 0xce,
+    };
+    exports.usart2Config = {
+        rxCompleteInterrupt: 0x66,
+        dataRegisterEmptyInterrupt: 0x68,
+        txCompleteInterrupt: 0x6A,
+        UCSRA: 0xD0,
+        UCSRB: 0xD1,
+        UCSRC: 0xD2,
+        UBRRL: 0xD4,
+        UBRRH: 0xD5,
+        UDR: 0xD6,
+    };
+    exports.usart3Config = {
+        rxCompleteInterrupt: 0x6C,
+        dataRegisterEmptyInterrupt: 0x6E,
+        txCompleteInterrupt: 0x70,
+        UCSRA: 0x130,
+        UCSRB: 0x131,
+        UCSRC: 0x132,
+        UBRRL: 0x134,
+        UBRRH: 0x135,
+        UDR: 0x136,
+    };
+    exports.twiConfig = {
+        twiInterrupt: 0x4E,
+        TWBR: 0xb8,
+        TWSR: 0xb9,
+        TWAR: 0xba,
+        TWDR: 0xbb,
+        TWCR: 0xbc,
+        TWAMR: 0xbd,
+    };
+    exports.adcConfig = {
+        ADMUX: 0x7c,
+        ADCSRA: 0x7a,
+        ADCSRB: 0x7b,
+        ADCL: 0x78,
+        ADCH: 0x79,
+        DIDR0: 0x7e,
+        adcInterrupt: 0x3a,
+        numChannels: 16,
+        muxInputMask: 0xf,
+        muxChannels: avr8js_3.atmega328Channels,
+        adcReferences: [
+            avr8js_3.ADCReference.AREF,
+            avr8js_3.ADCReference.AVCC,
+            avr8js_3.ADCReference.Reserved,
+            avr8js_3.ADCReference.Internal1V1,
+        ],
+    };
+});
+define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/avr8js/index", "boards/arduino/arduino-mega/configs", "boards/arduino/arduino"], function (require, exports, avr8js_4, configs_1, arduino_2) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.ArduinoMega = void 0;
+    class ArduinoMega {
+        constructor(program) {
+            const avrCPU = new avr8js_4.CPU(program, 0x2200);
+            const adc = new avr8js_4.AVRADC(avrCPU, configs_1.adcConfig);
+            const portA = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portAConfig);
+            const portB = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portBConfig);
+            const portC = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portCConfig);
+            const portD = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portDConfig);
+            const portE = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portEConfig);
+            const portF = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portFConfig);
+            const portG = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portGConfig);
+            const portH = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portHConfig);
+            const portJ = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portJConfig);
+            const portK = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portKConfig);
+            const portL = new avr8js_4.AVRIOPort(avrCPU, avr8js_4.portLConfig);
+            this.cpu = new arduino_2.ArduinoCPU(avrCPU);
+            this.spis = [new arduino_2.ArduinoSPI(new avr8js_4.AVRSPI(avrCPU, configs_1.spiConfig, arduino_2.MHZ))];
+            this.timers = [
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer0Config)),
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer1Config)),
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer2Config)),
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer3Config)),
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer4Config)),
+                new arduino_2.ArduinoTimer(new avr8js_4.AVRTimer(avrCPU, configs_1.timer5Config))
+            ];
+            this.twis = [new arduino_2.ArduinoTWI(new avr8js_4.AVRTWI(avrCPU, configs_1.twiConfig, arduino_2.MHZ))];
+            this.usarts = [
+                new arduino_2.ArduinoUSART(new avr8js_4.AVRUSART(avrCPU, configs_1.usart0Config, arduino_2.MHZ)),
+                new arduino_2.ArduinoUSART(new avr8js_4.AVRUSART(avrCPU, configs_1.usart1Config, arduino_2.MHZ)),
+                new arduino_2.ArduinoUSART(new avr8js_4.AVRUSART(avrCPU, configs_1.usart2Config, arduino_2.MHZ)),
+                new arduino_2.ArduinoUSART(new avr8js_4.AVRUSART(avrCPU, configs_1.usart3Config, arduino_2.MHZ)),
+            ];
+            this.pins = [
+                { digital: new arduino_2.ArduinoDigital(portE, 0), usart: this.usarts[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 1), usart: this.usarts[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 4), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portE, 5), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portG, 5), timer: this.timers[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 3), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portH, 3), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 4), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 5), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 6), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 4), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 5), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 6), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 7), timer: this.timers[0] },
+                { digital: new arduino_2.ArduinoDigital(portJ, 1), usart: this.usarts[3] },
+                { digital: new arduino_2.ArduinoDigital(portJ, 0), usart: this.usarts[3] },
+                { digital: new arduino_2.ArduinoDigital(portH, 1), usart: this.usarts[2] },
+                { digital: new arduino_2.ArduinoDigital(portH, 0), usart: this.usarts[2] },
+                { digital: new arduino_2.ArduinoDigital(portD, 3), usart: this.usarts[1] },
+                { digital: new arduino_2.ArduinoDigital(portD, 2), usart: this.usarts[1] },
+                { digital: new arduino_2.ArduinoDigital(portD, 1), twi: this.twis[0] },
+                { digital: new arduino_2.ArduinoDigital(portD, 0), twi: this.twis[0] },
+                { digital: new arduino_2.ArduinoDigital(portA, 0) },
+                { digital: new arduino_2.ArduinoDigital(portA, 1) },
+                { digital: new arduino_2.ArduinoDigital(portA, 2) },
+                { digital: new arduino_2.ArduinoDigital(portA, 3) },
+                { digital: new arduino_2.ArduinoDigital(portA, 4) },
+                { digital: new arduino_2.ArduinoDigital(portA, 5) },
+                { digital: new arduino_2.ArduinoDigital(portA, 6) },
+                { digital: new arduino_2.ArduinoDigital(portA, 7) },
+                { digital: new arduino_2.ArduinoDigital(portC, 7) },
+                { digital: new arduino_2.ArduinoDigital(portC, 6) },
+                { digital: new arduino_2.ArduinoDigital(portC, 5) },
+                { digital: new arduino_2.ArduinoDigital(portC, 4) },
+                { digital: new arduino_2.ArduinoDigital(portC, 3) },
+                { digital: new arduino_2.ArduinoDigital(portC, 2) },
+                { digital: new arduino_2.ArduinoDigital(portC, 1) },
+                { digital: new arduino_2.ArduinoDigital(portC, 0) },
+                { digital: new arduino_2.ArduinoDigital(portD, 7) },
+                { digital: new arduino_2.ArduinoDigital(portG, 2) },
+                { digital: new arduino_2.ArduinoDigital(portG, 1) },
+                { digital: new arduino_2.ArduinoDigital(portG, 0) },
+                { digital: new arduino_2.ArduinoDigital(portL, 7) },
+                { digital: new arduino_2.ArduinoDigital(portL, 6) },
+                { digital: new arduino_2.ArduinoDigital(portL, 5), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 4), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 3), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 2) },
+                { digital: new arduino_2.ArduinoDigital(portL, 1) },
+                { digital: new arduino_2.ArduinoDigital(portL, 0) },
+                { digital: new arduino_2.ArduinoDigital(portB, 3), spi: this.spis[0] },
+                { digital: new arduino_2.ArduinoDigital(portB, 2), spi: this.spis[0] },
+                { digital: new arduino_2.ArduinoDigital(portB, 1), spi: this.spis[0] },
+                { digital: new arduino_2.ArduinoDigital(portB, 0), spi: this.spis[0] },
+                { digital: new arduino_2.ArduinoDigital(portF, 0), analog: new arduino_2.ArduinoAnalog(adc, 0) },
+                { digital: new arduino_2.ArduinoDigital(portF, 1), analog: new arduino_2.ArduinoAnalog(adc, 1) },
+                { digital: new arduino_2.ArduinoDigital(portF, 2), analog: new arduino_2.ArduinoAnalog(adc, 2) },
+                { digital: new arduino_2.ArduinoDigital(portF, 3), analog: new arduino_2.ArduinoAnalog(adc, 3) },
+                { digital: new arduino_2.ArduinoDigital(portF, 4), analog: new arduino_2.ArduinoAnalog(adc, 4) },
+                { digital: new arduino_2.ArduinoDigital(portF, 5), analog: new arduino_2.ArduinoAnalog(adc, 5) },
+                { digital: new arduino_2.ArduinoDigital(portF, 6), analog: new arduino_2.ArduinoAnalog(adc, 6) },
+                { digital: new arduino_2.ArduinoDigital(portF, 7), analog: new arduino_2.ArduinoAnalog(adc, 7) },
+                { digital: new arduino_2.ArduinoDigital(portK, 0), analog: new arduino_2.ArduinoAnalog(adc, 8) },
+                { digital: new arduino_2.ArduinoDigital(portK, 1), analog: new arduino_2.ArduinoAnalog(adc, 9) },
+                { digital: new arduino_2.ArduinoDigital(portK, 2), analog: new arduino_2.ArduinoAnalog(adc, 10) },
+                { digital: new arduino_2.ArduinoDigital(portK, 3), analog: new arduino_2.ArduinoAnalog(adc, 11) },
+                { digital: new arduino_2.ArduinoDigital(portK, 4), analog: new arduino_2.ArduinoAnalog(adc, 12) },
+                { digital: new arduino_2.ArduinoDigital(portK, 5), analog: new arduino_2.ArduinoAnalog(adc, 13) },
+                { digital: new arduino_2.ArduinoDigital(portK, 6), analog: new arduino_2.ArduinoAnalog(adc, 14) },
+                { digital: new arduino_2.ArduinoDigital(portK, 7), analog: new arduino_2.ArduinoAnalog(adc, 15) },
+            ];
+        }
+    }
+    exports.ArduinoMega = ArduinoMega;
+    ArduinoMega.FLASH = 0x40000;
+});
+define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/index", "lib/compile-util", "lib/execute", "boards/arduino/arduino-uno/arduino-uno", "boards/arduino/arduino-mega/arduino-mega"], function (require, exports, TimingPacket_1, index_1, compile_util_2, execute_3, arduino_uno_3, arduino_mega_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.interopManager = void 0;
@@ -11716,24 +12035,9 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 return [...Array(8)].map((x, i) => ((diff >> i) & 1) * (i + 1)).filter(e => e !== 0).map(e => e + (delta - 1));
             }
             startCodeLoop() {
-                this.runner.portB.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    this.runner.pausedOn = this.runner.pausedOn.concat(this.getChangedPins(e, 0).filter(e => this.awaitResponseOn.includes(e)));
-                    this.prevB = e;
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 0);
+                this.runner.board.usarts[0].onByteTransmit = ((value) => __awaiter(this, void 0, void 0, function* () {
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "SendSerial", String.fromCharCode(value));
                 }));
-                this.runner.portC.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    this.runner.pausedOn.concat(this.getChangedPins(e, 1).filter(e => this.awaitResponseOn.includes(e)));
-                    this.prevC = e;
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 1);
-                }));
-                this.runner.portD.addListener((e) => __awaiter(this, void 0, void 0, function* () {
-                    this.runner.pausedOn.concat(this.getChangedPins(e, 2).filter(e => this.awaitResponseOn.includes(e)));
-                    this.prevD = e;
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendVal", e, this.runner.cpu.cycles, 2);
-                }));
-                this.runner.usart.onByteTransmit = (value) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
-                });
                 this.runCode();
             }
             getWindowWidth() {
@@ -11773,7 +12077,8 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 });
             }
             runCode() {
-                this.runner.execute(cpu => { });
+                this.runner.execute(cpu => {
+                });
             }
             stop() {
                 this.runner.stop();
@@ -11796,24 +12101,9 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                     this.runner.pausedOn.splice(index, 1);
                 }
             }
-            arduinoADCInput(channel, value) {
-                this.runner.adc.channelValues[channel] = value;
-            }
             getPinState(index) {
-                var state;
-                if (index < 8) {
-                    state = this.runner.portD.pinState(index);
-                }
-                else if (index < 14) {
-                    state = this.runner.portB.pinState(index - 8);
-                }
-                else if (index < 20) {
-                    state = this.runner.portC.pinState(index - 14);
-                }
-                else {
-                    console.log("getPinState received invalid index: " + index);
-                }
-                if (state == index_2.PinState.High || state == index_2.PinState.InputPullUp) {
+                const state = this.runner.board.pins[index].digital.state;
+                if (state == index_1.PinState.High || state == index_1.PinState.InputPullUp) {
                     return true;
                 }
                 else {
@@ -11846,6 +12136,18 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                     console.log("intro not valid");
                 }
                 intro.start();
+            }
+            setBoard(board) {
+                let boardConstructor;
+                switch (board) {
+                    case execute_3.BoardType.ArduinoUno:
+                        boardConstructor = arduino_uno_3.ArduinoUno;
+                        break;
+                    case execute_3.BoardType.ArduinoMega:
+                        boardConstructor = arduino_mega_1.ArduinoMega;
+                        break;
+                }
+                this.runner.boardConstructor = boardConstructor;
             }
         }
         interopManager.InteropManager = InteropManager;
@@ -11907,7 +12209,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.updated = false;
         }
         setup() {
-            execute_4.AVRRunner.getInstance().twi.eventHandler.registerController(exports.LCD1602_ADDR, this);
+            execute_4.AVRRunner.getInstance().board.twis[0].registerController(exports.LCD1602_ADDR, this);
         }
         cleanup() {
             this.cgram.fill(0);
@@ -12360,7 +12662,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         31, 31, 31, 31, 31, 31, 31, 31,
     ]);
 });
-define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_1) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MAX6675 = void 0;
@@ -12387,19 +12689,19 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                     byteToSend = temperature & 0xFF;
                 }
                 this.nextByteIsHigh = !this.nextByteIsHigh;
-                execute_5.AVRRunner.getInstance().cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().spi.completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().spi.transferCycles);
+                execute_5.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().board.spis[0].transferCycles);
             };
         }
         setup() {
-            execute_5.AVRRunner.getInstance().spi.addListener(this.spiCallback);
+            execute_5.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
         }
         get shouldReadSPI() {
-            return this.pins.cs[0].getState() == avr8js_1.PinState.Low;
+            return this.pins.cs[0].digital.state == avr8js_5.PinState.Low;
         }
     }
     exports.MAX6675 = MAX6675;
 });
-define("controllers/ky012", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_3, avr8js_2) {
+define("controllers/ky012", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_3, avr8js_6) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY012 = void 0;
@@ -12419,7 +12721,7 @@ define("controllers/ky012", ["require", "exports", "controllers/controller", "li
                 console.warn("KY-012: Signal pin not connected");
                 return;
             }
-            signalPins[0].setListener(this.handleStateChange.bind(this));
+            signalPins[0].digital.addListener(this.handleStateChange.bind(this));
         }
         initAudio() {
             try {
@@ -12434,12 +12736,12 @@ define("controllers/ky012", ["require", "exports", "controllers/controller", "li
         }
         handleStateChange(state) {
             switch (state) {
-                case avr8js_2.PinState.High:
+                case avr8js_6.PinState.High:
                     if (!this.isActive) {
                         this.startBuzzer();
                     }
                     break;
-                case avr8js_2.PinState.Low:
+                case avr8js_6.PinState.Low:
                     if (this.isActive) {
                         this.stopBuzzer();
                     }
@@ -12627,7 +12929,7 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
         }
         setup() {
-            execute_6.AVRRunner.getInstance().twi.eventHandler.registerController(exports.BNO055_ADDR, this);
+            execute_6.AVRRunner.getInstance().board.twis[0].registerController(exports.BNO055_ADDR, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
@@ -12718,10 +13020,10 @@ define("controllers/hcsr501", ["require", "exports", "controllers/controller"], 
         detectMotion() {
             if (this.triggerMode) {
                 if (!this.isInTimeWindow) {
-                    this.pins.digital_out[0].setState(true);
+                    this.pins.digital_out[0].digital.state = true;
                     this.isInTimeWindow = true;
                     this.motionTimeoutId = setTimeout(() => {
-                        this.pins.digital_out[0].setState(false);
+                        this.pins.digital_out[0].digital.state = false;
                         this.isMotionDetected = false;
                         this.isInTimeWindow = false;
                         this.motionTimeoutId = 0;
@@ -12730,7 +13032,7 @@ define("controllers/hcsr501", ["require", "exports", "controllers/controller"], 
                 else {
                     clearTimeout(this.motionTimeoutId);
                     this.motionTimeoutId = this.motionTimeoutId = setTimeout(() => {
-                        this.pins.digital_out[0].setState(false);
+                        this.pins.digital_out[0].digital.state = false;
                         this.isMotionDetected = false;
                         this.isInTimeWindow = false;
                         this.motionTimeoutId = 0;
@@ -12743,9 +13045,9 @@ define("controllers/hcsr501", ["require", "exports", "controllers/controller"], 
                 }
                 else {
                     this.isInTimeWindow = true;
-                    this.pins.digital_out[0].setState(true);
+                    this.pins.digital_out[0].digital.state = true;
                     this.motionTimeoutId = setTimeout(() => {
-                        this.pins.digital_out[0].setState(false);
+                        this.pins.digital_out[0].digital.state = false;
                         this.isMotionDetected = false;
                         this.isInTimeWindow = false;
                         this.motionTimeoutId = 0;
@@ -12790,7 +13092,7 @@ define("controllers/ky018", ["require", "exports", "controllers/controller"], fu
         luxToVoltage(lux) {
             const R_PHOTO = (this.RL10 * Math.pow(10, this.GAMMA)) / Math.pow(lux, this.GAMMA);
             const V_OUT = 5 * (R_PHOTO / (R_PHOTO + this.R_FIXED));
-            this.pins.analog_out[0].setAdcVoltage(V_OUT);
+            this.pins.analog_out[0].analog.voltage = V_OUT;
         }
     }
     exports.KY018 = KY018;
@@ -12808,46 +13110,57 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
             if (surface) {
                 surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
             }
-            this.digitalOut.setState(pushed);
+            this.digitalOut.digital.state = pushed;
         }
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("controllers/servo", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_3, execute_7) {
+define("controllers/sg90", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_7) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Servo = void 0;
-    class Servo extends controller_8.Controller {
+    exports.SG90 = void 0;
+    class SG90 extends controller_8.Controller {
         setup() {
             var _a;
             this.fallingEdgeCycle = undefined;
             this.risingEdgeCycle = undefined;
-            this.signal = this.pins.orange[0];
-            (_a = this.signal) === null || _a === void 0 ? void 0 : _a.setListener(this.onSignalChange.bind(this));
+            this.animationFrameId = null;
+            this.signal = this.pins.orange[0].digital;
+            (_a = this.signal) === null || _a === void 0 ? void 0 : _a.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.hornAngle = null;
         }
         onSignalChange(state) {
-            const currentCycle = execute_7.AVRRunner.getInstance().cpu.cycles;
-            if (state === avr8js_3.PinState.High) {
+            const currentCycle = execute_7.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_7.PinState.High) {
                 this.risingEdgeCycle = currentCycle;
             }
-            else if (state === avr8js_3.PinState.Low && this.risingEdgeCycle !== undefined) {
+            else if (state === avr8js_7.PinState.Low && this.risingEdgeCycle !== undefined) {
                 this.fallingEdgeCycle = currentCycle;
                 const pulseWidthCycles = this.fallingEdgeCycle - this.risingEdgeCycle;
                 const pulseWidthMs = this.cyclesToMs(pulseWidthCycles);
                 const angle = Math.round(this.msToAngle(pulseWidthMs));
                 if (this.previousAngle !== angle) {
-                    this.renderHorn(angle);
+                    this.hornAngle = angle;
+                    if (!this.animationFrameId) {
+                        this.animationFrameId = requestAnimationFrame(this.renderHorn.bind(this));
+                    }
                 }
                 this.previousAngle = angle;
             }
         }
-        renderHorn(angle) {
+        renderHorn() {
             const horn = this.element.querySelector(".horn");
-            const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
+            const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle}) translate(-91.467 -59.773)`;
             horn.setAttribute('transform', transformValue);
+            this.animationFrameId = null;
         }
         cyclesToMs(cycles) {
-            return (cycles * 1000) / (execute_7.AVRRunner.getInstance().MHZ / 1000);
+            return (cycles * 1000) / (execute_7.AVRRunner.getInstance().board.cpu.frequency / 1000);
         }
         msToAngle(ms) {
             const minPulse = 544;
@@ -12861,7 +13174,7 @@ define("controllers/servo", ["require", "exports", "controllers/controller", "li
             return ((ms - minPulse) / (maxPulse - minPulse)) * (maxAngle - minAngle) + minAngle;
         }
     }
-    exports.Servo = Servo;
+    exports.SG90 = SG90;
 });
 define("controllers/memory", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -12929,7 +13242,7 @@ define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/cont
             this.memory.write(REGISTERS[register], value);
         }
         setup() {
-            execute_8.AVRRunner.getInstance().twi.eventHandler.registerController(TF_LUNA_LIDAR_ADDR, this);
+            execute_8.AVRRunner.getInstance().board.twis[0].registerController(TF_LUNA_LIDAR_ADDR, this);
             this.memory.clear();
             this.address = null;
             this.startTime = Date.now();
@@ -12971,7 +13284,7 @@ define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/cont
     }
     exports.TFLunaLidarI2C = TFLunaLidarI2C;
 });
-define("controllers/ky008", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_10, avr8js_4) {
+define("controllers/ky008", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_10, avr8js_8) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY008 = void 0;
@@ -12980,11 +13293,11 @@ define("controllers/ky008", ["require", "exports", "controllers/controller", "li
             super(...arguments);
             this.toggleLaser = (state) => {
                 const beam = this.element.querySelector("#laser-beam");
-                beam.style.fill = state === avr8js_4.PinState.High ? "url(#a)" : "none";
+                beam.style.fill = state === avr8js_8.PinState.High ? "url(#a)" : "none";
             };
         }
         setup() {
-            this.pins.digital_in[0].setListener(this.toggleLaser);
+            this.pins.digital_in[0].digital.addListener(this.toggleLaser);
         }
     }
     exports.KY008 = KY008;
@@ -13043,7 +13356,7 @@ define("controllers/adxl345i2c", ["require", "exports", "controllers/controller"
             this.setRegister("DATAZ", z);
         }
         setup() {
-            execute_9.AVRRunner.getInstance().twi.eventHandler.registerController(exports.ADXL345_ADDR, this);
+            execute_9.AVRRunner.getInstance().board.twis[0].registerController(exports.ADXL345_ADDR, this);
             this.memory.clear();
             this.address = null;
             this.setRegister("DEVID", 0xE5);
@@ -13101,7 +13414,7 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
             if (!this.inSimulation) {
                 return;
             }
-            this.pins.analog_out[0].setAdcVoltage(this.alcohol);
+            this.pins.analog_out[0].analog.voltage = this.alcohol;
         }
         setup() {
             this.inSimulation = true;
@@ -13109,23 +13422,874 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
     }
     exports.MQ3 = MQ3;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1) {
+define("controllers/hcsr04", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_13, execute_10, avr8js_9) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HCSR04 = void 0;
+    class HCSR04 extends controller_13.Controller {
+        constructor() {
+            super(...arguments);
+            this.distance = 20;
+        }
+        setDistance(distance) {
+            this.distance = distance;
+        }
+        setup() {
+            console.log(JSON.stringify(this.pins.trigger));
+            this.pins.trigger[0].digital.addListener(this.trigger.bind(this));
+        }
+        trigger(state) {
+            if (state === avr8js_9.PinState.High) {
+                setTimeout(() => this.echo(), 1);
+            }
+        }
+        echo() {
+            this.pins.echo[0].digital.state = true;
+            execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                this.pins.echo[0].digital.state = false;
+            }, this.distance * 58 * (execute_10.AVRRunner.getInstance().board.cpu.frequency / 1e6));
+        }
+    }
+    exports.HCSR04 = HCSR04;
+});
+define("controllers/ky003", ["require", "exports", "controllers/controller"], function (require, exports, controller_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY003 = void 0;
+    class KY003 extends controller_14.Controller {
+        setup() {
+            this.inSimulation = true;
+        }
+        setFieldDetected(isFieldDetected) {
+            if (!this.inSimulation)
+                return;
+            isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
+        }
+    }
+    exports.KY003 = KY003;
+});
+define("controllers/ky022", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_15, execute_11) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY022 = void 0;
+    class KY022 extends controller_15.Controller {
+        constructor() {
+            super(...arguments);
+            this.inSimulation = false;
+            this.inTransfer = false;
+        }
+        setup() {
+            this.setNecAddress(0);
+            this.setNecCommand(0);
+            this.inSimulation = true;
+        }
+        setNecAddress(address) {
+            this.address = address & 0xFF;
+            this.invAddress = (~address) & 0xFF;
+            if (!this.inSimulation)
+                return;
+            if (this.inTransfer)
+                return;
+            this.inTransfer = true;
+            this.sendNecFrame();
+        }
+        setNecCommand(command) {
+            this.command = command & 0xFF;
+            this.invCommand = (~command) & 0xFF;
+            if (!this.inSimulation)
+                return;
+            if (this.inTransfer)
+                return;
+            this.inTransfer = true;
+            this.sendNecFrame();
+        }
+        sendNecFrame() {
+            const frame = this.encodeNecFrame();
+            let count = 0;
+            for (const packet of frame) {
+                execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                    console.log("previous state:", this.pins.digital_out[0].digital.state);
+                    console.log("desired state:", packet.state);
+                    this.pins.digital_out[0].digital.state = packet.state;
+                    console.log("current state:", this.pins.digital_out[0].digital.state);
+                    console.log("current cycle:", execute_11.AVRRunner.getInstance().board.cpu.cycles);
+                }, execute_11.AVRRunner.getInstance().usToCycles(packet.us));
+                count += packet.us;
+            }
+            this.inTransfer = false;
+        }
+        encodeNecFrame() {
+            let frame = [];
+            frame.push({ state: true, us: 9000 });
+            frame.push({ state: false, us: 4500 });
+            this.packNecFrame(frame, this.address);
+            this.packNecFrame(frame, this.invAddress);
+            this.packNecFrame(frame, this.command);
+            this.packNecFrame(frame, this.invCommand);
+            frame.push({ state: true, us: 565.5 });
+            frame.push({ state: false, us: 0 });
+            return frame;
+        }
+        packNecFrame(frame, byte) {
+            for (let i = 7; i >= 0; i--) {
+                const bit = (byte >> i) & 1;
+                if (bit === 1) {
+                    frame.push({ state: true, us: 565.5 });
+                    frame.push({ state: false, us: 1687.5 });
+                }
+                else {
+                    frame.push({ state: true, us: 565.5 });
+                    frame.push({ state: false, us: 565.5 });
+                }
+            }
+        }
+    }
+    exports.KY022 = KY022;
+});
+define("controllers/led", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_16, avr8js_10) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.LED = void 0;
+    class LED extends controller_16.Controller {
+        constructor() {
+            super(...arguments);
+            this.lightColors = {
+                "red": "#ff8080",
+                "green": "#80ff80",
+                "blue": "#8080ff",
+                "yellow": "#ffff80",
+                "orange": "#ffcf80",
+                "white": "#ffffff",
+                "purple": "#ff80ff"
+            };
+        }
+        setup() {
+            this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));
+        }
+        cleanup() {
+            this.element.querySelector("#ledDisplay").style.display = "none";
+        }
+        setColor(color) {
+            const _color = this.lightColors[color] ? this.lightColors[color] : "red";
+            this.element.querySelector("#ledColor").style.fill = _color;
+            this.element.querySelector("#ledColorBrightness").style.fill = _color;
+        }
+        toggleLed(state) {
+            if (state == avr8js_10.PinState.Low) {
+                this.element.querySelector("#ledDisplay").style.display = "none";
+            }
+            else if (state == avr8js_10.PinState.High) {
+                this.element.querySelector("#ledDisplay").style.display = "inherit";
+            }
+        }
+    }
+    exports.LED = LED;
+});
+define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_17, execute_12) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
+    exports.I2C_MST_CTRL = 0x68;
+    const registers = {
+        CONFIG: { address: 0x1A },
+        GYRO_CONFIG: { address: 0x1B },
+        ACCEL_CONFIG: { address: 0x1C },
+        ACCEL_XOUT_H: { address: 0x3B },
+        ACCEL_XOUT_L: { address: 0x3C },
+        ACCEL_YOUT_H: { address: 0x3D },
+        ACCEL_YOUT_L: { address: 0x3E },
+        ACCEL_ZOUT_H: { address: 0x3F },
+        ACCEL_ZOUT_L: { address: 0x40 },
+        TEMP_OUT_H: { address: 0x41 },
+        TEMP_OUT_L: { address: 0x42 },
+        GYRO_XOUT_H: { address: 0x43 },
+        GYRO_XOUT_L: { address: 0x44 },
+        GYRO_YOUT_H: { address: 0x45 },
+        GYRO_YOUT_L: { address: 0x46 },
+        GYRO_ZOUT_H: { address: 0x47 },
+        GYRO_ZOUT_L: { address: 0x48 },
+        EULER_HEADING_H: { address: 0x49 },
+        EULER_HEADING_L: { address: 0x4A },
+        EULER_ROLL_H: { address: 0x4B },
+        EULER_ROLL_L: { address: 0x4C },
+        EULER_PITCH_H: { address: 0x4D },
+        EULER_PITCH_L: { address: 0x4E },
+        QUATERNIONW_H: { address: 0x4F },
+        QUATERNIONW_L: { address: 0x50 },
+        QUATERNIONX_H: { address: 0x51 },
+        QUATERNIONX_L: { address: 0x52 },
+        QUATERNIONY_H: { address: 0x53 },
+        QUATERNIONY_L: { address: 0x54 },
+        QUATERNIONZ_H: { address: 0x55 },
+        QUATERNIONZ_L: { address: 0x56 },
+        LINEAR_ACCEL_X_H: { address: 0x57 },
+        LINEAR_ACCEL_X_L: { address: 0x58 },
+        LINEAR_ACCEL_Y_H: { address: 0x59 },
+        LINEAR_ACCEL_Y_L: { address: 0x5A },
+        LINEAR_ACCEL_Z_H: { address: 0x5B },
+        LINEAR_ACCEL_Z_L: { address: 0x5C },
+        PWR_MGMT_1: { address: 0x6B, default: 0x40 },
+        PWR_MGMT_2: { address: 0x6C, default: 0x00 },
+        WHO_AM_I: { address: 0x75, default: 0x68 }
+    };
+    class MPU6050 extends controller_17.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new Uint8Array(128);
+            this.accelerometer = { x: 0, y: 0, z: 9.81 };
+            this.gyroscope = { x: 0, y: 0, z: 0 };
+            this.orientation = { x: 0, y: 0, z: 0 };
+            this.lastRead = Date.now();
+            this.rotating = false;
+            this.temperature = 25.0;
+            this.sensorControls = {
+                setAcceleration: (x, y, z) => {
+                    this.accelerometer = { x, y, z };
+                    this.calculateOrientation();
+                },
+                setGyroscope: (x, y, z) => {
+                    this.gyroscope = { x, y, z };
+                    this.rotating = (x !== 0 || y !== 0 || z !== 0);
+                    this.calculateOrientation();
+                },
+                setTemp: (temp) => {
+                    this.temperature = temp;
+                    const encoded = this.encodeTemperature(temp);
+                    this.memory[registers.TEMP_OUT_H.address] = (encoded >> 8) & 0xFF;
+                    this.memory[registers.TEMP_OUT_L.address] = encoded & 0xFF;
+                },
+                setOrientation: (pitch, roll, yaw) => {
+                    this.orientation = { x: yaw, y: pitch, z: roll };
+                    this.calculateOrientation();
+                }
+            };
+        }
+        addSensorNoise(value, magnitude = 0.01) {
+            return value + (Math.random() - 0.5) * magnitude;
+        }
+        encodeTemperature(celsius) {
+            return Math.round((celsius - 36.53) * 340);
+        }
+        setVector(address, vector, scalar) {
+            let writePointer = address;
+            for (const num of vector) {
+                const noisyValue = this.addSensorNoise(num);
+                const scaled = Math.round(noisyValue * scalar);
+                const msb = (scaled >> 8) & 0xFF;
+                const lsb = scaled & 0xFF;
+                this.memory[writePointer] = msb;
+                writePointer++;
+                this.memory[writePointer] = lsb;
+                writePointer++;
+            }
+        }
+        eulerToQuaternion(heading, roll, pitch) {
+            const toRadians = (degrees) => degrees * (Math.PI / 180);
+            heading = toRadians(heading);
+            roll = toRadians(roll);
+            pitch = toRadians(pitch);
+            const cy = Math.cos(heading * 0.5);
+            const sy = Math.sin(heading * 0.5);
+            const cr = Math.cos(roll * 0.5);
+            const sr = Math.sin(roll * 0.5);
+            const cp = Math.cos(pitch * 0.5);
+            const sp = Math.sin(pitch * 0.5);
+            const qw = cr * cp * cy + sr * sp * sy;
+            const qx = sr * cp * cy - cr * sp * sy;
+            const qy = cr * sp * cy + sr * cp * sy;
+            const qz = cr * cp * sy - sr * sp * cy;
+            return { w: qw, x: qx, y: qy, z: qz };
+        }
+        calculateOrientation() {
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - this.lastRead) / 1000;
+            this.lastRead = currentTime;
+            if (this.rotating && timeDiff > 0) {
+                this.orientation.x += this.gyroscope.z * timeDiff;
+                this.orientation.y += this.gyroscope.x * timeDiff;
+                this.orientation.z += this.gyroscope.y * timeDiff;
+                this.orientation.x = this.orientation.x % 360;
+                this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+                this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+                const gravityX = Math.sin(this.orientation.y * Math.PI / 180) * 9.81;
+                const gravityY = -Math.sin(this.orientation.z * Math.PI / 180) * 9.81;
+                const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
+                    Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
+                this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+            }
+            this.setVector(registers.ACCEL_XOUT_H.address, [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z], 16384 / 9.81);
+            this.setVector(registers.GYRO_XOUT_H.address, [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z], 131);
+            this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+            const quaternion = this.eulerToQuaternion(this.orientation.x, this.orientation.z, this.orientation.y);
+            this.setVector(registers.QUATERNIONW_H.address, [quaternion.w, quaternion.x, quaternion.y, quaternion.z], 16384);
+        }
+        setMotion(rotating) {
+            if (rotating) {
+                this.sensorControls.setGyroscope(0, 0, 90);
+            }
+            this.rotating = rotating;
+        }
+        setup() {
+            execute_12.AVRRunner.getInstance().board.twis[0].registerController(exports.I2C_MST_CTRL, this);
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+            }
+            this.sensorControls.setTemp(25);
+            this.calculateOrientation();
+            this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
+        }
+        cleanup() {
+            this.element.querySelector("#mpuLed").setAttribute("fill", "none");
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() {
+        }
+        i2cReadByte(acked) {
+            let byte;
+            if (this.address !== null) {
+                this.calculateOrientation();
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = acked ? (this.address + 1) % this.memory.length : null;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                if (this.address === registers.PWR_MGMT_1.address) {
+                    const isResetBitSet = ((value >> 7) & 0xFF) == 1;
+                    if (isResetBitSet) {
+                        this.reset();
+                    }
+                }
+                this.address = null;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+        reset() {
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+                else {
+                    this.memory[register.address] = 0;
+                }
+            }
+            this.memory[registers.PWR_MGMT_1.address] = 0;
+        }
+    }
+    exports.MPU6050 = MPU6050;
+});
+define("controllers/ky024", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY024 = void 0;
+    class KY024 extends controller_18.Controller {
+        constructor() {
+            super(...arguments);
+            this.gauss = 0;
+            this.isInSimulation = false;
+            this.isMagneticFieldDetected = false;
+        }
+        setGauss(gauss) {
+            if (gauss < -1000) {
+                this.gauss = -1000;
+            }
+            else if (gauss > 1000) {
+                this.gauss = 1000;
+            }
+            else {
+                this.gauss = gauss;
+            }
+            if (this.isInSimulation) {
+                this.gaussToVoltage(this.gauss);
+            }
+        }
+        setIsMagneticFieldDetected(isDetected) {
+            this.isMagneticFieldDetected = isDetected > 0;
+            if (this.isInSimulation) {
+                this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
+            }
+        }
+        setup() {
+            this.isInSimulation = true;
+            this.gaussToVoltage(this.gauss);
+        }
+        gaussToVoltage(gauss) {
+            const V_OUT = 1.0 + ((gauss + 1000) / 2000) * 3.0;
+            this.pins.analog_out[0].analog.voltage = V_OUT;
+        }
+    }
+    exports.KY024 = KY024;
+});
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY001 = void 0;
+    class KY001 extends controller_19.Controller {
+        setTemperature(temperature) {
+        }
+        setup() { }
+    }
+    exports.KY001 = KY001;
+});
+define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_13) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RGBLED = void 0;
+    class RGBLED extends controller_20.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.rLastPinState = this.pins.R[0].digital.state;
+            this.rFirstHigh = true;
+            this.rBrightness = 0;
+            this.rPeriod = 0;
+            this.rPreviousFallingEdgeCycle = 0;
+            this.rPreviousRisingEdgeCycle = 0;
+            this.rPeriodCreated = true;
+            this.gLastPinState = this.pins.G[0].digital.state;
+            this.gFirstHigh = true;
+            this.gBrightness = 0;
+            this.gPeriod = 0;
+            this.gPreviousFallingEdgeCycle = 0;
+            this.gPreviousRisingEdgeCycle = 0;
+            this.gPeriodCreated = true;
+            this.bLastPinState = this.pins.B[0].digital.state;
+            this.bFirstHigh = true;
+            this.bBrightness = 0;
+            this.bPeriod = 0;
+            this.bPreviousFallingEdgeCycle = 0;
+            this.bPreviousRisingEdgeCycle = 0;
+            this.bPeriodCreated = true;
+            this.animationFrameId = null;
+            this.pins.R[0].digital.addListener(this.rListener.bind(this));
+            this.pins.G[0].digital.addListener(this.gListener.bind(this));
+            this.pins.B[0].digital.addListener(this.bListener.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.rBrightness = 0;
+            this.gBrightness = 0;
+            this.bBrightness = 0;
+            this.renderSvg();
+        }
+        rWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.rPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.rBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.rPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.rBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        gWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.gPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.gPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        bWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.bPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.bPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        rListener(state) {
+            if (this.rPeriodCreated) {
+                this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
+                this.rPeriodCreated = false;
+            }
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.rPreviousRisingEdgeCycle = currentCycle;
+                if (this.rFirstHigh) {
+                    this.rBrightness = 0;
+                    this.rFirstHigh = false;
+                }
+                else {
+                    this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rPreviousFallingEdgeCycle)) / this.rPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.rLastPinState === avr8js_11.PinState.High) {
+                    this.rPreviousFallingEdgeCycle = currentCycle;
+                    this.rBrightness = Math.min((currentCycle - this.rPreviousRisingEdgeCycle) / this.rPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+                }
+            }
+            this.rLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        gListener(state) {
+            if (this.gPeriodCreated) {
+                this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
+                this.gPeriodCreated = false;
+            }
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.gPreviousRisingEdgeCycle = currentCycle;
+                if (this.gFirstHigh) {
+                    this.gBrightness = 0;
+                    this.gFirstHigh = false;
+                }
+                else {
+                    this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gPreviousFallingEdgeCycle)) / this.gPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.gLastPinState === avr8js_11.PinState.High) {
+                    this.gPreviousFallingEdgeCycle = currentCycle;
+                    this.gBrightness = Math.min((currentCycle - this.gPreviousRisingEdgeCycle) / this.gPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+                }
+            }
+            this.gLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        bListener(state) {
+            if (this.bPeriodCreated) {
+                this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
+                this.bPeriodCreated = false;
+            }
+            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.bPreviousRisingEdgeCycle = currentCycle;
+                if (this.bFirstHigh) {
+                    this.bBrightness = 0;
+                    this.bFirstHigh = false;
+                }
+                else {
+                    this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bPreviousFallingEdgeCycle)) / this.bPeriod, 0);
+                }
+                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.bLastPinState === avr8js_11.PinState.High) {
+                    this.bPreviousFallingEdgeCycle = currentCycle;
+                    this.bBrightness = Math.min((currentCycle - this.bPreviousRisingEdgeCycle) / this.bPeriod, 1);
+                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+                }
+            }
+            this.bLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+            const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
+            const redBlur = this.element.querySelector("#rgbRedBlur");
+            redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);
+            const greenBlur = this.element.querySelector("#rgbGreenBlur");
+            greenBlur.setAttribute("stdDeviation", `${this.gBrightness * 3}`);
+            const blueBlur = this.element.querySelector("#rgbBlueBlur");
+            blueBlur.setAttribute("stdDeviation", `${this.bBrightness * 3}`);
+            const redCircle = this.element.querySelector("#rgbRedCircle");
+            redCircle.setAttribute("r", `${this.rBrightness * 5 + 2}`);
+            redCircle.setAttribute("opacity", `${Math.min(this.rBrightness * 20, 0.3)}`);
+            const greenCircle = this.element.querySelector("#rgbGreenCircle");
+            greenCircle.setAttribute("r", `${this.gBrightness * 5 + 2}`);
+            greenCircle.setAttribute("opacity", `${Math.min(this.gBrightness * 20, 0.3)}`);
+            const blueCircle = this.element.querySelector("#rgbBlueCircle");
+            blueCircle.setAttribute("r", `${this.bBrightness * 5 + 2}`);
+            blueCircle.setAttribute("opacity", `${Math.min(this.bBrightness * 20, 0.3)}`);
+            const mixedCircle = this.element.querySelector("#rgbMixedCircle");
+            mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255}, ${this.bBrightness * 255})`);
+            mixedCircle.setAttribute("opacity", `${totalOpacity}`);
+            const hollowCircle = this.element.querySelector("#rgbHollowCircle");
+            hollowCircle.setAttribute("opacity", `${totalOpacity}`);
+            this.animationFrameId = null;
+        }
+    }
+    exports.RGBLED = RGBLED;
+});
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_14) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DCMotorL298N = void 0;
+    var MotorDirection;
+    (function (MotorDirection) {
+        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
+        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
+        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
+    })(MotorDirection || (MotorDirection = {}));
+    class DCMotorL298N extends controller_21.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.motorDirection = MotorDirection.OFF;
+            this.dutyCycle = 0;
+            this.previousFallingEdgeCycle = 0;
+            this.period = 0;
+            this.lastPinState = avr8js_12.PinState.Input;
+            this.previousRisingEdgeCycle = 0;
+            this.isFirstRisingEdge = true;
+            this.isPeriodCreated = false;
+            this.animationFrameId = null;
+            this.pins.in1[0].digital.addListener(this.in1Listener.bind(this));
+            this.pins.in2[0].digital.addListener(this.in2Listener.bind(this));
+            this.pins.ena[0].digital.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.dutyCycle = 0;
+            this.renderSvg();
+        }
+        in1Listener(state) {
+            this.setMotorDirection();
+        }
+        in2Listener(state) {
+            this.setMotorDirection();
+        }
+        setMotorDirection() {
+            const in1 = this.pins.in1[0].digital.state;
+            const in2 = this.pins.in2[0].digital.state;
+            if (in1 === in2) {
+                this.motorDirection = MotorDirection.OFF;
+            }
+            else if (in1) {
+                this.motorDirection = MotorDirection.FORWARD;
+            }
+            else {
+                this.motorDirection = MotorDirection.REVERSE;
+            }
+        }
+        watchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_12.PinState.High && this.previousFallingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 1;
+            }
+            else if (lastState === avr8js_12.PinState.Low && this.previousRisingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        onSignalChange(state) {
+            if (!this.isPeriodCreated) {
+                this.period = this.pins.ena[0].timer.getPwmPeriod();
+                console.log("period");
+                this.isPeriodCreated = true;
+            }
+            const currentCycle = execute_14.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_12.PinState.High) {
+                this.previousRisingEdgeCycle = currentCycle;
+                if (this.isFirstRisingEdge) {
+                    this.dutyCycle = 0;
+                    this.isFirstRisingEdge = false;
+                }
+                else {
+                    this.dutyCycle = Math.max((this.period - (currentCycle - this.previousFallingEdgeCycle)) / this.period, 0);
+                }
+                execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+            }
+            else if (state === avr8js_12.PinState.Low) {
+                if (this.lastPinState === avr8js_12.PinState.High) {
+                    this.previousFallingEdgeCycle = currentCycle;
+                    this.dutyCycle = Math.min((currentCycle - this.previousRisingEdgeCycle) / this.period, 1);
+                    execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                }
+            }
+            this.lastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            let dcMotor = this.element.querySelector("#shakeAnimation");
+            if (!dcMotor) {
+                const dcMotorGroup = this.element.querySelector("#dcMotorGroup");
+                const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                animateTransform.setAttribute('id', 'shakeAnimation');
+                animateTransform.setAttribute('attributeName', 'transform');
+                animateTransform.setAttribute('type', 'translate');
+                animateTransform.setAttribute('additive', 'sum');
+                animateTransform.setAttribute('from', '0 0');
+                animateTransform.setAttribute('to', '0 5');
+                animateTransform.setAttribute('dur', '0s');
+                animateTransform.setAttribute('repeatCount', '0');
+                animateTransform.setAttribute('keyTimes', '0;0.5;1');
+                animateTransform.setAttribute('values', '0 0; 0 5; 0 0');
+                dcMotorGroup.appendChild(animateTransform);
+                dcMotor = this.element.querySelector("#shakeAnimation");
+            }
+            if (this.dutyCycle === 0 || this.motorDirection === MotorDirection.OFF) {
+                dcMotor.remove();
+                this.animationFrameId = null;
+                return;
+            }
+            const speed = (1 - (0.1 + this.dutyCycle * (1 - .1))) + 0.1;
+            dcMotor.setAttribute("dur", `${speed}s`);
+            dcMotor.setAttribute("repeatCount", "indefinite");
+            this.animationFrameId = null;
+        }
+    }
+    exports.DCMotorL298N = DCMotorL298N;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
-    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () { yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight()); }));
+    window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+    }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
     window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
-    window.Servo = servo_1.Servo;
+    window.SG90 = sg90_1.SG90;
     window.HCSR501 = hcsr501_1.HCSR501;
     window.KY018 = ky018_1.KY018;
     window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
     window.KY008 = ky008_1.KY008;
     window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
     window.MQ3 = mq3_1.MQ3;
+    window.HCSR04 = hcsr04_1.HCSR04;
+    window.KY003 = ky003_1.KY003;
+    window.KY022 = ky022_1.KY022;
+    window.LED = led_1.LED;
+    window.MPU6050 = mpu6050_1.MPU6050;
+    window.KY024 = ky024_1.KY024;
+    window.KY001 = ky001_1.KY001;
+    window.RGBLED = rgbled_1.RGBLED;
+    window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
+});
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_22) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RPLidarA1M9 = void 0;
+    const RPLIDAR_CMD_STOP = 0x25;
+    const RPLIDAR_CMD_SCAN = 0x20;
+    const RPLIDAR_CMD_FORCE_SCAN = 0x21;
+    const RPLIDAR_CMD_RESET = 0x40;
+    const RPLIDAR_CMD_GET_DEVICE_INFO = 0x50;
+    const RPLIDAR_CMD_GET_DEVICE_HEALTH = 0x52;
+    const RPLIDAR_ANS_TYPE_MEASUREMENT = 0x81;
+    const RPLIDAR_ANS_TYPE_DEVINFO = 0x4;
+    const RPLIDAR_ANS_TYPE_DEVHEALTH = 0x6;
+    const RPLIDAR_STATUS_OK = 0x0;
+    const RPLIDAR_STATUS_WARNING = 0x1;
+    const RPLIDAR_STATUS_ERROR = 0x2;
+    const RPLIDAR_RESP_MEASUREMENT_SYNCBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_QUALITY_SHIFT = 2;
+    const RPLIDAR_RESP_MEASUREMENT_CHECKBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT = 1;
+    const RPLIDAR_CMD_SYNC_BYTE = 0xA5;
+    const RPLIDAR_CMDFLAG_HAS_PAYLOAD = 0x80;
+    const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
+    const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
+    const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
+    class RPLidarA1M9 extends controller_22.Controller {
+        constructor() {
+            super(...arguments);
+            this.distance = 0;
+            this.angle = 0;
+            this.serialNumber = 1;
+            this.currentCmd = null;
+            this.inSync = false;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
+        }
+        setup() {
+            this.pins.rx[0].usart.onByteTransmit = this.rxListener.bind(this);
+        }
+        rxListener(value) {
+            if (value === RPLIDAR_CMD_SYNC_BYTE && !this.inSync) {
+                this.inSync = true;
+                return;
+            }
+            if (this.inSync) {
+                if (this.currentCmd == null) {
+                    this.currentCmd = value;
+                    if (this.currentCmd == RPLIDAR_CMD_STOP ||
+                        this.currentCmd == RPLIDAR_CMD_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_FORCE_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_RESET ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_INFO ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_HEALTH) {
+                    }
+                    return;
+                }
+                else if (this.payloadSize == null) {
+                    this.payloadSize = value;
+                    return;
+                }
+                else if (this.payload.length < this.payloadSize) {
+                    this.payload.push(value);
+                    return;
+                }
+                else {
+                    this.checksum = value;
+                    return;
+                }
+            }
+            return this.notOk();
+        }
+        afterCmdFinishSelfReset() {
+            this.inSync = false;
+            this.currentCmd = null;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
+        }
+        notOk() {
+        }
+        cmdStop() {
+        }
+        cmdScan() {
+        }
+        cmdForceScan() {
+        }
+        cmdReset() {
+        }
+        cmdGetDeviceInfo() {
+        }
+        cmdGetDeviceHealth() {
+        }
+        writeBack() {
+        }
+    }
+    exports.RPLidarA1M9 = RPLidarA1M9;
 });
 //# sourceMappingURL=build.js.map

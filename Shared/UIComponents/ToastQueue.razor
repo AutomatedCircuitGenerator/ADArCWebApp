@@ -1,0 +1,73 @@
+﻿@inject ToastService ToastService
+<div style="position: absolute; left: 50%; bottom: 10%;" @onmouseover="HandleMouseOver" @onmouseleave="HandleMouseLeave">
+    @foreach (var (toast, _) in _toasts.AsEnumerable().Reverse())
+    {
+        <Toast Variant="@toast.Variant" OnClose="() => RemoveToast(toast)">@toast.Message</Toast>
+    }
+</div>
+
+@code {
+    private List<(Shared.Toast Toast, Timer Timer)> _toasts = []; // Store toasts and their timeouts
+
+    protected override void OnInitialized()
+    {
+        ToastService.ToastAdded += OnToastAdded;
+    }
+
+    private void OnToastAdded(Shared.Toast toast)
+    {
+        var timeout = Math.Min(Math.Max(toast.Message.Length * 50, 2000), 8000);
+        var timer = new Timer(RemoveToast, toast, timeout, Timeout.Infinite);
+        _toasts.Add((toast, timer));
+        
+        if (toast.Components != null)
+        {
+            foreach (var component in toast.Components)
+            {
+                component.Highlight = toast.Variant;
+            }
+        }
+        
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void RemoveToast(object? state)
+    {
+        if (state is not Shared.Toast toast) return;
+
+        var entry = _toasts.FirstOrDefault(t => t.Toast == toast);
+        if (entry != default)
+        {
+            entry.Timer.Dispose(); // Dispose the timer to free resources
+            _toasts.Remove(entry); // Remove the timer entry from the list
+        }
+
+        if (toast.Components != null)
+        {
+            foreach (var component in toast.Components)
+            {
+                component.Highlight = null;
+            }
+        }
+
+        // Trigger a UI update
+        InvokeAsync(StateHasChanged);
+    }
+
+    private void HandleMouseOver()
+    {
+        foreach (var toast in _toasts)
+        {
+            toast.Timer.Change(Timeout.Infinite, Timeout.Infinite);
+        }
+    }
+
+    private void HandleMouseLeave()
+    {
+        foreach (var toast in _toasts)
+        {
+            toast.Timer.Change(3000, Timeout.Infinite);
+        }
+    }
+
+}

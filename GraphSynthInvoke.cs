@@ -1,30 +1,29 @@
-﻿using ADArCWebApp;
-using GraphSynth.Representation;
-using GraphSynth.Search;
+﻿using GraphSynth.Representation;
 using Microsoft.AspNetCore.Components;
-using System.Linq;
-using System.Xml.Linq;
+using ADArCWebApp.Shared.Exceptions;
+using ADArCWebApp.Shared;
 
 namespace ADArCWebApp
 {
-    public static class GraphSynthInvoke
+    public class GraphSynthInvoke
     {
-
-
         //Dictionary<string, ruleSet> rulesets = new() {
         //    {"add", null },
         //    {"connect1", null}
         //};
-        static Dictionary<string, ruleSet> rulesets = RuleSetMap.rulesets;
+        public Dictionary<string, ruleSet> rulesets { get; set; }
 
         //inputs from user selecting components
-        public static List<string> inputs = new();
+        public readonly List<string> Inputs = [];
 
-        static designGraph seed = new();
+        private designGraph seed = new();
+
+        [Inject] private ToastService? ToastService { get; set; }
 
 
-        public static void destroyGraph() {
-            seed = new();
+        public void DestroyGraph()
+        {
+            seed = new designGraph();
         }
 
         /// <summary>
@@ -33,69 +32,67 @@ namespace ADArCWebApp
         /// TODO: improve.
         /// </summary>
         /// <param name="Inputs">A list of graphsynth node names with their "user_" prefix missing.</param>
-        public static void makeGraph(List<string> Inputs)
+        private void MakeGraph(List<string> Inputs)
         {
             //designGraph Graph = new designGraph();
-            inputs.AddRange(Inputs);
-            for (int i = 0; i < Inputs.Count; i++)
+            this.Inputs.AddRange(Inputs);
+            foreach (var t in Inputs)
             {
                 node n = new();
-                n.setLabel(0, "user_" + Inputs[i]);
+                n.setLabel(0, "user_" + t);
                 seed.addNode(n);
                 //seed.nodes[i].setLabel(0, "user_"+inputs[i]);
             }
         }
+
         //apply the GraphSynth rules
-        static public void recg_apply(List<string>? fInp = null)
+        public void RecgApply(List<string>? fInp = null)
         {
-            if (fInp != null) { 
-                makeGraph(fInp);
+            if (fInp != null)
+            {
+                MakeGraph(fInp);
             }
+
             if (seed.nodes.Count == 0)
             {
-                makeGraph(inputs);
+                MakeGraph(Inputs);
             }
+
             ruleSet r = new();
             ruleSet connect = rulesets["CONNECT"];
-            for(int i = 0; i < connect.rules.Count; i++)
+            foreach (var t in connect.rules)
             {
-                for(int j = 0; j < inputs.Count; j++)
+                var j = Inputs.Count - 1;
+                //edit the names to avoid adding rules that have common words in their name
+                if (Inputs[j].Contains("servo") && Inputs[j].Contains("direct"))
                 {
-                    //edit the names to avoid adding rules that have common words in their name
-                    if (inputs[j].Contains("servo") && inputs[j].Contains("direct"))
-                    {
-                        inputs[j] = "servo";
-                    }
-                    else if (inputs[j].Contains("pca9685"))
-                    {
-                        inputs[j] = "pca9685";
-                    }
-                    else if (inputs[j].Contains("l298n"))
-                    {
-                        inputs[j] = "l298n";
-                    }
-                    else if (inputs[j].Contains("a4988"))
-                    {
-                        inputs[j] = "a4988";
-                    }
-                    else if (inputs[j].Contains("lm386"))
-                    {
-                        inputs[j] = "lm386";
-                    }
-                    else if (inputs[j].Contains("hx711"))
-                    {
-                        inputs[j] = "hx711";
-                    }
+                    Inputs[j] = "servo";
+                }
+                else if (Inputs[j].Contains("pca9685"))
+                {
+                    Inputs[j] = "pca9685";
+                }
+                else if (Inputs[j].Contains("l298n"))
+                {
+                    Inputs[j] = "l298n";
+                }
+                else if (Inputs[j].Contains("a4988"))
+                {
+                    Inputs[j] = "a4988";
+                }
+                else if (Inputs[j].Contains("lm386"))
+                {
+                    Inputs[j] = "lm386";
+                }
+                else if (Inputs[j].Contains("hx711"))
+                {
+                    Inputs[j] = "hx711";
+                }
 
-                    if (connect.rules[i].name.Contains(inputs[j]))
-                    {
-                        if (!r.rules.Contains(connect.rules[i])){
-                            r.Add(connect.rules[i]);
-                            Console.WriteLine(connect.rules[i].name);
-						}
-                    }
-
-				}
+                if (!t.name.Contains(Inputs[j])) continue;
+                if (r.rules.Contains(t)) continue;
+                r.Add(t);
+                Console.WriteLine(t.name);
             }
 
             //Console.WriteLine(r.rules.Count);
@@ -107,53 +104,228 @@ namespace ADArCWebApp
                 options[0].apply(seed, null);
                 options = rulesets["ADD"].recognize(seed, true);
             }
-            //Console.WriteLine(options.Count);
-            Console.WriteLine("adding ends");
-            options = r.recognize(seed, true);      //also overwrites the add ruleset with the connect set
+
+            // this entire region is essentially a replacement to the "recognize/apply" algorithm for setting
+            // up the connections for the newly created component. This was required due to performance issues
+            // on larger boards (Mega) where the number of options generated by recognize was too high.
+        }
+
+        public void Add()
+        {
+            List<option> options = rulesets["ADD"].recognize(seed, true);
+
             while (options.Count > 0)
             {
-                Console.WriteLine(options.Count);
                 options[0].apply(seed, null);
-				options = r.recognize(seed, true);
-                
+                options = rulesets["ADD"].recognize(seed, true);
             }
-			Console.WriteLine("connecting ends");
-            Console.WriteLine(seed.nodes.Count);
+        }
+
+        /// <summary>
+        /// Sets up connections between the node of a newly added component, and the component it is connecting to
+        /// </summary>
+        /// <param name="from">The label which identifies the node of the component that has just been added</param>
+        /// <param name="to">The label which identifies the node of the component we are connecting to. By default, arduino</param>
+        /// <param name="selector">An algorithm to pick a node from a list of nodes given the labels we are looking for. Can be used
+        /// to set up preferential picking, like reserving some pins till later.</param>
+        /// <exception cref="RuleNotFoundException"></exception>
+        /// <exception cref="NoConnectionsException"></exception>
+        public bool Connect(string from, string to = "arduino",
+            Func<List<node>, HashSet<string>, node?>? selector = null)
+        {
+            ruleSet connect = rulesets["CONNECT"];
+            var ruleName = from + "_" + to;
+            grammarRule? rule = connect.rules.Find(r => r.name.Contains(ruleName));
+
+            if (rule == null)
+            {
+                throw new RuleNotFoundException(ruleName);
+            }
+
+            node? fromNode = null;
+            node? toNode = null;
+
+
+            for (var i = seed.nodes.Count - 1; i >= 0; i--)
+            {
+                if (seed.nodes[i].localLabels.Contains(from) &&
+                    !seed.nodes[i].localLabels.Any(l => l.Contains("localId:")))
+                {
+                    fromNode = seed.nodes[i];
+                }
+                else if (seed.nodes[i].localLabels.Contains(to))
+                {
+                    toNode = seed.nodes[i];
+                }
+            }
+
+            var fromNodes = fromNode?.arcsTo.Select(arc => arc.From)
+                .Concat(fromNode.arcsFrom.Select(arc => arc.To))
+                .ToList();
+            var toNodes = toNode?.arcsTo.Select(arc => arc.From)
+                .Concat(toNode.arcsFrom.Select(arc => arc.To))
+                .ToList();
+
+            List<arc> connections = [];
+            foreach (var arc in rule.R.arcs)
+            {
+                // only look at arcs that represent new connections
+                if (!arc.localLabels.Contains("connection")) continue;
+                var isFrom = (arc.From.arcsFrom.Any(a => a.To.localLabels.Contains(to)) ||
+                              arc.From.arcsTo.Any(a => a.From.localLabels.Contains(to)));
+
+                // this is to figure out which side of the arc is the arduino's pin and which is the component's
+                var ruleToNode = isFrom ? arc.From : arc.To;
+                var ruleFromNode = isFrom ? arc.To : arc.From;
+
+                // we do a lot of comparisons using these labels later, so put them in a HashSet 
+                // will be more performant on checks like Contains
+                var ruleToNodeLabels = new HashSet<string>(ruleToNode.localLabels);
+                var ruleFromNodeLabels = new HashSet<string>(ruleFromNode.localLabels);
+                // remove the connected labels, remembering whether it was present in the arduino node (unique connection)
+                var uniqueConnection = ruleToNodeLabels.Contains("connected");
+                ruleToNodeLabels.Remove("connected");
+                ruleFromNodeLabels.Remove("connected");
+
+                // finding the equivalent nodes in the actual graph
+                node? matchedToNode;
+                if (selector != null)
+                {
+                    matchedToNode = selector.Invoke(toNodes, ruleToNodeLabels);
+                }
+                else
+                {
+                    matchedToNode = toNodes.Find(n =>
+                        ruleToNodeLabels.IsSubsetOf(n.localLabels) &&
+                        !n.localLabels.Contains("connected"));
+                }
+                var matchedFromNode = fromNodes.Find(n =>
+                    ruleFromNodeLabels.IsSubsetOf(n.localLabels) && !n.localLabels.Contains("connected"));
+
+                // if we find a match, create the connection
+                if (matchedFromNode != null && matchedToNode != null)
+                {
+                    // if the connection is intended to be unique (marked as "connected") we add the label back
+                    if (uniqueConnection)
+                    {
+                        matchedToNode.localLabels.Add("connected");
+                    }
+
+                    var newArc = new arc
+                    {
+                        From = matchedFromNode,
+                        To = matchedToNode,
+                        localLabels = arc.localLabels
+                    };
+
+                    connections.Add(newArc);
+                }
+                else
+                {
+                    return false;
+                }
+            }
+
+            foreach (var connection in connections)
+            {
+                seed.addArc(connection, connection.From, connection.To);
+            }
+
+            return true;
+        }
+
+        public void RemoveConnectedComponent(node n)
+        {
+            var visitedNodes = new HashSet<node>(); // Keeps track of visited nodes
+            var queue = new Queue<node>(); // Queue for BFS
+            var arcsToRemove = new HashSet<arc>(); // Collect arcs to delete
+
+            queue.Enqueue(n);
+            visitedNodes.Add(n);
+
+            while (queue.Count > 0)
+            {
+                var currentNode = queue.Dequeue();
+
+                // Collect arcsTo and arcsFrom
+                var outgoingArcs = currentNode.arcsTo;
+                var incomingArcs = currentNode.arcsFrom;
+
+                // Add all arcs to the set of arcs to remove
+                arcsToRemove.UnionWith(outgoingArcs);
+                arcsToRemove.UnionWith(incomingArcs);
+
+                // Get connected nodes
+                var connectedNodes = outgoingArcs.Select(arc => arc.To)
+                    .Concat(incomingArcs.Select(arc => arc.From));
+
+                // Visit all unvisited connected nodes
+                foreach (var connectedNode in connectedNodes)
+                {
+                    if (visitedNodes.Add(connectedNode))
+                    {
+                        queue.Enqueue(connectedNode);
+                    }
+                }
+            }
+
+            // Remove all arcs in the connected component
+            foreach (var arc in arcsToRemove)
+            {
+                seed.removeArc(arc);
+            }
+
+            // Remove all nodes in the connected component
+            foreach (var node in visitedNodes)
+            {
+                seed.removeNode(node);
+            }
         }
 
         /// <summary>
         /// This function removes the component from the seed graph.
         /// </summary>
         /// <param name="n">A node that belongs to the component being removed.</param>
-        static public void removeComp(node n)
+        public  void RemoveComp(node n)
         {
-            if (n == null) {
+            if (n == null)
+            {
                 return;
             }
-			string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
-			foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
+
+            string localId = n.localLabels.Find(s => s.StartsWith("localId:"));
+            foreach (var nodeToRemove in seed.nodes.Where(n => n.localLabels.Contains(localId)).ToList())
             {
-                foreach (arc arcToRemove in nodeToRemove.arcs.ToList())
+                foreach (var graphElement in nodeToRemove.arcs.ToList())
                 {
+                    var arcToRemove = (arc)graphElement;
                     arcToRemove.otherNode(nodeToRemove).localLabels.Remove("connected");
+                    if (arcToRemove.otherNode(nodeToRemove).degree == 2)
+                    {
+                        arcToRemove.otherNode(nodeToRemove).localLabels.Remove("bus");
+                    }
+
                     seed.removeArc(arcToRemove);
                 }
-				seed.removeNode(nodeToRemove);
-			}
+
+                seed.removeNode(nodeToRemove);
+            }
         }
+
         /// <summary>
-		/// Returns the arcs of seed
-		/// </summary>
-		/// <returns>A list of arcs</returns>
-        static public List<arc> GetArcs()
+        /// Returns the arcs of seed
+        /// </summary>
+        /// <returns>A list of arcs</returns>
+        public  List<arc> GetArcs()
         {
             return seed.arcs;
         }
+
         /// <summary>
-		/// Returns the nodes of seed
-		/// </summary>
-		/// <returns>A list of nodes</returns>
-        static public List<node> GetNodes()
+        /// Returns the nodes of seed
+        /// </summary>
+        /// <returns>A list of nodes</returns>
+        public  List<node> GetNodes()
         {
             return seed.nodes;
         }

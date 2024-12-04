@@ -1,0 +1,77 @@
+div {
+    border-radius: 5px;
+    position: relative;
+    left: 10%;
+    margin-top: 5px;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+    gap: 10px;
+    padding: 5px 10px;
+    justify-content: center;
+    align-items: center;
+    border-style: solid;
+    border-width: 2px;
+    background-color: hsl(198deg 64.52% 87.84%);
+    color: hsl(204.83deg 41.63% 40.98%);
+    border-color: hsl(204.83deg 41.63% 40.98%);
+    transition: opacity 0.5s ease, transform 0.5s ease;
+    opacity: 1;
+}
+
+div.fade-out {
+    opacity: 0;
+    transform: translateY(20px);
+}
+
+svg {
+    width: 2rem;
+}
+
+div.error {
+    background-color: #ebc8c4;
+    color: #ae2e28;
+    border-color: #c49797;
+}
+
+div.warning {
+    background-color: hsl(51.18deg 70.83% 90.59%);
+    color: hsl(39.29deg 43.3% 38.04%);
+    border-color: hsl(39.29deg 43.3% 38.04%);
+}
+
+p {
+    margin: 0;
+    line-height: 1.5;
+}
+
+button {
+    font-weight: bold;
+    background-color: transparent;
+    border: none;
+    vertical-align: middle;
+    margin-left: 5px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    line-height: 1.5;
+    margin-top: 2px;
+    color: hsl(200.87deg 37.1% 75.69%);
+}
+
+button.error {
+    color: #c49797;
+}
+
+button.warning {
+    color: hsl(37.02deg 47.47% 38.82%);
+}
+
+.fade-out {
+    opacity: 0;
+    transition: opacity 1s ease-in-out;
+}
+
+.hidden {
+    display: none;
+}

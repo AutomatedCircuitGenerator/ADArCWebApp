@@ -1,257 +1,42 @@
-﻿@code {
-    [Parameter] public bool led1 { get; set; } = false;
+﻿@inherits RazorComponent
+
+@code {
+    private string _motion = "Static";
+
     [Parameter]
-    public int x { get; set; }
-    [Parameter]
-    public int y { get; set; }
-    [Parameter]
-    public int z { get; set; }
+    [DropdownSetting(["Static", "Rotating"])]
+    public string motion
+    {
+        get => _motion;
+        set
+        {
+            var hasChanged = !_motion.Equals(value);
+            _motion = value;
+            if (Controller is not null && hasChanged)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion == "Rotating"); });
+            }
+        }
+    }
+
     public static ElementPin[] pinInfo
     {
         get
         {
             return new ElementPin[]
             {
-                new ElementPin( name: "VCC", x: 101, y: 32.78, number: 13, signals: new PinSignalInfo[]{ PinSignalInfo.GND() } ),
-                new ElementPin( name: "GND", x: 91, y: 32.78, number: 12, signals: new PinSignalInfo[]{ PinSignalInfo.VCC() } ),
-                new ElementPin( name: "SCL", x: 81, y: 32.78, number: 11, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) } ),
-                new ElementPin( name: "SDA", x: 71, y: 32.78, number: 10, signals: new PinSignalInfo[]{ PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) } ),
-                new ElementPin( name: "XDA", x: 36.0, y: 5.78, number: 10, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "XCL", x: 26.4, y: 5.78, number: 9, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "AD0", x: 16.9, y: 5.78, number: 8, signals: new PinSignalInfo[]{} ),
-                new ElementPin( name: "INT", x: 7.28, y: 5.78, number: 7, signals: new PinSignalInfo[]{} ),
-                
-                
-                
-                
-                
-                
-                
+                new ElementPin(name: "5V", x: 100, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+                new ElementPin(name: "gnd", x: 90, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
+                new ElementPin(name: "scl", x: 80, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, number: 3),
+                new ElementPin(name: "sda", x: 70, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, number: 4),
+                new ElementPin(name: "xda", x: 60, y: 30, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "xcl", x: 50, y: 30, signals: new PinSignalInfo[] { }, number: 6),
+                new ElementPin(name: "add", x: 40, y: 30, signals: new PinSignalInfo[] { }, number: 7),
+                new ElementPin(name: "int", x: 30, y: 30, signals: new PinSignalInfo[] { }, number: 8),
             };
         }
     }
-    static int TwosComplement8Bits(int number)
-    {
-        // Apply 2's complement operation
-        int complement = (~number + 1) & 0xFF; // Masking to keep only the 8 least significant bits
 
-        return complement;
-    }
-
-    static Dictionary<int, int> getReg(ComponentInstance comp)
-    {
-        Dictionary<int, int> register = new Dictionary<int, int>
-        {
-            { 0x3B, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF00 >> 8 },//ACCEL_XOUT_H
-            { 0x3C, TwosComplement8Bits((int)comp.compParams["x"].getValue()) & 0xFF },//ACCEL_XOUT_L
-            { 0x3D, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF00 >> 8 },//ACCEL_YOUT_H
-            { 0x3E, TwosComplement8Bits((int)comp.compParams["y"].getValue()) & 0xFF },//ACCEL_YOUT_L
-            { 0x3F, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF00 >> 8 },//ACCEL_ZOUT_H
-            { 0x40, TwosComplement8Bits((int)comp.compParams["z"].getValue()) & 0xFF },//ACCEL_ZOUT_L
-            { 0x41, 0 },//TEMP_OUT_H
-            { 0x42, 0 },//TEMP_OUT_L
-            { 0x43, 0 },//GYRO_XOUT_H
-            { 0x44, 0 },//GYRO_XOUT_L
-            { 0x45, 0 },//GYRO_YOUT_H
-            { 0x46, 0 },//GYRO_YOUT_L
-            { 0x47, 0 },//GYRO_ZOUT_H
-            { 0x48, 0 },//GYRO_ZOUT_L
-        };
-
-        return register;
-    }
-
-    public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    {
-        bool sda = false;
-        bool scl = false;
-        if (0 == comp.getConnection("SDA", out InstanceConnection? conn, out List<InstanceConnection>? all))
-        {
-            sda = await AvrCPU.getPinState(conn!.toId);
-        }
-        if (0 == comp.getConnection("SCL", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-        {
-            scl = await AvrCPU.getPinState(conn2!.toId);
-        }
-
-        //
-        if (sda && scl && comp.midSignal == 0)//before start, scl and sda pulled-up
-        {
-            comp.midSignal = 1;
-        }
-        if (!sda && scl && comp.midSignal == 1)//HIGH-to-LOW on SDA, start condition
-        {
-            comp.midSignal = 2;
-            comp.counter = 0;
-            comp.Wbuffer = 0;
-            comp.byteIndex = 7;
-        }
-        if (!sda && !scl && comp.midSignal == 2)//wait until first LOW for scl ends
-        {
-            comp.midSignal = 3;
-        }
-        if (scl && comp.midSignal == 3)//HIGH on scl, read data on sda
-        {
-            comp.midSignal = 4;
-            comp.Wbuffer = comp.Wbuffer << 1 | (sda ? 1 : 0);//store data in Wbuffer, HIGH = 1, LOW = 0
-            comp.counter++;
-        }
-        if (!scl && comp.midSignal == 4)
-        {
-            comp.midSignal = 3;
-
-            if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000 && comp.Wbuffer % 2 == 1)//CHECK THE ADDRESS HERE! the read/write set to 1 signifying read
-            {
-                comp.midSignal = 17;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else if (comp.counter == 8 && (comp.Wbuffer >> 1) == 0b1101000)//CHECK THE ADDRESS HERE! device address matched 0b1101000 for MPU6050
-            {
-                comp.midSignal = 5;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else if (comp.counter == 16 && getReg(comp).ContainsKey(comp.Wbuffer & 0xFF))
-            {
-                comp.midSignal = 6;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-            else//here it is assumed that the master will always pull sda to HIGH, might not be true
-            {
-                comp.midSignal = 99;//not this device, go wait until the communication ends
-            }
-        }
-        if (!sda && scl && comp.midSignal == 5)//ACK by Slave after slave device address
-        {
-            comp.midSignal = 4;
-        }
-        if (!sda && scl && comp.midSignal == 6)//ACK by Slave after register address
-        {
-            comp.midSignal = 7;
-        }
-        if (!sda && !scl && comp.midSignal == 7)//scl LOW after ACK
-        {
-            comp.RegAddr = comp.Wbuffer & 0xFF;
-            comp.Wbuffer = 0;
-            comp.midSignal = 8;
-        }
-        if (!sda && scl && comp.midSignal == 8)
-        {
-            comp.midSignal = 12;
-        }
-        if (!sda && !scl && comp.midSignal == 12)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-        if (sda && !scl && comp.midSignal == 8)
-        {
-            comp.midSignal = 9;
-        }
-        if (sda && scl && comp.midSignal == 9)
-        {
-            comp.midSignal = 10;
-        }
-        if (!sda && scl && comp.midSignal == 10)
-        {
-            comp.midSignal = 1;//repeated start
-        }
-        if (sda && !scl && comp.midSignal == 10)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 1;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-        if (!scl && comp.midSignal == 11)
-        {
-            comp.midSignal = 8;
-            if (comp.counter == 0)//the read/write set to 1 signifying read
-            {
-                comp.midSignal = 13;
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//set sda to LOW to prepare ACK by Slave
-            }
-        }
-
-        //Slave sends data to master
-        if (scl && comp.midSignal == 17)
-        {
-            int a = getReg(comp)[comp.RegAddr] >> comp.byteIndex;
-            comp.byteIndex--;
-            if (a % 2 == 1)
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);
-            }
-            else
-            {
-                AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
-            }
-            comp.midSignal = 18;
-            if (comp.byteIndex == 0)
-            {
-                comp.midSignal = 19;
-            }
-        }
-        if (!scl && comp.midSignal == 18)
-        {
-            comp.midSignal = 17;
-        }
-        if (!scl && comp.midSignal == 19)
-        {
-            comp.midSignal = 20;
-        }
-        if (scl && comp.midSignal == 20)
-        {
-            if (sda)
-            {
-                comp.midSignal = 14;
-            }
-            else
-            {
-                comp.midSignal = 18;
-            }
-        }
-
-        if (!sda && scl && comp.midSignal == 13)//ACK by Slave after writing a byte
-        {
-            comp.midSignal = 14;
-        }
-        if (!scl && !sda && comp.midSignal == 14)
-        {
-            comp.midSignal = 15;
-        }
-        if (scl && !sda && comp.midSignal == 15)
-        {
-            comp.midSignal = 16;
-        }
-        if (scl && sda && comp.midSignal == 16)//stop condition
-        {
-            comp.midSignal = 0;
-            getReg(comp)[comp.RegAddr] = comp.Wbuffer;//write data into register
-        }
-        if (!scl && !sda && comp.midSignal == 16)
-        {
-            comp.Wbuffer = comp.Wbuffer << 1 | 0;//store data in midSignal, HIGH = 1, LOW = 0
-            comp.counter++;
-            comp.midSignal = 11;
-        }
-
-        if (!scl && !sda && comp.midSignal == 99)
-        {
-            comp.midSignal = 100;
-        }
-        if (scl && !sda && comp.midSignal == 100)
-        {
-            comp.midSignal = 101;
-        }
-        if (scl && sda && comp.midSignal == 101)//stop condition
-        {
-            comp.midSignal = 0;
-        }
-        else
-        {
-            comp.midSignal = 99;
-        }
-    }
 }
 
 <svg width="21.6mm"
@@ -264,100 +49,97 @@
     <defs>
         <pattern id="pin-pattern" height="2.1" width="14" patternUnits="userSpaceOnUse">
             <path d=" m2.09 1.32c0.124 0 0.243-0.049 0.331-0.137 0.086-0.086 0.137-0.206 0.137-0.33v-0.387c0-0.124-0.050-0.242-0.137-0.33-0.087-0.087-0.207-0.137-0.331-0.137h-1.62v1.32z"
-                  fill="#f5f9f0" />
+                  fill="#f5f9f0"/>
         </pattern>
     </defs>
 
     <!-- Board -->
     <path d="m81.6 0h-81.6v61.2h81.6zm-10 44.9c3.8 0 6.88 3.08 6.88 6.88 0 3.8-3.08 6.89-6.88 6.89-3.8 0-6.89-3.09-6.89-6.89 0-3.8 3.09-6.88 6.89-6.88zm-61.6 0c3.8 0 6.89 3.08 6.89 6.88 0 3.8-3.09 6.89-6.89 6.89-3.8 0-6.88-3.09-6.88-6.89 0-3.8 3.08-6.88 6.88-6.88zm-2.74-41.9c1.55 0 2.81 1.26 2.81 2.81s-1.26 2.8-2.81 2.8-2.8-1.26-2.8-2.8 1.26-2.81 2.8-2.81zm19.2 0c1.55 0 2.81 1.26 2.81 2.81s-1.26 2.8-2.81 2.8c-1.55 0-2.8-1.26-2.8-2.8s1.26-2.81 2.8-2.81zm-9.58 0c1.55 0 2.81 1.26 2.81 2.81s-1.26 2.8-2.81 2.8c-1.55 0-2.8-1.26-2.8-2.8s1.26-2.81 2.8-2.81zm19.2 0c1.55 0 2.81 1.26 2.81 2.81s-1.26 2.8-2.81 2.8c-1.55 0-2.8-1.26-2.8-2.8s1.26-2.81 2.8-2.81zm9.58 0c1.55 0 2.8 1.26 2.8 2.81s-1.26 2.8-2.8 2.8c-1.55 0-2.81-1.26-2.81-2.8s1.26-2.81 2.81-2.81zm19.2 0c1.55 0 2.8 1.26 2.8 2.81s-1.26 2.8-2.8 2.8-2.81-1.26-2.81-2.8 1.26-2.81 2.81-2.81zm-9.58 0c1.55 0 2.8 1.26 2.8 2.81s-1.26 2.8-2.8 2.8c-1.55 0-2.81-1.26-2.81-2.8s1.26-2.81 2.81-2.81zm19.2 0c1.55 0 2.8 1.26 2.8 2.81s-1.26 2.8-2.8 2.8c-1.55 0-2.81-1.26-2.81-2.8s1.26-2.81 2.81-2.81z"
-          fill="#16619d" />
+          fill="#16619d"/>
 
     <!-- Right Chip -->
     <g fill="#fefdf4">
-        <rect x="74.5" y="23.1" width="2.01" height="4.81" />
-        <rect x="67.8" y="33" width="2.01" height="4.81" />
-        <rect x="71.2" y="23.1" width="2.01" height="4.81" />
-        <rect x="67.8" y="23.1" width="2.01" height="4.81" />
-        <rect x="74.5" y="33" width="2.01" height="4.81" />
+        <rect x="74.5" y="23.1" width="2.01" height="4.81"/>
+        <rect x="67.8" y="33" width="2.01" height="4.81"/>
+        <rect x="71.2" y="23.1" width="2.01" height="4.81"/>
+        <rect x="67.8" y="23.1" width="2.01" height="4.81"/>
+        <rect x="74.5" y="33" width="2.01" height="4.81"/>
     </g>
     <g fill="#31322e">
-        <rect x="74.5" y="25.5" width="2.01" height="2.4" />
-        <rect x="67.8" y="33" width="2.01" height="2.4" />
-        <rect x="71.2" y="25.5" width="2.01" height="2.4" />
-        <rect x="67.8" y="25.5" width="2.01" height="2.4" />
-        <rect x="74.5" y="33" width="2.01" height="2.4" />
+        <rect x="74.5" y="25.5" width="2.01" height="2.4"/>
+        <rect x="67.8" y="33" width="2.01" height="2.4"/>
+        <rect x="71.2" y="25.5" width="2.01" height="2.4"/>
+        <rect x="67.8" y="25.5" width="2.01" height="2.4"/>
+        <rect x="74.5" y="33" width="2.01" height="2.4"/>
     </g>
 
     <!-- Resistors -->
     <g fill="#e5e5e5">
-        <rect x="12" y="21.3" width="3.83" height="9.3" />
-        <rect x="17.7" y="21.3" width="3.83" height="9.3" />
-        <rect x="56.5" y="21.3" width="3.83" height="9.3" />
-        <rect x="51.2" y="21.3" width="3.83" height="9.3" />
-        <rect x="17.7" y="35.6" width="3.83" height="9.3" />
-        <rect x="23.3" y="21.3" width="3.83" height="9.3" />
-        <rect x="62.2" y="21.3" width="3.83" height="9.3" />
-        <rect x="51.2" y="35.8" width="3.83" height="9.3" />
-        <rect x="56.9" y="35.8" width="3.83" height="9.3" />
+        <rect x="12" y="21.3" width="3.83" height="9.3"/>
+        <rect x="17.7" y="21.3" width="3.83" height="9.3"/>
+        <rect x="56.5" y="21.3" width="3.83" height="9.3"/>
+        <rect x="51.2" y="21.3" width="3.83" height="9.3"/>
+        <rect x="17.7" y="35.6" width="3.83" height="9.3"/>
+        <rect x="23.3" y="21.3" width="3.83" height="9.3"/>
+        <rect x="62.2" y="21.3" width="3.83" height="9.3"/>
+        <rect x="51.2" y="35.8" width="3.83" height="9.3"/>
+        <rect x="56.9" y="35.8" width="3.83" height="9.3"/>
     </g>
-    <path d="m76 42.6v-3.13h-7.59v3.13z" fill="#fefdf4" />
-    <rect x="23.1" y="35.6" width="3.83" height="9.3" fill="#e5e5e5" />
+    <path d="m76 42.6v-3.13h-7.59v3.13z" fill="#fefdf4"/>
+    <rect x="23.1" y="35.6" width="3.83" height="9.3" fill="#e5e5e5"/>
 
     <g fill="#26232b">
-        <rect x="17.7" y="23.4" width="3.83" height="5.31" />
-        <rect x="56.5" y="23.4" width="3.83" height="5.31" />
-        <rect x="51.2" y="23.4" width="3.83" height="5.31" />
-        <rect x="17.7" y="37.7" width="3.83" height="5.31" />
+        <rect x="17.7" y="23.4" width="3.83" height="5.31"/>
+        <rect x="56.5" y="23.4" width="3.83" height="5.31"/>
+        <rect x="51.2" y="23.4" width="3.83" height="5.31"/>
+        <rect x="17.7" y="37.7" width="3.83" height="5.31"/>
     </g>
     <g fill="#d8c18d">
-        <rect x="23.3" y="23.4" width="3.83" height="5.31" />
-        <rect x="62.2" y="23.4" width="3.83" height="5.31" />
-        <rect x="51.2" y="37.8" width="3.83" height="5.31" />
-        <rect x="56.9" y="37.8" width="3.83" height="5.31" />
-        <path d="m74.3 42.6v-3.13h-4.33v3.13z" />
+        <rect x="23.3" y="23.4" width="3.83" height="5.31"/>
+        <rect x="62.2" y="23.4" width="3.83" height="5.31"/>
+        <rect x="51.2" y="37.8" width="3.83" height="5.31"/>
+        <rect x="56.9" y="37.8" width="3.83" height="5.31"/>
+        <path d="m74.3 42.6v-3.13h-4.33v3.13z"/>
     </g>
     <g>
-        <rect x="23.1" y="37.7" width="3.83" height="5.31" fill="#a06352" />
-        <rect x="31.8" y="47.1" width="15.6" height="6.03" fill="#f3c338" />
-        <rect x="67.3" y="27.9" width="9.76" height="5.28" fill="#010303" />
+        <rect x="23.1" y="37.7" width="3.83" height="5.31" fill="#a06352"/>
+        <rect x="31.8" y="47.1" width="15.6" height="6.03" fill="#f3c338"/>
+        <rect x="67.3" y="27.9" width="9.76" height="5.28" fill="#010303"/>
     </g>
 
     <!-- MPU6050 Chip -->
-    <rect transform="translate(47,26)" width="5" height="14.5" fill="url(#pin-pattern)" />
+    <rect transform="translate(47,26)" width="5" height="14.5" fill="url(#pin-pattern)"/>
     <rect transform="translate(32.3,40) rotate(180)"
           width="5"
           height="14.5"
-          fill="url(#pin-pattern)" />
+          fill="url(#pin-pattern)"/>
     <rect transform="translate(46.5,40.7) rotate(90)"
           width="5"
           height="14.5"
-          fill="url(#pin-pattern)" />
+          fill="url(#pin-pattern)"/>
     <rect transform="translate(32.3,26) rotate(270)"
           width="5"
           height="14.5"
-          fill="url(#pin-pattern)" />
-    <rect x="31.8" y="25.4" width="15.6" height="15.6" />
+          fill="url(#pin-pattern)"/>
+    <rect x="31.8" y="25.4" width="15.6" height="15.6"/>
 
     <!-- LED -->
-    <rect x="12" y="23.4" width="3.83" height="5.31" fill="#f5ecde" />
+    <rect x="12" y="23.4" width="3.83" height="5.31" fill="#f5ecde"/>
     <filter id="ledFilter" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="2" />
+        <feGaussianBlur stdDeviation="2"/>
     </filter>
-    @if (led1)
-    {
-        <circle cx="13.9" cy="25.5" r="3.5" fill="#80ff80" filter="url(#ledFilter)" />
-    }
+    <circle id="mpuLed" cx="13.9" cy="25.5" r="3.5" fill="none" filter="url(#ledFilter)"/>
 
     <!-- PCB Pins-->
     <g fill="none" stroke="#d0ae88" stroke-width=".648px">
-        <circle cx="64.8" cy="5.78" r="2.81" />
-        <circle cx="55.2" cy="5.78" r="2.81" />
-        <circle cx="45.6" cy="5.78" r="2.81" />
-        <circle cx="36" cy="5.78" r="2.81" />
-        <circle cx="26.4" cy="5.78" r="2.81" />
-        <circle cx="16.9" cy="5.78" r="2.81" />
-        <circle cx="7.28" cy="5.78" r="2.81" />
-        <circle cx="74.4" cy="5.78" r="2.81" />
+        <circle cx="64.8" cy="5.78" r="2.81"/>
+        <circle cx="55.2" cy="5.78" r="2.81"/>
+        <circle cx="45.6" cy="5.78" r="2.81"/>
+        <circle cx="36" cy="5.78" r="2.81"/>
+        <circle cx="26.4" cy="5.78" r="2.81"/>
+        <circle cx="16.9" cy="5.78" r="2.81"/>
+        <circle cx="7.28" cy="5.78" r="2.81"/>
+        <circle cx="74.4" cy="5.78" r="2.81"/>
     </g>
 
     <!-- Text -->

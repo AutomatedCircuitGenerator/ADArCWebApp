@@ -2,13 +2,13 @@
 {
 	public interface IComponentParameter
 	{
-		public object getValue();
+		public object? GetValue();
 
-		public (Type type, object obj) getValWithType();
+		public (Type type, object obj) GetValWithType();
 
-		public void setValue<T>(T obj);
+		public void SetValue<T>(T obj);
 
-		public IComponentParameter copy();
+		public IComponentParameter Copy();
 
 	}
 	/// <summary>
@@ -17,25 +17,21 @@
 	/// and allowing it to be deserialized more nicely.
 	/// </summary>
 	/// <typeparam name="T">the type of the parameter to use.</typeparam>
-	public class ComponentParameter<T> : IComponentParameter {
+	public class ComponentParameter<T>(T? val) : IComponentParameter
+	{
+		private T? Value { get; set; } = val;
 
-		public ComponentParameter(T val) { 
-			Value = val;
-		}
-
-		private T Value { get; set; }
-
-		public object getValue()
+		public object? GetValue()
 		{
 			return Value;
 		}
 
-        public (Type type, object obj) getValWithType()
+        public (Type type, object obj) GetValWithType()
         {
 			return (typeof(T), Value);
         }
 
-        public void setValue<T1>(T1 obj)
+        public void SetValue<T1>(T1 obj)
 		{
 			//Console.WriteLine(typeof(T1) + ", " + typeof(T));
 
@@ -53,9 +49,9 @@
 		}
 
 		//Ran into some problems with template vs object params, this was created to fix that.
-		public IComponentParameter copy()
+		public IComponentParameter Copy()
 		{
-			IComponentParameter ret =  new ComponentParameter<T>(Value);
+			IComponentParameter ret =  new ComponentParameter<T?>(Value);
 			return ret;
 		}
 	}
