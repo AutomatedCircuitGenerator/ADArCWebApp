@@ -1,5 +1,5 @@
 ﻿<div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
-    <h2>IR Remote</h2>
+    <h2 style="font-size: 20px">IR Remote</h2>
     <div class="remote">
         <div>
             <button @onclick="() => SetCommand(1)">1</button>
@@ -19,7 +19,7 @@
         <div>
             <button style="font-size: 1.5rem" class="red" @onclick="() => SetCommand(10)">*</button>
             <button @onclick="() => SetCommand(0)">0</button>
-            <button @onclick="() => SetCommand(11)">#</button>
+            <button @onclick="() => SetCommand(11)" class="red">#</button>
         </div>
         <div>
             <button class="blue" @onclick="() => SetCommand(12)">▲</button>
