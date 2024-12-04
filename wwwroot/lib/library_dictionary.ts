@@ -1626,7 +1626,7 @@
     "placeholder_1625": "DFW",
     "placeholder_1626": "DHT Sensors Non-Blocking",
     "placeholder_1627": "DHT kxn",
-    "placeholder_1628": "DHT sensor library",
+    "DHT.h": "DHT sensor library",
     "placeholder_1629": "DHT sensor library for ESPx",
     "placeholder_1630": "DHT11",
     "placeholder_1631": "DHT118266",

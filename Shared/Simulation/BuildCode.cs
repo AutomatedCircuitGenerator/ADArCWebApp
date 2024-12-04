@@ -8,29 +8,32 @@ namespace ADArCWebApp.Shared.Simulation
 	{
 		public static List<int> outputPins = new();
 
-		public static string code => includeCode() + "\n\n" + globalCode() + "\n\n" + setupCode() + "\n\n" + loopCode();
+		public static string code => includeCode() + "\n\n" + globalCode() + "\n\n" + setupCode() + "\n\n" + loopCode() + "\n\n" + functionsCode();
 
 		private static string includeCode()
 		{
             StringBuilder b = new StringBuilder();
+            var regex = new Regex(@"(#include\s+<[^>]+>)");
             foreach (ComponentInstance c in Pages.Index.Comps.Values)
-            {
-                b.Append(parseProvidedCode(c, "include", true));
+            { 
+	            var include = regex.Matches(c.Data.codeForGen["include"]).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+	            var output = regex.Matches(b.ToString()).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
+	            foreach (var inc1 in include)
+	            {
+		            if (!output.Contains(inc1))
+		            {
+			            Console.WriteLine(inc1);
+			            b.Append(parseInclude(inc1.ToString(), true));
+		            }
+	            }
             }
+
 			return b.ToString();
         }
-		private static string globalCode() {
+		private static string globalCode()
+		{
 			StringBuilder b = new StringBuilder();
-			//Console.WriteLine("2: " + outputPins.Count);
-			// b.Append("char outputPins[] = {");
-			// for (int i = 0; i < outputPins.Count; i++) {
-			// 	b.Append(outputPins[i]);
-			// 	if (i != outputPins.Count - 1) { b.Append(", "); }
-			// }
-			//
-			// b.AppendLine("};\n\n");
-
 
 			//insert global vars from components
 			foreach (ComponentInstance c in Pages.Index.Comps.Values)
@@ -38,6 +41,7 @@ namespace ADArCWebApp.Shared.Simulation
 				b.Append(parseProvidedCode(c, "global", true));
 
 			}
+			
 
 			return b.ToString();
 		}
@@ -46,10 +50,6 @@ namespace ADArCWebApp.Shared.Simulation
 			StringBuilder b = new StringBuilder();
 
 			b.AppendLine("void setup() {");
-			// b.AppendLine("  Serial.begin(9600);");//keep an eye on
-			// b.AppendLine("  for (int i = 0; i < " + outputPins.Count + "; i++) {");
-			// b.AppendLine("    pinMode(outputPins[i], OUTPUT);");
-			// b.AppendLine("  }");
 
             //insert global vars from components
             foreach (ComponentInstance c in Pages.Index.Comps.Values)
@@ -105,14 +105,44 @@ namespace ADArCWebApp.Shared.Simulation
 				b.AppendLine("  }");
 				i++;
 			}
-
+			
 			b.AppendLine("}");
 			return b.ToString();
 		}
 
+		private static string functionsCode()
+		{
+			StringBuilder b = new StringBuilder();
+			b.AppendLine(" ");
+			foreach (ComponentInstance c in Pages.Index.Comps.Values)
+			{
+				b.Append(parseProvidedCode(c, "functions", false));
+			}
+			return b.ToString();
+		}
+		
+		/// <summary>
+		/// Handles the #includes for a circuit. Appends a line for each new #include.
+		/// </summary>
+		/// <param name="c"></param>
+		/// <param name="addNewLine"></param>
+		/// <returns></returns>
+		private static string parseInclude(string c, bool addNewLine)
+		{
+			string ret = c;
+			
+			if (ret != "")
+			{
+				return ret + (addNewLine ? "\n" : "");
+			}
+			else { 
+				return ret;
+			}
+		}
 		///<summary>
 		///Handles removing sheet pin name formatting (~"name") and changes it to pin number.
 		///Also warns if the component is missing code.
+		///Also updates the componentInstance with local Id.
 		///</summary>
 		///<param name="addNewLine">If the code exists, adds a newline to the end if true. Use true if AppendLine needed, false for Append.</param>
 		private static string parseProvidedCode(ComponentInstance c, string codeField, bool addNewLine) {
@@ -127,12 +157,30 @@ namespace ADArCWebApp.Shared.Simulation
 				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
 			}
 
-			ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+			//This Regex is for replacing (~"name") on pins in the ComponentNamespace to their pin connection.
+			if(Regex.IsMatch(prePin,"(~\"(.*?)\")"))
 			{
-				c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-				return conn!.ToId.ToString();
-			}); //2..^1 is substring from 3rd char to end-1 char. This is because the format is ~"pinName", so this extracts the pin properly.
-
+				ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+				{
+					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+					return conn!.ToId.ToString();
+				}); 
+			}
+			else if (!(Regex.IsMatch(prePin, "@")))
+			{
+				ret = Regex.Replace(prePin,"(~\"(.*?)\")" , m =>
+				{
+					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+					return conn!.ToId.ToString();
+				}); 
+			}
+			
+			//This Regex is for replacing @ to the component local ID.
+			if(Regex.IsMatch(prePin,"@"))
+			{
+				ret = Regex.Replace(prePin, "@", c.localId.ToString());
+			}
+			
 			if (ret != "")
 			{
 				return ret + (addNewLine ? "\n" : "");
@@ -141,8 +189,6 @@ namespace ADArCWebApp.Shared.Simulation
 				return ret;
 			}
 		}
-
-
 
 	}
 }
