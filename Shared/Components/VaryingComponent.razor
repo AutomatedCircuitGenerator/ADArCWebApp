@@ -32,7 +32,7 @@
     }
 
     <div id="component-@individualData.localId">
-        <DynamicComponent Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
+        <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
 
@@ -44,10 +44,13 @@
 
         @if (individualData.Data.EnvironmentalSettingsType != null)
         {
-            var parameters = new Dictionary<string, object>
+            var parameters = new Dictionary<string, object>();
+
+            // Safely cast and access Controller
+            if (_componentRef?.Instance is RazorComponent razorComponent && razorComponent.Controller != null)
             {
-                { "Controller", individualData.Controller }
-            };
+                parameters["Controller"] = razorComponent.Controller;
+            }
 
             <DynamicComponent Type="individualData.Data.EnvironmentalSettingsType" Parameters="parameters"/>
         }
@@ -130,11 +133,8 @@
 </div>
 
 @code {
-    protected override async Task OnAfterRenderAsync(bool firstRender)
-    {
-        if (individualData != null && individualData.IsCanvasComponent && firstRender)
-            await individualData.LinkController(JsRuntime);
-    }
+
+    private DynamicComponent? _componentRef;
 
     /// <summary>
     /// Formats a property name for display in the environmental settings.
