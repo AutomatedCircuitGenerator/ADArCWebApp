@@ -130,10 +130,9 @@
 </div>
 
 @code {
-
-    protected override async Task OnInitializedAsync()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (individualData != null && individualData.IsCanvasComponent)
+        if (individualData != null && individualData.IsCanvasComponent && firstRender)
             await individualData.LinkController(JsRuntime);
     }
 
