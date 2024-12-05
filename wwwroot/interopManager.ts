@@ -8,6 +8,7 @@ import {Board, BoardConstructor} from "./boards/board";
 /*declare var introJs: any;*/
 
 export namespace interopManager {
+    let isUrlLoadInitialized = false;
 
     export class InteropManager {
 
@@ -257,11 +258,19 @@ export namespace interopManager {
          * Initialize URL loading functionality
          */
         initUrlLoading() {
+            // Only initialize once
+            if (isUrlLoadInitialized) {
+                return;
+            }
+            isUrlLoadInitialized = true;
+
+            // Check if document is already loaded
             if (document.readyState === 'complete') {
-                this.waitForBlazerAndRules();
+                this.tryLoadFromUrl();
             } else {
+                // Wait for document to load
                 window.addEventListener('load', () => {
-                    this.waitForBlazerAndRules();
+                    this.tryLoadFromUrl();
                 });
             }
         }
@@ -273,18 +282,23 @@ export namespace interopManager {
             }, 12000);
         }
 
-        private tryLoadFromUrl() {
+        private async tryLoadFromUrl() {
             const params = new URLSearchParams(window.location.search);
-            const data = params.get('c'); // Changed from 'data' to 'c'
+            const data = params.get('c');
 
             if (data) {
                 try {
-                    DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data)
-                        .catch((error) => {
-                            console.error("Error loading from URL:", error);
-                        });
+                    // Add a small delay to ensure Blazor is ready
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+
+                    // Try to load only once
+                    await DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data);
+
+                    // Clear the URL parameter after successful load
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, '', newUrl);
                 } catch (error) {
-                    console.error("Error loading URL data:", error);
+                    console.error("Error loading from URL:", error);
                 }
             }
         }
@@ -302,15 +316,19 @@ export namespace interopManager {
             this.runner.boardConstructor = boardConstructor;
         }
     }
-    
-    
-    
-    
+
+
+
+
 
     // Keep this outside the class
+    let manager: InteropManager | null = null;
+
     export function getInteropManager(): InteropManager {
-        const manager = new InteropManager();
-        manager.initUrlLoading();
+        if (!manager) {
+            manager = new InteropManager();
+            manager.initUrlLoading();
+        }
         return manager;
     }
 }
