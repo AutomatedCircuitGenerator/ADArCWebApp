@@ -30,6 +30,11 @@ namespace ADArCWebApp.Shared
             {
                 2,
                 new ComponentDataBuilder("MEGA 2560", false, "Arduino", 0.3, 390, 195, typeof(RazorArduinoMega),
+                    codeForGen: new()
+                    {
+                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+                        { "delayLoop", "" }, { "delayTime", "" }
+                    },
                     pins:
                     [
                         "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "d13", "d14",
