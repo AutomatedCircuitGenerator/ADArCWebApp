@@ -1,9 +1,28 @@
-﻿@code {
+﻿@inherits RazorComponent
+
+@code {
     // HX711 5kg Load Cell Amplifier
 
     [Parameter] public double width { get; set; } = 507;
     [Parameter] public double height { get; set; } = 269;
 
+    private double _weight = 100;
+
+    [Parameter]
+    [ValueSetting("g", 100, 100, 1500)] // 1023.75*
+    public double weight
+    {
+        get => _weight;
+        set
+        {
+            if (Controller is not null && value != _weight)
+            {
+                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setWeight", value); });
+            }
+            _weight = value;
+        }
+    }
+    
     public static ElementPin[] pinInfo
     {
         get
@@ -17,99 +36,6 @@
             };
         }
     }
-
-    // //24 bits 2's complement; min:800000h, max:7FFFFFh
-    // static List<bool> getSignal(ComponentInstance comp)
-    // {
-    //     //8388607 = +50kg up (assumption here, values defined by the actual physical loadcell)
-    //     //-8388608 = -50kg down
-    //     double step = 16777215 / 1000;//one decimal place
-    //     long number = Convert.ToInt64((double)comp.compParams["weight"].getValue() * 10 * step);
-    //     List<bool> bits = new List<bool>();
-    //     bool isNegative = number < 0;
-    //     number = Math.Abs(number);
-    //
-    //     // Convert the long integer to binary representation
-    //     while (number != 0)
-    //     {
-    //         bits.Insert(0, (number % 2 == 0) ? false : true);
-    //         number /= 2;
-    //     }
-    //
-    //     if (isNegative)
-    //     {
-    //         // Find 1's complement
-    //         for (int i = 0; i < bits.Count; i++)
-    //         {
-    //             bits[i] = !bits[i];
-    //         }
-    //
-    //         // Add 1 to 1's complement
-    //         int carry = 1;
-    //         for (int i = bits.Count - 1; i >= 0; i--)
-    //         {
-    //             int bitValue = (bits[i] ? 1 : 0) + carry;
-    //             bits[i] = (bitValue % 2 == 0) ? false : true;
-    //             carry = bitValue / 2;
-    //         }
-    //     }
-    //
-    //     // Truncate to a fixed number of bits (e.g., 24 bits)
-    //     int numberOfBitsToKeep = 24;
-    //     if (bits.Count > numberOfBitsToKeep)
-    //     {
-    //         bits.RemoveRange(0, bits.Count - numberOfBitsToKeep);
-    //     }
-    //
-    //     return bits;
-    // }
-    //
-    // public static async void translate(ComponentInstance comp, long pinChangeCycle)
-    // {
-    //     bool dt = false;
-    //     bool sck = false;
-    //     if (0 == comp.getConnection("DT", out InstanceConnection? conn, out List<InstanceConnection>? all))
-    //     {
-    //         dt = await AvrCPU.getPinState(conn!.toId);
-    //     }
-    //     if (0 == comp.getConnection("SCK", out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-    //     {
-    //         sck = await AvrCPU.getPinState(conn2!.toId);
-    //     }
-    //
-    //     //if data ready, 25-27 pulses will be sent through SCK, each pulse shifts out 1 bit, starting from msb
-    //     //the 25th pulse bring DOUT to HIGH
-    //     //10Hz sampling rate
-    //     if (!sck && comp.midSignal == 0)//starting state
-    //     {
-    //         comp.midSignal = 1;
-    //         comp.compParams["counter"].setValue(0);
-    //         AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);//DOUT goes to LOW indicating data is ready
-    //     }
-    //     if (sck && comp.midSignal == 1)//trigger pulse HIGH
-    //     {
-    //         comp.midSignal = 2;
-    //         if ((int)comp.compParams["counter"].getValue() == 24)
-    //         {
-    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);//set DOUT to high after 25th pulse
-    //             comp.midSignal = 0;
-    //             comp.compParams["counter"].setValue(0);
-    //         }
-    //         else if (getSignal(comp)[23 - (int)comp.compParams["counter"].getValue()])
-    // {
-    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, true);// Data bit, 1 is HIGH, 0 is LOW
-    //         }
-    //         else
-    //         {
-    //             AvrCPU.setPinState(pinChangeCycle, conn!.toId, false);
-    //         }
-    //     }
-    //     if (!sck && comp.midSignal == 2)//trigger pulse LOW, gap in between pulses
-    //     {
-    //         comp.compParams["counter"].setValue( (int)comp.compParams["counter"].getValue() + 1);
-    //         comp.midSignal = 0;
-    //     }
-    // }
 }
 
 <style>

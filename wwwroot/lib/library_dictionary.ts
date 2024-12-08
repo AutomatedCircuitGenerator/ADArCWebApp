@@ -2778,7 +2778,7 @@
     "placeholder_2777": "HUSB238Driver",
     "placeholder_2778": "HV518",
     "placeholder_2779": "HX710",
-    "placeholder_2780": "HX711",
+    "HX711.h": "HX711",
     "placeholder_2781": "HX711 Arduino Library",
     "placeholder_2782": "HX711_ADC",
     "placeholder_2783": "HX711_MP",

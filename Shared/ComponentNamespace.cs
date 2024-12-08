@@ -337,13 +337,13 @@ namespace ADArCWebApp.Shared
                             "global",
                             "const int LOADCELL_DOUT_PIN@ = ~\"dat\";\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";\nHX711 scale@; "
                         },
-                        { "setup", "  scale.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@); " },
+                        { "setup", "  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@); " },
                         {
                             "loopMain",
                             "  if (scale@.is_ready()) {\n    long reading@ = scale@.read();\n Serial.print(\"HX711 reading: \");\n Serial.println(reading@);\n  } else {\n Serial.println(\"HX711 not found.\");\n  }\n\n delay(1000); "
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711").Finish()
+                    }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711").Property("weight", 100.0).Finish()
             },
             {
                 18,
