@@ -408,7 +408,7 @@
     "placeholder_407": "Adafruit PM25 AQI Sensor",
     "placeholder_408": "Adafruit PN532",
     "placeholder_409": "Adafruit PS2 Trackpad",
-    "placeholder_410": "Adafruit PWM Servo Driver Library",
+    "Adafruit_PWMServoDriver.h": "Adafruit PWM Servo Driver Library",
     "placeholder_411": "Adafruit PixelDust",
     "placeholder_412": "Adafruit Pixie",
     "placeholder_413": "Adafruit Protomatter",

@@ -446,22 +446,22 @@ namespace ADArCWebApp.Shared
                     typeof(RazorSG90PCA9685), paneHoverText: "SG90/PCA9685",
                     codeForGen: new()
                     {
-                        { "include", "#include <wire.h>\n#include <Adafruit_PWMServoDriver.h>" },
+                        { "include", "#include <Adafruit_PWMServoDriver.h>\n" },
                         {
                             "global",
-                            "// called this way, it uses the default address 0x40\nAdafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();\n// you can also call it with a different address you want\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);\n// you can also call it with a different address and I2C interface\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);\n\n// Depending on your servo make, the pulse width min and max may vary, you \n// want these to be as small/large as possible without hitting the hard stop\n// for max range. You'll have to tweak them as necessary to match the servos you\n// have!\n#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)\n#define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)\n#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150\n#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600\n#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates\n\n// our servo # counter\nuint8_t servonum = 0;"
+                            "Adafruit_PWMServoDriver board@ = Adafruit_PWMServoDriver(0x@); // Use the I2C address of your board\n\n#define SERVOMIN  125 // Minimum pulse length\n#define SERVOMAX  625 // Maximum pulse length\n\nint servoChannel@ = 0; // The servo channel you are using (0-15 for 16 channels on the board)\n"
                         },
                         {
                             "setup",
-                            "  Serial.println(\"8 channel Servo test!\");\n\n  pwm.begin();\n  pwm.setOscillatorFrequency(27000000);\n  pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates\n\n  delay(10);"
+                            "Serial.begin(9600);\n  board@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
                         },
                         {
                             "loopMain",
-                            "  // Drive each servo one at a time using setPWM()\n  Serial.println(servonum);\n  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n\n  // Drive each servo one at a time using writeMicroseconds(), it's not precise due to calculation rounding!\n  // The writeMicroseconds() function is used to mimic the Arduino Servo library writeMicroseconds() behavior. \n  for (uint16_t microsec = USMIN; microsec < USMAX; microsec++) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n  for (uint16_t microsec = USMAX; microsec > USMIN; microsec--) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n\n  servonum++;\n  if (servonum > 7) servonum = 0; // Testing the first 8 servo channels"
+                            "  // Move servo from 0 to 180 degrees\n  for (int angle = 0; angle <= 180; angle++) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move (depends on your servo's speed)\n  }\n\n  // Move servo back from 180 to 0 degrees\n  for (int angle = 180; angle >= 0; angle--) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move\n  }"
                         },
                         {
                             "functions",
-                            "// You can use this function if you'd like to set the pulse length in seconds\n// e.g. setServoPulse(0, 0.001) is a ~1 millisecond pulse width. It's not precise!\nvoid setServoPulse(uint8_t n, double pulse) {\n  double pulselength;\n  \n  pulselength = 1000000;   // 1,000,000 us per second\n  pulselength /= SERVO_FREQ;   // Analog servos run at ~60 Hz updates\n  Serial.print(pulselength); Serial.println(\" us per period\"); \n  pulselength /= 4096;  // 12 bits of resolution\n  Serial.print(pulselength); Serial.println(\" us per bit\"); \n  pulse *= 1000000;  // convert input seconds to us\n  pulse /= pulselength;\n  Serial.println(pulse);\n  pwm.setPWM(n, 0, pulse);\n}"
+                            "int angleToPulse@(int ang) {\n  // Maps angle (0-180 degrees) to pulse width (SERVOMIN - SERVOMAX)\n  int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);  \n  Serial.print(\"Angle: \");\n  Serial.print(ang);\n  Serial.print(\" pulse: \");\n  Serial.println(pulse);\n  return pulse;\n\n}"
                         },
                         { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["gnd", "pwr_gnd", "5V", "scl", "sda"], gsNodeName: "pca9685").Finish()

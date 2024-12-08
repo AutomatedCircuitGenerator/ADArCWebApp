@@ -6,6 +6,7 @@ import {Interfaces} from "../boards/board";
 export abstract class Controller {
     protected component: DotNetObjectReference;
     protected pins: { [canonicalPinName: string]: Interfaces[] } = {};
+    protected id: number;
     protected element: HTMLDivElement;
     protected pinIndices: { [canonicalPinName: string]: number[] };
 
@@ -41,6 +42,7 @@ export abstract class Controller {
         [canonicalPinName: string]: number[]
     }, component: DotNetObjectReference): T {
         const instance = new this();
+        instance.id = id;
         instance.element = document.getElementById(`component-${id}`) as HTMLDivElement;
         instance.pinIndices = pins;
         instance.component = component;
