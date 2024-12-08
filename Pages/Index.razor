@@ -387,10 +387,9 @@
             //create listeners for arduino pins to components.
             //Personally, not a huge fan of this system. good place for improvement
             setupListeners();
+            ToastService.AddToast("Code panel updated.", Variant.Info);
         }
         
-        ToastService.AddToast("Code panel updated.", Variant.Info);
-
         moverOffsetLeft = 0;
         moverOffsetTop = 0;
         targetCardComponentId = -1;
