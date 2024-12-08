@@ -10,14 +10,22 @@ export class KY022 extends Controller {
     private signal: Digital;
     private cpu: CPU;
     private counter: number;
+    private simulationStarted = false;
     
     setup() {
         this.signal = this.pins.digital_out[0].digital;
         this.cpu = AVRRunner.getInstance().board.cpu;
         this.signal.state = true;
+        this.simulationStarted = true;
     }
     
+    override cleanup() {
+        this.simulationStarted = false;
+        super.cleanup();
+    }
+
     setCommand(command: number) {
+        if (!this.simulationStarted) return;
         this.counter = 0;
         this.pulse(9);
         this.space(4.5);

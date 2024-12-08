@@ -1,37 +1,40 @@
-﻿<div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
-    <h2 style="font-size: 20px">IR Remote</h2>
-    <div class="remote">
-        <div>
-            <button @onclick="() => SetCommand(1)">1</button>
-            <button @onclick="() => SetCommand(2)">2</button>
-            <button @onclick="() => SetCommand(3)">3</button>
+﻿<div>
+    <div style="display: flex; flex-direction: column; align-items: center; justify-content: center">
+        <h2 style="font-size: 20px">IR Remote</h2>
+        <div class="remote">
+            <div>
+                <button @onclick="() => SetCommand(1)" data-tooltip="80" data-tooltip-position="left">1</button>
+                <button @onclick="() => SetCommand(2)" data-tooltip="40" data-tooltip-position="top">2</button>
+                <button @onclick="() => SetCommand(3)" data-tooltip="C0" data-tooltip-position="right">3</button>
+            </div>
+            <div>
+                <button @onclick="() => SetCommand(4)" data-tooltip="20" data-tooltip-position="left">4</button>
+                <button @onclick="() => SetCommand(5)" data-tooltip="A0" data-tooltip-position="top">5</button>
+                <button @onclick="() => SetCommand(6)" data-tooltip="60" data-tooltip-position="right">6</button>
+            </div>
+            <div>
+                <button @onclick="() => SetCommand(7)" data-tooltip="E0" data-tooltip-position="left">7</button>
+                <button @onclick="() => SetCommand(8)" data-tooltip="10" data-tooltip-position="top">8</button>
+                <button @onclick="() => SetCommand(9)" data-tooltip="90" data-tooltip-position="right">9</button>
+            </div>
+            <div>
+                <button style="font-size: 1.5rem" class="red" @onclick="() => SetCommand(10)" data-tooltip="50" data-tooltip-position="left">*</button>
+                <button @onclick="() => SetCommand(0)" data-tooltip="0" data-tooltip-position="top">0</button>
+                <button @onclick="() => SetCommand(11)" class="red" data-tooltip="D0" data-tooltip-position="right">#</button>
+            </div>
+            <div>
+                <button class="blue" @onclick="() => SetCommand(12)" data-tooltip="30" data-tooltip-position="top">▲</button>
+            </div>
+            <div>
+                <button class="blue" @onclick="() => SetCommand(13)" data-tooltip="B0" data-tooltip-position="left">◀</button>
+                <button class="red" style="width: 35px" @onclick="() => SetCommand(14)" data-tooltip="70" data-tooltip-position="top">OK</button>
+                <button class="blue" @onclick="() => SetCommand(15)" data-tooltip="F0" data-tooltip-position="right">▶</button>
+            </div>
+            <div>
+                <button class="blue" @onclick="() => SetCommand(16)" data-tooltip="8" data-tooltip-position="bottom">▼</button>
+            </div>
         </div>
-        <div>
-            <button @onclick="() => SetCommand(4)">4</button>
-            <button @onclick="() => SetCommand(5)">5</button>
-            <button @onclick="() => SetCommand(6)">6</button>
-        </div>
-        <div>
-            <button @onclick="() => SetCommand(7)">7</button>
-            <button @onclick="() => SetCommand(8)">8</button>
-            <button @onclick="() => SetCommand(9)">9</button>
-        </div>
-        <div>
-            <button style="font-size: 1.5rem" class="red" @onclick="() => SetCommand(10)">*</button>
-            <button @onclick="() => SetCommand(0)">0</button>
-            <button @onclick="() => SetCommand(11)" class="red">#</button>
-        </div>
-        <div>
-            <button class="blue" @onclick="() => SetCommand(12)">▲</button>
-        </div>
-        <div>
-            <button class="blue" @onclick="() => SetCommand(13)">◀</button>
-            <button class="red" style="width: 35px" @onclick="() => SetCommand(14)">OK</button>
-            <button class="blue" @onclick="() => SetCommand(15)">▶</button>
-        </div>
-        <div>
-            <button class="blue" @onclick="() => SetCommand(16)">▼</button>
-        </div>
+        <p style="font-size: smaller; padding-top: 0.5rem"><b >Note:</b> IR commands may not correspond to the buttons label. Hover over a button to see its command.</p>
     </div>
 </div>
 
@@ -45,4 +48,3 @@
     }
 
 }
-

@@ -39,8 +39,10 @@
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
     <div class="settingsContainer">
-        <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
-        <h2>Environmental Settings</h2>
+        <div style="display: flex; margin-bottom: 0.5rem">
+            <h2 style="margin-bottom:0; white-space: nowrap">Environmental Settings</h2>
+            <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
+        </div>
 
         @if (individualData.Data.EnvironmentalSettingsType != null)
         {
