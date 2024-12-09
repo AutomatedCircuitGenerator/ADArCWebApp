@@ -156,32 +156,28 @@ namespace ADArCWebApp.Shared.Simulation
 			{
 				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
 			}
-
-			//This Regex is for replacing (~"name") on pins in the ComponentNamespace to their pin connection.
-			if (Regex.IsMatch(prePin, "(~\"(.*?)\")") || Regex.IsMatch(prePin, "@"))
+			
+			if (Regex.IsMatch(prePin, "@"))
 			{
-				if (Regex.IsMatch(prePin, "@"))
+				ret = Regex.Replace(prePin, "@", c.localId.ToString());
+				if (Regex.IsMatch(ret, "(~\"(.*?)\")"))
 				{
-					ret = Regex.Replace(prePin, "@", c.localId.ToString());
-					if (Regex.IsMatch(ret, "(~\"(.*?)\")"))
-					{
-						ret = Regex.Replace(ret, "(~\"(.*?)\")", m =>
-						{
-							c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-							return conn!.ToId.ToString();
-						});
-					}
-				}
-				else if (Regex.IsMatch(prePin, "(~\"(.*?)\")"))
-				{
-					ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+					ret = Regex.Replace(ret, "(~\"(.*?)\")", m =>
 					{
 						c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
 						return conn!.ToId.ToString();
 					});
 				}
 			}
-
+			else
+			{
+				ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+				{
+					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+					return conn!.ToId.ToString();
+				});
+			}
+			
 			if (ret != "")
 			{
 				return ret + (addNewLine ? "\n" : "");
