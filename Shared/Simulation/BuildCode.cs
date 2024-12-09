@@ -158,29 +158,30 @@ namespace ADArCWebApp.Shared.Simulation
 			}
 
 			//This Regex is for replacing (~"name") on pins in the ComponentNamespace to their pin connection.
-			if(Regex.IsMatch(prePin,"(~\"(.*?)\")"))
+			if (Regex.IsMatch(prePin, "(~\"(.*?)\")") || Regex.IsMatch(prePin, "@"))
 			{
-				ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+				if (Regex.IsMatch(prePin, "@"))
 				{
-					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-					return conn!.ToId.ToString();
-				}); 
-			}
-			else if (!(Regex.IsMatch(prePin, "@")))
-			{
-				ret = Regex.Replace(prePin,"(~\"(.*?)\")" , m =>
+					ret = Regex.Replace(prePin, "@", c.localId.ToString());
+					if (Regex.IsMatch(ret, "(~\"(.*?)\")"))
+					{
+						ret = Regex.Replace(ret, "(~\"(.*?)\")", m =>
+						{
+							c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+							return conn!.ToId.ToString();
+						});
+					}
+				}
+				else if (Regex.IsMatch(prePin, "(~\"(.*?)\")"))
 				{
-					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-					return conn!.ToId.ToString();
-				}); 
+					ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
+					{
+						c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
+						return conn!.ToId.ToString();
+					});
+				}
 			}
-			
-			//This Regex is for replacing @ to the component local ID.
-			if(Regex.IsMatch(prePin,"@"))
-			{
-				ret = Regex.Replace(prePin, "@", c.localId.ToString());
-			}
-			
+
 			if (ret != "")
 			{
 				return ret + (addNewLine ? "\n" : "");
