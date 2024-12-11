@@ -914,17 +914,33 @@
         try
         {
             Console.WriteLine("Parsing file JSON data");
-            var data = JsonSerializer.Deserialize<Data>(str);
+            var options = new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true,
+                IncludeFields = true
+            };
+            
+            var data = JsonSerializer.Deserialize<Data>(str, options);
             
             if (data?.Comps != null && data.Comps.ContainsKey(1))
             {
                 var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                 Console.WriteLine($"Detected board type from file: {boardType}");
+                
+                Console.WriteLine("Setting board type");
                 BoardService.Board = boardType;
-                Console.WriteLine("Board type set successfully");
-
-                Console.WriteLine("Setting up bench from file JSON");
+                
+                Console.WriteLine("Setting up bench");
                 SetupBenchFromJsonString(str);
+                
+                // Unlock components
+                Console.WriteLine("Unlocking components");
+                selLockedOut = false;
+                if (CompPane != null)
+                {
+                    CompPane.ReleaseLockout();
+                }
+                
                 Console.WriteLine("File import complete");
             }
             else
@@ -936,6 +952,10 @@
         {
             Console.WriteLine($"Error processing file contents: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            if (str.Length > 0)
+            {
+                Console.WriteLine($"JSON content: {str.Substring(0, Math.Min(200, str.Length))}...");
+            }
         }
     }
     catch (Exception ex)
