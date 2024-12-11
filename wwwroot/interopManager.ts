@@ -282,25 +282,43 @@ export namespace interopManager {
             }, 12000);
         }
 
+        // Field to track auto-board selection
+        private autoSelectedBoard: BoardType | null = null;
+
         private async tryLoadFromUrl() {
             const params = new URLSearchParams(window.location.search);
             const data = params.get('c');
 
             if (data) {
                 try {
-                    // Add a small delay to ensure Blazor is ready
+                    console.log("Found URL parameter 'c', attempting to load circuit");
+
+                    // Add a delay to ensure Blazor is ready
                     await new Promise(resolve => setTimeout(resolve, 10000));
 
-                    // Try to load only once
+                    // Simply pass the compressed data to C#
+                    // Let C# handle decompression and board detection
                     await DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data);
 
                     // Clear the URL parameter after successful load
                     const newUrl = window.location.pathname;
                     window.history.replaceState({}, '', newUrl);
+
+                    console.log("URL loading complete");
                 } catch (error) {
                     console.error("Error loading from URL:", error);
                 }
             }
+        }
+
+        // Add method to check if board was auto-selected
+        public getAutoSelectedBoard(): BoardType | null {
+            return this.autoSelectedBoard;
+        }
+
+        // Add method to clear auto-selected board
+        public clearAutoSelectedBoard() {
+            this.autoSelectedBoard = null;
         }
 
         setBoard(board: BoardType) {

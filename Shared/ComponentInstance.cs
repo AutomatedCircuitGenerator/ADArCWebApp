@@ -64,27 +64,72 @@ namespace ADArCWebApp.Shared
 
         public async Task LinkController(IJSRuntime js)
         {
-            var jsIdentifier = Data.compType.Name.Replace("Razor", "");
-            // Canonical pin name: "SO", to absolute pin indexes it is connected to
-            Dictionary<string, List<int>> pins = new();
-
-            foreach (var pin in Data.pins)
+            try
             {
-                if (ConnMap.TryGetValue(pin.Value, out var connections))
+                // Skip if not a canvas component or already has a controller
+                if (!IsCanvasComponent || Controller != null) 
                 {
-                    //one pin on a component can be connected to many pins on the arduino
-                    var pinIds = connections.Select(connection => connection.ToId);
-
-                    pins[pin.Key] = pinIds.ToList();
+                    return;
                 }
-                else
+    
+                // Get the JavaScript identifier for this component type
+                var jsIdentifier = Data.compType.Name.Replace("Razor", "");
+                Console.WriteLine($"Linking controller for {jsIdentifier} (ID: {localId})");
+    
+                // Build pin mapping dictionary
+                Dictionary<string, List<int>> pins = new();
+                foreach (var pin in Data.pins)
                 {
-                    pins[pin.Key] = [];
+                    if (ConnMap.TryGetValue(pin.Value, out var connections))
+                    {
+                        //one pin on a component can be connected to many pins on the arduino
+                        var pinIds = connections.Select(connection => connection.ToId);
+                        pins[pin.Key] = pinIds.ToList();
+                    }
+                    else
+                    {
+                        pins[pin.Key] = [];
+                    }
                 }
+    
+                // Create the controller with retries if needed
+                int maxRetries = 3;
+                Exception? lastException = null;
+    
+                for (int i = 0; i < maxRetries; i++)
+                {
+                    try
+                    {
+                        Controller = await js.InvokeAsync<IJSObjectReference>(
+                            $"{jsIdentifier}.create",
+                            localId,
+                            pins,
+                            _reference
+                        );
+                        
+                        Console.WriteLine($"Successfully created controller for {jsIdentifier}");
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        lastException = ex;
+                        Console.WriteLine($"Attempt {i + 1} failed to create controller for {jsIdentifier}: {ex.Message}");
+                        
+                        if (i < maxRetries - 1)
+                        {
+                            await Task.Delay(100 * (i + 1)); // Progressive delay between retries
+                        }
+                    }
+                }
+    
+                // If we get here, all retries failed
+                Console.WriteLine($"Failed to create controller for {jsIdentifier} after {maxRetries} attempts: {lastException?.Message}");
             }
-
-            Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", localId,
-                pins, _reference);
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Unexpected error linking controller: {ex.Message}");
+                // Don't throw - allow component to exist without controller
+            }
         }
         
         public async ValueTask DisposeAsync()

@@ -4,10 +4,12 @@
 @using System
 @using System.IO
 @using System.IO.Compression
+@using System.Web;
 @using System.Text
 @using System.Linq
 @using System.Collections.Generic
 @using ADArCWebApp.Shared.UIComponents
+@using Microsoft.AspNetCore.Components;
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject BoardService BoardService
@@ -21,7 +23,10 @@
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-<BoardSelect OnSelect="HandleBoardSelect"></BoardSelect>
+@if (shouldShowBoardSelect)
+{
+<BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
+}
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
         <div class="logo-and-adarc">
@@ -133,6 +138,10 @@
 </body>
 
 @code{
+
+	private BoardSelect boardSelect;
+    private bool shouldShowBoardSelect = true;
+
     bool isLeftExpanded = true;
 	private string generatedUrl = string.Empty;
     bool isRightExpanded;
@@ -170,16 +179,23 @@
 
     private void HandleBoardSelect(Board board)
     {
+        Console.WriteLine($"HandleBoardSelect called with board: {board}");
+        
+        // Normal board selection flow - no auto-selection check needed
+        BoardService.Board = board;
         Comps[0] = BoardService.GetComponentInstance();
-
+        Console.WriteLine($"Board set to {board}, component instance created");
+    
         if (LoadingProgress == -1)
         {
+            Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
         else
         {
+            Console.WriteLine("Loading in progress, scheduling bench setup");
             _scheduleBenchSetup = true;
         }
     }
@@ -620,32 +636,45 @@
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-        // ^^ Hard to do because it downloads the rule set inside of the function, yet needs knowledge of next ruleset which hasnt been downloaded
-        // can request just one file?
+        Console.WriteLine("OnInitializedAsync started");
+        
+        // Initialize JS interop first
+        if (AppInterop.JsModule == null)
+        {
+            Console.WriteLine("Initializing JS interop");
+            AppInterop.Runtime = JsRuntime;
+            AppInterop.JsModule = await AppInterop.GetModuleWrapper();
+        }
+        
+        // Check if we're loading from a URL
+        var uri = new Uri(navMan.Uri);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
+        shouldShowBoardSelect = !hasUrlParam;
+        Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
+    
+        // Only lock selection if we're not loading from URL
+        selLockedOut = !hasUrlParam;
+        
+        Console.WriteLine("Loading rulesets...");
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+        
         if (_scheduleBenchSetup)
         {
+            Console.WriteLine("Setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
-
-        //all else finish first
+    
         await Task.Delay(1000);
         LoadingProgress = -1;
-
-        // await RuleSetMap.getInstance().loadRuleSet("BIG1");
-        // foreach (string str in ruleNames)
-        // {
-        // 	await RuleSetMap.getInstance().loadRuleSet(str);
-        // 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-        // 	base.StateHasChanged();
-        // }
-
-        // // allRulesLoaded = true;
+        Console.WriteLine("OnInitializedAsync completed");
+    
+        // Force a re-render to ensure visibility changes are applied
+        await InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -869,14 +898,52 @@
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-    public async Task LoadFromFile(InputFileChangeEventArgs e)
+	public async Task LoadFromFile(InputFileChangeEventArgs e)
+{
+    Console.WriteLine("LoadFromFile called");
+    try
     {
         var file = e.File;
+        Console.WriteLine($"Processing file: {file.Name}, size: {file.Size}");
+        
         var buffer = new byte[file.Size];
         await e.File.OpenReadStream().ReadAsync(buffer);
         var str = System.Text.Encoding.UTF8.GetString(buffer);
-        SetupBenchFromJsonString(str);
+        Console.WriteLine("File content loaded successfully");
+
+        try
+        {
+            Console.WriteLine("Parsing file JSON data");
+            var data = JsonSerializer.Deserialize<Data>(str);
+            
+            if (data?.Comps != null && data.Comps.ContainsKey(1))
+            {
+                var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                Console.WriteLine($"Detected board type from file: {boardType}");
+                BoardService.Board = boardType;
+                Console.WriteLine("Board type set successfully");
+
+                Console.WriteLine("Setting up bench from file JSON");
+                SetupBenchFromJsonString(str);
+                Console.WriteLine("File import complete");
+            }
+            else
+            {
+                Console.WriteLine("Error: Could not find board type in file data");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing file contents: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Critical error in LoadFromFile: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+}
 
     /// <summary>
     /// Handles most of the setup process of the bench after import.
@@ -1267,30 +1334,109 @@
         {
             Console.WriteLine("LoadFromUrl called with compressed data length: " + compressedData.Length);
             
-            if (App == null || App.selLockedOut)
+            if (App == null)
             {
-                Console.WriteLine("App not ready or rules not loaded yet");
+                Console.WriteLine("Error: App not ready");
                 return;
             }
     
-            Console.WriteLine("Decompressing data");
-            string json = DecompressCircuitData(compressedData);
-            Console.WriteLine($"Decompressed JSON length: {json.Length}");
-            
-            Console.WriteLine("Setting up bench from JSON");
-            App.SetupBenchFromJsonString(json);
-            
-            Console.WriteLine("Triggering state change");
-            await App.StateChanged();
-            
-            Console.WriteLine("URL load complete");
+            try
+            {
+                // Handle Base64 padding
+                compressedData = compressedData.Replace('-', '+').Replace('_', '/');
+                switch (compressedData.Length % 4)
+                {
+                    case 2: compressedData += "=="; break;
+                    case 3: compressedData += "="; break;
+                }
+    
+                // Decompress
+                byte[] compressedBytes = Convert.FromBase64String(compressedData);
+                using var msi = new MemoryStream(compressedBytes);
+                using var mso = new MemoryStream();
+                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+                {
+                    await gs.CopyToAsync(mso);
+                }
+    
+                var json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+                Console.WriteLine($"Successfully decompressed JSON data, length: {json.Length}");
+    
+                // Replace compressed patterns with original values
+                foreach (var kvp in CompressionMap.OrderByDescending(x => x.Value.Length))
+                {
+                    json = json.Replace(kvp.Value, kvp.Key);
+                }
+    
+                try
+                {
+                    // Parse JSON to get board type
+                    Console.WriteLine("Parsing JSON data to determine board type");
+                    var options = new JsonSerializerOptions 
+                    { 
+                        PropertyNameCaseInsensitive = true,
+                        IncludeFields = true
+                    };
+                    
+                    var data = JsonSerializer.Deserialize<Data>(json, options);
+                    Console.WriteLine($"JSON deserialized successfully, checking components");
+                    
+                    if (data?.Comps != null && data.Comps.ContainsKey(1))
+                    {
+                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                        Console.WriteLine($"Detected board type from URL data: {boardType}");
+                        
+                        await App.InvokeAsync(() => {
+                            Console.WriteLine("Setting shouldShowBoardSelect to false");
+                            App.shouldShowBoardSelect = false;
+                            App.StateHasChanged();
+                            
+                            Console.WriteLine("Setting board type");
+                            App.BoardService.Board = boardType;
+                            
+                            Console.WriteLine("Setting up bench");
+                            App.SetupBenchFromJsonString(json);
+    
+                            // Unlock components after setup is complete
+                            Console.WriteLine("Unlocking components");
+                            App.selLockedOut = false;
+                            if (CompPane != null)
+                            {
+                                CompPane.ReleaseLockout();
+                            }
+    
+                            Console.WriteLine("Board and bench setup complete");
+                        });
+                        
+                        Console.WriteLine("Triggering state change");
+                        await App.StateChanged();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Could not find board type in component data");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing JSON or setting up bench: {ex.Message}");
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    Console.WriteLine($"JSON content: {json.Substring(0, Math.Min(200, json.Length))}...");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error decompressing data: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error loading from URL: {ex.Message}");
+            Console.WriteLine($"Critical error in LoadFromUrl: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
+				
+
 
 
     private static readonly Dictionary<string, string> CompressionMap = new()
