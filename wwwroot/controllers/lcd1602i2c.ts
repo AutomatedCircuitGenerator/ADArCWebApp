@@ -75,7 +75,7 @@ export class LCD1602I2C extends Controller implements I2CController {
     private updated = false;
     
     setup() {
-        AVRRunner.getInstance().board.twis[0].registerController(LCD1602_ADDR, this);
+        this.pins.pin3[0].twi.registerController(this.id, this);
     }
     
     override cleanup() {

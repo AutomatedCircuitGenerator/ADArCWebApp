@@ -77,7 +77,7 @@ namespace ADArCWebApp.Shared
                             { "global", "Adafruit_MPU6050 mpu@;" },
                             {
                                 "setup",
-                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize!\n  if (!mpu@.begin()) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");\n\n  mpu@.setAccelerometerRange(MPU6050_RANGE_8_G@);\n  Serial.print(\"Accelerometer range set to: \");\n  switch (mpu@.getAccelerometerRange()) {\n  case MPU6050_RANGE_2_G@:\n    Serial.println(\"+-2G\");\n    break;\n  case MPU6050_RANGE_4_G@:\n    Serial.println(\"+-4G\");\n    break;\n  case MPU6050_RANGE_8_G@:\n    Serial.println(\"+-8G\");\n    break;\n  case MPU6050_RANGE_16_G@:\n    Serial.println(\"+-16G\");\n    break;\n  }\n  mpu@.setGyroRange(MPU6050_RANGE_500_DEG@);\n  Serial.print(\"Gyro range set to: \");\n  switch (mpu@.getGyroRange()) {\n  case MPU6050_RANGE_250_DEG@:\n    Serial.println(\"+- 250 deg/s\");\n    break;\n  case MPU6050_RANGE_500_DEG@:\n    Serial.println(\"+- 500 deg/s\");\n    break;\n  case MPU6050_RANGE_1000_DEG@:\n    Serial.println(\"+- 1000 deg/s\");\n    break;\n  case MPU6050_RANGE_2000_DEG@:\n    Serial.println(\"+- 2000 deg/s\");\n    break;\n  }\n\n  mpu@.setFilterBandwidth(MPU6050_BAND_21_HZ@);\n  Serial.print(\"Filter bandwidth set to: \");\n  switch (mpu@.getFilterBandwidth()) {\n  case MPU6050_BAND_260_HZ@:\n    Serial.println(\"260 Hz\");\n    break;\n  case MPU6050_BAND_184_HZ@:\n    Serial.println(\"184 Hz\");\n    break;\n  case MPU6050_BAND_94_HZ@:\n    Serial.println(\"94 Hz\");\n    break;\n  case MPU6050_BAND_44_HZ@:\n    Serial.println(\"44 Hz\");\n    break;\n  case MPU6050_BAND_21_HZ@:\n    Serial.println(\"21 Hz\");\n    break;\n  case MPU6050_BAND_10_HZ@:\n    Serial.println(\"10 Hz\");\n    break;\n  case MPU6050_BAND_5_HZ@:\n    Serial.println(\"5 Hz\");\n    break;\n  }\n\n  Serial.println(\"\");\n  delay(100);"
+                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");\n\n "
                             },
                             {
                                 "loopMain",
@@ -98,7 +98,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "/* Set the delay between fresh samples */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Check I2C device address and correct line below (by default address is 0x29 or 0x28)\n//                                   id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055();"
+                                "/* Set the delay between fresh samples */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Check I2C device address and correct line below (by default address is 0x29 or 0x28)\n//                                   id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
                             },
                             {
                                 "setup",
@@ -409,7 +409,7 @@ namespace ADArCWebApp.Shared
                             { "include", "#include <LiquidCrystal_I2C.h>" },
                             {
                                 "global",
-                                "// Add the lcd, change the first parameter to your LCD's I2C device in real life!\nLiquidCrystal_I2C lcd@(0x27, 16, 2);"
+                                "// Add the lcd, change the first parameter to your LCD's I2C device in real life!\nLiquidCrystal_I2C lcd@(@, 16, 2);"
                             },
                             {
                                 "setup",

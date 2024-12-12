@@ -169,7 +169,7 @@ export class BNO055 extends Controller implements I2CController {
     }
     
     setup(): void {
-        AVRRunner.getInstance().board.twis[0].registerController(BNO055_ADDR, this);
+        this.pins.sda[0].twi.registerController(this.id, this);
         
         for (const register of Object.values(registers)) {
             if (register.default) {

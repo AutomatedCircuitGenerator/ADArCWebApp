@@ -210,7 +210,7 @@ export class MPU6050 extends Controller implements I2CController {
     };
 
     setup(): void {
-        AVRRunner.getInstance().board.twis[0].registerController(I2C_MST_CTRL, this);
+        this.pins.sda[0].twi.registerController(this.id, this);
 
         for (const register of Object.values(registers)) {
             if (register.default) {
