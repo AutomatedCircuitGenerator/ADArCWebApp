@@ -1,0 +1,16 @@
+﻿@if (Open)
+{
+<div class="modal-backdrop" @onclick="@OnClose">
+    @ChildContent
+</div>
+}
+
+@code {
+    [Parameter]
+    public bool Open { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
+    [Parameter]
+    public RenderFragment? ChildContent { get; set; }
+}
+

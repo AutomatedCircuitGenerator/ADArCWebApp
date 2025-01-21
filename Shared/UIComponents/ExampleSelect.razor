@@ -1,0 +1,30 @@
+﻿<div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem">
+    <h1 style="font-size: 1.5rem">Select an example to load</h1>
+    <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem">
+        @foreach (var example in _examples)
+        {
+        <div style="border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" @onclick="() => HandleClick(example)">
+            <h2 style="font-size: 1.25rem">
+                @example.Title
+            </h2>
+        </div>
+        }
+    </div>
+</div>
+
+@code {
+
+private record Example(string Title, string Json);
+
+private void HandleClick(Example example)
+{
+    Pages.Index.App.SetupBenchFromJsonString(example.Json);
+}
+
+
+private List<Example> _examples =
+[
+new("Buzzer and Sensors", "{\"LocalId\":3,\"Code\":\"\\n\\nconst int buttonPin2 = 2;\\nconst int buzzerPin3 = 4;  // Signal pin for the buzzer\\n\\n\\nvoid setup() {\\n  pinMode(buttonPin2, INPUT); // Set the button pin as an input\\n  Serial.begin(9600);        // Start serial communication at 9600 baud\\npinMode(buzzerPin3, OUTPUT);  // Set buzzer pin as output\\n}\\n\\n\\nvoid loop() {\\n  int buttonState2 = digitalRead(buttonPin2); // Read the button state\\n\\n  if (buttonState2 == HIGH) { // If button is pressed\\n    Serial.println(\\u0022Button is pressed!\\u0022);\\n  }\\n\\n  delay(100); // Optional: Small delay to avoid spamming the serial monitor\\ndigitalWrite(buzzerPin3, HIGH);  // Turn buzzer on\\n  delay(4000);                    // Wait 4 seconds\\n  digitalWrite(buzzerPin3, LOW);    // Turn buzzer off\\n  delay(2000);                    // Wait 2 seconds\\n}\\n\\n\\n \\n\",\"Comps\":{\"1\":{\"localId\":0,\"Highlight\":null,\"GlobalId\":1,\"X\":780,\"Y\":308,\"zoomedX\":841,\"zoomedY\":366,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{}},\"2\":{\"localId\":2,\"Highlight\":null,\"GlobalId\":29,\"X\":888.5,\"Y\":39.5,\"zoomedX\":949.5,\"zoomedY\":97.5,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{\"pushed\":{\"type\":\"System.String\",\"value\":\"Released\"}}},\"3\":{\"localId\":3,\"Highlight\":null,\"GlobalId\":30,\"X\":604.75,\"Y\":111.423,\"zoomedX\":665.75,\"zoomedY\":169.423,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{}}}}"),
+];
+
+}

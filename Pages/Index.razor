@@ -28,6 +28,9 @@
         </button>
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
+                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
+                    Example
+                </button>
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
@@ -78,6 +81,9 @@
             </div>
             <CodePane></CodePane>
         </div>
+        <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
+            <ExampleSelect></ExampleSelect>
+        </Modal>
         <ToastQueue></ToastQueue>
     </div>
     @if (showZoomTooltip)
@@ -113,6 +119,8 @@
 </body>
 
 @code{
+    private Modal modal;
+    private bool _exampleModalOpen;
     bool isLeftExpanded = true;
     bool isRightExpanded;
 
@@ -864,47 +872,119 @@
     /// <param name="json">The full JSON to deserialize.</param>
     public void SetupBenchFromJsonString(string json)
     {
-        Data? data = DeserializeJson(json);
-        //clear the components. uses the special delete function to hopefully include any special things that need to happen on removal
-        //notably, this is the case for the dht (global id 20) which has to deregister the arduino pause.
-        foreach (var comp in Comps)
+        Console.WriteLine("Starting bench setup from JSON");
+        Data? data;
+        try
         {
-            SelectedComponent = comp.Key;
-            RemoveComp();
-            SelectedComponent = -1;
+            var options = new JsonSerializerOptions { 
+                IncludeFields = true,
+                WriteIndented = true
+            };
+            options.Converters.Add(new ParamSerializer());
+            data = JsonSerializer.Deserialize<Data>(json, options);
+            
+            if (data == null)
+            {
+                Console.WriteLine("Deserialization returned null");
+                return;
+            }
+            Console.WriteLine($"Deserialization successful. Component count: {data.Comps?.Count ?? 0}");
         }
-
-        BuildCanvas!.ConnLines.Clear();
-        BuildCanvas.ResetTransform();
-        GraphSynthInvoke.Inputs.Clear();
-        GraphSynthInvoke.DestroyGraph();
-        BuildCode.outputPins.Clear();
-
-        //Console.WriteLine(ex);
-        localIds = data.LocalId;
-
-        foreach (var kv in data.Comps)
+        catch (Exception ex)
         {
-            Comps.Add(kv.Key, kv.Value);
-            var n = new node(); //label with localId (easy tracking)
-            n.localLabels.Add("user_" + kv.Value.Data.nodeName);
-            kv.Value.GsNode = n;
-
-            GraphSynthInvoke.GetNodes().Add(n);
-            if (kv.Value.Data.nodeName != null) GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
-            GraphSynthInvoke.RecgApply();
-            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + kv.Key));
-            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + kv.Key));
+            Console.WriteLine($"Error during deserialization: {ex.Message}");
+            Console.WriteLine($"JSON content: {json.Substring(0, Math.Min(200, json.Length))}...");
+            return;
         }
-
-        foreach (var c in Comps.Values)
+    
+        try
         {
-            UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
+            // Clear existing components
+            foreach (var comp in Comps)
+            {
+                Console.WriteLine($"Removing component {comp.Key}");
+                SelectedComponent = comp.Key;
+                RemoveComp();
+                SelectedComponent = -1;
+            }
+    
+            BuildCanvas!.ConnLines.Clear();
+            BuildCanvas.ResetTransform();
+            GraphSynthInvoke.Inputs.Clear();
+            GraphSynthInvoke.DestroyGraph();
+            BuildCode.outputPins.Clear();
+            localIds = data.LocalId;
+    
+            // First pass: Create all component nodes
+            foreach (var kv in data.Comps)
+            {
+                Console.WriteLine($"Setting up component {kv.Key} of type {kv.Value.Data.nodeName}");
+                Comps.Add(kv.Key, kv.Value);
+                var n = new node();
+                n.localLabels.Add("user_" + kv.Value.Data.nodeName);
+                kv.Value.GsNode = n;
+                
+                GraphSynthInvoke.GetNodes().Add(n);
+                if (kv.Value.Data.nodeName != null)
+                {
+                    GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
+                    Console.WriteLine($"Added input for {kv.Value.Data.nodeName}");
+                }
+    
+                // Add and connect each component
+                GraphSynthInvoke.Add();
+                if (kv.Value.Data.nodeName != null && !kv.Value.IsArduino())
+                {
+                    var connected = GraphSynthInvoke.Connect(kv.Value.Data.nodeName, "arduino", SelectArduinoNode);
+                    Console.WriteLine($"Connected component {kv.Key}: {connected}");
+                }
+    
+                // Label nodes and arcs with localId
+                var newNodes = GraphSynthInvoke.GetNodes()
+                    .FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null);
+                var newArcs = GraphSynthInvoke.GetArcs()
+                    .FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null);
+                    
+                foreach(var node in newNodes)
+                {
+                    node.localLabels.Add("localId:" + kv.Key);
+                }
+                foreach(var arc in newArcs)
+                {
+                    arc.localLabels.Add("localId:" + kv.Key);
+                }
+                
+                Console.WriteLine($"Labeled {newNodes.Count} nodes and {newArcs.Count} arcs for component {kv.Key}");
+            }
+    
+            // Second pass: Update bindings and setup listeners
+            foreach (var comp in Comps.Values)
+            {
+                UpdatePinBindings(comp);
+                
+                // Re-register DHT if present
+                if (comp.GlobalId == 20)
+                {
+                    if (comp.ConnMap.ContainsKey(1) && comp.ConnMap[1].Count > 0)
+                    {
+                        AppInterop.RegisterResponseRequired(comp.ConnMap[1][0].ToId);
+                        Console.WriteLine("Registered DHT component");
+                    }
+                }
+            }
+    
+            Console.WriteLine("Setting up listeners");
+            setupListeners();
+            Console.WriteLine("Setting code");
+            AppInterop.SetCodeWrapper(data.Code);
+            Console.WriteLine("Bench setup complete");
         }
-
-        setupListeners();
-
-        AppInterop.SetCodeWrapper(data.Code);
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during bench setup: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            throw;
+        }
     }
 
     /// <summary>
