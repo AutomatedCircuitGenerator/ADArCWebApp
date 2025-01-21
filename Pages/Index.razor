@@ -899,71 +899,71 @@
     /// <param name="e"></param>
     /// <returns></returns>
 	public async Task LoadFromFile(InputFileChangeEventArgs e)
-{
-    Console.WriteLine("LoadFromFile called");
-    try
     {
-        var file = e.File;
-        Console.WriteLine($"Processing file: {file.Name}, size: {file.Size}");
-        
-        var buffer = new byte[file.Size];
-        await e.File.OpenReadStream().ReadAsync(buffer);
-        var str = System.Text.Encoding.UTF8.GetString(buffer);
-        Console.WriteLine("File content loaded successfully");
-
+        Console.WriteLine("LoadFromFile called");
         try
         {
-            Console.WriteLine("Parsing file JSON data");
-            var options = new JsonSerializerOptions 
-            { 
-                PropertyNameCaseInsensitive = true,
-                IncludeFields = true
-            };
+            var file = e.File;
+            Console.WriteLine($"Processing file: {file.Name}, size: {file.Size}");
             
-            var data = JsonSerializer.Deserialize<Data>(str, options);
-            
-            if (data?.Comps != null && data.Comps.ContainsKey(1))
+            var buffer = new byte[file.Size];
+            await e.File.OpenReadStream().ReadAsync(buffer);
+            var str = System.Text.Encoding.UTF8.GetString(buffer);
+            Console.WriteLine("File content loaded successfully");
+    
+            try
             {
-                var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
-                Console.WriteLine($"Detected board type from file: {boardType}");
+                Console.WriteLine("Parsing file JSON data");
+                var options = new JsonSerializerOptions 
+                { 
+                    PropertyNameCaseInsensitive = true,
+                    IncludeFields = true
+                };
                 
-                Console.WriteLine("Setting board type");
-                BoardService.Board = boardType;
+                var data = JsonSerializer.Deserialize<Data>(str, options);
                 
-                Console.WriteLine("Setting up bench");
-                SetupBenchFromJsonString(str);
-                
-                // Unlock components
-                Console.WriteLine("Unlocking components");
-                selLockedOut = false;
-                if (CompPane != null)
+                if (data?.Comps != null && data.Comps.ContainsKey(1))
                 {
-                    CompPane.ReleaseLockout();
+                    var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                    Console.WriteLine($"Detected board type from file: {boardType}");
+                    
+                    Console.WriteLine("Setting board type");
+                    BoardService.Board = boardType;
+                    
+                    Console.WriteLine("Setting up bench");
+                    SetupBenchFromJsonString(str);
+                    
+                    // Unlock components
+                    Console.WriteLine("Unlocking components");
+                    selLockedOut = false;
+                    if (CompPane != null)
+                    {
+                        CompPane.ReleaseLockout();
+                    }
+                    
+                    Console.WriteLine("File import complete");
                 }
-                
-                Console.WriteLine("File import complete");
+                else
+                {
+                    Console.WriteLine("Error: Could not find board type in file data");
+                }
             }
-            else
+            catch (Exception ex)
             {
-                Console.WriteLine("Error: Could not find board type in file data");
+                Console.WriteLine($"Error processing file contents: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                if (str.Length > 0)
+                {
+                    Console.WriteLine($"JSON content: {str.Substring(0, Math.Min(200, str.Length))}...");
+                }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error processing file contents: {ex.Message}");
+            Console.WriteLine($"Critical error in LoadFromFile: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
-            if (str.Length > 0)
-            {
-                Console.WriteLine($"JSON content: {str.Substring(0, Math.Min(200, str.Length))}...");
-            }
         }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine($"Critical error in LoadFromFile: {ex.Message}");
-        Console.WriteLine($"Stack trace: {ex.StackTrace}");
-    }
-}
 
     /// <summary>
     /// Handles most of the setup process of the bench after import.
@@ -1145,10 +1145,6 @@
     /// Creates a JSON string representing most of the current state of the circuit.
     /// </summary>
     /// <returns>A JSON string of a Data object.</returns>
-    /// <summary>
-/// Creates a JSON string representing most of the current state of the circuit.
-/// </summary>
-/// <returns>A JSON string of a Data object.</returns>
     private async Task<string> ExportJson()
     {
         Console.WriteLine("Starting JSON export");
