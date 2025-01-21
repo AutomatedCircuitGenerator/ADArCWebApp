@@ -1,6 +1,15 @@
 ﻿@page "/"
 @using GraphSynth.Representation
+@using System.Text.Json
+@using System
+@using System.IO
+@using System.IO.Compression
+@using System.Web;
+@using System.Text
+@using System.Linq
+@using System.Collections.Generic
 @using ADArCWebApp.Shared.UIComponents
+@using Microsoft.AspNetCore.Components;
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject BoardService BoardService
@@ -14,7 +23,10 @@
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
-<BoardSelect OnSelect="HandleBoardSelect"></BoardSelect>
+@if (shouldShowBoardSelect)
+{
+<BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
+}
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
         <div class="logo-and-adarc">
@@ -31,6 +43,19 @@
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
                     Example
                 </button>
+                <button class="toolbar-button" @onclick="ToggleUrlDisplay">
+                    <span>🔗 Generate URL</span>
+                </button>
+                @if (isUrlBoxVisible)
+                {
+                    <div class="url-modal">
+                        <input type="text" class="url-textbox" value="@generatedUrl" readonly />
+                        <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                            <span>@copyButtonText</span>
+                        </button>
+                    </div>
+                }
+
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
@@ -119,9 +144,13 @@
 </body>
 
 @code{
-    private Modal modal;
     private bool _exampleModalOpen;
+
+	private BoardSelect boardSelect;
+    private bool shouldShowBoardSelect = true;
+
     bool isLeftExpanded = true;
+	private string generatedUrl = string.Empty;
     bool isRightExpanded;
 
     private bool _scheduleBenchSetup;
@@ -157,16 +186,23 @@
 
     private void HandleBoardSelect(Board board)
     {
+        Console.WriteLine($"HandleBoardSelect called with board: {board}");
+        
+        // Normal board selection flow - no auto-selection check needed
+        BoardService.Board = board;
         Comps[0] = BoardService.GetComponentInstance();
-
+        Console.WriteLine($"Board set to {board}, component instance created");
+    
         if (LoadingProgress == -1)
         {
+            Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
         else
         {
+            Console.WriteLine("Loading in progress, scheduling bench setup");
             _scheduleBenchSetup = true;
         }
     }
@@ -240,9 +276,9 @@
     /// <summary>
     /// Provides avenue for non-component classes to invoke render.
     /// </summary>
-    public void StateChanged()
+    public async Task StateChanged()
     {
-        StateHasChanged();
+         await InvokeAsync(StateHasChanged);
     }
 
 
@@ -606,32 +642,45 @@
     /// <returns></returns>
     protected override async Task OnInitializedAsync()
     {
-        //TODO: find a way to automatically update the max number of rules so bar won't go over 100%.
-        // ^^ Hard to do because it downloads the rule set inside of the function, yet needs knowledge of next ruleset which hasnt been downloaded
-        // can request just one file?
+        Console.WriteLine("OnInitializedAsync started");
+        
+        // Initialize JS interop first
+        if (AppInterop.JsModule == null)
+        {
+            Console.WriteLine("Initializing JS interop");
+            AppInterop.Runtime = JsRuntime;
+            AppInterop.JsModule = await AppInterop.GetModuleWrapper();
+        }
+        
+        // Check if we're loading from a URL
+        var uri = new Uri(navMan.Uri);
+        var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
+        var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
+        shouldShowBoardSelect = !hasUrlParam;
+        Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
+    
+        // Only lock selection if we're not loading from URL
+        selLockedOut = !hasUrlParam;
+        
+        Console.WriteLine("Loading rulesets...");
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+        
         if (_scheduleBenchSetup)
         {
+            Console.WriteLine("Setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
-
-        //all else finish first
+    
         await Task.Delay(1000);
         LoadingProgress = -1;
-
-        // await RuleSetMap.getInstance().loadRuleSet("BIG1");
-        // foreach (string str in ruleNames)
-        // {
-        // 	await RuleSetMap.getInstance().loadRuleSet(str);
-        // 	loadPercent = Math.Floor((RuleSetMap.getInstance().getNumRules() / totalRules) * 100.0);
-        // 	base.StateHasChanged();
-        // }
-
-        // // allRulesLoaded = true;
+        Console.WriteLine("OnInitializedAsync completed");
+    
+        // Force a re-render to ensure visibility changes are applied
+        await InvokeAsync(StateHasChanged);
     }
 
     /// <summary>
@@ -857,19 +906,107 @@
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-    public async Task LoadFromFile(InputFileChangeEventArgs e)
+	public async Task LoadFromFile(InputFileChangeEventArgs e)
+{
+    Console.WriteLine("LoadFromFile called");
+    try
     {
         var file = e.File;
+        Console.WriteLine($"Processing file: {file.Name}, size: {file.Size}");
+        
         var buffer = new byte[file.Size];
         await e.File.OpenReadStream().ReadAsync(buffer);
         var str = System.Text.Encoding.UTF8.GetString(buffer);
-        SetupBenchFromJsonString(str);
+        Console.WriteLine("File content loaded successfully");
+
+        try
+        {
+            Console.WriteLine("Parsing file JSON data");
+            var options = new JsonSerializerOptions 
+            { 
+                PropertyNameCaseInsensitive = true,
+                IncludeFields = true
+            };
+            
+            var data = JsonSerializer.Deserialize<Data>(str, options);
+            
+            if (data?.Comps != null && data.Comps.ContainsKey(1))
+            {
+                var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                Console.WriteLine($"Detected board type from file: {boardType}");
+                
+                Console.WriteLine("Setting board type");
+                BoardService.Board = boardType;
+                
+                Console.WriteLine("Setting up bench");
+                SetupBenchFromJsonString(str);
+                
+                // Unlock components
+                Console.WriteLine("Unlocking components");
+                selLockedOut = false;
+                if (CompPane != null)
+                {
+                    CompPane.ReleaseLockout();
+                }
+                
+                Console.WriteLine("File import complete");
+            }
+            else
+            {
+                Console.WriteLine("Error: Could not find board type in file data");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error processing file contents: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            if (str.Length > 0)
+            {
+                Console.WriteLine($"JSON content: {str.Substring(0, Math.Min(200, str.Length))}...");
+            }
+        }
     }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"Critical error in LoadFromFile: {ex.Message}");
+        Console.WriteLine($"Stack trace: {ex.StackTrace}");
+    }
+}
 
     /// <summary>
     /// Handles most of the setup process of the bench after import.
     /// </summary>
     /// <param name="json">The full JSON to deserialize.</param>
+    private static Data? DeserializeJson(string jsonString)
+    {
+        Console.WriteLine("Starting JSON deserialization");
+        try
+        {
+            var options = new JsonSerializerOptions { 
+                IncludeFields = true,
+                WriteIndented = true
+            };
+            options.Converters.Add(new ParamSerializer());
+            
+            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+            
+            if (canvasData == null)
+            {
+                Console.WriteLine("Deserialization returned null");
+                return null;
+            }
+    
+            Console.WriteLine($"Deserialization successful. Component count: {canvasData.Comps?.Count ?? 0}");
+            return canvasData;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Error during deserialization: {ex.Message}");
+            Console.WriteLine($"JSON content: {jsonString.Substring(0, Math.Min(200, jsonString.Length))}..."); // Show start of JSON for debugging
+            return null;
+        }
+    }
+
     public void SetupBenchFromJsonString(string json)
     {
         Console.WriteLine("Starting bench setup from JSON");
@@ -1016,47 +1153,61 @@
     /// Creates a JSON string representing most of the current state of the circuit.
     /// </summary>
     /// <returns>A JSON string of a Data object.</returns>
+    /// <summary>
+/// Creates a JSON string representing most of the current state of the circuit.
+/// </summary>
+/// <returns>A JSON string of a Data object.</returns>
     private async Task<string> ExportJson()
     {
-        Data parentObject = new Data
+        Console.WriteLine("Starting JSON export");
+        try 
         {
-            // ConnLines = Index.buildCanvas.connLines,
-            Comps = Comps,
-            LocalId = localIds,
-            Code = await AppInterop.GetCodeWrapper()
-        };
-
-        var options = new JsonSerializerOptions { IncludeFields = true };
-        options.Converters.Add(new ParamSerializer());
-        return JsonSerializer.Serialize(parentObject, options);
-    }
-
-    /// <summary>
-    /// Deserializes a JSON string to Data object.
-    /// </summary>
-    /// <param name="jsonString">The JSON to deserialize.</param>
-    /// <returns>A Data object.</returns>
-    private static Data? DeserializeJson(string jsonString)
-    {
-        try
-        {
-            // Deserialize JSON data into a Data object
-            var options = new JsonSerializerOptions { IncludeFields = true };
+            // Create clean component dictionary without Controller references
+            var cleanComps = new Dictionary<int, ComponentInstance>();
+            foreach(var kvp in Comps)
+            {
+                var comp = kvp.Value;
+                // Temporarily clear controller before serialization
+                var controller = comp.Controller;
+                comp.Controller = null;
+                cleanComps.Add(kvp.Key, comp);
+            }
+    
+            Data parentObject = new Data
+            {
+                Comps = cleanComps,
+                LocalId = localIds,
+                Code = await AppInterop.GetCodeWrapper()
+            };
+    
+            var options = new JsonSerializerOptions { 
+                IncludeFields = true,
+                WriteIndented = true // Makes JSON more readable for debugging
+            };
             options.Converters.Add(new ParamSerializer());
-            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options) ?? throw new InvalidOperationException("Deserialization failed: 'canvasData' is null. Check if 'jsonString' is in the correct format.");
-
-            // Now you have access to the deserialized data as a CanvasData object
-            // Do whatever you need with this data
-
-            return canvasData;
+            
+            var json = JsonSerializer.Serialize(parentObject, options);
+            Console.WriteLine($"JSON export successful. Length: {json.Length}");
+    
+            // Restore controllers
+            foreach(var kvp in Comps)
+            {
+                var comp = kvp.Value;
+                if(cleanComps.ContainsKey(kvp.Key))
+                {
+                    comp.Controller = kvp.Value.Controller;
+                }
+            }
+    
+            return json;
         }
-        catch (Exception ex)
+        catch(Exception ex)
         {
-            Console.WriteLine($"Error during deserialization: {ex.Message}");
+            Console.WriteLine($"Error during JSON export: {ex.Message}");
+            throw;
         }
-
-        return null;
     }
+
 
     // runs the introjs tutorial
     public async void RunTutorial()
@@ -1067,5 +1218,422 @@
         //await AppInterop.jsModule!.InvokeVoidAsync("runTutorial", true);
         StateHasChanged();
     }
+
+
+	private string copyButtonText = "📋 Copy";
+
+    private async Task CopyUrlToClipboard()
+    {
+        await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", generatedUrl);
+        copyButtonText = "✓ Copied!";
+        StateHasChanged();
+        
+        // Reset button text after 2 seconds
+        await Task.Delay(2000);
+        copyButtonText = "📋 Copy";
+        StateHasChanged();
+    }
+
+
+	private bool isUrlBoxVisible = false;
+
+    private async Task ToggleUrlDisplay()
+    {
+        isUrlBoxVisible = !isUrlBoxVisible;
+		copyButtonText = "📋 Copy";  // Reset text
+        
+        if (isUrlBoxVisible)
+        {
+            try
+            {
+                var json = await ExportJson();
+                var compressed = await CompressCircuitData(json);
+                var baseUrl = navMan.BaseUri;
+                generatedUrl = $"{baseUrl}?c={compressed}";
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error generating URL: {ex.Message}");
+                generatedUrl = "Error generating URL";
+            }
+        }
+        
+        StateHasChanged();
+    }
+
+
+
+    private static async Task<string> CompressCircuitData(string json)
+    {
+        try
+        {
+            // First validate the input JSON
+            using (JsonDocument.Parse(json)) { }
+
+            // Apply replacements in order of longest pattern first
+            foreach (var kvp in CompressionMap.OrderByDescending(x => x.Key.Length))
+            {
+                json = json.Replace(kvp.Key, kvp.Value);
+            }
+
+            byte[] jsonBytes = System.Text.Encoding.UTF8.GetBytes(json);
+            using var msi = new MemoryStream(jsonBytes);
+            using var mso = new MemoryStream();
+            using (var gs = new GZipStream(mso, CompressionMode.Compress))
+            {
+                await msi.CopyToAsync(gs);
+            }
+
+            return Convert.ToBase64String(mso.ToArray())
+                .Replace('+', '-')
+                .Replace('/', '_')
+                .Replace("=", "");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Compression error: {ex.Message}");
+            throw;
+        }
+    }
+
+    private static string DecompressCircuitData(string compressed)
+    {
+        try
+        {
+            // Handle Base64 padding
+            compressed = compressed.Replace('-', '+').Replace('_', '/');
+            switch (compressed.Length % 4)
+            {
+                case 2: compressed += "=="; break;
+                case 3: compressed += "="; break;
+            }
+
+            // Decompress
+            byte[] compressedBytes = Convert.FromBase64String(compressed);
+            using var msi = new MemoryStream(compressedBytes);
+            using var mso = new MemoryStream();
+            using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+            {
+                gs.CopyTo(mso);
+            }
+
+            string json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+
+            // First handle JSON structure (#-prefixed patterns) in reverse order
+            foreach (var kvp in CompressionMap
+                         .Where(x => x.Value.StartsWith("\"#"))
+                         .OrderByDescending(x => x.Value.Length))
+            {
+                json = json.Replace(kvp.Value, kvp.Key);
+            }
+
+            // Then handle code patterns (@-prefixed) in reverse order
+            foreach (var kvp in CompressionMap
+                         .Where(x => x.Value.StartsWith("@"))
+                         .OrderByDescending(x => x.Value.Length))
+            {
+                json = json.Replace(kvp.Value, kvp.Key);
+            }
+
+            // Finally handle whitespace patterns
+            foreach (var kvp in CompressionMap
+                         .Where(x => !x.Value.StartsWith("\"#") && !x.Value.StartsWith("@"))
+                         .OrderByDescending(x => x.Value.Length))
+            {
+                json = json.Replace(kvp.Value, kvp.Key);
+            }
+
+            // Validate final JSON
+            using (JsonDocument.Parse(json)) { }
+
+            return json;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Decompression error at: {ex.Message}");
+            throw;
+        }
+    }
+
+    [JSInvokable]
+    public static async Task LoadFromUrl(string compressedData)
+    {
+        try
+        {
+            Console.WriteLine("LoadFromUrl called with compressed data length: " + compressedData.Length);
+            
+            if (App == null)
+            {
+                Console.WriteLine("Error: App not ready");
+                return;
+            }
+    
+            try
+            {
+                // Handle Base64 padding
+                compressedData = compressedData.Replace('-', '+').Replace('_', '/');
+                switch (compressedData.Length % 4)
+                {
+                    case 2: compressedData += "=="; break;
+                    case 3: compressedData += "="; break;
+                }
+    
+                // Decompress
+                byte[] compressedBytes = Convert.FromBase64String(compressedData);
+                using var msi = new MemoryStream(compressedBytes);
+                using var mso = new MemoryStream();
+                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
+                {
+                    await gs.CopyToAsync(mso);
+                }
+    
+                var json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+                Console.WriteLine($"Successfully decompressed JSON data, length: {json.Length}");
+    
+                // Replace compressed patterns with original values
+                foreach (var kvp in CompressionMap.OrderByDescending(x => x.Value.Length))
+                {
+                    json = json.Replace(kvp.Value, kvp.Key);
+                }
+    
+                try
+                {
+                    // Parse JSON to get board type
+                    Console.WriteLine("Parsing JSON data to determine board type");
+                    var options = new JsonSerializerOptions 
+                    { 
+                        PropertyNameCaseInsensitive = true,
+                        IncludeFields = true
+                    };
+                    
+                    var data = JsonSerializer.Deserialize<Data>(json, options);
+                    Console.WriteLine($"JSON deserialized successfully, checking components");
+                    
+                    if (data?.Comps != null && data.Comps.ContainsKey(1))
+                    {
+                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                        Console.WriteLine($"Detected board type from URL data: {boardType}");
+                        
+                        await App.InvokeAsync(() => {
+                            Console.WriteLine("Setting shouldShowBoardSelect to false");
+                            App.shouldShowBoardSelect = false;
+                            App.StateHasChanged();
+                            
+                            Console.WriteLine("Setting board type");
+                            App.BoardService.Board = boardType;
+                            
+                            Console.WriteLine("Setting up bench");
+                            App.SetupBenchFromJsonString(json);
+    
+                            // Unlock components after setup is complete
+                            Console.WriteLine("Unlocking components");
+                            App.selLockedOut = false;
+                            if (CompPane != null)
+                            {
+                                CompPane.ReleaseLockout();
+                            }
+    
+                            Console.WriteLine("Board and bench setup complete");
+                        });
+                        
+                        Console.WriteLine("Triggering state change");
+                        await App.StateChanged();
+                    }
+                    else
+                    {
+                        Console.WriteLine("Error: Could not find board type in component data");
+                    }
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"Error parsing JSON or setting up bench: {ex.Message}");
+                    Console.WriteLine($"Stack trace: {ex.StackTrace}");
+                    Console.WriteLine($"JSON content: {json.Substring(0, Math.Min(200, json.Length))}...");
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error decompressing data: {ex.Message}");
+                Console.WriteLine($"Stack trace: {ex.StackTrace}");
+            }
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"Critical error in LoadFromUrl: {ex.Message}");
+            Console.WriteLine($"Stack trace: {ex.StackTrace}");
+        }
+    }
+				
+
+
+
+    private static readonly Dictionary<string, string> CompressionMap = new()
+    {
+        // JSON Structure (use numbered patterns to avoid collisions)
+        {"\"LocalId\":", "\"#01:"},
+        {"\"Comps\":{", "\"#02:{"},
+        {"\"compParams\":", "\"#03:"},
+        {"\"System.Double\"", "\"#04\""},
+        {"\"System.String\"", "\"#05\""},
+        {"\"System.Boolean\"", "\"#06\""},
+        {"\"System.Int32\"", "\"#07\""},
+        
+        // Component Properties
+        {"\"localId\":", "\"#11:"},
+        {"\"globalId\":", "\"#12:"},
+        {"\"x\":", "\"#13:"},
+        {"\"y\":", "\"#14:"},
+        {"\"zoomedX\":", "\"#15:"},
+        {"\"zoomedY\":", "\"#16:"},
+        {"\"midSignal\":", "\"#17:"},
+        {"\"counter\":", "\"#18:"},
+        {"\"Wbuffer\":", "\"#19:"},
+        {"\"RegAddr\":", "\"#20:"},
+        {"\"byteIndex\":", "\"#21:"},
+        {"\"timer\":", "\"#22:"},
+        {"\"type\":", "\"#23:"},
+        {"\"value\":", "\"#24:"},
+        
+        // Component Numbers
+        {"\"1\":{", "\"#31:{"},
+        {"\"2\":{", "\"#32:{"},
+        {"\"3\":{", "\"#33:{"},
+        {"\"4\":{", "\"#34:{"},
+        {"\"5\":{", "\"#35:{"},
+        {"\"6\":{", "\"#36:{"},
+        {"\"7\":{", "\"#37:{"},
+        {"\"8\":{", "\"#38:{"},
+        {"\"9\":{", "\"#39:{"},
+        
+        // Component Parameters
+        {"\"triggermode\":", "\"#41:"},
+        {"\"ismotiondetected\":", "\"#42:"},
+        {"\"timedelayseconds\":", "\"#43:"},
+        {"\"text\":", "\"#44:"},
+        {"\"backlight\":", "\"#45:"},
+        {"\"blink\":", "\"#46:"},
+        {"\"cursor\":", "\"#47:"},
+        {"\"cursorX\":", "\"#48:"},
+        {"\"cursorY\":", "\"#49:"},
+        
+        // Include Statements
+        {"#include <Arduino.h>", "@inc1"},
+        {"#include <Wire.h>", "@inc2"},
+        {"#include <LiquidCrystal_PCF8574.h>", "@inc3"},
+        
+        // Code Patterns (use @ for code patterns to distinguish from JSON #)
+        {"int inputPin", "@ip"},
+        {"const buzzerPin", "@bp"},
+        {"int val", "@iv"},
+        {"pinMode(inputPin, INPUT)", "@pmii"},
+        {"pinMode(buzzerPin, OUTPUT);", "@pmbo"},
+        {"void setup()", "@vs"},
+        {"void loop()", "@vl"},
+        {"val = digitalRead(inputPin)", "@vdri"},
+        {"if (val == HIGH)", "@ifh"},
+        
+        // Delays
+        {"delay(1000)", "@1k"},
+        {"delay(2000)", "@2k"},
+        {"delay(4000)", "@4k"},
+        {"delay(5000)", "@5k"},
+        {"delay(10000)", "@10k"},
+        
+        // PIR Code
+        {"int pirState = LOW", "@pl"},
+        {"int pirState = HIGH", "@ph"},
+        {"if (pirState == LOW)", "@ipl"},
+        {"if (pirState == HIGH)", "@iph"},
+        {"Serial.println(\\u0022Motion detected!\\u0022)", "@spmd"},
+        {"Serial.println(\\u0022Motion ended!\\u0022)", "@spme"},
+        {"digitalWrite(buzzerPin, HIGH)", "@dwbh"},
+        {"digitalWrite(buzzerPin, LOW)", "@dwbl"},
+        
+        // LCD Object Creation and Setup
+        {"LiquidCrystal_PCF8574 lcd(0x27);", "@lcd1"},
+        {"lcd.begin(16, 2);", "@lcd2"},
+        {"lcd.createChar(1, dotOff);", "@lcd3"},
+        {"lcd.createChar(2, dotOn);", "@lcd4"},
+        {"lcd.setBacklight(255);", "@lbl1"},
+        {"lcd.setBacklight(0);", "@lbl0"},
+        {"lcd.home();", "@lh"},
+        {"lcd.clear();", "@lc"},
+        {"lcd.print(\"", "@lp\""},
+        {"lcd.setCursor(", "@lsc"},
+        {"lcd.cursor();", "@lcur"},
+        {"lcd.blink();", "@lb"},
+        {"lcd.noBlink();", "@lnb"},
+        {"lcd.noCursor();", "@lnc"},
+        {"lcd.noDisplay();", "@lnd"},
+        {"lcd.display();", "@ld"},
+        {"lcd.scrollDisplayLeft();", "@lsl"},
+        {"lcd.scrollDisplayRight();", "@lsr"},
+        {"Serial.println(\"LCD...\");", "@sp1"},
+        {"Serial.println(\"Probing for PCF8574 on address 0x27...\");", "@sp2"},
+        {"Serial.println(\": LCD found.\");", "@sp3"},
+        {"Serial.println(\": LCD not found.\");", "@sp4"},
+        {"Hello LCD", "@t1"},
+        {"Cursor On", "@t2"},
+        {"Cursor Blink", "@t3"},
+        {"Cursor OFF", "@t4"},
+        {"Display Off", "@t5"},
+        {"Display On", "@t6"},
+        {"*** first line.", "@t7"},
+        {"*** second line.", "@t8"},
+        
+        // LCD Custom Character Data
+        {"byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,\n                  0b10001, 0b01110, 0b00000, 0b00000 };", "@dot1"},
+        {"byte dotOn[] = { 0b00000, 0b01110, 0b11111, 0b11111,\n                 0b11111, 0b01110, 0b00000, 0b00000 };", "@dot2"},
+        
+        // I2C/Wire Commands
+        {"Wire.begin();", "@wb"},
+        {"Wire.beginTransmission(0x27);", "@wbt"},
+        {"Wire.endTransmission();", "@wet"},
+        
+        // Comments PIR & buzzer
+        {"// choose the input pin (for PIR sensor)", "@c1"},
+        {"// we start, assuming no motion detected", "@c2"},
+        {"// variable for reading the pin status", "@c3"},
+        {"// Signal pin for the buzzer", "@c4"},
+        {"// declare sensor as input", "@c5"},
+        {"// Set buzzer pin as output", "@c6"},
+        {"// read input value", "@c7"},
+        {"// check if the input is HIGH", "@c8"},
+        {"// we have just turned on", "@c9"},
+        {"// we have just turned off", "@c10"},
+        {"// Turn buzzer on", "@c11"},
+        {"// Wait 4 seconds", "@c12"},
+        {"// Turn buzzer off", "@c13"},
+        {"// Wait 2 seconds", "@c14"},
+        // Comments LCD
+        {"// We only want to print on the output change, not state", "@c15"},
+        {"// set the LCD address to 0x27 (TI chip) or 0x3F (NPX Chip)", "@c16"},
+        {"// 2 custom characters", "@c17"},
+        {"// wait on Serial to be available on Leonardo", "@c18"},
+        {"// See http:", "@c19"},
+        {"//playground.arduino.cc/Main/I2cScanner how to test for a I2C device.", "@c20"},
+        {"//  initialize the lcd", "@c21"},
+        
+        
+        
+        // Control Flow & Whitespace
+        {" else if ", "@ei"},
+        {"while (", "@w("},
+        {"if (", "@i("},
+        {") {", "}{"},
+        {"} else {", "}e{"},
+        {" {", "{"},
+        {"{ ", "{"},
+        {" }", "}"},
+        {" ;", ";"},
+        {", ", ","},
+        {": ", ":"},
+        {" = ", "="},
+        {" == ", "="},
+        {"\n\n", "\n"},
+        {" // ", "//"}
+    };
+    
+
 
 }

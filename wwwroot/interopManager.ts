@@ -8,6 +8,7 @@ import {Board, BoardConstructor} from "./boards/board";
 /*declare var introJs: any;*/
 
 export namespace interopManager {
+    let isUrlLoadInitialized = false;
 
     export class InteropManager {
 
@@ -252,6 +253,74 @@ export namespace interopManager {
 
         }
 
+
+        /**
+         * Initialize URL loading functionality
+         */
+        initUrlLoading() {
+            // Only initialize once
+            if (isUrlLoadInitialized) {
+                return;
+            }
+            isUrlLoadInitialized = true;
+
+            // Check if document is already loaded
+            if (document.readyState === 'complete') {
+                this.tryLoadFromUrl();
+            } else {
+                // Wait for document to load
+                window.addEventListener('load', () => {
+                    this.tryLoadFromUrl();
+                });
+            }
+        }
+
+        private waitForBlazerAndRules() {
+            // Wait 12 seconds total to ensure Blazor is ready and rules are loaded
+            setTimeout(() => {
+                this.tryLoadFromUrl();
+            }, 12000);
+        }
+
+        // Field to track auto-board selection
+        private autoSelectedBoard: BoardType | null = null;
+
+        private async tryLoadFromUrl() {
+            const params = new URLSearchParams(window.location.search);
+            const data = params.get('c');
+
+            if (data) {
+                try {
+                    console.log("Found URL parameter 'c', attempting to load circuit");
+
+                    // Add a delay to ensure Blazor is ready
+                    await new Promise(resolve => setTimeout(resolve, 10000));
+
+                    // Simply pass the compressed data to C#
+                    // Let C# handle decompression and board detection
+                    await DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data);
+
+                    // Clear the URL parameter after successful load
+                    const newUrl = window.location.pathname;
+                    window.history.replaceState({}, '', newUrl);
+
+                    console.log("URL loading complete");
+                } catch (error) {
+                    console.error("Error loading from URL:", error);
+                }
+            }
+        }
+
+        // Add method to check if board was auto-selected
+        public getAutoSelectedBoard(): BoardType | null {
+            return this.autoSelectedBoard;
+        }
+
+        // Add method to clear auto-selected board
+        public clearAutoSelectedBoard() {
+            this.autoSelectedBoard = null;
+        }
+
         setBoard(board: BoardType) {
             let boardConstructor: BoardConstructor;
             switch(board) {
@@ -265,8 +334,19 @@ export namespace interopManager {
             this.runner.boardConstructor = boardConstructor;
         }
     }
-    
+
+
+
+
+
+    // Keep this outside the class
+    let manager: InteropManager | null = null;
+
     export function getInteropManager(): InteropManager {
-        return new InteropManager();
+        if (!manager) {
+            manager = new InteropManager();
+            manager.initUrlLoading();
+        }
+        return manager;
     }
 }
