@@ -1112,6 +1112,7 @@
     
             Console.WriteLine("Setting up listeners");
             setupListeners();
+            BoardService.Board = data.Board;
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
             Console.WriteLine("Bench setup complete");
@@ -1147,6 +1148,7 @@
         public int LocalId { get; set; }
         public string Code { get; set; }
         public Dictionary<int, ComponentInstance> Comps { get; set; }
+        public Board Board { get; set; }
     }
 
     /// <summary>
@@ -1167,9 +1169,6 @@
             foreach(var kvp in Comps)
             {
                 var comp = kvp.Value;
-                // Temporarily clear controller before serialization
-                var controller = comp.Controller;
-                comp.Controller = null;
                 cleanComps.Add(kvp.Key, comp);
             }
     
@@ -1177,7 +1176,8 @@
             {
                 Comps = cleanComps,
                 LocalId = localIds,
-                Code = await AppInterop.GetCodeWrapper()
+                Code = await AppInterop.GetCodeWrapper(),
+                Board = BoardService.Board,
             };
     
             var options = new JsonSerializerOptions { 
@@ -1188,16 +1188,6 @@
             
             var json = JsonSerializer.Serialize(parentObject, options);
             Console.WriteLine($"JSON export successful. Length: {json.Length}");
-    
-            // Restore controllers
-            foreach(var kvp in Comps)
-            {
-                var comp = kvp.Value;
-                if(cleanComps.ContainsKey(kvp.Key))
-                {
-                    comp.Controller = kvp.Value.Controller;
-                }
-            }
     
             return json;
         }
