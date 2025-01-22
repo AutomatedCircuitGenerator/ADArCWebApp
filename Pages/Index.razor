@@ -1050,9 +1050,9 @@
             GraphSynthInvoke.DestroyGraph();
             BuildCode.outputPins.Clear();
             localIds = data.LocalId;
-    
+            
             // First pass: Create all component nodes
-            foreach (var kv in data.Comps)
+            foreach (var kv in data.Comps.OrderBy(kv => kv.Key))
             {
                 Console.WriteLine($"Setting up component {kv.Key} of type {kv.Value.Data.nodeName}");
                 Comps.Add(kv.Key, kv.Value);
@@ -1162,9 +1162,6 @@
             foreach(var kvp in Comps)
             {
                 var comp = kvp.Value;
-                // Temporarily clear controller before serialization
-                var controller = comp.Controller;
-                comp.Controller = null;
                 cleanComps.Add(kvp.Key, comp);
             }
     
@@ -1183,16 +1180,6 @@
             
             var json = JsonSerializer.Serialize(parentObject, options);
             Console.WriteLine($"JSON export successful. Length: {json.Length}");
-    
-            // Restore controllers
-            foreach(var kvp in Comps)
-            {
-                var comp = kvp.Value;
-                if(cleanComps.ContainsKey(kvp.Key))
-                {
-                    comp.Controller = kvp.Value.Controller;
-                }
-            }
     
             return json;
         }

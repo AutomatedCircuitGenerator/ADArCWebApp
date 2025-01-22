@@ -99,6 +99,7 @@ export class LCD1602I2C extends Controller implements I2CController {
         this.shiftMode = false;     
         this.is8bit = true;         
         this.updated = false;
+        this.render();
     }
 
     update() {
