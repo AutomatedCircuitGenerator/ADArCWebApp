@@ -29,7 +29,7 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 (<any>window).interopManager = interopManager;
 //send a request to C# to resize palette elements on window resize.
 (<any>window).addEventListener("resize", async (e) => {
-    await DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight())
+    await DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight())
 });
 //components
 (<any>window).LCD1602I2C = LCD1602I2C;
