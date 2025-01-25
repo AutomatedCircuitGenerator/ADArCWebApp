@@ -7,8 +7,11 @@ export abstract class Controller {
     protected component: DotNetObjectReference;
     protected pins: { [canonicalPinName: string]: Interfaces[] } = {};
     protected id: number;
-    protected element: HTMLDivElement;
     protected pinIndices: { [canonicalPinName: string]: number[] };
+    
+    protected get element() {
+        return document.getElementById(`component-${this.id}`) as HTMLDivElement;
+    }
 
     protected constructor() {
         AVRRunner.getInstance().addController(this);
@@ -43,21 +46,9 @@ export abstract class Controller {
     }, component: DotNetObjectReference): T {
         const instance = new this();
         instance.id = id;
-        instance.element = document.getElementById(`component-${id}`) as HTMLDivElement;
         instance.pinIndices = pins;
         instance.component = component;
 
         return instance;
-    }
-
-    /**
-     * when awaited, pauses execution of controller part until the specified number of cycles have passed.
-     * @param {number} cycles - The number of cycles to wait.
-     * @returns {Promise} A promise that resolves once the specified number of cycles have elapsed.
-     */
-    sleep(cycles: number): Promise<any> {
-        return new Promise(resolve => {
-            AVRRunner.getInstance().board.cpu.addClockEvent(() => resolve(void 0), cycles);
-        });
     }
 }

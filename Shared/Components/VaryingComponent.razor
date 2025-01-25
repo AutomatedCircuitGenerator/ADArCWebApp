@@ -48,13 +48,9 @@
         {
             var parameters = new Dictionary<string, object>();
 
-            // Safely cast and access Controller
-            if (_componentRef?.Instance is RazorComponent razorComponent && razorComponent.Controller != null)
-            {
-                parameters["Controller"] = razorComponent.Controller;
-            }
+            parameters["Controller"] = individualData?.Controller;
 
-            <DynamicComponent Type="individualData.Data.EnvironmentalSettingsType" Parameters="parameters"/>
+            <DynamicComponent Type="individualData?.Data.EnvironmentalSettingsType" Parameters="parameters"/>
         }
 
         <!-- Value Setting -->

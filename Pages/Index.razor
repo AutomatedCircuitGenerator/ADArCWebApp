@@ -381,7 +381,7 @@
         moverOffsetTop = e.ClientY;
     }
 
-    private void AddToCanvasIfNecessary(MouseEventArgs e)
+    private async void AddToCanvasIfNecessary(MouseEventArgs e)
     {
         if (targetCardComponentId == -1) return;
         isVisible = "hidden";
@@ -420,6 +420,8 @@
             {
                 UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
             }
+
+            await comp.LinkController(JsRuntime);
 
             //register the dht specifically to forced the arduino to pause while awaiting response from sensor
             //TODO: improve and generalize.
@@ -793,23 +795,23 @@
     /// <summary>
     /// Deletes a component.
     /// </summary>
-    public void RemoveComp()
+    public async void RemoveComp()
     {
-        node Comp2remove = Index.Comps[SelectedComponent].GsNode;
+        var removedComponent = Comps[SelectedComponent];
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
         //TODO: improve and generalize.
-        if (Comps[SelectedComponent].GlobalId == 20)
+        if (removedComponent.GlobalId == 20)
         {
             AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
         }
 
-        GraphSynthInvoke.RemoveComp(Comp2remove);
+        GraphSynthInvoke.RemoveComp(removedComponent.GsNode);
+        
         Comps.Remove(SelectedComponent);
-        List<node> b = GraphSynthInvoke.GetNodes();
-        List<arc> c = GraphSynthInvoke.GetArcs();
 
-
+        await removedComponent.DisposeAsync();
+        
         BuildCode.outputPins.Clear();
         BuildCanvas!.ConnLines.Clear();
         foreach (var comp in Comps.Values)
@@ -818,17 +820,6 @@
         }
         
         ToastService.AddToast("Code panel updated.", Variant.Info);
-
-        /*int numofcon = 0;
-        for (int i = 0; i < c.Count; i++)
-            {
-            if (c[i].localLabels.Contains("connection"))
-                {
-                numofcon++;
-        }
-        }
-        Console.WriteLine("the number of nodes is " + b.Count);
-        Console.WriteLine("the number of connections is " + numofcon);*/
     }
 
     /// <summary>
@@ -1006,7 +997,7 @@
         }
     }
 
-    public void SetupBenchFromJsonString(string json)
+    public async Task SetupBenchFromJsonString(string json)
     {
         Console.WriteLine("Starting bench setup from JSON");
         Data? data;
@@ -1097,6 +1088,7 @@
             foreach (var comp in Comps.Values)
             {
                 UpdatePinBindings(comp);
+                if (!comp.IsArduino()) await comp.LinkController(JsRuntime);
                 
                 // Re-register DHT if present
                 if (comp.GlobalId == 20)
