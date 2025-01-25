@@ -270,4 +270,24 @@
         targetFound = false;
     }
 
+	public void TriggerRefresh()
+    {
+        StateHasChanged();
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);  // Apply transform/zoom to each component
+        }
+        ConnLines.Clear();  // Remove all wires
+        foreach (var comp in comps.Values)
+        {
+            foreach (var connMap in comp.ConnMap)
+            {
+                foreach (var conn in connMap.Value)
+                {
+                    ConnLines.Add(conn);  // Rebuild wires with correct positions
+                }
+            }
+        }
+    }
+
 }

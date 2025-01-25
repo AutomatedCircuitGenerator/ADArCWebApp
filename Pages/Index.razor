@@ -1105,7 +1105,8 @@
             setupListeners();
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
-            Console.WriteLine("Bench setup complete");
+            BuildCanvas!.TriggerRefresh();
+			Console.WriteLine("Bench setup complete");
         }
         catch (Exception ex)
         {
