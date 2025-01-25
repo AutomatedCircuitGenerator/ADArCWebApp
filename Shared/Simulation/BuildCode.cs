@@ -12,25 +12,39 @@ namespace ADArCWebApp.Shared.Simulation
 
 		private static string includeCode()
 		{
-            StringBuilder b = new StringBuilder();
-            var regex = new Regex(@"(#include\s+<[^>]+>)");
-            foreach (ComponentInstance c in Pages.Index.Comps.Values)
-            { 
-	            var include = regex.Matches(c.Data.codeForGen["include"]).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
-	            var output = regex.Matches(b.ToString()).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+			StringBuilder b = new StringBuilder();
+			var regex = new Regex(@"(#include\s+<[^>]+>)");
 
-	            foreach (var inc1 in include)
-	            {
-		            if (!output.Contains(inc1))
-		            {
-			            Console.WriteLine(inc1);
-			            b.Append(parseInclude(inc1.ToString(), true));
-		            }
-	            }
-            }
+			if (Pages.Index.Comps?.Values == null)
+			{
+				Console.WriteLine("Comps.Values is null or empty. Returning empty include code.");
+				return string.Empty;
+			}
+
+			foreach (ComponentInstance c in Pages.Index.Comps.Values)
+			{
+				if (c.Data?.codeForGen == null || !c.Data.codeForGen.ContainsKey("include"))
+				{
+					Console.WriteLine($"Skipping component: {c} due to missing 'include' data.");
+					continue;
+				}
+
+				var include = regex.Matches(c.Data.codeForGen["include"]).Select(m => m.Groups[1].Value).ToList();
+				var output = regex.Matches(b.ToString()).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
+
+				foreach (var inc1 in include)
+				{
+					if (!output.Contains(inc1))
+					{
+						Console.WriteLine(inc1);
+						b.Append(parseInclude(inc1, true));
+					}
+				}
+			}
 
 			return b.ToString();
-        }
+		}
+
 		private static string globalCode()
 		{
 			StringBuilder b = new StringBuilder();

@@ -4,19 +4,12 @@ using Microsoft.JSInterop;
 namespace ADArCWebApp.Shared.Components;
 
 /*
- * class for managing interop for components with .js controllers. Controller classes should
- * have the same name as the Razor component without the Razor, otherwise the linking
- * will not work. For example:
- * RazorLED.razor -> LED class in controllers/led.js
+ * This is a remnant of the old RazorComponent class. This used to handle linking controller instances throuhg
+ * lifecycle methods (OnAfterRenderAsync) but we found that these were not reliably called upon, especially
+ * during deserialization from JSON. As such, it now just exists to pass Controller from ComponentInstance
+ * to Razor components that need it.
  */
 public abstract class RazorComponent : ComponentBase
 {
-    private DotNetObjectReference<RazorComponent>? _reference;
-
-    [Inject] protected IJSRuntime _js { get; set; }
-
-    [Inject] protected BoardService _boardService { get; set; }
-
     [Parameter] public IJSObjectReference? Controller { get; set; }
-    
 }

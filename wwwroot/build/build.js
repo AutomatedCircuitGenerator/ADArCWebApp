@@ -301,7 +301,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_249": "Adafruit ADS7830",
         "placeholder_250": "Adafruit ADT7410 Library",
         "placeholder_251": "Adafruit ADXL343",
-        "placeholder_252": "Adafruit ADXL345",
+        "Adafruit_ADXL345_U.h": "Adafruit ADXL345",
         "placeholder_253": "Adafruit ADXL375",
         "placeholder_254": "Adafruit AGS02MA",
         "placeholder_255": "Adafruit AHRS",
@@ -459,7 +459,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_407": "Adafruit PM25 AQI Sensor",
         "placeholder_408": "Adafruit PN532",
         "placeholder_409": "Adafruit PS2 Trackpad",
-        "placeholder_410": "Adafruit PWM Servo Driver Library",
+        "Adafruit_PWMServoDriver.h": "Adafruit PWM Servo Driver Library",
         "placeholder_411": "Adafruit PixelDust",
         "placeholder_412": "Adafruit Pixie",
         "placeholder_413": "Adafruit Protomatter",
@@ -1677,7 +1677,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_1625": "DFW",
         "placeholder_1626": "DHT Sensors Non-Blocking",
         "placeholder_1627": "DHT kxn",
-        "placeholder_1628": "DHT sensor library",
+        "DHT.h": "DHT sensor library",
         "placeholder_1629": "DHT sensor library for ESPx",
         "placeholder_1630": "DHT11",
         "placeholder_1631": "DHT118266",
@@ -2829,7 +2829,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_2777": "HUSB238Driver",
         "placeholder_2778": "HV518",
         "placeholder_2779": "HX710",
-        "placeholder_2780": "HX711",
+        "HX711.h": "HX711",
         "placeholder_2781": "HX711 Arduino Library",
         "placeholder_2782": "HX711_ADC",
         "placeholder_2783": "HX711_MP",
@@ -10544,6 +10544,9 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Controller = void 0;
     class Controller {
+        get element() {
+            return document.getElementById(`component-${this.id}`);
+        }
         constructor() {
             this.pins = {};
             execute_1.AVRRunner.getInstance().addController(this);
@@ -10562,15 +10565,10 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         }
         static create(id, pins, component) {
             const instance = new this();
-            instance.element = document.getElementById(`component-${id}`);
+            instance.id = id;
             instance.pinIndices = pins;
             instance.component = component;
             return instance;
-        }
-        sleep(cycles) {
-            return new Promise(resolve => {
-                execute_1.AVRRunner.getInstance().board.cpu.addClockEvent(() => resolve(void 0), cycles);
-            });
         }
     }
     exports.Controller = Controller;
@@ -12008,6 +12006,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
     exports.interopManager = void 0;
     var interopManager;
     (function (interopManager) {
+        let isUrlLoadInitialized = false;
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
@@ -12016,6 +12015,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 this.prevB = 0;
                 this.prevC = 0;
                 this.prevD = 0;
+                this.autoSelectedBoard = null;
             }
             getChangedPins(newReg, regIndex) {
                 var diff;
@@ -12137,6 +12137,50 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 }
                 intro.start();
             }
+            initUrlLoading() {
+                if (isUrlLoadInitialized) {
+                    return;
+                }
+                isUrlLoadInitialized = true;
+                if (document.readyState === 'complete') {
+                    this.tryLoadFromUrl();
+                }
+                else {
+                    window.addEventListener('load', () => {
+                        this.tryLoadFromUrl();
+                    });
+                }
+            }
+            waitForBlazerAndRules() {
+                setTimeout(() => {
+                    this.tryLoadFromUrl();
+                }, 12000);
+            }
+            tryLoadFromUrl() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const params = new URLSearchParams(window.location.search);
+                    const data = params.get('c');
+                    if (data) {
+                        try {
+                            console.log("Found URL parameter 'c', attempting to load circuit");
+                            yield new Promise(resolve => setTimeout(resolve, 10000));
+                            yield DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data);
+                            const newUrl = window.location.pathname;
+                            window.history.replaceState({}, '', newUrl);
+                            console.log("URL loading complete");
+                        }
+                        catch (error) {
+                            console.error("Error loading from URL:", error);
+                        }
+                    }
+                });
+            }
+            getAutoSelectedBoard() {
+                return this.autoSelectedBoard;
+            }
+            clearAutoSelectedBoard() {
+                this.autoSelectedBoard = null;
+            }
             setBoard(board) {
                 let boardConstructor;
                 switch (board) {
@@ -12151,13 +12195,18 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             }
         }
         interopManager.InteropManager = InteropManager;
+        let manager = null;
         function getInteropManager() {
-            return new InteropManager();
+            if (!manager) {
+                manager = new InteropManager();
+                manager.initUrlLoading();
+            }
+            return manager;
         }
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_4) {
+define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"], function (require, exports, controller_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.fontA00 = exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
@@ -12209,7 +12258,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.updated = false;
         }
         setup() {
-            execute_4.AVRRunner.getInstance().board.twis[0].registerController(exports.LCD1602_ADDR, this);
+            this.pins.pin3[0].twi.registerController(this.id, this);
         }
         cleanup() {
             this.cgram.fill(0);
@@ -12229,6 +12278,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.shiftMode = false;
             this.is8bit = true;
             this.updated = false;
+            this.render();
         }
         update() {
             if (this.updated) {
@@ -12662,7 +12712,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         31, 31, 31, 31, 31, 31, 31, 31,
     ]);
 });
-define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_5) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_4, avr8js_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MAX6675 = void 0;
@@ -12689,11 +12739,11 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                     byteToSend = temperature & 0xFF;
                 }
                 this.nextByteIsHigh = !this.nextByteIsHigh;
-                execute_5.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().board.spis[0].transferCycles);
+                execute_4.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().board.spis[0].transferCycles);
             };
         }
         setup() {
-            execute_5.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
+            execute_4.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
         }
         get shouldReadSPI() {
             return this.pins.cs[0].digital.state == avr8js_5.PinState.Low;
@@ -12794,7 +12844,7 @@ define("controllers/ky012", ["require", "exports", "controllers/controller", "li
     }
     exports.KY012 = KY012;
 });
-define("controllers/bno055", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_4, execute_6) {
+define("controllers/bno055", ["require", "exports", "controllers/controller"], function (require, exports, controller_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BNO055 = exports.BNO055_ADDR = void 0;
@@ -12929,7 +12979,7 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
         }
         setup() {
-            execute_6.AVRRunner.getInstance().board.twis[0].registerController(exports.BNO055_ADDR, this);
+            this.pins.sda[0].twi.registerController(this.id, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
@@ -13115,7 +13165,7 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("controllers/sg90", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_7) {
+define("controllers/sg90", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.SG90 = void 0;
@@ -13133,9 +13183,10 @@ define("controllers/sg90", ["require", "exports", "controllers/controller", "lib
                 cancelAnimationFrame(this.animationFrameId);
             }
             this.hornAngle = null;
+            this.renderHorn();
         }
         onSignalChange(state) {
-            const currentCycle = execute_7.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_5.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_7.PinState.High) {
                 this.risingEdgeCycle = currentCycle;
             }
@@ -13154,13 +13205,14 @@ define("controllers/sg90", ["require", "exports", "controllers/controller", "lib
             }
         }
         renderHorn() {
+            var _a;
             const horn = this.element.querySelector(".horn");
-            const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle}) translate(-91.467 -59.773)`;
+            const transformValue = `translate(91.467 59.773) rotate(${(_a = this.hornAngle) !== null && _a !== void 0 ? _a : 0}) translate(-91.467 -59.773)`;
             horn.setAttribute('transform', transformValue);
             this.animationFrameId = null;
         }
         cyclesToMs(cycles) {
-            return (cycles * 1000) / (execute_7.AVRRunner.getInstance().board.cpu.frequency / 1000);
+            return (cycles * 1000) / (execute_5.AVRRunner.getInstance().board.cpu.frequency / 1000);
         }
         msToAngle(ms) {
             const minPulse = 544;
@@ -13220,7 +13272,7 @@ define("controllers/memory", ["require", "exports"], function (require, exports)
     }
     exports.Memory = Memory;
 });
-define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_9, execute_8, memory_1) {
+define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_9, execute_6, memory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.TFLunaLidarI2C = void 0;
@@ -13242,7 +13294,7 @@ define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/cont
             this.memory.write(REGISTERS[register], value);
         }
         setup() {
-            execute_8.AVRRunner.getInstance().board.twis[0].registerController(TF_LUNA_LIDAR_ADDR, this);
+            execute_6.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
             this.memory.clear();
             this.address = null;
             this.startTime = Date.now();
@@ -13302,7 +13354,7 @@ define("controllers/ky008", ["require", "exports", "controllers/controller", "li
     }
     exports.KY008 = KY008;
 });
-define("controllers/adxl345i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_9, memory_2) {
+define("controllers/adxl345i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_7, memory_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ADXL345I2C = exports.ADXL345_ADDR = void 0;
@@ -13356,7 +13408,7 @@ define("controllers/adxl345i2c", ["require", "exports", "controllers/controller"
             this.setRegister("DATAZ", z);
         }
         setup() {
-            execute_9.AVRRunner.getInstance().board.twis[0].registerController(exports.ADXL345_ADDR, this);
+            execute_7.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
             this.memory.clear();
             this.address = null;
             this.setRegister("DEVID", 0xE5);
@@ -13422,7 +13474,7 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
     }
     exports.MQ3 = MQ3;
 });
-define("controllers/hcsr04", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_13, execute_10, avr8js_9) {
+define("controllers/hcsr04", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_13, execute_8, avr8js_9) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HCSR04 = void 0;
@@ -13435,7 +13487,6 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
             this.distance = distance;
         }
         setup() {
-            console.log(JSON.stringify(this.pins.trigger));
             this.pins.trigger[0].digital.addListener(this.trigger.bind(this));
         }
         trigger(state) {
@@ -13445,9 +13496,9 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
         }
         echo() {
             this.pins.echo[0].digital.state = true;
-            execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+            execute_8.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
                 this.pins.echo[0].digital.state = false;
-            }, this.distance * 58 * (execute_10.AVRRunner.getInstance().board.cpu.frequency / 1e6));
+            }, this.distance * 58 * (execute_8.AVRRunner.getInstance().board.cpu.frequency / 1e6));
         }
     }
     exports.HCSR04 = HCSR04;
@@ -13468,80 +13519,75 @@ define("controllers/ky003", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY003 = KY003;
 });
-define("controllers/ky022", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_15, execute_11) {
+define("controllers/ky022", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_15, execute_9) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY022 = void 0;
+    const ADDRESS = 0x10;
     class KY022 extends controller_15.Controller {
         constructor() {
             super(...arguments);
-            this.inSimulation = false;
-            this.inTransfer = false;
+            this.simulationStarted = false;
         }
         setup() {
-            this.setNecAddress(0);
-            this.setNecCommand(0);
-            this.inSimulation = true;
+            this.signal = this.pins.digital_out[0].digital;
+            this.cpu = execute_9.AVRRunner.getInstance().board.cpu;
+            this.signal.state = true;
+            this.simulationStarted = true;
         }
-        setNecAddress(address) {
-            this.address = address & 0xFF;
-            this.invAddress = (~address) & 0xFF;
-            if (!this.inSimulation)
+        cleanup() {
+            this.simulationStarted = false;
+            super.cleanup();
+        }
+        setCommand(command) {
+            if (!this.simulationStarted)
                 return;
-            if (this.inTransfer)
-                return;
-            this.inTransfer = true;
-            this.sendNecFrame();
+            this.counter = 0;
+            this.pulse(9);
+            this.space(4.5);
+            this.writeByte(ADDRESS);
+            this.writeByte(this.invert(ADDRESS));
+            this.writeByte(command);
+            this.writeByte(this.invert(command));
+            this.pulse(0.5625);
         }
-        setNecCommand(command) {
-            this.command = command & 0xFF;
-            this.invCommand = (~command) & 0xFF;
-            if (!this.inSimulation)
-                return;
-            if (this.inTransfer)
-                return;
-            this.inTransfer = true;
-            this.sendNecFrame();
-        }
-        sendNecFrame() {
-            const frame = this.encodeNecFrame();
-            let count = 0;
-            for (const packet of frame) {
-                execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                    console.log("previous state:", this.pins.digital_out[0].digital.state);
-                    console.log("desired state:", packet.state);
-                    this.pins.digital_out[0].digital.state = packet.state;
-                    console.log("current state:", this.pins.digital_out[0].digital.state);
-                    console.log("current cycle:", execute_11.AVRRunner.getInstance().board.cpu.cycles);
-                }, execute_11.AVRRunner.getInstance().usToCycles(packet.us));
-                count += packet.us;
-            }
-            this.inTransfer = false;
-        }
-        encodeNecFrame() {
-            let frame = [];
-            frame.push({ state: true, us: 9000 });
-            frame.push({ state: false, us: 4500 });
-            this.packNecFrame(frame, this.address);
-            this.packNecFrame(frame, this.invAddress);
-            this.packNecFrame(frame, this.command);
-            this.packNecFrame(frame, this.invCommand);
-            frame.push({ state: true, us: 565.5 });
-            frame.push({ state: false, us: 0 });
-            return frame;
-        }
-        packNecFrame(frame, byte) {
+        writeByte(byte) {
             for (let i = 7; i >= 0; i--) {
-                const bit = (byte >> i) & 1;
-                if (bit === 1) {
-                    frame.push({ state: true, us: 565.5 });
-                    frame.push({ state: false, us: 1687.5 });
-                }
-                else {
-                    frame.push({ state: true, us: 565.5 });
-                    frame.push({ state: false, us: 565.5 });
-                }
+                const bit = ((byte >> i) & 1) === 1;
+                this.writeBit(bit);
             }
+        }
+        writeBit(bit) {
+            this.pulse(0.5625);
+            if (bit) {
+                this.space(1.6875);
+            }
+            else {
+                this.space(0.5625);
+            }
+        }
+        pulse(ms) {
+            if (this.counter === 0) {
+                this.signal.state = false;
+            }
+            else {
+                this.cpu.addClockEvent(() => {
+                    this.signal.state = false;
+                }, this.counter);
+            }
+            this.counter += this.msToCycles(ms);
+            this.cpu.addClockEvent(() => {
+                this.signal.state = true;
+            }, this.counter);
+        }
+        space(ms) {
+            this.counter += this.msToCycles(ms);
+        }
+        invert(byte) {
+            return ~byte & 0xFF;
+        }
+        msToCycles(ms) {
+            return ms * (this.cpu.frequency / 1000);
         }
     }
     exports.KY022 = KY022;
@@ -13585,7 +13631,7 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
     }
     exports.LED = LED;
 });
-define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_17, execute_12) {
+define("controllers/mpu6050", ["require", "exports", "controllers/controller"], function (require, exports, controller_17) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
@@ -13731,7 +13777,7 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             this.rotating = rotating;
         }
         setup() {
-            execute_12.AVRRunner.getInstance().board.twis[0].registerController(exports.I2C_MST_CTRL, this);
+            this.pins.sda[0].twi.registerController(this.id, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
@@ -13844,7 +13890,7 @@ define("controllers/ky001", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY001 = KY001;
 });
-define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_13) {
+define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_10) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RGBLED = void 0;
@@ -13860,21 +13906,21 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             this.rPeriod = 0;
             this.rPreviousFallingEdgeCycle = 0;
             this.rPreviousRisingEdgeCycle = 0;
-            this.rPeriodCreated = true;
+            this.rIsPeriodCreated = false;
             this.gLastPinState = this.pins.G[0].digital.state;
             this.gFirstHigh = true;
             this.gBrightness = 0;
             this.gPeriod = 0;
             this.gPreviousFallingEdgeCycle = 0;
             this.gPreviousRisingEdgeCycle = 0;
-            this.gPeriodCreated = true;
+            this.gIsPeriodCreated = false;
             this.bLastPinState = this.pins.B[0].digital.state;
             this.bFirstHigh = true;
             this.bBrightness = 0;
             this.bPeriod = 0;
             this.bPreviousFallingEdgeCycle = 0;
             this.bPreviousRisingEdgeCycle = 0;
-            this.bPeriodCreated = true;
+            this.bIsPeriodCreated = false;
             this.animationFrameId = null;
             this.pins.R[0].digital.addListener(this.rListener.bind(this));
             this.pins.G[0].digital.addListener(this.gListener.bind(this));
@@ -13923,11 +13969,11 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         rListener(state) {
-            if (this.rPeriodCreated) {
+            if (!this.rIsPeriodCreated) {
                 this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
-                this.rPeriodCreated = false;
+                this.rIsPeriodCreated = true;
             }
-            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.rPreviousRisingEdgeCycle = currentCycle;
                 if (this.rFirstHigh) {
@@ -13937,13 +13983,13 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
                 else {
                     this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rPreviousFallingEdgeCycle)) / this.rPeriod, 0);
                 }
-                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
             }
             else if (state === avr8js_11.PinState.Low) {
                 if (this.rLastPinState === avr8js_11.PinState.High) {
                     this.rPreviousFallingEdgeCycle = currentCycle;
                     this.rBrightness = Math.min((currentCycle - this.rPreviousRisingEdgeCycle) / this.rPeriod, 1);
-                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
                 }
             }
             this.rLastPinState = state;
@@ -13952,11 +13998,11 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         gListener(state) {
-            if (this.gPeriodCreated) {
+            if (!this.gIsPeriodCreated) {
                 this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
-                this.gPeriodCreated = false;
+                this.gIsPeriodCreated = true;
             }
-            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.gPreviousRisingEdgeCycle = currentCycle;
                 if (this.gFirstHigh) {
@@ -13966,13 +14012,13 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
                 else {
                     this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gPreviousFallingEdgeCycle)) / this.gPeriod, 0);
                 }
-                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
             }
             else if (state === avr8js_11.PinState.Low) {
                 if (this.gLastPinState === avr8js_11.PinState.High) {
                     this.gPreviousFallingEdgeCycle = currentCycle;
                     this.gBrightness = Math.min((currentCycle - this.gPreviousRisingEdgeCycle) / this.gPeriod, 1);
-                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
                 }
             }
             this.gLastPinState = state;
@@ -13981,11 +14027,11 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
             }
         }
         bListener(state) {
-            if (this.bPeriodCreated) {
+            if (!this.bIsPeriodCreated) {
                 this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
-                this.bPeriodCreated = false;
+                this.bIsPeriodCreated = true;
             }
-            const currentCycle = execute_13.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_11.PinState.High) {
                 this.bPreviousRisingEdgeCycle = currentCycle;
                 if (this.bFirstHigh) {
@@ -13995,13 +14041,13 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
                 else {
                     this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bPreviousFallingEdgeCycle)) / this.bPeriod, 0);
                 }
-                execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
             }
             else if (state === avr8js_11.PinState.Low) {
                 if (this.bLastPinState === avr8js_11.PinState.High) {
                     this.bPreviousFallingEdgeCycle = currentCycle;
                     this.bBrightness = Math.min((currentCycle - this.bPreviousRisingEdgeCycle) / this.bPeriod, 1);
-                    execute_13.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
                 }
             }
             this.bLastPinState = state;
@@ -14037,7 +14083,7 @@ define("controllers/rgbled", ["require", "exports", "controllers/controller", "l
     }
     exports.RGBLED = RGBLED;
 });
-define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_14) {
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_11) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.DCMotorL298N = void 0;
@@ -14109,7 +14155,7 @@ define("controllers/dcmotorl298n", ["require", "exports", "controllers/controlle
                 console.log("period");
                 this.isPeriodCreated = true;
             }
-            const currentCycle = execute_14.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_11.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_12.PinState.High) {
                 this.previousRisingEdgeCycle = currentCycle;
                 if (this.isFirstRisingEdge) {
@@ -14119,13 +14165,13 @@ define("controllers/dcmotorl298n", ["require", "exports", "controllers/controlle
                 else {
                     this.dutyCycle = Math.max((this.period - (currentCycle - this.previousFallingEdgeCycle)) / this.period, 0);
                 }
-                execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
             }
             else if (state === avr8js_12.PinState.Low) {
                 if (this.lastPinState === avr8js_12.PinState.High) {
                     this.previousFallingEdgeCycle = currentCycle;
                     this.dutyCycle = Math.min((currentCycle - this.previousRisingEdgeCycle) / this.period, 1);
-                    execute_14.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                    execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
                 }
             }
             this.lastPinState = state;
@@ -14164,13 +14210,108 @@ define("controllers/dcmotorl298n", ["require", "exports", "controllers/controlle
     }
     exports.DCMotorL298N = DCMotorL298N;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1) {
+define("controllers/pca9685", ["require", "exports", "controllers/controller", "controllers/memory"], function (require, exports, controller_22, memory_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PCA9685 = void 0;
+    const SERVO_MIN = 150;
+    const SERVO_MAX = 600;
+    const REGISTERS = {
+        LED0_ON: { address: 0x6, size: 2 },
+        LED0_OFF: { address: 0x8, size: 2 },
+    };
+    class PCA9685 extends controller_22.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new memory_3.Memory(128);
+        }
+        setup() {
+            this.pins.sda[0].twi.registerController(this.id, this);
+            this.memory.clear();
+            this.address = null;
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() {
+            this.address = null;
+        }
+        i2cReadByte(acked) {
+            let byte;
+            if (this.address !== null) {
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = this.address + 1 % this.memory.size;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                if (this.address === 0x9) {
+                    this.renderHorn(this.calculateAngle());
+                }
+                this.address = this.address + 1 % this.memory.size;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+        renderHorn(angle) {
+            const horn = this.element.querySelector(".horn");
+            horn.style.transform = `rotate(${angle}deg)`;
+        }
+        calculateAngle() {
+            const on = this.memory.read(REGISTERS.LED0_ON);
+            const off = this.memory.read(REGISTERS.LED0_OFF);
+            const pulse = off - on;
+            const angle = ((pulse - SERVO_MIN) / (SERVO_MAX - SERVO_MIN)) * 180;
+            return Math.max(0, Math.min(180, angle));
+        }
+    }
+    exports.PCA9685 = PCA9685;
+});
+define("controllers/hx711", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_23, avr8js_13) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HX711 = void 0;
+    class HX711 extends controller_23.Controller {
+        constructor() {
+            super(...arguments);
+            this.weight = 100;
+            this.bitIndex = 23;
+        }
+        setup() {
+            this.data = this.pins.dat[0].digital;
+            this.clock = this.pins.clk[0].digital;
+            this.clock.addListener((state) => this.handleClock(state));
+        }
+        setWeight(weight) {
+            this.weight = weight;
+        }
+        handleClock(state) {
+            if (state === avr8js_13.PinState.High) {
+                this.data.state = ((this.weight >> this.bitIndex) & 1) === 1;
+                this.bitIndex--;
+                if (this.bitIndex < 0) {
+                    this.bitIndex = 24;
+                }
+            }
+        }
+    }
+    exports.HX711 = HX711;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n", "controllers/pca9685", "controllers/hx711"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1, pca9685_1, hx711_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
     }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.BNO055 = bno055_1.BNO055;
@@ -14193,8 +14334,10 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY001 = ky001_1.KY001;
     window.RGBLED = rgbled_1.RGBLED;
     window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
+    window.SG90PCA9685 = pca9685_1.PCA9685;
+    window.HX711 = hx711_1.HX711;
 });
-define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_22) {
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_24) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.RPLidarA1M9 = void 0;
@@ -14219,7 +14362,7 @@ define("controllers/rplidar", ["require", "exports", "controllers/controller"], 
     const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
     const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
     const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
-    class RPLidarA1M9 extends controller_22.Controller {
+    class RPLidarA1M9 extends controller_24.Controller {
         constructor() {
             super(...arguments);
             this.distance = 0;

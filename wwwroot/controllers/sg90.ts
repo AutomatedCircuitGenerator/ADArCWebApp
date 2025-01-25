@@ -24,6 +24,7 @@ export class SG90 extends Controller {
             cancelAnimationFrame(this.animationFrameId);
         }
         this.hornAngle= null;
+        this.renderHorn();
     }
 
     private onSignalChange(state: PinState) {
@@ -50,7 +51,7 @@ export class SG90 extends Controller {
 
     private renderHorn() {
         const horn = this.element.querySelector<HTMLElement>(".horn");
-        const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle}) translate(-91.467 -59.773)`;
+        const transformValue = `translate(91.467 59.773) rotate(${this.hornAngle ?? 0}) translate(-91.467 -59.773)`;
         horn.setAttribute('transform', transformValue);
         this.animationFrameId = null;
     }

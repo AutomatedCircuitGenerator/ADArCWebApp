@@ -10,7 +10,6 @@ export class HCSR04 extends Controller {
     }
 
     setup() {
-        console.log(JSON.stringify(this.pins.trigger));
         this.pins.trigger[0].digital.addListener(this.trigger.bind(this));
     }
 

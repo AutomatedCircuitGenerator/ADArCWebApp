@@ -165,7 +165,7 @@ namespace ADArCWebApp.Shared
                             { "setup", "  pinMode(trigPin@, OUTPUT);\n  pinMode(echoPin@, INPUT);" },
                             {
                                 "loopMain",
-                                "  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2);\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trigPin@, LOW);\n  duration = pulseIn(echoPin@, HIGH);\n  distance = (duration@ * .0343) / 2;\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n  delay(100);"
+                                "  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2);\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trigPin@, LOW);\n  duration@ = pulseIn(echoPin@, HIGH);\n  distance@ = (duration@ * .0343) / 2;\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n  delay(100);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["vcc", "trigger", "echo", "gnd"], gsNodeName: "hcsr04").Property("distance", 20.0)

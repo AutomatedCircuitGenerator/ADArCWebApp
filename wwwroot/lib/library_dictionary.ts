@@ -250,7 +250,7 @@
     "placeholder_249": "Adafruit ADS7830",
     "placeholder_250": "Adafruit ADT7410 Library",
     "placeholder_251": "Adafruit ADXL343",
-    "placeholder_252": "Adafruit ADXL345",
+    "Adafruit_ADXL345_U.h": "Adafruit ADXL345",
     "placeholder_253": "Adafruit ADXL375",
     "placeholder_254": "Adafruit AGS02MA",
     "placeholder_255": "Adafruit AHRS",

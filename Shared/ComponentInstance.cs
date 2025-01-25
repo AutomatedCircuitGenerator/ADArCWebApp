@@ -36,6 +36,7 @@ namespace ADArCWebApp.Shared
         public int byteIndex;
         public long timer;
         public readonly Dictionary<string, IComponentParameter> CompParams = new();
+        [JsonIgnore]
         public IJSObjectReference? Controller { get; set; }
         
         public async ValueTask DisposeAsync()
