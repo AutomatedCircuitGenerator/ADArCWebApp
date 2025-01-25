@@ -102,7 +102,7 @@ namespace ADArCWebApp.Shared
 
             if (Data.compType.IsSubclassOf(typeof(RazorComponent)))
             {
-                ret.Add("ComponentInstance", this);
+                ret.Add("Controller", Controller);
             }
             
             return ret;

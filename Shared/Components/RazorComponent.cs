@@ -11,13 +11,12 @@ namespace ADArCWebApp.Shared.Components;
  */
 public abstract class RazorComponent : ComponentBase
 {
-    public IJSObjectReference? Controller;
     private DotNetObjectReference<RazorComponent>? _reference;
 
     [Inject] protected IJSRuntime _js { get; set; }
 
     [Inject] protected BoardService _boardService { get; set; }
 
-    [Parameter] public ComponentInstance? ComponentInstance { get; set; }
+    [Parameter] public IJSObjectReference? Controller { get; set; }
     
 }
