@@ -214,7 +214,7 @@
     "placeholder_213": "AbsoluteMouse",
     "placeholder_214": "AcaiaArduinoBLE",
     "placeholder_215": "AccelMotor",
-    "placeholder_216": "AccelStepper",
+    "AccelStepper.h": "AccelStepper",
     "placeholder_217": "AccelStepperWithDistances",
     "placeholder_218": "Accelerometer ADXL335",
     "placeholder_219": "Accelerometer ADXL345",

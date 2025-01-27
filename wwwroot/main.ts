@@ -26,6 +26,7 @@ import {RGBLED} from "@controllers/rgbled";
 import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
+import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -57,3 +58,4 @@ import {HX711} from "@controllers/hx711";
 (<any>window).DCMotorL298N = DCMotorL298N;
 (<any>window).SG90PCA9685 = PCA9685;
 (<any>window).HX711 = HX711;
+(<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;

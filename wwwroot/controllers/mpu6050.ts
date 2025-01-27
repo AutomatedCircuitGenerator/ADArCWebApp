@@ -75,7 +75,7 @@ type Vector = { x: number, y: number, z: number };
 export class MPU6050 extends Controller implements I2CController {
     private address: number | null = null;
     private memory = new Uint8Array(128);
-    private accelerometer: Vector = {x: 0, y: 0, z: 9.81};  // Initialize with gravity on Z-axis
+    private accelerometer: Vector = {x: 0, y: 0, z: 1};  // Initialize with gravity on Z-axis
     private gyroscope: Vector = {x: 0, y: 0, z: 0};
     private orientation: Vector = {x: 0, y: 0, z: 0};
     private lastRead: number = Date.now();
@@ -180,6 +180,8 @@ export class MPU6050 extends Controller implements I2CController {
     setMotion(rotating: boolean) {
         if (rotating) {
             this.sensorControls.setGyroscope(0, 0, 90);
+        } else {
+            this.sensorControls.setGyroscope(0, 0, 0);
         }
         this.rotating = rotating;
     }
@@ -217,7 +219,7 @@ export class MPU6050 extends Controller implements I2CController {
                 this.memory[register.address] = register.default;
             }
         }
-        
+
         this.sensorControls.setTemp(25);
         this.calculateOrientation();
         this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
@@ -237,7 +239,7 @@ export class MPU6050 extends Controller implements I2CController {
     i2cReadByte(acked: boolean): number {
         let byte: number;
         if (this.address !== null) {
-            this.calculateOrientation();  
+            this.calculateOrientation();
             byte = this.memory[this.address];
         } else {
             byte = 0xff;
