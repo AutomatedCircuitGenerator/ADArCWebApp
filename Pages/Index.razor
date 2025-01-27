@@ -43,27 +43,25 @@
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
                     Example
                 </button>
+                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
+                    <span>⬆️ Export</span>
+                </button>
+                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="LoadFromFile"/>
+                <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")">
+                    <span>⬇️️ Import</span>
+                </label>
                 <button class="toolbar-button" @onclick="ToggleUrlDisplay">
                     <span>🔗 Generate URL</span>
                 </button>
                 @if (isUrlBoxVisible)
                 {
-                    <div class="url-modal">
-                        <input type="text" class="url-textbox" value="@generatedUrl" readonly />
-                        <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                            <span>@copyButtonText</span>
-                        </button>
-                    </div>
+                <div class="url-modal">
+                    <input type="text" class="url-textbox" value="@generatedUrl" readonly />
+                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                        <span>@copyButtonText</span>
+                    </button>
+                </div>
                 }
-
-                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
-                    <span>⬆️ Export</span>
-                </button>
-
-                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="LoadFromFile"/>
-                <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")">
-                    <span>⬇️️ Import</span>
-                </label>
             </div>
             <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
                 <span>ℹ Help</span>
