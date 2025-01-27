@@ -324,26 +324,28 @@ namespace ADArCWebApp.Shared
                             "  if (IrReceiver.decode())\n\n  {\n\n    Serial.println(IrReceiver.decodedIRData.command, HEX);\n\n    IrReceiver.resume();\n  }\n\n  delay(500);"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky022", environmentalSettingsType: typeof(KY022Settings)).Finish()
+                    }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky022",
+                    environmentalSettingsType: typeof(KY022Settings)).Finish()
             },
             {
                 17,
                 new ComponentDataBuilder("Load Cell(HX711)", true, "Input/Other Sensors", .6, 200, 100,
-                    typeof(RazorHX711), paneHoverText: "TAL221",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <HX711.h>" },
+                        typeof(RazorHX711), paneHoverText: "TAL221",
+                        codeForGen: new()
                         {
-                            "global",
-                            "const int LOADCELL_DOUT_PIN@ = ~\"dat\";\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";\nHX711 scale@; "
-                        },
-                        { "setup", "  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@); " },
-                        {
-                            "loopMain",
-                            "  if (scale@.is_ready()) {\n    long reading@ = scale@.read();\n Serial.print(\"HX711 reading: \");\n Serial.println(reading@);\n  } else {\n Serial.println(\"HX711 not found.\");\n  }\n\n delay(1000); "
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711").Property("weight", 100.0).Finish()
+                            { "include", "#include <HX711.h>" },
+                            {
+                                "global",
+                                "const int LOADCELL_DOUT_PIN@ = ~\"dat\";\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";\nHX711 scale@; "
+                            },
+                            { "setup", "  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@); " },
+                            {
+                                "loopMain",
+                                "  if (scale@.is_ready()) {\n    long reading@ = scale@.read();\n Serial.print(\"HX711 reading: \");\n Serial.println(reading@);\n  } else {\n Serial.println(\"HX711 not found.\");\n  }\n\n delay(1000); "
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711")
+                    .Property("weight", 100.0).Finish()
             },
             {
                 18,
@@ -506,7 +508,12 @@ namespace ADArCWebApp.Shared
             {
                 27,
                 new ComponentDataBuilder("Stepper motor with driver", true, "Output/Motors/Stepper Motor", .4, 75, 75,
-                    typeof(Razor28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
+                    typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <AccelStepper.h>\n" }, { "global", "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n" }, { "setup", "\tstepper.setMaxSpeed(1000);" }, { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
+                        { "delayLoop", "" }, { "delayTime", "" }
+                    },
                     pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003").Finish()
             },
             {
