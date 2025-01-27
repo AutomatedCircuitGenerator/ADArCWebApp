@@ -51,15 +51,15 @@ namespace ADArCWebApp.Shared
                     typeof(RazorADXL345I2C),
                     codeForGen: new()
                     {
-                        { "include", "#include <Wire.h>\n#include <SparkFun_ADXL345.h>\n" },
-                        { "global", "ADXL345 adxl@ = ADXL345();  // Initialize ADXL345 in I2C mode\n" },
+                        { "include", "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>" },
+                        { "global", "Adafruit_ADXL345_Unified accel@ = Adafruit_ADXL345_Unified();" },
                         {
                             "setup",
-                            "  Serial.begin(9600);\n\n  adxl@.powerOn();\n\n  adxl@.setRangeSetting(4);  // Options are 2, 4, 8, or 16\n\n  byte rangeSetting@;\n  adxl@.getRangeSetting(&rangeSetting@);  \n  Serial.print(\"Range set to: \u00b1\");\n  switch (rangeSetting@) {\n    case 0: Serial.println(\"2g\"); break;\n    case 1: Serial.println(\"4g\"); break;\n    case 2: Serial.println(\"8g\"); break;\n    case 3: Serial.println(\"16g\"); break;\n    default: Serial.println(\"Unknown\"); break;\n  }"
+                            "   \n  // Begin communication with ADXL at I2C address 0x@\n  // Change this address to your ADXL's real address!\n  if(!accel@.begin(0x@)) {\n    /* There was a problem detecting the ADXL345 ... check your connections */\n    Serial.println(\"Ooops, no ADXL345 detected ... Check your wiring!\");\n    while(1);\n  }\n\n  // Setting the range of the accelerometer\n  accel@.setRange(ADXL345_RANGE_4_G);"
                         },
                         {
                             "loopMain",
-                            "  int x@, y@, z@;\n\n  adxl@.readAccel(&x@, &y@, &z@);\n\n  Serial.print(\"X: \");\n  Serial.print(x@);\n  Serial.print(\" Y: \");\n  Serial.print(y@);\n  Serial.print(\" Z: \");\n  Serial.println(z@);\n\n  delay(500);\n"
+                            "  /* Get a new sensor event */ \n  sensors_event_t event@; \n  accel@.getEvent(&event@);\n \n  /* Display the results (acceleration is measured in m/s^2) */\n  Serial.print(\"X: \"); Serial.print(event@.acceleration.x); Serial.print(\"  \");\n  Serial.print(\"Y: \"); Serial.print(event@.acceleration.y); Serial.print(\"  \");\n  Serial.print(\"Z: \"); Serial.print(event@.acceleration.z); Serial.print(\"  \");Serial.println(\"m/s^2 \");\n  delay(500);"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "sda", "scl"], gsNodeName: "adxl345").Property("motion", "Static").Finish()
@@ -124,16 +124,16 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "TFLI2C tflI2C@;\n\n// Use these defaults or insert your own values\nint16_t  tfAddr@ = TFL_DEF_ADR;    // default I2C address\nuint16_t tfFrame@ = TFL_DEF_FPS;   // default frame rate\n\n// device variables passed back by getData\nint16_t  tfDist@ = 0 ;   // distance in centimeters\nint16_t  tfFlux@ = 0 ;   // signal quality in arbitrary units\nint16_t  tfTemp@ = 0 ;   // temperature in 0.01 degree Celsius\n\n// other device variables\nuint16_t tfTime@ = 0;    // device clock in milliseconds\nuint8_t  tfVer@[3];      // device version number\nuint8_t  tfCode@[14];    // device serial number\n\n// sub-loop counter for Time display\nuint8_t tfCount@ = 0;"
+                                "TFLI2C tflI2C@;\nint16_t  tfDist@;    // distance in centimeters"
                             },
-                            { "setup", "  Wire.begin();           // Initialize Wire library\n\n" },
+                            { "setup", "  Wire.begin();           // initialize Wire library" },
                             {
                                 "loopMain",
-                                "  // If data is read without error...\n    if( tflI2C@.getData( tfDist@, tfFlux@, tfTemp@, tfAddr@))\n    {\n        Serial.print(\"Dist: \");      // ...print distance,\n        Serial.print(tfDist@);\n        Serial.print(\" | Flux: \");   // ...print quality\n        Serial.print(tfFlux@);\n\n        // Convert temperature from hundredths\n        // of a degree to a whole number and...\n        tfTemp@ = int16_t( tfTemp@ / 100);\n\n        Serial.print(\" | Temp: \");     // ...print temperature.\n        Serial.println( tfTemp@);\n    }\n    else tflI2C@.printStatus();        // else, print error status.\n\n    // Every ten loops, print device time\n    // in milliseconds and reset the counter.\n    if( tfCount@ < 10) ++tfCount@;\n    else\n    {\n        Serial.print( \"Get Time: \");\n        tflI2C@.Get_Time( tfTime, tfAddr@);\n        Serial.println(  tfTime);\n        tfCount@ = 0;\n    }\n\n    delay( 50);"
+                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);\n"
                             },
                             {
                                 "functions",
-                                "//  This is a group of various sample\n//  commands that can be called at setup.\nvoid sampleCommands( uint8_t adr@)\n{\n    Serial.print( \"Device Address: \");\n    Serial.println( adr@);\n\n    Serial.print(\"System Reset: \");\n    if( tflI2C@.Soft_Reset( adr@))\n    {\n        Serial.println( \"Passed\");\n    }\n    else tflI2C@.printStatus();  // `printStatus()` is for troubleshooting,\n                                //  It's not necessary for operation.\n    delay(500);\n\n    Serial.print( \"Get Firmware Version: \");\n    if( tflI2C@.Get_Firmware_Version( tfVer@, adr@))\n    {\n      Serial.print( tfVer[2]);\n      Serial.print( \".\");\n      Serial.print( tfVer@[1]);\n      Serial.print( \".\");\n      Serial.println( tfVer@[0]);\n    }\n    else tflI2C@.printStatus();    \n    delay(500);\n\n    Serial.print( \"Get Serial Number: \");\n    if( tflI2C@.Get_Prod_Code( tfCode@, adr@))\n    {\n      for( uint8_t i = 0; i < 14; ++i)\n      {\n        Serial.print( char( tfCode@[i]));\n      }\n      Serial.println();\n    }\n    else tflI2C@.printStatus();\n    delay(500);\n\n    // In main 'loop', command to print\n    // device time in milliseconds is\n    // called every 10 loops.\n    Serial.print( \"Get Time: \");\n    if( tflI2C@.Get_Time( tfTime@, adr@))\n    {\n      Serial.println(  tfTime@);\n    }\n    else tflI2C@.printStatus();\n    delay(500);\n\n    Serial.print( \"Set Frame Rate to: \");\n    if( tflI2C@.Set_Frame_Rate( tfFrame, adr@))\n    {\n      Serial.println(  tfFrame@);\n    }\n    else tflI2C@.printStatus();\n    delay(500);\n    \n    //  Read frame rate back from the device\n    Serial.print( \"Get Frame Rate: \");\n    if( tflI2C@.Get_Frame_Rate( tfFrame@, adr@))\n    {\n      Serial.println(  tfFrame@);\n    }\n    else tflI2C@.printStatus();\n    delay(500);\n\n}"
+                                ""
                             },
                             { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "5V", "rxd", "txd"], gsNodeName: "tfLunaLidarI2C").Property("distance", 50.0)
@@ -203,7 +203,7 @@ namespace ADArCWebApp.Shared
                             "global",
                             "const int photoresistorPin@ = ~\"analog_out\";\n// LDR Characteristics\nconst float GAMMA@ = 0.7;\nconst float RL10@ = 50;"
                         },
-                        { "setup", "Serial.begin(9600);\npinMode(photoresistorPin@, INPUT);" },
+                        { "setup", "pinMode(photoresistorPin@, INPUT);" },
                         {
                             "loopMain",
                             "  int analogValue@ = analogRead(photoresistorPin@);\n  float voltage@ = analogValue@ / 1024. * 5;\n  float resistance@ = 2000 * voltage@ / (1 - voltage@ / 5);\n  float lux@ = pow(RL10@ * 1e3 * pow(10, GAMMA@) / resistance@, (1 / GAMMA@));\n  Serial.print(\"Lux value: \");\n  Serial.println(lux@);\n  delay(1000);\n"
@@ -279,7 +279,7 @@ namespace ADArCWebApp.Shared
                         {
                             { "include", "#include <MAX6675.h>" },
                             { "global", "#define CS_PIN@ ~\"cs\"\nMAX6675 tcouple@(CS_PIN@);" },
-                            { "setup", "Serial.begin(9600);" },
+                            { "setup", "" },
                             {
                                 "loopMain",
                                 "float celsius@ = tcouple@.readTempC();\n  float fahrenheit@ = tcouple@.readTempF();\n  Serial.print(\"T in C = \");\n  Serial.print(celsius@);\n  Serial.print(\". T in Fahrenheit = \");\n  Serial.println(fahrenheit@);\n  delay(500);"
@@ -453,7 +453,7 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "setup",
-                            "Serial.begin(9600);\n  board@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
+                            "board@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
                         },
                         {
                             "loopMain",
@@ -537,7 +537,7 @@ namespace ADArCWebApp.Shared
                             { "include", "" }, { "global", "const int buttonPin@ = ~\"digital_out\";" },
                             {
                                 "setup",
-                                "  pinMode(buttonPin@, INPUT); // Set the button pin as an input\n  Serial.begin(9600);        // Start serial communication at 9600 baud"
+                                "  pinMode(buttonPin@, INPUT); // Set the button pin as an input\n"
                             },
                             {
                                 "loopMain",

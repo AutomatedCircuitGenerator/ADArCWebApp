@@ -107,7 +107,7 @@
             <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
-            <ExampleSelect></ExampleSelect>
+            <ExampleSelect OnSelect="HandleExampleSelect"></ExampleSelect>
         </Modal>
         <ToastQueue></ToastQueue>
     </div>
@@ -430,10 +430,7 @@
                 //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
                 AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
             }
-
-            //create listeners for arduino pins to components.
-            //Personally, not a huge fan of this system. good place for improvement
-            setupListeners();
+            AppInterop.UpdateCodeWrapper();
             ToastService.AddToast("Code panel updated.", Variant.Info);
         }
         
@@ -584,55 +581,8 @@
         ToastService.AddToast(message, Variant.Error, connectedComponents.Take(3));
         return selectedNode;
     }
-
-    /// <summary>
-    /// Binds component translation functions to arduino pins through listeners.
-    /// </summary>
-    private void setupListeners()
-    {
-        if (!Comps.Values.Any(c => c.IsArduino())) return; //set has an arduino uno
-
-        foreach (var c in Comps.Values) //iterate all components (don't know what listeners exist already)
-        {
-            if (c.IsArduino()) continue; //exclude the arduino
-            foreach (var listen in c.Data.pinsToListen) //add a listener for each important pin
-            {
-                var pin = -1;
-                if (0 == c.GetConnection(listen, out InstanceConnection? conn, out List<InstanceConnection>? all))
-                {
-                    pin = conn!.ToId;
-                }
-
-                bool hasList = AvrCPU.pinListeners.TryGetValue(pin, out var list);
-                //hopefully the only time the list extends
-                //is on arduino, which is excluded here
-                if (hasList && list!.Any(el => el.actor == c)) continue; //no list for this pin yet, or the list does not contain any connections for this component
-                var pin2 = -1;
-                if (0 == c.GetConnection(listen, out InstanceConnection? conn2, out List<InstanceConnection>? all2))
-                {
-                    pin2 = conn2!.ToId;
-                }
-
-                //TODO: fix so that all componenents inherit from one class
-                var info = c.Data.compType.GetMethod("translate");
-                if (info != null)
-                {
-                    AvrCPU.addListener(pin2, c, info);
-                }
-                else
-                {
-                    Console.WriteLine("Attempted to listen on component without translation! this is probably an error!");
-                }
-            }
-        }
-
-        AppInterop.UpdateCodeWrapper();
-    }
-
     #endregion
-
-    private readonly List<string> ruleNames = new();
-
+    
     /// <summary>
     /// Disables the palette until rules are loaded.
     /// </summary>
@@ -673,7 +623,7 @@
         if (_scheduleBenchSetup)
         {
             Console.WriteLine("Setting up bench from JSON");
-            SetupBenchFromJsonString(BoardService.GetJson());
+            await SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
         }
@@ -795,7 +745,7 @@
     /// <summary>
     /// Deletes a component.
     /// </summary>
-    public async void RemoveComp()
+    public async void RemoveComp(bool suppressToast = false)
     {
         var removedComponent = Comps[SelectedComponent];
 
@@ -819,7 +769,7 @@
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
         
-        ToastService.AddToast("Code panel updated.", Variant.Info);
+        if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
     }
 
     /// <summary>
@@ -997,7 +947,7 @@
         }
     }
 
-    public async Task SetupBenchFromJsonString(string json)
+    private async Task SetupBenchFromJsonString(string json)
     {
         Console.WriteLine("Starting bench setup from JSON");
         Data? data;
@@ -1031,7 +981,7 @@
             {
                 Console.WriteLine($"Removing component {comp.Key}");
                 SelectedComponent = comp.Key;
-                RemoveComp();
+                RemoveComp(true);
                 SelectedComponent = -1;
             }
     
@@ -1100,9 +1050,7 @@
                     }
                 }
             }
-    
-            Console.WriteLine("Setting up listeners");
-            setupListeners();
+            
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
             BuildCanvas!.TriggerRefresh();
@@ -1437,6 +1385,13 @@
             Console.WriteLine($"Critical error in LoadFromUrl: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
+    }
+
+    private async Task HandleExampleSelect(ExampleSelect.Example example)
+    {
+        _exampleModalOpen = false;
+        BoardService.Board = example.Board;
+        await SetupBenchFromJsonString(example.Json);
     }
 				
 

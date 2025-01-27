@@ -1,7 +1,7 @@
 ﻿@if (Open)
 {
 <div class="modal-backdrop" @onclick="@OnClose">
-    @ChildContent
+    <div @onclick:stopPropagation>@ChildContent</div>
 </div>
 }
 
