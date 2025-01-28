@@ -1,40 +1,34 @@
 ﻿@using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
-    @if (!forceBorder)
-    {
-        rightClickable = false;
-    }
-    @if (forceBorder)
-    {
-        @if (rightClickable)
-        {
-            <div class="right-click-container">
-                <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
-                    <span>⚙</span>
-                    <span style="padding-left: 5px">￨ Environmental Settings</span>
-                </button>
-
-                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
-                    <span style="padding-left: 3px">𝗶</span>
-                    <span style="padding-left: 7px">￨ Component Information</span>
-                </button>
-                @if (!Pages.Index.App!.IsRunning && individualData.GlobalId != 1)
-                {
-                    <button id="deletebutton" @onclick="Remove">
-                        <span>x</span>
-                        <span style="padding-left: 6px">￨ Delete Component</span>
-                    </button>
-                }
-            </div>
-        }
-    }
-
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="@((args) => { rightClickable = false; DragStart.InvokeAsync(args); })" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
+
+<!-- Right-click menu container (moved outside) -->
+@if (rightClickable)
+{
+    <div class="right-click-container" style="top: @(menuTop)px; left: @(menuLeft)px;">
+        <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
+            <span>⚙</span>
+            <span style="padding-left: 5px">￨ Environmental Settings</span>
+        </button>
+
+        <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
+            <span style="padding-left: 3px">𝗶</span>
+            <span style="padding-left: 7px">￨ Component Information</span>
+        </button>
+        @if (!Pages.Index.App!.IsRunning && individualData.GlobalId != 1)
+        {
+            <button id="deletebutton" @onclick="Remove">
+                <span>x</span>
+                <span style="padding-left: 6px">￨ Delete Component</span>
+            </button>
+        }
+    </div>
+}
 
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
@@ -47,9 +41,7 @@
         @if (individualData.Data.EnvironmentalSettingsType != null)
         {
             var parameters = new Dictionary<string, object>();
-
             parameters["Controller"] = individualData?.Controller;
-
             <DynamicComponent Type="individualData?.Data.EnvironmentalSettingsType" Parameters="parameters"/>
         }
 
@@ -84,6 +76,7 @@
                 </div>
             }
         }
+
         <!-- Dropdown Setting -->
         @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
         {
@@ -131,8 +124,39 @@
 </div>
 
 @code {
-
     private DynamicComponent? _componentRef;
+    private static VaryingComponent CurrentInstance { get; set; }
+
+    protected override void OnInitialized()
+    {
+        CurrentInstance = this;
+        base.OnInitialized();
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await JsRuntime.InvokeVoidAsync("eval", @"
+                window.addEventListener('click', function(e) {
+                    if (!e.target.closest('.right-click-container')) {
+                        DotNet.invokeMethodAsync('" + typeof(VaryingComponent).Assembly.GetName().Name + @"', 'CloseRightClickMenuStatic');
+                    }
+                }, true);
+            ");
+        }
+    }
+
+    [JSInvokable]
+    public static Task CloseRightClickMenuStatic()
+    {
+        if (CurrentInstance != null)
+        {
+            CurrentInstance.rightClickable = false;
+            CurrentInstance.StateHasChanged();
+        }
+        return Task.CompletedTask;
+    }
 
     /// <summary>
     /// Formats a property name for display in the environmental settings.
@@ -198,6 +222,7 @@
     private void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
+        if (convert)
         {
             individualData?.CompParams[prop.Name.ToLower()].SetValue(Convert.ToDouble(e.Value));
         }
@@ -207,6 +232,7 @@
         }
 
         if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
+        if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput"))
         {
             individualData.Data.compType.GetMethod("translate")?.Invoke(individualData, [individualData]);
         }
@@ -245,25 +271,20 @@
     }
 
     private bool rightClickable = false;
-    private bool rightClick2 = false;
 
-    private void RightClick()
+    private void RightClick(MouseEventArgs args)
     {
         rightClickable = true;
-        if (rightClickable && forceBorder)
-        {
-            rightClick2 = true;
-        }
-        else
-        {
-            rightClick2 = false;
-        }
+        menuTop = args.ClientY;
+        menuLeft = args.ClientX;
+        StateHasChanged();
     }
 
     string GenerateLink(string nodeName)
     {
         Console.WriteLine($"nodeName: {nodeName}");
         switch (nodeName) //no breaks needed as return ends.
+        switch (nodeName)
         {
             case "Rev 3":
                 return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
@@ -273,8 +294,10 @@
                 return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
             case "Pushbutton":
                 return ""; // Add link for Pushbutton here
+                return "";
             case "Switch":
                 return ""; // Add link for Switch here
+                return "";
             case "ADXL345":
                 return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "MPU6050":
@@ -283,10 +306,13 @@
                 return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
             case "TF-Luna Lidar - I2C":
                 return ""; // Add link for TF-Luna Lidar - I2C here
+                return "";
             case "TF-Luna Lidar - UART":
                 return ""; // Add link for TF-Luna Lidar - UART here
+                return "";
             case "Ultrasonic":
                 return ""; // Add link for Ultrasonic here
+                return "";
             case "IR Distance":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
             case "MQ-3":
@@ -295,6 +321,7 @@
                 return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
             case "KY-018 LDR":
                 return ""; // Add link for KY-018 LDR here
+                return "";
             case "Ambient Light":
                 return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "Luminosity":

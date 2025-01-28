@@ -3,6 +3,7 @@
     height: 100%;
     display: grid;
     grid-template-columns: 33% 33% 33%;
+    position: relative;
 }
 
 svg {
@@ -10,8 +11,5 @@ svg {
     left: 0;
     position: absolute;
     pointer-events: none;
-}
-
-line {
-    z-index: 50;
+    z-index: 1;
 }
