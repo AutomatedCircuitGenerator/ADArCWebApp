@@ -166,7 +166,6 @@
         return Task.CompletedTask;
     }
 
-
 	/// <summary>
     /// Formats a property name for display in the environmental settings.
     /// </summary>
@@ -192,7 +191,6 @@
     [Parameter] public bool disableBorder { get; set; } = false;
     [Parameter] public bool forceBorder { get; set; } = false;
 
-
 	/// <summary>
     /// Handles the dashed and solid borders.
     /// </summary>
@@ -213,7 +211,6 @@
         return enableBorder ? "b-border" : "";
     }
 
-
 	/// <summary>
     /// Updates the component's data when the environmental settings are used.
     /// </summary>
@@ -223,7 +220,6 @@
     private void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
-        if (convert)
         {
             individualData?.CompParams[prop.Name.ToLower()].SetValue(Convert.ToDouble(e.Value));
         }
@@ -233,7 +229,6 @@
         }
 
         if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
-        if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput"))
         {
             individualData.Data.compType.GetMethod("translate")?.Invoke(individualData, [individualData]);
         }
@@ -261,12 +256,11 @@
 
     private void HandleEnvironmentalSettingsMenu(MouseEventArgs args)
     {
-		// Set the envr settings menu to be visible        
+        // Set the envr settings menu to be visible        
 		showMenu = true;
 		// Console.WriteLine("lel");
 
         // Set menu position
-        showMenu = true;
         menuTop = args.ClientY;
         menuLeft = args.ClientX;
     }
@@ -294,10 +288,8 @@
                 return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
             case "Pushbutton":
                 return ""; // Add link for Pushbutton here
-                return "";
             case "Switch":
                 return ""; // Add link for Switch here
-                return "";
             case "ADXL345":
                 return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "MPU6050":
@@ -306,14 +298,10 @@
                 return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
             case "TF-Luna Lidar - I2C":
                 return ""; // Add link for TF-Luna Lidar - I2C here
-            case "TF-Luna Lidar - UART": 
-                return ""; // Add link for TF-Luna Lidar - UART here
-                return "";
             case "TF-Luna Lidar - UART":
-                return "";
+                return ""; // Add link for TF-Luna Lidar - UART here
             case "Ultrasonic":
                 return ""; // Add link for Ultrasonic here
-                return "";
             case "IR Distance":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
             case "MQ-3":
@@ -322,7 +310,6 @@
                 return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
             case "KY-018 LDR":
                 return ""; // Add link for KY-018 LDR here
-                return "";
             case "Ambient Light":
                 return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "Luminosity":
