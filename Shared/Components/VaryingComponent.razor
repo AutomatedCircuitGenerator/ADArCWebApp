@@ -30,7 +30,7 @@
     </div>
 }
 
-<!-- ignore scaling -->
+<!-- Environmental Settings -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
     <div class="settingsContainer">
         <div style="display: flex; margin-bottom: 0.5rem">
@@ -125,12 +125,17 @@
 
 @code {
     private DynamicComponent? _componentRef;
-    private static VaryingComponent CurrentInstance { get; set; }
+    private static HashSet<VaryingComponent> ActiveInstances = new();
 
     protected override void OnInitialized()
     {
-        CurrentInstance = this;
+        ActiveInstances.Add(this);
         base.OnInitialized();
+    }
+
+    public void Dispose()
+    {
+        ActiveInstances.Remove(this);
     }
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -138,22 +143,25 @@
         if (firstRender)
         {
             await JsRuntime.InvokeVoidAsync("eval", @"
-                window.addEventListener('click', function(e) {
-                    if (!e.target.closest('.right-click-container')) {
-                        DotNet.invokeMethodAsync('" + typeof(VaryingComponent).Assembly.GetName().Name + @"', 'CloseRightClickMenuStatic');
-                    }
-                }, true);
+                if (!window._rightClickHandlerAdded) {
+                    window._rightClickHandlerAdded = true;
+                    window.addEventListener('mousedown', function(e) {
+                        if (!e.target.closest('.right-click-container')) {
+                            DotNet.invokeMethodAsync('" + typeof(VaryingComponent).Assembly.GetName().Name + @"', 'CloseAllRightClickMenusStatic');
+                        }
+                    }, true);
+                }
             ");
         }
     }
 
     [JSInvokable]
-    public static Task CloseRightClickMenuStatic()
+    public static Task CloseAllRightClickMenusStatic()
     {
-        if (CurrentInstance != null)
+        foreach (var instance in ActiveInstances)
         {
-            CurrentInstance.rightClickable = false;
-            CurrentInstance.StateHasChanged();
+            instance.rightClickable = false;
+            instance.StateHasChanged();
         }
         return Task.CompletedTask;
     }
@@ -215,6 +223,7 @@
     private void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
+        if (convert)
         {
             individualData?.CompParams[prop.Name.ToLower()].SetValue(Convert.ToDouble(e.Value));
         }
@@ -224,6 +233,7 @@
         }
 
         if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
+        if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput"))
         {
             individualData.Data.compType.GetMethod("translate")?.Invoke(individualData, [individualData]);
         }
@@ -256,6 +266,7 @@
 		// Console.WriteLine("lel");
 
         // Set menu position
+        showMenu = true;
         menuTop = args.ClientY;
         menuLeft = args.ClientX;
     }
@@ -283,8 +294,10 @@
                 return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
             case "Pushbutton":
                 return ""; // Add link for Pushbutton here
+                return "";
             case "Switch":
                 return ""; // Add link for Switch here
+                return "";
             case "ADXL345":
                 return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "MPU6050":
@@ -295,8 +308,12 @@
                 return ""; // Add link for TF-Luna Lidar - I2C here
             case "TF-Luna Lidar - UART": 
                 return ""; // Add link for TF-Luna Lidar - UART here
+                return "";
+            case "TF-Luna Lidar - UART":
+                return "";
             case "Ultrasonic":
                 return ""; // Add link for Ultrasonic here
+                return "";
             case "IR Distance":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
             case "MQ-3":
@@ -305,6 +322,7 @@
                 return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
             case "KY-018 LDR":
                 return ""; // Add link for KY-018 LDR here
+                return "";
             case "Ambient Light":
                 return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "Luminosity":
