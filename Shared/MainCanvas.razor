@@ -1,14 +1,14 @@
-﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="handleMouseLeave">
+﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); }">
     @foreach (var c in comps)
     {
-        <VaryingComponent forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        <VaryingComponent CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
 
 
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in ConnLines.Select((line, index) => (line, index)))
         {
-            var gridLines = GetGridLines(line.line, 50, line.index * 0); // Example stepSize = 50 pixels
+            var gridLines = GetGridLines(line.line, 50, line.index * 0);
             foreach (var segment in gridLines)
             {
                 <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.line.Color" stroke-width="@(3 * zoomFactor)"></line>
@@ -50,6 +50,11 @@
     public void ResetTransform()
     {
         transform = new Transform();
+    }
+
+    private void CancelDrag()
+    {
+        _dragging = false;
     }
 
     private (double x, double y) zoomOrigin = (950 / 2, 1080 / 2); //assumes 1920x1080, doesn't really matter, but shouldn't change
@@ -270,21 +275,22 @@
         targetFound = false;
     }
 
-	public void TriggerRefresh()
+    public void TriggerRefresh()
     {
         StateHasChanged();
         foreach (var comp in comps.Values)
         {
-            AdjustCompToZoom(comp);  // Apply transform/zoom to each component
+            AdjustCompToZoom(comp); // Apply transform/zoom to each component
         }
-        ConnLines.Clear();  // Remove all wires
+
+        ConnLines.Clear(); // Remove all wires
         foreach (var comp in comps.Values)
         {
             foreach (var connMap in comp.ConnMap)
             {
                 foreach (var conn in connMap.Value)
                 {
-                    ConnLines.Add(conn);  // Rebuild wires with correct positions
+                    ConnLines.Add(conn); // Rebuild wires with correct positions
                 }
             }
         }

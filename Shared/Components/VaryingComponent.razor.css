@@ -51,17 +51,14 @@
     font-size: 15px;
     object-fit: contain;
     display: inline-block;
-    position: absolute;
     margin-top: 0;
 }
 
 .EnvironmentalSettingsClass {
-    max-height: 350px; 
+    position: absolute;
     width: 250px;
-    flex-direction: column;
-    translate: 600px 100px;
-    padding-bottom: 5px;
     z-index: 1000000;
+    height: min-content;
 }
 
 .settingsContainer h2{

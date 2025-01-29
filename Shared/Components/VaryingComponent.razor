@@ -1,132 +1,132 @@
 ﻿@using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor))">
-    @if (!forceBorder)
-    {
-        rightClickable = false;
-    }
-    @if (forceBorder)
-    {
-        @if (rightClickable)
-        {
-            <div class="right-click-container">
-                <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
-                    <span>⚙</span>
-                    <span style="padding-left: 5px">￨ Environmental Settings</span>
-                </button>
-
-                <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
-                    <span style="padding-left: 3px">𝗶</span>
-                    <span style="padding-left: 7px">￨ Component Information</span>
-                </button>
-                @if (!Pages.Index.App!.IsRunning && individualData.GlobalId != 1)
-                {
-                    <button id="deletebutton" @onclick="Remove">
-                        <span>x</span>
-                        <span style="padding-left: 6px">￨ Delete Component</span>
-                    </button>
-                }
-            </div>
-        }
-    }
-
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor));">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
+@if (!forceBorder)
+{
+    rightClickable = false;
+}
+@if (forceBorder)
+{
+    @if (rightClickable)
+    {
+        <div class="right-click-container" style="top: @(individualData.zoomedY)px; left: @(individualData.zoomedX)px">
+            <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
+                <span>⚙</span>
+                <span style="padding-left: 5px">￨ Environmental Settings</span>
+            </button>
 
-<!-- ignore scaling -->
-<div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none");">
-    <div class="settingsContainer">
-        <div style="display: flex; margin-bottom: 0.5rem">
-            <h2 style="margin-bottom:0; white-space: nowrap">Environmental Settings</h2>
-            <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
+            <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
+                <span style="padding-left: 3px">𝗶</span>
+                <span style="padding-left: 7px">￨ Component Information</span>
+            </button>
+            @if (!Pages.Index.App!.IsRunning && !individualData.IsArduino())
+            {
+                <button id="deletebutton" @onclick="Remove">
+                    <span>x</span>
+                    <span style="padding-left: 6px">￨ Delete Component</span>
+                </button>
+            }
         </div>
+    }
+}
+<!-- ignore scaling -->
+<div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY)px; left: @(_envSettingsX)px;">
+    <div @onclick:stopPropagation @onmousedown:stopPropagation @onmousemove:stopPropagation @onmouseup:stopPropagation @onmouseleave:stopPropagation>
+        <div class="settingsContainer" @onmousedown="StartEnvSettingsDrag" @onmousemove="ContinueEnvSettingsDrag" @onmouseup="EndEnvSettingsDrag" @onmouseleave="EndEnvSettingsDrag">
+            <div style="display: flex; margin-bottom: 0.5rem">
+                <h2 style="margin-bottom:0; white-space: nowrap">Environmental Settings</h2>
+                <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
+            </div>
 
-        @if (individualData.Data.EnvironmentalSettingsType != null)
-        {
-            var parameters = new Dictionary<string, object>();
-
-            parameters["Controller"] = individualData?.Controller;
-
-            <DynamicComponent Type="individualData?.Data.EnvironmentalSettingsType" Parameters="parameters"/>
-        }
-
-        <!-- Value Setting -->
-        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
-        {
-            foreach (var value in prop.GetCustomAttributes<ValueSetting>())
+            @if (individualData.Data.EnvironmentalSettingsType != null)
             {
-                <div class="valueSetting" style="padding: 3px 0;">
-                    <h2>@(FormatTitle(prop))</h2>
-                    <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
-                        <span class="default-value-label">@value.Label</span>
+                var parameters = new Dictionary<string, object>();
+
+                parameters["Controller"] = individualData?.Controller;
+
+                <DynamicComponent Type="individualData?.Data.EnvironmentalSettingsType" Parameters="parameters"/>
+            }
+
+            <!-- Value Setting -->
+            @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
+            {
+                foreach (var value in prop.GetCustomAttributes<ValueSetting>())
+                {
+                    <div class="valueSetting" style="padding: 3px 0;">
+                        <h2>@(FormatTitle(prop))</h2>
+                        <div style="margin-left: 10px;">
+                            <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                            <span class="default-value-label">@value.Label</span>
+                        </div>
+                        <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
                     </div>
-                    <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
-                </div>
+                }
             }
-        }
 
-        <!-- Value Setting Double -->
-        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
-        {
-            foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
+            <!-- Value Setting Double -->
+            @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
             {
-                <div class="valueSetting" style="padding: 3px 0;">
-                    <h2>@(FormatTitle(prop))</h2>
-                    <div style="margin-left: 10px;">
-                        <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
-                        <span class="default-value-label">@value.Label</span>
+                foreach (var value in prop.GetCustomAttributes<ValueSettingDouble>())
+                {
+                    <div class="valueSetting" style="padding: 3px 0;">
+                        <h2>@(FormatTitle(prop))</h2>
+                        <div style="margin-left: 10px;">
+                            <input type="number" value="@value.DefaultValue" class="default-value-input" @onchange="(e) => { OnInput(e, prop, true); }" min="@value.MinValue" max="@value.MaxValue"></input>
+                            <span class="default-value-label">@value.Label</span>
+                        </div>
+                        <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
                     </div>
-                    <p class="min-max-values" style="margin: 0; white-space: nowrap;">Min: @value.MinValue&nbsp;&nbsp;&nbsp;&nbsp;Max: @value.MaxValue</p>
-                </div>
+                }
             }
-        }
-        <!-- Dropdown Setting -->
-        @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
-        {
-            foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
+            <!-- Dropdown Setting -->
+            @foreach (var prop in individualData.Data.compType.GetProperties().Where(property => property.GetCustomAttribute<SettingGroup>() == null))
             {
-                <div class="dropdownSetting" style="padding: 10px 0;">
-                    <h2>@(FormatTitle(prop))</h2>
-                    <select @onchange="(e) => { OnInput(e, prop, false); }">
-                        @foreach (var s in value.dropdownList)
-                        {
-                            <option value="@s">@s</option>
-                        }
-                    </select>
-                </div>
-            }
-        }
-
-        <!-- Grouped Settings -->
-        @foreach (var group in individualData.Data.compType.GetProperties()
-                      .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
-        {
-            if (group.Key != null)
-            {
-                <div class="settingGroup">
-                    <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
-                    <div>
-                        @foreach (var prop in group)
-                        {
-                            var valueSetting = prop.GetCustomAttribute<ValueSetting>();
-                            if (valueSetting != null)
+                foreach (var value in prop.GetCustomAttributes<DropdownSetting>())
+                {
+                    <div class="dropdownSetting" style="padding: 10px 0;">
+                        <h2>@(FormatTitle(prop))</h2>
+                        <select @onchange="(e) => { OnInput(e, prop, false); }">
+                            @foreach (var s in value.dropdownList)
                             {
-                                <div class="valueSetting" style="flex: 1;">
-                                    <label style="display: block">@valueSetting.Label</label>
-                                    <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
-                                           min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
-                                           @onchange="(e) => { OnInput(e, prop, true); }">
-                                </div>
+                                <option value="@s">@s</option>
                             }
-                        }
+                        </select>
                     </div>
-                </div>
+                }
             }
-        }
+
+            <!-- Grouped Settings -->
+            @foreach (var group in individualData.Data.compType.GetProperties()
+                          .GroupBy(prop => prop.GetCustomAttribute<SettingGroup>()?.Label))
+            {
+                if (group.Key != null)
+                {
+                    <div class="settingGroup">
+                        <h2 style="text-align: center; font-size: 18px;">@group.Key</h2>
+                        <div>
+                            @foreach (var prop in group)
+                            {
+                                var valueSetting = prop.GetCustomAttribute<ValueSetting>();
+                                if (valueSetting != null)
+                                {
+                                    <div class="valueSetting" style="flex: 1;">
+                                        <label style="display: block">@valueSetting.Label</label>
+                                        <input type="number" value="@valueSetting.DefaultValue" class="default-value-input"
+                                               min="@valueSetting.MinValue" max="@valueSetting.MaxValue"
+                                               @onchange="(e) => { OnInput(e, prop, true); }">
+                                    </div>
+                                }
+                            }
+                        </div>
+                    </div>
+                }
+            }
+        </div>
     </div>
 </div>
 
@@ -162,6 +162,8 @@
     [Parameter] public ComponentInstance? individualData { get; set; }
 
     [Parameter] public double zoomFactor { get; set; } = 1;
+
+    [Parameter] public EventCallback CancelDrag { get; set; }
 
     private bool enableBorder = false;
 
@@ -226,12 +228,7 @@
     public void CloseEnvironmentalSettings()
     {
         showMenu = false;
-        StateHasChanged();
     }
-
-
-    private double menuTop = 0;
-    private double menuLeft = 0;
 
     private void HandleEnvironmentalSettingsMenu(MouseEventArgs args)
     {
@@ -240,8 +237,9 @@
         // Console.WriteLine("lel");
 
         // Set menu position
-        menuTop = args.ClientY;
-        menuLeft = args.ClientX;
+        if (individualData == null) return;
+        _envSettingsX = individualData.zoomedX - 300;
+        _envSettingsY = individualData.zoomedY;
     }
 
     private bool rightClickable = false;
@@ -258,6 +256,31 @@
         {
             rightClick2 = false;
         }
+    }
+
+    private bool _isDraggingEnvSettings = false;
+    private double _envSettingsX;
+    private double _envSettingsY;
+
+    private void StartEnvSettingsDrag(MouseEventArgs e)
+    {
+        _isDraggingEnvSettings = true;
+    }
+
+    private void ContinueEnvSettingsDrag(MouseEventArgs e)
+    {
+        CancelDrag.InvokeAsync();
+        if (!_isDraggingEnvSettings) return;
+        var newX = _envSettingsX + e.MovementX;
+        var newY = _envSettingsY + e.MovementY;
+
+        _envSettingsX = Math.Clamp(newX, 0, 1920);
+        _envSettingsY = Math.Clamp(newY, 0, 1080);
+    }
+
+    private void EndEnvSettingsDrag()
+    {
+        _isDraggingEnvSettings = false;
     }
 
     string GenerateLink(string nodeName)
