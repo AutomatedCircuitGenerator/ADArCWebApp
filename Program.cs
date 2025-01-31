@@ -30,4 +30,5 @@ builder.Services.Configure<StaticFileOptions>(options => { options.ContentTypePr
 builder.Services.AddSingleton<BoardService>();
 builder.Services.AddSingleton<ToastService>();
 builder.Services.AddSingleton<GraphSynthInvoke>();
+builder.Services.AddSingleton<LocalStorageService>();
 await builder.Build().RunAsync();
