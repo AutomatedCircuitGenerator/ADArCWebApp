@@ -62,6 +62,7 @@
 }
 
 @inject BoardService BoardService
+@inject LocalStorageService LocalStorageService
 
 @code {
 
@@ -95,7 +96,13 @@
         BoardService.Board = board;
         await OnSelect.InvokeAsync(board);
         _isVisible = false; // Set visibility to false when a board is selected
-        Pages.Index.App!.RunTutorial();
+        var firstVisit = await LocalStorageService.GetItem("firstVisit");
+
+        if (firstVisit != "false")
+        {
+            Pages.Index.App!.RunTutorial();
+            await LocalStorageService.AddItem("firstVisit", "false");
+        }
     }
 
 }
