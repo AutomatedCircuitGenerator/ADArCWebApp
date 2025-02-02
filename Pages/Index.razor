@@ -8,6 +8,7 @@
 @using System.Text
 @using System.Linq
 @using System.Collections.Generic
+@using ADArCWebApp.Shared.Data
 @using ADArCWebApp.Shared.UIComponents
 @using Microsoft.AspNetCore.Components;
 @inject IJSRuntime JsRuntime
@@ -41,7 +42,7 @@
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
-                    Example
+                    Examples
                 </button>
                 <button class="toolbar-button" @onclick="ToggleUrlDisplay">
                     <span>🔗 Generate URL</span>
@@ -107,7 +108,7 @@
             <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
-            <ExampleSelect OnSelect="HandleExampleSelect"></ExampleSelect>
+            <ExampleSelect ComponentFrequencies="_componentFrequencies"></ExampleSelect>
         </Modal>
         <ToastQueue></ToastQueue>
     </div>
@@ -156,6 +157,8 @@
 
     private bool _scheduleBenchSetup;
 
+    private FrequencyVector<int> _componentFrequencies = new ();
+
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
@@ -200,6 +203,7 @@
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
+            StateHasChanged();
         }
         else
         {
@@ -422,6 +426,7 @@
             }
 
             await comp.LinkController(JsRuntime);
+            _componentFrequencies.IncrementFrequency(targetCardComponentId);
 
             //register the dht specifically to forced the arduino to pause while awaiting response from sensor
             //TODO: improve and generalize.
@@ -626,6 +631,7 @@
             await SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
+            StateHasChanged();
         }
     
         await Task.Delay(1000);
@@ -748,6 +754,7 @@
     public async void RemoveComp(bool suppressToast = false)
     {
         var removedComponent = Comps[SelectedComponent];
+        _componentFrequencies.DecrementFrequency(removedComponent.GlobalId);
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
         //TODO: improve and generalize.
@@ -884,6 +891,7 @@
                     // Unlock components
                     Console.WriteLine("Unlocking components");
                     selLockedOut = false;
+                    StateHasChanged();
                     if (CompPane != null)
                     {
                         CompPane.ReleaseLockout();
@@ -997,6 +1005,7 @@
             {
                 Console.WriteLine($"Setting up component {kv.Key} of type {kv.Value.Data.nodeName}");
                 Comps.Add(kv.Key, kv.Value);
+                _componentFrequencies.IncrementFrequency(kv.Value.GlobalId);
                 var n = new node();
                 n.localLabels.Add("user_" + kv.Value.Data.nodeName);
                 kv.Value.GsNode = n;
@@ -1053,7 +1062,7 @@
             
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
-            BuildCanvas!.TriggerRefresh();
+            StateHasChanged();
 			Console.WriteLine("Bench setup complete");
         }
         catch (Exception ex)
@@ -1386,13 +1395,6 @@
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
     }
-
-    private async Task HandleExampleSelect(ExampleSelect.Example example)
-    {
-        _exampleModalOpen = false;
-        BoardService.Board = example.Board;
-        await SetupBenchFromJsonString(example.Json);
-    }
 				
 
 
@@ -1558,8 +1560,6 @@
         {" ;", ";"},
         {", ", ","},
         {": ", ":"},
-        {" = ", "="},
-        {" == ", "="},
         {"\n\n", "\n"},
         {" // ", "//"}
     };
