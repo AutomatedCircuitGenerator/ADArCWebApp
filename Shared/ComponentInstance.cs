@@ -17,13 +17,37 @@ namespace ADArCWebApp.Shared
         public int localId { get; set; }
 
         public readonly int GlobalId;
-        public double X;
-        public double Y;
-        
-        public Variant? Highlight {get; set;}
 
-        public double zoomedX;
-        public double zoomedY;
+        private double _x;
+        private double _y;
+        private double _zoomedX;
+        private double _zoomedY;
+
+        public double X
+        {
+            get => _x;
+            set => _x = Math.Round(value); // Round to the nearest whole number
+        }
+
+        public double Y
+        {
+            get => _y;
+            set => _y = Math.Round(value); // Round to the nearest whole number
+        }
+
+        public double zoomedX
+        {
+            get => _zoomedX;
+            set => _zoomedX = Math.Round(value); // Round to the nearest whole number
+        }
+
+        public double zoomedY
+        {
+            get => _zoomedY;
+            set => _zoomedY = Math.Round(value); // Round to the nearest whole number
+        }
+
+        public Variant? Highlight { get; set; }
 
         [JsonIgnore]
         public readonly Dictionary<int, List<InstanceConnection>> ConnMap = new(); //this.pinId -> connection
@@ -38,7 +62,7 @@ namespace ADArCWebApp.Shared
         public readonly Dictionary<string, IComponentParameter> CompParams = new();
         [JsonIgnore]
         public IJSObjectReference? Controller { get; set; }
-        
+
         public async ValueTask DisposeAsync()
         {
             if (Controller is not null)
@@ -47,7 +71,7 @@ namespace ADArCWebApp.Shared
                 await Controller.DisposeAsync();
             }
         }
-        
+
         public async Task LinkController(IJSRuntime js)
         {
             var jsIdentifier = Data.compType.Name.Replace("Razor", "");
@@ -81,6 +105,7 @@ namespace ADArCWebApp.Shared
                 CompParams.Add(kv.Key, kv.Value.Copy());
             }
 
+            // Use the properties to ensure rounding
             X = x;
             Y = y;
             zoomedX = x;
@@ -105,7 +130,7 @@ namespace ADArCWebApp.Shared
             {
                 ret.Add("Controller", Controller);
             }
-            
+
             return ret;
         }
 
@@ -188,7 +213,6 @@ namespace ADArCWebApp.Shared
             return GlobalId is 1 or 2;
         }
     }
-
 
     public class InstanceConnection(ComponentInstance from, int fromId, int toId, ComponentInstance to, string color)
     {
