@@ -2,7 +2,10 @@
 @inject BoardService BoardService
 
 <div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem">
-    <h1 style="font-size: 1.75rem; margin-bottom: 1rem">Examples Library</h1>
+    <div style="display: flex; justify-content: space-between; margin-bottom: 1rem">
+        <h1 style="font-size: 1.75rem; margin-bottom: 0">Examples Library</h1>
+        <button style="border: none; background: none" @onclick="OnClose">❌</button>
+    </div>
     @if (_suggestions.Any())
     {
         <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">Suggestions</h2>
@@ -37,6 +40,8 @@
     public record Example(string Title, string Image, FrequencyVector<int> ComponentFrequencies, string Url);
 
     [Parameter, EditorRequired] public FrequencyVector<int>? ComponentFrequencies { get; set; }
+    [Parameter]
+    public EventCallback OnClose { get; set; }
     private List<Example> _suggestions = [];
 
     /// <summary>

@@ -42,7 +42,7 @@
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
-                    Examples
+                    📖 Examples
                 </button>
                 <button class="toolbar-button" @onclick="ToggleUrlDisplay">
                     <span>🔗 Generate URL</span>
@@ -108,7 +108,7 @@
             <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
-            <ExampleSelect ComponentFrequencies="_componentFrequencies"></ExampleSelect>
+            <ExampleSelect ComponentFrequencies="_componentFrequencies" OnClose="() => _exampleModalOpen = false"></ExampleSelect>
         </Modal>
         <ToastQueue></ToastQueue>
     </div>
@@ -138,7 +138,7 @@
 
 
 </div>
-<div class="progress-container" style="display: @(LoadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+<div class="progress-container" style="display: @((LoadingProgress < 0) && !_loadingFromUrl ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
     <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(LoadingProgress, 0))% component rules loaded</span>
     <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
 </div>
@@ -437,6 +437,7 @@
             }
             AppInterop.UpdateCodeWrapper();
             ToastService.AddToast("Code panel updated.", Variant.Info);
+            if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
         }
         
         moverOffsetLeft = 0;
@@ -1287,6 +1288,7 @@
         }
     }
 
+    private bool _loadingFromUrl;
     [JSInvokable]
     public static async Task LoadFromUrl(string compressedData)
     {
@@ -1346,16 +1348,17 @@
                         var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                         Console.WriteLine($"Detected board type from URL data: {boardType}");
                         
-                        await App.InvokeAsync(() => {
+                        await App.InvokeAsync(async () => {
                             Console.WriteLine("Setting shouldShowBoardSelect to false");
                             App.shouldShowBoardSelect = false;
+                            App._loadingFromUrl = true;
                             App.StateHasChanged();
                             
                             Console.WriteLine("Setting board type");
                             App.BoardService.Board = boardType;
                             
                             Console.WriteLine("Setting up bench");
-                            App.SetupBenchFromJsonString(json);
+                            await App.SetupBenchFromJsonString(json);
     
                             // Unlock components after setup is complete
                             Console.WriteLine("Unlocking components");
@@ -1364,7 +1367,8 @@
                             {
                                 CompPane.ReleaseLockout();
                             }
-    
+
+                            App._loadingFromUrl = false;
                             Console.WriteLine("Board and bench setup complete");
                         });
                         
