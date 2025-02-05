@@ -93,9 +93,6 @@
     <None Include="wwwroot\rules\servo_arduino.grxml" />
     <None Include="wwwroot\rules\servo_pca9685.grxml" />
     <None Include="wwwroot\rules\uln2003_arduino.grxml" />
-    <None Update="Shared\EnvironmentalSettings\PIRButton.css">
-      <DependentUpon>PIRButton.razor</DependentUpon>
-    </None>
   </ItemGroup>
 
   <ItemGroup>
