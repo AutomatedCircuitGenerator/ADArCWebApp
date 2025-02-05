@@ -31,15 +31,21 @@
         InvokeAsync(StateHasChanged);
     }
 
+    private readonly object _toastLock = new();
+
     private void RemoveToast(object? state)
     {
         if (state is not Shared.Toast toast) return;
 
-        var entry = _toasts.FirstOrDefault(t => t.Toast == toast);
-        if (entry != default)
+        lock (_toastLock)
         {
-            entry.Timer.Dispose(); // Dispose the timer to free resources
-            _toasts.Remove(entry); // Remove the timer entry from the list
+            var index = _toasts.FindIndex(t => t.Toast == toast);
+            if (index >= 0)
+            {
+                var entry = _toasts[index];
+                entry.Timer.Dispose();
+                _toasts.RemoveAt(index);
+            }
         }
 
         if (toast.Components != null)
@@ -50,9 +56,9 @@
             }
         }
 
-        // Trigger a UI update
         InvokeAsync(StateHasChanged);
     }
+
 
     private void HandleMouseOver()
     {
