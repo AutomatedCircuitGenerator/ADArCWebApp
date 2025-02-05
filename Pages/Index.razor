@@ -40,11 +40,10 @@
             💡 Tutorial
         </button>
         <div class="center-toolbar">
+            <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true" data-title="Examples" data-intro="Click here to load example circuits.">
+                📖 Examples
+            </button>
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
-                    📖 Examples
-                </button>
-
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
                 </button>
@@ -60,17 +59,17 @@
             <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter.">
                 <span>🐛 Report Bug</span>
             </button>
-            <button class="toolbar-button" @onclick="ToggleUrlDisplay">
+            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-intro="Click here to generate and copy a URL with your circuit.">
                 <span>🔗 Generate URL</span>
             </button>
             @if (isUrlBoxVisible)
             {
-            <div class="url-modal">
-                <input type="text" class="url-textbox" value="@generatedUrl" readonly />
-                <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                    <span>@copyButtonText</span>
-                </button>
-            </div>
+                <div class="url-modal">
+                    <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
+                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                        <span>@copyButtonText</span>
+                    </button>
+                </div>
             }
             <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
                 <span>@runStopText</span>
