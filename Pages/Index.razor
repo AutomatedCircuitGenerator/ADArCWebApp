@@ -8,6 +8,7 @@
 @using System.Text
 @using System.Linq
 @using System.Collections.Generic
+@using ADArCWebApp.Shared.Data
 @using ADArCWebApp.Shared.UIComponents
 @using Microsoft.AspNetCore.Components;
 @inject IJSRuntime JsRuntime
@@ -23,9 +24,31 @@
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
+@if (_isMobileUser)
+{
+    <div style="width: 100vw;
+                height: 100vh;
+                position: absolute;
+                z-index: 10000000000;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+                background-color: white;
+                text-align: center;
+                padding: 20px;
+                font-family: Arial, sans-serif;">
+        <div>
+            <h2 style="font-weight: bold">Unsupported Device</h2>
+            <p style="color: black; font-size: 18px;">
+                This web application is not designed for mobile devices.  
+                Please access it from a desktop or laptop for the best experience.
+            </p>
+        </div>
+    </div>
+}
 @if (shouldShowBoardSelect)
 {
-<BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
+    <BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
 }
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
@@ -40,21 +63,9 @@
         </button>
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true">
-                    Example
+                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen = true">
+                    📖 Examples
                 </button>
-                <button class="toolbar-button" @onclick="ToggleUrlDisplay">
-                    <span>🔗 Generate URL</span>
-                </button>
-                @if (isUrlBoxVisible)
-                {
-                    <div class="url-modal">
-                        <input type="text" class="url-textbox" value="@generatedUrl" readonly />
-                        <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                            <span>@copyButtonText</span>
-                        </button>
-                    </div>
-                }
 
                 <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
                     <span>⬆️ Export</span>
@@ -68,6 +79,21 @@
             <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
                 <span>ℹ Help</span>
             </button>
+            <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter.">
+                <span>🐛 Report Bug</span>
+            </button>
+            <button class="toolbar-button" @onclick="ToggleUrlDisplay">
+                <span>🔗 Generate URL</span>
+            </button>
+            @if (isUrlBoxVisible)
+            {
+            <div class="url-modal">
+                <input type="text" class="url-textbox" value="@generatedUrl" readonly />
+                <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                    <span>@copyButtonText</span>
+                </button>
+            </div>
+            }
             <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
                 <span>@runStopText</span>
             </button>
@@ -107,7 +133,7 @@
             <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
-            <ExampleSelect OnSelect="HandleExampleSelect"></ExampleSelect>
+            <ExampleSelect ComponentFrequencies="_componentFrequencies" OnClose="() => _exampleModalOpen = false"></ExampleSelect>
         </Modal>
         <ToastQueue></ToastQueue>
     </div>
@@ -137,7 +163,7 @@
 
 
 </div>
-<div class="progress-container" style="display: @(LoadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+<div class="progress-container" style="display: @((LoadingProgress < 0) && !_loadingFromUrl ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
     <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(LoadingProgress, 0))% component rules loaded</span>
     <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
 </div>
@@ -147,14 +173,16 @@
     private Modal modal;
     private bool _exampleModalOpen;
 
-	private BoardSelect boardSelect;
+    private BoardSelect boardSelect;
     private bool shouldShowBoardSelect = true;
 
     bool isLeftExpanded = true;
-	private string generatedUrl = string.Empty;
+    private string generatedUrl = string.Empty;
     bool isRightExpanded;
 
     private bool _scheduleBenchSetup;
+
+    private FrequencyVector<int> _componentFrequencies = new();
 
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
@@ -188,18 +216,19 @@
     private void HandleBoardSelect(Board board)
     {
         Console.WriteLine($"HandleBoardSelect called with board: {board}");
-        
+
         // Normal board selection flow - no auto-selection check needed
         BoardService.Board = board;
         Comps[0] = BoardService.GetComponentInstance();
         Console.WriteLine($"Board set to {board}, component instance created");
-    
+
         if (LoadingProgress == -1)
         {
             Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
+            StateHasChanged();
         }
         else
         {
@@ -279,7 +308,7 @@
     /// </summary>
     public async Task StateChanged()
     {
-         await InvokeAsync(StateHasChanged);
+        await InvokeAsync(StateHasChanged);
     }
 
 
@@ -422,6 +451,7 @@
             }
 
             await comp.LinkController(JsRuntime);
+            _componentFrequencies.IncrementFrequency(targetCardComponentId);
 
             //register the dht specifically to forced the arduino to pause while awaiting response from sensor
             //TODO: improve and generalize.
@@ -430,13 +460,21 @@
                 //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
                 AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
             }
+
             AppInterop.UpdateCodeWrapper();
             ToastService.AddToast("Code panel updated.", Variant.Info);
+            if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
         }
-        
+
         moverOffsetLeft = 0;
         moverOffsetTop = 0;
         targetCardComponentId = -1;
+    }
+    
+    private void ReportBug()
+    {
+        const string googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdI9w3ABXX34mRSPd0VRiu5LT63fRXSKzNQKhZypOkse2YuiA/viewform?usp=dialog";
+        JsRuntime.InvokeVoidAsync("window.open", googleFormUrl, "_blank");
     }
 
     private node? SelectArduinoNode(List<node> nodes, HashSet<string> labels)
@@ -581,12 +619,15 @@
         ToastService.AddToast(message, Variant.Error, connectedComponents.Take(3));
         return selectedNode;
     }
+
     #endregion
-    
+
     /// <summary>
     /// Disables the palette until rules are loaded.
     /// </summary>
     private bool selLockedOut = true;
+
+    private bool _isMobileUser;
 
     /// <summary>
     /// This is triggered exactly once when blazor is loaded, but before render if I remember correctly.
@@ -596,7 +637,7 @@
     protected override async Task OnInitializedAsync()
     {
         Console.WriteLine("OnInitializedAsync started");
-        
+
         // Initialize JS interop first
         if (AppInterop.JsModule == null)
         {
@@ -604,34 +645,37 @@
             AppInterop.Runtime = JsRuntime;
             AppInterop.JsModule = await AppInterop.GetModuleWrapper();
         }
-        
+
+        _isMobileUser = await AppInterop.IsMobileUser();
+
         // Check if we're loading from a URL
         var uri = new Uri(navMan.Uri);
         var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
         var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
         shouldShowBoardSelect = !hasUrlParam;
         Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
-    
+
         // Only lock selection if we're not loading from URL
         selLockedOut = !hasUrlParam;
-        
+
         Console.WriteLine("Loading rulesets...");
         int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
-        
+
         if (_scheduleBenchSetup)
         {
             Console.WriteLine("Setting up bench from JSON");
             await SetupBenchFromJsonString(BoardService.GetJson());
             CompPane!.ReleaseLockout();
             selLockedOut = false;
+            StateHasChanged();
         }
-    
+
         await Task.Delay(1000);
         LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
-    
+
         // Force a re-render to ensure visibility changes are applied
         await InvokeAsync(StateHasChanged);
     }
@@ -748,6 +792,7 @@
     public async void RemoveComp(bool suppressToast = false)
     {
         var removedComponent = Comps[SelectedComponent];
+        _componentFrequencies.DecrementFrequency(removedComponent.GlobalId);
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
         //TODO: improve and generalize.
@@ -757,18 +802,18 @@
         }
 
         GraphSynthInvoke.RemoveComp(removedComponent.GsNode);
-        
+
         Comps.Remove(SelectedComponent);
 
         await removedComponent.DisposeAsync();
-        
+
         BuildCode.outputPins.Clear();
         BuildCanvas!.ConnLines.Clear();
         foreach (var comp in Comps.Values)
         {
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
-        
+
         if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
     }
 
@@ -846,49 +891,50 @@
     /// </summary>
     /// <param name="e"></param>
     /// <returns></returns>
-	public async Task LoadFromFile(InputFileChangeEventArgs e)
+    public async Task LoadFromFile(InputFileChangeEventArgs e)
     {
         Console.WriteLine("LoadFromFile called");
         try
         {
             var file = e.File;
             Console.WriteLine($"Processing file: {file.Name}, size: {file.Size}");
-            
+
             var buffer = new byte[file.Size];
             await e.File.OpenReadStream().ReadAsync(buffer);
             var str = System.Text.Encoding.UTF8.GetString(buffer);
             Console.WriteLine("File content loaded successfully");
-    
+
             try
             {
                 Console.WriteLine("Parsing file JSON data");
-                var options = new JsonSerializerOptions 
-                { 
+                var options = new JsonSerializerOptions
+                {
                     PropertyNameCaseInsensitive = true,
                     IncludeFields = true
                 };
-                
+
                 var data = JsonSerializer.Deserialize<Data>(str, options);
-                
+
                 if (data?.Comps != null && data.Comps.ContainsKey(1))
                 {
                     var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                     Console.WriteLine($"Detected board type from file: {boardType}");
-                    
+
                     Console.WriteLine("Setting board type");
                     BoardService.Board = boardType;
-                    
+
                     Console.WriteLine("Setting up bench");
                     SetupBenchFromJsonString(str);
-                    
+
                     // Unlock components
                     Console.WriteLine("Unlocking components");
                     selLockedOut = false;
+                    StateHasChanged();
                     if (CompPane != null)
                     {
                         CompPane.ReleaseLockout();
                     }
-                    
+
                     Console.WriteLine("File import complete");
                 }
                 else
@@ -922,20 +968,21 @@
         Console.WriteLine("Starting JSON deserialization");
         try
         {
-            var options = new JsonSerializerOptions { 
+            var options = new JsonSerializerOptions
+            {
                 IncludeFields = true,
                 WriteIndented = true
             };
             options.Converters.Add(new ParamSerializer());
-            
+
             Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
-            
+
             if (canvasData == null)
             {
                 Console.WriteLine("Deserialization returned null");
                 return null;
             }
-    
+
             Console.WriteLine($"Deserialization successful. Component count: {canvasData.Comps?.Count ?? 0}");
             return canvasData;
         }
@@ -953,18 +1000,20 @@
         Data? data;
         try
         {
-            var options = new JsonSerializerOptions { 
+            var options = new JsonSerializerOptions
+            {
                 IncludeFields = true,
                 WriteIndented = true
             };
             options.Converters.Add(new ParamSerializer());
             data = JsonSerializer.Deserialize<Data>(json, options);
-            
+
             if (data == null)
             {
                 Console.WriteLine("Deserialization returned null");
                 return;
             }
+
             Console.WriteLine($"Deserialization successful. Component count: {data.Comps?.Count ?? 0}");
         }
         catch (Exception ex)
@@ -973,7 +1022,7 @@
             Console.WriteLine($"JSON content: {json.Substring(0, Math.Min(200, json.Length))}...");
             return;
         }
-    
+
         try
         {
             // Clear existing components
@@ -984,30 +1033,31 @@
                 RemoveComp(true);
                 SelectedComponent = -1;
             }
-    
+
             BuildCanvas!.ConnLines.Clear();
             BuildCanvas.ResetTransform();
             GraphSynthInvoke.Inputs.Clear();
             GraphSynthInvoke.DestroyGraph();
             BuildCode.outputPins.Clear();
             localIds = data.LocalId;
-            
+
             // First pass: Create all component nodes
             foreach (var kv in data.Comps.OrderBy(kv => kv.Key))
             {
                 Console.WriteLine($"Setting up component {kv.Key} of type {kv.Value.Data.nodeName}");
                 Comps.Add(kv.Key, kv.Value);
+                _componentFrequencies.IncrementFrequency(kv.Value.GlobalId);
                 var n = new node();
                 n.localLabels.Add("user_" + kv.Value.Data.nodeName);
                 kv.Value.GsNode = n;
-                
+
                 GraphSynthInvoke.GetNodes().Add(n);
                 if (kv.Value.Data.nodeName != null)
                 {
                     GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
                     Console.WriteLine($"Added input for {kv.Value.Data.nodeName}");
                 }
-    
+
                 // Add and connect each component
                 GraphSynthInvoke.Add();
                 if (kv.Value.Data.nodeName != null && !kv.Value.IsArduino())
@@ -1015,31 +1065,32 @@
                     var connected = GraphSynthInvoke.Connect(kv.Value.Data.nodeName, "arduino", SelectArduinoNode);
                     Console.WriteLine($"Connected component {kv.Key}: {connected}");
                 }
-    
+
                 // Label nodes and arcs with localId
                 var newNodes = GraphSynthInvoke.GetNodes()
                     .FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null);
                 var newArcs = GraphSynthInvoke.GetArcs()
                     .FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null);
-                    
-                foreach(var node in newNodes)
+
+                foreach (var node in newNodes)
                 {
                     node.localLabels.Add("localId:" + kv.Key);
                 }
-                foreach(var arc in newArcs)
+
+                foreach (var arc in newArcs)
                 {
                     arc.localLabels.Add("localId:" + kv.Key);
                 }
-                
+
                 Console.WriteLine($"Labeled {newNodes.Count} nodes and {newArcs.Count} arcs for component {kv.Key}");
             }
-    
+
             // Second pass: Update bindings and setup listeners
             foreach (var comp in Comps.Values)
             {
                 UpdatePinBindings(comp);
                 if (!comp.IsArduino()) await comp.LinkController(JsRuntime);
-                
+
                 // Re-register DHT if present
                 if (comp.GlobalId == 20)
                 {
@@ -1050,11 +1101,11 @@
                     }
                 }
             }
-            
+
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
-            BuildCanvas!.TriggerRefresh();
-			Console.WriteLine("Bench setup complete");
+            StateHasChanged();
+            Console.WriteLine("Bench setup complete");
         }
         catch (Exception ex)
         {
@@ -1096,35 +1147,36 @@
     private async Task<string> ExportJson()
     {
         Console.WriteLine("Starting JSON export");
-        try 
+        try
         {
             // Create clean component dictionary without Controller references
             var cleanComps = new Dictionary<int, ComponentInstance>();
-            foreach(var kvp in Comps)
+            foreach (var kvp in Comps)
             {
                 var comp = kvp.Value;
                 cleanComps.Add(kvp.Key, comp);
             }
-    
+
             Data parentObject = new Data
             {
                 Comps = cleanComps,
                 LocalId = localIds,
                 Code = await AppInterop.GetCodeWrapper()
             };
-    
-            var options = new JsonSerializerOptions { 
+
+            var options = new JsonSerializerOptions
+            {
                 IncludeFields = true,
                 WriteIndented = true // Makes JSON more readable for debugging
             };
             options.Converters.Add(new ParamSerializer());
-            
+
             var json = JsonSerializer.Serialize(parentObject, options);
             Console.WriteLine($"JSON export successful. Length: {json.Length}");
-    
+
             return json;
         }
-        catch(Exception ex)
+        catch (Exception ex)
         {
             Console.WriteLine($"Error during JSON export: {ex.Message}");
             throw;
@@ -1143,14 +1195,14 @@
     }
 
 
-	private string copyButtonText = "📋 Copy";
+    private string copyButtonText = "📋 Copy";
 
     private async Task CopyUrlToClipboard()
     {
         await JsRuntime.InvokeVoidAsync("navigator.clipboard.writeText", generatedUrl);
         copyButtonText = "✓ Copied!";
         StateHasChanged();
-        
+
         // Reset button text after 2 seconds
         await Task.Delay(2000);
         copyButtonText = "📋 Copy";
@@ -1158,13 +1210,13 @@
     }
 
 
-	private bool isUrlBoxVisible = false;
+    private bool isUrlBoxVisible = false;
 
     private async Task ToggleUrlDisplay()
     {
         isUrlBoxVisible = !isUrlBoxVisible;
-		copyButtonText = "📋 Copy";  // Reset text
-        
+        copyButtonText = "📋 Copy"; // Reset text
+
         if (isUrlBoxVisible)
         {
             try
@@ -1180,10 +1232,9 @@
                 generatedUrl = "Error generating URL";
             }
         }
-        
+
         StateHasChanged();
     }
-
 
 
     private static async Task<string> CompressCircuitData(string json)
@@ -1191,7 +1242,9 @@
         try
         {
             // First validate the input JSON
-            using (JsonDocument.Parse(json)) { }
+            using (JsonDocument.Parse(json))
+            {
+            }
 
             // Apply replacements in order of longest pattern first
             foreach (var kvp in CompressionMap.OrderByDescending(x => x.Key.Length))
@@ -1227,8 +1280,12 @@
             compressed = compressed.Replace('-', '+').Replace('_', '/');
             switch (compressed.Length % 4)
             {
-                case 2: compressed += "=="; break;
-                case 3: compressed += "="; break;
+                case 2:
+                    compressed += "==";
+                    break;
+                case 3:
+                    compressed += "=";
+                    break;
             }
 
             // Decompress
@@ -1267,7 +1324,9 @@
             }
 
             // Validate final JSON
-            using (JsonDocument.Parse(json)) { }
+            using (JsonDocument.Parse(json))
+            {
+            }
 
             return json;
         }
@@ -1278,29 +1337,35 @@
         }
     }
 
+    private bool _loadingFromUrl;
+
     [JSInvokable]
     public static async Task LoadFromUrl(string compressedData)
     {
         try
         {
             Console.WriteLine("LoadFromUrl called with compressed data length: " + compressedData.Length);
-            
+
             if (App == null)
             {
                 Console.WriteLine("Error: App not ready");
                 return;
             }
-    
+
             try
             {
                 // Handle Base64 padding
                 compressedData = compressedData.Replace('-', '+').Replace('_', '/');
                 switch (compressedData.Length % 4)
                 {
-                    case 2: compressedData += "=="; break;
-                    case 3: compressedData += "="; break;
+                    case 2:
+                        compressedData += "==";
+                        break;
+                    case 3:
+                        compressedData += "=";
+                        break;
                 }
-    
+
                 // Decompress
                 byte[] compressedBytes = Convert.FromBase64String(compressedData);
                 using var msi = new MemoryStream(compressedBytes);
@@ -1309,45 +1374,47 @@
                 {
                     await gs.CopyToAsync(mso);
                 }
-    
+
                 var json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
                 Console.WriteLine($"Successfully decompressed JSON data, length: {json.Length}");
-    
+
                 // Replace compressed patterns with original values
                 foreach (var kvp in CompressionMap.OrderByDescending(x => x.Value.Length))
                 {
                     json = json.Replace(kvp.Value, kvp.Key);
                 }
-    
+
                 try
                 {
                     // Parse JSON to get board type
                     Console.WriteLine("Parsing JSON data to determine board type");
-                    var options = new JsonSerializerOptions 
-                    { 
+                    var options = new JsonSerializerOptions
+                    {
                         PropertyNameCaseInsensitive = true,
                         IncludeFields = true
                     };
-                    
+
                     var data = JsonSerializer.Deserialize<Data>(json, options);
                     Console.WriteLine($"JSON deserialized successfully, checking components");
-                    
+
                     if (data?.Comps != null && data.Comps.ContainsKey(1))
                     {
                         var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                         Console.WriteLine($"Detected board type from URL data: {boardType}");
-                        
-                        await App.InvokeAsync(() => {
+
+                        await App.InvokeAsync(async () =>
+                        {
                             Console.WriteLine("Setting shouldShowBoardSelect to false");
                             App.shouldShowBoardSelect = false;
+                            App._loadingFromUrl = true;
                             App.StateHasChanged();
-                            
+
                             Console.WriteLine("Setting board type");
                             App.BoardService.Board = boardType;
-                            
+
                             Console.WriteLine("Setting up bench");
-                            App.SetupBenchFromJsonString(json);
-    
+                            await App.SetupBenchFromJsonString(json);
+
                             // Unlock components after setup is complete
                             Console.WriteLine("Unlocking components");
                             App.selLockedOut = false;
@@ -1355,10 +1422,11 @@
                             {
                                 CompPane.ReleaseLockout();
                             }
-    
+
+                            App._loadingFromUrl = false;
                             Console.WriteLine("Board and bench setup complete");
                         });
-                        
+
                         Console.WriteLine("Triggering state change");
                         await App.StateChanged();
                     }
@@ -1387,183 +1455,170 @@
         }
     }
 
-    private async Task HandleExampleSelect(ExampleSelect.Example example)
-    {
-        _exampleModalOpen = false;
-        BoardService.Board = example.Board;
-        await SetupBenchFromJsonString(example.Json);
-    }
-				
-
-
 
     private static readonly Dictionary<string, string> CompressionMap = new()
     {
         // JSON Structure (use numbered patterns to avoid collisions)
-        {"\"LocalId\":", "\"#01:"},
-        {"\"Comps\":{", "\"#02:{"},
-        {"\"compParams\":", "\"#03:"},
-        {"\"System.Double\"", "\"#04\""},
-        {"\"System.String\"", "\"#05\""},
-        {"\"System.Boolean\"", "\"#06\""},
-        {"\"System.Int32\"", "\"#07\""},
-        
+        { "\"LocalId\":", "\"#01:" },
+        { "\"Comps\":{", "\"#02:{" },
+        { "\"compParams\":", "\"#03:" },
+        { "\"System.Double\"", "\"#04\"" },
+        { "\"System.String\"", "\"#05\"" },
+        { "\"System.Boolean\"", "\"#06\"" },
+        { "\"System.Int32\"", "\"#07\"" },
+
         // Component Properties
-        {"\"localId\":", "\"#11:"},
-        {"\"globalId\":", "\"#12:"},
-        {"\"x\":", "\"#13:"},
-        {"\"y\":", "\"#14:"},
-        {"\"zoomedX\":", "\"#15:"},
-        {"\"zoomedY\":", "\"#16:"},
-        {"\"midSignal\":", "\"#17:"},
-        {"\"counter\":", "\"#18:"},
-        {"\"Wbuffer\":", "\"#19:"},
-        {"\"RegAddr\":", "\"#20:"},
-        {"\"byteIndex\":", "\"#21:"},
-        {"\"timer\":", "\"#22:"},
-        {"\"type\":", "\"#23:"},
-        {"\"value\":", "\"#24:"},
-        
+        { "\"localId\":", "\"#11:" },
+        { "\"globalId\":", "\"#12:" },
+        { "\"x\":", "\"#13:" },
+        { "\"y\":", "\"#14:" },
+        { "\"zoomedX\":", "\"#15:" },
+        { "\"zoomedY\":", "\"#16:" },
+        { "\"midSignal\":", "\"#17:" },
+        { "\"counter\":", "\"#18:" },
+        { "\"Wbuffer\":", "\"#19:" },
+        { "\"RegAddr\":", "\"#20:" },
+        { "\"byteIndex\":", "\"#21:" },
+        { "\"timer\":", "\"#22:" },
+        { "\"type\":", "\"#23:" },
+        { "\"value\":", "\"#24:" },
+
         // Component Numbers
-        {"\"1\":{", "\"#31:{"},
-        {"\"2\":{", "\"#32:{"},
-        {"\"3\":{", "\"#33:{"},
-        {"\"4\":{", "\"#34:{"},
-        {"\"5\":{", "\"#35:{"},
-        {"\"6\":{", "\"#36:{"},
-        {"\"7\":{", "\"#37:{"},
-        {"\"8\":{", "\"#38:{"},
-        {"\"9\":{", "\"#39:{"},
-        
+        { "\"1\":{", "\"#31:{" },
+        { "\"2\":{", "\"#32:{" },
+        { "\"3\":{", "\"#33:{" },
+        { "\"4\":{", "\"#34:{" },
+        { "\"5\":{", "\"#35:{" },
+        { "\"6\":{", "\"#36:{" },
+        { "\"7\":{", "\"#37:{" },
+        { "\"8\":{", "\"#38:{" },
+        { "\"9\":{", "\"#39:{" },
+
         // Component Parameters
-        {"\"triggermode\":", "\"#41:"},
-        {"\"ismotiondetected\":", "\"#42:"},
-        {"\"timedelayseconds\":", "\"#43:"},
-        {"\"text\":", "\"#44:"},
-        {"\"backlight\":", "\"#45:"},
-        {"\"blink\":", "\"#46:"},
-        {"\"cursor\":", "\"#47:"},
-        {"\"cursorX\":", "\"#48:"},
-        {"\"cursorY\":", "\"#49:"},
-        
+        { "\"triggermode\":", "\"#41:" },
+        { "\"ismotiondetected\":", "\"#42:" },
+        { "\"timedelayseconds\":", "\"#43:" },
+        { "\"text\":", "\"#44:" },
+        { "\"backlight\":", "\"#45:" },
+        { "\"blink\":", "\"#46:" },
+        { "\"cursor\":", "\"#47:" },
+        { "\"cursorX\":", "\"#48:" },
+        { "\"cursorY\":", "\"#49:" },
+
         // Include Statements
-        {"#include <Arduino.h>", "@inc1"},
-        {"#include <Wire.h>", "@inc2"},
-        {"#include <LiquidCrystal_PCF8574.h>", "@inc3"},
-        
+        { "#include <Arduino.h>", "@inc1" },
+        { "#include <Wire.h>", "@inc2" },
+        { "#include <LiquidCrystal_PCF8574.h>", "@inc3" },
+
         // Code Patterns (use @ for code patterns to distinguish from JSON #)
-        {"int inputPin", "@ip"},
-        {"const buzzerPin", "@bp"},
-        {"int val", "@iv"},
-        {"pinMode(inputPin, INPUT)", "@pmii"},
-        {"pinMode(buzzerPin, OUTPUT);", "@pmbo"},
-        {"void setup()", "@vs"},
-        {"void loop()", "@vl"},
-        {"val = digitalRead(inputPin)", "@vdri"},
-        {"if (val == HIGH)", "@ifh"},
-        
+        { "int inputPin", "@ip" },
+        { "const buzzerPin", "@bp" },
+        { "int val", "@iv" },
+        { "pinMode(inputPin, INPUT)", "@pmii" },
+        { "pinMode(buzzerPin, OUTPUT);", "@pmbo" },
+        { "void setup()", "@vs" },
+        { "void loop()", "@vl" },
+        { "val = digitalRead(inputPin)", "@vdri" },
+        { "if (val == HIGH)", "@ifh" },
+
         // Delays
-        {"delay(1000)", "@1k"},
-        {"delay(2000)", "@2k"},
-        {"delay(4000)", "@4k"},
-        {"delay(5000)", "@5k"},
-        {"delay(10000)", "@10k"},
-        
+        { "delay(1000)", "@1k" },
+        { "delay(2000)", "@2k" },
+        { "delay(4000)", "@4k" },
+        { "delay(5000)", "@5k" },
+        { "delay(10000)", "@10k" },
+
         // PIR Code
-        {"int pirState = LOW", "@pl"},
-        {"int pirState = HIGH", "@ph"},
-        {"if (pirState == LOW)", "@ipl"},
-        {"if (pirState == HIGH)", "@iph"},
-        {"Serial.println(\\u0022Motion detected!\\u0022)", "@spmd"},
-        {"Serial.println(\\u0022Motion ended!\\u0022)", "@spme"},
-        {"digitalWrite(buzzerPin, HIGH)", "@dwbh"},
-        {"digitalWrite(buzzerPin, LOW)", "@dwbl"},
-        
+        { "int pirState = LOW", "@pl" },
+        { "int pirState = HIGH", "@ph" },
+        { "if (pirState == LOW)", "@ipl" },
+        { "if (pirState == HIGH)", "@iph" },
+        { "Serial.println(\\u0022Motion detected!\\u0022)", "@spmd" },
+        { "Serial.println(\\u0022Motion ended!\\u0022)", "@spme" },
+        { "digitalWrite(buzzerPin, HIGH)", "@dwbh" },
+        { "digitalWrite(buzzerPin, LOW)", "@dwbl" },
+
         // LCD Object Creation and Setup
-        {"LiquidCrystal_PCF8574 lcd(0x27);", "@lcd1"},
-        {"lcd.begin(16, 2);", "@lcd2"},
-        {"lcd.createChar(1, dotOff);", "@lcd3"},
-        {"lcd.createChar(2, dotOn);", "@lcd4"},
-        {"lcd.setBacklight(255);", "@lbl1"},
-        {"lcd.setBacklight(0);", "@lbl0"},
-        {"lcd.home();", "@lh"},
-        {"lcd.clear();", "@lc"},
-        {"lcd.print(\"", "@lp\""},
-        {"lcd.setCursor(", "@lsc"},
-        {"lcd.cursor();", "@lcur"},
-        {"lcd.blink();", "@lb"},
-        {"lcd.noBlink();", "@lnb"},
-        {"lcd.noCursor();", "@lnc"},
-        {"lcd.noDisplay();", "@lnd"},
-        {"lcd.display();", "@ld"},
-        {"lcd.scrollDisplayLeft();", "@lsl"},
-        {"lcd.scrollDisplayRight();", "@lsr"},
-        {"Serial.println(\"LCD...\");", "@sp1"},
-        {"Serial.println(\"Probing for PCF8574 on address 0x27...\");", "@sp2"},
-        {"Serial.println(\": LCD found.\");", "@sp3"},
-        {"Serial.println(\": LCD not found.\");", "@sp4"},
-        {"Hello LCD", "@t1"},
-        {"Cursor On", "@t2"},
-        {"Cursor Blink", "@t3"},
-        {"Cursor OFF", "@t4"},
-        {"Display Off", "@t5"},
-        {"Display On", "@t6"},
-        {"*** first line.", "@t7"},
-        {"*** second line.", "@t8"},
-        
+        { "LiquidCrystal_PCF8574 lcd(0x27);", "@lcd1" },
+        { "lcd.begin(16, 2);", "@lcd2" },
+        { "lcd.createChar(1, dotOff);", "@lcd3" },
+        { "lcd.createChar(2, dotOn);", "@lcd4" },
+        { "lcd.setBacklight(255);", "@lbl1" },
+        { "lcd.setBacklight(0);", "@lbl0" },
+        { "lcd.home();", "@lh" },
+        { "lcd.clear();", "@lc" },
+        { "lcd.print(\"", "@lp\"" },
+        { "lcd.setCursor(", "@lsc" },
+        { "lcd.cursor();", "@lcur" },
+        { "lcd.blink();", "@lb" },
+        { "lcd.noBlink();", "@lnb" },
+        { "lcd.noCursor();", "@lnc" },
+        { "lcd.noDisplay();", "@lnd" },
+        { "lcd.display();", "@ld" },
+        { "lcd.scrollDisplayLeft();", "@lsl" },
+        { "lcd.scrollDisplayRight();", "@lsr" },
+        { "Serial.println(\"LCD...\");", "@sp1" },
+        { "Serial.println(\"Probing for PCF8574 on address 0x27...\");", "@sp2" },
+        { "Serial.println(\": LCD found.\");", "@sp3" },
+        { "Serial.println(\": LCD not found.\");", "@sp4" },
+        { "Hello LCD", "@t1" },
+        { "Cursor On", "@t2" },
+        { "Cursor Blink", "@t3" },
+        { "Cursor OFF", "@t4" },
+        { "Display Off", "@t5" },
+        { "Display On", "@t6" },
+        { "*** first line.", "@t7" },
+        { "*** second line.", "@t8" },
+
         // LCD Custom Character Data
-        {"byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,\n                  0b10001, 0b01110, 0b00000, 0b00000 };", "@dot1"},
-        {"byte dotOn[] = { 0b00000, 0b01110, 0b11111, 0b11111,\n                 0b11111, 0b01110, 0b00000, 0b00000 };", "@dot2"},
-        
+        { "byte dotOff[] = { 0b00000, 0b01110, 0b10001, 0b10001,\n                  0b10001, 0b01110, 0b00000, 0b00000 };", "@dot1" },
+        { "byte dotOn[] = { 0b00000, 0b01110, 0b11111, 0b11111,\n                 0b11111, 0b01110, 0b00000, 0b00000 };", "@dot2" },
+
         // I2C/Wire Commands
-        {"Wire.begin();", "@wb"},
-        {"Wire.beginTransmission(0x27);", "@wbt"},
-        {"Wire.endTransmission();", "@wet"},
-        
+        { "Wire.begin();", "@wb" },
+        { "Wire.beginTransmission(0x27);", "@wbt" },
+        { "Wire.endTransmission();", "@wet" },
+
         // Comments PIR & buzzer
-        {"// choose the input pin (for PIR sensor)", "@c1"},
-        {"// we start, assuming no motion detected", "@c2"},
-        {"// variable for reading the pin status", "@c3"},
-        {"// Signal pin for the buzzer", "@c4"},
-        {"// declare sensor as input", "@c5"},
-        {"// Set buzzer pin as output", "@c6"},
-        {"// read input value", "@c7"},
-        {"// check if the input is HIGH", "@c8"},
-        {"// we have just turned on", "@c9"},
-        {"// we have just turned off", "@c10"},
-        {"// Turn buzzer on", "@c11"},
-        {"// Wait 4 seconds", "@c12"},
-        {"// Turn buzzer off", "@c13"},
-        {"// Wait 2 seconds", "@c14"},
+        { "// choose the input pin (for PIR sensor)", "@c1" },
+        { "// we start, assuming no motion detected", "@c2" },
+        { "// variable for reading the pin status", "@c3" },
+        { "// Signal pin for the buzzer", "@c4" },
+        { "// declare sensor as input", "@c5" },
+        { "// Set buzzer pin as output", "@c6" },
+        { "// read input value", "@c7" },
+        { "// check if the input is HIGH", "@c8" },
+        { "// we have just turned on", "@c9" },
+        { "// we have just turned off", "@c10" },
+        { "// Turn buzzer on", "@c11" },
+        { "// Wait 4 seconds", "@c12" },
+        { "// Turn buzzer off", "@c13" },
+        { "// Wait 2 seconds", "@c14" },
         // Comments LCD
-        {"// We only want to print on the output change, not state", "@c15"},
-        {"// set the LCD address to 0x27 (TI chip) or 0x3F (NPX Chip)", "@c16"},
-        {"// 2 custom characters", "@c17"},
-        {"// wait on Serial to be available on Leonardo", "@c18"},
-        {"// See http:", "@c19"},
-        {"//playground.arduino.cc/Main/I2cScanner how to test for a I2C device.", "@c20"},
-        {"//  initialize the lcd", "@c21"},
-        
-        
-        
+        { "// We only want to print on the output change, not state", "@c15" },
+        { "// set the LCD address to 0x27 (TI chip) or 0x3F (NPX Chip)", "@c16" },
+        { "// 2 custom characters", "@c17" },
+        { "// wait on Serial to be available on Leonardo", "@c18" },
+        { "// See http:", "@c19" },
+        { "//playground.arduino.cc/Main/I2cScanner how to test for a I2C device.", "@c20" },
+        { "//  initialize the lcd", "@c21" },
+
+
         // Control Flow & Whitespace
-        {" else if ", "@ei"},
-        {"while (", "@w("},
-        {"if (", "@i("},
-        {") {", "}{"},
-        {"} else {", "}e{"},
-        {" {", "{"},
-        {"{ ", "{"},
-        {" }", "}"},
-        {" ;", ";"},
-        {", ", ","},
-        {": ", ":"},
-        {" = ", "="},
-        {" == ", "="},
-        {"\n\n", "\n"},
-        {" // ", "//"}
+        { " else if ", "@ei" },
+        { "while (", "@w(" },
+        { "if (", "@i(" },
+        { ") {", "}{" },
+        { "} else {", "}e{" },
+        { " {", "{" },
+        { "{ ", "{" },
+        { " }", "}" },
+        { " ;", ";" },
+        { ", ", "," },
+        { ": ", ":" },
+        { "\n\n", "\n" },
+        { " // ", "//" }
     };
-    
 
 
 }

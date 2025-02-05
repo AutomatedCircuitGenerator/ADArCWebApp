@@ -444,7 +444,7 @@ namespace ADArCWebApp.Shared
                 25,
                 new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
                     typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
-                    gsNodeName: "l298n").Finish()
+                    gsNodeName: "l298n",  warning: "The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.").Finish()
             },
             {
                 26,
@@ -492,7 +492,7 @@ namespace ADArCWebApp.Shared
                         { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
                         { "delayLoop", "" }, { "delayTime", "" }
                     },
-                    pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003").Finish()
+                    pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003", warning: "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Finish()
             },
             {
                 29,

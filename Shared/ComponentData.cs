@@ -22,7 +22,8 @@ namespace ADArCWebApp.Shared
 		public string? nodeName;
 		public ElementPin[] pinInfo;
         public Type compType;
-        public Type? EnvironmentalSettingsType;
+        public readonly Type? EnvironmentalSettingsType;
+        public string? Warning;
 
         public Dictionary<string,IComponentParameter> templateParams = new Dictionary<string,IComponentParameter>();
 		public List<string> pinsToListen = new();
@@ -40,6 +41,7 @@ namespace ADArCWebApp.Shared
 			bottomOffset = builder.bottomOffset;
 			compType = builder.compType;
 			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
+			Warning = builder.Warning;
 			pins = builder.pins;
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
@@ -62,13 +64,14 @@ namespace ADArCWebApp.Shared
 
 		public Type compType;
 		public Type? EnvironmentalSettingsType;
+		public string? Warning;
 		public Dictionary<string, int> pins = new();
 		public List<string> pinsToListen = new();
 		public string? nodeName;
 
 		public ElementPin[] pinInfo;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null) {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null) {
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -76,6 +79,7 @@ namespace ADArCWebApp.Shared
 			this.codeForGen = codeForGen;
 			this.compType = compType ?? typeof(InvalidComponent);
 			this.EnvironmentalSettingsType = environmentalSettingsType;
+			Warning = warning;
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;

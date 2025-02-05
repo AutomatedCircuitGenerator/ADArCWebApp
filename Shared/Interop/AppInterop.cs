@@ -215,5 +215,10 @@ namespace ADArCWebApp.Shared.Interop
 		{
 			await JsModule!.InvokeVoidAsync("setBoard", board);
 		}
+
+		public static async Task<bool>  IsMobileUser()
+		{
+			return await JsModule.InvokeAsync<bool>("isMobileUser");
+		}
     }
 }

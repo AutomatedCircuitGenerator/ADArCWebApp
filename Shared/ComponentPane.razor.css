@@ -67,7 +67,6 @@
 }
 
 .palette-tooltip {
-    z-index: 9999999999999;
     border-radius: 5px;
     flex-wrap: wrap;
     justify-content: center;

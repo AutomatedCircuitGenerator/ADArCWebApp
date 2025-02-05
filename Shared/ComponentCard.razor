@@ -1,20 +1,18 @@
 ﻿@inject IJSRuntime JsRuntime
 
-<div class="card-container" @onmouseenter="HandleMouseEnterCardContainer" @onmouseleave="HandleMouseLeaveCardContainer" @onmousedown="handleClick" style="pointer-events:@(Disabled?"none":"auto"); background-color:@(Disabled?"gray":"white")">
+<div class="card-container" @onmouseenter="HandleMouseEnterCardContainer" @onmouseleave="HandleMouseLeaveCardContainer" @onmousedown="handleClick" style="pointer-events:@(Disabled ? "none" : "auto"); background-color:@(Disabled ? "gray" : "white")">
     @if (_showPaletteRightClick) //palette right click
     {
         <div class="palette-right-click-container" style="z-index: 9999; position: absolute; top: 0; left: 0; font-size: 80%" @onmouseenter="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick">
-            <button id="environmental-settings-button" >
-                <span style="font-size: 85%">⚙￨Available Settings</span>
-            </button>
-
-            <button id="palette-component-help-button" style="font-size: 100%">
-                <span style="padding-left: 4px; font-size: 85%;">𝗶￨Component Info</span>
+            <div @onmousedown:stopPropagation style="width: 100%">
+                <button id="palette-component-help-button" style="font-size: 100%; width: 100%" @onclick="() => OpenLink(GenerateLink(ComponentDeclarations.Components[GlobalId].name))">
+                    <span style="padding-left: 4px; font-size: 85%;">𝗶￨Component Info</span>
                 </button>
             </div>
+        </div>
     }
     <div class="card-img-container">
-        <VaryingComponent disableBorder="true" posAbsolute="false" individualData="new(GlobalId, new(), 0, 0)" objId="@GlobalId" zoomFactor="@(ComponentDeclarations.Components[GlobalId].cardScaleFactor * ADArCWebApp.Pages.Index.CurrentWidthRatio)" DragStart="()=>{}" DragProgress="()=>{}" DragEnd="()=>{}"></VaryingComponent>
+        <VaryingComponent disableBorder="true" posAbsolute="false" individualData="new(GlobalId, new(), 0, 0)" objId="@GlobalId" zoomFactor="@(ComponentDeclarations.Components[GlobalId].cardScaleFactor * ADArCWebApp.Pages.Index.CurrentWidthRatio)" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
     </div>
 
     <div class="altContainer" @oncontextmenu="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick" @oncontextmenu:preventDefault="true">
@@ -30,9 +28,9 @@
         [Parameter] public int GlobalId { get; set; }
         [Parameter] public bool Disabled { get; set; }
         [Parameter] public string NodeName { get; set; }
-        
+
         [Parameter] public ComponentInstance IndividualData { get; set; }
-        
+
         public ComponentCard(int id)
         {
             GlobalId = id;
@@ -48,18 +46,19 @@
         // event handling for palette right click menu
         private bool _showPaletteRightClick = false;
 
-        private void ShowPaletteRightClickFunc() 
-        { 
-            _showPaletteRightClick = true; 
+        private void ShowPaletteRightClickFunc()
+        {
+            _showPaletteRightClick = true;
             isPaletteHovered = true; // Set the flag to true when the mouse is over the palette
         }
 
         private void StartHidingPaletteRightClick()
         {
             isPaletteHovered = false; // Reset the flag when the mouse leaves the menu
-            Task.Delay(100).ContinueWith(_ => {
+            Task.Delay(100).ContinueWith(_ =>
+            {
                 if (!isCardContainerHovered && !isPaletteHovered) // Only hide if the mouse is not over the card container and not over the menu
-                    _showPaletteRightClick = false; 
+                    _showPaletteRightClick = false;
             }); // Delay hiding the menu to allow smooth transition
         }
 
@@ -78,7 +77,9 @@
             isCardContainerHovered = false;
             StartHidingPaletteRightClick();
         }
+
     }
+
 </div>
 
 @code {
@@ -90,82 +91,124 @@
 
     string GenerateLink(string nodeName)
     {
-        //todo i think this will break lol
         Console.WriteLine($"nodeName: {nodeName}");
-        return nodeName switch
+        switch (nodeName) //no breaks needed as return ends.
         {
-            "arduinouno_rev3" => "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1",
-            "MEGA 2560" => "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1",
-            "Uno WIFI Rev2" => "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767",
-            "Pushbutton" => "" // Add link for Pushbutton here
-            ,
-            "Switch" => "" // Add link for Switch here
-            ,
-            "ADXL345" => "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520",
-            "MPU6050" => "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239",
-            "BNO-055" => "https://adarc-help.mech.website/bno055_code.html#d38361e8125",
-            "TF-Luna Lidar - I2C" => "" // Add link for TF-Luna Lidar - I2C here
-            ,
-            "TF-Luna Lidar - UART" => "" // Add link for TF-Luna Lidar - UART here
-            ,
-            "Ultrasonic" => "" // Add link for Ultrasonic here
-            ,
-            "IR Distance" => "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1",
-            "MQ-3" => "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1",
-            "SGP41" => "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1",
-            "KY-018 LDR" => "" // Add link for KY-018 LDR here
-            ,
-            "Ambient Light" => "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1",
-            "Luminosity" => "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1",
-            "Alt - Ambient Light" => "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1",
-            "DHT11 / DHT22" => "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1",
-            "SHT31" => "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1",
-            "DS18B20" => "https://adarc-help.mech.website/ds18b20.html#styler-id1.1.1.2.8.13.8.1",
-            "Hall effect" => "https://adarc-help.mech.website/hallEffect.html#styler-id1.1.1.2.8.14.7.1",
-            "K-Thermocouple" => "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1",
-            "PIR motion sensor" => "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1",
-            "IR receiver" => "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1",
-            "SD Card Reader" => "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1",
-            "Load Cell(HX711)" => "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1",
-            "LED" => "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1",
-            "7 - segment" => "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1",
-            "Bar" => "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B",
-            "Matrix" => "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B",
-            "RGB" => "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018",
-            "RGB module" => "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018",
-            "Laser LED" => "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1",
-            "LCD2004" => "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324",
-            "LCD2004 - I2C" => "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324",
-            "LCD1602" => "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA",
-            "LCD1602 - I2C" => "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA",
-            "SH1106 OLED - SPI" => "https://adarc-help.mech.website",
-            "SH1106 OLED - I2C" => "https://adarc-help.mech.website",
-            "Direct - SG90" => "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1",
-            "Direct - DS-7001HV" => "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1",
-            "Driver - SG90" => "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1",
-            "Driver - DS-7001HV" => "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1",
-            "Direct - Motor" => "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1",
-            "Driver - Motor" => "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1",
-            "Brushless ESC - Motor" => "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1",
-            "28BYJ-48" => "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1",
-            "Nema-17" => "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1",
-            "Speaker" => "" // Add link for Speaker here
-            ,
-            "Buzzer" => "" // Add link for Buzzer here
-            ,
-            "Encoder" => "" // Add link for Encoder here
-            ,
-            "Voltage regulator" => "" // Add link for Voltage regulator here
-            ,
-            "Bluetooth Module" => "https://adarc-help.mech.website" // Add link for Bluetooth Module here
-            ,
-            "resistor" => "" // Add link for resistor here
-            ,
-            "stepper driver" => "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1" // Add link for stepper driver here
-            ,
-            _ => "https://adarc-help.mech.website"
-        };
+            case "Rev 3":
+                return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
+            case "MEGA 2560":
+                return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
+            case "Uno WIFI Rev2":
+                return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
+            case "Pushbutton":
+                return ""; // Add link for Pushbutton here
+            case "Switch":
+                return ""; // Add link for Switch here
+            case "ADXL345":
+                return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
+            case "MPU6050":
+                return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
+            case "BNO-055":
+                return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
+            case "TF-Luna Lidar - I2C":
+                return ""; // Add link for TF-Luna Lidar - I2C here
+            case "TF-Luna Lidar - UART":
+                return ""; // Add link for TF-Luna Lidar - UART here
+            case "Ultrasonic":
+                return ""; // Add link for Ultrasonic here
+            case "IR Distance":
+                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
+            case "MQ-3":
+                return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1";
+            case "SGP41":
+                return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
+            case "KY-018 LDR":
+                return ""; // Add link for KY-018 LDR here
+            case "Ambient Light":
+                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
+            case "Luminosity":
+                return "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1";
+            case "Alt - Ambient Light":
+                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
+            case "DHT11 / DHT22":
+                return "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1";
+            case "SHT31":
+                return "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1";
+            case "DS18B20":
+                return "https://adarc-help.mech.website/ds18b20.html#styler-id1.1.1.2.8.13.8.1";
+            case "Hall effect":
+                return "https://adarc-help.mech.website/hallEffect.html#styler-id1.1.1.2.8.14.7.1";
+            case "K-Thermocouple":
+                return "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1";
+            case "PIR motion sensor":
+                return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
+            case "IR receiver":
+                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
+            case "SD Card Reader":
+                return "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1";
+            case "Load Cell(HX711)":
+                return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1";
+            case "LED":
+                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
+            case "7 - segment":
+                return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1";
+            case "Bar":
+                return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B";
+            case "Matrix":
+                return "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B";
+            case "RGB":
+                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
+            case "RGB module":
+                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
+            case "Laser LED":
+                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
+            case "LCD2004":
+                return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
+            case "LCD2004 - I2C":
+                return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
+            case "LCD1602":
+                return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
+            case "LCD1602 - I2C":
+                return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
+            case "SH1106 OLED - SPI":
+                return "https://adarc-help.mech.website";
+            case "SH1106 OLED - I2C":
+                return "https://adarc-help.mech.website";
+            case "Direct - SG90":
+                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
+            case "Direct - DS-7001HV":
+                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
+            case "Driver - SG90":
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
+            case "Driver - DS-7001HV":
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
+            case "Direct - Motor":
+                return "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1";
+            case "Driver - Motor":
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
+            case "Brushless ESC - Motor":
+                return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1";
+            case "28BYJ-48":
+                return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
+            case "Nema-17":
+                return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
+            case "Speaker":
+                return ""; // Add link for Speaker here
+            case "Buzzer":
+                return ""; // Add link for Buzzer here
+            case "Encoder":
+                return ""; // Add link for Encoder here
+            case "Voltage regulator":
+                return ""; // Add link for Voltage regulator here
+            case "Bluetooth Module":
+                return "https://adarc-help.mech.website"; // Add link for Bluetooth Module here
+            case "resistor":
+                return ""; // Add link for resistor here
+            case "stepper driver":
+                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; // Add link for stepper driver here
+            default:
+                return "https://adarc-help.mech.website"; // Default just in case it returns null
+        }
     }
 
 }
-
