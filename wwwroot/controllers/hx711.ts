@@ -6,7 +6,7 @@ export class HX711 extends Controller {
     private clock?: Digital;
     private data?: Digital;
     private weight = 100;
-    private bitIndex = 23;
+    private bitIndex = 24;
     
     setup(): void {
         this.data = this.pins.dat[0].digital;
