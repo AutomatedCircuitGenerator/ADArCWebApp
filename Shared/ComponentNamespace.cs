@@ -223,7 +223,7 @@ namespace ADArCWebApp.Shared
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["digital_out", "5V", "gnd", "analog_out"], gsNodeName: "ky024").Property("gauss", 0.0)
-                    .Property("ismagneticfielddetected", 0.0).Finish()
+                    .Finish()
             },
             {
                 13,
@@ -443,8 +443,11 @@ namespace ADArCWebApp.Shared
             {
                 25,
                 new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
-                    typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
-                    gsNodeName: "l298n",  warning: "The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.").Finish()
+                        typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
+                        gsNodeName: "l298n",
+                        warning:
+                        "The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.")
+                    .Finish()
             },
             {
                 26,
@@ -480,19 +483,22 @@ namespace ADArCWebApp.Shared
             {
                 27,
                 new ComponentDataBuilder("Stepper motor with driver", true, "Output/Motors/Stepper Motor", .4, 75, 75,
-                    typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <AccelStepper.h>\n" },
+                        typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
+                        codeForGen: new()
                         {
-                            "global",
-                            "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n"
+                            { "include", "#include <AccelStepper.h>\n" },
+                            {
+                                "global",
+                                "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n"
+                            },
+                            { "setup", "\tstepper.setMaxSpeed(1000);" },
+                            { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
+                            { "delayLoop", "" }, { "delayTime", "" }
                         },
-                        { "setup", "\tstepper.setMaxSpeed(1000);" },
-                        { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    },
-                    pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003", warning: "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Finish()
+                        pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003",
+                        warning:
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")
+                    .Finish()
             },
             {
                 29,
