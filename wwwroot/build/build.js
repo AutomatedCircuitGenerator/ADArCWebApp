@@ -14370,8 +14370,6 @@ define("controllers/28byj48uln2003", ["require", "exports", "controllers/control
         }
         setSpinning(isSpinning) {
             const animationElem = this.element.querySelector("#_28byj-shaft-rotateAnim");
-            const circle = this.element.querySelector("#CIRCLE");
-            console.log(circle.getBBox());
             const svgElem = this.element.querySelector("#_28byj");
             if (this.first) {
                 animationElem.beginElement();

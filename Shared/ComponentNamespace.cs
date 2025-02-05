@@ -51,7 +51,10 @@ namespace ADArCWebApp.Shared
                     typeof(RazorADXL345I2C),
                     codeForGen: new()
                     {
-                        { "include", "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>" },
+                        {
+                            "include",
+                            "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>"
+                        },
                         { "global", "Adafruit_ADXL345_Unified accel@ = Adafruit_ADXL345_Unified();" },
                         {
                             "setup",
@@ -140,18 +143,6 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
-                7,
-                new ComponentDataBuilder("RPLIDAR-A1 LiDAR", true, "Input/Distance Sensors", .6, 75, 75,
-                        typeof(RazorRPLidarA1M9), paneHoverText: "A1M9",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <RPLidar.h>" }, { "global", "" }, { "setup", " " },
-                            { "loopMain", "" },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["tx", "rx", "5V", "gnd", "gnd_moto", "ctrl_moto", "5V_moto"], gsNodeName: "rplidar")
-                    .Finish()
-            },
-            {
                 8,
                 new ComponentDataBuilder("Ultrasonic", true, "Input/Distance Sensors", 0.65, 170, 95,
                         typeof(RazorHCSR04), paneHoverText: "HC-SR04",
@@ -183,7 +174,7 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "setup",
-                            "  Serial.println(\"MQ3 warming up!\");\n  delay(20000); // allow the MQ3 to warm up"
+                            "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
                         },
                         {
                             "loopMain",
@@ -212,26 +203,6 @@ namespace ADArCWebApp.Shared
                     }, pins: ["analog_out", "5V", "gnd"], gsNodeName: "ky018").Property("lux", 100.0).Finish()
             },
             {
-                11,
-                new ComponentDataBuilder("DHT11 / DHT22 ", true, "Input/Temperature and Humidity Sensors", 0.9, 60, 120,
-                        typeof(RazorDHT22),
-                        codeForGen: new()
-                        {
-                            { "include", "#include <DHT.h>" },
-                            {
-                                "global",
-                                "#define DHTPIN@ ~\"signal\"     // Digital pin connected to the DHT sensor\n// Feather HUZZAH ESP8266 note: use pins 3, 4, 5, 12, 13 or 14 --\n// Pin 15 can work but DHT must be disconnected during program upload.\n\n// Uncomment whatever type you're using!\n//#define DHTTYPE@ DHT11   // DHT 11\n#define DHTTYPE@ DHT22   // DHT 22  (AM2302), AM2321\n//#define DHTTYPE@ DHT21   // DHT 21 (AM2301)\n\n// Connect pin 1 (on the left) of the sensor to +5V\n// NOTE: If using a board with 3.3V logic like an Arduino Due connect pin 1\n// to 3.3V instead of 5V!\n// Connect pin 2 of the sensor to whatever your DHTPIN is\n// Connect pin 3 (on the right) of the sensor to GROUND (if your sensor has 3 pins)\n// Connect pin 4 (on the right) of the sensor to GROUND and leave the pin 3 EMPTY (if your sensor has 4 pins)\n// Connect a 10K resistor from pin 2 (data) to pin 1 (power) of the sensor\n\n// Initialize DHT sensor.\n// Note that older versions of this library took an optional third parameter to\n// tweak the timings for faster processors.  This parameter is no longer needed\n// as the current DHT reading algorithm adjusts itself to work on faster procs.\nDHT dht@(DHTPIN@, DHTTYPE@);"
-                            },
-                            { "setup", "Serial.println(F(\"DHTxx test!\"));\n\n  dht@.begin();" },
-                            {
-                                "loopMain",
-                                "// Wait a few seconds between measurements.\n  delay(2000);\n\n  // Reading temperature or humidity takes about 250 milliseconds!\n  // Sensor readings may also be up to 2 seconds 'old' (its a very slow sensor)\n  float h@ = dht@.readHumidity();\n  // Read temperature as Celsius (the default)\n  float t@ = dht@.readTemperature();\n  // Read temperature as Fahrenheit (isFahrenheit = true)\n  float f@ = dht@.readTemperature(true);\n\n  // Check if any reads failed and exit early (to try again).\n  if (isnan(h@) || isnan(t@) || isnan(f@)) {\n    Serial.println(F(\"Failed to read from DHT sensor!\"));\n    return;\n  }\n\n  // Compute heat index in Fahrenheit (the default)\n  float hif@ = dht@.computeHeatIndex(f@, h@);\n  // Compute heat index in Celsius (isFahreheit = false)\n  float hic@ = dht@.computeHeatIndex(t@, h@, false);\n\n  Serial.print(F(\"Humidity: \"));\n  Serial.print(h@);\n  Serial.print(F(\"%  Temperature: \"));\n  Serial.print(t@);\n  Serial.print(F(\"°C \"));\n  Serial.print(f@);\n  Serial.print(F(\"°F  Heat index: \"));\n  Serial.print(hic@);\n  Serial.print(F(\"°C \"));\n  Serial.print(hif@);\n  Serial.println(F(\"°F\"));"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["Vcc", "signal", "gnd"], listenOn: ["signal"], gsNodeName: "dht22")
-                    .Property("humidity", 40.0).Property("temperature", 20.0).Finish()
-            },
-            {
                 12,
                 new ComponentDataBuilder("Hall effect sensor", true, "Input/Other Sensors", .8, 75, 75,
                         typeof(RazorKY024), paneHoverText: "KY-024",
@@ -248,7 +219,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000); \n  "
+                                "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000); \n  "
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["digital_out", "5V", "gnd", "analog_out"], gsNodeName: "ky024").Property("gauss", 0.0)
@@ -265,10 +236,10 @@ namespace ADArCWebApp.Shared
                             { "setup", "  pinMode(sensor@, INPUT); //set sensor pin as input" },
                             {
                                 "loopMain",
-                                "  val = digitalRead(sensor@); //Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@); "
+                                "  val@ = digitalRead(sensor@); //Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);\n"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Detected")
+                        }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
                     .Finish()
             },
             {
@@ -302,10 +273,11 @@ namespace ADArCWebApp.Shared
                             { "setup", "  pinMode(inputPin@, INPUT); // declare sensor as input" },
                             {
                                 "loopMain",
-                                "  val = digitalRead(inputPin@); // read input value\n  if (val@ == HIGH) { // check if the input is HIGH\n    if (pirState@ == LOW) {\n      // we have just turned on\n      Serial.println(\"Motion detected!\");\n      // We only want to print on the output change, not state\n      pirState@ = HIGH;\n    }\n  } else {\n    if (pirState@ == HIGH) {\n      // we have just turned of\n      Serial.println(\"Motion ended!\");\n      // We only want to print on the output change, not state\n      pirState@ = LOW;\n    }\n  }"
+                                "  val@ = digitalRead(inputPin@); // read input value\n  if (val@ == HIGH) { // check if the input is HIGH\n    if (pirState@ == LOW) {\n      // we have just turned on\n      Serial.println(\"Motion detected!\");\n      // We only want to print on the output change, not state\n      pirState@ = HIGH;\n    }\n  } else {\n    if (pirState@ == HIGH) {\n      // we have just turned of\n      Serial.println(\"Motion ended!\");\n      // We only want to print on the output change, not state\n      pirState@ = LOW;\n    }\n  }"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501").Property("ismotiondetected", 0.0)
+                        }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
+                        environmentalSettingsType: typeof(PIRButton))
                     .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Finish()
             },
             {
@@ -511,29 +483,16 @@ namespace ADArCWebApp.Shared
                     typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
                     codeForGen: new()
                     {
-                        { "include", "#include <AccelStepper.h>\n" }, { "global", "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n" }, { "setup", "\tstepper.setMaxSpeed(1000);" }, { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
+                        { "include", "#include <AccelStepper.h>\n" },
+                        {
+                            "global",
+                            "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n"
+                        },
+                        { "setup", "\tstepper.setMaxSpeed(1000);" },
+                        { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
                         { "delayLoop", "" }, { "delayTime", "" }
                     },
                     pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003").Finish()
-            },
-            {
-                28,
-                new ComponentDataBuilder("Encoder", true, "Input/Other Sensors", .7, 75, 75, typeof(RazorE6B2CWZ3E),
-                    paneHoverText: "E6B2-CWZ3E",
-                    codeForGen: new()
-                    {
-                        { "include", "" }, { "global", "Encoder encoder = Encoder(~\"A\", ~\"B\", 1024);" },
-                        {
-                            "setup",
-                            "  //Encoder===========================\n  // enable/disable quadrature mode\n  encoder.quadrature = Quadrature::ON;\n  // check if you need internal pullups\n  encoder.pullup = Pullup::USE_EXTERN;\n  // initialize encoder hardware\n  encoder.init();\n  // hardware interrupt enable\n  encoder.enableInterrupts(doA, doB);\n  Serial.println(\"Encoder ready\");"
-                        },
-                        {
-                            "loopMain",
-                            "  // update the sensor values\n  encoder.update();\n  Serial.print(encoder.getAngle() * 180 / 3.1416);\n  Serial.print(\"\t\");\n  Serial.println(encoder.getVelocity());"
-                        },
-                        { "functions", "void doA() {\n  encoder.handleA();\n}\nvoid doB() {\n  encoder.handleB();\n}" },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["A", "B", "Z", "gnd", "5V"], gsNodeName: "encoder").Finish()
             },
             {
                 29,
@@ -570,16 +529,16 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
-            {
-                31,
-                new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
-                    19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
-                    codeForGen: new()
-                    {
-                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
-            }
+            // {
+            //     31,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
         };
     }
 }
