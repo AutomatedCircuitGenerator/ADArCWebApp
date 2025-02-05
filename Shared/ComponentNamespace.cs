@@ -332,13 +332,13 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
             },
-            {
-                19,
-                new ComponentDataBuilder("7 segment display", true, "Output/LED", 1, 50, 85, typeof(RazorSevenSeg),
-                        paneHoverText: "Adafruit 0.56''", pins: ["com1", "a", "b", "c", "d", "e", "f", "g", "dp"],
-                        listenOn: ["a", "b", "c", "d", "e", "f", "g", "dp"], gsNodeName: "7segment")
-                    .Property("values", new int[] { 0, 0, 0, 0, 0, 0, 0, 0 }).Finish()
-            },
+            // {
+            //     19,
+            //     new ComponentDataBuilder("7 segment display", true, "Output/LED", 1, 50, 85, typeof(RazorSevenSeg),
+            //             paneHoverText: "Adafruit 0.56''", pins: ["com1", "a", "b", "c", "d", "e", "f", "g", "dp"],
+            //             listenOn: ["a", "b", "c", "d", "e", "f", "g", "dp"], gsNodeName: "7segment")
+            //         .Property("values", new int[] { 0, 0, 0, 0, 0, 0, 0, 0 }).Finish()
+            // },
             {
                 20,
                 new ComponentDataBuilder("RGB LED", true, "Output/LED", 1.5, 45, 80, typeof(RazorRGBLED),
