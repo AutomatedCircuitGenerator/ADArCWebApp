@@ -461,9 +461,13 @@
             }
 
             AppInterop.UpdateCodeWrapper();
+            await JsRuntime.InvokeVoidAsync("onLoad");
+            await JsRuntime.InvokeVoidAsync("onAppend");
             ToastService.AddToast("Code panel updated.", Variant.Info);
             if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
         }
+        
+
 
         moverOffsetLeft = 0;
         moverOffsetTop = 0;
@@ -814,6 +818,10 @@
         }
 
         if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
+        await JsRuntime.InvokeVoidAsync("onDelete");
+        AppInterop.UpdateCodeWrapper();
+        await JsRuntime.InvokeVoidAsync("onLoad");
+        await JsRuntime.InvokeVoidAsync("onAppend");
     }
 
     /// <summary>
