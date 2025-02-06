@@ -265,7 +265,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_213": "AbsoluteMouse",
         "placeholder_214": "AcaiaArduinoBLE",
         "placeholder_215": "AccelMotor",
-        "placeholder_216": "AccelStepper",
+        "AccelStepper.h": "AccelStepper",
         "placeholder_217": "AccelStepperWithDistances",
         "placeholder_218": "Accelerometer ADXL335",
         "placeholder_219": "Accelerometer ADXL345",
@@ -301,7 +301,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_249": "Adafruit ADS7830",
         "placeholder_250": "Adafruit ADT7410 Library",
         "placeholder_251": "Adafruit ADXL343",
-        "placeholder_252": "Adafruit ADXL345",
+        "Adafruit_ADXL345_U.h": "Adafruit ADXL345",
         "placeholder_253": "Adafruit ADXL375",
         "placeholder_254": "Adafruit AGS02MA",
         "placeholder_255": "Adafruit AHRS",
@@ -459,7 +459,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_407": "Adafruit PM25 AQI Sensor",
         "placeholder_408": "Adafruit PN532",
         "placeholder_409": "Adafruit PS2 Trackpad",
-        "placeholder_410": "Adafruit PWM Servo Driver Library",
+        "Adafruit_PWMServoDriver.h": "Adafruit PWM Servo Driver Library",
         "placeholder_411": "Adafruit PixelDust",
         "placeholder_412": "Adafruit Pixie",
         "placeholder_413": "Adafruit Protomatter",
@@ -1677,7 +1677,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_1625": "DFW",
         "placeholder_1626": "DHT Sensors Non-Blocking",
         "placeholder_1627": "DHT kxn",
-        "placeholder_1628": "DHT sensor library",
+        "DHT.h": "DHT sensor library",
         "placeholder_1629": "DHT sensor library for ESPx",
         "placeholder_1630": "DHT11",
         "placeholder_1631": "DHT118266",
@@ -2829,7 +2829,7 @@ define("lib/library_dictionary", ["require", "exports"], function (require, expo
         "placeholder_2777": "HUSB238Driver",
         "placeholder_2778": "HV518",
         "placeholder_2779": "HX710",
-        "placeholder_2780": "HX711",
+        "HX711.h": "HX711",
         "placeholder_2781": "HX711 Arduino Library",
         "placeholder_2782": "HX711_ADC",
         "placeholder_2783": "HX711_MP",
@@ -9242,7 +9242,7 @@ define("lib/avr8js/peripherals/spi", ["require", "exports"], function (require, 
 define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/peripherals/gpio"], function (require, exports, gpio_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.AVRTimer = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
+    exports.AVRTimer = exports.TimerMode = exports.timer2Config = exports.timer1Config = exports.timer0Config = void 0;
     const timer01Dividers = {
         0: 0,
         1: 1,
@@ -9288,7 +9288,7 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
         TimerMode[TimerMode["FastPWM"] = 3] = "FastPWM";
         TimerMode[TimerMode["PWMPhaseFrequencyCorrect"] = 4] = "PWMPhaseFrequencyCorrect";
         TimerMode[TimerMode["Reserved"] = 5] = "Reserved";
-    })(TimerMode || (TimerMode = {}));
+    })(TimerMode || (exports.TimerMode = TimerMode = {}));
     var TOVUpdateMode;
     (function (TOVUpdateMode) {
         TOVUpdateMode[TOVUpdateMode["Max"] = 0] = "Max";
@@ -9591,6 +9591,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
             this.countingUp = false;
             this.updateDivider = true;
         }
+        getDivider() {
+            return this.config.dividers[this.CS];
+        }
         get TCCRA() {
             return this.cpu.data[this.config.TCCRA];
         }
@@ -9616,6 +9619,9 @@ define("lib/avr8js/peripherals/timer", ["require", "exports", "lib/avr8js/periph
                 default:
                     return this.topValue;
             }
+        }
+        getTimerMode() {
+            return this.timerMode;
         }
         get ocrMask() {
             switch (this.topValue) {
@@ -10538,6 +10544,9 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.Controller = void 0;
     class Controller {
+        get element() {
+            return document.getElementById(`component-${this.id}`);
+        }
         constructor() {
             this.pins = {};
             execute_1.AVRRunner.getInstance().addController(this);
@@ -10556,20 +10565,15 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         }
         static create(id, pins, component) {
             const instance = new this();
-            instance.element = document.getElementById(`component-${id}`);
+            instance.id = id;
             instance.pinIndices = pins;
             instance.component = component;
             return instance;
         }
-        sleep(cycles) {
-            return new Promise(resolve => {
-                execute_1.AVRRunner.getInstance().board.cpu.addClockEvent(() => resolve(void 0), cycles);
-            });
-        }
     }
     exports.Controller = Controller;
 });
-define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], function (require, exports, avr8js_1) {
+define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index", "lib/avr8js/peripherals/timer"], function (require, exports, avr8js_1, timer_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ArduinoAnalog = exports.ArduinoDigital = exports.ArduinoUSART = exports.ArduinoTWI = exports.ArduinoTimer = exports.ArduinoSPI = exports.ArduinoCPU = exports.MHZ = void 0;
@@ -10615,6 +10619,18 @@ define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], fun
         constructor(timer) {
             this.timer = timer;
         }
+        getPwmPeriod() {
+            const { timer } = this;
+            const timerMode = timer.getTimerMode();
+            let period = 0;
+            if (timerMode === timer_2.TimerMode.FastPWM) {
+                period = ((timer.TOP + 1) * timer.getDivider());
+            }
+            else if (timerMode === timer_2.TimerMode.PWMPhaseCorrect) {
+                period = (2 * (timer.TOP + 1) * timer.getDivider());
+            }
+            return period;
+        }
     }
     exports.ArduinoTimer = ArduinoTimer;
     class ArduinoTWI {
@@ -10632,6 +10648,9 @@ define("boards/arduino/arduino", ["require", "exports", "lib/avr8js/index"], fun
         }
         set onByteTransmit(listener) {
             this.usart.onByteTransmit = listener;
+        }
+        writeByte(value, immediate = false) {
+            return this.usart.writeByte(value, immediate);
         }
     }
     exports.ArduinoUSART = ArduinoUSART;
@@ -10693,15 +10712,15 @@ define("boards/arduino/arduino-uno/arduino-uno", ["require", "exports", "lib/avr
                 { digital: new arduino_1.ArduinoDigital(portD, 0), usart: this.usarts[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 1), usart: this.usarts[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 2) },
-                { digital: new arduino_1.ArduinoDigital(portD, 3) },
+                { digital: new arduino_1.ArduinoDigital(portD, 3), timer: this.timers[2] },
                 { digital: new arduino_1.ArduinoDigital(portD, 4) },
-                { digital: new arduino_1.ArduinoDigital(portD, 5) },
-                { digital: new arduino_1.ArduinoDigital(portD, 6) },
+                { digital: new arduino_1.ArduinoDigital(portD, 5), timer: this.timers[0] },
+                { digital: new arduino_1.ArduinoDigital(portD, 6), timer: this.timers[0] },
                 { digital: new arduino_1.ArduinoDigital(portD, 7) },
                 { digital: new arduino_1.ArduinoDigital(portB, 0) },
-                { digital: new arduino_1.ArduinoDigital(portB, 1) },
-                { digital: new arduino_1.ArduinoDigital(portB, 2) },
-                { digital: new arduino_1.ArduinoDigital(portB, 3) },
+                { digital: new arduino_1.ArduinoDigital(portB, 1), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 2), timer: this.timers[1] },
+                { digital: new arduino_1.ArduinoDigital(portB, 3), timer: this.timers[2] },
                 { digital: new arduino_1.ArduinoDigital(portB, 4) },
                 { digital: new arduino_1.ArduinoDigital(portB, 5) },
                 { analog: new arduino_1.ArduinoAnalog(adc, 0), digital: new arduino_1.ArduinoDigital(portC, 0) },
@@ -10839,7 +10858,7 @@ const config = { childList: true };
 const callback = function (mutationsList) {
     const targetNode = document.getElementById('console-container');
     if (!targetNode) {
-        console.log("console-container does not exist for some reason");
+        console.warn("console-container does not exist for some reason");
         return;
     }
     for (const mutation of mutationsList) {
@@ -10863,6 +10882,53 @@ function toggleConsoleOutputBehavior() {
         }
     }
     isObserving = !isObserving;
+}
+let loadValue = null;
+let deleteValue = null;
+let diffValue = [];
+function difference(string1, string2) {
+    const a = string1.split('\n');
+    const b = string2.split('\n');
+    const diff = [];
+    for (let i = 0; i < a.length - 1; i++) {
+        if (a[i] !== b[i]) {
+            if (a[i] !== b[i + 1]) {
+                diff.push({ lineNumber: i + 1, text: b[i + 1] });
+            }
+            else {
+                diff.push({ lineNumber: i + 1, text: b[i] });
+            }
+        }
+    }
+    return diff;
+}
+function onLoad() {
+    var editor = monaco.editor.getModels()[0];
+    loadValue = editor.getValue();
+    console.log(loadValue);
+}
+function onDelete() {
+    var editor = monaco.editor.getModels()[0];
+    deleteValue = editor.getValue();
+    console.log(deleteValue);
+    compare();
+}
+function compare() {
+    if (deleteValue !== null && loadValue !== null) {
+        diffValue = difference(loadValue, deleteValue);
+    }
+}
+function onAppend() {
+    var editor = monaco.editor.getModels()[0];
+    const edit = diffValue.map(diff => {
+        const range = new monaco.Range(diff.lineNumber, 1, diff.lineNumber, 1);
+        return {
+            range: range,
+            text: diff.text,
+            forceMoveMarkers: true,
+        };
+    });
+    editor.applyEdits(edit);
 }
 define("lib/avr8js/utils/assembler", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -11907,18 +11973,18 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
             this.pins = [
                 { digital: new arduino_2.ArduinoDigital(portE, 0), usart: this.usarts[0] },
                 { digital: new arduino_2.ArduinoDigital(portE, 1), usart: this.usarts[0] },
-                { digital: new arduino_2.ArduinoDigital(portE, 4) },
-                { digital: new arduino_2.ArduinoDigital(portE, 5) },
-                { digital: new arduino_2.ArduinoDigital(portG, 5) },
-                { digital: new arduino_2.ArduinoDigital(portE, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 3) },
-                { digital: new arduino_2.ArduinoDigital(portH, 4) },
-                { digital: new arduino_2.ArduinoDigital(portH, 5) },
-                { digital: new arduino_2.ArduinoDigital(portH, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 4) },
-                { digital: new arduino_2.ArduinoDigital(portB, 5) },
-                { digital: new arduino_2.ArduinoDigital(portB, 6) },
-                { digital: new arduino_2.ArduinoDigital(portB, 7) },
+                { digital: new arduino_2.ArduinoDigital(portE, 4), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portE, 5), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portG, 5), timer: this.timers[0] },
+                { digital: new arduino_2.ArduinoDigital(portE, 3), timer: this.timers[3] },
+                { digital: new arduino_2.ArduinoDigital(portH, 3), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 4), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 5), timer: this.timers[4] },
+                { digital: new arduino_2.ArduinoDigital(portH, 6), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 4), timer: this.timers[2] },
+                { digital: new arduino_2.ArduinoDigital(portB, 5), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 6), timer: this.timers[1] },
+                { digital: new arduino_2.ArduinoDigital(portB, 7), timer: this.timers[0] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 1), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portJ, 0), usart: this.usarts[3] },
                 { digital: new arduino_2.ArduinoDigital(portH, 1), usart: this.usarts[2] },
@@ -11949,9 +12015,9 @@ define("boards/arduino/arduino-mega/arduino-mega", ["require", "exports", "lib/a
                 { digital: new arduino_2.ArduinoDigital(portG, 0) },
                 { digital: new arduino_2.ArduinoDigital(portL, 7) },
                 { digital: new arduino_2.ArduinoDigital(portL, 6) },
-                { digital: new arduino_2.ArduinoDigital(portL, 5) },
-                { digital: new arduino_2.ArduinoDigital(portL, 4) },
-                { digital: new arduino_2.ArduinoDigital(portL, 3) },
+                { digital: new arduino_2.ArduinoDigital(portL, 5), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 4), timer: this.timers[5] },
+                { digital: new arduino_2.ArduinoDigital(portL, 3), timer: this.timers[5] },
                 { digital: new arduino_2.ArduinoDigital(portL, 2) },
                 { digital: new arduino_2.ArduinoDigital(portL, 1) },
                 { digital: new arduino_2.ArduinoDigital(portL, 0) },
@@ -11987,6 +12053,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
     exports.interopManager = void 0;
     var interopManager;
     (function (interopManager) {
+        let isUrlLoadInitialized = false;
         class InteropManager {
             constructor() {
                 this.interopLoc = "ADArCWebApp";
@@ -11995,6 +12062,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 this.prevB = 0;
                 this.prevC = 0;
                 this.prevD = 0;
+                this.autoSelectedBoard = null;
             }
             getChangedPins(newReg, regIndex) {
                 var diff;
@@ -12015,7 +12083,7 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
             }
             startCodeLoop() {
                 this.runner.board.usarts[0].onByteTransmit = ((value) => __awaiter(this, void 0, void 0, function* () {
-                    yield DotNet.invokeMethodAsync(this.interopLoc, "sendSerial", String.fromCharCode(value));
+                    yield DotNet.invokeMethodAsync(this.interopLoc, "SendSerial", String.fromCharCode(value));
                 }));
                 this.runCode();
             }
@@ -12116,6 +12184,50 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 }
                 intro.start();
             }
+            initUrlLoading() {
+                if (isUrlLoadInitialized) {
+                    return;
+                }
+                isUrlLoadInitialized = true;
+                if (document.readyState === 'complete') {
+                    this.tryLoadFromUrl();
+                }
+                else {
+                    window.addEventListener('load', () => {
+                        this.tryLoadFromUrl();
+                    });
+                }
+            }
+            waitForBlazerAndRules() {
+                setTimeout(() => {
+                    this.tryLoadFromUrl();
+                }, 12000);
+            }
+            tryLoadFromUrl() {
+                return __awaiter(this, void 0, void 0, function* () {
+                    const params = new URLSearchParams(window.location.search);
+                    const data = params.get('c');
+                    if (data) {
+                        try {
+                            console.log("Found URL parameter 'c', attempting to load circuit");
+                            yield new Promise(resolve => setTimeout(resolve, 10000));
+                            yield DotNet.invokeMethodAsync("ADArCWebApp", "LoadFromUrl", data);
+                            const newUrl = window.location.pathname;
+                            window.history.replaceState({}, '', newUrl);
+                            console.log("URL loading complete");
+                        }
+                        catch (error) {
+                            console.error("Error loading from URL:", error);
+                        }
+                    }
+                });
+            }
+            getAutoSelectedBoard() {
+                return this.autoSelectedBoard;
+            }
+            clearAutoSelectedBoard() {
+                this.autoSelectedBoard = null;
+            }
             setBoard(board) {
                 let boardConstructor;
                 switch (board) {
@@ -12128,15 +12240,26 @@ define("interopManager", ["require", "exports", "lib/TimingPacket", "lib/avr8js/
                 }
                 this.runner.boardConstructor = boardConstructor;
             }
+            isMobileUser() {
+                let check = false;
+                (function (a) { if (/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a) || /1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0, 4)))
+                    check = true; })(navigator.userAgent || navigator.vendor || window["opera"]);
+                return check;
+            }
         }
         interopManager.InteropManager = InteropManager;
+        let manager = null;
         function getInteropManager() {
-            return new InteropManager();
+            if (!manager) {
+                manager = new InteropManager();
+                manager.initUrlLoading();
+            }
+            return manager;
         }
         interopManager.getInteropManager = getInteropManager;
     })(interopManager || (exports.interopManager = interopManager = {}));
 });
-define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_1, execute_4) {
+define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"], function (require, exports, controller_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.fontA00 = exports.LCD1602I2C = exports.LCD1602_ADDR = void 0;
@@ -12188,7 +12311,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.updated = false;
         }
         setup() {
-            execute_4.AVRRunner.getInstance().board.twis[0].registerController(exports.LCD1602_ADDR, this);
+            this.pins.pin3[0].twi.registerController(this.id, this);
         }
         cleanup() {
             this.cgram.fill(0);
@@ -12208,6 +12331,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
             this.shiftMode = false;
             this.is8bit = true;
             this.updated = false;
+            this.render();
         }
         update() {
             if (this.updated) {
@@ -12641,7 +12765,7 @@ define("controllers/lcd1602i2c", ["require", "exports", "controllers/controller"
         31, 31, 31, 31, 31, 31, 31, 31,
     ]);
 });
-define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_5, avr8js_5) {
+define("controllers/max6675", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_2, execute_4, avr8js_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MAX6675 = void 0;
@@ -12668,11 +12792,11 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                     byteToSend = temperature & 0xFF;
                 }
                 this.nextByteIsHigh = !this.nextByteIsHigh;
-                execute_5.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_5.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_5.AVRRunner.getInstance().board.spis[0].transferCycles);
+                execute_4.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().board.spis[0].transferCycles);
             };
         }
         setup() {
-            execute_5.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
+            execute_4.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
         }
         get shouldReadSPI() {
             return this.pins.cs[0].digital.state == avr8js_5.PinState.Low;
@@ -12773,7 +12897,7 @@ define("controllers/ky012", ["require", "exports", "controllers/controller", "li
     }
     exports.KY012 = KY012;
 });
-define("controllers/bno055", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_4, execute_6) {
+define("controllers/bno055", ["require", "exports", "controllers/controller"], function (require, exports, controller_4) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.BNO055 = exports.BNO055_ADDR = void 0;
@@ -12908,7 +13032,7 @@ define("controllers/bno055", ["require", "exports", "controllers/controller", "l
             this.setVector(registers.QUATERNION_W_LSB.address, [w, x, y, z], 16384);
         }
         setup() {
-            execute_6.AVRRunner.getInstance().board.twis[0].registerController(exports.BNO055_ADDR, this);
+            this.pins.sda[0].twi.registerController(this.id, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
@@ -13094,20 +13218,28 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     }
     exports.ArcadePushButton = ArcadePushButton;
 });
-define("controllers/servo", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_7) {
+define("controllers/sg90", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_8, avr8js_7, execute_5) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.Servo = void 0;
-    class Servo extends controller_8.Controller {
+    exports.SG90 = void 0;
+    class SG90 extends controller_8.Controller {
         setup() {
             var _a;
             this.fallingEdgeCycle = undefined;
             this.risingEdgeCycle = undefined;
+            this.animationFrameId = null;
             this.signal = this.pins.orange[0].digital;
             (_a = this.signal) === null || _a === void 0 ? void 0 : _a.addListener(this.onSignalChange.bind(this));
         }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.hornAngle = null;
+            this.renderHorn();
+        }
         onSignalChange(state) {
-            const currentCycle = execute_7.AVRRunner.getInstance().board.cpu.cycles;
+            const currentCycle = execute_5.AVRRunner.getInstance().board.cpu.cycles;
             if (state === avr8js_7.PinState.High) {
                 this.risingEdgeCycle = currentCycle;
             }
@@ -13117,18 +13249,23 @@ define("controllers/servo", ["require", "exports", "controllers/controller", "li
                 const pulseWidthMs = this.cyclesToMs(pulseWidthCycles);
                 const angle = Math.round(this.msToAngle(pulseWidthMs));
                 if (this.previousAngle !== angle) {
-                    this.renderHorn(angle);
+                    this.hornAngle = angle;
+                    if (!this.animationFrameId) {
+                        this.animationFrameId = requestAnimationFrame(this.renderHorn.bind(this));
+                    }
                 }
                 this.previousAngle = angle;
             }
         }
-        renderHorn(angle) {
+        renderHorn() {
+            var _a;
             const horn = this.element.querySelector(".horn");
-            const transformValue = `translate(91.467 59.773) rotate(${angle}) translate(-91.467 -59.773)`;
+            const transformValue = `translate(91.467 59.773) rotate(${(_a = this.hornAngle) !== null && _a !== void 0 ? _a : 0}) translate(-91.467 -59.773)`;
             horn.setAttribute('transform', transformValue);
+            this.animationFrameId = null;
         }
         cyclesToMs(cycles) {
-            return (cycles * 1000) / (execute_7.AVRRunner.getInstance().board.cpu.frequency / 1000);
+            return (cycles * 1000) / (execute_5.AVRRunner.getInstance().board.cpu.frequency / 1000);
         }
         msToAngle(ms) {
             const minPulse = 544;
@@ -13142,7 +13279,7 @@ define("controllers/servo", ["require", "exports", "controllers/controller", "li
             return ((ms - minPulse) / (maxPulse - minPulse)) * (maxAngle - minAngle) + minAngle;
         }
     }
-    exports.Servo = Servo;
+    exports.SG90 = SG90;
 });
 define("controllers/memory", ["require", "exports"], function (require, exports) {
     "use strict";
@@ -13188,7 +13325,7 @@ define("controllers/memory", ["require", "exports"], function (require, exports)
     }
     exports.Memory = Memory;
 });
-define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_9, execute_8, memory_1) {
+define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_9, execute_6, memory_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.TFLunaLidarI2C = void 0;
@@ -13210,7 +13347,7 @@ define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/cont
             this.memory.write(REGISTERS[register], value);
         }
         setup() {
-            execute_8.AVRRunner.getInstance().board.twis[0].registerController(TF_LUNA_LIDAR_ADDR, this);
+            execute_6.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
             this.memory.clear();
             this.address = null;
             this.startTime = Date.now();
@@ -13270,7 +13407,7 @@ define("controllers/ky008", ["require", "exports", "controllers/controller", "li
     }
     exports.KY008 = KY008;
 });
-define("controllers/adxl345i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_9, memory_2) {
+define("controllers/adxl345i2c", ["require", "exports", "controllers/controller", "lib/execute", "controllers/memory"], function (require, exports, controller_11, execute_7, memory_2) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ADXL345I2C = exports.ADXL345_ADDR = void 0;
@@ -13324,7 +13461,7 @@ define("controllers/adxl345i2c", ["require", "exports", "controllers/controller"
             this.setRegister("DATAZ", z);
         }
         setup() {
-            execute_9.AVRRunner.getInstance().board.twis[0].registerController(exports.ADXL345_ADDR, this);
+            execute_7.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
             this.memory.clear();
             this.address = null;
             this.setRegister("DEVID", 0xE5);
@@ -13390,7 +13527,7 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
     }
     exports.MQ3 = MQ3;
 });
-define("controllers/hcsr04", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_13, execute_10, avr8js_9) {
+define("controllers/hcsr04", ["require", "exports", "controllers/controller", "lib/execute", "lib/avr8js/index"], function (require, exports, controller_13, execute_8, avr8js_9) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.HCSR04 = void 0;
@@ -13403,7 +13540,6 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
             this.distance = distance;
         }
         setup() {
-            console.log(JSON.stringify(this.pins.trigger));
             this.pins.trigger[0].digital.addListener(this.trigger.bind(this));
         }
         trigger(state) {
@@ -13413,9 +13549,9 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
         }
         echo() {
             this.pins.echo[0].digital.state = true;
-            execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+            execute_8.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
                 this.pins.echo[0].digital.state = false;
-            }, this.distance * 58 * (execute_10.AVRRunner.getInstance().board.cpu.frequency / 1e6));
+            }, this.distance * 58 * (execute_8.AVRRunner.getInstance().board.cpu.frequency / 1e6));
         }
     }
     exports.HCSR04 = HCSR04;
@@ -13436,80 +13572,75 @@ define("controllers/ky003", ["require", "exports", "controllers/controller"], fu
     }
     exports.KY003 = KY003;
 });
-define("controllers/ky022", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_15, execute_11) {
+define("controllers/ky022", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_15, execute_9) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY022 = void 0;
+    const ADDRESS = 0x10;
     class KY022 extends controller_15.Controller {
         constructor() {
             super(...arguments);
-            this.inSimulation = false;
-            this.inTransfer = false;
+            this.simulationStarted = false;
         }
         setup() {
-            this.setNecAddress(0);
-            this.setNecCommand(0);
-            this.inSimulation = true;
+            this.signal = this.pins.digital_out[0].digital;
+            this.cpu = execute_9.AVRRunner.getInstance().board.cpu;
+            this.signal.state = true;
+            this.simulationStarted = true;
         }
-        setNecAddress(address) {
-            this.address = address & 0xFF;
-            this.invAddress = (~address) & 0xFF;
-            if (!this.inSimulation)
+        cleanup() {
+            this.simulationStarted = false;
+            super.cleanup();
+        }
+        setCommand(command) {
+            if (!this.simulationStarted)
                 return;
-            if (this.inTransfer)
-                return;
-            this.inTransfer = true;
-            this.sendNecFrame();
+            this.counter = 0;
+            this.pulse(9);
+            this.space(4.5);
+            this.writeByte(ADDRESS);
+            this.writeByte(this.invert(ADDRESS));
+            this.writeByte(command);
+            this.writeByte(this.invert(command));
+            this.pulse(0.5625);
         }
-        setNecCommand(command) {
-            this.command = command & 0xFF;
-            this.invCommand = (~command) & 0xFF;
-            if (!this.inSimulation)
-                return;
-            if (this.inTransfer)
-                return;
-            this.inTransfer = true;
-            this.sendNecFrame();
-        }
-        sendNecFrame() {
-            const frame = this.encodeNecFrame();
-            let count = 0;
-            for (const packet of frame) {
-                execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                    console.log("previous state:", this.pins.digital_out[0].digital.state);
-                    console.log("desired state:", packet.state);
-                    this.pins.digital_out[0].digital.state = packet.state;
-                    console.log("current state:", this.pins.digital_out[0].digital.state);
-                    console.log("current cycle:", execute_11.AVRRunner.getInstance().board.cpu.cycles);
-                }, execute_11.AVRRunner.getInstance().usToCycles(packet.us));
-                count += packet.us;
-            }
-            this.inTransfer = false;
-        }
-        encodeNecFrame() {
-            let frame = [];
-            frame.push({ state: true, us: 9000 });
-            frame.push({ state: false, us: 4500 });
-            this.packNecFrame(frame, this.address);
-            this.packNecFrame(frame, this.invAddress);
-            this.packNecFrame(frame, this.command);
-            this.packNecFrame(frame, this.invCommand);
-            frame.push({ state: true, us: 565.5 });
-            frame.push({ state: false, us: 0 });
-            return frame;
-        }
-        packNecFrame(frame, byte) {
+        writeByte(byte) {
             for (let i = 7; i >= 0; i--) {
-                const bit = (byte >> i) & 1;
-                if (bit === 1) {
-                    frame.push({ state: true, us: 565.5 });
-                    frame.push({ state: false, us: 1687.5 });
-                }
-                else {
-                    frame.push({ state: true, us: 565.5 });
-                    frame.push({ state: false, us: 565.5 });
-                }
+                const bit = ((byte >> i) & 1) === 1;
+                this.writeBit(bit);
             }
+        }
+        writeBit(bit) {
+            this.pulse(0.5625);
+            if (bit) {
+                this.space(1.6875);
+            }
+            else {
+                this.space(0.5625);
+            }
+        }
+        pulse(ms) {
+            if (this.counter === 0) {
+                this.signal.state = false;
+            }
+            else {
+                this.cpu.addClockEvent(() => {
+                    this.signal.state = false;
+                }, this.counter);
+            }
+            this.counter += this.msToCycles(ms);
+            this.cpu.addClockEvent(() => {
+                this.signal.state = true;
+            }, this.counter);
+        }
+        space(ms) {
+            this.counter += this.msToCycles(ms);
+        }
+        invert(byte) {
+            return ~byte & 0xFF;
+        }
+        msToCycles(ms) {
+            return ms * (this.cpu.frequency / 1000);
         }
     }
     exports.KY022 = KY022;
@@ -13521,7 +13652,6 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
     class LED extends controller_16.Controller {
         constructor() {
             super(...arguments);
-            this.color = "#ff8080";
             this.lightColors = {
                 "red": "#ff8080",
                 "green": "#80ff80",
@@ -13539,22 +13669,22 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
             this.element.querySelector("#ledDisplay").style.display = "none";
         }
         setColor(color) {
-            this.color = this.lightColors[color];
+            const _color = this.lightColors[color] ? this.lightColors[color] : "red";
+            this.element.querySelector("#ledColor").style.fill = _color;
+            this.element.querySelector("#ledColorBrightness").style.fill = _color;
         }
         toggleLed(state) {
-            this.element.querySelector("#ledColor").style.fill = this.color;
-            this.element.querySelector("#ledColorBrightness").style.fill = this.color;
             if (state == avr8js_10.PinState.Low) {
                 this.element.querySelector("#ledDisplay").style.display = "none";
             }
-            else if (state == avr8js_10.PinState.High || state === avr8js_10.PinState.InputPullUp) {
-                this.element.querySelector("#ledDisplay").style.display = "";
+            else if (state == avr8js_10.PinState.High) {
+                this.element.querySelector("#ledDisplay").style.display = "inherit";
             }
         }
     }
     exports.LED = LED;
 });
-define("controllers/mpu6050", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_17, execute_12) {
+define("controllers/mpu6050", ["require", "exports", "controllers/controller"], function (require, exports, controller_17) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MPU6050 = exports.I2C_MST_CTRL = void 0;
@@ -13563,40 +13693,42 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         CONFIG: { address: 0x1A },
         GYRO_CONFIG: { address: 0x1B },
         ACCEL_CONFIG: { address: 0x1C },
-        MPU6050_ACCX_H: { address: 0x3B },
-        MPU6050_ACCX_L: { address: 0x3C },
-        MPU6050_ACCY_H: { address: 0x3D },
-        MPU6050_ACCY_L: { address: 0x3E },
-        MPU6050_ACCZ_H: { address: 0x3F },
-        MPU6050_ACCZ_L: { address: 0x40 },
-        TEMP_H: { address: 0x41 },
-        TEMP_L: { address: 0x42 },
-        MPU6050_GYROX_H: { address: 0x43 },
-        MPU6050_GYROX_L: { address: 0x44 },
-        MPU6050_GYROY_H: { address: 0x45 },
-        MPU6050_GYROY_L: { address: 0x46 },
-        MPU6050_GYROZ_H: { address: 0x47 },
-        MPU6050_GYROZ_L: { address: 0x48 },
-        MPU6050_HEADING_H: { address: 0x49 },
-        MPU6050_HEADING_L: { address: 0x4A },
-        MPU6050_EULERX_H: { address: 0x4B },
-        MPU6050_EULERX_L: { address: 0x4C },
-        MPU6050_EULERY_H: { address: 0x4D },
-        MPU6050_EULERY_L: { address: 0x4E },
-        MPU6050_QUATERNIONW_H: { address: 0x4F },
-        MPU6050_QUATERNIONW_L: { address: 0x50 },
-        MPU6050_QUATERNIONX_H: { address: 0x51 },
-        MPU6050_QUATERNIONX_L: { address: 0x52 },
-        MPU6050_QUATERNIONY_H: { address: 0x53 },
-        MPU6050_QUATERNIONY_L: { address: 0x54 },
-        MPU6050_QUATERNIONZ_H: { address: 0x55 },
-        MPU6050_QUATERNIONZ_L: { address: 0x56 },
-        MPU6050_LINEAR_ACCX_H: { address: 0x57 },
-        MPU6050_LINEAR_ACCX_L: { address: 0x58 },
-        MPU6050_LINEAR_ACCY_H: { address: 0x59 },
-        MPU6050_LINEAR_ACCY_L: { address: 0x5A },
-        MPU6050_LINEAR_ACCZ_H: { address: 0x5B },
-        MPU6050_LINEAR_ACCZ_L: { address: 0x5C },
+        ACCEL_XOUT_H: { address: 0x3B },
+        ACCEL_XOUT_L: { address: 0x3C },
+        ACCEL_YOUT_H: { address: 0x3D },
+        ACCEL_YOUT_L: { address: 0x3E },
+        ACCEL_ZOUT_H: { address: 0x3F },
+        ACCEL_ZOUT_L: { address: 0x40 },
+        TEMP_OUT_H: { address: 0x41 },
+        TEMP_OUT_L: { address: 0x42 },
+        GYRO_XOUT_H: { address: 0x43 },
+        GYRO_XOUT_L: { address: 0x44 },
+        GYRO_YOUT_H: { address: 0x45 },
+        GYRO_YOUT_L: { address: 0x46 },
+        GYRO_ZOUT_H: { address: 0x47 },
+        GYRO_ZOUT_L: { address: 0x48 },
+        EULER_HEADING_H: { address: 0x49 },
+        EULER_HEADING_L: { address: 0x4A },
+        EULER_ROLL_H: { address: 0x4B },
+        EULER_ROLL_L: { address: 0x4C },
+        EULER_PITCH_H: { address: 0x4D },
+        EULER_PITCH_L: { address: 0x4E },
+        QUATERNIONW_H: { address: 0x4F },
+        QUATERNIONW_L: { address: 0x50 },
+        QUATERNIONX_H: { address: 0x51 },
+        QUATERNIONX_L: { address: 0x52 },
+        QUATERNIONY_H: { address: 0x53 },
+        QUATERNIONY_L: { address: 0x54 },
+        QUATERNIONZ_H: { address: 0x55 },
+        QUATERNIONZ_L: { address: 0x56 },
+        LINEAR_ACCEL_X_H: { address: 0x57 },
+        LINEAR_ACCEL_X_L: { address: 0x58 },
+        LINEAR_ACCEL_Y_H: { address: 0x59 },
+        LINEAR_ACCEL_Y_L: { address: 0x5A },
+        LINEAR_ACCEL_Z_H: { address: 0x5B },
+        LINEAR_ACCEL_Z_L: { address: 0x5C },
+        PWR_MGMT_1: { address: 0x6B, default: 0x40 },
+        PWR_MGMT_2: { address: 0x6C, default: 0x00 },
         WHO_AM_I: { address: 0x75, default: 0x68 }
     };
     class MPU6050 extends controller_17.Controller {
@@ -13604,38 +13736,50 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             super(...arguments);
             this.address = null;
             this.memory = new Uint8Array(128);
-            this.accelerometer = { x: 0, y: 0, z: 0 };
+            this.accelerometer = { x: 0, y: 0, z: 1 };
             this.gyroscope = { x: 0, y: 0, z: 0 };
             this.orientation = { x: 0, y: 0, z: 0 };
+            this.lastRead = Date.now();
             this.rotating = false;
+            this.temperature = 25.0;
             this.sensorControls = {
                 setAcceleration: (x, y, z) => {
                     this.accelerometer = { x, y, z };
-                    this.setVector(registers.MPU6050_ACCELX_H.address, [x, y, z], 100);
                     this.calculateOrientation();
                 },
                 setGyroscope: (x, y, z) => {
                     this.gyroscope = { x, y, z };
-                    this.setVector(registers.MPU6050_GYROX_H.address, [x, y, z], 16);
+                    this.rotating = (x !== 0 || y !== 0 || z !== 0);
                     this.calculateOrientation();
                 },
                 setTemp: (temp) => {
-                    this.memory[registers.TEMP_H.address] = temp;
+                    this.temperature = temp;
+                    const encoded = this.encodeTemperature(temp);
+                    this.memory[registers.TEMP_OUT_H.address] = (encoded >> 8) & 0xFF;
+                    this.memory[registers.TEMP_OUT_L.address] = encoded & 0xFF;
                 },
-                setLinearAcceleration: (x, y, z) => {
-                    this.setVector(registers.MPU6050_LINEAR_ACCELX_H.address, [x, y, z], 100);
-                },
+                setOrientation: (pitch, roll, yaw) => {
+                    this.orientation = { x: yaw, y: pitch, z: roll };
+                    this.calculateOrientation();
+                }
             };
+        }
+        addSensorNoise(value, magnitude = 0.01) {
+            return value + (Math.random() - 0.5) * magnitude;
+        }
+        encodeTemperature(celsius) {
+            return Math.round((celsius - 36.53) * 340);
         }
         setVector(address, vector, scalar) {
             let writePointer = address;
             for (const num of vector) {
-                const scaled = Math.round(num * scalar);
-                const lsb = scaled & 0xFF;
+                const noisyValue = this.addSensorNoise(num);
+                const scaled = Math.round(noisyValue * scalar);
                 const msb = (scaled >> 8) & 0xFF;
-                this.memory[writePointer] = lsb;
-                writePointer++;
+                const lsb = scaled & 0xFF;
                 this.memory[writePointer] = msb;
+                writePointer++;
+                this.memory[writePointer] = lsb;
                 writePointer++;
             }
         }
@@ -13650,58 +13794,68 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             const sr = Math.sin(roll * 0.5);
             const cp = Math.cos(pitch * 0.5);
             const sp = Math.sin(pitch * 0.5);
+            const qw = cr * cp * cy + sr * sp * sy;
             const qx = sr * cp * cy - cr * sp * sy;
             const qy = cr * sp * cy + sr * cp * sy;
             const qz = cr * cp * sy - sr * sp * cy;
-            const qw = cr * cp * cy + sr * sp * sy;
-            return { x: qx, y: qy, z: qz, w: qw };
+            return { w: qw, x: qx, y: qy, z: qz };
         }
         calculateOrientation() {
-            const avgX = (this.accelerometer.x + this.gyroscope.x) / 2;
-            const avgY = (this.accelerometer.y + this.gyroscope.y) / 2;
-            const avgZ = (this.accelerometer.z + this.gyroscope.z) / 2;
-            this.setVector(registers.EULER_HEADING_H.address, [avgX, avgY, avgZ], 16);
-            const { w, x, y, z } = this.eulerToQuaternion(avgX, avgY, avgZ);
-            this.setVector(registers.MPU6050_QUATERNIONW_H.address, [w, x, y, z], 16384);
+            const currentTime = Date.now();
+            const timeDiff = (currentTime - this.lastRead) / 1000;
+            this.lastRead = currentTime;
+            if (this.rotating && timeDiff > 0) {
+                this.orientation.x += this.gyroscope.z * timeDiff;
+                this.orientation.y += this.gyroscope.x * timeDiff;
+                this.orientation.z += this.gyroscope.y * timeDiff;
+                this.orientation.x = this.orientation.x % 360;
+                this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
+                this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
+                const gravityX = Math.sin(this.orientation.y * Math.PI / 180) * 9.81;
+                const gravityY = -Math.sin(this.orientation.z * Math.PI / 180) * 9.81;
+                const gravityZ = Math.cos(this.orientation.y * Math.PI / 180) *
+                    Math.cos(this.orientation.z * Math.PI / 180) * 9.81;
+                this.accelerometer = { x: gravityX, y: gravityY, z: gravityZ };
+            }
+            this.setVector(registers.ACCEL_XOUT_H.address, [this.accelerometer.x, this.accelerometer.y, this.accelerometer.z], 16384 / 9.81);
+            this.setVector(registers.GYRO_XOUT_H.address, [this.gyroscope.x, this.gyroscope.y, this.gyroscope.z], 131);
+            this.setVector(registers.EULER_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
+            const quaternion = this.eulerToQuaternion(this.orientation.x, this.orientation.z, this.orientation.y);
+            this.setVector(registers.QUATERNIONW_H.address, [quaternion.w, quaternion.x, quaternion.y, quaternion.z], 16384);
+        }
+        setMotion(rotating) {
+            if (rotating) {
+                this.sensorControls.setGyroscope(0, 0, 90);
+            }
+            else {
+                this.sensorControls.setGyroscope(0, 0, 0);
+            }
+            this.rotating = rotating;
         }
         setup() {
-            execute_12.AVRRunner.getInstance().board.twis[0].registerController(exports.I2C_MST_CTRL, this);
+            this.pins.sda[0].twi.registerController(this.id, this);
             for (const register of Object.values(registers)) {
                 if (register.default) {
                     this.memory[register.address] = register.default;
                 }
             }
-            this.sensorControls.setLinearAcceleration(0.1, 0.2, 0.3);
-            this.sensorControls.setTemp(75);
+            this.sensorControls.setTemp(25);
+            this.calculateOrientation();
+            this.element.querySelector("#mpuLed").setAttribute("fill", "#80ff80");
+        }
+        cleanup() {
+            this.element.querySelector("#mpuLed").setAttribute("fill", "none");
         }
         i2cConnect(addr, write) {
             return true;
         }
-        i2cDisconnect() { }
+        i2cDisconnect() {
+        }
         i2cReadByte(acked) {
             let byte;
             if (this.address !== null) {
-                if (this.address === registers.MPU6050_HEADING_H.address && this.rotating) {
-                    const currentTime = Date.now();
-                    const timeDiff = (this.lastRead !== undefined) ? (currentTime - this.lastRead) / 1000 : 0;
-                    if (timeDiff > 0) {
-                        const gyroX = this.gyroscope.x * timeDiff;
-                        const gyroY = this.gyroscope.y * timeDiff;
-                        const gyroZ = this.gyroscope.z * timeDiff;
-                        this.orientation.x += gyroZ;
-                        this.orientation.y += gyroX;
-                        this.orientation.z += gyroY;
-                        this.orientation.x = this.orientation.x % 360;
-                        this.orientation.y = Math.max(-90, Math.min(90, this.orientation.y));
-                        this.orientation.z = Math.max(-90, Math.min(90, this.orientation.z));
-                        this.lastRead = currentTime;
-                        this.setVector(registers.MPU6050_HEADING_H.address, [this.orientation.x, this.orientation.y, this.orientation.z], 16);
-                    }
-                }
+                this.calculateOrientation();
                 byte = this.memory[this.address];
-                if (this.address === registers.MPU6050_EULERY_L.address && this.rotating) {
-                    this.lastRead = Date.now();
-                }
             }
             else {
                 byte = 0xff;
@@ -13712,6 +13866,12 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
         i2cWriteByte(value) {
             if (this.address !== null) {
                 this.memory[this.address] = value;
+                if (this.address === registers.PWR_MGMT_1.address) {
+                    const isResetBitSet = ((value >> 7) & 0xFF) == 1;
+                    if (isResetBitSet) {
+                        this.reset();
+                    }
+                }
                 this.address = null;
             }
             else {
@@ -13719,23 +13879,602 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller", "
             }
             return true;
         }
+        reset() {
+            for (const register of Object.values(registers)) {
+                if (register.default) {
+                    this.memory[register.address] = register.default;
+                }
+                else {
+                    this.memory[register.address] = 0;
+                }
+            }
+            this.memory[registers.PWR_MGMT_1.address] = 0;
+        }
     }
     exports.MPU6050 = MPU6050;
 });
-define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/servo", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, servo_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1) {
+define("controllers/ky024", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY024 = void 0;
+    class KY024 extends controller_18.Controller {
+        constructor() {
+            super(...arguments);
+            this.gauss = 0;
+            this.isInSimulation = false;
+            this.isMagneticFieldDetected = false;
+        }
+        setGauss(gauss) {
+            if (gauss < -1000) {
+                this.gauss = -1000;
+            }
+            else if (gauss > 1000) {
+                this.gauss = 1000;
+            }
+            else {
+                this.gauss = gauss;
+            }
+            if (this.isInSimulation) {
+                this.gaussToVoltage(this.gauss);
+            }
+        }
+        setIsMagneticFieldDetected(isDetected) {
+            this.isMagneticFieldDetected = isDetected > 0;
+            if (this.isInSimulation) {
+                this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
+            }
+        }
+        setup() {
+            this.isInSimulation = true;
+            this.gaussToVoltage(this.gauss);
+        }
+        gaussToVoltage(gauss) {
+            const V_OUT = 1.0 + ((gauss + 1000) / 2000) * 3.0;
+            this.pins.analog_out[0].analog.voltage = V_OUT;
+        }
+    }
+    exports.KY024 = KY024;
+});
+define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_19) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.KY001 = void 0;
+    class KY001 extends controller_19.Controller {
+        setTemperature(temperature) {
+        }
+        setup() { }
+    }
+    exports.KY001 = KY001;
+});
+define("controllers/rgbled", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_20, avr8js_11, execute_10) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.RGBLED = void 0;
+    class RGBLED extends controller_20.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.rLastPinState = this.pins.R[0].digital.state;
+            this.rFirstHigh = true;
+            this.rBrightness = 0;
+            this.rPeriod = 0;
+            this.rPreviousFallingEdgeCycle = 0;
+            this.rPreviousRisingEdgeCycle = 0;
+            this.rIsPeriodCreated = false;
+            this.gLastPinState = this.pins.G[0].digital.state;
+            this.gFirstHigh = true;
+            this.gBrightness = 0;
+            this.gPeriod = 0;
+            this.gPreviousFallingEdgeCycle = 0;
+            this.gPreviousRisingEdgeCycle = 0;
+            this.gIsPeriodCreated = false;
+            this.bLastPinState = this.pins.B[0].digital.state;
+            this.bFirstHigh = true;
+            this.bBrightness = 0;
+            this.bPeriod = 0;
+            this.bPreviousFallingEdgeCycle = 0;
+            this.bPreviousRisingEdgeCycle = 0;
+            this.bIsPeriodCreated = false;
+            this.animationFrameId = null;
+            this.pins.R[0].digital.addListener(this.rListener.bind(this));
+            this.pins.G[0].digital.addListener(this.gListener.bind(this));
+            this.pins.B[0].digital.addListener(this.bListener.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.rBrightness = 0;
+            this.gBrightness = 0;
+            this.bBrightness = 0;
+            this.renderSvg();
+        }
+        rWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.rPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.rBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.rPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.rBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        gWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.gPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.gPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.gBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        bWatchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_11.PinState.High && this.bPreviousFallingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 1;
+            }
+            else if (lastState === avr8js_11.PinState.Low && this.bPreviousRisingEdgeCycle <= lastStateCycle) {
+                this.bBrightness = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        rListener(state) {
+            if (!this.rIsPeriodCreated) {
+                this.rPeriod = this.pins.R[0].timer.getPwmPeriod();
+                this.rIsPeriodCreated = true;
+            }
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.rPreviousRisingEdgeCycle = currentCycle;
+                if (this.rFirstHigh) {
+                    this.rBrightness = 0;
+                    this.rFirstHigh = false;
+                }
+                else {
+                    this.rBrightness = Math.max((this.rPeriod - (currentCycle - this.rPreviousFallingEdgeCycle)) / this.rPeriod, 0);
+                }
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.rLastPinState === avr8js_11.PinState.High) {
+                    this.rPreviousFallingEdgeCycle = currentCycle;
+                    this.rBrightness = Math.min((currentCycle - this.rPreviousRisingEdgeCycle) / this.rPeriod, 1);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.rWatchDog(state, currentCycle), this.rPeriod - 3);
+                }
+            }
+            this.rLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        gListener(state) {
+            if (!this.gIsPeriodCreated) {
+                this.gPeriod = this.pins.G[0].timer.getPwmPeriod();
+                this.gIsPeriodCreated = true;
+            }
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.gPreviousRisingEdgeCycle = currentCycle;
+                if (this.gFirstHigh) {
+                    this.gBrightness = 0;
+                    this.gFirstHigh = false;
+                }
+                else {
+                    this.gBrightness = Math.max((this.gPeriod - (currentCycle - this.gPreviousFallingEdgeCycle)) / this.gPeriod, 0);
+                }
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.gLastPinState === avr8js_11.PinState.High) {
+                    this.gPreviousFallingEdgeCycle = currentCycle;
+                    this.gBrightness = Math.min((currentCycle - this.gPreviousRisingEdgeCycle) / this.gPeriod, 1);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.gWatchDog(state, currentCycle), this.gPeriod - 3);
+                }
+            }
+            this.gLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        bListener(state) {
+            if (!this.bIsPeriodCreated) {
+                this.bPeriod = this.pins.B[0].timer.getPwmPeriod();
+                this.bIsPeriodCreated = true;
+            }
+            const currentCycle = execute_10.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_11.PinState.High) {
+                this.bPreviousRisingEdgeCycle = currentCycle;
+                if (this.bFirstHigh) {
+                    this.bBrightness = 0;
+                    this.bFirstHigh = false;
+                }
+                else {
+                    this.bBrightness = Math.max((this.bPeriod - (currentCycle - this.bPreviousFallingEdgeCycle)) / this.bPeriod, 0);
+                }
+                execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+            }
+            else if (state === avr8js_11.PinState.Low) {
+                if (this.bLastPinState === avr8js_11.PinState.High) {
+                    this.bPreviousFallingEdgeCycle = currentCycle;
+                    this.bBrightness = Math.min((currentCycle - this.bPreviousRisingEdgeCycle) / this.bPeriod, 1);
+                    execute_10.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.bWatchDog(state, currentCycle), this.bPeriod - 3);
+                }
+            }
+            this.bLastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            const totalBrightness = Math.max(this.rBrightness, this.gBrightness, this.bBrightness);
+            const totalOpacity = totalBrightness != 0 ? 0.2 + totalBrightness * 0.6 : 0;
+            const redBlur = this.element.querySelector("#rgbRedBlur");
+            redBlur.setAttribute("stdDeviation", `${this.rBrightness * 3}`);
+            const greenBlur = this.element.querySelector("#rgbGreenBlur");
+            greenBlur.setAttribute("stdDeviation", `${this.gBrightness * 3}`);
+            const blueBlur = this.element.querySelector("#rgbBlueBlur");
+            blueBlur.setAttribute("stdDeviation", `${this.bBrightness * 3}`);
+            const redCircle = this.element.querySelector("#rgbRedCircle");
+            redCircle.setAttribute("r", `${this.rBrightness * 5 + 2}`);
+            redCircle.setAttribute("opacity", `${Math.min(this.rBrightness * 20, 0.3)}`);
+            const greenCircle = this.element.querySelector("#rgbGreenCircle");
+            greenCircle.setAttribute("r", `${this.gBrightness * 5 + 2}`);
+            greenCircle.setAttribute("opacity", `${Math.min(this.gBrightness * 20, 0.3)}`);
+            const blueCircle = this.element.querySelector("#rgbBlueCircle");
+            blueCircle.setAttribute("r", `${this.bBrightness * 5 + 2}`);
+            blueCircle.setAttribute("opacity", `${Math.min(this.bBrightness * 20, 0.3)}`);
+            const mixedCircle = this.element.querySelector("#rgbMixedCircle");
+            mixedCircle.setAttribute("fill", `rgb(${this.rBrightness * 255}, ${this.gBrightness * 255}, ${this.bBrightness * 255})`);
+            mixedCircle.setAttribute("opacity", `${totalOpacity}`);
+            const hollowCircle = this.element.querySelector("#rgbHollowCircle");
+            hollowCircle.setAttribute("opacity", `${totalOpacity}`);
+            this.animationFrameId = null;
+        }
+    }
+    exports.RGBLED = RGBLED;
+});
+define("controllers/dcmotorl298n", ["require", "exports", "controllers/controller", "lib/avr8js/index", "lib/execute"], function (require, exports, controller_21, avr8js_12, execute_11) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DCMotorL298N = void 0;
+    var MotorDirection;
+    (function (MotorDirection) {
+        MotorDirection[MotorDirection["OFF"] = 0] = "OFF";
+        MotorDirection[MotorDirection["FORWARD"] = 1] = "FORWARD";
+        MotorDirection[MotorDirection["REVERSE"] = 2] = "REVERSE";
+    })(MotorDirection || (MotorDirection = {}));
+    class DCMotorL298N extends controller_21.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+        }
+        setup() {
+            this.motorDirection = MotorDirection.OFF;
+            this.dutyCycle = 0;
+            this.previousFallingEdgeCycle = 0;
+            this.period = 0;
+            this.lastPinState = avr8js_12.PinState.Input;
+            this.previousRisingEdgeCycle = 0;
+            this.isFirstRisingEdge = true;
+            this.isPeriodCreated = false;
+            this.animationFrameId = null;
+            this.pins.in1[0].digital.addListener(this.in1Listener.bind(this));
+            this.pins.in2[0].digital.addListener(this.in2Listener.bind(this));
+            this.pins.ena[0].digital.addListener(this.onSignalChange.bind(this));
+        }
+        cleanup() {
+            if (this.animationFrameId) {
+                cancelAnimationFrame(this.animationFrameId);
+            }
+            this.dutyCycle = 0;
+            this.renderSvg();
+        }
+        in1Listener(state) {
+            this.setMotorDirection();
+        }
+        in2Listener(state) {
+            this.setMotorDirection();
+        }
+        setMotorDirection() {
+            const in1 = this.pins.in1[0].digital.state;
+            const in2 = this.pins.in2[0].digital.state;
+            if (in1 === in2) {
+                this.motorDirection = MotorDirection.OFF;
+            }
+            else if (in1) {
+                this.motorDirection = MotorDirection.FORWARD;
+            }
+            else {
+                this.motorDirection = MotorDirection.REVERSE;
+            }
+        }
+        watchDog(lastState, lastStateCycle) {
+            if (lastState === avr8js_12.PinState.High && this.previousFallingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 1;
+            }
+            else if (lastState === avr8js_12.PinState.Low && this.previousRisingEdgeCycle <= lastStateCycle) {
+                this.dutyCycle = 0;
+            }
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        onSignalChange(state) {
+            if (!this.isPeriodCreated) {
+                this.period = this.pins.ena[0].timer.getPwmPeriod();
+                console.log("period");
+                this.isPeriodCreated = true;
+            }
+            const currentCycle = execute_11.AVRRunner.getInstance().board.cpu.cycles;
+            if (state === avr8js_12.PinState.High) {
+                this.previousRisingEdgeCycle = currentCycle;
+                if (this.isFirstRisingEdge) {
+                    this.dutyCycle = 0;
+                    this.isFirstRisingEdge = false;
+                }
+                else {
+                    this.dutyCycle = Math.max((this.period - (currentCycle - this.previousFallingEdgeCycle)) / this.period, 0);
+                }
+                execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+            }
+            else if (state === avr8js_12.PinState.Low) {
+                if (this.lastPinState === avr8js_12.PinState.High) {
+                    this.previousFallingEdgeCycle = currentCycle;
+                    this.dutyCycle = Math.min((currentCycle - this.previousRisingEdgeCycle) / this.period, 1);
+                    execute_11.AVRRunner.getInstance().board.cpu.addClockEvent(() => this.watchDog(state, currentCycle), this.period - 3);
+                }
+            }
+            this.lastPinState = state;
+            if (!this.animationFrameId) {
+                this.animationFrameId = requestAnimationFrame(this.renderSvg.bind(this));
+            }
+        }
+        renderSvg() {
+            let dcMotor = this.element.querySelector("#shakeAnimation");
+            if (!dcMotor) {
+                const dcMotorGroup = this.element.querySelector("#dcMotorGroup");
+                const animateTransform = document.createElementNS('http://www.w3.org/2000/svg', 'animateTransform');
+                animateTransform.setAttribute('id', 'shakeAnimation');
+                animateTransform.setAttribute('attributeName', 'transform');
+                animateTransform.setAttribute('type', 'translate');
+                animateTransform.setAttribute('additive', 'sum');
+                animateTransform.setAttribute('from', '0 0');
+                animateTransform.setAttribute('to', '0 5');
+                animateTransform.setAttribute('dur', '0s');
+                animateTransform.setAttribute('repeatCount', '0');
+                animateTransform.setAttribute('keyTimes', '0;0.5;1');
+                animateTransform.setAttribute('values', '0 0; 0 5; 0 0');
+                dcMotorGroup.appendChild(animateTransform);
+                dcMotor = this.element.querySelector("#shakeAnimation");
+            }
+            if (this.dutyCycle === 0 || this.motorDirection === MotorDirection.OFF) {
+                dcMotor.remove();
+                this.animationFrameId = null;
+                return;
+            }
+            const speed = (1 - (0.1 + this.dutyCycle * (1 - .1))) + 0.1;
+            dcMotor.setAttribute("dur", `${speed}s`);
+            dcMotor.setAttribute("repeatCount", "indefinite");
+            this.animationFrameId = null;
+        }
+    }
+    exports.DCMotorL298N = DCMotorL298N;
+});
+define("controllers/pca9685", ["require", "exports", "controllers/controller", "controllers/memory"], function (require, exports, controller_22, memory_3) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.PCA9685 = void 0;
+    const SERVO_MIN = 150;
+    const SERVO_MAX = 600;
+    const REGISTERS = {
+        LED0_ON: { address: 0x6, size: 2 },
+        LED0_OFF: { address: 0x8, size: 2 },
+    };
+    class PCA9685 extends controller_22.Controller {
+        constructor() {
+            super(...arguments);
+            this.address = null;
+            this.memory = new memory_3.Memory(128);
+        }
+        setup() {
+            this.pins.sda[0].twi.registerController(this.id, this);
+            this.memory.clear();
+            this.address = null;
+        }
+        i2cConnect(addr, write) {
+            return true;
+        }
+        i2cDisconnect() {
+            this.address = null;
+        }
+        i2cReadByte(acked) {
+            let byte;
+            if (this.address !== null) {
+                byte = this.memory[this.address];
+            }
+            else {
+                byte = 0xff;
+            }
+            this.address = this.address + 1 % this.memory.size;
+            return byte;
+        }
+        i2cWriteByte(value) {
+            if (this.address !== null) {
+                this.memory[this.address] = value;
+                if (this.address === 0x9) {
+                    this.renderHorn(this.calculateAngle());
+                }
+                this.address = this.address + 1 % this.memory.size;
+            }
+            else {
+                this.address = value;
+            }
+            return true;
+        }
+        renderHorn(angle) {
+            const horn = this.element.querySelector(".horn");
+            horn.style.transform = `rotate(${angle}deg)`;
+        }
+        calculateAngle() {
+            const on = this.memory.read(REGISTERS.LED0_ON);
+            const off = this.memory.read(REGISTERS.LED0_OFF);
+            const pulse = off - on;
+            const angle = ((pulse - SERVO_MIN) / (SERVO_MAX - SERVO_MIN)) * 180;
+            return Math.max(0, Math.min(180, angle));
+        }
+    }
+    exports.PCA9685 = PCA9685;
+});
+define("controllers/hx711", ["require", "exports", "controllers/controller", "lib/avr8js/index"], function (require, exports, controller_23, avr8js_13) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.HX711 = void 0;
+    class HX711 extends controller_23.Controller {
+        constructor() {
+            super(...arguments);
+            this.weight = 100;
+            this.bitIndex = 24;
+        }
+        setup() {
+            this.data = this.pins.dat[0].digital;
+            this.clock = this.pins.clk[0].digital;
+            this.clock.addListener((state) => this.handleClock(state));
+        }
+        setWeight(weight) {
+            this.weight = weight;
+        }
+        handleClock(state) {
+            if (state === avr8js_13.PinState.High) {
+                this.data.state = ((this.weight >> this.bitIndex) & 1) === 1;
+                this.bitIndex--;
+                if (this.bitIndex < 0) {
+                    this.bitIndex = 24;
+                }
+            }
+        }
+    }
+    exports.HX711 = HX711;
+});
+define("controllers/28byj48uln2003", ["require", "exports", "controllers/controller", "lib/execute"], function (require, exports, controller_24, execute_12) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports._28BYJ48ULN2003 = void 0;
+    var ProngState;
+    (function (ProngState) {
+        ProngState[ProngState["Low"] = 0] = "Low";
+        ProngState[ProngState["High"] = 1] = "High";
+    })(ProngState || (ProngState = {}));
+    var Coil;
+    (function (Coil) {
+        Coil[Coil["A"] = 0] = "A";
+        Coil[Coil["B"] = 1] = "B";
+        Coil[Coil["C"] = 2] = "C";
+        Coil[Coil["D"] = 3] = "D";
+    })(Coil || (Coil = {}));
+    class StepperMotor {
+        constructor() {
+            this.prongs = Array.from({ length: 32 }, () => ({
+                state: ProngState.Low,
+            }));
+            this.prongAngles = Array.from([this.prongs.length], (_, index) => index * 11.40625);
+        }
+        setCoilState(coil, state) {
+            for (let step = coil; step < this.prongs.length; step += 4) {
+                this.prongs[step].state = state;
+            }
+            this.adjustHead();
+        }
+        getCoilState(coil) {
+            return this.prongs[coil].state.valueOf();
+        }
+        adjustHead() {
+            if (this.prongs.filter(prong => prong.state === ProngState.High).length < 16) {
+                return;
+            }
+        }
+    }
+    class _28BYJ48ULN2003 extends controller_24.Controller {
+        constructor() {
+            super(...arguments);
+            this.animationFrameId = null;
+            this.randWaitAmount = 16000000;
+            this.lastSpinState = false;
+            this.first = true;
+            this.wasPrevFirst = false;
+        }
+        setup() {
+            this.pins.in1[0].digital.addListener((state) => this.aListener(state));
+            this.pins.in2[0].digital.addListener((state) => this.bListener(state));
+            this.pins.in3[0].digital.addListener((state) => this.cListener(state));
+            this.pins.in4[0].digital.addListener((state) => this.dListener(state));
+            this.animationFrameId = null;
+        }
+        cleanup() {
+            const animationElem = this.element.querySelector("#_28byj-shaft-rotateAnim");
+            const svgElem = this.element.querySelector("#_28byj");
+            animationElem.endElement();
+            svgElem.pauseAnimations();
+        }
+        setSpinning(isSpinning) {
+            const animationElem = this.element.querySelector("#_28byj-shaft-rotateAnim");
+            const svgElem = this.element.querySelector("#_28byj");
+            if (this.first) {
+                animationElem.beginElement();
+                this.first = false;
+                this.wasPrevFirst = true;
+            }
+            else {
+                if (!this.wasPrevFirst && isSpinning == this.lastSpinState) {
+                    return;
+                }
+                this.wasPrevFirst = false;
+                if (isSpinning) {
+                    svgElem.unpauseAnimations();
+                    execute_12.AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                        this.setSpinning(false);
+                    }, this.randWaitAmount);
+                }
+                else {
+                    svgElem.pauseAnimations();
+                }
+            }
+            this.lastSpinState = isSpinning;
+        }
+        aListener(state) {
+            this.setSpinning(true);
+        }
+        bListener(state) {
+            this.setSpinning(true);
+        }
+        cListener(state) {
+            this.setSpinning(true);
+        }
+        dListener(state) {
+            this.setSpinning(true);
+        }
+    }
+    exports._28BYJ48ULN2003 = _28BYJ48ULN2003;
+});
+define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c", "controllers/max6675", "controllers/ky012", "controllers/bno055", "controllers/hcsr501", "controllers/ky018", "controllers/arcade-push-button", "controllers/sg90", "controllers/tf-luna-lidar-i2c", "controllers/ky008", "controllers/adxl345i2c", "controllers/mq3", "controllers/hcsr04", "controllers/ky003", "controllers/ky022", "controllers/led", "controllers/mpu6050", "controllers/ky024", "controllers/ky001", "controllers/rgbled", "controllers/dcmotorl298n", "controllers/pca9685", "controllers/hx711", "controllers/28byj48uln2003"], function (require, exports, interopManager_1, lcd1602i2c_1, max6675_1, ky012_1, bno055_1, hcsr501_1, ky018_1, arcade_push_button_1, sg90_1, tf_luna_lidar_i2c_1, ky008_1, adxl345i2c_1, mq3_1, hcsr04_1, ky003_1, ky022_1, led_1, mpu6050_1, ky024_1, ky001_1, rgbled_1, dcmotorl298n_1, pca9685_1, hx711_1, _28byj48uln2003_1) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
     var getInteropManager = interopManager_1.interopManager.getInteropManager;
     window.interopManager = interopManager_1.interopManager;
     window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
-        yield DotNet.invokeMethodAsync("ADArCWebApp", "updateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+        yield DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
     }));
     window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
     window.BNO055 = bno055_1.BNO055;
     window.MAX6675 = max6675_1.MAX6675;
     window.KY012 = ky012_1.KY012;
     window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
-    window.Servo = servo_1.Servo;
+    window.SG90 = sg90_1.SG90;
     window.HCSR501 = hcsr501_1.HCSR501;
     window.KY018 = ky018_1.KY018;
     window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
@@ -13747,16 +14486,110 @@ define("main", ["require", "exports", "interopManager", "controllers/lcd1602i2c"
     window.KY022 = ky022_1.KY022;
     window.LED = led_1.LED;
     window.MPU6050 = mpu6050_1.MPU6050;
+    window.KY024 = ky024_1.KY024;
+    window.KY001 = ky001_1.KY001;
+    window.RGBLED = rgbled_1.RGBLED;
+    window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
+    window.SG90PCA9685 = pca9685_1.PCA9685;
+    window.HX711 = hx711_1.HX711;
+    window._28BYJ48ULN2003 = _28byj48uln2003_1._28BYJ48ULN2003;
 });
-define("controllers/ky001", ["require", "exports", "controllers/controller"], function (require, exports, controller_18) {
+define("controllers/rplidar", ["require", "exports", "controllers/controller"], function (require, exports, controller_25) {
     "use strict";
     Object.defineProperty(exports, "__esModule", { value: true });
-    exports.KY001 = void 0;
-    class KY001 extends controller_18.Controller {
-        setTemperature(temperature) {
+    exports.RPLidarA1M9 = void 0;
+    const RPLIDAR_CMD_STOP = 0x25;
+    const RPLIDAR_CMD_SCAN = 0x20;
+    const RPLIDAR_CMD_FORCE_SCAN = 0x21;
+    const RPLIDAR_CMD_RESET = 0x40;
+    const RPLIDAR_CMD_GET_DEVICE_INFO = 0x50;
+    const RPLIDAR_CMD_GET_DEVICE_HEALTH = 0x52;
+    const RPLIDAR_ANS_TYPE_MEASUREMENT = 0x81;
+    const RPLIDAR_ANS_TYPE_DEVINFO = 0x4;
+    const RPLIDAR_ANS_TYPE_DEVHEALTH = 0x6;
+    const RPLIDAR_STATUS_OK = 0x0;
+    const RPLIDAR_STATUS_WARNING = 0x1;
+    const RPLIDAR_STATUS_ERROR = 0x2;
+    const RPLIDAR_RESP_MEASUREMENT_SYNCBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_QUALITY_SHIFT = 2;
+    const RPLIDAR_RESP_MEASUREMENT_CHECKBIT = (0x1 << 0);
+    const RPLIDAR_RESP_MEASUREMENT_ANGLE_SHIFT = 1;
+    const RPLIDAR_CMD_SYNC_BYTE = 0xA5;
+    const RPLIDAR_CMDFLAG_HAS_PAYLOAD = 0x80;
+    const RPLIDAR_ANS_SYNC_BYTE1 = 0xA5;
+    const RPLIDAR_ANS_SYNC_BYTE2 = 0x5A;
+    const RPLIDAR_ANS_PKTFLAG_LOOP = 0x1;
+    class RPLidarA1M9 extends controller_25.Controller {
+        constructor() {
+            super(...arguments);
+            this.distance = 0;
+            this.angle = 0;
+            this.serialNumber = 1;
+            this.currentCmd = null;
+            this.inSync = false;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
         }
-        setup() { }
+        setup() {
+            this.pins.rx[0].usart.onByteTransmit = this.rxListener.bind(this);
+        }
+        rxListener(value) {
+            if (value === RPLIDAR_CMD_SYNC_BYTE && !this.inSync) {
+                this.inSync = true;
+                return;
+            }
+            if (this.inSync) {
+                if (this.currentCmd == null) {
+                    this.currentCmd = value;
+                    if (this.currentCmd == RPLIDAR_CMD_STOP ||
+                        this.currentCmd == RPLIDAR_CMD_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_FORCE_SCAN ||
+                        this.currentCmd == RPLIDAR_CMD_RESET ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_INFO ||
+                        this.currentCmd == RPLIDAR_CMD_GET_DEVICE_HEALTH) {
+                    }
+                    return;
+                }
+                else if (this.payloadSize == null) {
+                    this.payloadSize = value;
+                    return;
+                }
+                else if (this.payload.length < this.payloadSize) {
+                    this.payload.push(value);
+                    return;
+                }
+                else {
+                    this.checksum = value;
+                    return;
+                }
+            }
+            return this.notOk();
+        }
+        afterCmdFinishSelfReset() {
+            this.inSync = false;
+            this.currentCmd = null;
+            this.payloadSize = null;
+            this.payload = null;
+            this.checksum = null;
+        }
+        notOk() {
+        }
+        cmdStop() {
+        }
+        cmdScan() {
+        }
+        cmdForceScan() {
+        }
+        cmdReset() {
+        }
+        cmdGetDeviceInfo() {
+        }
+        cmdGetDeviceHealth() {
+        }
+        writeBack() {
+        }
     }
-    exports.KY001 = KY001;
+    exports.RPLidarA1M9 = RPLidarA1M9;
 });
 //# sourceMappingURL=build.js.map

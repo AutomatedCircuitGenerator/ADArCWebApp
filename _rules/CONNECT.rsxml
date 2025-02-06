@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ruleSet xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <ruleFileNames>
+    <string>a4988_arduino.grxml</string>
+    <string>add_uln2003.grxml</string>
+    <string>adxl345_arduino.grxml</string>
+    <string>bno055_arduino.grxml</string>
+	<string>dht22_arduino.grxml</string>
+    <string>drv8825_arduino.grxml</string>
+    <string>drv8833_arduino.grxml</string>
+    <string>ds18b20_arduino.grxml</string>
+    <string>encoder_arduino.grxml</string>
+    <string>hcsr04_arduino.grxml</string>
+    <string>hcsr501_arduino.grxml</string>
+    <string>hm10_arduino.grxml</string>
+    <string>hx711_arduino.grxml</string>
+    <string>ky003_arduino.grxml</string>
+    <string>ky012_arduino.grxml</string>
+    <string>ky018_arduino.grxml</string>
+    <string>ky022_arduino.grxml</string>
+    <string>ky024_arduino.grxml</string>
+    <string>ky035_arduino.grxml</string>
+    <string>l298n_arduino.grxml</string>
+    <string>lcd_1602_i2c_arduino.grxml</string>
+    <string>lcd_parallel_arduino.grxml</string>
+    <string>led_arduino.grxml</string>
+    <string>led_rgb_arduino.grxml</string>
+    <string>lidar_tfluna_I2C_arduino.grxml</string>
+    <string>lm386_arduino.grxml</string>
+    <string>lm2596_a4988.grxml</string>
+    <string>lm2596_arduino.grxml</string>
+    <string>lm2596_l298n.grxml</string>
+    <string>lm2596_lm386.grxml</string>
+    <string>max6675_arduino.grxml</string>
+    <string>mpu6050_arduino.grxml</string>
+    <string>mq3_arduino.grxml</string>
+    <string>pca9685_arduino.grxml</string>
+    <string>pushbutton_arduino.grxml</string>
+    <string>rplidar_arduino.grxml</string>
+    <string>sdCard_arduino.grxml</string>
+    <string>servo_arduino.grxml</string>
+    <string>uln2003_arduino.grxml</string>
+	<string>7segment_arduino.grxml</string>
+	<string>arcade_pushbutton_arduino.grxml</string>
+	<string>ky008_arduino.grxml</string>
+  </ruleFileNames>
+  <name>CONNECT</name>
+  <TriggerRuleNum>0</TriggerRuleNum>
+  <choiceMethod>Design</choiceMethod>
+  <interimCandidates>Unspecified</interimCandidates>
+  <finalCandidates>Unspecified</finalCandidates>
+  <recognizeSourceFiles />
+  <applySourceFiles />
+  <generationAfterNormal>Loop</generationAfterNormal>
+  <generationAfterChoice>Stop</generationAfterChoice>
+  <generationAfterCycleLimit>Stop</generationAfterCycleLimit>
+  <generationAfterNoRules>Stop</generationAfterNoRules>
+  <generationAfterTriggerRule>Stop</generationAfterTriggerRule>
+</ruleSet>
