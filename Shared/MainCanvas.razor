@@ -6,12 +6,11 @@
 
 
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
-        @foreach (var line in ConnLines.Select((line, index) => (line, index)))
+        @foreach (var line in GetAllGridLines(ConnLines))
         {
-            var gridLines = GetGridLines(line.line, 50, line.index * 10);
-            foreach (var segment in gridLines)
+            @foreach (var segment in line.Segments)
             {
-                <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.line.Color" stroke-width="@(3 * zoomFactor)"></line>
+                <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.Color" stroke-width="@(3 * zoomFactor)"></line>
             }
         }
     </svg>
@@ -66,6 +65,41 @@
         set { transform.scale = value; }
     }
 
+    private record Segment(double x1, double y1, double x2, double y2);
+
+    private record GridLine(string Color, List<Segment> Segments);
+
+    private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
+    {
+        Dictionary<int, bool> routes = new();
+
+        foreach (var connection in connections)
+        {
+            var fromPins = connection.From.Data.pinInfo;
+            var fromPin = fromPins[connection.FromId];
+            var startX = (int) Math.Floor(connection.From.X + fromPin.x);
+            
+            if (!routes.TryAdd(startX, false))
+            {
+                routes[startX] = true;
+            }
+        }
+        
+        var lines = new List<GridLine>();
+
+        for (var i = 0; i < connections.Count; i++)
+        {
+            var connection = connections[i];
+            var fromPins = connection.From.Data.pinInfo;
+            var fromPin = fromPins[connection.FromId];
+            var start = connection.From.X + fromPin.x;
+            var gridLines = GetGridLines(connection, 50, 4 + i * 8, routes[(int) Math.Floor(start)]);
+            lines.Add(new GridLine(connection.Color, gridLines));
+        }
+
+        return lines;
+    }
+
     /// <summary>
     /// Gets 1 of 4 coordinates of a connection line.
     /// </summary>
@@ -73,7 +107,7 @@
     /// <param name="stepSize"></param>
     /// <param name="offset"></param>
     /// <returns>The requested coordinate.</returns>
-    private List<(double x1, double y1, double x2, double y2)> GetGridLines(InstanceConnection conn, double stepSize, double offset)
+    private List<Segment> GetGridLines(InstanceConnection conn, double stepSize, double offset, bool moveHorizontallyFirst)
     {
         ElementPin[] toPins = conn.To.Data.pinInfo;
         ElementPin[] fromPins = conn.From.Data.pinInfo;
@@ -82,37 +116,41 @@
         var start = ZoomCoord((conn.From.X + fromPin.x, conn.From.Y + fromPin.y));
         var end = ZoomCoord((conn.To.X + toPin.x, conn.To.Y + toPin.y));
 
-        var lines = new List<(double x1, double y1, double x2, double y2)>();
+        var lines = new List<Segment>();
 
         double currentX = start.x;
         double currentY = start.y;
 
-        // 1. Diagonal Start Segment
-        double diagonalX = end.x > start.x ? currentX + offset : currentX  - offset;
-        double diagonalY = end.y > start.y ? currentY + offset : currentY - offset;
-        lines.Add((currentX, currentY, diagonalX, diagonalY));
-        currentX = diagonalX;
-        currentY = diagonalY;
+        // Midpoint with offset for separation
+        double midY = (start.y + end.y) / 2 + offset;  
 
-        // 2. Grid Path (align with target X, then target Y)
-        while (Math.Abs(currentX - end.x) > stepSize)
+        if (moveHorizontallyFirst)
         {
-            double nextX = currentX + Math.Sign(end.x - currentX) * stepSize;
-            lines.Add((currentX, currentY, nextX, currentY));
-            currentX = nextX;
+            // Move horizontally first
+            lines.Add(new Segment(currentX, currentY, end.x, currentY));
+            currentX = end.x;
+
+            // Move vertically to the target y
+            lines.Add(new Segment(currentX, currentY, currentX, end.y));
+        }
+        else
+        {
+            // Move vertically first
+            lines.Add(new Segment(currentX, currentY, currentX, midY));
+            currentY = midY;
+
+            // Move horizontally towards the target x
+            lines.Add(new Segment(currentX, currentY, end.x, currentY));
+            currentX = end.x;
+
+            // Move vertically to the target y
+            lines.Add(new Segment(currentX, currentY, currentX, end.y));
         }
 
-        while (Math.Abs(currentY - end.y) > stepSize)
-        {
-            double nextY = currentY + Math.Sign(end.y - currentY) * stepSize;
-            lines.Add((currentX, currentY, currentX, nextY));
-            currentY = nextY;
-        }
-
-        // 3. Diagonal End Segment
-        lines.Add((currentX, currentY, end.x, end.y));
         return lines;
     }
+
+
 
 
     /// <summary>
