@@ -11,6 +11,8 @@
             @foreach (var segment in line.Segments)
             {
                 <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.Color" stroke-width="@(3 * zoomFactor)"></line>
+                <circle cx="@segment.x1" cy="@segment.y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+                <circle cx="@segment.x2" cy="@segment.y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
             }
         }
     </svg>
@@ -71,17 +73,18 @@
 
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
-        Dictionary<int, bool> routes = new();
+        Dictionary<(int, int), bool> routes = new();
 
         foreach (var connection in connections)
         {
             var fromPins = connection.From.Data.pinInfo;
             var fromPin = fromPins[connection.FromId];
             var startX = (int) Math.Floor(connection.From.X + fromPin.x);
+            var startId = connection.From.localId;
             
-            if (!routes.TryAdd(startX, false))
+            if (!routes.TryAdd((startId, startX), false))
             {
-                routes[startX] = true;
+                routes[(startId, startX)] = true;
             }
         }
         
@@ -93,7 +96,7 @@
             var fromPins = connection.From.Data.pinInfo;
             var fromPin = fromPins[connection.FromId];
             var start = connection.From.X + fromPin.x;
-            var gridLines = GetGridLines(connection, 50, 4 + i * 8, routes[(int) Math.Floor(start)]);
+            var gridLines = GetGridLines(connection, 50, 4 + i * 8, routes[(connection.From.localId, (int)Math.Floor(start))]);
             lines.Add(new GridLine(connection.Color, gridLines));
         }
 
