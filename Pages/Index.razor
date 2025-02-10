@@ -40,7 +40,7 @@
         <div>
             <h2 style="font-weight: bold">Unsupported Device</h2>
             <p style="color: black; font-size: 18px;">
-                This web application is not designed for mobile devices.  
+                This web application is not designed for mobile devices.
                 Please access it from a desktop or laptop for the best experience.
             </p>
         </div>
@@ -51,49 +51,48 @@
     <BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
 }
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
-    <div class="toolbar" data-title="Toolbar" data-intro="This is the toolbar. This contains tools to modify, research, and run your project">
+    <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
         <div class="logo-and-adarc">
             <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
             <span class="adarc-text">ADArC</span>
         </div>
 
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial">
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to rerun this tutorial.">
             <!-- change -->
             💡 Tutorial
         </button>
         <div class="center-toolbar">
-            <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen=true" data-title="Examples" data-intro="Click here to load example circuits.">
+            <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" class="toolbar-button" @onclick="() => _exampleModalOpen = true" data-title="Examples" data-intro="Click here to load example circuits.">
                 📖 Examples
             </button>
-            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="These are your Import and Export buttons. These are used to save and upload your current and past projects for future work.">
-                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
-                    <span>⬆️ Export</span>
-                </button>
-
+            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="LoadFromFile"/>
                 <label for="import-button" class="toolbar-button" style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")">
                     <span>⬇️️ Import</span>
                 </label>
+                <button style="visibility:@(selLockedOut || IsRunning ? "hidden" : "visible")" @onclick="DownloadFile" class="toolbar-button">
+                    <span>⬆️ Export</span>
+                </button>
             </div>
-            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Buttons" data-intro="This will take you to our dedicated help website, where you can research the datasheets and uses of each of the components we have available.">
+            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library.">
                 <span>ℹ Help</span>
             </button>
             <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter.">
                 <span>🐛 Report Bug</span>
             </button>
-            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-intro="Click here to generate and copy a URL with your circuit.">
+            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
                 <span>🔗 Generate URL</span>
             </button>
             @if (isUrlBoxVisible)
             {
-            <div class="url-modal">
-                <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
-                <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                    <span>@copyButtonText</span>
-                </button>
-            </div>
+                <div class="url-modal">
+                    <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
+                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                        <span>@copyButtonText</span>
+                    </button>
+                </div>
             }
-            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="This will compile your code and start simulating your project. This should be run when you are finished designing your project.">
+            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
         </div>
@@ -102,7 +101,7 @@
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
-        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="This is the Component Palette. Here you can choose from our library of components to create your project. All the wires are automatically connected once you add a component to the workbench.">
+        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from our library of components to create your project. All wires are automatically connected to the Arduino once you add a component to the workbench.">
             <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
                 @if (isLeftExpanded)
                 {
@@ -118,7 +117,7 @@
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
-        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="This is where you can start coding the digital Arduino. It follows the same design as the Arduino IDE and contains sample code for each component on the workbench.">
+        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
                 @if (isRightExpanded)
                 {
@@ -204,6 +203,7 @@
         isRightExpanded = false;
         StateHasChanged();
     }
+
 
     void ToggleRightSidebar()
     {
@@ -466,14 +466,13 @@
             ToastService.AddToast("Code panel updated.", Variant.Info);
             if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
         }
-        
 
 
         moverOffsetLeft = 0;
         moverOffsetTop = 0;
         targetCardComponentId = -1;
     }
-    
+
     private void ReportBug()
     {
         const string googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdI9w3ABXX34mRSPd0VRiu5LT63fRXSKzNQKhZypOkse2YuiA/viewform?usp=dialog";

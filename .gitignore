@@ -37,7 +37,6 @@ bld/
 [Oo]ut/
 [Ll]og/
 [Ll]ogs/
-wwwroot/build/*
 
 
 # Visual Studio 2015/2017 cache/options directory
@@ -373,3 +372,4 @@ FodyWeavers.xsd
 # Build files
 
 # wwwroot/build/
+/wwwroot/build/
