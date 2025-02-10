@@ -6,12 +6,14 @@
 
 
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
-        @foreach (var line in ConnLines.Select((line, index) => (line, index)))
+        @foreach (var line in GetAllGridLines(ConnLines))
         {
-            var gridLines = GetGridLines(line.line, 50, line.index * 10);
-            foreach (var segment in gridLines)
+            var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
+            @foreach (var segment in line.Segments)
             {
-                <line x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.line.Color" stroke-width="@(3 * zoomFactor)"></line>
+                <line class="segment @(highlighted ? "highlighted" : "")" x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.Color" stroke-width="@(3 * zoomFactor)"></line>
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@segment.x1" cy="@segment.y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@segment.x2" cy="@segment.y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
             }
         }
     </svg>
@@ -66,54 +68,79 @@
         set { transform.scale = value; }
     }
 
+    private record Segment(double x1, double y1, double x2, double y2);
+
+    private record GridLine(string Color, (double x, double y) Start, (double x, double y) End, int FromId, int ToId, List<Segment> Segments);
+
     /// <summary>
-    /// Gets 1 of 4 coordinates of a connection line.
+    /// Computes all the gridlines for the given connections
     /// </summary>
-    /// <param name="conn">Connection to display.</param>
-    /// <param name="stepSize"></param>
-    /// <param name="offset"></param>
-    /// <returns>The requested coordinate.</returns>
-    private List<(double x1, double y1, double x2, double y2)> GetGridLines(InstanceConnection conn, double stepSize, double offset)
+    /// <param name="connections"></param>
+    /// <returns></returns>
+    private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
-        ElementPin[] toPins = conn.To.Data.pinInfo;
-        ElementPin[] fromPins = conn.From.Data.pinInfo;
-        var toPin = toPins[conn.ToId];
-        var fromPin = fromPins[conn.FromId];
-        var start = ZoomCoord((conn.From.X + fromPin.x, conn.From.Y + fromPin.y));
-        var end = ZoomCoord((conn.To.X + toPin.x, conn.To.Y + toPin.y));
-
-        var lines = new List<(double x1, double y1, double x2, double y2)>();
-
-        double currentX = start.x;
-        double currentY = start.y;
-
-        // 1. Diagonal Start Segment
-        double diagonalX = end.x > start.x ? currentX + offset : currentX  - offset;
-        double diagonalY = end.y > start.y ? currentY + offset : currentY - offset;
-        lines.Add((currentX, currentY, diagonalX, diagonalY));
-        currentX = diagonalX;
-        currentY = diagonalY;
-
-        // 2. Grid Path (align with target X, then target Y)
-        while (Math.Abs(currentX - end.x) > stepSize)
+        // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
+        Dictionary<(int, int), bool> routes = new();
+        var lines = new List<GridLine>();
+        
+        foreach (var connection in connections)
         {
-            double nextX = currentX + Math.Sign(end.x - currentX) * stepSize;
-            lines.Add((currentX, currentY, nextX, currentY));
-            currentX = nextX;
+            var toPins = connection.To.Data.pinInfo;
+            var fromPins = connection.From.Data.pinInfo;
+            var toPin = toPins[connection.ToId];
+            var fromPin = fromPins[connection.FromId];
+            var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
+            var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
+            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId,[]));
+            var startId = connection.From.localId;
+            var startX = (int)Math.Floor(start.x);
+            
+            // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
+            if (!routes.ContainsKey((startId, startX)))
+            {
+                routes[(startId, startX)] = false;
+            }
+            else
+            {
+                routes[(startId, startX)] = true;
+            }
+        }
+        
+        for (var i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))]);
         }
 
-        while (Math.Abs(currentY - end.y) > stepSize)
-        {
-            double nextY = currentY + Math.Sign(end.y - currentY) * stepSize;
-            lines.Add((currentX, currentY, currentX, nextY));
-            currentY = nextY;
-        }
-
-        // 3. Diagonal End Segment
-        lines.Add((currentX, currentY, end.x, end.y));
         return lines;
     }
 
+    /// <summary>
+    /// Populates the segments for a given gridline
+    /// </summary>
+    /// <param name="line">the line to populate segments of</param>
+    /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
+    /// <param name="moveHorizontallyFirst">whether to move horizontally or vertically first</param>
+    private void GetGridSegments(GridLine line, double offset, bool moveHorizontallyFirst)
+    {
+        var start = line.Start;
+        var end = line.End;
+
+        var currentX = start.x;
+        var currentY = start.y;
+
+        var midY = (start.y + end.y) / 2 + offset;  
+
+        if (!moveHorizontallyFirst)
+        {
+            line.Segments.Add(new Segment(currentX, currentY, currentX, midY));
+            currentY = midY;
+        }
+
+        line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
+        currentX = end.x;
+        line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+    }
 
     /// <summary>
     /// Currently unused. Handles scrollwheel zooming.
