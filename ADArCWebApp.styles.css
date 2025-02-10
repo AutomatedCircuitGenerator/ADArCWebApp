@@ -914,6 +914,17 @@ svg[b-9ycb6eis6j] {
 line[b-9ycb6eis6j] {
     z-index: 50;
 }
+
+.segment[b-9ycb6eis6j], .node[b-9ycb6eis6j] {
+    transition: stroke-width 0.2s ease, filter 0.2s ease;
+}
+
+.segment.highlighted[b-9ycb6eis6j], .node.highlighted[b-9ycb6eis6j] {
+    z-index: 5;
+    stroke-width: 4px !important;
+    filter: drop-shadow(0px 0px 4px white) brightness(1.5);
+}
+
 /* /Shared/MainLayout.razor.rz.scp.css */
 body[b-8rp2ts1m1k] {
     overflow: hidden;
