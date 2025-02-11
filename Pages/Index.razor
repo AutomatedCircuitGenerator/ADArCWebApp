@@ -144,7 +144,7 @@
         </div>
     }
 
-    @if (LoadingProgress == -1)
+    @if (LoadingProgress == -1 && !_loadingFromUrl)
     {
         <div class="workbench-title">
             <span @onclick="ShowRightClickTooltipFn">💡 Workbench</span>
@@ -162,9 +162,14 @@
 
 
 </div>
-<div class="progress-container" style="display: @((LoadingProgress < 0) && !_loadingFromUrl ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(LoadingProgress, 0))% component rules loaded</span>
-    <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+<div class="progress-container" style="display: @(_loadingFromUrl || LoadingProgress >= 0 ? "block" : "none"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">
+        @(_loadingFromUrl && LoadingProgress < 0 ? "Loading example..." : $"{Math.Round(LoadingProgress, 0)}% component rules loaded")
+    </span>
+    @if (LoadingProgress is >= 0 and <= 100)
+    {
+        <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+    }
 </div>
 </body>
 
@@ -657,6 +662,11 @@
         var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
         shouldShowBoardSelect = !hasUrlParam;
         Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
+
+        if (!shouldShowBoardSelect)
+        {
+            _loadingFromUrl = true;
+        }
 
         // Only lock selection if we're not loading from URL
         selLockedOut = !hasUrlParam;
@@ -1413,7 +1423,6 @@
                         {
                             Console.WriteLine("Setting shouldShowBoardSelect to false");
                             App.shouldShowBoardSelect = false;
-                            App._loadingFromUrl = true;
                             App.StateHasChanged();
 
                             Console.WriteLine("Setting board type");
@@ -1431,6 +1440,7 @@
                             }
 
                             App._loadingFromUrl = false;
+                            App.ToastService.AddToast("Example loaded", Variant.Info);
                             Console.WriteLine("Board and bench setup complete");
                         });
 
