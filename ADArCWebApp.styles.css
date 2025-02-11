@@ -922,7 +922,7 @@ line[b-9ycb6eis6j] {
 .segment.highlighted[b-9ycb6eis6j], .node.highlighted[b-9ycb6eis6j] {
     z-index: 5;
     stroke-width: 4px !important;
-    filter: drop-shadow(0px 0px 4px white) brightness(1.5);
+    filter: drop-shadow(0px 0px 3px white);
 }
 
 /* /Shared/MainLayout.razor.rz.scp.css */
