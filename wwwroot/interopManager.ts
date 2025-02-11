@@ -236,20 +236,81 @@ export namespace interopManager {
             URL.revokeObjectURL(url);
         }
 
-        // runs the tutorial using Intro.js
-        public runTutorial() {
 
-            const intro = (<any>window).introJs().setOption('keyboardNavigation', false);
+        public runTutorial() {
+            const intro = (<any>window).introJs()
+                .setOption('keyboardNavigation', false);
 
             if (intro) {
-                console.log("intro is a valid object")
+                console.log("intro is a valid object");
+
+                // Add custom positioning for specific steps
+                intro.onafterchange(function (targetElement: any) {
+                    const currentStep = this._currentStep;
+
+                    // Use a longer timeout to ensure intro.js has finished its positioning
+                    setTimeout(() => {
+                        const tooltip = document.querySelector('.introjs-tooltip') as HTMLElement;
+                        if (!tooltip) return;
+
+                        // Apply custom positioning based on step
+                        let customPosition: { top?: string; marginLeft?: string } = {};
+                        switch (currentStep) {
+                            case 1: // Step 2 (0-based index)
+                                customPosition.top = '170px'; // 70px + 100px
+                                break;
+                            case 2: // Step 3
+                            case 3: // Step 4
+                            case 4: // Step 5
+                            case 5: // Step 6
+                            case 6: // Step 7
+                            case 7: // Step 8
+                            case 8: // Step 9
+                                customPosition.top = '100px';
+                                break;
+                            case 9: // Step 10
+                                customPosition.marginLeft = '100px';
+                                break;
+                            case 10: // Step 11
+                                customPosition.marginLeft = '-100px';
+                                break;
+                        }
+
+                        // Apply custom positioning
+                        if (customPosition.top) tooltip.style.top = customPosition.top;
+                        if (customPosition.marginLeft) tooltip.style.marginLeft = customPosition.marginLeft;
+
+                        // Add a mutation observer to prevent intro.js from changing it back
+                        const observer = new MutationObserver((mutations) => {
+                            mutations.forEach((mutation) => {
+                                if (mutation.type === 'attributes' && mutation.attributeName === 'style') {
+                                    if (customPosition.top && tooltip.style.top !== customPosition.top) {
+                                        tooltip.style.top = customPosition.top;
+                                    }
+                                    if (customPosition.marginLeft && tooltip.style.marginLeft !== customPosition.marginLeft) {
+                                        tooltip.style.marginLeft = customPosition.marginLeft;
+                                    }
+                                }
+                            });
+                        });
+
+                        observer.observe(tooltip, {
+                            attributes: true,
+                            attributeFilter: ['style']
+                        });
+
+                        // Cleanup observer after a short delay
+                        setTimeout(() => observer.disconnect(), 500);
+
+                    }, 50); // Increased timeout to ensure intro.js has finished
+                });
+
+                intro.start();
             } else {
-                console.log("intro not valid")
+                console.log("intro not valid");
             }
-
-            intro.start();
         }
-
+        
         setBoard(board: BoardType) {
             let boardConstructor: BoardConstructor;
             switch (board) {

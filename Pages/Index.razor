@@ -50,18 +50,18 @@
 {
     <BoardSelect OnSelect="HandleBoardSelect" @ref="boardSelect"></BoardSelect>
 }
-<div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
-    <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
+<div class="page" data-title="Welcome to ADArC" data-step="1" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
+    <div class="toolbar" data-title="Toolbar" data-step="2" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
         <div class="logo-and-adarc">
             <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
             <span class="adarc-text">ADArC</span>
         </div>
 
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to rerun this tutorial.">
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-step="3" data-intro="Click here to rerun this tutorial.">
             💡 Tutorial
         </button>
         <div class="center-toolbar">
-            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file." style="opacity:@(IsRunning ? "0.5" : "1.0")">
+            <div class="Import-Export" data-title="Import & Export Buttons" data-step="4" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file." style="opacity:@(IsRunning ? "0.5" : "1.0")">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning ? null : LoadFromFile)" disabled="@IsRunning"/>
                 <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning ? "none" : "auto")">
                     <span>⬇️️ Import</span>
@@ -70,16 +70,16 @@
                     <span>⬆️ Export</span>
                 </button>
             </div>
-            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
+            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-step="5" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
                 <span>🔗 Generate URL</span>
             </button>
-            <button class="toolbar-button" @onclick="() => _exampleModalOpen = true" data-title="Examples" data-intro="Click here to load example circuits.">
+            <button class="toolbar-button" @onclick="() => _exampleModalOpen = true" data-title="Examples" data-step="6" data-intro="Click here to load example circuits.">
                 📖 Examples
             </button>
-            <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter.">
+            <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-step="7" data-intro="Click here to report any bugs or issues you encounter.">
                 <span>🐛 Report Bug</span>
             </button>
-            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Button" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
+            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Button" data-step="8" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
                 <span>ℹ Help</span>
             </button>
             @if (isUrlBoxVisible)
@@ -91,7 +91,7 @@
                 </button>
             </div>
             }
-            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
+            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-step="9" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
         </div>
@@ -100,7 +100,7 @@
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
-        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from our library of components to create your project. All wires are automatically connected to the Arduino once you add a component to the workbench.">
+        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-step="10" data-intro="You can choose from our library of components to create your project. All wires are automatically connected to the Arduino once you add a component to the workbench.">
             <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
                 @if (isLeftExpanded)
                 {
@@ -116,7 +116,7 @@
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
-        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
+        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-step="11" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
                 @if (isRightExpanded)
                 {
