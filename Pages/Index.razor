@@ -143,7 +143,7 @@
         </div>
     }
 
-    @if (LoadingProgress == -1 && !_loadingFromUrl)
+    @if (LoadingProgress == -1)
     {
         <div class="workbench-title">
             <span @onclick="ShowRightClickTooltipFn">💡 Workbench</span>
@@ -161,14 +161,10 @@
 
 
 </div>
-<div class="progress-container" style="display: @(_loadingFromUrl || LoadingProgress >= 0 ? "block" : "none"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
-    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">
-        @(_loadingFromUrl && LoadingProgress < 0 ? "Loading example..." : $"{Math.Round(LoadingProgress, 0)}% component rules loaded")
-    </span>
-    @if (LoadingProgress is >= 0 and <= 100)
-    {
-        <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
-    }
+<div class="progress-container" style="display: @(LoadingProgress < 0 ? "none" : "block"); position: fixed; bottom: 50px; left: 50%; transform: translateX(-50%); width: 400px; height: 60px; padding: 25px; background-color: lightgray; border-radius: 10px;">
+    <span style="display: inline-block; width: 100%; text-align: center; color: black; transform: translateY(-13px);">@(Math.Round(LoadingProgress, 0))% component rules loaded</span>
+    <div class="progress-bar" style="width: @(LoadingProgress)%; height: 10px; background-color: dodgerblue; border-radius: 13px; transform: translateY(-10px);"></div>
+
 </div>
 </body>
 
@@ -177,7 +173,7 @@
     private bool _exampleModalOpen;
 
     private BoardSelect boardSelect;
-    private bool shouldShowBoardSelect = true;
+    private bool shouldShowBoardSelect;
 
     bool isLeftExpanded = true;
     private string generatedUrl = string.Empty;
@@ -654,26 +650,29 @@
         }
 
         _isMobileUser = await AppInterop.IsMobileUser();
-
+        
         // Check if we're loading from a URL
         var uri = new Uri(navMan.Uri);
         var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
         var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
         shouldShowBoardSelect = !hasUrlParam;
+        StateHasChanged();
         Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
 
-        if (!shouldShowBoardSelect)
-        {
-            _loadingFromUrl = true;
-        }
-
-        // Only lock selection if we're not loading from URL
-        selLockedOut = !hasUrlParam;
+        // Only lock selection if we're not loading from URL uhm
+        // selLockedOut = !hasUrlParam;
 
         Console.WriteLine("Loading rulesets...");
-        int x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
+        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
         await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
+
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+        
+        if (hasUrlParam)
+        {
+            await LoadFromUrl(queryParams["c"]);
+        }
+
 
         if (_scheduleBenchSetup)
         {
@@ -688,8 +687,7 @@
         LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
 
-        // Force a re-render to ensure visibility changes are applied
-        await InvokeAsync(StateHasChanged);
+        StateHasChanged();
     }
 
     /// <summary>
@@ -1352,10 +1350,8 @@
             throw;
         }
     }
-
-    private bool _loadingFromUrl;
-
-    [JSInvokable]
+    
+    // [JSInvokable]
     public static async Task LoadFromUrl(string compressedData)
     {
         try
@@ -1438,7 +1434,6 @@
                                 CompPane.ReleaseLockout();
                             }
 
-                            App._loadingFromUrl = false;
                             App.ToastService.AddToast("Example loaded", Variant.Info);
                             Console.WriteLine("Board and bench setup complete");
                         });

@@ -121,4 +121,9 @@
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Content Remove="wwwroot\build\build.js" />
+    <Content Remove="wwwroot\build\build.js.map" />
+  </ItemGroup>
+
 </Project>
