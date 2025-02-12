@@ -13,7 +13,7 @@
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 1rem">
             @foreach (var example in _suggestions)
             {
-                <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{NavigationManager.Uri}{example.Url}")" target="_blank">
+                <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{NavigationManager.Uri}{example.Url}&e=1")" target="_blank">
                     <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
                         @example.Title
                     </h3>
@@ -132,6 +132,11 @@
             [20] = 1,
             [6] = 1
         }), "?c=H4sIAAAAAAAAA71W227bOBB9z1cQyosDeBNJrl1bxgJJbTcNkN0GTtJuAQMBLY1sAhRpkFSabKB_75C6WHJ6QR92H2JpLmc4Z3hI5eWIEO_YD6JB377NZAJe5B0zEfM8AbLKfX8wu1BJzoQ83TpzsRIH8c9MwQ-Dd--vr8LZPrwSZ2dkpoAaIFQQJrShIgYiU2K2QMp0okFoqVaiMk3K8TGt0J-oYnTNgRhJtJEKSAZU5woSkrCqHBMkBmFYBgaUXgkmTDB6ME1CXWsOKRNArhdzskOMyLO1y48lNoZVDHl3fb94sPE_yXDaDlwuF4u_q8ioE1ku5pV_UK8z21KxwY63TNu2n2WuLFc7lfCtJjQ2OeXEcqVJokBrh2IpyTUTmxIX4-5YYjg8TjhLgfxBdkqucRbPxH8K_HYP5eQeLubz5eL2Flvxn8pmzh_1y0oQcv51Tc7OrgQzjHL2L7jFY5lluWAxNUwKm3ULOGt-uoYNE73JyPdPpoi6NVQZ3CQb62JIKhVJYJ1vELCxFfAPAWDqGSNZTWRudrnRNo6uv5BYr55z_-P93c393cm0HWxm_d1oNe9WrKjG_j4XsWvLSgV7sBKLJcceK73ZptZUo3QwaXn5jjxSngM29ihZYiGYMLOAnh0qSqxvnxsFINzbGrMLN08qKJebz4qZfUOYj_Oq-Ft9uuUU22yNcHvche1ZugVOpiXQGb-ANtOzDZV7BGV3r4BFqQL-4nbmwhjIdsYOCHXVOkEJNZSkSmZuTvWBRN2wXnkcTzdg5pjUqyH9ruZOyrk0GtopHFjPKT6cIyQqX8ut7GZx0RR1XG6s8_UpXzmJtuRVbm2znw0Xs8UjtZU80eVayKGJldcUGfh1u6Sz7eFw2Pf7peyXWNbqO-ZSA1H2RDtIcQ6vCuJt8ZOKrqqr-QU4l19d2Qy1rOy92KoM3y3htwpcOnVYfEpVG4q_DbzaMTdcPLwm173WYEEpuzyqg-IdhZeOVYK9dlLKuB1ZUU46AU6fe0F9CWSU89JH1pDae1jAk6nBTmhe9VnJdtqLXo5sK15Qv9lPTxBEfr-2PqBIuRWqF4mc88Z_yfGS41eJFwWN7x8vGoeTxvziRWGwN4-DYTQe-C17dBB_G7Wj4441aVuh37GCjhW2LMvyhiqaWaqF9RZlzAsPGIe_wTj0O5RH49Nhm3Tgj7ukR5NWgqXdzfg_aQ8OaA9-g_aozXoynHRZTwYdksMIv0wHtA9S_mPelRPd9TXQdjrsAP-v8t94_a73TTQMa09xtH_gT3FUfAPl8OVTnwkAAA"),
+        new("16 Servos", "16-servos", new FrequencyVector<int>(new Dictionary<int, uint>
+        {
+            [2] = 1,
+            [23] = 16,
+        }), "?c=H4sIAAAAAAAAA9WYbW-jRhDH3-dTjIgq2RKOd1iWpyjStbmqvReVTuqbVnVeYHttU2GIAOd0ivju3QVjs2Old4d7lUhizAz79P_twDB5vQGwbhlGGNr69DFfSyuybpNslR7WEhYHxvjj77J4ye92jfHzIltk8zk8FjKuJMQZxEURf4Z8A00zyJd_y1VVLrLWLPWx_AuDp_tjz9b_nJdJleRZCZM426ZyusiSrDq7dQ94eGX2F39rMnCSQXbYL2VRtkM2K_iYnIZ0Xdv1bFfYyG10bEQbmR3age3bni1s1-a28vbGfZ8USpFaFGzSeBtVxUHCXsZq6QqTwlAm2dbexGnZudeycy-yZZ6nvXbwALp_M_S7l_J1kcF8_mNVxasdSH1oVgtVDklVwiovClk-59lad1XKVHPY5AVMtLBEDcbu1Ve7S4CBMvS581N7rPXw6ue4B8nTXdzMNDkjSZ6mai1QL7K6XVLaLum3_EVCtZPHvrCMS7kGhUD71h2QYct5l0zOQDon9LY-UdsEE8NuRwCcwg9qYHY_n3_QQ-ylmrjh1rWGCdP0VBu1DdtCynLaTaDmNed4APTD8wLA3KdmR9VEjzsVoD3R8GknMyj0rLphb6bjQHXzXcuvUzYDPKkL2Fnfe_mGPj2hUvhV-tib6poo_KK4N6TRsPpUJJU0Jp_eH2PoHNRtmAHoz1qm8eeJM210qlMtaJVnVaFulibqnqUOtw3s1RgaQhOf1vEZtX8urej1Rq_Bwu5MP8gQI2Z31q_JdpeqT2VF2SFNT_5f0nwZpx_WVuScfH9YUeCEJ_NPdQ3P5i2KKAjdnu2p60HP9nvz3mJgWGHfcphhoWE5PUur_BgX8V5LrbW3bq9ZDlHsfIti3pcs0L8TfdE8FIZoETh3wpDNDQzfWfbRqdxNiuh7mo5cZSrmW7bpdSPWOeqb81eHjxN8fDg-xzHxzTxCzyf0Zv7I4bkEnjsYHnLOTXooTHzIw4DwQyFGDlAQgGJ49GFo8vN9En0uoed7I4fnEXjeNdFH6LkBiT6XUX5uMPbo8wlA_xqAHskdJGEqgEiTx_-ZM78LwIAADAYDFEj4OZxmD4rP4WOPv5DgC6_A5_979rh8dRl_8kBG-OE3ve3SG9gl-cMxAKr0G9IEgmMHSKsFxGsAkjt4hswkePkEnOHoEdLyA6-pPwKToBCBQVAEnAAUYuyv0EgLEBxegSB3kRD0LrKwRxF6Y8_CSMsQHF6H-JzEoM_QIBgwGoM-Y2MHSMsQ_A_rENenmfjiRdoffSampQheVYuQdxmXkVSsHBQhG30iocUIDq9GLhIJR0FikN7EHMf-jyykxQgOr0ZUDApajgQ0BtlFPTLaXHyj_up_AIyZCRP9GgAA"),
     ];
 
 }

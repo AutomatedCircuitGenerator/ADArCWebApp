@@ -132,8 +132,8 @@
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
             <ExampleSelect ComponentFrequencies="_componentFrequencies" OnClose="() => _exampleModalOpen = false"></ExampleSelect>
         </Modal>
-        <ToastQueue></ToastQueue>
     </div>
+    <ToastQueue></ToastQueue>
     @if (showZoomTooltip)
     {
         <div class="zoom-tooltip" style="background: #ece1be">
@@ -654,6 +654,7 @@
         var uri = new Uri(navMan.Uri);
         var queryParams = System.Web.HttpUtility.ParseQueryString(uri.Query);
         var hasUrlParam = !string.IsNullOrEmpty(queryParams["c"]);
+        var isExample = !string.IsNullOrEmpty(queryParams["e"]);
         shouldShowBoardSelect = !hasUrlParam;
         StateHasChanged();
         Console.WriteLine($"Should show board select: {shouldShowBoardSelect} (URL parameter present: {hasUrlParam})");
@@ -669,7 +670,7 @@
         
         if (hasUrlParam)
         {
-            await LoadFromUrl(queryParams["c"]);
+            await LoadFromUrl(queryParams["c"], isExample);
         }
 
 
@@ -682,7 +683,6 @@
             StateHasChanged();
         }
 
-        await Task.Delay(1000);
         LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
 
@@ -1351,7 +1351,7 @@
     }
     
     // [JSInvokable]
-    public static async Task LoadFromUrl(string compressedData)
+    public static async Task LoadFromUrl(string compressedData, bool example = false)
     {
         try
         {
@@ -1433,7 +1433,15 @@
                                 CompPane.ReleaseLockout();
                             }
 
-                            App.ToastService.AddToast("Example loaded", Variant.Info);
+                            if (example)
+                            {
+                                App.ToastService.AddToast("Example loaded successfully. To navigate back to the previous workspace, click on the previous tab.", Variant.Info);
+                            }
+                            else
+                            {
+                                App.ToastService.AddToast("Load from URL complete", Variant.Info);
+                            }
+
                             Console.WriteLine("Board and bench setup complete");
                         });
 
