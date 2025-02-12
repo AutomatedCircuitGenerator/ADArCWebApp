@@ -266,13 +266,13 @@ export namespace interopManager {
                             case 6: // Step 7
                             case 7: // Step 8
                             case 8: // Step 9
-                                customPosition.top = '100px';
+                                customPosition.top = '80px';
                                 break;
                             case 9: // Step 10
-                                customPosition.marginLeft = '100px';
+                                customPosition.marginLeft = '80px';
                                 break;
                             case 10: // Step 11
-                                customPosition.marginLeft = '-100px';
+                                customPosition.marginLeft = '-80px';
                                 break;
                         }
 
