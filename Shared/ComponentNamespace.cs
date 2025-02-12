@@ -164,24 +164,25 @@ namespace ADArCWebApp.Shared
             },
             {
                 9,
-                new ComponentDataBuilder("MQ-3", true, "Input/Gas Sensors", .66, 75, 75, typeof(RazorMQ3),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
+                new ComponentDataBuilder("Alcohol Sensor", true, "Input/Gas Sensors", .66, 75, 75, typeof(RazorMQ3),
+                        codeForGen: new()
                         {
-                            "global",
-                            "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value"
-                        },
-                        {
-                            "setup",
-                            "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
-                        },
-                        {
-                            "loopMain",
-                            "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading\n"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["gnd", "5V", "analog_out"], gsNodeName: "mq3").Property("alcohol", 0.0).Finish()
+                            { "include", "" },
+                            {
+                                "global",
+                                "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value"
+                            },
+                            {
+                                "setup",
+                                "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+                            },
+                            {
+                                "loopMain",
+                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading\n"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, paneHoverText: "MQ-3", pins: ["gnd", "5V", "analog_out"], gsNodeName: "mq3")
+                    .Property("alcohol", 0.0).Finish()
             },
             {
                 10,
