@@ -203,7 +203,10 @@
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
         {
-            individualData?.CompParams[prop.Name.ToLower()].SetValue(Convert.ToDouble(e.Value));
+            if (double.TryParse(e.Value.ToString(), out double result))
+            {
+                individualData?.CompParams[prop.Name.ToLower()].SetValue(result);
+            }
         }
         else
         {
