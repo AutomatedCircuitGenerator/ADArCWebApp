@@ -64,79 +64,73 @@ tr.introjs-showElement > th {
 }
 
 .introjs-arrow {
-    border: 30px solid transparent !important;
-    content: "" !important;
-    position: absolute !important;
+    border: 30px solid transparent;
+    content: "";
+    position: absolute;
 }
 
 .introjs-arrow.top {
-    border: 30px solid transparent !important;
-    top: -60px !important;
-    left: 20px !important;
-    border-bottom-color: #fff !important;
+    top: -60px;
+    left: 20px;
+    border-bottom-color: #fff;
 }
 
 .introjs-arrow.top-right {
-    top: -60px !important;
-    right: 20px !important;
-    border-bottom-color: #fff !important;
+    top: -60px;
+    right: 20px;
+    border-bottom-color: #fff;
 }
 
 .introjs-arrow.top-middle {
-    top: -60px !important;
-    left: 50%; !important;
-    margin-left: -10px !important;
-    border-bottom-color: #fff !important;
+    top: -60px;
+    left: 50%;
+    margin-left: -5px;
+    border-bottom-color: #fff;
 }
 
 .introjs-arrow.right {
-    right: -20px !important;
-    top: 20px !important;
-    border-left-color: #fff !important;
+    right: -60px;
+    top: 10px;
+    border-left-color: #fff;
 }
 
 .introjs-arrow.right-bottom {
-    bottom: -20px !important;
-    right: 20px !important;
-    border-left-color: #fff !important;
+    bottom: 10px;
+    right: -10px;
+    border-left-color: #fff;
 }
 
 .introjs-arrow.bottom {
-    bottom: -20px !important;
-    left: 20px !important;
-    border-top-color: #fff !important;
+    bottom: -10px;
+    left: 10px;
+    border-top-color: #fff;
 }
 
 .introjs-arrow.bottom-right {
-    bottom: -20px !important;
-    right: 60px !important;
-    border-top-color: #fff !important;
+    bottom: -10px;
+    right: 10px;
+    border-top-color: #fff;
 }
 
 .introjs-arrow.bottom-middle {
-    bottom: -20px !important;
+    bottom: -10px;
     left: 50%;
-    margin-left: -10px !important;
-    border-top-color: #fff !important;
+    margin-left: -5px;
+    border-top-color: #fff;
 }
 
 .introjs-arrow.left {
-    left: -60px !important;
-    top: 20px !important;
-    border-right-color: #fff !important;
+    left: -60px;
+    top: 10px;
+    border-right-color: #fff;
 }
 
 .introjs-arrow.left-bottom {
-    left: -20px !important;
-    bottom: 20px !important;
-    border-right-color: #fff !important;
+    left: -10px;
+    bottom: 10px;
+    border-right-color: #fff;
 }
 
-.introjs-tooltip {
-    transition: all 0.3s ease-out !important;
-}
-
-/* Base tooltip styles */
 .introjs-tooltip {
     box-sizing: content-box;
     position: absolute;

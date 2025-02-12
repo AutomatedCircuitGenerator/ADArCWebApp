@@ -254,10 +254,10 @@ export namespace interopManager {
                         if (!tooltip) return;
 
                         // Apply custom positioning based on step
-                        let customPosition: { top?: string; marginLeft?: string } = {};
+                        let customPosition: { top?: string; marginLeft?: string; marginRight?: string; } = {};
                         switch (currentStep) {
                             case 1: // Step 2 (0-based index)
-                                customPosition.top = '170px'; // 70px + 100px
+                                customPosition.top = '100px';
                                 break;
                             case 2: // Step 3
                             case 3: // Step 4
@@ -272,13 +272,14 @@ export namespace interopManager {
                                 customPosition.marginLeft = '80px';
                                 break;
                             case 10: // Step 11
-                                customPosition.marginLeft = '-80px';
+                                customPosition.marginRight = '80px';
                                 break;
                         }
 
                         // Apply custom positioning
                         if (customPosition.top) tooltip.style.top = customPosition.top;
                         if (customPosition.marginLeft) tooltip.style.marginLeft = customPosition.marginLeft;
+                        if (customPosition.marginRight) tooltip.style.marginRight = customPosition.marginRight;
 
                         // Add a mutation observer to prevent intro.js from changing it back
                         const observer = new MutationObserver((mutations) => {
@@ -290,6 +291,9 @@ export namespace interopManager {
                                     if (customPosition.marginLeft && tooltip.style.marginLeft !== customPosition.marginLeft) {
                                         tooltip.style.marginLeft = customPosition.marginLeft;
                                     }
+                                    if (customPosition.marginRight && tooltip.style.marginRight !== customPosition.marginRight) {
+                                        tooltip.style.marginRight = customPosition.marginRight;
+                                    }    
                                 }
                             });
                         });
