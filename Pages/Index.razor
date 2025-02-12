@@ -1,26 +1,17 @@
 ﻿@page "/"
 @using GraphSynth.Representation
-@using System.Text.Json
-@using System
 @using System.IO
 @using System.IO.Compression
-@using System.Web;
-@using System.Text
 @using System.Linq
-@using System.Collections.Generic
 @using ADArCWebApp.Shared.Data
 @using ADArCWebApp.Shared.UIComponents
-@using Microsoft.AspNetCore.Components;
 @inject IJSRuntime JsRuntime
 @inject NavigationManager navMan
 @inject BoardService BoardService
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
 
-<PageTitle>Index</PageTitle>
-<head>
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css" rel="stylesheet"/>
-</head>
+<PageTitle>Home | ADArC</PageTitle>
 <body>
 <script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
