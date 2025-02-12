@@ -13,7 +13,7 @@
         <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 1rem">
             @foreach (var example in _suggestions)
             {
-                <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{NavigationManager.Uri}{example.Url}&e=1")" target="_blank">
+                <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank">
                     <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
                         @example.Title
                     </h3>
@@ -26,7 +26,7 @@
     <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem">
         @foreach (var example in _examples)
         {
-            <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{NavigationManager.Uri}{example.Url}&e=1")" target="_blank">
+            <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank">
                 <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
                     @example.Title
                 </h3>
