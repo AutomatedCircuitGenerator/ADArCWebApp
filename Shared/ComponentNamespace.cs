@@ -287,10 +287,10 @@ namespace ADArCWebApp.Shared
                     paneHoverText: "KY-022",
                     codeForGen: new()
                     {
-                        { "include", "#include <IRremote.hpp>" }, { "global", "int IRPIN = ~\"digital_out\";" },
+                        { "include", "#include <IRremote.hpp>" }, { "global", "int IRPIN@ = ~\"digital_out\";" },
                         {
                             "setup",
-                            "  Serial.println(\"Enabling IRin\");\n\n  IrReceiver.begin(IRPIN, ENABLE_LED_FEEDBACK);\n  Serial.println(\"Enabled IRin\");"
+                            "  Serial.println(\"Enabling IRin\");\n\n  IrReceiver.begin(IRPIN@, ENABLE_LED_FEEDBACK);\n  Serial.println(\"Enabled IRin\");"
                         },
                         {
                             "loopMain",

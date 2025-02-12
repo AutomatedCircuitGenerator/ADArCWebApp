@@ -52,27 +52,36 @@
             💡 Tutorial
         </button>
         <div class="center-toolbar">
-            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file." style="opacity:@(IsRunning ? "0.5" : "1.0")">
-                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning ? null : LoadFromFile)" disabled="@IsRunning"/>
-                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning ? "none" : "auto")">
+            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
+                <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
+                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(selLockedOut ? "0.5" : "1.0")">
                     <span>⬇️️ Import</span>
                 </label>
-                <button @onclick="@(IsRunning ? null : DownloadFile)" class="toolbar-button" style="pointer-events:@(IsRunning ? "none" : "auto")">
+                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" disabled="@(IsRunning || selLockedOut)">
                     <span>⬆️ Export</span>
                 </button>
             </div>
-            <button class="toolbar-button" @onclick="ToggleUrlDisplay" data-title="Generate a URL" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
+
+            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears."
+                    disabled="@selLockedOut">
                 <span>🔗 Generate URL</span>
             </button>
-            <button class="toolbar-button" @onclick="() => _exampleModalOpen = true" data-title="Examples" data-intro="Click here to load example circuits.">
+
+            <button class="toolbar-button" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
+                    disabled="@selLockedOut">
                 📖 Examples
             </button>
-            <button class="toolbar-button" @onclick="ReportBug" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter.">
+
+            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
+                    disabled="@selLockedOut">
                 <span>🐛 Report Bug</span>
             </button>
-            <button class="toolbar-button" @onclick="OpenExternalHelp" data-title="Help Button" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears.">
+
+            <button class="toolbar-button" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears."
+                    disabled="@selLockedOut">
                 <span>ℹ Help</span>
             </button>
+
             @if (isUrlBoxVisible)
             {
             <div class="url-modal">
@@ -82,7 +91,7 @@
                 </button>
             </div>
             }
-            <button class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
+            <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
         </div>
@@ -814,6 +823,7 @@
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
 
+        StateHasChanged();
         if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
         await JsRuntime.InvokeVoidAsync("onDelete");
         AppInterop.UpdateCodeWrapper();
