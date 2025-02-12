@@ -1,5 +1,5 @@
 ﻿@inject ToastService ToastService
-<div style="position: absolute; left: 50%; bottom: 10%;" @onmouseover="HandleMouseOver" @onmouseleave="HandleMouseLeave">
+<div style="position: fixed; left: 50%; bottom: 40px;" @onmouseover="HandleMouseOver" @onmouseleave="HandleMouseLeave">
     @foreach (var (toast, _) in _toasts.AsEnumerable().Reverse())
     {
         <Toast Variant="@toast.Variant" OnClose="() => RemoveToast(toast)">@toast.Message</Toast>

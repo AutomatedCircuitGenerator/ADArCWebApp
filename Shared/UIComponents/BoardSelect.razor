@@ -6,12 +6,12 @@
             @switch (_step)
             {
                 case Step.Initial:
-                    <button @onclick="() => HandleSelect(Board.ArduinoUno)">
+                    <button @onclick="async () => { _board = Board.ArduinoUno; await HandleSelect(); }">
                         <RazorArduinoUno Width="85px" Height="80px"></RazorArduinoUno>
                         <h2>Arduino Uno</h2>
                         <p>Great for simple, small projects</p>
                     </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
+                    <button @onclick="async () => { _board = Board.ArduinoMega; await HandleSelect(); }">
                         <RazorArduinoMega Width="120" Height="80px"></RazorArduinoMega>
                         <h2>Arduino Mega</h2>
                         <p>Ideal for bigger, complex projects</p>
@@ -25,7 +25,7 @@
                     <button @onclick="() => _step = Step.Serial">
                         <h2>Less than 20</h2>
                     </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
+                    <button @onclick="() => { _board = Board.ArduinoMega; _step = Step.Confirm; }">
                         <h2>More than 20</h2>
                     </button>
                     <button @onclick="() => _step = Step.Serial">
@@ -37,7 +37,7 @@
                     <button @onclick="() => _step = Step.Complexity">
                         <h2>No</h2>
                     </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
+                    <button @onclick="() => { _board = Board.ArduinoMega; _step = Step.Confirm; }">
                         <h2>Yes</h2>
                     </button>
                     <button @onclick="() => _step = Step.Complexity">
@@ -46,15 +46,25 @@
                     break;
 
                 case Step.Complexity:
-                    <button @onclick="() => HandleSelect(Board.ArduinoUno)">
+                    <button @onclick="() => { _board = Board.ArduinoUno; _step = Step.Confirm; }">
                         <h2>Simple, small programs</h2>
                     </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
+                    <button @onclick="() => { _board = Board.ArduinoMega; _step = Step.Confirm; }">
                         <h2>Complex programs with large libraries</h2>
                     </button>
-                    <button @onclick="() => HandleSelect(Board.ArduinoMega)">
+                    <button @onclick="() => { _board = Board.ArduinoMega; _step = Step.Confirm; }">
                         <h2>I don't know</h2>
                     </button>
+                    break;
+
+                case Step.Confirm:
+                    <div>
+                        <p>Based on your answers, the suggested board is the <strong>@(_board == Board.ArduinoMega ? "Arduino Mega" : "Arduino Uno")</strong>. Would you like to proceed with this selection?</p>
+                        <div style="display: flex; gap: 1rem; justify-content: end">
+                            <button style="font-weight: bold" @onclick="async () => await HandleSelect()">Yes, use this board</button>
+                            <button style="font-weight: bold" @onclick="() => _step = Step.Initial">Choose a different board</button>
+                        </div>
+                    </div>
                     break;
             }
         </div>
@@ -72,12 +82,15 @@
 
     private Step _step = Step.Initial;
 
+    private Board _board;
+
     private enum Step
     {
         Initial,
         IoPins,
         Serial,
         Complexity,
+        Confirm
     }
 
     private string GetHeading()
@@ -88,13 +101,14 @@
             Step.IoPins => "How many input/output (I/O) pins will you need?",
             Step.Serial => "Will you be using multiple serial devices (e.g. GPS, GSM, or Bluetooth)?",
             Step.Complexity => "How complex is your project in terms of memory usage (e.g., libraries, large datasets, or graphical displays)?",
+            Step.Confirm => "Suggested board"
         };
     }
 
-    private async Task HandleSelect(Board board)
+    private async Task HandleSelect()
     {
-        BoardService.Board = board;
-        await OnSelect.InvokeAsync(board);
+        BoardService.Board = _board;
+        await OnSelect.InvokeAsync(_board);
         _isVisible = false; // Set visibility to false when a board is selected
         var firstVisit = await LocalStorageService.GetItem("firstVisit");
 
