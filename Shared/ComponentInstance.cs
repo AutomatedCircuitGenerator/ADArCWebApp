@@ -114,8 +114,8 @@ namespace ADArCWebApp.Shared
             { "BK", "black" },
             { "RD", "red" },
             { "LB", "lightblue" },
-            { "DB", "#000435" },
-            { "GN", "green" },
+            { "DB", "darkblue" },
+            { "GN", "lime" },
             { "VT", "violet" },
             { "OG", "orange" }
         };
