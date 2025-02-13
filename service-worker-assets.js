@@ -197,6 +197,10 @@
       "url": "css\/open-iconic\/README.md"
     },
     {
+      "hash": "sha256-3iaj84JYQPg0V35gUCodmpH1cxu8yOueXcbezyJiXzU=",
+      "url": "favicon.ico"
+    },
+    {
       "hash": "sha256-t3eW8Fl8mqWZFch+r2haX+TrM7svPQyTWyJlgu57Rww=",
       "url": "images\/adarc-logo.001.png"
     },
@@ -233,10 +237,6 @@
       "url": "images\/examples\/turn-on-led-when-dark.png"
     },
     {
-      "hash": "sha256-3iaj84JYQPg0V35gUCodmpH1cxu8yOueXcbezyJiXzU=",
-      "url": "images\/favicon.ico"
-    },
-    {
       "hash": "sha256-kIKH0c4hCLcDVe9XFs2eb7JS8JW5bRiS8psjUnlTC2c=",
       "url": "images\/redx.png"
     },
@@ -245,7 +245,7 @@
       "url": "images\/unavail.png"
     },
     {
-      "hash": "sha256-Qzxy2vTLDBNV9IiwTFJDZQKF1Q14CdMSygeS0+\/pYF8=",
+      "hash": "sha256-T626+Wk7SfSWS1PrNYSzH3gfHX9seIkiTXyljOLsJ64=",
       "url": "index.html"
     },
     {
@@ -1113,11 +1113,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-Lfmar\/QhOpjjwBI8PrVOWPRRs1vjh\/9e3BOgBItn1zY=",
+      "hash": "sha256-YhLKfl0EzWPnTM9MiNUsyMvToW5wWcntxLz4rUA\/K2g=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-HOkUc5CWB2g1prqRmVGA2lL6SXycudDS1UK4tengQkU=",
+      "hash": "sha256-JYtg9FAtTfyTtaQjg0m+vu93Kb0nlW9GtmZAemB57eA=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -2389,5 +2389,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "glkqixOJ"
+  "version": "vf1vNVT7"
 };
