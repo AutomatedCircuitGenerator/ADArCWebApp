@@ -74,6 +74,12 @@
     overflow-wrap: unset;
 }
 
+.toolbar-button:disabled[b-s7qrrfca0g] {
+    opacity: 0.5;
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
 .toolbar-button img[b-s7qrrfca0g] {
     margin-right: 10px;
 }
