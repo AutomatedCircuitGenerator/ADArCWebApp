@@ -243,15 +243,20 @@
 
         // Set menu position
         if (individualData == null) return;
-        _envSettingsX = individualData.zoomedX - 300;
-        _envSettingsY = individualData.zoomedY;
+        _envSettingsX = args.ClientX;
+        _envSettingsY =  args.ClientY - 55;
     }
 
     private bool rightClickable = false;
     private bool rightClick2 = false;
 
+    [Parameter] public Action CanvasClick { get; set; }
+
     private void RightClick()
     {
+        handleClick.InvokeAsync();
+        CanvasClick.Invoke();
+        
         rightClickable = true;
         if (rightClickable && forceBorder)
         {
