@@ -77,16 +77,21 @@ namespace ADArCWebApp.Shared
                                 "include",
                                 "#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n#include <Wire.h>"
                             },
-                            { "global", "Adafruit_MPU6050 mpu@;" },
+                            {
+                                "global",
+                                "Adafruit_MPU6050 mpu@;"
+                            },
                             {
                                 "setup",
-                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");\n\n "
+                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");\n"
                             },
                             {
                                 "loopMain",
-                                "/* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);\n"
+                                "  /* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);\n"
                             },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
                         }, pins: ["5V", "gnd", "scl", "sda", "xda", "xcl", "add", "int"], gsNodeName: "mpu6050")
                     .Property("motion", "Static").Finish()
             },
@@ -97,21 +102,29 @@ namespace ADArCWebApp.Shared
                         {
                             {
                                 "include",
-                                "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BNO055.h>\n#include <utility/imumaths.h>"
+                                "// Include necessary libraries for the BNO055 sensor\n#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BNO055.h>\n#include <utility/imumaths.h>"
                             },
                             {
                                 "global",
-                                "/* Set the delay between fresh samples */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Check I2C device address and correct line below (by default address is 0x29 or 0x28)\n//                                   id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
+                                "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n//                                  id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
                             },
                             {
                                 "setup",
-                                "  while (!Serial) delay(10);  // wait for serial port to open!\n\n  Serial.println(\"Orientation Sensor Raw Data Test\"); Serial.println(\"\");\n\n  /* Initialise the sensor */\n  if(!bno@.begin())\n  {\n    /* There was a problem detecting the BNO055 ... check your connections */\n    Serial.print(\"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!\");\n    while(1);\n  }\n\n  delay(1000);\n\n  /* Display the current temperature */\n  int8_t temp@ = bno@.getTemp();\n  Serial.print(\"Current Temperature: \");\n  Serial.print(temp@);\n  Serial.println(\" C\");\n  Serial.println(\"\");\n\n  bno@.setExtCrystalUse(true);\n\n  Serial.println(\"Calibration status values: 0=uncalibrated, 3=fully calibrated\");"
+                                "  // Setup function: runs once at startup\n  while (!Serial) delay(10);  // Wait for serial port to open\n\n  Serial.println(\"Orientation Sensor Raw Data Test\");\n  Serial.println(\"\");\n\n  /* Initialize the sensor */\n  if(!bno@.begin())\n  {\n    // Error handling: if the sensor is not detected, print a message and halt\n    Serial.print(\"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!\");\n    while(1);\n  }\n\n  delay(1000); // Allow the sensor to stabilize\n\n  /* Display the current temperature from the sensor */\n  int8_t temp@ = bno@.getTemp();\n  Serial.print(\"Current Temperature: \");\n  Serial.print(temp@);\n  Serial.println(\" C\");\n  Serial.println(\"\");\n\n  // Use external crystal for better accuracy\n  bno@.setExtCrystalUse(true);\n\n  Serial.println(\"Calibration status values: 0=uncalibrated, 3=fully calibrated\");"
                             },
                             {
                                 "loopMain",
-                                "  // Possible vector values can be:\n  // - VECTOR_ACCELEROMETER - m/s^2\n  // - VECTOR_MAGNETOMETER  - uT\n  // - VECTOR_GYROSCOPE     - rad/s\n  // - VECTOR_EULER         - degrees\n  // - VECTOR_LINEARACCEL   - m/s^2\n  // - VECTOR_GRAVITY       - m/s^2\n  imu::Vector<3> euler@ = bno@.getVector(Adafruit_BNO055::VECTOR_EULER);\n\n  /* Display the floating point data */\n  Serial.print(\"X: \");\n  Serial.print(euler@.x());\n  Serial.print(\" Y: \");\n  Serial.print(euler@.y());\n  Serial.print(\" Z: \");\n  Serial.print(euler@.z());\n  Serial.print(\"\t\t\");\n\n  /*\n  // Quaternion data\n  imu::Quaternion quat@ = bno@.getQuat();\n  Serial.print(\"qW: \");\n  Serial.print(quat@.w(), 4);\n  Serial.print(\" qX: \");\n  Serial.print(quat@.x(), 4);\n  Serial.print(\" qY: \");\n  Serial.print(quat@.y(), 4);\n  Serial.print(\" qZ: \");\n  Serial.print(quat@.z(), 4);\n  Serial.print(\"\t\t\");\n  */\n\n  /* Display calibration status for each sensor. */\n  uint8_t system@, gyro@, accel@, mag@ = 0;\n  bno@.getCalibration(&system@, &gyro@, &accel@, &mag@);\n  Serial.print(\"CALIBRATION: Sys=\");\n  Serial.print(system@, DEC);\n  Serial.print(\" Gyro=\");\n  Serial.print(gyro@, DEC);\n  Serial.print(\" Accel=\");\n  Serial.print(accel@, DEC);\n  Serial.print(\" Mag=\");\n  Serial.println(mag@, DEC);\n\n  delay(BNO055_SAMPLERATE_DELAY_MS@);"
+                                "  // Main loop: Continuously read sensor data\n\n  // Possible vector values can be:\n  // - VECTOR_ACCELEROMETER - m/s^2\n  // - VECTOR_MAGNETOMETER  - uT\n  // - VECTOR_GYROSCOPE     - rad/s\n  // - VECTOR_EULER         - degrees\n  // - VECTOR_LINEARACCEL   - m/s^2\n  // - VECTOR_GRAVITY       - m/s^2\n  \n  // Read Euler angles (heading, roll, pitch)\n  imu::Vector<3> euler@ = bno@.getVector(Adafruit_BNO055::VECTOR_EULER);\n\n  /* Display the floating point data */\n  Serial.print(\"X: \");\n  Serial.print(euler@.x());\n  Serial.print(\" Y: \");\n  Serial.print(euler@.y());\n  Serial.print(\" Z: \");\n  Serial.print(euler@.z());\n  Serial.print(\"\t\t\");\n\n  /* Uncomment the following block to display quaternion data */\n  /*\n  imu::Quaternion quat@ = bno@.getQuat();\n  Serial.print(\"qW: \");\n  Serial.print(quat@.w(), 4);\n  Serial.print(\" qX: \");\n  Serial.print(quat@.x(), 4);\n  Serial.print(\" qY: \");\n  Serial.print(quat@.y(), 4);\n  Serial.print(\" qZ: \");\n  Serial.print(quat@.z(), 4);\n  Serial.print(\"\t\t\");\n  */\n\n  /* Display calibration status for each sensor */\n  uint8_t system@, gyro@, accel@, mag@ = 0;\n  bno@.getCalibration(&system@, &gyro@, &accel@, &mag@);\n  Serial.print(\"CALIBRATION: Sys=\");\n  Serial.print(system@, DEC);\n  Serial.print(\" Gyro=\");\n  Serial.print(gyro@, DEC);\n  Serial.print(\" Accel=\");\n  Serial.print(accel@, DEC);\n  Serial.print(\" Mag=\");\n  Serial.println(mag@, DEC);\n\n  // Delay between readings to allow sensor data to refresh\n  delay(BNO055_SAMPLERATE_DELAY_MS@);"
                             },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                            {
+                                "functions", ""
+                            },
+                            {
+                                "delayLoop", ""
+                            },
+                            {
+                                "delayTime", ""
+                            }
                         }, pins: ["int", "adr", "5V", "gnd", "rst", "sda", "scl", "ps0", "ps1"], gsNodeName: "bno055")
                     .Property("motion", "Static").Finish()
             },
@@ -148,15 +161,20 @@ namespace ADArCWebApp.Shared
                         typeof(RazorHCSR04), paneHoverText: "HC-SR04",
                         codeForGen: new()
                         {
-                            { "include", "" },
+                            {
+                                "include", ""
+                            },
                             {
                                 "global",
-                                "const int trigPin@ = ~\"trigger\";\nconst int echoPin@ = ~\"echo\";\n\nfloat duration@, distance@;"
+                                "// Global variables and pin definitions\n// Define the pins for the HC-SR04 sensor\nconst int trigPin@ = ~\"trigger\"; // Pin that triggers the ultrasonic pulse\nconst int echoPin@ = ~\"echo\";    // Pin that receives the echo signal\n\n// Variables to store the pulse duration and calculated distance\nfloat duration@, distance@;"
                             },
-                            { "setup", "  pinMode(trigPin@, OUTPUT);\n  pinMode(echoPin@, INPUT);" },
+                            {
+                                "setup",
+                                "  // Setup function: runs once at startup\n  // Configure the trigger pin as an OUTPUT and the echo pin as an INPUT\n  pinMode(trigPin@, OUTPUT); // Set trigger pin as output\n  pinMode(echoPin@, INPUT);  // Set echo pin as input"
+                            },
                             {
                                 "loopMain",
-                                "  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2);\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10);\n  digitalWrite(trigPin@, LOW);\n  duration@ = pulseIn(echoPin@, HIGH);\n  distance@ = (duration@ * .0343) / 2;\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n  delay(100);"
+                                "  // Main loop: continuously measures distance\n\n  // Ensure the trigger pin is LOW to start\n  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2); // Short delay to allow sensor stabilization\n\n  // Trigger the sensor by sending a HIGH pulse for 10 microseconds\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10); // Pulse duration\n  digitalWrite(trigPin@, LOW);\n\n  // Read the duration of the echo pulse (in microseconds)\n  duration@ = pulseIn(echoPin@, HIGH);\n\n  // Calculate the distance (cm) using the speed of sound (0.0343 cm/us)\n  // Dividing by 2 accounts for the round-trip distance\n  distance@ = (duration@ * 0.0343) / 2;\n\n  // Output the measured distance to the Serial Monitor\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n\n  // Short delay before the next measurement\n  delay(100);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["vcc", "trigger", "echo", "gnd"], gsNodeName: "hcsr04").Property("distance", 20.0)
@@ -190,17 +208,30 @@ namespace ADArCWebApp.Shared
                     paneHoverText: "KY-018",
                     codeForGen: new()
                     {
-                        { "include", "" },
+                        {
+                            "include", ""
+                        },
                         {
                             "global",
-                            "const int photoresistorPin@ = ~\"analog_out\";\n// LDR Characteristics\nconst float GAMMA@ = 0.7;\nconst float RL10@ = 50;"
+                            "// Global variables and constants\n// Define the analog pin for the photoresistor (LDR)\nconst int photoresistorPin@ = ~\"analog_out\"; // Analog input pin for the light sensor\n\n// LDR (Light Dependent Resistor) characteristics\nconst float GAMMA@ = 0.7; // Gamma value for LDR calculations\nconst float RL10@ = 50;   // Resistance of the LDR at 10 lux"
                         },
-                        { "setup", "pinMode(photoresistorPin@, INPUT);" },
+                        {
+                            "setup",
+                            "  // Setup function: runs once at startup\n  // Configure the photoresistor pin as an INPUT\n  pinMode(photoresistorPin@, INPUT);"
+                        },
                         {
                             "loopMain",
-                            "  int analogValue@ = analogRead(photoresistorPin@);\n  float voltage@ = analogValue@ / 1024. * 5;\n  float resistance@ = 2000 * voltage@ / (1 - voltage@ / 5);\n  float lux@ = pow(RL10@ * 1e3 * pow(10, GAMMA@) / resistance@, (1 / GAMMA@));\n  Serial.print(\"Lux value: \");\n  Serial.println(lux@);\n  delay(1000);\n"
+                            "  // Main loop: continuously reads light intensity\n\n  // Read the analog value from the photoresistor\n  int analogValue@ = analogRead(photoresistorPin@);\n\n  // Convert the analog value to voltage (assuming a 5V reference)\n  float voltage@ = analogValue@ / 1024. * 5;\n\n  // Calculate the resistance of the LDR using a voltage divider formula\n  float resistance@ = 2000 * voltage@ / (1 - voltage@ / 5);\n\n  // Compute the light intensity in lux using the LDR characteristics\n  float lux@ = pow(RL10@ * 1e3 * pow(10, GAMMA@) / resistance@, (1 / GAMMA@));\n\n  // Output the measured light intensity to the Serial Monitor\n  Serial.print(\"Lux value: \");\n  Serial.println(lux@);\n\n  // Delay before the next reading to allow stable measurements\n  delay(1000);"
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        {
+                            "functions", ""
+                        },
+                        {
+                            "delayLoop", ""
+                        },
+                        {
+                            "delayTime", ""
+                        }
                     }, pins: ["analog_out", "5V", "gnd"], gsNodeName: "ky018").Property("lux", 100.0).Finish()
             },
             {
@@ -233,7 +264,10 @@ namespace ADArCWebApp.Shared
                         codeForGen: new()
                         {
                             { "include", "" },
-                            { "global", "int sensor@ = ~\"digital_out\"; //sensor pin\nint val@; //numeric variable" },
+                            {
+                                "global",
+                                "int sensor@ = ~\"digital_out\"; //sensor pin\nint val@; //1: Magnetic field detected, 0: No magnetic field detected"
+                            },
                             { "setup", "  pinMode(sensor@, INPUT); //set sensor pin as input" },
                             {
                                 "loopMain",
@@ -249,12 +283,12 @@ namespace ADArCWebApp.Shared
                         75, typeof(RazorMAX6675), paneHoverText: "MAX6675",
                         codeForGen: new()
                         {
-                            { "include", "#include <MAX6675.h>" },
-                            { "global", "#define CS_PIN@ ~\"cs\"\nMAX6675 tcouple@(CS_PIN@);" },
+                            { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
+                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
                             { "setup", "" },
                             {
                                 "loopMain",
-                                "float celsius@ = tcouple@.readTempC();\n  float fahrenheit@ = tcouple@.readTempF();\n  Serial.print(\"T in C = \");\n  Serial.print(celsius@);\n  Serial.print(\". T in Fahrenheit = \");\n  Serial.println(fahrenheit@);\n  delay(500);"
+                                "float celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading\n"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "max6675").Property("temperature", 20.0)
@@ -287,14 +321,21 @@ namespace ADArCWebApp.Shared
                     paneHoverText: "KY-022",
                     codeForGen: new()
                     {
-                        { "include", "#include <IRremote.hpp>" }, { "global", "int IRPIN@ = ~\"digital_out\";" },
+                        {
+                            "include",
+                            "#include <IRremote.hpp> // Include the IRremote library for handling IR communication"
+                        },
+                        {
+                            "global",
+                            "// Global variable\n// Define the pin connected to the IR receiver\nint IRPIN@ = ~\"digital_out\"; // Pin for receiving IR signals"
+                        },
                         {
                             "setup",
-                            "  Serial.println(\"Enabling IRin\");\n\n  IrReceiver.begin(IRPIN@, ENABLE_LED_FEEDBACK);\n  Serial.println(\"Enabled IRin\");"
+                            "// Setup function: runs once at startup\n\n  // Print a message to indicate IR receiver setup\n  Serial.println(\"Enabling IRin\");\n\n  // Initialize the IR receiver with feedback on LED activity\n  IrReceiver.begin(IRPIN@, ENABLE_LED_FEEDBACK);\n  // Confirm that the IR receiver has been initialized\n  Serial.println(\"Enabled IRin\");"
                         },
                         {
                             "loopMain",
-                            "  if (IrReceiver.decode())\n\n  {\n\n    Serial.println(IrReceiver.decodedIRData.command, HEX);\n\n    IrReceiver.resume();\n  }\n\n  delay(500);"
+                            "// Main loop: continuously checks for incoming IR signals\n\n  // If an IR signal is received and decoded\n  if (IrReceiver.decode())\n\n  {\n\n    // Print the decoded IR command in hexadecimal format\n    Serial.println(IrReceiver.decodedIRData.command, HEX);\n\n    // Prepare the receiver for the next incoming signal\n    IrReceiver.resume();\n  }\n\n  // Delay to avoid flooding the serial output\n  delay(500);"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky022",
@@ -306,17 +347,30 @@ namespace ADArCWebApp.Shared
                         typeof(RazorHX711), paneHoverText: "TAL221",
                         codeForGen: new()
                         {
-                            { "include", "#include <HX711.h>" },
+                            {
+                                "include", "#include <HX711.h>"
+                            },
                             {
                                 "global",
-                                "const int LOADCELL_DOUT_PIN@ = ~\"dat\";\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";\nHX711 scale@; "
+                                "// Global variables and HX711 setup\n// Define the data and clock pins for the HX711 load cell\nconst int LOADCELL_DOUT_PIN@ = ~\"dat\"; // Data pin for the HX711\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";  // Clock pin for the HX711\n\n// Initialize the HX711 scale object\nHX711 scale@;"
                             },
-                            { "setup", "  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@); " },
+                            {
+                                "setup",
+                                "  // Setup function: runs once at startup\n  // Initialize the HX711 scale with the data and clock pins\n  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@);"
+                            },
                             {
                                 "loopMain",
-                                "  if (scale@.is_ready()) {\n    long reading@ = scale@.read();\n Serial.print(\"HX711 reading: \");\n Serial.println(reading@);\n  } else {\n Serial.println(\"HX711 not found.\");\n  }\n\n delay(1000); "
+                                "  // Main loop: continuously reads data from the HX711\n\n  // Check if the HX711 scale is ready for reading\n  if (scale@.is_ready()) {\n    // Read the data from the HX711\n    long reading@ = scale@.read();\n    // Output the reading to the Serial Monitor\n    Serial.print(\"HX711 reading: \");\n    Serial.println(reading@);\n  } else {\n    // If the HX711 is not ready, print an error message\n    Serial.println(\"HX711 not found.\");\n  }\n\n  // Delay before the next reading to allow stabilization\n  delay(1000);"
                             },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                            {
+                                "functions", ""
+                            },
+                            {
+                                "delayLoop", ""
+                            },
+                            {
+                                "delayTime", ""
+                            }
                         }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711")
                     .Property("weight", 100.0).Finish()
             },
@@ -325,12 +379,16 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, typeof(RazorLED),
                     codeForGen: new()
                     {
-                        { "include", "" }, { "global", "" }, { "setup", "\tpinMode(~\"anode\", OUTPUT);" },
+                        { "include", "" }, 
+                        { "global", "" }, 
+                        { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
                         {
                             "loopMain",
-                            "  digitalWrite(~\"anode\", HIGH);\n  delay(1000);            \n  digitalWrite(~\"anode\", LOW);   \n  delay(1000);\n"
+                            "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating\n"
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        { "functions", "" }, 
+                        { "delayLoop", "" }, 
+                        { "delayTime", "" }
                     }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
             },
             // {
@@ -348,17 +406,19 @@ namespace ADArCWebApp.Shared
                         { "include", "" },
                         {
                             "global",
-                            "const int blueLED@ = ~\"B\";\nconst int greenLED@ = ~\"G\";\nconst int redLED@ = ~\"R\";"
+                            "const int blueLED@ = ~\"B\"; // Define pin for blue LED\nconst int greenLED@ = ~\"G\"; // Define pin for green LED\nconst int redLED@ = ~\"R\"; // Define pin for red LED"
                         },
                         {
                             "setup",
-                            "  pinMode(blueLED@, OUTPUT);\n  pinMode(greenLED@, OUTPUT);\n  pinMode(redLED@, OUTPUT);"
+                            "  pinMode(blueLED@, OUTPUT); // Set blue LED pin as an output\n  pinMode(greenLED@, OUTPUT); // Set green LED pin as an output\n  pinMode(redLED@, OUTPUT); // Set red LED pin as an output"
                         },
                         {
                             "loopMain",
-                            "  analogWrite(redLED@,64);\n  delay(1000);\n  analogWrite(redLED@,0);\n  analogWrite(greenLED@,255);\n  delay(1000);\n  analogWrite(greenLED@,0);\n  delay(1000);\n"
+                            "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating\n"
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        { "functions", "" }, 
+                        { "delayLoop", "" }, 
+                        { "delayTime", "" }
                     }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed").Finish()
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
             {
@@ -366,13 +426,16 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("Laser diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
                     codeForGen: new()
                     {
-                        { "include", "" }, { "global", "int laserPin@ = ~\"digital_in\";" },
-                        { "setup", "pinMode(laserPin@, OUTPUT);" },
+                        { "include", "" }, 
+                        { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
+                        { "setup", "pinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
                         {
                             "loopMain",
-                            "\tdigitalWrite(laserPin@, HIGH);\n\tdelay(1000);\n\tdigitalWrite(laserPin@, LOW);\n\tdelay(1000);"
+                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating\n"
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        { "functions", "" }, 
+                        { "delayLoop", "" }, 
+                        { "delayTime", "" }
                     }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
             },
             {
@@ -445,6 +508,25 @@ namespace ADArCWebApp.Shared
                 25,
                 new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
                         typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
+                        codeForGen: new ()
+                        {
+                            { "include", "" }, 
+                            {
+                                "global",
+                                "int ena@ = ~\"ena\"; // Enable pin for motor speed control\nint in1@ = ~\"in1\"; // Control pin 1 for motor direction\nint in2@ = ~\"in2\"; // Control pin 2 for motor direction"
+                            },
+                            {
+                                "setup",
+                                "pinMode(ena@, OUTPUT); // Set enable pin as an output\npinMode(in1@, OUTPUT); // Set control pin 1 as an output\npinMode(in2@, OUTPUT); // Set control pin 2 as an output"
+                            },
+                            {
+                                "loopMain",
+                                "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating\n"
+                            },
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
+                            { "delayTime", "" }
+                        },
                         gsNodeName: "l298n",
                         warning:
                         "The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.")
@@ -490,11 +572,19 @@ namespace ADArCWebApp.Shared
                             { "include", "#include <AccelStepper.h>\n" },
                             {
                                 "global",
-                                "int motorPin1 = ~\"in1\";\nint motorPin2 = ~\"in2\";\nint motorPin3 = ~\"in3\";\nint motorPin4 = ~\"in4\";\nint MotorInterfaceType = 8;\n\nAccelStepper stepper = AccelStepper(MotorInterfaceType, motorPin1, motorPin3, motorPin2, motorPin4);\n"
+                                "int motorPin1_@ = ~\"in1\"; // Define control pin 1 for stepper motor\nint motorPin2_@ = ~\"in2\"; // Define control pin 2 for stepper motor\nint motorPin3_@ = ~\"in3\"; // Define control pin 3 for stepper motor\nint motorPin4_@ = ~\"in4\"; // Define control pin 4 for stepper motor\nint MotorInterfaceType@ = 8; // Define motor driver interface type\n\nAccelStepper stepper@ = AccelStepper(MotorInterfaceType@, motorPin1_@, motorPin3_@, motorPin2_@, motorPin4_@); // Initialize stepper motor with pin configuration\n"
                             },
-                            { "setup", "\tstepper.setMaxSpeed(1000);" },
-                            { "loopMain", "\tstepper.setSpeed(500);\n\tstepper.runSpeed();\n" }, { "functions", "" },
-                            { "delayLoop", "" }, { "delayTime", "" }
+                            {
+                                "setup",
+                                "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor"
+                            },
+                            {
+                                "loopMain",
+                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed\n"
+                            },
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
+                            { "delayTime", "" }
                         },
                         pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003",
                         warning:
