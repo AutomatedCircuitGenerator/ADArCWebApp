@@ -83,11 +83,11 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "setup",
-                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");\n"
+                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");"
                             },
                             {
                                 "loopMain",
-                                "  /* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);\n"
+                                "  /* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
@@ -145,7 +145,7 @@ namespace ADArCWebApp.Shared
                             { "setup", "  Wire.begin();           // initialize Wire library" },
                             {
                                 "loopMain",
-                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);\n"
+                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);"
                             },
                             {
                                 "functions",
@@ -196,7 +196,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading\n"
+                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "MQ-3", pins: ["gnd", "5V", "analog_out"], gsNodeName: "mq3")
@@ -251,7 +251,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000); \n  "
+                                "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["digital_out", "5V", "gnd", "analog_out"], gsNodeName: "ky024").Property("gauss", 0.0)
@@ -271,7 +271,7 @@ namespace ADArCWebApp.Shared
                             { "setup", "  pinMode(sensor@, INPUT); //set sensor pin as input" },
                             {
                                 "loopMain",
-                                "  val@ = digitalRead(sensor@); //Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);\n"
+                                "  val@ = digitalRead(sensor@); //Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
@@ -288,7 +288,7 @@ namespace ADArCWebApp.Shared
                             { "setup", "" },
                             {
                                 "loopMain",
-                                "float celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading\n"
+                                "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "max6675").Property("temperature", 20.0)
@@ -384,7 +384,7 @@ namespace ADArCWebApp.Shared
                         { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
                         {
                             "loopMain",
-                            "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating\n"
+                            "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
                         },
                         { "functions", "" }, 
                         { "delayLoop", "" }, 
@@ -414,7 +414,7 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "loopMain",
-                            "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating\n"
+                            "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating"
                         },
                         { "functions", "" }, 
                         { "delayLoop", "" }, 
@@ -428,10 +428,10 @@ namespace ADArCWebApp.Shared
                     {
                         { "include", "" }, 
                         { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
-                        { "setup", "pinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
+                        { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
                         {
                             "loopMain",
-                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating\n"
+                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating"
                         },
                         { "functions", "" }, 
                         { "delayLoop", "" }, 
@@ -491,7 +491,7 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "setup",
-                            "board@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
+                            "\tboard@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
                         },
                         {
                             "loopMain",
@@ -517,11 +517,11 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "setup",
-                                "pinMode(ena@, OUTPUT); // Set enable pin as an output\npinMode(in1@, OUTPUT); // Set control pin 1 as an output\npinMode(in2@, OUTPUT); // Set control pin 2 as an output"
+                                "\tpinMode(ena@, OUTPUT); // Set enable pin as an output\n\tpinMode(in1@, OUTPUT); // Set control pin 1 as an output\n\tpinMode(in2@, OUTPUT); // Set control pin 2 as an output"
                             },
                             {
                                 "loopMain",
-                                "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating\n"
+                                "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating"
                             },
                             { "functions", "" }, 
                             { "delayLoop", "" }, 
@@ -580,7 +580,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed\n"
+                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
                             },
                             { "functions", "" }, 
                             { "delayLoop", "" }, 
@@ -604,7 +604,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "  int buttonState@ = digitalRead(buttonPin@); // Read the button state\n\n  if (buttonState@ == HIGH) { // If button is pressed\n    Serial.println(\"Button is pressed!\");\n  }\n\n  delay(100); // Optional: Small delay to avoid spamming the serial monitor\n"
+                                "  int buttonState@ = digitalRead(buttonPin@); // Read the button state\n\n  if (buttonState@ == HIGH) { // If button is pressed\n    Serial.println(\"Button is pressed!\");\n  }\n\n  delay(100); // Optional: Small delay to avoid spamming the serial monitor"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["digital_out", "gnd"], gsNodeName: "arcadePushButton").Property("pushed", "Released")
@@ -618,10 +618,10 @@ namespace ADArCWebApp.Shared
                     {
                         { "include", "" },
                         { "global", "const int buzzerPin@ = ~\"digital_out\";  // Signal pin for the buzzer" },
-                        { "setup", "pinMode(buzzerPin@, OUTPUT);  // Set buzzer pin as output" },
+                        { "setup", "\tpinMode(buzzerPin@, OUTPUT);  // Set buzzer pin as output" },
                         {
                             "loopMain",
-                            "digitalWrite(buzzerPin@, HIGH);  // Turn buzzer on\n  delay(4000);                    // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW);    // Turn buzzer off\n  delay(2000);                    // Wait 2 seconds\n"
+                            "\tdigitalWrite(buzzerPin@, HIGH);  // Turn buzzer on\n  delay(4000);                    // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW);    // Turn buzzer off\n  delay(2000);                    // Wait 2 seconds"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
