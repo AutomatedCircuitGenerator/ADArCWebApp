@@ -233,6 +233,10 @@
       "url": "images\/examples\/motion-detector-alarm.png"
     },
     {
+      "hash": "sha256-KHNu9Rv5uU90lK0HyH7Qkpn6ByE0GjBvW2Yau0VuPFg=",
+      "url": "images\/examples\/password-entry-system.png"
+    },
+    {
       "hash": "sha256-itmu7oKZRc30QvXYBABt0XEceWpUZuRp1gGfoGgIxcQ=",
       "url": "images\/examples\/turn-on-led-when-dark.png"
     },
@@ -1113,11 +1117,11 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-tA+542JEk6ZZrOapRTKQB8NWv\/cK2NbX76JQzzeADgU=",
+      "hash": "sha256-F1+3unqfMfa7dSRZBCtg3vusYSDV8fGcrIm9R+2Eu28=",
       "url": "_framework\/blazor.boot.json"
     },
     {
-      "hash": "sha256-tjtFeCazBh7oR6DBIuBP0+UwusaFVLswpk94BMcqRx4=",
+      "hash": "sha256-DcQXPiIBATbXzSNWMuneDRjq9QbyB2DK\/c2xyUz+K1E=",
       "url": "_framework\/ADArCWebApp.wasm"
     },
     {
@@ -1405,7 +1409,7 @@
       "url": "_framework\/System.Xml.XmlSerializer.wasm"
     },
     {
-      "hash": "sha256-nv36gcmsOGoDJfV2bRVlOpE8ui3UXZ0g9pY\/BIexBmI=",
+      "hash": "sha256-Q16llSGHgazwQ+EGpKUgsB7bRjxskHOs\/PeQ0Nloeio=",
       "url": "ADArCWebApp.styles.css"
     },
     {
@@ -2389,5 +2393,5 @@
       "url": "_content\/BlazorMonaco\/lib\/monaco-editor\/min\/vs\/loader.min.js"
     }
   ],
-  "version": "K7RRyDxB"
+  "version": "ITrmZvXf"
 };

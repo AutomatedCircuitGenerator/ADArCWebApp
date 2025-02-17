@@ -75,7 +75,7 @@
 }
 
 .toolbar-button:disabled[b-s7qrrfca0g] {
-    opacity: 0.5;
+    opacity: 0.25;
     cursor: not-allowed;
     pointer-events: none;
 }

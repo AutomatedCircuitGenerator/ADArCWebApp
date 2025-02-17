@@ -14294,18 +14294,19 @@ define("controllers/hx711", ["require", "exports", "controllers/controller", "li
         constructor() {
             super(...arguments);
             this.weight = 100;
-            this.bitIndex = 24;
+            this.bitIndex = 23;
         }
         setup() {
             this.data = this.pins.dat[0].digital;
             this.clock = this.pins.clk[0].digital;
+            this.bitIndex = 23;
             this.clock.addListener((state) => this.handleClock(state));
         }
         setWeight(weight) {
             this.weight = weight;
         }
         handleClock(state) {
-            if (state === avr8js_13.PinState.High) {
+            if (state === avr8js_13.PinState.Low) {
                 this.data.state = ((this.weight >> this.bitIndex) & 1) === 1;
                 this.bitIndex--;
                 if (this.bitIndex < 0) {
