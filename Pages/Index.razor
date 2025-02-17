@@ -54,7 +54,7 @@
         <div class="center-toolbar">
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
-                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(selLockedOut ? "0.5" : "1.0")">
+                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
                     <span>⬇️️ Import</span>
                 </label>
                 <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" disabled="@(IsRunning || selLockedOut)">

@@ -64,6 +64,9 @@ namespace ADArCWebApp.Shared.Simulation
 			StringBuilder b = new StringBuilder();
 
 			b.AppendLine("void setup() {");
+			
+			b.AppendLine("\t// Initialize serial communication - allows printing to the console for debugging.");
+			b.AppendLine("\tSerial.begin(9600);");
 
             //insert global vars from components
             foreach (ComponentInstance c in Pages.Index.Comps.Values)
@@ -120,7 +123,7 @@ namespace ADArCWebApp.Shared.Simulation
 				i++;
 			}
 			
-			b.AppendLine("}");
+			b.AppendLine("\n}");
 			return b.ToString();
 		}
 

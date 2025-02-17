@@ -2,7 +2,7 @@
 @inject BoardService BoardService
 @inject NavigationManager NavigationManager
 
-<div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem">
+<div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem; overflow-y: scroll; max-height: 80vh">
     <div style="display: flex; justify-content: space-between; margin-bottom: 1rem">
         <h1 style="font-size: 1.75rem; margin-bottom: 0">Examples Library</h1>
         <button style="border: none; background: none" @onclick="OnClose">❌</button>
@@ -50,7 +50,7 @@
     /// </summary>
     protected override void OnParametersSet()
     {
-        _suggestions = GetSuggestions(3);
+        _suggestions = GetSuggestions(3, 0);
     }
 
     /// <summary>
@@ -132,11 +132,19 @@
             [20] = 1,
             [6] = 1
         }), "?c=H4sIAAAAAAAAA71W227bOBB9z1cQyosDeBNJrl1bxgJJbTcNkN0GTtJuAQMBLY1sAhRpkFSabKB_75C6WHJ6QR92H2JpLmc4Z3hI5eWIEO_YD6JB377NZAJe5B0zEfM8AbLKfX8wu1BJzoQ83TpzsRIH8c9MwQ-Dd--vr8LZPrwSZ2dkpoAaIFQQJrShIgYiU2K2QMp0okFoqVaiMk3K8TGt0J-oYnTNgRhJtJEKSAZU5woSkrCqHBMkBmFYBgaUXgkmTDB6ME1CXWsOKRNArhdzskOMyLO1y48lNoZVDHl3fb94sPE_yXDaDlwuF4u_q8ioE1ku5pV_UK8z21KxwY63TNu2n2WuLFc7lfCtJjQ2OeXEcqVJokBrh2IpyTUTmxIX4-5YYjg8TjhLgfxBdkqucRbPxH8K_HYP5eQeLubz5eL2Flvxn8pmzh_1y0oQcv51Tc7OrgQzjHL2L7jFY5lluWAxNUwKm3ULOGt-uoYNE73JyPdPpoi6NVQZ3CQb62JIKhVJYJ1vELCxFfAPAWDqGSNZTWRudrnRNo6uv5BYr55z_-P93c393cm0HWxm_d1oNe9WrKjG_j4XsWvLSgV7sBKLJcceK73ZptZUo3QwaXn5jjxSngM29ihZYiGYMLOAnh0qSqxvnxsFINzbGrMLN08qKJebz4qZfUOYj_Oq-Ft9uuUU22yNcHvche1ZugVOpiXQGb-ANtOzDZV7BGV3r4BFqQL-4nbmwhjIdsYOCHXVOkEJNZSkSmZuTvWBRN2wXnkcTzdg5pjUqyH9ruZOyrk0GtopHFjPKT6cIyQqX8ut7GZx0RR1XG6s8_UpXzmJtuRVbm2znw0Xs8UjtZU80eVayKGJldcUGfh1u6Sz7eFw2Pf7peyXWNbqO-ZSA1H2RDtIcQ6vCuJt8ZOKrqqr-QU4l19d2Qy1rOy92KoM3y3htwpcOnVYfEpVG4q_DbzaMTdcPLwm173WYEEpuzyqg-IdhZeOVYK9dlLKuB1ZUU46AU6fe0F9CWSU89JH1pDae1jAk6nBTmhe9VnJdtqLXo5sK15Qv9lPTxBEfr-2PqBIuRWqF4mc88Z_yfGS41eJFwWN7x8vGoeTxvziRWGwN4-DYTQe-C17dBB_G7Wj4441aVuh37GCjhW2LMvyhiqaWaqF9RZlzAsPGIe_wTj0O5RH49Nhm3Tgj7ukR5NWgqXdzfg_aQ8OaA9-g_aozXoynHRZTwYdksMIv0wHtA9S_mPelRPd9TXQdjrsAP-v8t94_a73TTQMa09xtH_gT3FUfAPl8OVTnwkAAA"),
-        new("16 Servos", "16-servos", new FrequencyVector<int>(new Dictionary<int, uint>
+        new("17 Servos", "16-servos", new FrequencyVector<int>(new Dictionary<int, uint>
         {
             [2] = 1,
             [23] = 16,
         }), "?c=H4sIAAAAAAAAA9WYbW-jRhDH3-dTjIgq2RKOd1iWpyjStbmqvReVTuqbVnVeYHttU2GIAOd0ivju3QVjs2Old4d7lUhizAz79P_twDB5vQGwbhlGGNr69DFfSyuybpNslR7WEhYHxvjj77J4ye92jfHzIltk8zk8FjKuJMQZxEURf4Z8A00zyJd_y1VVLrLWLPWx_AuDp_tjz9b_nJdJleRZCZM426ZyusiSrDq7dQ94eGX2F39rMnCSQXbYL2VRtkM2K_iYnIZ0Xdv1bFfYyG10bEQbmR3age3bni1s1-a28vbGfZ8USpFaFGzSeBtVxUHCXsZq6QqTwlAm2dbexGnZudeycy-yZZ6nvXbwALp_M_S7l_J1kcF8_mNVxasdSH1oVgtVDklVwiovClk-59lad1XKVHPY5AVMtLBEDcbu1Ve7S4CBMvS581N7rPXw6ue4B8nTXdzMNDkjSZ6mai1QL7K6XVLaLum3_EVCtZPHvrCMS7kGhUD71h2QYct5l0zOQDon9LY-UdsEE8NuRwCcwg9qYHY_n3_QQ-ylmrjh1rWGCdP0VBu1DdtCynLaTaDmNed4APTD8wLA3KdmR9VEjzsVoD3R8GknMyj0rLphb6bjQHXzXcuvUzYDPKkL2Fnfe_mGPj2hUvhV-tib6poo_KK4N6TRsPpUJJU0Jp_eH2PoHNRtmAHoz1qm8eeJM210qlMtaJVnVaFulibqnqUOtw3s1RgaQhOf1vEZtX8urej1Rq_Bwu5MP8gQI2Z31q_JdpeqT2VF2SFNT_5f0nwZpx_WVuScfH9YUeCEJ_NPdQ3P5i2KKAjdnu2p60HP9nvz3mJgWGHfcphhoWE5PUur_BgX8V5LrbW3bq9ZDlHsfIti3pcs0L8TfdE8FIZoETh3wpDNDQzfWfbRqdxNiuh7mo5cZSrmW7bpdSPWOeqb81eHjxN8fDg-xzHxzTxCzyf0Zv7I4bkEnjsYHnLOTXooTHzIw4DwQyFGDlAQgGJ49GFo8vN9En0uoed7I4fnEXjeNdFH6LkBiT6XUX5uMPbo8wlA_xqAHskdJGEqgEiTx_-ZM78LwIAADAYDFEj4OZxmD4rP4WOPv5DgC6_A5_979rh8dRl_8kBG-OE3ve3SG9gl-cMxAKr0G9IEgmMHSKsFxGsAkjt4hswkePkEnOHoEdLyA6-pPwKToBCBQVAEnAAUYuyv0EgLEBxegSB3kRD0LrKwRxF6Y8_CSMsQHF6H-JzEoM_QIBgwGoM-Y2MHSMsQ_A_rENenmfjiRdoffSampQheVYuQdxmXkVSsHBQhG30iocUIDq9GLhIJR0FikN7EHMf-jyykxQgOr0ZUDApajgQ0BtlFPTLaXHyj_up_AIyZCRP9GgAA"),
+        new("Password Entry System", "password-entry-system", new FrequencyVector<int>(new Dictionary<int, uint>
+        {
+            [2] = 1,
+            [16] = 1,
+            [20] = 1,
+            [22] = 1,
+            [30] = 1,
+        }), "?c=H4sIAAAAAAAAA71XW2_iOBR-76_wpi9hlEKu3KpKbSFT0DJtRdvt7LRVZRJTLELCOEmnF_Hf186F2CFMF2lUhAL2Of7O-c4N874HgLSval1LYd96gYukrrSPfceLXQTuY1U1eiP8M8Zuj7yGEfQeh3qvPksE9r1f0hyOCVoEEarPlstc5d5vNMDQxxGGHn5DYNTrA9mZQf8JgWiGwBSTMAJLSOACRYiAKAALGDkz8BrEhGkzIL0VAmoYQNclKAxr9_6GU8BzXFlXtKai1w4zswNI3F-QIOAEvo-cCAd-eO_TBbWI_QgMx4-Xw3NwBHTjkN8_vfnxw17LdEE2tvuPI7tPBaYpCM7Gtn2eiywRb3Rj55Jm7lwfTbGPKPMw_BUQF4ToZ4x8B9HoBISyXAa-G7JwaAf6gXFggsBPAjYcg3ES5Rpv4vLk6ur2Yty_ewBH7-pLW1XUF5M9euyhq6tDAKr0qVvnZ9cD6llIsxNM5VxQA43y1p36sA7tP5BgOPEQjSeDQz7NHXIvMzJ3JfiHw1QN-y56obbUBOb4OXy_9wF9XSGK5tUn6An7cqepqswOEyTPRkOsn1RE813HdF_OddnGBDpzDz_NxN0locblpJB0m3kKcke76WZKq2yKRpogB-FnRFKsIRln68zVtIAU-_zkdJRk-PGrbfdPT3p_c4hXKALxEiwxKz4GQ799o50mF2WmXNxcX95c5z7nClmtbZGuC26LPK86TixyBKwkaf9EKD3o4idMu-mW4KiwPbq4zYEFeWF9m8bafqawSnPuZTk_xjIXTxc5zOfaKpOyF6sYJ1gsoO_SmtlQdofjPoxgPVM5LA5m5cSnPTvLJ7xK2_PlDE4Z2N_XIQNJ2E4RWoJpQMAUIZdVWoEhEi_yOhieDXhbLvLgq6wVBf67w1ncOA-uooCkYzNrOPAMvRgVUDSoaY-lA7nc5nx02avctslZOkHAZkwTdC90EhVFq5VE5Tb7kseZev0NhvNizlGb5FU8nGAmB07TZwG-Evj3ZsiZAzwt0HDIfF16KKqKwtHRRxFwGGLOX65VG-Zrj07meIFyzVVW1s8BdktYuaVJEHggGelORCMbkRhlVlgpyclYTEYi_ajOGpXwweEpUKYbOXwAfxW06XKD8tqXKfRCVErkhCA4F8LAB4Pay44LXnhOsShXwonj0J9scEYgddTdbL8tU6XcOcf6_ONDxShaoR396yMf8-5xVffVg-EMsG5jA5NNozCI6XMSv73R3xIPzxHdBdCDZFHY2ZpdcyOfuQkGPWFDxgIRXqBQzEzleC6HaUPxN8Mo0S0GEpsvs4BE9KJxwMzzDbDVPjf8PzJfpVplfTrNzFeWYKMxRiGK-DHC3yqEdP_v3_4EXMruwItlKHXf9xiApOXf2D1Z07qqkq8G9JaR3DSkrh973nr_zAsm0Bu6Uldf732Xum3NWi__lbqGZigFrkXFJrduUrnOrVuc3X2tLaw6_EpXhZUmrHRuxVhesjs3o7piu6tUJuklxvoujAXKmtZUec6aKXLWNKsjkNbMTySdbTIl0-SWySmD_glSLUkRd82uJOU7K4UHsCoBmpsAycStxmj-AYzWH8BoV2K0NjHU6vOd3c_vFR95GRqlMjR2KEP6H5DvPLNdF3pPa5tCHbbNFqeQFGLb-LxCFGibJdrmDrQNlaetqYZRbwnEdc2qm3qpCVVD59UYfV0zS3qfGQKrFAJrhxDopRB0mmLqdaNVYt-xSrnXjeZnE9-j79V_L-FLNIsRAAA"),
     ];
 
 }

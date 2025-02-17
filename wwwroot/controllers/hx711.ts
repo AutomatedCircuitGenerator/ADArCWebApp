@@ -6,11 +6,12 @@ export class HX711 extends Controller {
     private clock?: Digital;
     private data?: Digital;
     private weight = 100;
-    private bitIndex = 24;
+    private bitIndex = 23;
     
     setup(): void {
         this.data = this.pins.dat[0].digital;
         this.clock = this.pins.clk[0].digital;
+        this.bitIndex = 23;
         
         this.clock.addListener((state: PinState) => this.handleClock(state))
     }
@@ -19,7 +20,7 @@ export class HX711 extends Controller {
         this.weight = weight;
     }
     private handleClock(state: PinState) {
-        if (state === PinState.High) {
+        if (state === PinState.Low) {
             this.data.state = ((this.weight >> this.bitIndex) & 1) === 1;
             this.bitIndex--;
 
