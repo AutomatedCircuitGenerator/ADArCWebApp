@@ -52,6 +52,16 @@
             💡 Tutorial
         </button>
         <div class="center-toolbar">
+            <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
+                <button class="toolbar-button" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
+                        disabled="@(_lastExecutedAction == null)">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Undo</span>
+                </button>
+                <button class="toolbar-button" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
+                        disabled="@(_lastUndoneAction == null)">
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>Redo</span>
+                </button>
+            </div>
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
                 <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
@@ -84,20 +94,20 @@
 
             @if (isUrlBoxVisible)
             {
-            <div class="url-modal">
-                <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
-                <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                    <span>@copyButtonText</span>
-                </button>
-            </div>
+                <div class="url-modal">
+                    <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
+                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                        <span>@copyButtonText</span>
+                    </button>
+                </div>
             }
             <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
         </div>
     </div>
-    <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="AddToCanvasIfNecessary">
-        <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
+    <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true); await _mainCanvasContainer.FocusAsync();}">
+        <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
         <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from our library of components to create your project. All wires are automatically connected to the Arduino once you add a component to the workbench.">
@@ -170,6 +180,8 @@
 @code{
     private Modal modal;
     private bool _exampleModalOpen;
+
+    private ElementReference _mainCanvasContainer;
 
     private BoardSelect boardSelect;
     private bool shouldShowBoardSelect;
@@ -409,7 +421,7 @@
         moverOffsetTop = e.ClientY;
     }
 
-    private async void AddToCanvasIfNecessary(MouseEventArgs e)
+    private async void AddToCanvasIfNecessary(MouseEventArgs e, bool trackHistory = false)
     {
         if (targetCardComponentId == -1) return;
         isVisible = "hidden";
@@ -465,6 +477,10 @@
             await JsRuntime.InvokeVoidAsync("onAppend");
             ToastService.AddToast("Code panel updated.", Variant.Info);
             if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
+            if (trackHistory)
+            {
+                ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
+            }
         }
 
 
@@ -798,9 +814,15 @@
     /// <summary>
     /// Deletes a component.
     /// </summary>
-    public async void RemoveComp(bool suppressToast = false)
+    public async void RemoveComp(bool suppressToast = false, bool trackHistory = false)
     {
         var removedComponent = Comps[SelectedComponent];
+        if (trackHistory)
+        {
+            var clientX = removedComponent.X + 0.5 * removedComponent.Data.rightOffset;
+            var clientY = removedComponent.Y + 0.5 * removedComponent.Data.bottomOffset + 50;
+            ExecuteAction(new UserAction(SelectedComponent, removedComponent.GlobalId, UserActionType.Remove, new MouseEventArgs { ClientX = clientX, ClientY = clientY}));
+        }
         _componentFrequencies.DecrementFrequency(removedComponent.GlobalId);
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
@@ -837,9 +859,12 @@
     /// <param name="e"></param>
     private void HandleKeyPress(KeyboardEventArgs e)
     {
+        if (IsRunning) return;
+        if (e.Key == "z" && e.CtrlKey) Undo();
+        else if (e.Key == "y" && e.CtrlKey) Redo();
         // 1 is the arduino, not sure what -2 or -1 is
-        if (IsRunning || (e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
-        RemoveComp();
+        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        RemoveComp(false, true);
         SelectedComponent = -1;
     }
 
@@ -1472,6 +1497,62 @@
             Console.WriteLine($"Critical error in LoadFromUrl: {ex.Message}");
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
         }
+    }
+
+    private record UserAction(int LocalId, int GlobalId, UserActionType Type, MouseEventArgs MouseEventArgs);
+    private enum UserActionType
+    {
+        Add,
+        Remove,
+    }
+
+    private UserAction? _lastExecutedAction;
+    private UserAction? _lastUndoneAction;
+
+    private void Undo()
+    {
+        if (_lastExecutedAction == null) return;
+        var lastAction = _lastExecutedAction;
+        _lastExecutedAction = null; // Remove the stored undo action after using it
+        _lastUndoneAction = lastAction with { LocalId = localIds + 1 }; // Store it for redo
+
+        switch (lastAction.Type)
+        {
+            case UserActionType.Add:
+                SelectedComponent = lastAction.LocalId;
+                RemoveComp();
+                break;
+            case UserActionType.Remove:
+                targetCardComponentId = lastAction.GlobalId;
+                AddToCanvasIfNecessary(lastAction.MouseEventArgs);
+                break;
+        }
+    }
+
+    private void Redo()
+    {
+        if (_lastUndoneAction == null) return;
+        var lastAction = _lastUndoneAction;
+        _lastUndoneAction = null; // Remove the stored redo action after using it
+        _lastExecutedAction = lastAction with { LocalId = localIds + 1 }; // Store it for undo
+
+        switch (lastAction.Type)
+        {
+            case UserActionType.Add:
+                targetCardComponentId = lastAction.GlobalId;
+                AddToCanvasIfNecessary(lastAction.MouseEventArgs);
+                break;
+            case UserActionType.Remove:
+                SelectedComponent = lastAction.LocalId;
+                RemoveComp();
+                break;
+        }
+    }
+
+    private void ExecuteAction(UserAction action)
+    {
+        _lastExecutedAction = action;
+        _lastUndoneAction = null; // Clear redo history whenever a new action is executed
     }
 
 

@@ -2,38 +2,41 @@
 @inject BoardService BoardService
 @inject NavigationManager NavigationManager
 
-<div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem; overflow-y: scroll; max-height: 80vh">
+<div style="background-color: #fff; border: 1px solid #ccc; border-radius: 5px; padding: 1rem;">
     <div style="display: flex; justify-content: space-between; margin-bottom: 1rem">
         <h1 style="font-size: 1.75rem; margin-bottom: 0">Examples Library</h1>
         <button style="border: none; background: none" @onclick="OnClose">❌</button>
     </div>
-    @if (_suggestions.Any())
-    {
-        <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">Suggestions</h2>
-        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 1rem">
-            @foreach (var example in _suggestions)
+    <div style="overflow-y: scroll; max-height: 75vh; padding-right: 1rem; padding-left: 1rem">
+        @if (_suggestions.Any())
+        {
+            <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">Suggestions</h2>
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 1rem">
+                @foreach (var example in _suggestions)
+                {
+                    <a style="position:relative; text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank" class="example-link">
+                        <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
+                            @example.Title
+                        </h3>
+                        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
+                        <img src="@($"images/examples/{example.Image}.png")" alt="@example.Title" style="width: 120px; height: 120px; object-fit: contain; margin-top: auto; margin-bottom: auto"/>
+                    </a>
+                }
+            </div>
+        }
+        <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">All</h2>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem">
+            @foreach (var example in _examples)
             {
-                <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank">
+                <a style="position:relative; text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank" class="example-link">
                     <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
                         @example.Title
                     </h3>
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="black" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>
                     <img src="@($"images/examples/{example.Image}.png")" alt="@example.Title" style="width: 120px; height: 120px; object-fit: contain; margin-top: auto; margin-bottom: auto"/>
                 </a>
             }
-        </div>
-    }
-    <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">All</h2>
-    <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem">
-        @foreach (var example in _examples)
-        {
-            <a style="text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank">
-                <h3 style="font-size: 1.15rem; color: black; text-decoration: none;">
-                    @example.Title
-                </h3>
-                <img src="@($"images/examples/{example.Image}.png")" alt="@example.Title" style="width: 120px; height: 120px; object-fit: contain; margin-top: auto; margin-bottom: auto"/>
-            </a>
-        }
-    </div>
+        </div></div>
 </div>
 
 @code {
