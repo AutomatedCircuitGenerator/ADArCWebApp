@@ -92,15 +92,14 @@
                 <span>ℹ Help</span>
             </button>
 
-            @if (isUrlBoxVisible)
-            {
+            <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
                 <div class="url-modal">
                     <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
                     <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
                         <span>@copyButtonText</span>
                     </button>
                 </div>
-            }
+            </Modal>
             <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
@@ -1255,7 +1254,7 @@
     {
         isUrlBoxVisible = !isUrlBoxVisible;
         copyButtonText = "📋 Copy"; // Reset text
-
+    
         if (isUrlBoxVisible)
         {
             try
@@ -1271,7 +1270,7 @@
                 generatedUrl = "Error generating URL";
             }
         }
-
+    
         StateHasChanged();
     }
 
