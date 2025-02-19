@@ -106,7 +106,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n//                                  id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
+                                "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n// id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
                             },
                             {
                                 "setup",
@@ -140,9 +140,9 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "TFLI2C tflI2C@;\nint16_t  tfDist@;    // distance in centimeters"
+                                "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters"
                             },
-                            { "setup", "  Wire.begin();           // initialize Wire library" },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
                             {
                                 "loopMain",
                                 "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);"
@@ -166,7 +166,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "// Global variables and pin definitions\n// Define the pins for the HC-SR04 sensor\nconst int trigPin@ = ~\"trigger\"; // Pin that triggers the ultrasonic pulse\nconst int echoPin@ = ~\"echo\";    // Pin that receives the echo signal\n\n// Variables to store the pulse duration and calculated distance\nfloat duration@, distance@;"
+                                "// Global variables and pin definitions\n// Define the pins for the HC-SR04 sensor\nconst int trigPin@ = ~\"trigger\"; // Pin that triggers the ultrasonic pulse\nconst int echoPin@ = ~\"echo\"; // Pin that receives the echo signal\n\n// Variables to store the pulse duration and calculated distance\nfloat duration@, distance@;"
                             },
                             {
                                 "setup",
@@ -213,11 +213,11 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "global",
-                            "// Global variables and constants\n// Define the analog pin for the photoresistor (LDR)\nconst int photoresistorPin@ = ~\"analog_out\"; // Analog input pin for the light sensor\n\n// LDR (Light Dependent Resistor) characteristics\nconst float GAMMA@ = 0.7; // Gamma value for LDR calculations\nconst float RL10@ = 50;   // Resistance of the LDR at 10 lux"
+                            "// Global variables and constants\n// Define the analog pin for the photoresistor (LDR)\nconst int photoresistorPin@ = ~\"analog_out\"; // Analog input pin for the light sensor\n\n// LDR (Light Dependent Resistor) characteristics\nconst float GAMMA@ = 0.7; // Gamma value for LDR calculations\nconst float RL10@ = 50; // Resistance of the LDR at 10 lux"
                         },
                         {
                             "setup",
-                            "  // Setup function: runs once at startup\n  // Configure the photoresistor pin as an INPUT\n  pinMode(photoresistorPin@, INPUT);"
+                            "    // Setup function: runs once at startup\n  // Configure the photoresistor pin as an INPUT\n  pinMode(photoresistorPin@, INPUT);"
                         },
                         {
                             "loopMain",
@@ -266,12 +266,12 @@ namespace ADArCWebApp.Shared
                             { "include", "" },
                             {
                                 "global",
-                                "int sensor@ = ~\"digital_out\"; //sensor pin\nint val@; //1: Magnetic field detected, 0: No magnetic field detected"
+                                "int sensor@ = ~\"digital_out\"; // sensor pin\nint val@; // 1: Magnetic field detected, 0: No magnetic field detected"
                             },
-                            { "setup", "  pinMode(sensor@, INPUT); //set sensor pin as input" },
+                            { "setup", "  pinMode(sensor@, INPUT); // set sensor pin as input" },
                             {
                                 "loopMain",
-                                "  val@ = digitalRead(sensor@); //Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);"
+                                "  val@ = digitalRead(sensor@); // Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
@@ -473,7 +473,7 @@ namespace ADArCWebApp.Shared
                         { "setup", "  myservo@.attach(~\"orange\");" },
                         {
                             "loopMain",
-                            "  for (pos@ = 0; pos@ <= 180; pos@ += 1) { // goes from 0 degrees to 180 degrees\n    // in steps of 1 degree\n    myservo@.write(pos@);              // tell servo to go to position in variable 'pos'\n    delay(15);                       // waits 15 ms for the servo to reach the position\n  }\n  for (pos@ = 180; pos@ >= 0; pos@ -= 1) { // goes from 180 degrees to 0 degrees\n    myservo@.write(pos@);              // tell servo to go to position in variable 'pos'\n    delay(15);                       // waits 15 ms for the servo to reach the position\n  }"
+                            "  for (pos@ = 0; pos@ <= 180; pos@ += 1) { // goes from 0 degrees to 180 degrees\n    // in steps of 1 degree\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }\n  for (pos@ = 180; pos@ >= 0; pos@ -= 1) { // goes from 180 degrees to 0 degrees\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["brown", "red", "orange"], gsNodeName: "servo").Property("angle", 0).Finish()
@@ -617,11 +617,11 @@ namespace ADArCWebApp.Shared
                     codeForGen: new()
                     {
                         { "include", "" },
-                        { "global", "const int buzzerPin@ = ~\"digital_out\";  // Signal pin for the buzzer" },
-                        { "setup", "\tpinMode(buzzerPin@, OUTPUT);  // Set buzzer pin as output" },
+                        { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
+                        { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
                         {
                             "loopMain",
-                            "\tdigitalWrite(buzzerPin@, HIGH);  // Turn buzzer on\n  delay(4000);                    // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW);    // Turn buzzer off\n  delay(2000);                    // Wait 2 seconds"
+                            "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
