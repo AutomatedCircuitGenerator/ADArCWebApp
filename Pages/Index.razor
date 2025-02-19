@@ -100,6 +100,17 @@
                     </button>
                 </div>
             </Modal>
+
+            <Modal Open="@_reportBugModalOpen" OnClose="() => _reportBugModalOpen = false">
+                <div class="report-bug-modal">
+                    <p>You will be navigated to a separate Google Form. Would you like to proceed?</p>
+                    <div class="modal-buttons">
+                        <button class="no-button" @onclick="CloseReportBugModal">No</button>
+                        <button class="yes-button" @onclick="ProceedToReportBug">Yes</button>
+                    </div>
+                </div>
+            </Modal>
+
             <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
                 <span>@runStopText</span>
             </button>
@@ -488,10 +499,33 @@
         targetCardComponentId = -1;
     }
 
-    private void ReportBug()
+    // State for the Report Bug modal
+    private bool _reportBugModalOpen = false;
+
+    // Open the Report Bug modal
+    private void OpenReportBugModal()
     {
+        _reportBugModalOpen = true;
+    }
+
+    // Close the Report Bug modal
+    private void CloseReportBugModal()
+    {
+        _reportBugModalOpen = false;
+    }
+
+    // Proceed to the Google Form
+    private void ProceedToReportBug()
+    {
+        _reportBugModalOpen = false; // Close the modal
         const string googleFormUrl = "https://docs.google.com/forms/d/e/1FAIpQLSdI9w3ABXX34mRSPd0VRiu5LT63fRXSKzNQKhZypOkse2YuiA/viewform?usp=dialog";
         JsRuntime.InvokeVoidAsync("window.open", googleFormUrl, "_blank");
+    }
+
+    // Update the ReportBug method to open the modal instead of navigating directly
+    private void ReportBug()
+    {
+        OpenReportBugModal();
     }
 
     private node? SelectArduinoNode(List<node> nodes, HashSet<string> labels)
