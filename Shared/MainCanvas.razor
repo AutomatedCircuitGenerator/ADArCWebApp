@@ -1,4 +1,4 @@
-﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); }">
+﻿<div class="canvas-container" data-title="Workbench"data-intro="This is where circuits are created, and where output of the simulation is visualized. To read more, click the '💡 Workbench' icon below." @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); }">
     @foreach (var c in comps)
     {
         <VaryingComponent CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
@@ -82,7 +82,7 @@
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
         Dictionary<(int, int), bool> routes = new();
         var lines = new List<GridLine>();
-        
+
         foreach (var connection in connections)
         {
             var toPins = connection.To.Data.pinInfo;
@@ -91,10 +91,10 @@
             var fromPin = fromPins[connection.FromId];
             var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
             var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
-            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId,[]));
+            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId, []));
             var startId = connection.From.localId;
             var startX = (int)Math.Floor(start.x);
-            
+
             // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
             if (!routes.ContainsKey((startId, startX)))
             {
@@ -105,7 +105,7 @@
                 routes[(startId, startX)] = true;
             }
         }
-        
+
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
@@ -129,7 +129,7 @@
         var currentX = start.x;
         var currentY = start.y;
 
-        var midY = (start.y + end.y) / 2 + offset;  
+        var midY = (start.y + end.y) / 2 + offset;
 
         if (!moveHorizontallyFirst)
         {

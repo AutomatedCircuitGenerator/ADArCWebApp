@@ -48,7 +48,7 @@
             <span class="adarc-text">ADArC</span>
         </div>
 
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to rerun this tutorial.">
+        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
             💡 Tutorial
         </button>
         <div class="center-toolbar">
@@ -62,7 +62,7 @@
                 </button>
             </div>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a URL with your current circuit and code. Once opened, you can copy this URL by clicking the button that appears."
+            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
                     disabled="@selLockedOut">
                 <span>🔗 Generate URL</span>
             </button>
@@ -100,7 +100,7 @@
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
-        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from our library of components to create your project. All wires are automatically connected to the Arduino once you add a component to the workbench.">
+        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
             <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
                 @if (isLeftExpanded)
                 {

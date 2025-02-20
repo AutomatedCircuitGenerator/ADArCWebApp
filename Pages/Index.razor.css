@@ -2,15 +2,16 @@
     width: 100vw;
     height: 100vh;
     overflow: hidden;
-    position:absolute;
+    position: absolute;
 }
 
 .page-content {
-    margin-top:50px;
-    position:absolute;
-    width:100%;
-    height:100%;
+    margin-top: 50px;
+    position: absolute;
+    width: 100%;
+    height: calc(100% - 50px);
 }
+
 .sidebar,
 .sidebar-right {
     /*height of the top bar*/
@@ -142,7 +143,7 @@
     max-width: 35px;
     overflow: hidden;
     margin-right: 10px;
-    
+
 }
 
 div, span {
@@ -285,7 +286,7 @@ div, span {
 }
 
 .Import-Export {
-    display:flex;
+    display: flex;
 
 }
 
@@ -319,18 +320,18 @@ div, span {
     padding: 8px 15px;
     display: flex;
     align-items: center;
-    background-color: #f0f0f0;  /* Light grey background */
-    border: 1px solid #d0d0d0;  /* Slightly darker grey border */
-    border-radius: 4px;         /* Rounded corners */
-    transition: all 0.2s ease;  /* Smooth transition for hover */
+    background-color: #f0f0f0; /* Light grey background */
+    border: 1px solid #d0d0d0; /* Slightly darker grey border */
+    border-radius: 4px; /* Rounded corners */
+    transition: all 0.2s ease; /* Smooth transition for hover */
     cursor: pointer;
 }
 
 .copy-button:hover {
-    background-color: #e0e0e0;  /* Darker grey on hover */
+    background-color: #e0e0e0; /* Darker grey on hover */
 }
 
 .copy-button:active {
-    background-color: #d0d0d0;  /* Even darker when clicked */
-    transform: scale(0.98);     /* Slight scale effect when clicked */
+    background-color: #d0d0d0; /* Even darker when clicked */
+    transform: scale(0.98); /* Slight scale effect when clicked */
 }
