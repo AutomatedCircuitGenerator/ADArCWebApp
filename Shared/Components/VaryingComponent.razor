@@ -37,7 +37,7 @@
     }
 }
 <!-- ignore scaling -->
-<div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY)px; left: @(_envSettingsX)px;">
+<div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY + Transform?.translate.y)px; left: @(_envSettingsX + Transform?.translate.x)px;">
     <div @onclick:stopPropagation @onmousedown:stopPropagation @onmousemove:stopPropagation @onmouseup:stopPropagation @onmouseleave:stopPropagation>
         <div class="settingsContainer" @onmousedown="StartEnvSettingsDrag" @onmousemove="ContinueEnvSettingsDrag" @onmouseup="EndEnvSettingsDrag" @onmouseleave="EndEnvSettingsDrag">
             <div style="display: flex; margin-bottom: 0.5rem">
@@ -172,6 +172,8 @@
     [Parameter] public bool disableBorder { get; set; } = false;
 
     [Parameter] public bool forceBorder { get; set; } = false;
+    
+    [Parameter] public Transform? Transform { get; set; }
 
     /// <summary>
     /// Handles the dashed and solid borders.
@@ -281,11 +283,8 @@
     {
         CancelDrag.InvokeAsync();
         if (!_isDraggingEnvSettings) return;
-        var newX = _envSettingsX + e.MovementX;
-        var newY = _envSettingsY + e.MovementY;
-
-        _envSettingsX = Math.Clamp(newX, 0, 1920);
-        _envSettingsY = Math.Clamp(newY, 0, 1080);
+        _envSettingsX = _envSettingsX + e.MovementX;
+        _envSettingsY = _envSettingsY + e.MovementY;
     }
 
     private void EndEnvSettingsDrag()
