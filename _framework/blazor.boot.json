@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ADArCWebApp",
   "resources": {
-    "hash": "sha256-7tKE5qSWMkdacOF/k501H4yWD1lNrr0ULPzlSV7fclU=",
+    "hash": "sha256-ZlGoFU4E70VByG6hP69GMwNLDc2rLeGn6x8fT6Wh9xA=",
     "jsModuleNative": {
       "dotnet.native.8.0.13.f1wj86lvfk.js": "sha256-xNQsYHtL1vcbrVTHDZAwJM4WovpoyjsrM2C6FQ8cW1w="
     },
@@ -17,10 +17,10 @@
       "icudt_no_CJK.dat": "sha256-L7sV7NEYP37/Qr2FPCePo5cJqRgTXRwGHuwF5Q+0Nfs="
     },
     "assembly": {
-      "ADArCWebApp.wasm": "sha256-ym3kHUxyYM8RYnhWR5XD3Yb2PXguVeSmwKPiy6ooOyk=",
+      "ADArCWebApp.wasm": "sha256-gpqS7uN1M5TkVwZZpzNv+WWwhQL9mNcBv+R7dGwq9Bg=",
       "BlazorMonaco.wasm": "sha256-sBPTDoXCnXpg2cEy78KvbTiCQaohN4h4qsW5rsxoXGc=",
-      "Microsoft.AspNetCore.Components.wasm": "sha256-w375k9QwvysdB75l8GIi0oSGkI1n/MHiWKrG6WJTEnE=",
-      "Microsoft.AspNetCore.Components.Web.wasm": "sha256-k5PDpBLsEVcdbu3t0nNZ2sdApIxwF9IF7IaaYaRko6s=",
+      "Microsoft.AspNetCore.Components.wasm": "sha256-tHOqx5MyQscHJzBEStSvqzjh5obvoUevf4zhsvF0ntQ=",
+      "Microsoft.AspNetCore.Components.Web.wasm": "sha256-mkSHQusAswnS/TV8bMM3WXLxeYd722UBqG1oHacVVoY=",
       "Microsoft.AspNetCore.Components.WebAssembly.wasm": "sha256-MpstXXgaAVpsiwe3RCupLGWTfPMkmIn19b6818JBZ/8=",
       "Microsoft.AspNetCore.Hosting.Abstractions.wasm": "sha256-bXPYKX1wopuKj7FVFlej/JsUicmEZsiYBG6ozGbvDt0=",
       "Microsoft.AspNetCore.Hosting.Server.Abstractions.wasm": "sha256-kXXmQYSgFVJjERESUous5yPJZ42ElCtRVR8NJAILuXo=",

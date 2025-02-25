@@ -12,7 +12,6 @@
     width: 100%;
     height: calc(100% - 50px);
 }
-
 .sidebar[b-s7qrrfca0g],
 .sidebar-right[b-s7qrrfca0g] {
     /*height of the top bar*/
@@ -291,24 +290,52 @@ div[b-s7qrrfca0g], span[b-s7qrrfca0g] {
 
 }
 
+/* Modal Backdrop */
+.modal-backdrop[b-s7qrrfca0g] {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent black */
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000; /* Ensure it's above other content */
+}
+
+/* Modal Content */
+.modal-content[b-s7qrrfca0g] {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    max-width: 90%;
+    max-height: 90%;
+    overflow-y: auto;
+    position: relative;
+}
+
+/* URL Modal Specific Styles */
 .url-modal[b-s7qrrfca0g] {
     position: fixed;
-    top: 10%;
+    top: 10%; /* Adjust this value to position the modal vertically */
     left: 50%;
-    transform: translate(-50%, -20%);
+    transform: translateX(-50%);
     width: 450px;
     padding: 10px;
     background-color: white;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
     border-radius: 8px;
     z-index: 1001;
-    display: flex;
-    justify-content: space-between;
-    gap: 10px;
+    display: flex; /* Use flexbox to align items horizontally */
+    justify-content: space-between; /* Space between input and button */
+    align-items: center; /* Vertically center items */
+    gap: 10px; /* Add spacing between input and button */
 }
 
 .url-textbox[b-s7qrrfca0g] {
-    flex: 1;
+    flex: 1; /* Allow the input to take up remaining space */
     padding: 8px;
     border: 1px solid #ccc;
     border-radius: 4px;
@@ -335,6 +362,54 @@ div[b-s7qrrfca0g], span[b-s7qrrfca0g] {
 .copy-button:active[b-s7qrrfca0g] {
     background-color: #d0d0d0; /* Even darker when clicked */
     transform: scale(0.98); /* Slight scale effect when clicked */
+}
+
+/* Report Bug Modal Styles */
+.report-bug-modal[b-s7qrrfca0g] {
+    background-color: white;
+    padding: 20px;
+    border-radius: 8px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+    width: 300px;
+    text-align: center;
+}
+
+.report-bug-modal p[b-s7qrrfca0g] {
+    margin-bottom: 20px;
+    font-size: 16px;
+}
+
+.modal-buttons[b-s7qrrfca0g] {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.no-button[b-s7qrrfca0g], .yes-button[b-s7qrrfca0g] {
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: background-color 0.2s ease;
+}
+
+.no-button[b-s7qrrfca0g] {
+    background-color: #ff4d4d; /* Red */
+    color: white;
+}
+
+.no-button:hover[b-s7qrrfca0g] {
+    background-color: #e60000; /* Darker red */
+}
+
+.yes-button[b-s7qrrfca0g] {
+    background-color: #4CAF50; /* Green */
+    color: white;
+}
+
+.yes-button:hover[b-s7qrrfca0g] {
+    background-color: #45a049; /* Darker green */
 }
 /* /Shared/CodePane.razor.rz.scp.css */
 .code-container[b-ve6qiki0tf] {
