@@ -1173,7 +1173,8 @@
                     }
                 }
             }
-
+            
+            BuildCanvas.ResetTransform();
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
             StateHasChanged();

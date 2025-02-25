@@ -52,6 +52,11 @@
     public void ResetTransform()
     {
         transform = new Transform();
+
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);
+        }
     }
 
     private void CancelDrag()
