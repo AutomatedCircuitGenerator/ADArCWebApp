@@ -112,3 +112,15 @@ a, .btn-link {
     width: 100%;
     border: 1px solid #ccc;
 }
+
+.example-link svg {
+    position: absolute;
+    bottom: 0.5rem;
+    right: 0.5rem;
+    opacity: 0;
+    transition: opacity 0.1s ease-in;
+}
+
+.example-link:hover svg {
+    opacity: 1;
+}

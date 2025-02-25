@@ -1,7 +1,7 @@
 ﻿<div class="canvas-container" data-title="Workbench"data-intro="This is where circuits are created, and where output of the simulation is visualized. To read more, click the '💡 Workbench' icon below." @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); }">
     @foreach (var c in comps)
     {
-        <VaryingComponent CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        <VaryingComponent Transform="transform" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
 
 
@@ -52,6 +52,11 @@
     public void ResetTransform()
     {
         transform = new Transform();
+
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);
+        }
     }
 
     private void CancelDrag()
