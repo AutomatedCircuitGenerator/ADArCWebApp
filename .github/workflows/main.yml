@@ -26,8 +26,8 @@ jobs:
       - name: Append cache-busting query strings
         run: |
           RANDOM_STR=$(date +%s%N)
-          sed -i "s|\(src=\|href=\)\"\([^\"]*\)\"|\1\"\2?v=$RANDOM_STR\"|g" index.html
-          sed -i "s|\(src=\|href=\)\"\([^\"]*\)\"|\1\"\2?v=$RANDOM_STR\"|g" 404.html
+          find release/wwwroot -name '*.html' -exec sed -i "s|\(src=\|href=\)\"\([^\"]*\)\(\?[^\"\']*\)\?\"|\1\"\2?v=$RANDOM_STR\"|g" {} +
+
 
       - name: Commit wwwroot to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
