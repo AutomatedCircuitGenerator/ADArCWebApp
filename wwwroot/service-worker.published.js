@@ -46,3 +46,5 @@ async function onFetch(event) {
 
     return cachedResponse || fetch(event.request);
 }
+
+/* updated 2/25/2025 */
