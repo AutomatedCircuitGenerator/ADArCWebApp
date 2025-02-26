@@ -1,4 +1,5 @@
-﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+﻿@using System.Text
+<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @foreach (var c in comps)
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
@@ -9,12 +10,15 @@
         @foreach (var line in GetAllGridLines(ConnLines))
         {
             var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
-            @foreach (var segment in line.Segments)
-            {
-                <line class="segment @(highlighted ? "highlighted" : "")" x1="@segment.x1" y1="@segment.y1" x2="@segment.x2" y2="@segment.y2" stroke="@line.Color" stroke-width="@(3 * zoomFactor)"></line>
-                <circle class="node @(highlighted ? "highlighted" : "")" cx="@segment.x1" cy="@segment.y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
-                <circle class="node @(highlighted ? "highlighted" : "")" cx="@segment.x2" cy="@segment.y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
-            }
+            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.First().x1" cy="@line.Segments.First().y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+            <path d="@BuildPathData(line.Segments)"
+                  stroke="@line.Color"
+                  stroke-width="@(3 * zoomFactor)"
+                  fill="none"
+                  stroke-linejoin="round"
+                  class="segment @(highlighted ? "highlighted" : "")">
+            </path>
+            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
         }
     </svg>
 
@@ -87,7 +91,54 @@
     private record Segment(double x1, double y1, double x2, double y2);
 
     private record GridLine(string Color, (double x, double y) Start, (double x, double y) End, int FromId, int ToId, List<Segment> Segments);
+    
+    private string BuildPathData(List<Segment> segments, double cornerRadius = 10)
+    {
+        if (segments.Count == 0) return "";
 
+        var path = new StringBuilder();
+        path.Append($"M {segments[0].x1} {segments[0].y1} "); 
+
+        for (int i = 0; i < segments.Count - 1; i++)
+        {
+            var current = segments[i];
+            var next = segments[i + 1];
+
+            var dx1 = current.x2 - current.x1;
+            var dy1 = current.y2 - current.y1;
+            var dx2 = next.x2 - next.x1;
+            var dy2 = next.y2 - next.y1;
+
+            var isStraight = (dx1 * dy2 == dx2 * dy1); 
+
+            if (isStraight)
+            {
+                path.Append($"L {current.x2} {current.y2} ");
+                continue;
+            }
+
+            var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+            var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+
+            var trim1 = Math.Min(cornerRadius, len1 / 2);
+            var trim2 = Math.Min(cornerRadius, len2 / 2);
+
+            var newX1 = current.x2 - (dx1 / len1) * trim1;
+            var newY1 = current.y2 - (dy1 / len1) * trim1;
+            var newX2 = next.x1 + (dx2 / len2) * trim2;
+            var newY2 = next.y1 + (dy2 / len2) * trim2;
+
+            path.Append($"L {newX1} {newY1} ");
+
+            path.Append($"Q {current.x2} {current.y2}, {newX2} {newY2} ");
+        }
+
+        var lastSegment = segments.Last();
+        path.Append($"L {lastSegment.x2} {lastSegment.y2} ");
+
+        return path.ToString();
+    }
+    
     /// <summary>
     /// Computes all the gridlines for the given connections
     /// </summary>
