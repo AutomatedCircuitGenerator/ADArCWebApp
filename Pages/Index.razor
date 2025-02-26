@@ -116,7 +116,7 @@
             </button>
         </div>
     </div>
-    <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true); await _mainCanvasContainer.FocusAsync();}">
+    <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true);}">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
