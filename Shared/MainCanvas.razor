@@ -1,7 +1,7 @@
-﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); }">
+﻿<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @foreach (var c in comps)
     {
-        <VaryingComponent Transform="transform" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
 
 
@@ -32,6 +32,17 @@
 
     [Parameter] public required Dictionary<int, ComponentInstance> comps { get; set; }
 
+    private Dictionary<int, VaryingComponent> _componentReferences = new();
+
+    protected override void OnParametersSet()
+    {
+        // Remove references that no longer exist in comps
+        var keysToRemove = _componentReferences.Keys.Except(comps.Keys).ToList();
+        foreach (var key in keysToRemove)
+        {
+            _componentReferences.Remove(key);
+        }
+    }
 
     [Parameter] public EventCallback<MouseEventArgs> handleMouseLeave { get; set; }
 
@@ -87,7 +98,7 @@
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
         Dictionary<(int, int), bool> routes = new();
         var lines = new List<GridLine>();
-        
+
         foreach (var connection in connections)
         {
             var toPins = connection.To.Data.pinInfo;
@@ -96,10 +107,10 @@
             var fromPin = fromPins[connection.FromId];
             var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
             var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
-            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId,[]));
+            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId, []));
             var startId = connection.From.localId;
             var startX = (int)Math.Floor(start.x);
-            
+
             // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
             if (!routes.ContainsKey((startId, startX)))
             {
@@ -110,7 +121,7 @@
                 routes[(startId, startX)] = true;
             }
         }
-        
+
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
@@ -134,7 +145,7 @@
         var currentX = start.x;
         var currentY = start.y;
 
-        var midY = (start.y + end.y) / 2 + offset;  
+        var midY = (start.y + end.y) / 2 + offset;
 
         if (!moveHorizontallyFirst)
         {
@@ -221,6 +232,11 @@
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
+        foreach (var component in _componentReferences.Values)
+        {
+            component.HandleCanvasMouseMove(e);
+        }
+
         switch (_dragging)
         {
             //dragging a specific component, the target
@@ -269,6 +285,10 @@
     private void DragEnd(MouseEventArgs e)
     {
         _dragging = false;
+        foreach (var component in _componentReferences.Values)
+        {
+            component.EndEnvSettingsDrag();
+        }
     }
 
     bool targetFound = false;
