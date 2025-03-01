@@ -38,8 +38,8 @@
 }
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY + Transform?.translate.y)px; left: @(_envSettingsX + Transform?.translate.x)px;">
-    <div @onclick:stopPropagation @onmousedown:stopPropagation @onmousemove:stopPropagation @onmouseup:stopPropagation @onmouseleave:stopPropagation>
-        <div class="settingsContainer" @onmousedown="StartEnvSettingsDrag" @onmousemove="ContinueEnvSettingsDrag" @onmouseup="EndEnvSettingsDrag" @onmouseleave="EndEnvSettingsDrag">
+    <div @onclick:stopPropagation @onmousedown:stopPropagation>
+        <div class="settingsContainer" @onmousedown="StartEnvSettingsDrag">
             <div style="display: flex; margin-bottom: 0.5rem">
                 <h2 style="margin-bottom:0; white-space: nowrap">Environmental Settings</h2>
                 <button class="close-button" @onclick="CloseEnvironmentalSettings">❌</button>
@@ -245,8 +245,11 @@
 
         // Set menu position
         if (individualData == null) return;
-        _envSettingsX = args.ClientX;
-        _envSettingsY =  args.ClientY - 55;
+        if (Transform != null)
+        {
+            _envSettingsX = args.ClientX - Transform.translate.x;
+            _envSettingsY = args.ClientY - 55 - Transform.translate.y;
+        }
     }
 
     private bool rightClickable = false;
@@ -270,6 +273,11 @@
         }
     }
 
+    public void EndEnvSettingsDrag()
+    {
+        _isDraggingEnvSettings = false;
+    }
+
     private bool _isDraggingEnvSettings = false;
     private double _envSettingsX;
     private double _envSettingsY;
@@ -279,17 +287,11 @@
         _isDraggingEnvSettings = true;
     }
 
-    private void ContinueEnvSettingsDrag(MouseEventArgs e)
+    public void HandleCanvasMouseMove(MouseEventArgs e)
     {
-        CancelDrag.InvokeAsync();
         if (!_isDraggingEnvSettings) return;
-        _envSettingsX = _envSettingsX + e.MovementX;
-        _envSettingsY = _envSettingsY + e.MovementY;
-    }
-
-    private void EndEnvSettingsDrag()
-    {
-        _isDraggingEnvSettings = false;
+        _envSettingsX += e.MovementX;
+        _envSettingsY += e.MovementY;
     }
 
     string GenerateLink(string nodeName)
