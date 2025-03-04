@@ -1,27 +1,28 @@
 ﻿@using System.Text
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
-    @foreach (var c in comps)
-    {
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
-    }
-
-
-    <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
-        @foreach (var line in GetAllGridLines(ConnLines))
+<div @onwheel="UpdZoom"@onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }"  class="canvas-container">
+    <div style="transform-origin: center center; transform: matrix(@_scale, 0, 0, @_scale, 0, 0); height: 100%; width: 100%">
+        @foreach (var c in comps)
         {
-            var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
-            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.First().x1" cy="@line.Segments.First().y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
-            <path d="@BuildPathData(line.Segments)"
-                  stroke="@line.Color"
-                  stroke-width="@(3 * zoomFactor)"
-                  fill="none"
-                  stroke-linejoin="round"
-                  class="segment @(highlighted ? "highlighted" : "")">
-            </path>
-            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" zoomFactor="@zoomFactor"></VaryingComponent>
         }
-    </svg>
 
+
+        <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg" style="overflow: visible">
+            @foreach (var line in GetAllGridLines(ConnLines))
+            {
+                var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.First().x1" cy="@line.Segments.First().y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+                <path d="@BuildPathData(line.Segments)"
+                      stroke="@line.Color"
+                      stroke-width="@(3 * zoomFactor)"
+                      fill="none"
+                      stroke-linejoin="round"
+                      class="segment @(highlighted ? "highlighted" : "")">
+                </path>
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+            }
+        </svg>
+    </div>
 
 </div>
 
@@ -209,21 +210,26 @@
         line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
     }
 
+    private double _scale = 1;
+    private double _offsetX = 0;
+    private double _offsetY = 0;
+
     /// <summary>
     /// Currently unused. Handles scrollwheel zooming.
     /// </summary>
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
     {
-        zoomFactor += e.DeltaY / -1000;
+        double oldScale = _scale;
+        _scale += e.DeltaY / -1000;
+        _scale = Math.Clamp(_scale, 0.4, 3);
+        
+        double mouseX = e.ClientX - _offsetX;
+        double mouseY = e.ClientY - _offsetY;
 
-        zoomFactor = Math.Clamp(zoomFactor, .4, 3);
-
-
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        // Adjust offsets to zoom relative to mouse position
+        _offsetX -= mouseX * (_scale - oldScale);
+        _offsetY -= mouseY * (_scale - oldScale);
     }
 
     /// <summary>
@@ -263,10 +269,9 @@
     /// <returns>the component, now returned to normal.</returns>
     public ComponentInstance UnZoom(ComponentInstance comp)
     {
-        comp.X = (comp.X - zoomOrigin.x) / zoomFactor + zoomOrigin.x - (transform.translate.x * (1 / zoomFactor));
-        comp.Y = (comp.Y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - (transform.translate.y * (1 / zoomFactor));
-
-
+        comp.X = (comp.X - zoomOrigin.x) / _scale + zoomOrigin.x - (transform.translate.x * (1 / _scale));
+        comp.Y = (comp.Y - zoomOrigin.y) / _scale + zoomOrigin.y - (transform.translate.y * (1 / _scale));
+        
         return comp;
     }
 
@@ -292,15 +297,15 @@
         {
             //dragging a specific component, the target
             case true when _hasTarget:
-                _target.Value.X += (e.MovementX / zoomFactor);
-                _target.Value.Y += (e.MovementY / zoomFactor);
+                _target.Value.X += (e.MovementX / _scale);
+                _target.Value.Y += (e.MovementY / _scale);
                 AdjustCompToZoom(_target.Value);
                 break;
             //dragging the canvas, all components
             case true:
             {
-                transform.translate.x += e.MovementX;
-                transform.translate.y += e.MovementY;
+                transform.translate.x += (e.MovementX / _scale);
+                transform.translate.y += (e.MovementY / _scale);
                 foreach (var t in comps)
                 {
                     //t.Value.x += (e.MovementX / zoomFactor);
@@ -315,14 +320,6 @@
 
     bool dragEndFlag = false; //disable deselection at end of drag
 
-    //handles the end of a drag targeting a specific component, removing the target
-    private void DragComponentEnd(MouseEventArgs e)
-    {
-        _dragging = false;
-        _hasTarget = false;
-        dragEndFlag = true;
-    }
-
     //canvas drag start, signal that there is a drag.
     private void DragStart(MouseEventArgs e)
     {
@@ -336,6 +333,11 @@
     private void DragEnd(MouseEventArgs e)
     {
         _dragging = false;
+        if (_hasTarget)
+        {
+            _hasTarget = false;
+            dragEndFlag = true;
+        }
         foreach (var component in _componentReferences.Values)
         {
             component.EndEnvSettingsDrag();

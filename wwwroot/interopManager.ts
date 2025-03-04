@@ -270,6 +270,10 @@ export namespace interopManager {
             })(navigator.userAgent || navigator.vendor || window["opera"]);
             return check;
         }
+        
+        getBoundingClientRect(element: HTMLElement) {
+            return element.getBoundingClientRect();
+        }
     }
 
 
