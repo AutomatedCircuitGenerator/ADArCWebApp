@@ -1,6 +1,7 @@
 ﻿using ADArCWebApp.Shared.Simulation;
 using Microsoft.JSInterop;
 using System.Text.Json;
+using Microsoft.AspNetCore.Components;
 
 namespace ADArCWebApp.Shared.Interop
 {
@@ -219,6 +220,23 @@ namespace ADArCWebApp.Shared.Interop
 		public static async Task<bool>  IsMobileUser()
 		{
 			return await JsModule.InvokeAsync<bool>("isMobileUser");
+		}
+		
+		public class DomRect
+		{
+			public double X { get; set; }
+			public double Y { get; set; }
+			public double Width { get; set; }
+			public double Height { get; set; }
+			public double Top { get; set; }
+			public double Right { get; set; }
+			public double Bottom { get; set; }
+			public double Left { get; set; }
+		}
+
+		public static async Task<DomRect> GetBoundingClientRect(ElementReference element)
+		{
+			return await JsModule!.InvokeAsync<DomRect>("getBoundingClientRect", element);
 		}
     }
 }

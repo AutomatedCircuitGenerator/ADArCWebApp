@@ -461,7 +461,7 @@
             //create frontend instance
             var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
             comp.localId = localIds;
-            Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
+            Comps.Add(localIds, await BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
             BuildCode.outputPins.Clear();
             BuildCanvas!.ConnLines.Clear();
             //reset the way that component pins are bound to the arduino.

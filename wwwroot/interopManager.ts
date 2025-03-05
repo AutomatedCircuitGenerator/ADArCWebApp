@@ -272,7 +272,18 @@ export namespace interopManager {
         }
         
         getBoundingClientRect(element: HTMLElement) {
-            return element.getBoundingClientRect();
+            const rect = element.getBoundingClientRect();
+            
+            return {
+                X: rect.x,
+                Y: rect.y,
+                Width: rect.width,
+                Height: rect.height,
+                Top: rect.top,
+                Left: rect.left,
+                Right: rect.right,
+                Bottom: rect.bottom
+            }
         }
     }
 

@@ -1,5 +1,5 @@
 ﻿@using System.Text
-<div @onwheel="UpdZoom"@onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }"  class="canvas-container">
+<div @onwheel="UpdZoom"@onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }"  class="canvas-container" @ref="_canvas">
     <div style="transform-origin: center center; transform: matrix(@_scale, 0, 0, @_scale, 0, 0); height: 100%; width: 100%">
         @foreach (var c in comps)
         {
@@ -32,6 +32,8 @@
     {
         Pages.Index.BuildCanvas = this;
     }
+
+    private ElementReference _canvas;
 
     public readonly List<InstanceConnection> ConnLines = [];
 
@@ -267,10 +269,13 @@
     /// </summary>
     /// <param name="comp">the component in question.</param>
     /// <returns>the component, now returned to normal.</returns>
-    public ComponentInstance UnZoom(ComponentInstance comp)
+    public async Task<ComponentInstance> UnZoom(ComponentInstance comp)
     {
-        comp.X = (comp.X - zoomOrigin.x) / _scale + zoomOrigin.x - (transform.translate.x * (1 / _scale));
-        comp.Y = (comp.Y - zoomOrigin.y) / _scale + zoomOrigin.y - (transform.translate.y * (1 / _scale));
+        var rect = await AppInterop.GetBoundingClientRect(_canvas);
+        var originX = rect.Width / 2;
+        var originY = rect.Height / 2;
+        comp.X = originX + _scale * (comp.X - originX);
+        comp.Y = originY + _scale * (comp.Y - originY);
         
         return comp;
     }
@@ -288,6 +293,7 @@
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
+        Console.WriteLine((e.ClientX, e.ClientY));
         foreach (var component in _componentReferences.Values)
         {
             component.HandleCanvasMouseMove(e);
