@@ -45,18 +45,15 @@ public class FrequencyVector<T>(Dictionary<T, uint>? frequencies = null)
     }
 
     /// <summary>
-    /// Computes the cosine similarity between this frequency vector and another frequency vector.
-    /// The cosine similarity measures the angle between two vectors in the multi-dimensional space.
+    /// Computes similarity to another FrequencyVector based on the size of the set intersection
     /// </summary>
-    /// <param name="other">The other frequency vector to compare to.</param>
-    /// <returns>A value between -1 and 1 representing the cosine similarity, where 1 means identical, 0 means orthogonal, and -1 means opposite.</returns>
+    /// <param name="other"></param>
+    /// <returns></returns>
     public double SimilarityTo(FrequencyVector<T> other)
     {
-        var dotProduct = _frequencies.Sum(kv => kv.Value * other.GetFrequency(kv.Key));
+        double intersectionSum = _frequencies.Sum(kv => Math.Min(kv.Value, other.GetFrequency(kv.Key)));
 
-        var mag1 = Math.Sqrt(_frequencies.Values.Sum(v => v * v));
-        var mag2 = Math.Sqrt(other._frequencies.Values.Sum(v => v * v));
-
-        return (mag1 > 0 && mag2 > 0) ? (dotProduct / (mag1 * mag2)) : 0.0;
+        return intersectionSum;
     }
+
 }
