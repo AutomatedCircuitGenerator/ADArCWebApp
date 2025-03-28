@@ -984,7 +984,7 @@
                     PropertyNameCaseInsensitive = true,
                     IncludeFields = true
                 };
-
+                options.Converters.Add(new ParamSerializer());
                 var data = JsonSerializer.Deserialize<Data>(str, options);
 
                 if (data?.Comps != null && data.Comps.ContainsKey(1))

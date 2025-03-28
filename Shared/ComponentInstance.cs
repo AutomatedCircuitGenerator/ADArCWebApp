@@ -35,7 +35,7 @@ namespace ADArCWebApp.Shared
         public int RegAddr;
         public int byteIndex;
         public long timer;
-        public readonly Dictionary<string, IComponentParameter> CompParams = new();
+        public Dictionary<string, IComponentParameter> CompParams = new();
         [JsonIgnore]
         public IJSObjectReference? Controller { get; set; }
         
