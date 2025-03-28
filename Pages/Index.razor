@@ -1464,6 +1464,7 @@
                         PropertyNameCaseInsensitive = true,
                         IncludeFields = true
                     };
+                    options.Converters.Add(new ParamSerializer());
 
                     var data = JsonSerializer.Deserialize<Data>(json, options);
                     Console.WriteLine($"JSON deserialized successfully, checking components");
