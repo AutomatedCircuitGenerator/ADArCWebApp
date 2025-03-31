@@ -11,7 +11,7 @@
         @if (_suggestions.Any())
         {
             <h2 style="font-size: 1.5rem; margin-bottom: 0.25rem">Suggestions</h2>
-            <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 1rem">
+            <div style="display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: auto; grid-gap: 1rem; margin-bottom: 2rem">
                 @foreach (var example in _suggestions)
                 {
                     <a style="position:relative; text-decoration:none; padding: 0.5rem; cursor:pointer; display:flex; flex-direction: column; align-items: center; border: 1px solid #ccc; border-radius: 5px; box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px;" aria-roledescription="button" href="@($"{example.Url}&e=1")" target="_blank" class="example-link">
