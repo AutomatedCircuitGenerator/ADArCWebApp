@@ -1,11 +1,11 @@
 ﻿@using BlazorMonaco.Editor
-@inject IJSRuntime JSRuntime
+@inject IJSRuntime jsRuntime
 
 <div class="code-container">
 
     <span @onclick="ToggleCodePanelTip" style="cursor:pointer">💡 Code Panel</span>
 
-    @if (isCodePanelTipDisplayed)
+    @if (_isCodePanelTipDisplayed)
     {
         <div class="code-tooltip">
             <label>Each component added to the Workbench auto-generates code in this Panel, which you can edit freely.</label><br/>
@@ -23,16 +23,16 @@
 
     <div id="button-row">
         <button @onclick="ClearConsole" style="margin-right: 0.25rem;">
-            <span>@clearIcon</span>
-            <span>@clearText</span>
+            <span>@_clearIcon</span>
+            <span>@_clearText</span>
         </button>
         <button @onclick="ToggleScrollLock">
-            <span>@lockIcon</span>
-            <span>@lockText</span>
+            <span>@_lockIcon</span>
+            <span>@_lockText</span>
         </button>
     </div>
     <div id="console-container">
-        @foreach (string line in text)
+        @foreach (string line in _text)
         {
             <span class="@(line.Contains("Error during build:") ? "error" : "auto")">@line</span>
             <hr>
@@ -43,31 +43,31 @@
 
 @code {
 
-    private string lockIcon = "🔒";
-    private string lockText = "Follow Latest Messages";
-    private bool isLocked = false;
+    private string _lockIcon = "🔓";
+    private string _lockText = "Scroll Freely";
+    private bool _isLocked = true;
 
     private async void ToggleScrollLock()
     {
-        isLocked = !isLocked;
-        lockIcon = isLocked ? "🔓" : "🔒";
-        lockText = isLocked ? "Scroll Freely" : "Follow Latest Messages";
+        _isLocked = !_isLocked;
+        _lockIcon = _isLocked ? "🔓" : "🔒";
+        _lockText = _isLocked ? "Scroll Freely" : "Follow Latest Messages";
 
-        await JSRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
+        await jsRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
     }
 
-    private string clearIcon = "🧹";
-    private string clearText = "Clear Console";
+    private string _clearIcon = "🧹";
+    private string _clearText = "Clear Console";
 
-    List<string> text = ["This is the Console. Compiler and Serial output appears here!", ""];
+    List<string> _text = ["This is the Console. Compiler and Serial output appears here!", ""];
 
-    int index = 1;
+    private int _index = 1;
 
     private void ClearConsole()
     {
-        text.Clear();
-        text.Add("");
-        index = 0;
+        _text.Clear();
+        _text.Add("");
+        _index = 0;
         StateHasChanged();
     }
 
@@ -118,7 +118,7 @@
             var lines = newText.Split("\n");
             for (int i = 0; i < lines.Length; i++)
             {
-                text[index] += lines[i];
+                _text[_index] += lines[i];
                 if (i != lines.Length - 1)
                 {
                     CommitBuffer();
@@ -127,7 +127,7 @@
         }
         else
         {
-            text[index] += newText;
+            _text[_index] += newText;
             if (newText.EndsWith("\n"))
             {
                 CommitBuffer();
@@ -142,16 +142,16 @@
     /// </summary>
     public void CommitBuffer()
     {
-        text.Add("");
-        index++;
+        _text.Add("");
+        _index++;
     }
 
 
-    private bool isCodePanelTipDisplayed = false;
+    private bool _isCodePanelTipDisplayed = false;
 
     private void ToggleCodePanelTip()
     {
-        isCodePanelTipDisplayed = !isCodePanelTipDisplayed;
+        _isCodePanelTipDisplayed = !_isCodePanelTipDisplayed;
     }
 
     /// <summary>
@@ -159,7 +159,15 @@
     /// </summary>
     private void HideCodePanelTip()
     {
-        isCodePanelTipDisplayed = false;
+        _isCodePanelTipDisplayed = false;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await jsRuntime.InvokeVoidAsync("toggleConsoleOutputBehavior");
+        }
     }
 
 }
