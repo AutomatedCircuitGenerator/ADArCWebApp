@@ -47,4 +47,4 @@
 //     return cachedResponse || fetch(event.request);
 // }
 //
-// /* updated 2/25/2025 *//* Manifest version: Lesp/Zfc */
+// /* updated 2/25/2025 *//* Manifest version: zVbOcvh6 */
