@@ -296,16 +296,16 @@
 
     string GenerateLink(string nodeName)
     {
-        Console.WriteLine($"nodeName: {nodeName}");
+        Console.WriteLine($"Component Name: {nodeName}");
         switch (nodeName) //no breaks needed as return ends.
         {
-            case "Rev 3":
+            case "Uno Rev3":
                 return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
             case "MEGA 2560":
                 return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
             case "Uno WIFI Rev2":
                 return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
-            case "Pushbutton":
+            case "Arcade push button":
                 return ""; // Add link for Pushbutton here
             case "Switch":
                 return ""; // Add link for Switch here
@@ -313,22 +313,22 @@
                 return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "MPU6050":
                 return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
-            case "BNO-055":
-                return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
-            case "TF-Luna Lidar - I2C":
-                return ""; // Add link for TF-Luna Lidar - I2C here
+            case "BNO055":
+                return "https://adarc-help.mech.website/bno055_topic.html#styler-id1.1.1.2.8.8.8.1";
+            case "TF-Luna LiDAR - I2C":
+                return "https://adarc-help.mech.website/tfLuna.html#styler-id1.1.1.2.8.10.9.1"; // Add link for TF-Luna Lidar - I2C here
             case "TF-Luna Lidar - UART":
                 return ""; // Add link for TF-Luna Lidar - UART here
             case "Ultrasonic":
-                return ""; // Add link for Ultrasonic here
+                return "https://adarc-help.mech.website/hc_sr04.html#styler-id1.1.1.2.8.10.7.1"; // Add link for Ultrasonic here
             case "IR Distance":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
-            case "MQ-3":
+            case "Alcohol Sensor":
                 return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1";
             case "SGP41":
                 return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
-            case "KY-018 LDR":
-                return ""; // Add link for KY-018 LDR here
+            case "Photoresistor":
+                return "https://adarc-help.mech.website/ldr.html#styler-id1.1.1.2.8.12.7.1"; // Add link for KY-018 LDR here
             case "Ambient Light":
                 return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
             case "Luminosity":
@@ -341,9 +341,9 @@
                 return "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1";
             case "DS18B20":
                 return "https://adarc-help.mech.website/ds18b20.html#styler-id1.1.1.2.8.13.8.1";
-            case "Hall effect":
+            case "Hall effect sensor":
                 return "https://adarc-help.mech.website/hallEffect.html#styler-id1.1.1.2.8.14.7.1";
-            case "K-Thermocouple":
+            case "K-type thermocouple":
                 return "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1";
             case "PIR motion sensor":
                 return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
@@ -355,17 +355,17 @@
                 return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1";
             case "LED":
                 return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
-            case "7 - segment":
+            case "7 segment display":
                 return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1";
             case "Bar":
                 return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B";
             case "Matrix":
                 return "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B";
-            case "RGB":
+            case "RGB LED":
                 return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
             case "RGB module":
                 return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
-            case "Laser LED":
+            case "Laser diode":
                 return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
             case "LCD2004":
                 return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
@@ -391,7 +391,7 @@
                 return "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1";
             case "Driver - Motor":
                 return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
-            case "Brushless ESC - Motor":
+            case "Brushless motor and ESC":
                 return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1";
             case "28BYJ-48":
                 return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
@@ -399,7 +399,7 @@
                 return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
             case "Speaker":
                 return ""; // Add link for Speaker here
-            case "Buzzer":
+            case "Active buzzer":
                 return ""; // Add link for Buzzer here
             case "Encoder":
                 return ""; // Add link for Encoder here
@@ -411,6 +411,14 @@
                 return ""; // Add link for resistor here
             case "stepper driver":
                 return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; // Add link for stepper driver here
+            case "Stepper motor with driver":
+                return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1"; // Add link for stepper driver here
+            case "Servo with driver":
+                return "https://adarc-help.mech.website/ServoPCA9685_Task.html#HowToConnectDCMotorToArduino-48F85C402";
+            case "DC motor with driver":
+                return "https://adarc-help.mech.website/L298driver_1.html#styler-id1.1.1.2.9.12.11.1";
+            case "Servo":
+                return "https://adarc-help.mech.website/ServoDirect_Task.html#HowToConnectDCMotorToArduino-48F85C40";
             default:
                 return "https://adarc-help.mech.website"; // Default just in case it returns null
         }

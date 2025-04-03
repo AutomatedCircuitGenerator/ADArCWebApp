@@ -5,7 +5,7 @@
     {
         <div class="palette-right-click-container" style="z-index: 9999; position: absolute; top: 0; left: 0; font-size: 80%" @onmouseenter="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick">
             <div @onmousedown:stopPropagation style="width: 100%">
-                <button id="palette-component-help-button" style="font-size: 100%; width: 100%" @onclick="() => OpenLink(GenerateLink(ComponentDeclarations.Components[GlobalId].name))">
+                <button id="palette-component-help-button" style="font-size: 100%; width: 100%" @onclick="() => OpenLink(GenerateLink(ComponentDeclarations.Components[GlobalId].nodeName))">
                     <span style="padding-left: 4px; font-size: 85%;">𝗶￨Component Info</span>
                 </button>
             </div>
@@ -90,8 +90,14 @@
     }
 
     string GenerateLink(string nodeName)
+	{
+    Console.WriteLine($"nodeName: {ComponentDeclarations.Components[GlobalId].nodeName}");
+    
+    if (string.IsNullOrEmpty(nodeName))
     {
-        Console.WriteLine($"nodeName: {nodeName}");
+        Console.WriteLine($"Warning: NodeName is empty for component {GlobalId} ({Name})!");
+        return "https://adarc-help.mech.website"; // Fallback URL
+    }
         switch (nodeName) //no breaks needed as return ends.
         {
             case "arduinoUnoRev3":
@@ -108,17 +114,17 @@
                 return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
             case "mpu6050":
                 return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
-            case "BNO055":
-                return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
+            case "bno055":
+                return "https://adarc-help.mech.website/bno055_topic.html#styler-id1.1.1.2.8.8.8.1";
             case "tfLunaLidarI2C":
                 return "https://adarc-help.mech.website/tfLuna.html#styler-id1.1.1.2.8.10.9.1";
             case "TF-Luna Lidar - UART":
                 return ""; // Add link for TF-Luna Lidar - UART here
-            case "Ultrasonic":
+            case "hcsr04":
                 return "https://adarc-help.mech.website/hc_sr04.html#styler-id1.1.1.2.8.10.7.1";
             case "IR Distance":
                 return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
-            case "Alcohol Sensor":
+            case "mq3":
                 return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1";
             case "SGP41":
                 return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
