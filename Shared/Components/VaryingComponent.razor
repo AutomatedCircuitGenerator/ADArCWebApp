@@ -201,7 +201,7 @@
     /// <param name="e">The change provided by the language.</param>
     /// <param name="prop">the property to affect.</param>
     /// <param name="convert">true if the property is a number, else false.</param>
-    private void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
+    private async void OnInput(ChangeEventArgs e, PropertyInfo prop, bool convert)
     {
         if (convert) //theoretically number data has convert true, -> double, whereas strings have convert false.
         {
@@ -215,9 +215,12 @@
             individualData?.CompParams[prop.Name.ToLower()].SetValue((string)e.Value);
         }
 
-        if (individualData != null && individualData.CompParams.ContainsKey("translateOnInput")) //certain components send data on their own without request. handle these cases.
+        if (individualData is { Controller: not null })
         {
-            individualData.Data.compType.GetMethod("translate")?.Invoke(individualData, [individualData]);
+            var options = new JsonSerializerOptions{IncludeFields = true};
+            options.Converters.Add(new ParamToStateSerializer());
+            var json = JsonSerializer.Serialize(individualData.CompParams, options);
+            await individualData.Controller.InvokeVoidAsync("update", json);
         }
     }
 

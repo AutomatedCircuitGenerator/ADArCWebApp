@@ -29,7 +29,13 @@ export abstract class Controller {
     // by default, it does nothing and must be overriden, most components shouldn't need this unless they have a visual/audio
     // component
     cleanup(): void {
-    };
+    }
+    
+    // this is called from C# any time the environmental settings is updated. it will pass a dictionary to this function
+    // which describes an updated state. by default, it does nothing as many components dont have env settings. however
+    // for those that do, this needs to be overriden and implemented accordingly.
+    update(state: { [key: string]: any }): void {
+    }
 
     // this is called exclusively by the runner, and calls the components setup function
     // while also setting each of its pins
