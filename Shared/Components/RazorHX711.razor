@@ -5,22 +5,13 @@
 
     [Parameter] public double width { get; set; } = 507;
     [Parameter] public double height { get; set; } = 269;
-
-    private double _weight = 100;
-
+    
     [Parameter]
     [ValueSetting("g", 100, 100, 1500)] // 1023.75*
     public double weight
     {
-        get => _weight;
-        set
-        {
-            if (Controller is not null && value != _weight)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setWeight", value); });
-            }
-            _weight = value;
-        }
+        get;
+        set;
     }
     
     public static ElementPin[] pinInfo

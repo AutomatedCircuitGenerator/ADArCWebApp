@@ -124,6 +124,10 @@ export class BNO055 extends Controller implements I2CController {
         return { x: qx, y: qy, z: qz, w: qw };
     }
     
+    override update(state: Record<string, any>) {
+        this.setMotion(state.motion === "Rotating");
+    }
+
     setMotion(rotating: boolean) {
         if (rotating) {
             this.sensorControls.setGyroscope(0, 0, 90);

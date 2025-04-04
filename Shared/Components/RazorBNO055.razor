@@ -1,21 +1,12 @@
 ﻿@inherits RazorComponent;
 
 @code {
-    private string _motion = "Static";
-    
     [Parameter]
     [DropdownSetting(["Static", "Rotating"])]
     public string motion
     {
-        get => _motion;
-        set
-        {
-            _motion = value;
-            if (Controller is not null)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion == "Rotating"); });
-            }
-        }
+        get;
+        set;
     }
 
     /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/

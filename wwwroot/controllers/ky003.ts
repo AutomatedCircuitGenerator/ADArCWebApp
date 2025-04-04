@@ -7,6 +7,10 @@ export class KY003 extends Controller {
     setup() {
         this.inSimulation = true
     }
+    
+    override update(state: Record<string, any>) {
+        this.setFieldDetected(state.magfield === "Detected");
+    }
 
     setFieldDetected(isFieldDetected: boolean) {
         if (!this.inSimulation) return;

@@ -1,23 +1,12 @@
 ﻿@inherits RazorComponent
 
 @code {
-
-    private double _alcohol;
-
     [Parameter]
     [ValueSetting("", 0, 0, 1024)]
     public double alcohol
     {
-        get => _alcohol;
-        set
-        {
-            var hasChanged = value != _alcohol;
-            _alcohol = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setAlcohol", _alcohol); });
-            }
-        }
+        get;
+        set;
     }
 
     public static ElementPin[] pinInfo

@@ -1,21 +1,12 @@
 @inherits RazorComponent
 
 @code {
-    private string _pushed = "Released";
-    
     [Parameter]
     [DropdownSetting(["Released", "Pushed"])]
     public string pushed
     {
-        get => _pushed;
-        set
-        {
-            _pushed = value;
-            if (Controller is not null)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setPushed", _pushed == "Pushed"); });
-            }
-        }
+      get;
+      set;
     }
     
     public static ElementPin[] pinInfo

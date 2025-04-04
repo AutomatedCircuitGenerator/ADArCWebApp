@@ -47,6 +47,10 @@ const REGISTERS = {
 export class ADXL345I2C extends Controller implements I2CController {
     private address: null | number = null; // I2C has you write the address to read, and then calls read, so need to save
     private memory = new Memory(128);
+    
+    override update(state: Record<string, any>) {
+        this.setMotion(state.motion === "Constant Acceleration");
+    }
 
     setMotion(moving: boolean) {
         if (moving) {

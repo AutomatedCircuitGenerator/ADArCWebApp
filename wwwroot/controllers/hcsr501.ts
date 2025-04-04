@@ -10,6 +10,11 @@ export class HCSR501 extends Controller {
     private timeDelaySeconds: number;
     private motionTimeoutId: number;
     private isInSimulation: boolean = false;
+    
+    override update(state: Record<string, any>) {
+        this.setTriggerMode(state.triggermode);
+        this.setTimeDelaySeconds(state.timedelayseconds);
+    }
 
     setIsMotionDetected = (isMotionDetected: number) => {
         this.isMotionDetected = isMotionDetected > 0;

@@ -18,8 +18,8 @@ export class TFLunaLidarI2C extends Controller implements I2CController {
     private memory = new Memory(128);
     private startTime: number;
     
-    update(state) {
-        console.log(state);
+    override update(state: Record<string, any>) {
+        this.setRegister("DIST", state.distance);
     }
     
     setRegister(register: string, value: number) {

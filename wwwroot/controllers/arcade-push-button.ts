@@ -5,6 +5,11 @@ export class ArcadePushButton extends Controller {
     setup(): void {
         this.digitalOut = this.pins.digital_out[0];
     }
+    
+    override update(state: Record<string, any>) {
+        this.setPushed(state.pushed === "Pushed");
+    }
+
     setPushed(pushed: boolean) {
         const surface = this.element.querySelector<HTMLElement>(".surface");
 

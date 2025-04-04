@@ -6,6 +6,10 @@ export class MAX6675 extends Controller {
 
     private _temperature: number;
 
+    override update(state: Record<string, any>) {
+        this.setTemperature(state.temperature);
+    }
+
     setTemperature = (temperature: number) => {
         this._temperature = temperature
     }

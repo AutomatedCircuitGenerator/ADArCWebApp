@@ -4,6 +4,10 @@ import {AVRRunner} from "@lib/execute";
 export class MQ3 extends Controller {
     private alcohol: number;
     private inSimulation: boolean;
+    
+    override update(state: Record<string, any>) {
+        this.setAlcohol(state.alcohol);
+    }
 
     setAlcohol(alcohol: number) {
         if (alcohol < 0) {

@@ -1,22 +1,12 @@
 ﻿@inherits RazorComponent
 
 @code {
-    private double _distance;
-
     [Parameter]
     [ValueSetting("cm", 20, 2, 400)]
     public double distance
     {
-        get => _distance;
-        set
-        {
-            var hasChanged = value != _distance;
-            _distance = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setDistance", _distance); });
-            }
-        }
+        get;
+        set;
     }
 
 

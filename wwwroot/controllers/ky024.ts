@@ -5,6 +5,11 @@ export class KY024 extends Controller {
     private isInSimulation: boolean = false;
     private isMagneticFieldDetected: boolean = false;
 
+    override update(state: Record<string, any>) {
+        this.setGauss(state.gauss);
+        this.setIsMagneticFieldDetected(Math.abs(state.gauss) > Number.EPSILON);
+    }
+
     setGauss(gauss: number) {
         // Limit gauss input range
         if (gauss < -1000) {
@@ -19,9 +24,9 @@ export class KY024 extends Controller {
         }
     }
 
-    setIsMagneticFieldDetected(isDetected: number) {
+    setIsMagneticFieldDetected(isMagneticFieldDetected: boolean) {
         // Simulate magnetic field detection with a digital output
-        this.isMagneticFieldDetected = isDetected > 0;
+        this.isMagneticFieldDetected = isMagneticFieldDetected;
         if (this.isInSimulation) {
             this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
         }

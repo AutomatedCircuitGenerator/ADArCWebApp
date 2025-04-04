@@ -14,23 +14,13 @@
             };
         }
     }
-
-    private double _lux;
-
+    
     [Parameter]
     [ValueSettingDouble("L", 100, 0.1, 100000)]
     public double lux
     {
-        get => _lux;
-        set
-        {
-            var hasChanged = value != _lux;
-            _lux = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setLux", _lux); });
-            }
-        }
+        get;
+        set;
     }
 
 }

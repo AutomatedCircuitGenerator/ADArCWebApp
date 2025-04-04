@@ -31,10 +31,17 @@ export abstract class Controller {
     cleanup(): void {
     }
     
-    // this is called from C# any time the environmental settings is updated. it will pass a dictionary to this function
+    // this is called exclusively by C# to send raw a raw JSON string before it is parsed and sent to update.
+    // you should probably not ever have to call it from JS.
+    send(state: string): void {
+        const json = JSON.parse(state);
+        this.update(json);
+    }
+    
+    // this is called any time the environmental settings is updated. it will pass JSON to this function
     // which describes an updated state. by default, it does nothing as many components dont have env settings. however
     // for those that do, this needs to be overriden and implemented accordingly.
-    update(state: { [key: string]: any }): void {
+    update(state: Record<string, any>): void {
     }
 
     // this is called exclusively by the runner, and calls the components setup function

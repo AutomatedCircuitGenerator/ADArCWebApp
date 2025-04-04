@@ -215,12 +215,13 @@
             individualData?.CompParams[prop.Name.ToLower()].SetValue((string)e.Value);
         }
 
+        // sends updated state to controller
         if (individualData is { Controller: not null })
         {
             var options = new JsonSerializerOptions{IncludeFields = true};
             options.Converters.Add(new ParamToStateSerializer());
             var json = JsonSerializer.Serialize(individualData.CompParams, options);
-            await individualData.Controller.InvokeVoidAsync("update", json);
+            await individualData.Controller.InvokeVoidAsync("send", json);
         }
     }
 

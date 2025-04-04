@@ -8,6 +8,10 @@ export class HX711 extends Controller {
     private weight = 100;
     private bitIndex = 23;
     
+    override update(state: Record<string, any>) {
+        this.setWeight(state.weight);
+    }
+
     setup(): void {
         this.data = this.pins.dat[0].digital;
         this.clock = this.pins.clk[0].digital;
