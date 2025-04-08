@@ -10556,7 +10556,12 @@ define("controllers/controller", ["require", "exports", "lib/execute"], function
         }
         cleanup() {
         }
-        ;
+        send(state) {
+            const json = JSON.parse(state);
+            this.update(json);
+        }
+        update(state) {
+        }
         init() {
             for (const [canonicalPinName, indices] of Object.entries(this.pinIndices)) {
                 this.pins[canonicalPinName] = indices.map(index => execute_1.AVRRunner.getInstance().board.pins[index]);
@@ -12750,6 +12755,9 @@ define("controllers/max6675", ["require", "exports", "controllers/controller", "
                 execute_4.AVRRunner.getInstance().board.cpu.addClockEvent(() => execute_4.AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), execute_4.AVRRunner.getInstance().board.spis[0].transferCycles);
             };
         }
+        update(state) {
+            this.setTemperature(state.temperature);
+        }
         setup() {
             execute_4.AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
         }
@@ -12972,6 +12980,9 @@ define("controllers/bno055", ["require", "exports", "controllers/controller"], f
             const qw = cr * cp * cy + sr * sp * sy;
             return { x: qx, y: qy, z: qz, w: qw };
         }
+        update(state) {
+            this.setMotion(state.motion === "Rotating");
+        }
         setMotion(rotating) {
             if (rotating) {
                 this.sensorControls.setGyroscope(0, 0, 90);
@@ -13066,6 +13077,10 @@ define("controllers/hcsr501", ["require", "exports", "controllers/controller"], 
                 this.timeDelaySeconds = timeDelaySeconds;
             };
         }
+        update(state) {
+            this.setTriggerMode(state.triggermode);
+            this.setTimeDelaySeconds(state.timedelayseconds);
+        }
         setup() {
             clearTimeout(this.motionTimeoutId);
             this.isInTimeWindow = false;
@@ -13129,6 +13144,9 @@ define("controllers/ky018", ["require", "exports", "controllers/controller"], fu
             this.R_FIXED = 10000;
             this.isInSimulation = false;
         }
+        update(state) {
+            this.setLux(state.lux);
+        }
         setLux(lux) {
             if (lux < .1) {
                 this.lux = .1;
@@ -13160,10 +13178,19 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.ArcadePushButton = void 0;
     class ArcadePushButton extends controller_7.Controller {
+        constructor() {
+            super(...arguments);
+            this.isPushed = false;
+        }
         setup() {
             this.digitalOut = this.pins.digital_out[0];
+            this.digitalOut.digital.state = this.isPushed;
+        }
+        update(state) {
+            this.setPushed(state.pushed === "Pushed");
         }
         setPushed(pushed) {
+            this.isPushed = pushed;
             const surface = this.element.querySelector(".surface");
             if (surface) {
                 surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
@@ -13298,15 +13325,16 @@ define("controllers/tf-luna-lidar-i2c", ["require", "exports", "controllers/cont
             this.address = null;
             this.memory = new memory_1.Memory(128);
         }
+        update(state) {
+            this.setRegister("DIST", state.distance);
+        }
         setRegister(register, value) {
             this.memory.write(REGISTERS[register], value);
         }
         setup() {
             execute_6.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
-            this.memory.clear();
             this.address = null;
             this.startTime = Date.now();
-            this.setRegister("DIST", 50);
             this.setRegister("FLUX", 200);
             this.setRegister("TEMP", 2500);
         }
@@ -13402,6 +13430,9 @@ define("controllers/adxl345i2c", ["require", "exports", "controllers/controller"
             this.address = null;
             this.memory = new memory_2.Memory(128);
         }
+        update(state) {
+            this.setMotion(state.motion === "Constant Acceleration");
+        }
         setMotion(moving) {
             if (moving) {
                 this.setAccel(1, 1, 1);
@@ -13417,12 +13448,10 @@ define("controllers/adxl345i2c", ["require", "exports", "controllers/controller"
         }
         setup() {
             execute_7.AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
-            this.memory.clear();
             this.address = null;
             this.setRegister("DEVID", 0xE5);
             this.setRegister("BW_RATE", 0xA);
             this.setRegister("INT_SOURCE", 0x2);
-            this.setMotion(false);
         }
         setRegister(register, value) {
             this.memory.write(REGISTERS[register], value);
@@ -13461,6 +13490,9 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.MQ3 = void 0;
     class MQ3 extends controller_12.Controller {
+        update(state) {
+            this.setAlcohol(state.alcohol);
+        }
         setAlcohol(alcohol) {
             if (alcohol < 0) {
                 this.alcohol = 0;
@@ -13478,6 +13510,7 @@ define("controllers/mq3", ["require", "exports", "controllers/controller"], func
         }
         setup() {
             this.inSimulation = true;
+            this.pins.analog_out[0].analog.voltage = this.alcohol;
         }
     }
     exports.MQ3 = MQ3;
@@ -13490,6 +13523,9 @@ define("controllers/hcsr04", ["require", "exports", "controllers/controller", "l
         constructor() {
             super(...arguments);
             this.distance = 20;
+        }
+        update(state) {
+            this.setDistance(state.distance);
         }
         setDistance(distance) {
             this.distance = distance;
@@ -13516,13 +13552,20 @@ define("controllers/ky003", ["require", "exports", "controllers/controller"], fu
     Object.defineProperty(exports, "__esModule", { value: true });
     exports.KY003 = void 0;
     class KY003 extends controller_14.Controller {
+        constructor() {
+            super(...arguments);
+            this.isFieldDetected = false;
+        }
         setup() {
-            this.inSimulation = true;
+            this.setFieldDetected(this.isFieldDetected);
+        }
+        update(state) {
+            this.setFieldDetected(state.magfield === "Detected");
         }
         setFieldDetected(isFieldDetected) {
-            if (!this.inSimulation)
-                return;
-            isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
+            this.isFieldDetected = isFieldDetected;
+            if (this.pins.digital_out)
+                isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
         }
     }
     exports.KY003 = KY003;
@@ -13616,6 +13659,9 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
                 "white": "#ffffff",
                 "purple": "#ff80ff"
             };
+        }
+        update(state) {
+            this.setColor(state.color);
         }
         setup() {
             this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));
@@ -13778,6 +13824,9 @@ define("controllers/mpu6050", ["require", "exports", "controllers/controller"], 
             const quaternion = this.eulerToQuaternion(this.orientation.x, this.orientation.z, this.orientation.y);
             this.setVector(registers.QUATERNIONW_H.address, [quaternion.w, quaternion.x, quaternion.y, quaternion.z], 16384);
         }
+        update(state) {
+            this.setMotion(state.motion === "Rotating");
+        }
         setMotion(rotating) {
             if (rotating) {
                 this.sensorControls.setGyroscope(0, 0, 90);
@@ -13859,6 +13908,10 @@ define("controllers/ky024", ["require", "exports", "controllers/controller"], fu
             this.isInSimulation = false;
             this.isMagneticFieldDetected = false;
         }
+        update(state) {
+            this.setGauss(state.gauss);
+            this.setIsMagneticFieldDetected(Math.abs(state.gauss) > Number.EPSILON);
+        }
         setGauss(gauss) {
             if (gauss < -1000) {
                 this.gauss = -1000;
@@ -13873,8 +13926,8 @@ define("controllers/ky024", ["require", "exports", "controllers/controller"], fu
                 this.gaussToVoltage(this.gauss);
             }
         }
-        setIsMagneticFieldDetected(isDetected) {
-            this.isMagneticFieldDetected = isDetected > 0;
+        setIsMagneticFieldDetected(isMagneticFieldDetected) {
+            this.isMagneticFieldDetected = isMagneticFieldDetected;
             if (this.isInSimulation) {
                 this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
             }
@@ -14295,6 +14348,9 @@ define("controllers/hx711", ["require", "exports", "controllers/controller", "li
             super(...arguments);
             this.weight = 100;
             this.bitIndex = 23;
+        }
+        update(state) {
+            this.setWeight(state.weight);
         }
         setup() {
             this.data = this.pins.dat[0].digital;
