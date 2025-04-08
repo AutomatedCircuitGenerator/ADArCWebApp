@@ -9,6 +9,10 @@ export class KY018 extends Controller {
     private R_FIXED = 10000;
     private isInSimulation: boolean = false;
 
+    override update(state: Record<string, any>) {
+        this.setLux(state.lux);
+    }
+
     setLux(lux: number) {
         //this should be done somewhere else, but done here as last defence to not bork things
         if (lux < .1) {

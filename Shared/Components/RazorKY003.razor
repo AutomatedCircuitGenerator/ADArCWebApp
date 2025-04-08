@@ -1,23 +1,12 @@
 ﻿@inherits RazorComponent;
 
 @code {
-
-    private string _magField = "Not detected";
-
     [DropdownSetting(["Not detected", "Detected"])]
     [Parameter]
     public string magfield
     {
-        get => _magField;
-        set
-        {
-            var hasChanged = value != _magField;        
-            _magField = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setFieldDetected", _magField == "Detected"); });
-            }
-        }
+        get;
+        set;
     }
 
     public static ElementPin[] pinInfo

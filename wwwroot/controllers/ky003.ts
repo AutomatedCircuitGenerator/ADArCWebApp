@@ -1,15 +1,19 @@
 import {Controller} from "@controllers/controller";
 
 export class KY003 extends Controller {
-    private inSimulation: boolean;
-    //change this so it starts off
+    private isFieldDetected = false;
 
     setup() {
-        this.inSimulation = true
+        this.setFieldDetected(this.isFieldDetected);
+    }
+    
+    override update(state: Record<string, any>) {
+        this.setFieldDetected(state.magfield === "Detected");
     }
 
     setFieldDetected(isFieldDetected: boolean) {
-        if (!this.inSimulation) return;
-        isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
+        this.isFieldDetected = isFieldDetected;
+        if (this.pins.digital_out)
+            isFieldDetected ? this.pins.digital_out[0].digital.state = true : this.pins.digital_out[0].digital.state = false;
     }
 }

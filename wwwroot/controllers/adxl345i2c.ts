@@ -47,6 +47,10 @@ const REGISTERS = {
 export class ADXL345I2C extends Controller implements I2CController {
     private address: null | number = null; // I2C has you write the address to read, and then calls read, so need to save
     private memory = new Memory(128);
+    
+    override update(state: Record<string, any>) {
+        this.setMotion(state.motion === "Constant Acceleration");
+    }
 
     setMotion(moving: boolean) {
         if (moving) {
@@ -64,12 +68,10 @@ export class ADXL345I2C extends Controller implements I2CController {
 
     setup() {
         AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
-        this.memory.clear()
         this.address = null;
         this.setRegister("DEVID", 0xE5);
         this.setRegister("BW_RATE", 0xA);
         this.setRegister("INT_SOURCE", 0x2);
-        this.setMotion(false);
         // this.setRegister("DATA_FORMAT", 0x0);
     }
 

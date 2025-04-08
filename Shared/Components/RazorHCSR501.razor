@@ -1,45 +1,14 @@
 @inherits RazorComponent
 
 @code {
-
-    private double _isMotionDetected;
-    private double _triggerMode;
-    private double _timeDelaySeconds;
-
-
-    //https://lastminuteengineers.com/pir-sensor-arduino-tutorial/
-    //this variable really just sends and "event". would be better as a button in the environmental settings panel
-    // [Parameter]
-    // [ValueSetting("", 0, 0, 1)]
-    public double ismotiondetected
-    {
-        get => _isMotionDetected;
-        set
-        {
-            var hasChanged = value != _isMotionDetected;
-            _isMotionDetected = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setIsMotionDetected", _isMotionDetected); });
-            }
-        }
-    }
-
     //reset timer if new motion detected
     // default is no retrigger
     [Parameter]
     [ValueSetting("", 0, 0, 1)]
     public double triggermode
     {
-        get => _triggerMode;
-        set
-        {
-            _triggerMode = value;
-            if (Controller is not null)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTriggerMode", _triggerMode); });
-            }
-        }
+        get;
+        set;
     }
 
     //how long to hold the pin high in seconds
@@ -47,15 +16,8 @@
     [ValueSetting("S", 1, 1, 180)]
     public double timedelayseconds
     {
-        get => _timeDelaySeconds;
-        set
-        {
-            _timeDelaySeconds = value;
-            if (Controller is not null)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setTimeDelaySeconds", _timeDelaySeconds); });
-            }
-        }
+        get;
+        set;
     }
 
     public static ElementPin[] pinInfo

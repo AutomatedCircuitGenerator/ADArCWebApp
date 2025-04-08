@@ -5,6 +5,10 @@ import {PinState} from "@lib/avr8js";
 export class HCSR04 extends Controller {
     private distance: number = 20;//cm
 
+    override update(state: Record<string, any>) {
+        this.setDistance(state.distance);
+    }
+
     setDistance(distance: number) {
         this.distance = distance;
     }

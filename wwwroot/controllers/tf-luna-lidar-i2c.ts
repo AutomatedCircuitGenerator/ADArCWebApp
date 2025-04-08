@@ -18,16 +18,18 @@ export class TFLunaLidarI2C extends Controller implements I2CController {
     private memory = new Memory(128);
     private startTime: number;
     
+    override update(state: Record<string, any>) {
+        this.setRegister("DIST", state.distance);
+    }
+    
     setRegister(register: string, value: number) {
         this.memory.write(REGISTERS[register], value);
     }
     
     setup(): void {
         AVRRunner.getInstance().board.twis[0].registerController(this.id, this);
-        this.memory.clear();
         this.address = null;
         this.startTime = Date.now();
-        this.setRegister("DIST", 50);   
         this.setRegister("FLUX", 200); 
         this.setRegister("TEMP", 2500);    
     }

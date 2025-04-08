@@ -1,22 +1,12 @@
 ﻿@inherits RazorComponent
 
 @code {
-    private string _color = "red";
-
     [Parameter]
     [DropdownSetting(["red", "blue", "green", "yellow", "purple", "orange", "white"])]
     public string color
     {
-        get => _color;
-        set
-        {
-            var hasChanged = value != _color;
-            _color = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setColor", _color); });
-            }
-        }
+        get;
+        set;
     }
 
 

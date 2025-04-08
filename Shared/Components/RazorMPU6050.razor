@@ -1,22 +1,12 @@
 ﻿@inherits RazorComponent
 
 @code {
-    private string _motion = "Static";
-
     [Parameter]
     [DropdownSetting(["Static", "Rotating"])]
     public string motion
     {
-        get => _motion;
-        set
-        {
-            var hasChanged = !_motion.Equals(value);
-            _motion = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion == "Rotating"); });
-            }
-        }
+        get;
+        set;
     }
 
     public static ElementPin[] pinInfo

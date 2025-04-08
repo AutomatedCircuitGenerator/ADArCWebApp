@@ -15,28 +15,14 @@
             };
         }
     }
-
-    private double _gauss;
-
+    
     [Parameter]
     [ValueSettingDouble("Gauss", 0, -1000, 1000)]
     public double gauss
     {
-        get => _gauss;
-        set
-        {
-            var hasChanged = Math.Abs(value - _gauss) > double.Epsilon;
-            _gauss = value;
-            if (Controller is not null && hasChanged)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setGauss", _gauss); });
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setIsMagneticFieldDetected", isMagneticFieldDetected); });
-            }
-        }
+      get;
+      set;
     }
-
-    private bool isMagneticFieldDetected => Math.Abs(_gauss) > double.Epsilon;
-
 
 }
 

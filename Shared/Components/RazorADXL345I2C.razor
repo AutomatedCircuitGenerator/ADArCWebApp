@@ -2,24 +2,9 @@
 
 @code {
 
-    //stationary, or accelerating forward at a constant rate.
-    private string _motion = "Static";
-
     [Parameter]
     [DropdownSetting(["Static", "Constant Acceleration"])]
-    public string motion
-    {
-        get => _motion;
-        set
-        {
-            var isDifferentValue = !_motion.Equals(value);
-            _motion = value;
-            if (Controller is not null && isDifferentValue)
-            {
-                InvokeAsync(async () => { await Controller.InvokeVoidAsync("setMotion", _motion.Equals("Constant Acceleration")); });
-            }
-        }
-    }
+    public string motion { get; set; }
 
     public static ElementPin[] pinInfo
     {

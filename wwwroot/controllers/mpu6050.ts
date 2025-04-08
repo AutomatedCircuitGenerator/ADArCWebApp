@@ -176,6 +176,10 @@ export class MPU6050 extends Controller implements I2CController {
             [quaternion.w, quaternion.x, quaternion.y, quaternion.z],
             16384);
     }
+    
+    override update(state: Record<string, any>) {
+        this.setMotion(state.motion === "Rotating");
+    }
 
     setMotion(rotating: boolean) {
         if (rotating) {
