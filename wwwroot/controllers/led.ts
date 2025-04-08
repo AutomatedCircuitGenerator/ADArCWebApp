@@ -13,6 +13,9 @@ export class LED extends Controller {
         "purple": "#ff80ff"
     }
 
+    override update(state: Record<string, any>) {
+        this.setColor(state.color);
+    }
 
     setup() {
         this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));

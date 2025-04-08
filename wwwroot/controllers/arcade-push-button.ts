@@ -2,8 +2,11 @@
 import {Interfaces} from "../boards/board";
 export class ArcadePushButton extends Controller {
     private digitalOut: Interfaces;
+    private isPushed: boolean = false;
+    
     setup(): void {
         this.digitalOut = this.pins.digital_out[0];
+        this.digitalOut.digital.state = this.isPushed;
     }
     
     override update(state: Record<string, any>) {
@@ -11,6 +14,7 @@ export class ArcadePushButton extends Controller {
     }
 
     setPushed(pushed: boolean) {
+        this.isPushed = pushed;
         const surface = this.element.querySelector<HTMLElement>(".surface");
 
         if (surface) {
