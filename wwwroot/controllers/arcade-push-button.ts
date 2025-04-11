@@ -15,6 +15,11 @@ export class ArcadePushButton extends Controller {
 
     setPushed(pushed: boolean) {
         this.isPushed = pushed;
+        
+        if (!this.element) {
+            return;
+        }
+        
         const surface = this.element.querySelector<HTMLElement>(".surface");
 
         if (surface) {

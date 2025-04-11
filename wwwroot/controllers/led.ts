@@ -26,6 +26,9 @@ export class LED extends Controller {
     }
 
     setColor(color: string) {
+        if (!this.element) {
+            return;
+        }
         const _color: string = this.lightColors[color] ? this.lightColors[color] : "red";
         this.element.querySelector<HTMLElement>("#ledColor").style.fill = _color;
         this.element.querySelector<HTMLElement>("#ledColorBrightness").style.fill = _color;
