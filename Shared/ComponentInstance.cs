@@ -73,15 +73,6 @@ namespace ADArCWebApp.Shared
             Controller = await js.InvokeAsync<IJSObjectReference>($"{jsIdentifier}.create", localId, pins);
         }
 
-        public async Task UpdateControllerState()
-        {
-            if (Controller == null) return;
-            var options = new JsonSerializerOptions{IncludeFields = true};
-            options.Converters.Add(new ParamToStateSerializer());
-            var json = JsonSerializer.Serialize(CompParams, options);
-            await Controller.InvokeVoidAsync("send", json);
-        }
-
         public ComponentInstance(int globalId, node gsNode, double x = 829.0, double y = 219.0)
         {
             GlobalId = globalId;
@@ -114,6 +105,7 @@ namespace ADArCWebApp.Shared
             if (Data.compType.IsSubclassOf(typeof(RazorComponent)))
             {
                 ret.Add("Controller", Controller);
+                ret.Add("Component", this);
             }
             
             return ret;

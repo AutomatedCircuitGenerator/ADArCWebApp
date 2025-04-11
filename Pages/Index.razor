@@ -1162,7 +1162,6 @@
             {
                 UpdatePinBindings(comp);
                 if (!comp.IsArduino()) await comp.LinkController(JsRuntime);
-                await comp.UpdateControllerState();
 
                 // Re-register DHT if present
                 if (comp.GlobalId == 20)
