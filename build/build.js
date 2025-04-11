@@ -13673,6 +13673,9 @@ define("controllers/led", ["require", "exports", "controllers/controller", "lib/
             this.element.querySelector("#ledDisplay").style.display = "none";
         }
         setColor(color) {
+            if (!this.element) {
+                return;
+            }
             const _color = this.lightColors[color] ? this.lightColors[color] : "red";
             this.element.querySelector("#ledColor").style.fill = _color;
             this.element.querySelector("#ledColorBrightness").style.fill = _color;
