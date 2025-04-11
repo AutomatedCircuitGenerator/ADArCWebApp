@@ -13191,6 +13191,9 @@ define("controllers/arcade-push-button", ["require", "exports", "controllers/con
         }
         setPushed(pushed) {
             this.isPushed = pushed;
+            if (!this.element) {
+                return;
+            }
             const surface = this.element.querySelector(".surface");
             if (surface) {
                 surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
