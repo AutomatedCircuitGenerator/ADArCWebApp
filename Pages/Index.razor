@@ -480,11 +480,12 @@
             {
                 //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
                 AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
-            }
-
+            } 
+            await JsRuntime.InvokeVoidAsync("differenceEditor.myOnT");
             AppInterop.UpdateCodeWrapper();
-            await JsRuntime.InvokeVoidAsync("onLoad");
-            await JsRuntime.InvokeVoidAsync("onAppend");
+            await JsRuntime.InvokeVoidAsync("differenceEditor.myOnLoad");
+            await JsRuntime.InvokeVoidAsync("differenceEditor.onAppend");
+
             ToastService.AddToast("Code panel updated.", Variant.Info);
             if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
             if (trackHistory)
@@ -880,10 +881,10 @@
 
         StateHasChanged();
         if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
-        await JsRuntime.InvokeVoidAsync("onDelete");
+        await JsRuntime.InvokeVoidAsync("differenceEditor.myOnDelete");
         AppInterop.UpdateCodeWrapper();
-        await JsRuntime.InvokeVoidAsync("onLoad");
-        await JsRuntime.InvokeVoidAsync("onAppend");
+        await JsRuntime.InvokeVoidAsync("differenceEditor.myOnLoad");
+        await JsRuntime.InvokeVoidAsync("differenceEditor.onAppend");
     }
 
     /// <summary>

@@ -22,6 +22,9 @@
     </div>
 
     <div id="button-row">
+        <button @onclick="ClearCodeCache" style="margin-right: 0.25rem;">
+            <span>@clearCacheText</span>
+        </button>
         <button @onclick="ClearConsole" style="margin-right: 0.25rem;">
             <span>@clearIcon</span>
             <span>@clearText</span>
@@ -58,6 +61,8 @@
 
     private string clearIcon = "🧹";
     private string clearText = "Clear Console";
+    
+    private string clearCacheText = "Clear Code Cache";
 
     List<string> text = ["This is the Console. Compiler and Serial output appears here!", ""];
 
@@ -69,6 +74,10 @@
         text.Add("");
         index = 0;
         StateHasChanged();
+    }
+    private void ClearCodeCache()
+    {
+        JSRuntime.InvokeVoidAsync("differenceEditor.deleteCache");
     }
 
 

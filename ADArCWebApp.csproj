@@ -119,6 +119,19 @@
     <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
     <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\constants\index.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\core\DiffMatchPatch.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\core\index.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\core\PatchObject.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\index.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\types\Diff.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\types\DiffOperation.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\types\HalfMatchArray.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\types\index.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\types\PatchApplyArray.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\utils\index.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diff-match-patch-typescript\utils\math.ts" />
+    <TypeScriptCompile Remove="wwwroot\lib\diffFolder\diff.d.ts" />
   </ItemGroup>
 
   <ItemGroup>
