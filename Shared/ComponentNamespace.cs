@@ -313,7 +313,7 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
                         environmentalSettingsType: typeof(PIRButton))
-                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1).Finish()
+                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0).Finish()
             },
             {
                 16,
