@@ -1,0 +1,16 @@
+@inherits RazorComponent
+
+@code {
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "", x: 0, y: 0, signals: new PinSignalInfo[] { }, number: 1)
+            };
+        }
+    }
+
+}
