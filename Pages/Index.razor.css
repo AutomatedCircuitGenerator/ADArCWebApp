@@ -97,7 +97,7 @@
     }
 }
 
-/* Medium-large screens - reduce padding */
+/* Medium-large screens - reduce padding and reduce font size */
 @media (max-width: 1399px) and (min-width: 1200px) {
     .toolbar-button {
         padding: 8px 12px;
@@ -109,6 +109,7 @@
     }
 }
 
+/* Small screens - reduce padding and reduce font size */
 @media (max-width: 1199px) and (min-width: 1000px) {
     .toolbar-button {
         padding: 6px 8px;
@@ -121,6 +122,7 @@
     }
 }
 
+/* Extra small screens - hide text */
 @media (max-width: 999px) {
     .toolbar-button.hide-text-sm .button-text {
         display: none;

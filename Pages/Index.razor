@@ -48,10 +48,11 @@
             <span class="adarc-text">ADArC</span>
         </div>
         
-        <button class="tutorial-button toolbar-button hide-text-sm" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
+        <button class="tutorial-button toolbar-button hide-text-sm" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
             <span class="button-icon">💡</span>
             <span class="button-text">Tutorial</span>
         </button>
+        
         <div class="center-toolbar">
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
                 <button class="toolbar-button hide-text-sm" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
