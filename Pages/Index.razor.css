@@ -57,6 +57,8 @@
 .center-toolbar {
     display: flex;
     align-items: center;
+    gap: 5px;
+    flex-wrap: nowrap;
 }
 
 .toolbar-button {
@@ -67,10 +69,62 @@
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: left;
     margin: 0 5px;
-    height: 10px;
+    height: auto;
     overflow-wrap: unset;
+    min-width: 20px
+}
+
+.button-text {
+    margin-left: 5px;
+}
+
+.button-icon {
+    display: inline-block;
+}
+
+/* Large screens - show everything */
+@media (min-width: 1400px) {
+    .toolbar-button {
+        padding: 5px 10px;
+        margin: 0 5px;
+    }
+    
+    .button-text {
+        margin-left: 3px;
+        font-size: 18px;
+    }
+}
+
+/* Medium-large screens - reduce padding */
+@media (max-width: 1399px) and (min-width: 1200px) {
+    .toolbar-button {
+        padding: 8px 12px;
+        margin: 0 4px;
+    }
+    .button-text {
+        margin-left: 3px;
+        font-size: 16px;
+    }
+}
+
+@media (max-width: 1199px) and (min-width: 1000px) {
+    .toolbar-button {
+        padding: 6px 8px;
+        margin: 0 2px;
+    }
+    
+    .button-text {
+        font-size: 12px;
+        margin: 2px;
+    }
+}
+
+@media (max-width: 999px) {
+    .toolbar-button.hide-text-sm .button-text {
+        display: none;
+    }
 }
 
 .toolbar-button:disabled {
@@ -127,12 +181,11 @@
 .logo-and-adarc {
     flex-wrap: nowrap;
     display: flex;
-    overflow: hidden;
 }
 
 .adarc-text {
     font-size: 24px;
-    margin: 0px 15px;
+    margin: 0 15px;
     position: relative;
     overflow: hidden;
 }

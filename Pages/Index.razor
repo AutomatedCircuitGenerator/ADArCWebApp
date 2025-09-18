@@ -48,54 +48,63 @@
             <span class="adarc-text">ADArC</span>
         </div>
         
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
-            💡 Tutorial
+        <button class="tutorial-button toolbar-button hide-text-sm" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
+            <span class="button-icon">💡</span>
+            <span class="button-text">Tutorial</span>
         </button>
         <div class="center-toolbar">
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button hide-text-sm" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Undo</span>
+                    <span class="button-icon"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg></span>
+                    <span class="button-text">Undo</span>
                 </button>
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button hide-text-sm" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastUndoneAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>Redo</span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg></span>
+                    <span class="button-text">Redo</span>
                 </button>
             </div>
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
-                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
-                    <span>⬇️️ Import</span>
+                <label for="import-button" class="toolbar-button hide-text-sm" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
+                    <span class="button-icon">⬇️</span>
+                    <span class="button-text">Import</span>
                 </label>
-                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" disabled="@(IsRunning || selLockedOut)">
-                    <span>⬆️ Export</span>
+                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button hide-text-sm" disabled="@(IsRunning || selLockedOut)">
+                    <span class="button-icon">⬆️</span>
+                    <span class="button-text">Export</span>
                 </button>
             </div>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
+            <button class="toolbar-button hide-text-sm" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
                     disabled="@selLockedOut">
-                <span>🔗 Generate URL</span>
+                <span class="button-icon">🔗</span>
+                <span class="button-text">Generate URL</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
+            <button class="toolbar-button hide-text-sm" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
                     disabled="@selLockedOut">
-                📖 Examples
+                <span class="button-icon">📖</span>
+                <span class="button-text">Examples</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
+            <button class="toolbar-button hide-text-sm" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
                     disabled="@selLockedOut">
-                <span>🐛 Report Bug</span>
+                <span class="button-icon">🐛</span>
+                <span class="button-text">Report Bug</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
+            <button class="toolbar-button hide-text-sm" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
                     disabled="@selLockedOut">
-                <span>ℹ Help</span>
+                <span class="button-icon">ℹ</span>
+                <span class="button-text">Help</span>
             </button>
 
             <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
                 <div class="url-modal">
                     <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
-                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                    <button class="toolbar-button copy-button hide-text-sm" @onclick="CopyUrlToClipboard">
                         <span>@copyButtonText</span>
                     </button>
                 </div>
