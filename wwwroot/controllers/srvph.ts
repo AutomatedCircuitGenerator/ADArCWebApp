@@ -3,7 +3,7 @@ import {AVRRunner} from "@lib/execute";
 
 export class SRVPH extends Controller {
     
-    private ph: number;
+    private ph: number = 7.0;
 
     override update(state: Record<string, any>) {
         this.setph(state.ph);
