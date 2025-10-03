@@ -636,6 +636,29 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            
+            {
+                31,
+                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
+                    paneHoverText: "SRV-PH",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        {
+                            "global",
+                            "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"ADC\"\nfloat sensorValue@;  //variable to store sensor value"
+                        },
+                        {
+                            "setup",
+                            "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+                        },
+                        {
+                            "loopMain",
+                            "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
+                        },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            }
         };
     }
 }
