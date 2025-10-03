@@ -10,7 +10,15 @@ export class SRVPH extends Controller {
     }
 
     setph(ph: number) {
-        this.ph = ph
+        
+        // Clamp ph, sensor's range is only 0-14
+        if (ph < 0)
+            this.ph = 0;
+        else if (ph > 14)
+            this.ph = 14;
+        else
+            this.ph = ph
+        
         this.pins.ADC[0].analog.voltage = this.phToVoltage(this.ph);
     }
 
