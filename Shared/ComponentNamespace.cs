@@ -646,10 +646,7 @@ namespace ADArCWebApp.Shared
                         { "include", "" },
                         {
                             "global",
-                            "#define ADC_Pin@ ~\"ADC\"\n" +
-                            "float sensorValue@;  // variable to store sensor value (0 - 1023)\n" +
-                            "float voltage@; // voltage, converted from ADC\n" +
-                            "float pH;"
+                            "#define SRVPH_PIN@ ~\"ADC\""
                         },
                         {
                             "setup",
@@ -657,9 +654,9 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "loopMain",
-                            "\tsensorValue@ = analogRead(ADC_Pin@); // read analog input pin\n" +
-                            "\tvoltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
-                            "\tpH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
+                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
+                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
+                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
                             "\tSerial.print(\"Sensor Value: \");\n" +
                             "\tSerial.print(sensorValue@);\n\n" + 
                             "\tSerial.print(\"\tVoltage: \");\n" +
