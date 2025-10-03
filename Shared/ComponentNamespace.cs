@@ -646,15 +646,27 @@ namespace ADArCWebApp.Shared
                         { "include", "" },
                         {
                             "global",
-                            "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"ADC\"\nfloat sensorValue@;  //variable to store sensor value"
+                            "#define ADC_Pin@ ~\"ADC\"\n" +
+                            "float sensorValue@;  // variable to store sensor value (0 - 1023)\n" +
+                            "float voltage@; // voltage, converted from ADC\n" +
+                            "float pH;"
                         },
                         {
                             "setup",
-                            "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+                            ""
                         },
                         {
                             "loopMain",
-                            "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
+                            "\tsensorValue@ = analogRead(ADC_Pin@); // read analog input pin\n" +
+                            "\tvoltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
+                            "\tpH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
+                            "\tSerial.print(\"Sensor Value: \");\n" +
+                            "\tSerial.print(sensorValue@);\n\n" + 
+                            "\tSerial.print(\"\tVoltage: \");\n" +
+                            "\tSerial.print(voltage@);\n\n" +
+                            "\tSerial.print(\"\tpH: \");\n" + 
+                            "\tSerial.println(pH);\n" +
+                            "\tdelay(2000); // wait 2s for next reading"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
