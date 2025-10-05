@@ -1,3 +1,4 @@
+/* Manifest version: GkJsxLJ9 */
 // // Caution! Be sure you understand the caveats before publishing an application with
 // // offline support. See https://aka.ms/blazor-offline-considerations
 //
@@ -47,4 +48,4 @@
 //     return cachedResponse || fetch(event.request);
 // }
 //
-// /* updated 2/25/2025 *//* Manifest version: TyxBf03F */
+// /* updated 2/25/2025 */
