@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "ADArCWebApp",
   "resources": {
-    "hash": "sha256-b44lKWHpniVNF1l1T7919EkD0/lblsUt2cJsxGT1qLc=",
+    "hash": "sha256-hxl00EeSBgiJBjxGp9sqHCJW9zY+ICOII+R6WcLbbug=",
     "jsModuleNative": {
       "dotnet.native.js": "sha256-D0bzod5lwwSzPR43JC8TTCcZKw+3jIHOk8CZFCRj5is="
     },
@@ -89,7 +89,7 @@
       "System.wasm": "sha256-9DLmgOsnmEbjuZrRVFruRmVRvh/skjCDv6hQMjVZ3K8=",
       "netstandard.wasm": "sha256-WSyfe0F1ty0qLN4zgmkxUoAK1v0e/ZPILoNZxbBbMYk=",
       "System.Private.CoreLib.wasm": "sha256-rVVljOYOiH3We8+qauyl3j7uZiyLMcHRp0+YtAb9uKM=",
-      "ADArCWebApp.wasm": "sha256-GSSxG/kApZXv6PnQhIygzXEErft7X5/L4NRXr+3C+cU="
+      "ADArCWebApp.wasm": "sha256-XjkOkrVxcNYZ/IPEoNir/ssbu3/TNm9O36eyKHwm1q8="
     }
   },
   "cacheBootResources": true,
