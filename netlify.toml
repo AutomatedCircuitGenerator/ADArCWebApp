@@ -3,8 +3,4 @@
 [[redirects]]
 from = "/*"
 to = "/index.html"
-status = 200
-
-[build]
-publish = "/release/wwwroot" # Or your Jekyll output directory
-command = ""      # Clear the build command
+status = 404
