@@ -1,5 +1,5 @@
 self.assetsManifest = {
-  "version": "BPcRu0Sd",
+  "version": "V8Dh6jq1",
   "assets": [
     {
       "hash": "sha256-IWRLPQEpY/Erwhf5eFf2sbiRkzGEYFDxaTp+n+fPG6M=",
@@ -986,7 +986,7 @@ self.assetsManifest = {
       "url": "_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.min.js"
     },
     {
-      "hash": "sha256-B/YdeDS7JDVzHfXOUV7zwPR9NA52Z5gBElShPtTutUo=",
+      "hash": "sha256-Oe9o7kruUP7EvTsqD/DYq00jLZBYFkDo3EKilNUjW5Q=",
       "url": "_framework/ADArCWebApp.wasm"
     },
     {
@@ -1270,7 +1270,7 @@ self.assetsManifest = {
       "url": "_framework/System.wasm"
     },
     {
-      "hash": "sha256-KYbzH5oFQ6WybqeoTUxSR+lhu0cXZrSxy6U73Q1K+k0=",
+      "hash": "sha256-CBozCGxwK5uCCyLwJ6wSBeIati+bXGSDHSbxtW1z2/U=",
       "url": "_framework/blazor.boot.json"
     },
     {
