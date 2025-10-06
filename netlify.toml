@@ -4,3 +4,7 @@
 from = "/*"
 to = "/index.html"
 status = 200
+
+[build]
+publish = "ADArCWebApp" # Or your Jekyll output directory
+command = ""      # Clear the build command
