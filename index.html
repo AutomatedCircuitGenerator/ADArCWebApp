@@ -1,61 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
-
+<html>
 <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <title>Automated Design Tool for Arduino Circuits, ADArC </title>
-
-    <!--This should be "/" in testing and "/ADArCWebApp/" in deployment. If something doesn't work, check here! -->
-    <base href="/ADArCWebApp/"/>
-
-    <!--<script src="lib/intro.js/intro.js"></script>-->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
-    <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
-    <link href="css/app.css" rel="stylesheet" />
-    <link href="ADArCWebApp.styles.css" rel="stylesheet" />
-    <link href="manifest.json" rel="manifest" />
-    <script src="_content/BlazorMonaco/jsInterop.js"></script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
-    <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
-
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
-    <script data-main="main" src="require.js"></script>
-    <script src="build/build.js"></script>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-<!--    <script src="lib/editor.ts"></script>-->
-    <link rel="stylesheet" href="lib/intro.js/introjs.css">
-<!--    introjs.css contains introjs-helperLayer with a height of 758px. this causes a 4px white space to show up at the bottom when going through the tutorial. not sure why the responsive design isnt catching this.-->
+  <meta charset="utf-8">
+  <title>Redirecting...</title>
+  <meta http-equiv="refresh" content="0; url=https://your-new-site.com">
+  <link rel="canonical" href="https://your-new-site.com">
 </head>
-
 <body>
-    <div id="app">
-        <svg class="loading-progress">
-            <circle r="40%" cx="50%" cy="50%" />
-            <circle r="40%" cx="50%" cy="50%" />
-        </svg>
-        <div class="loading-progress-text"></div>
-    </div>
-
-    <!-- hopefully clear the cache on load. doesn't entirely work, but not harmful -->
-    <script type="text/javascript">
-        caches.delete("blazor-resources-/").then(function (e) {
-            console.log("'blazor-resources-/' cache deleted");
-        });
-    </script>
-    
-    <!-- this isn't really necessary, but is left in anyway-->
-    <script>
-        window.triggerClick = (elt) => elt.click();
-    </script>
-
-<!--    <div id="blazor-error-ui">
-        An unhandled error has occurred.
-        <a href="" class="reload">Reload</a>
-        <a class="dismiss">🗙</a>
-    </div>-->
-    <script src="_framework/blazor.webassembly.js"></script>
-    <script>navigator.serviceWorker.register('service-worker.js');</script>
+  <p>Redirecting to <a href="https://your-new-site.com">https://your-new-site.com</a>...</p>
+  <script>window.location.href = "https://your-new-site.com";</script>
 </body>
-
 </html>
