@@ -641,7 +641,7 @@ namespace ADArCWebApp.Shared
                             "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vcc", "signal", "ground"], gsNodeName: "dht22").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
+                    }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
             },
             // {
             //     31,
