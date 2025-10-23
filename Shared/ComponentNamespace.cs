@@ -284,7 +284,10 @@ namespace ADArCWebApp.Shared
                         codeForGen: new()
                         {
                             { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
-                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+                            {
+                                "global",
+                                "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor"
+                            },
                             { "setup", "" },
                             {
                                 "loopMain",
@@ -313,7 +316,8 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
                         environmentalSettingsType: typeof(PIRButton))
-                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0).Finish()
+                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0)
+                    .Finish()
             },
             {
                 16,
@@ -379,15 +383,15 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, typeof(RazorLED),
                     codeForGen: new()
                     {
-                        { "include", "" }, 
-                        { "global", "" }, 
+                        { "include", "" },
+                        { "global", "" },
                         { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
                         {
                             "loopMain",
                             "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
             },
@@ -416,8 +420,8 @@ namespace ADArCWebApp.Shared
                             "loopMain",
                             "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed").Finish()
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
@@ -426,15 +430,15 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("Laser diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
                     codeForGen: new()
                     {
-                        { "include", "" }, 
+                        { "include", "" },
                         { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
                         { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
                         {
                             "loopMain",
                             "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
             },
@@ -508,9 +512,9 @@ namespace ADArCWebApp.Shared
                 25,
                 new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
                         typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
-                        codeForGen: new ()
+                        codeForGen: new()
                         {
-                            { "include", "" }, 
+                            { "include", "" },
                             {
                                 "global",
                                 "int ena@ = ~\"ena\"; // Enable pin for motor speed control\nint in1@ = ~\"in1\"; // Control pin 1 for motor direction\nint in2@ = ~\"in2\"; // Control pin 2 for motor direction"
@@ -523,8 +527,8 @@ namespace ADArCWebApp.Shared
                                 "loopMain",
                                 "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating"
                             },
-                            { "functions", "" }, 
-                            { "delayLoop", "" }, 
+                            { "functions", "" },
+                            { "delayLoop", "" },
                             { "delayTime", "" }
                         },
                         gsNodeName: "l298n",
@@ -582,8 +586,8 @@ namespace ADArCWebApp.Shared
                                 "loopMain",
                                 "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
                             },
-                            { "functions", "" }, 
-                            { "delayLoop", "" }, 
+                            { "functions", "" },
+                            { "delayLoop", "" },
                             { "delayTime", "" }
                         },
                         pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003",
@@ -625,6 +629,24 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
+            },
+            {
+                32,
+                new ComponentDataBuilder("Temperature and Humidity Sensor", true,
+                        "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
+                        paneHoverText: "DHT22",
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
+                            { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
+                            {
+                                "loopMain",
+                                "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
+                    .Property("temperature", 20.0).Finish()
             },
             // {
             //     31,
