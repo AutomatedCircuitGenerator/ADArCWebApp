@@ -15,6 +15,7 @@
     <None Include="wwwroot\rules\add_arduinoUno_wifi_rev2.grxml" />
     <None Include="wwwroot\rules\add_bno055.grxml" />
     <None Include="wwwroot\rules\add_dc_motor.grxml" />
+      <None Include="wwwroot\rules\add_dht22.grxml" />
     <None Include="wwwroot\rules\add_drv8825.grxml" />
     <None Include="wwwroot\rules\add_drv8833.grxml" />
     <None Include="wwwroot\rules\add_ds18b20.grxml" />
