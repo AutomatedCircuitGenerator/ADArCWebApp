@@ -626,23 +626,6 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
-            
-            {
-                32,
-                new ComponentDataBuilder("Temperature and Humidity Sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
-                    paneHoverText: "DHT22",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
-                        { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
-                        {
-                            "loopMain",
-                            "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
-            },
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
