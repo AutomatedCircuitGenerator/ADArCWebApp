@@ -1,8 +1,18 @@
-﻿<h3>RazorStrainGauge</h3>
-
-@inherits RazorComponent
+﻿@inherits RazorComponent
 
 @code {
+    
+    [Parameter] public double width { get; set; } = 507;
+    [Parameter] public double height { get; set; } = 269;
+    
+    [Parameter]
+    [ValueSetting("g", 100, 100, 1500)] // 1023.75*
+    public double weight
+    {
+        get;
+        set;
+    }
+    
     public static ElementPin[] pinInfo
     {
         get
@@ -16,17 +26,7 @@
             };
         }
     }
-    
-    [Parameter]
-    [ValueSetting("g", 100, 100, 1500)] // 1023.75*
-    public double weight
-    {
-        get;
-        set;
-    }
-    
 }
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
    width="200"
    zoomAndPan="magnify"
@@ -112,5 +112,3 @@
     </g>
   </g>
 </svg>
-
-
