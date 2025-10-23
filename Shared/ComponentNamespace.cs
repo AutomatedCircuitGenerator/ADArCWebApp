@@ -626,8 +626,18 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                31,
+                new ComponentDataBuilder("Turbidity sensor", true, "Input/Light Sensors", 0.35, -100,
+                    -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
+                    codeForGen: new()
+                    {
+                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+                        { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Finish()
+            },
             // {
-            //     31,
+            //     32,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
             //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
             //         codeForGen: new()
