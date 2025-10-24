@@ -664,7 +664,7 @@ namespace ADArCWebApp.Shared
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
-                    .Property("humidity", 40.0).Finish()
+                    .Property("humidity", 400.0).Finish()
             },
             // {
             //     31,
