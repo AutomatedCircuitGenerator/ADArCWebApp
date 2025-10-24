@@ -24,7 +24,7 @@ export class SEN0114 extends Controller {
         else if (humidity > 1024)
             humidity = 1024;
         
-        return humidity * 5 / 1024;
+        return humidity * 5 / 1023;
     }
     
         
