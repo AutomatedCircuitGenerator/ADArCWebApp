@@ -41,13 +41,12 @@ export class DHT22 extends Controller {
     }
     private sendAckAndData() { 
         console.log("Sending ACK and data...");
-        
         let counter = 0;
         console.log("Encoding DHT22:", this.humidity, this.temperature);
         const dataBytes = this.valuesToDigitalSignal();
         console.log("DHT22 bytes:", dataBytes);
 
-        const usToCycles = (us: number) => Math.round(us * (this.cpu.frequency / 1_000_000));
+        const usToCycles = (us: number) => AVRRunner.getInstance().usToCycles(us);
 
         const schedule = (callback: () => void, us: number) => {
             const cycles = counter + usToCycles(us);
