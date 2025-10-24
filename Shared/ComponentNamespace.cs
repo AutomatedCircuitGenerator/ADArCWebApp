@@ -628,14 +628,13 @@ namespace ADArCWebApp.Shared
             },
             {
                 32,
-                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .66, 75, 75, typeof(RazorSEN0114),
+                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
                             { "include", "" },
                             {
                                 "global",
                                 "/* Example code for the moisture sensor\n" +
-                                "Connect the sensor to the A0(Analog 0) pin on the Arduino board\n" +
                                 "Sensor value descriptions:\n" +
                                 "\t 0 - 300: Dry soil\n" +
                                 "\t 300 - 700: Humid soil\n" +
@@ -653,12 +652,13 @@ namespace ADArCWebApp.Shared
                                 "\tSerial.print(\"Moisture Sensor Value: \");\n" +
                                 "\tSerial.println(moistureValue@);\n\n" +
                                 "\t// Interpret the sensor value\n" +
+                                "\tSerial.print(\"Status: \");\n" +
                                 "\tif (moistureValue@ < 300) {\n" +
-                                "\t\tSerial.println(\"Status: Dry soil\");\n" +
+                                "\t\tSerial.println(\"Dry soil\");\n" +
                                 "\t} else if (moistureValue@ < 700) {\n" +
-                                "\t\tSerial.println(\"Status: Humid soil\");\n" +
+                                "\t\tSerial.println(\"Humid soil\");\n" +
                                 "\t} else {\n" +
-                                "\t\tSerial.println(\"Status: In water\");\n" +
+                                "\t\tSerial.println(\"In water\");\n" +
                                 "\t}\n" +
                                 "\tdelay(1000);"
                             },
