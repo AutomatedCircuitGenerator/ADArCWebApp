@@ -696,7 +696,7 @@ namespace ADArCWebApp.Shared
                             { "delayTime", "" }
                         },
                         pins: ["Vcc", "gnd", "so", "cs", "sck"],
-                        gsNodeName: "gp2y1014au0f"
+                        gsNodeName: "GP2Y1014AU0F"
                     )
                     .Property("dustLevel", 0.0)
                     .Finish()
