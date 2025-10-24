@@ -75,7 +75,7 @@ export class DHT22 extends Controller {
             schedule(() => this.signal.state = true, bit === 1 ? 70 : 27);
         }
         
-        schedule(() => this.signal.state = true, 0);
+        // schedule(() => this.signal.state = true, 0);
     }
 
     private valuesToDigitalSignal(): number[] {
