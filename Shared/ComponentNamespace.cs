@@ -634,15 +634,33 @@ namespace ADArCWebApp.Shared
                             { "include", "" },
                             {
                                 "global",
-                                "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value"
+                                "/* Example code for the moisture sensor\n" +
+                                "Connect the sensor to the A0(Analog 0) pin on the Arduino board\n" +
+                                "Sensor value descriptions:\n" +
+                                "\t 0 - 300: Dry soil\n" +
+                                "\t 300 - 700: Humid soil\n" +
+                                "\t 700 - 950: In water\n*/" +
+                                "#define moisturePin@ ~\"analog_out\"\n" +
+                                "int moistureValue@ = 0;"
                             },
                             {
                                 "setup",
-                                "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+                                ""
                             },
                             {
                                 "loopMain",
-                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
+                                "\tmoistureValue@ = analogRead(moisturePin@);\n" +
+                                "\tSerial.print(\"Moisture Sensor Value: \");\n" +
+                                "\tSerial.println(moistureValue@);\n\n" +
+                                "\t// Interpret the sensor value\n" +
+                                "\tif (moistureValue@ < 300) {\n" +
+                                "\t\tSerial.println(\"Status: Dry soil\");\n" +
+                                "\t} else if (moistureValue@ < 700) {\n" +
+                                "\t\tSerial.println(\"Status: Humid soil\");\n" +
+                                "\t} else {\n" +
+                                "\t\tSerial.println(\"Status: In water\");\n" +
+                                "\t}\n" +
+                                "\tdelay(100);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
