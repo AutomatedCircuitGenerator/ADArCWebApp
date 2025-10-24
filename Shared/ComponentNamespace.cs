@@ -639,7 +639,7 @@ namespace ADArCWebApp.Shared
                                 "Sensor value descriptions:\n" +
                                 "\t 0 - 300: Dry soil\n" +
                                 "\t 300 - 700: Humid soil\n" +
-                                "\t 700 - 950: In water\n*/" +
+                                "\t 700 - 950: In water\n*/\n" +
                                 "#define moisturePin@ ~\"analog_out\"\n" +
                                 "int moistureValue@ = 0;"
                             },
@@ -660,11 +660,11 @@ namespace ADArCWebApp.Shared
                                 "\t} else {\n" +
                                 "\t\tSerial.println(\"Status: In water\");\n" +
                                 "\t}\n" +
-                                "\tdelay(100);"
+                                "\tdelay(1000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
-                    .Property("humidity", 400.0).Finish()
+                    .Property("humidity", 512.0).Finish()
             },
             // {
             //     31,
