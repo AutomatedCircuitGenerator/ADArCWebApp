@@ -637,16 +637,32 @@ namespace ADArCWebApp.Shared
                         paneHoverText: "DHT22",
                         codeForGen: new()
                         {
-                            { "include", "" },
-                            { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
-                            { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
+                            { "include", "#include <DHT.h>\n" },
+                            { 
+                                "global", 
+                                "#define DHTPIN@ ~\"signal\"\n" + 
+                                "#define DHTTYPE DHT22\n" +
+                                "DHT dht@(DHTPIN@, DHTTYPE);" 
+                            },
+                            { "setup", "\tdht@.begin();" },
                             {
                                 "loopMain",
-                                "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
+                                "\tfloat humidity@ = dht@.readHumidity();\n" +
+                                "\tfloat temperature@ = dht@.readTemperature();\n" +
+                                "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
+                                "\t\tSerial.println(\"Failed to read from DHT22 sensor!\");\n" +
+                                "\t} else {\n" +
+                                "\t\tSerial.print(\"Humidity: \");\n" +
+                                "\t\tSerial.print(humidity@);\n" +
+                                "\t\tSerial.print(\"% | Temperature: \");\n" +
+                                "\t\tSerial.print(temperature@);\n" +
+                                "\t\tSerial.println(\"°C\");\n" +
+                                "\t}\n" +
+                                "\tdelay(2000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
-                    .Property("temperature", 20.0).Finish()
+                    .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
             },
             // {
             //     31,
