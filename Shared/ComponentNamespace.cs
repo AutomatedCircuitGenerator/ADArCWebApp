@@ -626,6 +626,28 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                32,
+                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .66, 75, 75, typeof(RazorSEN0114),
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            {
+                                "global",
+                                "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value"
+                            },
+                            {
+                                "setup",
+                                "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+                            },
+                            {
+                                "loopMain",
+                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
+                    .Property("humidity", 40.0).Finish()
+            },
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,

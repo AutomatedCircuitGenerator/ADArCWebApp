@@ -43,6 +43,7 @@
 	<string>7segment_arduino.grxml</string>
 	<string>arcade_pushbutton_arduino.grxml</string>
 	<string>ky008_arduino.grxml</string>
+	<string>sen0114_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
