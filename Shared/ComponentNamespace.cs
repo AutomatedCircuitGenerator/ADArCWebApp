@@ -650,7 +650,7 @@ namespace ADArCWebApp.Shared
                                 "  // Main loop: continuously reads data from the HX711\n\n  // Check if the HX711 scale is ready for reading\n  if (scale@.is_ready()) {\n    // Read the data from the HX711\n    long reading@ = scale@.read();\n    // Output the reading to the Serial Monitor\n    Serial.print(\"HX711 reading: \");\n    Serial.println(reading@);\n  } else {\n    // If the HX711 is not ready, print an error message\n    Serial.println(\"HX711 not found.\");\n  }\n\n  // Delay before the next reading to allow stabilization\n  delay(1000);"
                             },
                             { "functions", "" }, {"delayLoop", ""}, {"delayTime", ""}
-                        }, pins: ["Vcc", "dout", "clk", "gnd"], listenOn: ["dout"], gsNodeName: "strainGauge").Property("weight", 50.0).Finish()
+                        }, pins: ["Vcc", "dout", "sck", "gnd"], listenOn: ["dout"], gsNodeName: "strainGauge").Property("weight", 50.0).Finish()
             },
         };
     }
