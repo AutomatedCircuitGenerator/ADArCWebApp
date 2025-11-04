@@ -626,6 +626,16 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                31,
+                new ComponentDataBuilder("Relay", true, "Input/Buttons and Switches", 1, 18.5,
+                     19.154, typeof(RazorRELAY), paneHoverText: "DPDT",
+                     codeForGen: new()
+                     {
+                         { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+                         { "delayLoop", "" }, { "delayTime", "" }
+                     }, pins: ["VCC", "GND", "IN"], gsNodeName: "relay").Finish()
+            }
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
