@@ -634,7 +634,7 @@ namespace ADArCWebApp.Shared
                      {
                          { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
                          { "delayLoop", "" }, { "delayTime", "" }
-                     }, pins: ["VCC", "GND", "IN"], gsNodeName: "relay").Finish()
+                     }, pins: ["Vcc", "gnd", "IN"], gsNodeName: "relay").Finish()
             }
             // {
             //     31,
