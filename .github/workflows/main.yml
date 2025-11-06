@@ -9,29 +9,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       
-      - name: Setup .NET Core SDK
-        uses: actions/setup-dotnet@v4
-        with:
-          dotnet-version: 8.0.x
-      
-      - name: Publish .NET Core Project
-        run: dotnet publish ADArCWebApp.csproj -c Release -o release --nologo
-      
-      - name: Add .nojekyll file
-        run: touch release/wwwroot/.nojekyll
-      
-      - name: Copy index.html to 404.html
-        run: cp release/wwwroot/index.html release/wwwroot/404.html
-      
-      - name: Append cache-busting query strings
+      - name: Create redirect page
         run: |
-          RANDOM_STR=$(date +%s%N)
-          find release/wwwroot -name '*.html' -exec sed -i "s|\(src=\|href=\)\"\([^\"]*\)\(\?[^\"\']*\)\?\"|\1\"\2?v=$RANDOM_STR\"|g" {} +
-
-
-      - name: Commit wwwroot to GitHub Pages
+          mkdir -p public
+          cat > public/index.html << 'EOF'
+          <!DOCTYPE html>
+          <html>
+          <head>
+            <meta charset="utf-8">
+            <title>Redirecting...</title>
+            <meta http-equiv="refresh" content="0; url=https://adarc.netlify.app/">
+            <link rel="canonical" href="https://adarc.netlify.app/">
+          </head>
+          <body>
+            <p>Redirecting to <a href="https://adarc.netlify.app/">https://adarc.netlify.app/</a>...</p>
+            <script>window.location.href = "https://adarc.netlify.app/";</script>
+          </body>
+          </html>
+          EOF
+      
+      - name: Commit to GitHub Pages
         uses: JamesIves/github-pages-deploy-action@3.7.1
         with:
           GITHUB_TOKEN: ${{secrets.GITHUB_TOKEN}}
           BRANCH: gh-pages
-          FOLDER: release/wwwroot
+          FOLDER: public
