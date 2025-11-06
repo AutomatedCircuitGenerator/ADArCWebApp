@@ -636,6 +636,24 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+
+            // {
+            //     32,
+            //     new ComponentDataBuilder("Barcode scanner", true, "Input/Barcode Scanner", 
+            //         1, 18.5, 19.154, typeof(RazorDE2120), paneHoverText: "DE2120",
+            //         codeForGen: new ()
+            //         {
+            //             { "include", "" },
+            //             { "global", "" },
+            //             { "setup", "" },
+            //             { "loopMain", "" },
+            //             { "functions", "" },
+            //             { "delayLoop", "" },
+            //             { "delayTime", "" }
+            //         },
+            //         pins: ["vcc", "gnd", "rxd", "txd", "d-", "d+", "buz", "led", "trig"],
+            //         gsNodeName: "de2120").Finish()
+            // }
         };
     }
 }
