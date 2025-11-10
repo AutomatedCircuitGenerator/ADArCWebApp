@@ -491,6 +491,7 @@
             {
                 ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
             }
+            await InvokeAsync(StateHasChanged);
         }
 
 
@@ -737,6 +738,11 @@
 
         StateHasChanged();
     }
+    
+    public static bool IsOnCanvas(int globalId)
+    {
+        return Comps.Values.Any(comp => comp.GlobalId == globalId);
+    }
 
     /// <summary>
     /// sets up a components pin bindings to an arduino.
@@ -884,6 +890,7 @@
         AppInterop.UpdateCodeWrapper();
         await JsRuntime.InvokeVoidAsync("onLoad");
         await JsRuntime.InvokeVoidAsync("onAppend");
+        await InvokeAsync(StateHasChanged);
     }
 
     /// <summary>

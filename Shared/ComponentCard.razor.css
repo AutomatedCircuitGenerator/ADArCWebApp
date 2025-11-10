@@ -9,6 +9,7 @@
     margin-bottom: 1%;
     aspect-ratio: 4/5;
     position: relative;
+    overflow: visible;
 }
 
 .card-img-container {
@@ -86,4 +87,8 @@
 
 .palette-right-click-container button:not(:last-child) {
     border-bottom: 1px solid rgba(145, 145, 145, 0.3);
+}
+
+.RazorStrainGauge-indicator {
+    pointer-events: none; /* So it doesn't interfere with clicking */
 }
