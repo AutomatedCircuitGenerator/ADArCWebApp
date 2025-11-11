@@ -128,4 +128,8 @@
     <Content Remove="wwwroot\build\build.js.map" />
   </ItemGroup>
 
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\controllers\srvph.ts" />
+  </ItemGroup>
+
 </Project>

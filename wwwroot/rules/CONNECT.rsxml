@@ -30,6 +30,7 @@
     <string>tfLunaLidarI2C_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
     <string>sen0114_arduino.grxml</string>
+    <string>srv-ph_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
