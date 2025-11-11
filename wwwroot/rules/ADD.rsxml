@@ -31,7 +31,6 @@
     <string>add_servo.grxml</string>
     <string>add_tfLunaLidarI2C.grxml</string>
     <string>add_uln2003.grxml</string>
-    <string>add_srv-ph.grxml</string>
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>
