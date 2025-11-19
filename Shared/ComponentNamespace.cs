@@ -277,7 +277,7 @@ namespace ADArCWebApp.Shared
                         }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
                     .Finish()
             },
-            {
+            /*{
                 14,
                 new ComponentDataBuilder("K-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
                         75, typeof(RazorMAX6675), paneHoverText: "MAX6675",
@@ -293,7 +293,7 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "max6675").Property("temperature", 20.0)
                     .Finish()
-            },
+            },*/
             {
                 15,
                 new ComponentDataBuilder("PIR motion sensor", true, "Input/Other Sensors", 1, 75, 75,
@@ -636,6 +636,24 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                32,
+                new ComponentDataBuilder("PMS5003", true, "Input/Other Sensors", .7, 100,
+                        75, typeof(RazorPMS5003), paneHoverText: "PMS5003",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
+                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+                            { "setup", "" },
+                            {
+                                "loopMain",
+                                "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "pms5003").Property("temperature", 20.0)
+                    .Finish()
+                
+            }
         };
     }
 }
