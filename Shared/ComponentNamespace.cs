@@ -277,7 +277,7 @@ namespace ADArCWebApp.Shared
                         }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
                     .Finish()
             },
-            /*{
+            {
                 14,
                 new ComponentDataBuilder("K-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
                         75, typeof(RazorMAX6675), paneHoverText: "MAX6675",
@@ -293,7 +293,7 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "max6675").Property("temperature", 20.0)
                     .Finish()
-            },*/
+            },
             {
                 15,
                 new ComponentDataBuilder("PIR motion sensor", true, "Input/Other Sensors", 1, 75, 75,
