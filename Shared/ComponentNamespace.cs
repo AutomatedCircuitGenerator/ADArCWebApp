@@ -675,30 +675,19 @@ namespace ADArCWebApp.Shared
             },*/
             {
                 33,
-                new ComponentDataBuilder(
-                        "Dust Sensor",
-                        true,
-                        "Input/Other Sensors",
-                        1,
-                        18.5,
-                        19.154,
-                        typeof(RazorGP2Y1014AU0F),
-                        paneHoverText: "GP2Y1014AU0F Dust Sensor",
+                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .7, 100,
+                        75, typeof(RazorGP2Y1014AU0F), paneHoverText: "GP2Y101AU0F",
                         codeForGen: new()
                         {
-                            { "include", "// GP2Y1014AU0F: No special library required for analog reading" },
-                            { "global", "// Global variables\nint dustPin@ = ~\"SO\"; // Analog pin for dust sensor\nfloat dustLevel@ = 0.0;" },
-                            { "setup", "// Initialize serial if needed\nSerial.begin(9600);" },
-                            { "loopMain",
-                                "\tdustLevel@ = analogRead(dustPin@); // Read dust level from SO pin\n\tSerial.print(\"Dust level = \");\n\tSerial.println(dustLevel@);\n\tdelay(500);" },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        pins: ["Vcc", "gnd", "so", "cs", "sck"],
-                        gsNodeName: "GP2Y1014AU0F"
-                    )
-                    .Property("dustLevel", 0.0)
+                            { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
+                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+                            { "setup", "" },
+                            {
+                                "loopMain",
+                                "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "GP2Y101AU0F").Property("temperature", 20.0)
                     .Finish()
             },
         };
