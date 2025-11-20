@@ -707,7 +707,24 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+            {
+            33,
+            new ComponentDataBuilder("Air Quality Sensor", true, "Input/Other Sensors", .7, 100,
+                    75, typeof(RazorPMS5003), paneHoverText: "pms5003",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
+                        { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+                        { "setup", "" },
+                        {
+                            "loopMain",
+                            "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
+                        },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "pms5003").Property("temperature", 20.0)
+                .Finish()
+        }
         };
     }
 }
