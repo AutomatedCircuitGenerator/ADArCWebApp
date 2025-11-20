@@ -636,47 +636,10 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
-            /*{
-                32,
-                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", 1, 18.5, 19.154, typeof(RazorGP2Y1014AU0F),
-                    paneHoverText: "GP2Y1014AU0F",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", 
-                            "const int ledPin@ = ~\"d7\";       // LED control pin\n" +
-                            "const int dustOutPin@ = ~\"analog_out\"; // Analog output pin\n" +
-                            "int dustVal@ = 0;\n" +
-                            "float dustDensity@ = 0.0;"
-                        },
-                        { "setup", 
-                            "\tpinMode(ledPin@, OUTPUT);\n" +
-                            "\tpinMode(dustOutPin@, INPUT);\n" +
-                            "\tSerial.begin(9600);"
-                        },
-                        { "loopMain",
-                            "\tdigitalWrite(ledPin@, LOW); // Turn on LED\n" +
-                            "\tdelayMicroseconds(280);\n" +
-                            "\tdustVal@ = analogRead(dustOutPin@);\n" +
-                            "\tdelayMicroseconds(40);\n" +
-                            "\tdigitalWrite(ledPin@, HIGH); // Turn off LED\n" +
-                            "\tdelayMicroseconds(9680);\n\n" +
-                            "\t// Convert to approximate dust density (example calibration)\n" +
-                            "\tdustDensity@ = (dustVal@ * (5.0 / 1024.0) - 0.9) * 1000.0 / 5.0;\n" +
-                            "\tSerial.print(\"Dust Density: \");\n" +
-                            "\tSerial.print(dustDensity@);\n" +
-                            "\tSerial.println(\" ug/m^3\");"
-                        },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
-                        { "delayTime", "" }
-                    }, 
-                    pins: ["5V", "GND", "D7", "GND", "analog_out", "vcc"], gsNodeName: "").Finish()
-            },*/
             {
-                33,
+                32,
                 new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .7, 100,
-                        75, typeof(RazorGP2Y1014AU0F), paneHoverText: "GP2Y101AU0F",
+                        75, typeof(RazorGP2Y1014AU0F), paneHoverText: "Dust Sensor",
                         codeForGen: new()
                         {
                             { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
@@ -687,7 +650,7 @@ namespace ADArCWebApp.Shared
                                 "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "GP2Y101AU0F").Property("temperature", 20.0)
+                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "GP2Y1014AU0F").Property("temperature", 20.0)
                     .Finish()
             },
         };
