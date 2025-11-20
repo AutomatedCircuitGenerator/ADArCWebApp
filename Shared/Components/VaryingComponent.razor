@@ -3,8 +3,7 @@
 
 <div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor));">
     <div id="component-@individualData.localId">
-        <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
-    </div>
+        <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="GetVaryingComponentProps()"></DynamicComponent>    </div>
 </div>
 @if (!forceBorder)
 {
@@ -255,6 +254,16 @@
             _envSettingsY = args.ClientY - 55 - Transform.translate.y;
         }
     }
+    
+    private Dictionary<string, object?> GetVaryingComponentProps()
+    {
+        var props = individualData.GetPropsAsParams();
+        props["IsInPalette"] = IsInPaletteContext;
+        return props;
+    }
+
+    [Parameter] public bool IsInPaletteContext { get; set; } = false;
+
 
     private bool rightClickable = false;
     private bool rightClick2 = false;

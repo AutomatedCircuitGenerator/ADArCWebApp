@@ -2,6 +2,7 @@
     // import { css, html, LitElement } from 'lit';
     // import { customElement, property } from 'lit/decorators.js';
     // import { ElementPin } from './pin';
+    [Parameter] public bool IsInPalette { get; set; } = false;
 
 
     public Dictionary<int, string> bandColors = new Dictionary<int, string>()

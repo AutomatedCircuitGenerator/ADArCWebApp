@@ -48,8 +48,8 @@ public class BoardService(IJSRuntime js)
     {
         return _board switch
         {
-            Board.ArduinoUno => new ComponentInstance(1, null, 829, 219),
-            Board.ArduinoMega => new ComponentInstance(2, null, 829, 219),
+            Board.ArduinoUno => new ComponentInstance(1, null, 829, 219) { IsInPalette = false },
+            Board.ArduinoMega => new ComponentInstance(2, null, 829, 219) { IsInPalette = false },
             _ => null
         };
     }

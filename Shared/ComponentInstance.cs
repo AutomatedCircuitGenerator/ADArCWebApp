@@ -14,6 +14,8 @@ namespace ADArCWebApp.Shared
     {
         // Note: any changes here need to be reflected in unserialized strings, like in BoardService
         [JsonIgnore] public readonly ComponentData Data;
+        
+        [JsonIgnore] public bool IsInPalette { get; set; } = false; 
 
         public int localId { get; set; }
 

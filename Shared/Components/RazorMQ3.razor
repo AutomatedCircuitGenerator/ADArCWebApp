@@ -3,11 +3,13 @@
 @code {
     [Parameter]
     [ValueSetting("", 0, 0, 1024)]
+    
     public double alcohol
     {
         get;
         set;
     }
+    [Parameter] public bool IsInPalette { get; set; } = false;
 
     public static ElementPin[] pinInfo
     {

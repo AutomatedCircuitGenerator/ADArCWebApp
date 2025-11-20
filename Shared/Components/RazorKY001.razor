@@ -1,6 +1,8 @@
 @inherits RazorComponent
 
 @code {
+    
+    [Parameter] public bool IsInPalette { get; set; } = false;
     private double _temperature = 1;
 
     [Parameter]

@@ -4,6 +4,8 @@
     [Parameter]
     [ValueSetting("(cm)", 50, 20, 800)]
     public double distance { get; set; }
+    [Parameter] public bool IsInPalette { get; set; } = false;
+    
 
     //TODO wires dont draw. no errors tho...
     public static ElementPin[] pinInfo

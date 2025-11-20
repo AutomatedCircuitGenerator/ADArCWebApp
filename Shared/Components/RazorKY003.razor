@@ -1,6 +1,9 @@
 ﻿@inherits RazorComponent;
 
 @code {
+    
+    
+    [Parameter] public bool IsInPalette { get; set; } = false;
     [DropdownSetting(["Not detected", "Detected"])]
     [Parameter]
     public string magfield

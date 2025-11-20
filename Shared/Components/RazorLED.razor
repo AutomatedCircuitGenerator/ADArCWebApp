@@ -1,6 +1,8 @@
 ﻿@inherits RazorComponent
 
 @code {
+    
+    [Parameter] public bool IsInPalette { get; set; } = false;
     [Parameter]
     [DropdownSetting(["red", "blue", "green", "yellow", "purple", "orange", "white"])]
     public string color

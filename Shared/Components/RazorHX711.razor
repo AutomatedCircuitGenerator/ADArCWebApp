@@ -2,6 +2,8 @@
 
 @code {
     // HX711 5kg Load Cell Amplifier
+    
+    [Parameter] public bool IsInPalette { get; set; } = false;
 
     [Parameter] public double width { get; set; } = 507;
     [Parameter] public double height { get; set; } = 269;

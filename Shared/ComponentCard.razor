@@ -12,18 +12,24 @@
         </div>
     }
     <div class="card-img-container">
-        <VaryingComponent disableBorder="true" posAbsolute="false" individualData="new(GlobalId, new(), 0, 0)" objId="@GlobalId" zoomFactor="@(ComponentDeclarations.Components[GlobalId].cardScaleFactor * ADArCWebApp.Pages.Index.CurrentWidthRatio)" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
-    </div>
+        <VaryingComponent 
+            disableBorder="true" 
+            posAbsolute="false" 
+            individualData="_paletteInstance"
+            IsInPaletteContext="true"
+            objId="@GlobalId" 
+            zoomFactor="@(ComponentDeclarations.Components[GlobalId].cardScaleFactor * ADArCWebApp.Pages.Index.CurrentWidthRatio)" 
+            DragStart="() => { }" 
+            DragProgress="() => { }" 
+            DragEnd="() => { }">
+        </VaryingComponent>
+        </div>
 
     <div class="altContainer" @oncontextmenu="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick" @oncontextmenu:preventDefault="true">
         @ComponentDeclarations.Components[GlobalId].paneHoverText
     </div>
     <div class="card-name">
         @Name
-    </div>
-    
-    <div class="RazorStrainGauge-indicator" style="position: absolute; bottom: 5px; right: 5px; width: 16px; height: 16px; z-index: 10;">
-        <RazorStrainGauge GlobalId="@GlobalId" />
     </div>
 
     @code {
@@ -34,6 +40,14 @@
         [Parameter] public string NodeName { get; set; }
 
         [Parameter] public ComponentInstance IndividualData { get; set; }
+        private ComponentInstance _paletteInstance;
+        
+        protected override void OnInitialized()
+        {
+            _paletteInstance = new ComponentInstance(GlobalId, null, 0, 0);
+            _paletteInstance.IsInPalette = true;
+        }
+
 
         public ComponentCard(int id)
         {

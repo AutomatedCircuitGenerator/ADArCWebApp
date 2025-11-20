@@ -1,8 +1,10 @@
 ﻿@code {
 
+    [Parameter] public bool IsInPalette { get; set; } = false;
     /** The color of a lit segment */
     [Parameter]
     public string color { get; set; } = "red";
+    
 
     /** The color of an unlit segment */
     [Parameter]
