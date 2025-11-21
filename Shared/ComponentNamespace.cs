@@ -709,68 +709,68 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
 
-            {
-                32,
-                new ComponentDataBuilder("Barcode scanner", true, "Input/Barcode Scanner", 
-                    1, 18.5, 19.154, typeof(RazorDE2120), paneHoverText: "DE2120",
-                    codeForGen: new ()
-                    {
-                        { 
-                            "include",
-                            "#include \"SoftwareSerial.h\"\n" +
-                            "#include \"SparkFun_DE2120_Arduino_Library.h\" //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n" 
-                        },
-                        {
-                            "global", 
-                            "#define BUFFER_LEN 40\n" +
-                            "SoftwareSerial softSerial(~\"rxd\", ~\"txd\"); //RX, TX: Connect Arduino pin 2 to scanner TX pin. Connect Arduino pin 3 to scanner RX pin.\n" +
-                            "DE2120 scanner;\n" +
-                            "char scanBuffer[BUFFER_LEN];"
-                        },
-                        {
-                            "setup", 
-                            "void setup()\n" +
-                            "{\n  " +
-                            "\tSerial.begin(115200);\n  " +
-                            "\tSerial.println(\"DE2120 Scanner Example\");\n\n  " +
-                            "\tif (scanner.begin(softSerial) == false)\n  " +
-                            "\t{\n    " +
-                            "\t\tSerial.println(\"Scanner did not respond. Please check wiring. Did you scan the POR232 barcode? Freezing...\");\n    " +
-                            "\t\twhile (1)\n      " +
-                            "\t\t\t;\n  " +
-                            "\t}\n  " +
-                            "\tSerial.println(\"Scanner online!\");\n" +
-                            "}"
-                        },
-                        {
-                            "loopMain",
-                            "void loop()\n" +
-                            "{\n  " +
-                            "\tif (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n  " +
-                            "\t{\n    " +
-                            "\t\tSerial.print(\"Code found: \");\n    " +
-                            "\t\tfor (int i = 0; i < strlen(scanBuffer); i++)\n      " +
-                            "\t\t\tSerial.print(scanBuffer[i]);\n    " +
-                            "\t\tSerial.println();\n  " +
-                            "}\n\n  " +
-                            "\tdelay(200);\n" +
-                            "}"
-                        },
-                        {
-                            "functions", ""
-                        },
-                        {
-                            "delayLoop", ""
-                        },
-                        {
-                            "delayTime", ""
-                        }
-                    },
-                    pins: ["vcc", "gnd", "rxd", "txd", "d-", "d+", "buz", "led", "trig"],
-                    gsNodeName: "de2120")
-                    .Property("encodedValue", 0)
-                    .Finish()
-            }
+            // {
+            //     32,
+            //     new ComponentDataBuilder("Barcode scanner", true, "Input/Barcode Scanner", 
+            //         1, 18.5, 19.154, typeof(RazorDE2120), paneHoverText: "DE2120",
+            //         codeForGen: new ()
+            //         {
+            //             { 
+            //                 "include",
+            //                 "#include \"SoftwareSerial.h\"\n" +
+            //                 "#include \"SparkFun_DE2120_Arduino_Library.h\" //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n" 
+            //             },
+            //             {
+            //                 "global", 
+            //                 "#define BUFFER_LEN 40\n" +
+            //                 "SoftwareSerial softSerial(~\"rxd\", ~\"txd\"); //RX, TX: Connect Arduino pin 2 to scanner TX pin. Connect Arduino pin 3 to scanner RX pin.\n" +
+            //                 "DE2120 scanner;\n" +
+            //                 "char scanBuffer[BUFFER_LEN];"
+            //             },
+            //             {
+            //                 "setup", 
+            //                 "void setup()\n" +
+            //                 "{\n  " +
+            //                 "\tSerial.begin(115200);\n  " +
+            //                 "\tSerial.println(\"DE2120 Scanner Example\");\n\n  " +
+            //                 "\tif (scanner.begin(softSerial) == false)\n  " +
+            //                 "\t{\n    " +
+            //                 "\t\tSerial.println(\"Scanner did not respond. Please check wiring. Did you scan the POR232 barcode? Freezing...\");\n    " +
+            //                 "\t\twhile (1)\n      " +
+            //                 "\t\t\t;\n  " +
+            //                 "\t}\n  " +
+            //                 "\tSerial.println(\"Scanner online!\");\n" +
+            //                 "}"
+            //             },
+            //             {
+            //                 "loopMain",
+            //                 "void loop()\n" +
+            //                 "{\n  " +
+            //                 "\tif (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n  " +
+            //                 "\t{\n    " +
+            //                 "\t\tSerial.print(\"Code found: \");\n    " +
+            //                 "\t\tfor (int i = 0; i < strlen(scanBuffer); i++)\n      " +
+            //                 "\t\t\tSerial.print(scanBuffer[i]);\n    " +
+            //                 "\t\tSerial.println();\n  " +
+            //                 "}\n\n  " +
+            //                 "\tdelay(200);\n" +
+            //                 "}"
+            //             },
+            //             {
+            //                 "functions", ""
+            //             },
+            //             {
+            //                 "delayLoop", ""
+            //             },
+            //             {
+            //                 "delayTime", ""
+            //             }
+            //         },
+            //         pins: ["vcc", "gnd", "rxd", "txd", "d-", "d+", "buz", "led", "trig"],
+            //         gsNodeName: "de2120")
+            //         .Property("encodedValue", 0)
+            //         .Finish()
+            // }
         };
     }
 }
