@@ -643,8 +643,15 @@ namespace ADArCWebApp.Shared
                     -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
                     codeForGen: new()
                     {
-                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
+                        { "include", "" }, 
+                        { "global", "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)" }, 
+                        { "setup", "" }, 
+                        { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
+                                      + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
+                                      + "  Serial.print(\"Turbidity Voltage = \"); // Print label\n"
+                                      + "  Serial.println(voltage@, 3); // Print voltage with 3 decimals\n"
+                                      + "  delay(500); // Wait 500ms" }, 
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Finish()
             },
             // {
