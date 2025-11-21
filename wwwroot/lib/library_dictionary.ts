@@ -7340,5 +7340,6 @@
     "placeholder_7339": "zForce Air Library",
     "placeholder_7340": "zlib_turbo",
     "ph_surveyor.h": "local/ph_surveyor",
-    "base_surveyor.h": "local/base_surveyor"
+    "base_surveyor.h": "local/base_surveyor",
+    "SparkFun_DE2120_Arduino_Library.h": "SparkFun DE2120 2D Barcode Reader"
 };
