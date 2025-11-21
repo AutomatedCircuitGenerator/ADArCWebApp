@@ -648,8 +648,9 @@ namespace ADArCWebApp.Shared
                         { "setup", "" }, 
                         { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
                                       + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
-                                      + "  Serial.print(\"Turbidity Voltage = \"); // Print label\n"
-                                      + "  Serial.println(voltage@, 3); // Print voltage with 3 decimals\n"
+                                      + "  float turbNTU@ = -1120.4*voltage@*voltage@ + 5742.3*voltage@ + 4352.9; //Convert voltage to turbidity in NTU (Nephelometric Turbidity Units)\n"
+                                      + "  Serial.print(\"Turbidity in NTU = \"); // Print label\n"
+                                      + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
                                       + "  delay(500); // Wait 500ms" }, 
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Finish()
