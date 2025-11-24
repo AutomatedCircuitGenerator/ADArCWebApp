@@ -545,12 +545,12 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
   <UseShapeRestrictions>false</UseShapeRestrictions>
   <RestrictToNodeShapeMatch>false</RestrictToNodeShapeMatch>
   <TransformNodePositions>true</TransformNodePositions>
-  <TransformNodeShapes>false</TransformNodeShapes>
+  <TransformNodeShapes>true</TransformNodeShapes>
   <Translate>XYZIndependent</Translate>
   <Scale>XYZIndependent</Scale>
   <Skew>Prohibited</Skew>
   <Flip>Prohibited</Flip>
-  <Rotate>XYZIndependent</Rotate>
+  <Rotate>OnlyZ</Rotate>
   <Projection>Prohibited</Projection>
 </GraphSynth:grammarRule>
 
