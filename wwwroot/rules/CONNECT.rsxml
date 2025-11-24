@@ -29,6 +29,7 @@
     <string>servo_arduino.grxml</string>
     <string>tfLunaLidarI2C_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
+    <string>transceiver_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
