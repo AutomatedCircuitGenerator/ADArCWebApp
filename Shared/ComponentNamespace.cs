@@ -626,6 +626,19 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                31,
+                new ComponentDataBuilder("Time of Flight", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorTOF),
+                    paneHoverText: "VL53L4CD",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        { "global", "" },
+                        { "setup", "" },
+                        { "loopMain", "" },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["5V", "gnd", "scl", "sda", "gpio", "xshut"], gsNodeName: "tof").Finish()
+            },
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
