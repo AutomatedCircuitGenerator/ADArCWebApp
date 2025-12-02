@@ -638,19 +638,29 @@ namespace ADArCWebApp.Shared
             // }
             {
                 32,
-                new ComponentDataBuilder("CO2 Sensor", true, "Input/Other Sensors", 1, 18.5, 19.154, typeof(RazorSEN0219),
-                    paneHoverText: "SEN0219 Sensor",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
-                        { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
+                new ComponentDataBuilder("CO2 Sensor", true, "Input/Other Sensors", 0.7, 100, 75,
+                        typeof(RazorSEN0219), paneHoverText: "CO2 Sensor",
+                        codeForGen: new()
                         {
-                            "loopMain",
-                            "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
+                            { "include", "" },
+                            { "global",
+                                "#define AOUT_PIN@ ~\"aout\" // Analog output pin from CO2 sensor\n" +
+                                "int co2Value@ = 0;"
+                            },
+                            { "setup",
+                                "pinMode(AOUT_PIN@, INPUT);\nSerial.begin(9600);"
+                            },
+                            { "loopMain",
+                                "\tco2Value@ = analogRead(AOUT_PIN@); // Read analog CO2 value\n" +
+                                "\tSerial.print(\"CO2 value: \"); Serial.println(co2Value@);\n" +
+                                "\tdelay(500);"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["analog_out", "5V", "gnd"], gsNodeName: "SEN0219").Finish()
+                        pins: ["5V", "gnd", "analog_out"],
+                        gsNodeName: "SEN0219"
+                    ).Property("co2", 400.0)
+                    .Finish()
             },
         };
     }
