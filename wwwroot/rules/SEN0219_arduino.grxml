@@ -1,0 +1,572 @@
+<Page Background="#FF000000" xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border BorderThickness="1,1,1,1" BorderBrush="#FFA9A9A9" HorizontalAlignment="Center" VerticalAlignment="Center"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="300" /><ColumnDefinition Width="6" /><ColumnDefinition Width="300" /><ColumnDefinition Width="6" /><ColumnDefinition Width="288" /></Grid.ColumnDefinitions><GridSplitter ShowsPreview="True" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="1" /><GridSplitter ShowsPreview="True" Width="6" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" Grid.Column="3" /><ScrollViewer CanContentScroll="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Tag="L" Grid.Column="0"><Canvas Background="#FFFFFFFF" Width="410.95890410958907" Height="781.3698630136986" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="1,0,0,-1,0,781.3698630136986"><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n7,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,72,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 0V, gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,44.71666666666667,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n6,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,264,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="d16, digital, analog, gpio, a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,198.28166666666667,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n2,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,96,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,89.37166666666667,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n4,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,240,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,236.585,280.675" /><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n0,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,383" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="arduino" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,151.62166666666667,400.675" /><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n1,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,143" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="SEN0219" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,148.77333333333334,160.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n3,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="5V" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,164.05333333333334,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n5,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 5V, power" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,134.24,328.675" /><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a0,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="99.78623938856882,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="157.63760611431184,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a1,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,285.5" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,193" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a2,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="241.21376061143118,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="183.36239388568816,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a3,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="150.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="76.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a4,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,383" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,338.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a5,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="190.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="264.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path></Canvas></ScrollViewer><ScrollViewer CanContentScroll="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Tag="K" Grid.Column="2"><Canvas Background="#FFFFFFFF" Width="410.95890410958907" Height="781.3698630136986" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="1,0,0,-1,0,781.3698630136986"><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n7,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,72,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 0V, gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,44.71666666666667,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n6,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,264,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="d16, digital, analog, gpio, a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,198.28166666666667,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n2,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,96,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,89.37166666666667,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n4,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,240,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,236.585,280.675" /><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n0,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,383" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="arduino" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,151.62166666666667,400.675" /><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n1,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,143" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="SEN0219" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,148.77333333333334,160.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n3,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="5V" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,164.05333333333334,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n5,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 5V, power" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,134.24,328.675" /><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a0,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="99.78623938856882,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="157.63760611431184,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a1,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,285.5" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,193" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a2,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="241.21376061143118,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="183.36239388568816,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a3,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="150.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="76.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a4,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,383" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,338.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a5,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="190.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="264.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path></Canvas></ScrollViewer><ScrollViewer CanContentScroll="False" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Auto" Tag="R" Grid.Column="4"><Canvas Background="#FFFFFFFF" Width="410.95890410958907" Height="781.3698630136986" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="1,0,0,-1,0,781.3698630136986"><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n0,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,383" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="arduino" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,151.62166666666667,400.675" /><Ellipse Stretch="Fill" Fill="#FF006400" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n1,0,0,12" LayoutTransform="Identity" Width="50" Height="50" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,145.5,143" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="SEN0219" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,148.77333333333334,160.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n2,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,96,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,89.37166666666667,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" Stroke="#00FFFFFF" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n3,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="5V" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,164.05333333333334,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n4,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,240,285.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,236.585,280.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n5,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,168,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 5V, power" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,134.24,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n6,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,264,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="d16, digital, analog, gpio, a2" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,198.28166666666667,328.675" /><Ellipse Stretch="Fill" Fill="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="n7,0,0,12" LayoutTransform="Identity" Width="5" Height="5" Margin="0,0,0,0" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,1,72,333.5" RenderTransformOrigin="0.5,0.5" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False" /><TextBlock Text="pwr, 0V, gnd" FontSize="12" HorizontalAlignment="Center" VerticalAlignment="Center" RenderTransform="1,0,0,-1,44.71666666666667,328.675" /><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a0,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="99.78623938856882,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="157.63760611431184,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a1,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,285.5" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,193" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a2,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="241.21376061143118,285.85626768571865" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="183.36239388568816,189.4373231428136" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a3,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="150.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="76.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a4,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,383" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,338.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a5,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="190.5,393" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="264.5,337.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a6,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="75.6180339887499,333.7639320225002" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="97.3819660112501,290.2360679774998" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><TextBlock Text="connection, RD" FontSize="12" RenderTransform="1,0,0,-1,49.56333333333333,319.325" /><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a7,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="170.5,333.5" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="170.5,290.5" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><TextBlock Text="connection, BK" FontSize="12" RenderTransform="1,0,0,-1,134.13333333333333,319.325" /><Path Stretch="None" Fill="#FF000000" Stroke="#FF000000" StrokeThickness="1" StrokeStartLineCap="Flat" StrokeEndLineCap="Flat" StrokeDashCap="Flat" StrokeLineJoin="Miter" StrokeMiterLimit="10" StrokeDashOffset="0" Tag="a8,0,0.5,12:StraightArcController," LayoutTransform="Identity" Margin="0,0,0,0" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" RenderTransform="Identity" RenderTransformOrigin="0,0" Opacity="1" Visibility="Visible" SnapsToDevicePixels="False"><Path.Data><PathGeometry><PathGeometry.Figures><PathFigure StartPoint="265.3819660112501,333.7639320225002" IsFilled="False" IsClosed="False"><PathFigure.Segments><LineSegment Point="243.6180339887499,290.2360679774998" /></PathFigure.Segments></PathFigure></PathGeometry.Figures></PathGeometry></Path.Data></Path><TextBlock Text="connection, OG" FontSize="12" RenderTransform="1,0,0,-1,216.75499999999997,319.325" /></Canvas></ScrollViewer></Grid></Border> 
+
+<GraphSynth:CanvasProperty BackgroundColor="#FFFFFFFF" AxesColor="#FF000000" AxesOpacity="1" AxesThick="0.5" GridColor="#FF000000" GridOpacity="1" GridSpacing="24" GridThick="0.25" SnapToGrid="True" ScaleFactor="0.73" ShapeOpacity="1" ZoomToFit="False" ShowNodeName="False" ShowNodeLabel="True" ShowArcName="False" ShowArcLabel="True" ShowHyperArcName="False" ShowHyperArcLabel="True" NodeFontSize="12" ArcFontSize="12" HyperArcFontSize="12" NodeTextDistance="0" NodeTextPosition="0" ArcTextDistance="0" ArcTextPosition="0.5" HyperArcTextDistance="0" HyperArcTextPosition="0.5" GlobalTextSize="12" CanvasHeight="570.4" CanvasWidth="300,300,288,900" WindowLeft="669.6" WindowTop="344" extraAttributes="{x:Null}" Background="#FF93CDDD" xmlns="clr-namespace:GraphSynth.UI;assembly=GraphSynth" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:sx="clr-namespace:System.Xml;assembly=System.Private.Xml" xmlns:av="http://schemas.microsoft.com/winfx/2006/xaml/presentation" xmlns:gsui="clr-namespace:GraphSynth.UI;assembly=GraphSynth.CustomControls" xmlns:s="clr-namespace:System;assembly=System.Private.CoreLib"><CanvasProperty.extraData><x:Array Type="sx:XmlElement"><x:Null /></x:Array></CanvasProperty.extraData></GraphSynth:CanvasProperty>
+
+<GraphSynth:grammarRule
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <name>SEN0219_arduino</name>
+  <termination>false</termination>
+  <embeddingRules />
+  <recognizeFunctions />
+  <applyFunctions />
+  <L>
+    <globalLabels />
+    <globalVariables />
+    <arcs>
+      <arc
+        xsi:type="ruleArc">
+        <name>a0</name>
+        <localLabels />
+        <localVariables />
+        <From>n2</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a1</name>
+        <localLabels />
+        <localVariables />
+        <From>n3</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a2</name>
+        <localLabels />
+        <localVariables />
+        <From>n4</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a3</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n7</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a4</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n5</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a5</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n6</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+    </arcs>
+    <nodes>
+      <node
+        xsi:type="ruleNode">
+        <name>n7</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>0V</string>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>-24</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n6</name>
+        <localLabels>
+          <string>d16</string>
+          <string>digital</string>
+          <string>analog</string>
+          <string>gpio</string>
+          <string>a2</string>
+        </localLabels>
+        <localVariables />
+        <X>168</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n2</name>
+        <localLabels>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>0</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n4</name>
+        <localLabels>
+          <string>a2</string>
+        </localLabels>
+        <localVariables />
+        <X>144</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>arduino</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>336</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n1</name>
+        <localLabels>
+          <string>SEN0219</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>96</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n3</name>
+        <localLabels>
+          <string>5V</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n5</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>5V</string>
+          <string>power</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
+    <hyperarcs />
+  </L>
+  <R>
+    <globalLabels />
+    <globalVariables />
+    <arcs>
+      <arc
+        xsi:type="ruleArc">
+        <name>a0</name>
+        <localLabels />
+        <localVariables />
+        <From>n2</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a1</name>
+        <localLabels />
+        <localVariables />
+        <From>n3</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a2</name>
+        <localLabels />
+        <localVariables />
+        <From>n4</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a3</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n7</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a4</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n5</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a5</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n6</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a6</name>
+        <localLabels>
+          <string>connection</string>
+          <string>RD</string>
+        </localLabels>
+        <localVariables />
+        <From>n7</From>
+        <To>n2</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a7</name>
+        <localLabels>
+          <string>connection</string>
+          <string>BK</string>
+        </localLabels>
+        <localVariables />
+        <From>n5</From>
+        <To>n3</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+      <arc
+        xsi:type="ruleArc">
+        <name>a8</name>
+        <localLabels>
+          <string>connection</string>
+          <string>OG</string>
+        </localLabels>
+        <localVariables />
+        <From>n6</From>
+        <To>n4</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+    </arcs>
+    <nodes>
+      <node
+        xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>arduino</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>336</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n1</name>
+        <localLabels>
+          <string>SEN0219</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>96</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n2</name>
+        <localLabels>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>0</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n3</name>
+        <localLabels>
+          <string>5V</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n4</name>
+        <localLabels>
+          <string>a2</string>
+        </localLabels>
+        <localVariables />
+        <X>144</X>
+        <Y>216</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n5</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>5V</string>
+          <string>power</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n6</name>
+        <localLabels>
+          <string>d16</string>
+          <string>digital</string>
+          <string>analog</string>
+          <string>gpio</string>
+          <string>a2</string>
+        </localLabels>
+        <localVariables />
+        <X>168</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+      <node
+        xsi:type="ruleNode">
+        <name>n7</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>0V</string>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>-24</X>
+        <Y>264</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
+    <hyperarcs />
+  </R>
+  <spanning>false</spanning>
+  <induced>false</induced>
+  <negateLabels />
+  <containsAllGlobalLabels>false</containsAllGlobalLabels>
+  <OrderedGlobalLabels>false</OrderedGlobalLabels>
+  <UseShapeRestrictions>false</UseShapeRestrictions>
+  <RestrictToNodeShapeMatch>false</RestrictToNodeShapeMatch>
+  <TransformNodePositions>true</TransformNodePositions>
+  <TransformNodeShapes>false</TransformNodeShapes>
+  <Translate>XYZIndependent</Translate>
+  <Scale>XYZIndependent</Scale>
+  <Skew>Prohibited</Skew>
+  <Flip>Prohibited</Flip>
+  <Rotate>XYZIndependent</Rotate>
+  <Projection>Prohibited</Projection>
+</GraphSynth:grammarRule>
+
+</Page>
