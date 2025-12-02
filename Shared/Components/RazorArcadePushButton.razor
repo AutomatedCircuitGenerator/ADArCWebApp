@@ -9,6 +9,8 @@
       set;
     }
     
+    [Parameter] public bool IsInPalette { get; set; } = false;  // NEW: Accept context
+
     public static ElementPin[] pinInfo
     {
         get

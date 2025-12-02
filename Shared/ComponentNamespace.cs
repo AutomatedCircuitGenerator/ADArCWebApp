@@ -638,19 +638,41 @@ namespace ADArCWebApp.Shared
             // }
             {
                 31,
-                new ComponentDataBuilder("Strain Gauge(HX711)", true, "Input/Other Sensors", .6, 200, 100,
-                        typeof(RazorStrainGauge), paneHoverText: "Strain Gauge",
-                        codeForGen: new()
+                new ComponentDataBuilder("Strain Gauge (HX711)", true, "Input/Other Sensors",
+                    0.6, 200, 100,
+                    typeof(RazorStrainGauge),
+                    paneHoverText: "Strain Gauge",
+                    codeForGen: new()
+                    {
                         {
-                            { "include", "#include <StrainGauge.h>" },
-                            { "global", "// Global variables and HX711 setup\n// Define the data and clock pins for the HX711 strain gauge\nconst int STRAIN_GAUGE_DOUT_PIN@ = ~\"dat\"; // Data pin for the HX711\nconst int STRAIN_GAUGE_SCK_PIN@ = ~\"clk\";  // Clock pin for the HX711\n\n// Initialize the HX711 scale object\nHX711 scale@;" },
-                            { "setup", "  // Setup function: runs once at startup\n  // Initialize the HX711 scale with the data and clock pins\n  scale@.begin(STRAIN_GAUGE_DOUT_PIN@, STRAIN_GAUGE_SCK_PIN@);" },
-                            {
-                                "loopMain",
-                                "  // Main loop: continuously reads data from the HX711\n\n  // Check if the HX711 scale is ready for reading\n  if (scale@.is_ready()) {\n    // Read the data from the HX711\n    long reading@ = scale@.read();\n    // Output the reading to the Serial Monitor\n    Serial.print(\"HX711 reading: \");\n    Serial.println(reading@);\n  } else {\n    // If the HX711 is not ready, print an error message\n    Serial.println(\"HX711 not found.\");\n  }\n\n  // Delay before the next reading to allow stabilization\n  delay(1000);"
-                            },
-                            { "functions", "" }, {"delayLoop", ""}, {"delayTime", ""}
-                        }, pins: ["Vcc", "dout", "sck", "gnd"], listenOn: ["dout"], gsNodeName: "strainGauge").Property("weight", 50.0).Finish()
+                            "include", "#include <HX711.h>"
+                        },
+                        {
+                            "global",
+                            "// Global variables and HX711 setup\n// Define the data and clock pins for the HX711 load cell\nconst int LOADCELL_DOUT_PIN@ = ~\"dout\"; // Data pin for the HX711\nconst int LOADCELL_SCK_PIN@ = ~\"sck\";  // Clock pin for the HX711\n\n// Initialize the HX711 scale object\nHX711 scale@;"
+                        },
+                        {
+                            "setup",
+                            "  // Setup function: runs once at startup\n  // Initialize the HX711 scale with the data and clock pins\n  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@);"
+                        },
+                        {
+                            "loopMain",
+                            "  // Main loop: continuously reads data from the HX711\n\n  // Check if the HX711 scale is ready for reading\n  if (scale@.is_ready()) {\n    // Read the data from the HX711\n    long reading@ = scale@.read();\n    // Output the reading to the Serial Monitor\n    Serial.print(\"HX711 reading: \");\n    Serial.println(reading@);\n  } else {\n    // If the HX711 is not ready, print an error message\n    Serial.println(\"HX711 not found.\");\n  }\n\n  // Delay before the next reading to allow stabilization\n  delay(1000);"
+                        },
+                        {
+                            "functions", ""
+                        },
+                        {
+                            "delayLoop", ""
+                        },
+                        {
+                            "delayTime", ""
+                        }
+                    },
+                    pins: ["Vcc", "dout", "sck", "gnd"],
+                    listenOn: ["dout"],
+                    gsNodeName: "strainGauge"
+                ).Property("weight", 50.0).Finish()
             },
         };
     }

@@ -13,8 +13,8 @@ export class StrainGauge extends Controller {
     }
 
     setup(): void {
-        this.data = this.pins.dout[0].digital;
-        this.clock = this.pins.sck[0].digital;
+        this.data = this.pins.dat[0].digital;
+        this.clock = this.pins.clk[0].digital;
         this.bitIndex = 23;
 
         this.clock.addListener((state: PinState) => this.handleClock(state))

@@ -14,6 +14,8 @@
             };
         }
     }
+    [Parameter] public bool IsInPalette { get; set; } = false;  // NEW: Accept context
+
 
     //have the same name as in the actual component
     [Parameter] [ValueSetting("%", 40, 0, 100)]

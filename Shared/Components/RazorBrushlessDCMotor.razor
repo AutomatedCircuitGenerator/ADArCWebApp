@@ -1,6 +1,8 @@
 ﻿@code {
     //TODO i dont think this part should exist. you never direct connect a brushless motor
     [Parameter] public string speed { get; set; } = "";
+    [Parameter] public bool IsInPalette { get; set; } = false;  // NEW: Accept context
+
     public static ElementPin[] pinInfo
     {
         get

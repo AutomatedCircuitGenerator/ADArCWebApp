@@ -3,11 +3,14 @@
 @code {
     [Parameter]
     [DropdownSetting(["Static", "Rotating"])]
+    
     public string motion
     {
         get;
         set;
     }
+    [Parameter] public bool IsInPalette { get; set; } = false;  // NEW: Accept context
+
 
     /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
     public static ElementPin[] pinInfo
