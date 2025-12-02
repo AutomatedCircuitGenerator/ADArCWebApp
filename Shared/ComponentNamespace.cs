@@ -707,7 +707,39 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+            {
+                32,
+                new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
+                        .5, -20, -20, typeof(RazorAMG8833),
+                        paneHoverText: "AMG8833",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <Wire.h>" },
+                            {
+                                "global",
+                                "#define AMG8833_I2C_ADDR@ 0x69 // default I2C address"
+                            },
+                            {
+                                "setup",
+                                "Wire.begin(); // initialize I2C"
+                            },
+                            {
+                                "loopMain",
+                                "\t// Fake temperature reading for simulation\n" +
+                                "\tfloat tempC@ = 25.0 + (rand() % 500) / 100.0; // 25.00 - 30.00 °C\n\n" +
+                                "\tSerial.print(\"AMG8833 Temp: \");\n" +
+                                "\tSerial.print(tempC@);\n" +
+                                "\tSerial.println(\" °C\");\n" +
+                                "\tdelay(500); // update rate"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        },
+                        pins: ["3V3", "gnd", "scl", "sda", "int"],
+                        gsNodeName: "amg8833")
+                    .Property("temperature", 25.0)
+                    .Finish()
+            },
         };
     }
 }
