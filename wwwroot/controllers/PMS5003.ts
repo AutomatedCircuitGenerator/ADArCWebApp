@@ -1,44 +1,35 @@
-import {Controller} from "./controller";
-import {AVRRunner} from "@lib/execute";
-import {PinState} from "@lib/avr8js";
+import { Controller } from "./controller";
+import { AVRRunner } from "@lib/execute";
 
 export class PMS5003 extends Controller {
-
-    private _temperature: number;
+    private pm25: number = 42.0;   // arbitrary default value
+    private pm10: number = 84.0;   // arbitrary default value
 
     override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
-    }
-
-    setTemperature = (temperature: number) => {
-        this._temperature = temperature
+        if (state.pm25 !== undefined) this.pm25 = state.pm25;
+        if (state.pm10 !== undefined) this.pm10 = state.pm10;
     }
 
     setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
+        this.scheduleNextReading();
     }
 
-    private get shouldReadSPI(): boolean {
-        return this.pins.cs[0].digital.state == PinState.Low;
+    private scheduleNextReading() {
+        const cpu = AVRRunner.getInstance().board.cpu;
+
+        cpu.addClockEvent(() => {
+            this.printReading();
+            this.scheduleNextReading();
+        }, 200_000); // ~200ms
     }
 
-    private nextByteIsHigh = false;
+    private printReading() {
+        const usart0 = AVRRunner.getInstance().board.usarts[0];
+        const text =
+            `[PMS5003] PM2.5: ${this.pm25} µg/m3, PM10: ${this.pm10} µg/m3\n`;
 
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
-            return;
+        for (const c of text) {
+            usart0.writeByte(c.charCodeAt(0), true);
         }
-        if (this._temperature == undefined) {
-            console.log("Undefined\n")
-        }
-        let temperature = Math.round((this._temperature / 0.25) << 3);
-        let byteToSend: number;
-        if (!this.nextByteIsHigh) {
-            byteToSend = (temperature >> 8) & 0xFF;
-        } else {
-            byteToSend = temperature & 0xFF;
-        }
-        this.nextByteIsHigh = !this.nextByteIsHigh;
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), AVRRunner.getInstance().board.spis[0].transferCycles);
     }
 }

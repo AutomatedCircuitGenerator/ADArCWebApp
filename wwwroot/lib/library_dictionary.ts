@@ -3476,7 +3476,7 @@
     "placeholder_3475": "MCCI LTR-329ALS",
     "placeholder_3476": "MCCI LoRaWAN LMIC library",
     "placeholder_3477": "MCCI SofwareSerial",
-    "placeholder_3478": "MCCI-Catena-PMS7003",
+    "PMS7003.h": "MCCI-Catena-PMS7003",
     "placeholder_3479": "MCCI-Catena-SHT3x",
     "placeholder_3480": "MCMVoltSense",
     "placeholder_3481": "MCM_BL0940",
