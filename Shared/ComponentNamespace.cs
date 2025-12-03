@@ -628,7 +628,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 31,
-                new ComponentDataBuilder("Time of Flight", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorTOF),
+                new ComponentDataBuilder("Time of Flight", true, "Input/Other", 0.55, 200, 19.154, typeof(RazorTOF),
                     paneHoverText: "VL53L4CD",
                     codeForGen: new()
                     {
@@ -637,7 +637,7 @@ namespace ADArCWebApp.Shared
                         { "setup", "" },
                         { "loopMain", "" },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "gnd", "scl", "sda", "gpio", "xshut"], gsNodeName: "tof").Finish()
+                    }, pins: ["Vin", "xshut", "gnd", "gpio", "scl", "sda"], gsNodeName: "tof").Finish()
             },
             // {
             //     31,
