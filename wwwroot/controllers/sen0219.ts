@@ -13,7 +13,7 @@ export class SEN0219 extends Controller {
     }
 
     setCO2(co2: number) {
-        // Optional clamping if needed
+        // Clamp to realistic range
         if (co2 < 0) co2 = 0;
         if (co2 > 5000) co2 = 5000;
 
@@ -21,11 +21,13 @@ export class SEN0219 extends Controller {
 
         if (!this.inSimulation) return;
 
-        // Update analog_out pin voltage proportionally (0–5V)
-        // Assuming 0 ppm -> 0V, 5000 ppm -> 5V
+        // Convert ppm to voltage (0–5V)
         const voltage = this._co2 * 5 / 5000;
-        if (this.pins?.analog_out?.[0]?.analog) {
-            this.pins.analog_out[0].analog.voltage = voltage;
+
+        // Write to analog_out pin
+        const analogPin = this.pins?.analog_out?.[0]?.analog;
+        if (analogPin) {
+            analogPin.voltage = voltage;
         }
     }
 
@@ -33,16 +35,22 @@ export class SEN0219 extends Controller {
         if (this.inSimulation) return;
         this.inSimulation = true;
 
-        // Initialize the pin voltage
-        if (this.pins?.analog_out?.[0]?.analog) {
-            this.pins.analog_out[0].analog.voltage = this._co2 * 5 / 5000;
+        // Initialize output voltage
+        const initial = this._co2 * 5 / 5000;
+        const analogPin = this.pins?.analog_out?.[0]?.analog;
+        if (analogPin) {
+            analogPin.voltage = initial;
         }
 
-        // Optional: schedule repeated logging or simulation events
+        // Optional periodic debug logging
         const updateReading = () => {
             console.log(`[CO2 Sensor] CO2: ${this._co2} ppm`);
-            AVRRunner.getInstance().board.cpu.addClockEvent(() => updateReading(), 500000);
+            AVRRunner.getInstance()
+                .board
+                .cpu
+                .addClockEvent(() => updateReading(), 500000);
         };
+
         updateReading();
     }
 }
