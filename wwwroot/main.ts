@@ -27,7 +27,7 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
-import {SEN0129} from "@controllers/SEN0129";
+import {SEN0219} from "@controllers/sen0219";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -60,6 +60,6 @@ import {SEN0129} from "@controllers/SEN0129";
 (<any>window).SG90PCA9685 = PCA9685;
 (<any>window).HX711 = HX711;
 (<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;
-(<any>window).SEN0219 = SEN0129;
+(<any>window).SEN0219 = SEN0219;
 
 
