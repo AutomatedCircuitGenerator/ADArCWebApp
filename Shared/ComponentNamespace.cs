@@ -735,7 +735,7 @@ namespace ADArCWebApp.Shared
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         },
-                        pins: ["3V3", "gnd", "scl", "sda", "int"],
+                        pins: ["5V", "gnd", "scl", "sda"],
                         gsNodeName: "amg8833")
                     .Property("temperature", 25.0)
                     .Finish()
