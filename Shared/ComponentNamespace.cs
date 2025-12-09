@@ -707,7 +707,53 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("DHT11", true, "Input/Temperature and Humidity Sensors", 1, 75, 75,
+                        typeof(RazorDHT11),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <DHT.h>"
+                            },
+                            {
+                                "global",
+                                "#define DHTPIN@ ~\"data\"        // Data pin connected to DHT11\n#define DHTTYPE@ DHT11\nDHT dht@(DHTPIN@, DHTTYPE@);"
+                            },
+                            {
+                                "setup",
+                                "  dht@.begin(); // Initialize DHT11 sensor"
+                            },
+                            {
+                                "loopMain",
+                                "  float humidity@ = dht@.readHumidity();\n" +
+                                "  float temperature@ = dht@.readTemperature(); // Celsius\n\n" +
+                                "  // Check if any reads failed\n" +
+                                "  if (isnan(humidity@) || isnan(temperature@)) {\n" +
+                                "    Serial.println(\"Failed to read from DHT11 sensor!\");\n" +
+                                "    return;\n" +
+                                "  }\n\n" +
+                                "  Serial.print(\"Humidity: \");\n" +
+                                "  Serial.print(humidity@);\n" +
+                                "  Serial.print(\" %\");\n" +
+                                "  Serial.print(\"  Temperature: \");\n" +
+                                "  Serial.print(temperature@);\n" +
+                                "  Serial.println(\" °C\");\n\n" +
+                                "  delay(1000);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["5V", "gnd", "digital_out"],
+                        gsNodeName: "dht11")
+                    .Property("temperature", 22.0)
+                    .Property("humidity", 50.0)
+                    .Finish()
             }
+
         };
     }
 }
