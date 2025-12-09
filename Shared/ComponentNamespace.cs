@@ -709,7 +709,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                32,
+                33,
                 new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
                         .5, -20, -20, typeof(RazorAMG8833),
                         paneHoverText: "AMG8833",
