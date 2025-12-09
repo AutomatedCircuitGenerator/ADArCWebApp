@@ -658,7 +658,7 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         },
                         pins: ["5V", "gnd", "analog_out"],
-                        gsNodeName: "SEN0219"
+                        gsNodeName: "sen0219"
                     ).Property("co2", 400.0)
                     .Finish()
             },
