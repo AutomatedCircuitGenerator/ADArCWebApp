@@ -709,33 +709,34 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-            33,
-            new ComponentDataBuilder("Air Quality Sensor", true, "Input/Other Sensors", .7, 100,
-                    75, typeof(RazorPMS5003), paneHoverText: "pms5003",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <PMS7003.h>  // PMS5003 simulated output\n" },
-                        { "global", "// No real hardware — arbitrary output generator\n" },
-                        { "setup", "Serial.begin(9600);" },
+                33,
+                new ComponentDataBuilder("Air Quality Sensor", true, "Input/Other Sensors", 0.7, 100,
+                        75, typeof(RazorPMS5003), paneHoverText: "PMS5003",
+                        codeForGen: new()
                         {
-                            "loopMain",
-                            "  int pm25@ = 42;  // arbitrary constant PM2.5 reading\n" +
-                            "  int pm10@ = 84;  // arbitrary constant PM10 reading\n\n" +
-                            "  Serial.print(\"[PMS5003] PM2.5: \");\n" +
-                            "  Serial.print(pm25@);\n" +
-                            "  Serial.print(\" µg/m3, PM10: \");\n" +
-                            "  Serial.println(pm10@);\n\n" +
-                            "  delay(500);"
+                            { "include", "  // PMS5003 simulated output with streaming\n" },
+                            { "global", "\n" },
+                            { "setup", "Serial.begin(9600);" },
+                            {
+                                "loopMain",
+                                "  // Simulate small random fluctuations around default readings\n" +
+                                "  int pm25@ = 42 + random(-2, 3);  // PM2.5 fluctuates ±2\n" +
+                                "  int pm10@ = 84 + random(-4, 5);  // PM10 fluctuates ±4\n\n" +
+                                "  Serial.print(\"[PMS5003] PM2.5: \");\n" +
+                                "  Serial.print(pm25@);\n" +
+                                "  Serial.print(\" µg/m3, PM10: \");\n" +
+                                "  Serial.println(pm10@);\n\n" +
+                                "  delay(200);" // faster updates for smoother streaming
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
                         },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    },
-                    pins: ["5V", "gnd", "rxd", "txd"],
-                    gsNodeName: "pms5003"
-                ).Property("pm25", 42.0).Property("pm10", 84.0)
-                .Finish()
-        }
+                        pins: ["5V", "gnd", "rxd", "txd"],
+                        gsNodeName: "pms5003"
+                    ).Property("pm25", 42.0).Property("pm10", 84.0)
+                    .Finish()
+            }
         };
     }
 }
