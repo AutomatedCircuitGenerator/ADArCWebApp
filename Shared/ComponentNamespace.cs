@@ -632,8 +632,21 @@ namespace ADArCWebApp.Shared
                      19.154, typeof(RazorRELAY), paneHoverText: "DPDT",
                      codeForGen: new()
                      {
-                         { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                         { "delayLoop", "" }, { "delayTime", "" }
+                         { "include", "" }, 
+                         { "global", "const int relayPin@ = ~\"IN\"; // The digital pin the relay module is connected to" }, 
+                         { "setup", "\tpinMode(relayPin@, OUTPUT); // Set relay pin as output\n" +
+                                    "\tdigitalWrite(relayPin@, HIGH); // Turn relay OFF (or LOW, depends on module's logic)\n" +
+                                    "\tSerial.println(\"Relay control started\");" }, 
+                         { "loopMain", "\tdigitalWrite(relayPin@, LOW); // Turn relay ON (Commonly LOW for active-low modules)\n" +
+                                       "\tSerial.println(\"Relay ON\");\n" +
+                                       "\tdelay(1000); // Wait for 1 second\n" +
+                                       "\n" +
+                                       "\tdigitalWrite(relayPin@, HIGH); // Turn relay OFF\n" +
+                                       "\tSerial.println(\"Relay OFF\");\n" +
+                                       "\tdelay(1000); // Wait for 1 second" }, 
+                         { "functions", "" },
+                         { "delayLoop", "" }, 
+                         { "delayTime", "" }
                      }, pins: ["Vcc", "gnd", "IN"], gsNodeName: "relay").Finish()
             }
             // {
