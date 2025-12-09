@@ -688,7 +688,8 @@ namespace ADArCWebApp.Shared
                     },
                     pins: ["Vcc", "gnd", "sda", "scl"],
                     gsNodeName: "sgp40"
-                ).Property("gas", "VOC").Finish()
+                ).Property("gas", "VOC")
+                .Finish()
             }
         };
     }

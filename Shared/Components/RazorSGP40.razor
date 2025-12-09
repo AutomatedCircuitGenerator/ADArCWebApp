@@ -1,6 +1,11 @@
 ﻿@inherits RazorComponent
 
 @code {
+   
+   [Parameter]
+   [DropdownSetting(["Static", "VOC Simulation"])]
+   public string gas { get; set; }
+
 
     public static ElementPin[] pinInfo
     {
