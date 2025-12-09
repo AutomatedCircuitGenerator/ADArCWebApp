@@ -33,7 +33,7 @@
     <string>add_uln2003.grxml</string>
     <string>add_sen0114.grxml</string>
     <string>add_srv-ph.grxml</string>
-    <string>add_AMG8833.grxml</string>
+    <string>add_amg8833.grxml</string>
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>
