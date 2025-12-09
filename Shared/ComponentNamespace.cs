@@ -636,6 +636,60 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+
+            {
+                31,
+                new ComponentDataBuilder("SGP40", true, "Input/Air Quality Sensors", 1, 75, 75, typeof(RazorSGP40),
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <Wire.h>\n#include <SensirionI2CSgp40.h>"
+                        },
+                        { "global", "SensirionI2CSgp40 sgp40@;" },
+                        {
+                            "setup",
+                            "  Wire.begin();\n" +
+                            "  sgp40@.begin(Wire);\n\n" +
+                            "  // Run the required SGP40 self-test\n" +
+                            "  uint16_t serialNumber[3];\n" +
+                            "  uint8_t serialNumberSize = 3;\n" +
+                            "  uint16_t error = sgp40@.getSerialNumber(serialNumber, serialNumberSize);\n" +
+                            "  if (error) {\n" +
+                            "      Serial.print(\"SGP40 serial number error: 0x\");\n" +
+                            "      Serial.println(error, HEX);\n" +
+                            "  } else {\n" +
+                            "      Serial.println(\"SGP40 detected successfully.\");\n" +
+                            "  }\n"
+                        },
+                        {
+                            "loopMain",
+                            "  // SGP40 requires humidity compensation.\n" +
+                            "  // If humidity sensor not available, use default 50% RH & 25°C.\n" +
+                            "  float temperatureC = 25.0f;\n" +
+                            "  float relHumidity = 50.0f;\n\n" +
+                            "  // Convert to ticks as required by Sensirion formula\n" +
+                            "  uint16_t humidityTicks = (uint16_t)((relHumidity * 65535.0f) / 100.0f);\n" +
+                            "  uint16_t temperatureTicks = (uint16_t)(((temperatureC + 45.0f) * 65535.0f) / 175.0f);\n\n" +
+                            "  uint16_t vocIndex = 0;\n" +
+                            "  uint16_t error = sgp40@.measureRawSignal(humidityTicks, temperatureTicks, vocIndex);\n" +
+                            "  if (error) {\n" +
+                            "      Serial.print(\"SGP40 read error: 0x\");\n" +
+                            "      Serial.println(error, HEX);\n" +
+                            "  } else {\n" +
+                            "      Serial.print(\"VOC Index: \");\n" +
+                            "      Serial.println(vocIndex);\n" +
+                            "  }\n\n" +
+                            "  delay(1000);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["Vcc", "gnd", "sda", "scl"],
+                    gsNodeName: "sgp40"
+                ).Property("gas", "VOC").Finish()
+            }
         };
     }
 }
