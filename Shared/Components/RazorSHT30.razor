@@ -1,0 +1,35 @@
+@inherits RazorComponent
+
+@code {
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[] // the datasheet had more pins but the description on the website said that there were only 4 wires so i just put those
+            {
+                new ElementPin(name: "VCC", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "GND", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "SCL", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "SDA", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 4),
+            };
+        }
+    }
+
+    [Parameter]
+    [ValueSettingDouble("Temperature", 0.0, -40.0, 120)]
+    public double temperature
+    {
+        get;
+        set;
+    }
+    
+    [Parameter]
+    [ValueSettingDouble("Humidity", 0.0, 0.4, 1)]
+    public double humidity
+    {
+        get;
+        set;
+    }
+    
+}
