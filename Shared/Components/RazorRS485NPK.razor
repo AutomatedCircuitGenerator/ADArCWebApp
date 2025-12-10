@@ -1,0 +1,42 @@
+@inherits RazorComponent
+
+@code 
+{
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "RO", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "DI", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "DE", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 7),
+                new ElementPin(name: "RE", x: -1, y: -1, signals: new PinSignalInfo[] { }, number: 8),
+            };
+        }
+    }
+
+    [Parameter]
+    [ValueSettingDouble("N Content (mg/kg)", 0, 0, 0xFF)]
+    public double n
+    {
+        get;
+        set;
+    }
+    
+    [Parameter]
+    [ValueSettingDouble("P Content (mg/kg)", 0, 0, 0xFF)]
+    public double p
+    {
+        get;
+        set;
+    }
+    
+    [Parameter]
+    [ValueSettingDouble("K Content (mg/kg)", 0, 0, 0xFF)]
+    public double k
+    {
+        get;
+        set;
+    }
+}

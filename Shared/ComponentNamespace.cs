@@ -707,6 +707,146 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("Soil NPK Sensor with RS485", true, "Input/Other Sensors",0.5, -1, -1, typeof(RazorRS485NPK),
+                    paneHoverText: "NPK Sensor with RS485",
+                    codeForGen: new ()
+                    {
+                        {
+                            "include",
+                            "#include \"SoftwareSerial.h\"\n" +
+                            "#include \"Wire.h\"\n" +
+                            "#include \"Adafruit_GFX.h\"\n" + 
+                            "#include \"Adafruit_SSD1306.h\"\n"
+                        },
+                        {
+                            "define",
+                            "#define SCREEN_WIDTH 128    // OLED display width, in pixels\n" +
+                            "#define SCREEN_HEIGHT 64    // OLED display height, in pixels\n" +
+                            "#define OLED_RESET -1       // Reset pin # (or -1 if sharing Arduino reset pin)\n" +
+                            "#define RE 8\n" +
+                            "#define DE 7\n"
+                        },
+                        {
+                            "setup",
+                            "Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, OLED_RESET);\n" +
+                            "\n" + 
+                            "const byte nitro[] = {0x01, 0x03, 0x00, 0x1e, 0x00, 0x01, 0xe4, 0x0c};\n" +
+                            "const byte phos[]  = {0x01, 0x03, 0x00, 0x1f, 0x00, 0x01, 0xb5, 0xcc};\n" +
+                            "const byte pota[]  = {0x01, 0x03, 0x00, 0x20, 0x00, 0x01, 0x85, 0xc0};\n" +
+                            "\n" +
+                            "byte values[11];\n" +
+                            "SoftwareSerial mod(2, 3);\n"
+                        },
+                        {
+                            "loopMain",
+                            "\tbyte val1, val2, val3;\n" +
+                            "\tval1 = nitrogen();\n" +
+                            "\tdelay(250);\n" +
+                            "\tval2 = phosphorous();\n" +
+                            "\tdelay(250);\n" +
+                            "\tval3 = potassium();\n" +
+                            "\tdelay(250);\n" +
+                            "\n" +
+                            "\tSerial.print(\"Nitrogen: \");\n" +
+                            "\tSerial.print(val1);\n" +
+                            "\tSerial.println(\" mg/kg\");\n" +
+                            "\tSerial.print(\"Phosphorous: \");\n" +
+                            "\tSerial.print(val2);\n" +
+                            "\tSerial.println(\" mg/kg\");\n" +
+                            "\tSerial.print(\"Potassium: \");\n" +
+                            "\tSerial.print(val3);\n" +
+                            "\tSerial.println(\" mg/kg\");\n" +
+                            "\tdelay(2000);\n" +
+                            "\n" +
+                            "\tdisplay.clearDisplay();\n" +
+                            "\n" +
+                            "\tdisplay.setTextSize(2);\n" +
+                            "\tdisplay.setCursor(0, 5);\n" +
+                            "\tdisplay.print(\"N: \");\n" +
+                            "\tdisplay.print(val1);\n" +
+                            "\tdisplay.setTextSize(1);\n" +
+                            "\tdisplay.print(\" mg/kg\");\n" +
+                            "\n" +
+                            "\tdisplay.setTextSize(2);\n" +
+                            "\tdisplay.setCursor(0, 25);\n" +
+                            "\tdisplay.print(\"P: \");\n" +
+                            "\tdisplay.print(val2);\n" +
+                            "\tdisplay.setTextSize(1);\n" +
+                            "\tdisplay.print(\" mg/kg\");\n" +
+                            "\n" +
+                            "\tdisplay.setTextSize(2);\n" +
+                            "\tdisplay.setCursor(0, 45);\n" +
+                            "\tdisplay.print(\"K: \");\n" +
+                            "\tdisplay.print(val3);\n" +
+                            "\tdisplay.setTextSize(1);\n" +
+                            "\tdisplay.print(\" mg/kg\");\n" +
+                            "\n" +
+                            "\tdisplay.display();\n"
+                        },
+                        {
+                            "functions",
+                            "byte nitrogen() {\n"+
+                            "\tdigitalWrite(DE, HIGH);\n"+
+                            "\tdigitalWrite(RE, HIGH);\n"+
+                            "\tdelay(10);\n"+
+                            "\tif (mod.write(nitro, sizeof(nitro)) == 8) {\n"+
+                            "\t\tdigitalWrite(DE, LOW);\n"+
+                            "\t\tdigitalWrite(RE, LOW);\n"+
+                            "\t\tfor (byte i = 0; i < 7; i++) {\n"+
+                            "\t\t\t//Serial.print(mod.read(),HEX);\n"+
+                            "\t\t\tvalues[i] = mod.read();\n"+
+                            "\t\t\tSerial.print(values[i], HEX);\n"+
+                            "\t\t}\n"+
+                            "\t\tSerial.println();\n"+
+                            "\t}\n"+
+                            "\treturn values[4];\n"+
+                            "}\n"+
+                            "\n"+
+                            "byte phosphorous() {\n"+
+                            "\tdigitalWrite(DE, HIGH);\n"+
+                            "\tdigitalWrite(RE, HIGH);\n"+
+                            "\tdelay(10);\n"+
+                            "\tif (mod.write(phos, sizeof(phos)) == 8) {\n"+
+                            "\t\tdigitalWrite(DE, LOW);\n"+
+                            "\t\tdigitalWrite(RE, LOW);\n"+
+                            "\t\tfor (byte i = 0; i < 7; i++) {\n"+
+                            "\t\t\t//Serial.print(mod.read(),HEX);\n"+
+                            "\t\t\tvalues[i] = mod.read();\n"+
+                            "\t\t\tSerial.print(values[i], HEX);\n"+
+                            "\t\t}\n"+
+                            "\t\tSerial.println();\n"+
+                            "\t}\n"+
+                            "\treturn values[4];\n"+
+                            "}\n"+
+                            "\n"+
+                            "byte potassium() {\n"+
+                            "\tdigitalWrite(DE, HIGH);\n"+
+                            "\tdigitalWrite(RE, HIGH);\n"+
+                            "\tdelay(10);\n"+
+                            "\tif (mod.write(pota, sizeof(pota)) == 8) {\n"+
+                            "\t\tdigitalWrite(DE, LOW);\n"+
+                            "\t\tdigitalWrite(RE, LOW);\n"+
+                            "\t\tfor (byte i = 0; i < 7; i++) {\n"+
+                            "\t\t\t//Serial.print(mod.read(),HEX);\n"+
+                            "\t\t\tvalues[i] = mod.read();\n"+
+                            "\t\t\tSerial.print(values[i], HEX);\n"+
+                            "\t\t}\n"+
+                            "\t\tSerial.println();\n"+
+                            "\t}\n"+
+                            "\treturn values[4];\n"+
+                            "}\n"
+                        }
+                    },
+                    pins: ["RO", "DI", "DE", "RE"],
+                    gsNodeName: "rs485-npk"
+                )
+                .Property("n", 0.0)
+                .Property("p", 0.0)
+                .Property("k", 0.0)
+                .Finish()
             }
         };
     }
