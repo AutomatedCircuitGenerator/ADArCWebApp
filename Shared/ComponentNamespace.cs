@@ -715,8 +715,10 @@ namespace ADArCWebApp.Shared
                     codeForGen: new ()
                     {
                         
-                    }
-                    ).Finish()
+                    }, pins: ["VCC", "GND", "SCL", "SDA"], gsNodeName: "sht-30" /* make sure to have this mirror gs */)
+                    .Property("temperature", 0)
+                    .Property("humidity", 0.4)
+                    .Finish()
             },
         };
     }
