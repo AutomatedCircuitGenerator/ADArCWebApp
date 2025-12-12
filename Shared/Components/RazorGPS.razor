@@ -1,19 +1,29 @@
 ﻿@inherits RazorComponent
 
 @code {
-    public static ElementPin[] pinInfo
+
+  [Parameter]
+  [ValueSetting("(deg)", 0, -90, 90)]
+  public double latitude { get; set; }
+
+  [Parameter]
+  [ValueSetting("(deg)", 0, -180, 180)]
+  public double longitude { get; set; }
+
+  // TODO: wires may not draw; no errors expected
+  public static ElementPin[] pinInfo
+  {
+    get
     {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x: 200.9, y: 68.67, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-                new ElementPin(name: "5V", x: 200.87, y: 79.615, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-                new ElementPin(name: "RX", x: 200.91, y: 58.793, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "TX", x: 200.96, y: 48.793, signals: new PinSignalInfo[] { }, number: 5)
-            };
-        }
+      return new ElementPin[]
+      {
+        new ElementPin(name: "Vcc", x: 85, y: 98, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
+        new ElementPin(name: "gnd", x: 100, y: 98, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
+        new ElementPin(name: "rxd", x: 90, y: 98, signals: new PinSignalInfo[] { }, number: 3),
+        new ElementPin(name: "txd", x: 95, y: 98, signals: new PinSignalInfo[] { }, number: 4),
+      };
     }
+  }
 
 }
 
