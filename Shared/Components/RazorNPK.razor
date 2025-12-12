@@ -1,21 +1,34 @@
 ﻿@inherits RazorComponent
 
 @code {
-    public static ElementPin[] pinInfo
+
+  [Parameter]
+  [ValueSetting("ppm", 0, 0, 1024)]
+  public double nitrogen { get; set; }
+
+  [Parameter]
+  [ValueSetting("ppm", 0, 0, 1024)]
+  public double phosphorus { get; set; }
+
+  [Parameter]
+  [ValueSetting("ppm", 0, 0, 1024)]
+  public double potassium { get; set; }
+
+  public static ElementPin[] pinInfo
+  {
+    get
     {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "VCC", x: 44, y: 181, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 37, y: 181, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "RO", x: 67, y: 181, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "DI", x: 60, y: 181, signals: new PinSignalInfo[] { }, number: 6),
-                new ElementPin(name: "DE", x: 52, y: 181, signals: new PinSignalInfo[] { }, number: 7),
-                new ElementPin(name: "RE", x: 45, y: 181, signals: new PinSignalInfo[] { }, number: 8),
-            };
-        }
+      return new ElementPin[]
+      {
+        new ElementPin(name: "Vcc", x: 44, y: 181, signals: new PinSignalInfo[] { }, number: 1),
+        new ElementPin(name: "gnd", x: 37, y: 181, signals: new PinSignalInfo[] { }, number: 4),
+        new ElementPin(name: "RO", x: 67, y: 181, signals: new PinSignalInfo[] { }, number: 5),
+        new ElementPin(name: "DI", x: 60, y: 181, signals: new PinSignalInfo[] { }, number: 6),
+        new ElementPin(name: "DE", x: 52, y: 181, signals: new PinSignalInfo[] { }, number: 7),
+        new ElementPin(name: "RE", x: 45, y: 181, signals: new PinSignalInfo[] { }, number: 8),
+      };
     }
+  }
 
 }
 

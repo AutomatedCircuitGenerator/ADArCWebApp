@@ -707,7 +707,62 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+            {
+                33,
+                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
+                        typeof(RazorNPK),
+
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <SoftwareSerial.h>"
+                            },
+                            {
+                                "global",
+                                "SoftwareSerial npkSerial@(10, 11); // RO->RX, DI->TX\n" +
+                                "uint16_t npkN@ = 0, npkP@ = 0, npkK@ = 0;"
+                            },
+                            {
+                                "setup",
+                                "  npkSerial@.begin(9600);\n  delay(200);"
+                            },
+                            {
+                                "loopMain",
+                                "  // Example Modbus-like read request\n" +
+                                "  uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
+                                "  npkSerial@.write(request, sizeof(request));\n\n" +
+                                "  delay(100);\n\n" +
+                                "  if (npkSerial@.available() >= 9) {\n" +
+                                "      uint8_t response[9];\n" +
+                                "      npkSerial@.readBytes(response, 9);\n" +
+                                "      npkN@ = (response[3] << 8) | response[4];\n" +
+                                "      npkP@ = (response[5] << 8) | response[6];\n" +
+                                "      npkK@ = (response[7] << 8) | response[8];\n" +
+                                "      Serial.print(\"N: \"); Serial.println(npkN@);\n" +
+                                "      Serial.print(\"P: \"); Serial.println(npkP@);\n" +
+                                "      Serial.print(\"K: \"); Serial.println(npkK@);\n" +
+                                "  }\n" +
+                                "  delay(1000);"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+
+                        pins: ["Vcc", "gnd", "RO", "DI", "DE", "RE"],
+                        gsNodeName: "npk"
+                    )
+                    .Property("nitrogen", 0.0)
+                    .Property("phosphorus", 0.0)
+                    .Property("potassium", 0.0)
+                    .Finish()
+            },
+
         };
     }
 }
