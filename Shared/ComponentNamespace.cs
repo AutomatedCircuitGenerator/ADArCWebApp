@@ -636,6 +636,15 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                31,
+                new ComponentDataBuilder("Transceiver", true, "Input/Other Sensors", 1, 18.5, 19.154, typeof(RazorTRANSCEIVER),
+                    paneHoverText: "NRF24L01",
+                    codeForGen: new()
+                    {
+                    }, pins: ["gnd", "Vcc", "csn", "ce", "sck", "mosi", "miso"], gsNodeName: "transceiver").Finish()
+            },
         };
     }
+    
 }
