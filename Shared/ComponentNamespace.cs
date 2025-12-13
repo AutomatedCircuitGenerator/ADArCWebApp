@@ -707,6 +707,15 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("Pressure Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorMPS20N0040D),
+                    paneHoverText: "MPS20N0040D",
+                    codeForGen: new()
+                    {
+                        
+                    }, pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Finish()
             }
         };
     }

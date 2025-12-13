@@ -31,6 +31,7 @@
     <string>uln2003_arduino.grxml</string>
     <string>sen0114_arduino.grxml</string>
     <string>srv-ph_arduino.grxml</string>
+    <string>mps20n0040d_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
