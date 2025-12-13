@@ -707,7 +707,16 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+            {
+                33,
+                new ComponentDataBuilder("NEMA 23", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                        typeof(RazorNEMA23), paneHoverText: "NEMA23",
+                        codeForGen: new()
+                        {
+                        },
+                        pins: ["Vcc", "dir_minus", "pul_minus"], gsNodeName: "nema23").Finish()
+            },
         };
     }
 }
