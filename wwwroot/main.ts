@@ -29,7 +29,7 @@ import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
 import {SEN0114} from "@controllers/sen0114";
 import {SRVPH} from "@controllers/srvph";
-// import {DE2120} from "@controllers/de2120";
+import {DE2120} from "@controllers/de2120";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -62,6 +62,6 @@ import {SRVPH} from "@controllers/srvph";
 (<any>window).SG90PCA9685 = PCA9685;
 (<any>window).HX711 = HX711;
 (<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;
-// (<any>window).DE2120 = DE2120;
+(<any>window).DE2120 = DE2120;
 (<any>window).SEN0114 = SEN0114;
 (<any>window).SRVPH = SRVPH;
