@@ -707,6 +707,34 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("nema17", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                        typeof(RazorNEMA17), paneHoverText: "nema17",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <AccelStepper.h>\n" },
+                            {
+                                "global",
+                                "int motorPin1_@ = ~\"in1\"; // Define control pin 1 for stepper motor\nint motorPin2_@ = ~\"in2\"; // Define control pin 2 for stepper motor\nint motorPin3_@ = ~\"in3\"; // Define control pin 3 for stepper motor\nint motorPin4_@ = ~\"in4\"; // Define control pin 4 for stepper motor\nint MotorInterfaceType@ = 8; // Define motor driver interface type\n\nAccelStepper stepper@ = AccelStepper(MotorInterfaceType@, motorPin1_@, motorPin3_@, motorPin2_@, motorPin4_@); // Initialize stepper motor with pin configuration\n"
+                            },
+                            {
+                                "setup",
+                                "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor"
+                            },
+                            {
+                                "loopMain",
+                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
+                            },
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "STEP", "DIR"], gsNodeName: "nema17",
+                        warning:
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")
+                    .Finish()
             }
         };
     }
