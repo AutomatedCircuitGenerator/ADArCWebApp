@@ -707,7 +707,17 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+            {
+                33,
+                new ComponentDataBuilder("Geiger counter", true, "Input/Other Sensors", 1, 18.5,
+                    19.154, typeof(RazorJ305B), paneHoverText: "J305B",
+                    codeForGen: new()
+                    {
+
+                    }, pins: ["Vcc", "gnd", "vin"], gsNodeName: "j305b").Finish()
+                 }
+                
         };
     }
 }
