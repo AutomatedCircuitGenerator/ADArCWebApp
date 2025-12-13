@@ -707,6 +707,15 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorGP2Y1014AU0F),
+                    paneHoverText: "GP2Y1014AU0F",
+                    codeForGen: new()
+                    {
+                     
+                    }, pins: ["Vcc", "gnd", "led", "vout"], gsNodeName: "gp2y1014au0f").Finish()
             }
         };
     }
