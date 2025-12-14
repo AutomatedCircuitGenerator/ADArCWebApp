@@ -714,8 +714,42 @@ namespace ADArCWebApp.Shared
                     19.154, typeof(RazorJ305B), paneHoverText: "J305B",
                     codeForGen: new()
                     {
-
-                    }, pins: ["Vcc", "gnd", "vin"], gsNodeName: "j305b").Finish()
+                        {
+                            "include",
+                            "#include <Arduino.h>"
+                        },
+                        {
+                            "global",
+                            "volatile unsigned long geigerCount@ = 0;\n" +
+                            "unsigned long geigerLastTime@ = 0;\n" +
+                            "unsigned int cpm@ = 0;\n" +
+                            "int geigerPin@ = @;"
+                        },
+                        {
+                            "setup",
+                            "  pinMode(geigerPin@, INPUT);\n" +
+                            "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerISR@, RISING);\n" +
+                            "  geigerLastTime@ = millis();"
+                        },
+                        {
+                            "loopMain",
+                            "  if (millis() - geigerLastTime@ >= 60000) {\n" +
+                            "      cpm@ = geigerCount@;\n" +
+                            "      geigerCount@ = 0;\n" +
+                            "      geigerLastTime@ = millis();\n" +
+                            "      Serial.print(\"CPM: \");\n" +
+                            "      Serial.println(cpm@);\n" +
+                            "  }"
+                        },
+                        {
+                            "functions",
+                            "void geigerISR@() {\n" +
+                            "  geigerCount@++;\n" +
+                            "}"
+                        },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    }, pins: ["Vcc", "gnd", "vin"], gsNodeName: "j305b").Property("cpm", 15.0).Finish()
                  }
                 
         };
