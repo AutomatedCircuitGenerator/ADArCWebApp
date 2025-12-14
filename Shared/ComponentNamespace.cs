@@ -763,7 +763,7 @@ namespace ADArCWebApp.Shared
                          {
                              "delayTime", ""
                          }
-                     }, pins: ["Vcc", "gnd", "rxd", "txd"], gsNodeName: "de2120").Property("encodedValue", 0).Finish()
+                     }, pins: ["Vcc", "gnd", "rxd", "txd"], gsNodeName: "de2120").Property("encodedvalue", 0).Finish()
             }
         };
     }

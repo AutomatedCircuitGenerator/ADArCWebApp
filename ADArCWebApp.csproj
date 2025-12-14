@@ -121,6 +121,7 @@
     <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
     <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
+    <TypeScriptCompile Remove="wwwroot\controllers\nrf24l01.ts" />
   </ItemGroup>
 
   <ItemGroup>
