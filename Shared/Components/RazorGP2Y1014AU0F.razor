@@ -1,6 +1,10 @@
 ﻿@inherits RazorComponent
 
 @code {
+    
+    [Parameter]
+    [ValueSetting("µg/m³", 0, 0, 1000)]
+    public double dustdensity { get; set; }
 
     public static ElementPin[] pinInfo
     {

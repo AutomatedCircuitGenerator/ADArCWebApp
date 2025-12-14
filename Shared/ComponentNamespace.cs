@@ -714,8 +714,39 @@ namespace ADArCWebApp.Shared
                     paneHoverText: "GP2Y1014AU0F",
                     codeForGen: new()
                     {
-                     
-                    }, pins: ["Vcc", "gnd", "led", "vout"], gsNodeName: "gp2y1014au0f").Finish()
+                        {
+                            "include",
+                            "#include <Arduino.h>"
+                        },
+                        {
+                            "global",
+                            "int dustLEDPin@ = @;   // LED control pin\n" +
+                            "int dustAnalogPin@ = @; // VOUT pin\n" +
+                            "float dustDensity@ = 0.0;"
+                        },
+                        {
+                            "setup",
+                            "  pinMode(dustLEDPin@, OUTPUT);\n" +
+                            "  digitalWrite(dustLEDPin@, HIGH);"
+                        },
+                        {
+                            "loopMain",
+                            "  digitalWrite(dustLEDPin@, LOW);\n" +
+                            "  delayMicroseconds(280);\n\n" +
+                            "  int adcValue = analogRead(dustAnalogPin@);\n" +
+                            "  digitalWrite(dustLEDPin@, HIGH);\n\n" +
+                            "  delayMicroseconds(40);\n" +
+                            "  delay(10);\n\n" +
+                            "  float voltage = adcValue * (5.0 / 1023.0);\n" +
+                            "  dustDensity@ = (voltage - 0.9) * 1000.0 / 5.0;\n\n" +
+                            "  Serial.print(\"Dust Density (ug/m3): \");\n" +
+                            "  Serial.println(dustDensity@);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    }
+                    , pins: ["Vcc", "gnd", "led", "vout"], gsNodeName: "gp2y1014au0f").Property("dustdensity", 0.0).Finish()
             }
         };
     }
