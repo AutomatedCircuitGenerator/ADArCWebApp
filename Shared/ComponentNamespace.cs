@@ -714,8 +714,51 @@ namespace ADArCWebApp.Shared
                     paneHoverText: "MPS20N0040D",
                     codeForGen: new()
                     {
-                        
-                    }, pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Finish()
+                        { "include", "#include <Arduino.h>" },
+
+                        {
+                            "global",
+                            "int pressureSCK@ = @;\n" +
+                            "int pressureDOUT@ = @;\n" +
+                            "long pressureRaw@ = 0;"
+                        },
+
+                        {
+                            "setup",
+                            "  pinMode(pressureSCK@, OUTPUT);\n" +
+                            "  pinMode(pressureDOUT@, INPUT);\n" +
+                            "  digitalWrite(pressureSCK@, LOW);"
+                        },
+
+                        {
+                            "loopMain",
+                            "  pressureRaw@ = readPressureADC@();\n" +
+                            "  Serial.print(\"Raw Pressure ADC: \");\n" +
+                            "  Serial.println(pressureRaw@);\n"
+                        },
+
+                        {
+                            "functions",
+                            "long readPressureADC@() {\n" +
+                            "  long value = 0;\n" +
+                            "  while (digitalRead(pressureDOUT@) == HIGH);\n" +
+                            "  for (int i = 0; i < 24; i++) {\n" +
+                            "    digitalWrite(pressureSCK@, HIGH);\n" +
+                            "    value = (value << 1) | digitalRead(pressureDOUT@);\n" +
+                            "    digitalWrite(pressureSCK@, LOW);\n" +
+                            "  }\n" +
+                            "  if (value & 0x800000) value |= 0xFF000000;\n" +
+                            "  return value;\n" +
+                            "}"
+                        },
+
+                        { "delayLoop", "delay(500);" },
+                        { "delayTime", "" }
+                    }
+                    , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Property("pressure", 0.0)
+                    .Property("offset", 8388608.0)
+                    .Property("scale", 100000.0)
+                    .Finish()
             }
         };
     }

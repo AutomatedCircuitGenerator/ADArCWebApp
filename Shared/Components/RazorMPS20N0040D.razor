@@ -1,6 +1,19 @@
 ﻿@inherits RazorComponent
 
 @code {
+    
+    [Parameter]
+    [ValueSetting("kPa", 0, -40, 40)]
+    public double pressure { get; set; }
+
+    [Parameter]
+    [ValueSetting("ADC Offset", 8388608, 0, 16777215)]
+    public double offset { get; set; }
+
+    [Parameter]
+    [ValueSetting("ADC Scale", 100000, 1000, 500000)]
+    public double scale { get; set; }
+
 
     public static ElementPin[] pinInfo
     {
