@@ -708,21 +708,60 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
+            // {
+            //     33,
+            //     new ComponentDataBuilder("T-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
+            //             75, typeof(RazorMAX31856), paneHoverText: "MAX31856",
+            //             codeForGen: new()
+            //             {
+            //                 { "include", "#include <MAX31856.h> // Include library for MAX31856 T-type thermocouple" },
+            //                 { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX31856 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+            //                 { "setup", "" },
+            //                 {
+            //                     "loopMain",
+            //                     "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
+            //                 },
+            //                 { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+            //             }, pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"], gsNodeName: "max31856").Property("temperature", -4.0)
+            //         .Finish()
+            // },
             {
                 33,
-                new ComponentDataBuilder("T-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
-                        75, typeof(RazorMAX31856), paneHoverText: "MAX31856",
+                new ComponentDataBuilder(
+                        "T-type thermocouple",
+                        true,
+                        "Input/Temperature and Humidity Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorMAX31856),
+                        paneHoverText: "MAX31856",
                         codeForGen: new()
                         {
-                            { "include", "#include <MAX31856.h> // Include library for MAX31856 T-type thermocouple" },
-                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX31856 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
-                            { "setup", "" },
+                            { "include", "#include <SPI.h> // SPI library instead of MAX31856.h" },
+                            { "global", "// Define chip select for thermocouple\n#define CS_PIN@ ~\"cs\"\nfloat temperature@ = 0.0;" },
+                            { "setup", "SPI.begin();\npinMode(CS_PIN@, OUTPUT);\ndigitalWrite(CS_PIN@, HIGH);" },
                             {
                                 "loopMain",
-                                "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
+                                "// Read temperature from MAX31856 via SPI\n" +
+                                "digitalWrite(CS_PIN@, LOW);\n" +
+                                "byte config@ = SPI.transfer(0x00); // Example: send config/read command\n" +
+                                "byte tempMSB@ = SPI.transfer(0x00);\n" +
+                                "byte tempLSB@ = SPI.transfer(0x00);\n" +
+                                "digitalWrite(CS_PIN@, HIGH);\n" +
+                                "temperature@ = ((tempMSB@ << 8) | tempLSB@) * 0.25; // Convert to Celsius\n" +
+                                "Serial.print(\"Temperature = \");\n" +
+                                "Serial.println(temperature@);\n" +
+                                "delay(500);"
                             },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"], gsNodeName: "max31856").Property("temperature", -4.0)
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
+                        gsNodeName: "max31856"
+                    )
+                    .Property("temperature", -4.0)
                     .Finish()
             },
         };
