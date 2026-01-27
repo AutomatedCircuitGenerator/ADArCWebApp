@@ -709,38 +709,44 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                7,
-                new ComponentDataBuilder("Adafruit Ultimate GPS Breakout", true, "Input/Other Sensors", 1, 75, 75,
+                34,
+                new ComponentDataBuilder(
+                        "Adafruit Ultimate GPS Breakout",
+                        true,
+                        "Input/Other Sensors",
+                        1,
+                        75,
+                        75,
                         typeof(RazorGPS),
                         codeForGen: new()
                         {
                             {
                                 "include",
-                                "#include <Arduino.h>\n#include <Adafruit_GPS.h>\n#include <SoftwareSerial.h>  // For using custom RX/TX pins"
+                                "#include <Arduino.h>\n#include <Adafruit_GPS.h>\n#include <SoftwareSerial.h>"
                             },
                             {
                                 "global",
-                                "SoftwareSerial gpsSerial@(10, 11); // RX, TX pins\nAdafruit_GPS GPS@( &gpsSerial );"
+                                "SoftwareSerial gpsSerial@(10, 11);\nAdafruit_GPS GPS@(&gpsSerial@);"
                             },
                             {
                                 "setup",
-                                "  gpsSerial@.begin(9600);\n  GPS@.begin(9600);\n  GPS@.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);\n  GPS@.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);\n  delay(1000);"
+                                "gpsSerial@.begin(9600);\nGPS@.begin(9600);\nGPS@.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);\nGPS@.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);\ndelay(1000);"
                             },
                             {
                                 "loopMain",
-                                "  char c = GPS@.read();\n  if (GPS@.newNMEAreceived()) {\n      if (!GPS@.parse(GPS@.lastNMEA())) return;\n  }\n  if (GPS@.fix) {\n      Serial.print(\"Latitude: \"); Serial.println(GPS@.latitude, 6);\n      Serial.print(\"Longitude: \"); Serial.println(GPS@.longitude, 6);\n  } else {\n      Serial.println(\"Waiting for fix...\");\n  }\n  delay(1000);"
+                                "char c = GPS@.read();\nif (GPS@.newNMEAreceived()) {\n  GPS@.parse(GPS@.lastNMEA());\n}\nSerial.print(\"Latitude: \"); Serial.println(GPS@.latitude, 6);\nSerial.print(\"Longitude: \"); Serial.println(GPS@.longitude, 6);\ndelay(1000);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
-                        }, 
-                        pins: ["gnd", "Vcc", "rxd", "txd"], 
+                        },
+                        pins: ["gnd", "Vcc", "rxd", "txd"],
                         gsNodeName: "gps"
-                    ).Property("latitude", 0.0)
-                    .Property("longitude", 0.0)
+                    )
+                    .Property("latitude", 20.0)
+                    .Property("longitude", 40.0)
                     .Finish()
             },
-
         };
     }
 }
