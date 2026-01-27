@@ -5181,7 +5181,7 @@
     "placeholder_5180": "Sensirion I2C SFM-SF06",
     "placeholder_5181": "Sensirion I2C SFM3000",
     "placeholder_5182": "Sensirion I2C SFx6xxx",
-    "placeholder_5183": "Sensirion I2C SGP40",
+    "SensirionI2CSgp40.h": "Sensirion I2C SGP40",
     "placeholder_5184": "Sensirion I2C SGP41",
     "placeholder_5185": "Sensirion I2C SHT3x",
     "placeholder_5186": "Sensirion I2C SHT4x",

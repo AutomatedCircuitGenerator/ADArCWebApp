@@ -644,43 +644,37 @@ namespace ADArCWebApp.Shared
                     {
                         {
                             "include",
-                            "#include <Wire.h>\n#include <SensirionI2CSgp40.h>"
+                            "#include <Arduino.h>\n" +
+                            "#include <Wire.h>\n" +
+                            "#include <SensirionI2CSgp40.h>"
                         },
-                        { "global", "SensirionI2CSgp40 sgp40@;" },
+                        { "global",
+                            "SensirionI2CSgp40 sgp40;\n\n" +
+                            "// Values injected by TS controller\n" +
+                            "uint16_t vocIndex = 0;\n" +
+                            "float temperature = 25.0f;\n" +
+                            "float humidity = 50.0f;\n\n" +
+                            "// Simulation flag\n" +
+                            "bool sgp40Simulated = true;"
+                            
+                        },
                         {
                             "setup",
-                            "  Wire.begin();\n" +
-                            "  sgp40@.begin(Wire);\n\n" +
-                            "  // Run the required SGP40 self-test\n" +
-                            "  uint16_t serialNumber[3];\n" +
-                            "  uint8_t serialNumberSize = 3;\n" +
-                            "  uint16_t error = sgp40@.getSerialNumber(serialNumber, serialNumberSize);\n" +
-                            "  if (error) {\n" +
-                            "      Serial.print(\"SGP40 serial number error: 0x\");\n" +
-                            "      Serial.println(error, HEX);\n" +
-                            "  } else {\n" +
-                            "      Serial.println(\"SGP40 detected successfully.\");\n" +
-                            "  }\n"
+                            "Wire.begin();\n" +
+                            "sgp40.begin(Wire);\n\n" +
+                            "Serial.println(\"SGP40 initialized (simulation mode)\");"
                         },
                         {
                             "loopMain",
-                            "  // SGP40 requires humidity compensation.\n" +
-                            "  // If humidity sensor not available, use default 50% RH & 25°C.\n" +
-                            "  float temperatureC = 25.0f;\n" +
-                            "  float relHumidity = 50.0f;\n\n" +
-                            "  // Convert to ticks as required by Sensirion formula\n" +
-                            "  uint16_t humidityTicks = (uint16_t)((relHumidity * 65535.0f) / 100.0f);\n" +
-                            "  uint16_t temperatureTicks = (uint16_t)(((temperatureC + 45.0f) * 65535.0f) / 175.0f);\n\n" +
-                            "  uint16_t vocIndex = 0;\n" +
-                            "  uint16_t error = sgp40@.measureRawSignal(humidityTicks, temperatureTicks, vocIndex);\n" +
-                            "  if (error) {\n" +
-                            "      Serial.print(\"SGP40 read error: 0x\");\n" +
-                            "      Serial.println(error, HEX);\n" +
-                            "  } else {\n" +
-                            "      Serial.print(\"VOC Index: \");\n" +
-                            "      Serial.println(vocIndex);\n" +
-                            "  }\n\n" +
-                            "  delay(1000);"
+                            "// In simulation, DO NOT call real I2C reads\n" +
+                            "// Values are pushed in from the TS controller\n\n" +
+                            "Serial.print(\"VOC Index: \");\n" +
+                            "Serial.print(vocIndex);\n" +
+                            "Serial.print(\" | Temp: \");\n" +
+                            "Serial.print(temperature);\n" +
+                            "Serial.print(\" C | RH: \");\n" +
+                            "Serial.println(humidity);\n\n" +
+                            "delay(1000);"
                         },
                         { "functions", "" },
                         { "delayLoop", "" },
