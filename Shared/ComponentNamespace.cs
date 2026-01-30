@@ -638,7 +638,7 @@ namespace ADArCWebApp.Shared
             // }
             {
                 31,
-                new ComponentDataBuilder("Transceiver", true, "Input/Other Sensors", 1, 18.5, 19.154, typeof(RazorTransceiver),
+                new ComponentDataBuilder("Transceiver", true, "Input/Other Sensors", 1, 18.5, 19.154, typeof(RazorTRANSCEIVER),
                     paneHoverText: "NRF24L01",
                     codeForGen: new()
                     {
