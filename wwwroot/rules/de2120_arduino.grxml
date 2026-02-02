@@ -700,7 +700,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
   <Scale>XYZIndependent</Scale>
   <Skew>Prohibited</Skew>
   <Flip>Prohibited</Flip>
-  <Rotate>XYZIndependent</Rotate>
+  <Rotate>OnlyZ</Rotate>
   <Projection>Prohibited</Projection>
 </GraphSynth:grammarRule>
 
