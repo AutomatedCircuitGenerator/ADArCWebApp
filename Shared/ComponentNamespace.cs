@@ -720,7 +720,7 @@ namespace ADArCWebApp.Shared
                                 "int stepPin@ = ~\"STEP\"; // Define control pin 2 for stepper motor\n\n" +
                                 
                                 "#define motorInterfaceType@ 1\n" +
-                                "AccelStepper stepper@ = AccelStepper(MotorInterfaceType@, stepPin, dirPin); // Initialize stepper motor with pin configuration\n\n"
+                                "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin, dirPin); // Initialize stepper motor with pin configuration\n\n"
                             },
                             {
                                 "setup",
