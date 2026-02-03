@@ -27,7 +27,7 @@ export class ArcadePushButton extends Controller {
             surface.style.transform = pushed ? "translateY(5px)" : "translateY(0)";
         }
 
-        this.digitalOut.digital.state = pushed ? PinState.High : PinState.Low;;
+        this.digitalOut.digital.state = pushed ? PinState.High : PinState.Low;
     }
 
 }
