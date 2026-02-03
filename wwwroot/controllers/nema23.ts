@@ -9,12 +9,12 @@ export class NEMA23 extends Controller {
     private stepsPerRev: number;
 
     override update(state: Record<string, any>) {
-        this.stepsPerRev = Math.max(0, state.stepsPerRev || 400);
+        this.stepsPerRev = Math.max(0, state.stepsperrev || 400);
     }
 
     setup() {
-        this.stepPin = this.pins.STEP[0].digital;
-        this.dirPin = this.pins.DIR[0].digital;
+        this.stepPin = this.pins.pul_minus[0].digital;
+        this.dirPin = this.pins.dir_minus[0].digital;
         this.currentPos = 0;
         this.stepsPerRev = 400;
 
