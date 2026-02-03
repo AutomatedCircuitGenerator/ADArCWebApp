@@ -706,7 +706,56 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
                     .Property("humidity", 512.0).Finish()
-            }
+            },
+            // {
+            //     31,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
+            {
+                34,
+                new ComponentDataBuilder(
+                        "T-type thermocouple",
+                        true,
+                        "Input/Temperature and Humidity Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorMAX31856),
+                        paneHoverText: "MAX31856",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <SPI.h> // SPI library instead of MAX31856.h" },
+                            { "global", "// Define chip select for thermocouple\n#define CS_PIN@ ~\"cs\"\nfloat temperature@ = 0.0;" },
+                            { "setup", "SPI.begin();\npinMode(CS_PIN@, OUTPUT);\ndigitalWrite(CS_PIN@, HIGH);" },
+                            {
+                                "loopMain",
+                                "// Read temperature from MAX31856 via SPI\n" +
+                                "digitalWrite(CS_PIN@, LOW);\n" +
+                                "byte config@ = SPI.transfer(0x00); // Example: send config/read command\n" +
+                                "byte tempMSB@ = SPI.transfer(0x00);\n" +
+                                "byte tempLSB@ = SPI.transfer(0x00);\n" +
+                                "digitalWrite(CS_PIN@, HIGH);\n" +
+                                "temperature@ = ((tempMSB@ << 8) | tempLSB@) * 0.25; // Convert to Celsius\n" +
+                                "Serial.print(\"Temperature = \");\n" +
+                                "Serial.println(temperature@);\n" +
+                                "delay(500);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
+                        gsNodeName: "max31856"
+                    )
+                    .Property("temperature", -4.0)
+                    .Finish()
+            },
         };
     }
 }
