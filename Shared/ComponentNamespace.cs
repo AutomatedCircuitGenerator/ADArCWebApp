@@ -712,7 +712,7 @@ namespace ADArCWebApp.Shared
                     .Property("humidity", 512.0).Finish()
             }, 
             {
-                32,
+                34,
                 new ComponentDataBuilder("Temperature and Humidity Sensor", true,
                         "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
                         paneHoverText: "DHT22",
