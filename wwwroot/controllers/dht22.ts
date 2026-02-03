@@ -97,7 +97,6 @@ export class DHT22 extends Controller {
         for (let i = 0; i < 40; i++) {
             const byte = dataBytes[Math.floor(i / 8)];
             const bit = (byte >> (7 - (i % 8))) & 1;
-            console.log("Sending bit " + bit + " (" + (i + 1) + "/" + 40 + ")");
             
             // 50 us LOW for every bit
             schedule(() => this.signal.state = PinState.Low, 50);
