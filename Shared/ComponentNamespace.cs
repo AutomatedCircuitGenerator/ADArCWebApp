@@ -628,17 +628,59 @@ namespace ADArCWebApp.Shared
             },
             {
                 31,
-                new ComponentDataBuilder("Time of Flight", true, "Input/Other", 0.55, 200, 19.154, typeof(RazorTOF),
-                    paneHoverText: "VL53L4CD",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "" },
-                        { "setup", "" },
-                        { "loopMain", "" },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vin", "xshut", "gnd", "gpio", "scl", "sda"], gsNodeName: "tof").Finish()
+                new ComponentDataBuilder(
+                        "Time of Flight (VL53L4CD)",
+                        true,
+                        "Input/Distance Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorTOF),
+                        paneHoverText: "VL53L4CD",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <Wire.h>"
+                            },
+                            {
+                                "global",
+                                "//\nuint16_t tofDist@ = 0;\n"
+                                + "//\nuint16_t demoDist@ = 500;"
+                            },
+                            {
+                                "setup",
+                                "Wire.begin();\nSerial.begin(115200);"
+                            },
+                            {
+                                "loopMain",
+                                "\n"
+                                + "Wire.beginTransmission(0x29);\n"
+                                + "Wire.write(0x96);\n"
+                                + "Wire.endTransmission(false);\n"
+                                + "Wire.requestFrom(0x29, 2);\n"
+                                + "if (Wire.available() >= 2) {\n"
+                                + "    tofDist@ = (Wire.read() << 8) | Wire.read();\n"
+                                + "}\n\n"
+                                + "Serial.print(\"Distance (mm): \");\n"
+                                + "Serial.println(tofDist@);\n"
+                                + "delay(100);\n"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
+                        gsNodeName: "tof"
+                    )
+                    .Property("distance", 500.0)
+                    .Finish()
             },
+
+
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,

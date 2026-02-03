@@ -1,6 +1,9 @@
 ﻿@inherits RazorComponent
 
 @code {
+   
+   [Parameter]
+   public double distance { get; set; } = 500;
 
     public static ElementPin[] pinInfo
     {
