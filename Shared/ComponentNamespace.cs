@@ -706,6 +706,77 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
                     .Property("humidity", 512.0).Finish()
+            },
+            {
+                34,
+                new ComponentDataBuilder("NEMA 17 Stepper Motor", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                        typeof(RazorNEMA17), paneHoverText: "NEMA17",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <AccelStepper.h>\n" },
+                            
+                            { 
+                                "global", 
+                                "// Pin configuration for NEMA23 stepper motor\n" +
+                                "int dirPin@ = ~\"dir_minus\";  // Direction pin\n" +
+                                "int stepPin@ = ~\"pul_minus\"; // Step pin\n\n" +
+                                "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
+                                "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor\n" +
+                                "\n// Variables for stepper state (optional)\n" +
+                                "long currentPos@ = 0;\n" +
+                                "long targetPos@ = 0;\n" +
+                                "float speed@ = 0;\n"
+                            },
+                            
+                            {
+                                "setup",
+                                "\t// Stepper basic motion parameters\n" +
+                                "\tstepper@.setMaxSpeed(1000);      // Maximum speed (steps/sec)\n" +
+                                "\tstepper@.setAcceleration(500);   // Maximum acceleration (steps/sec^2)\n\n" +
+                                "\t// Optional: reset current position\n" +
+                                "\tstepper@.setCurrentPosition(0);\n\n" +
+                                "\t// Move to an absolute target position\n" +
+                                "\tstepper@.moveTo(400); // Example: move to step 400\n"
+                            },
+                            
+                            {
+                                "loopMain",
+                                "\t// Non-blocking run toward target position\n" +
+                                "\tif(stepper@.distanceToGo() != 0) {\n" +
+                                "\t\tstepper@.run(); // Moves motor toward target with acceleration\n" +
+                                "\t}\n\n" +
+                                "\t// --- Constant speed movement (without acceleration) ---\n" +
+                                "\t// stepper@.setSpeed(200); // Set speed in steps/sec\n" +
+                                "\t// stepper@.runSpeed();    // Call repeatedly to move at constant speed\n\n" +
+                                "\t// --- Relative movement ---\n" +
+                                "\t// stepper@.move(100); // Move 100 steps relative to current position\n\n" +
+                                "\t// --- Blocking movement to absolute position ---\n" +
+                                "\t// stepper@.runToPosition(); // Blocks until target is reached\n" +
+                                "\t// stepper@.runToNewPosition(800); // Blocks until new target is reached\n\n" +
+                                "\t// --- Query motor state ---\n" +
+                                "\tcurrentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
+                                "\ttargetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
+                                "\tlong remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
+                                "\tspeed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
+                                "\t// Print motor info to Serial for debugging\n" +
+                                "\t//Serial.print(\"Current: \"); \n" +
+                                "\tSerial.print(currentPos@);\n" +
+                                "\tSerial.print(\" Target: \");\n" +
+                                "\tSerial.print(targetPos@);\n" +
+                                "\tSerial.print(\" Remaining: \");" +
+                                "\tSerial.print(remaining@);\n" +
+                                "\tSerial.print(\" Speed: \"); " +
+                                "\tSerial.println(speed@);\n\n" +
+                                "\tdelay(100); // Small delay to reduce Serial flooding"
+                            },
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "STEP", "DIR"], gsNodeName: "nema17",
+                        warning:
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Property("stepsperrev", 200.0)
+                    .Finish()
             }
         };
     }
