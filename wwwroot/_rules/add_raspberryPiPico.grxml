@@ -1,0 +1,248 @@
+<GraphSynth:grammarRule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                       xmlns:xsd="http://www.w3.org/2001/XMLSchema"
+                       xmlns:GraphSynth="clr-namespace:GraphSynth.Representation;assembly=GraphSynth.Base">
+  <name>add_raspberryPiPico</name>
+  <termination>false</termination>
+  <embeddingRules />
+  <recognizeFunctions />
+  <applyFunctions />
+
+  <L>
+    <globalLabels />
+    <globalVariables />
+    <arcs />
+    <nodes>
+      <node xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>user_raspberryPiPico</string>
+        </localLabels>
+        <localVariables />
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
+    <hyperarcs />
+  </L>
+
+  <R>
+    <globalLabels />
+    <globalVariables />
+
+    <arcs>
+      <arc xsi:type="ruleArc">
+        <name>0</name>
+        <localLabels />
+        <localVariables />
+        <From>n0</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+
+      <arc xsi:type="ruleArc">
+        <name>1</name>
+        <localLabels />
+        <localVariables />
+        <From>n2</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+
+      <arc xsi:type="ruleArc">
+        <name>gnd</name>
+        <localLabels />
+        <localVariables />
+        <From>n3</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+
+      <arc xsi:type="ruleArc">
+        <name>gpio0</name>
+        <localLabels />
+        <localVariables />
+        <From>n4</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+
+      <arc xsi:type="ruleArc">
+        <name>gpio1</name>
+        <localLabels />
+        <localVariables />
+        <From>n5</From>
+        <To>n1</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+    </arcs>
+
+    <nodes>
+      <node xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>connected</string>
+          <string>user_raspberryPiPico</string>
+        </localLabels>
+        <localVariables />
+        <X>0</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+
+      <node xsi:type="ruleNode">
+        <name>n1</name>
+        <localLabels>
+          <string>raspberry</string>
+          <string>pico</string>
+        </localLabels>
+        <localVariables />
+        <X>50</X>
+        <Y>0</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+
+      <node xsi:type="ruleNode">
+        <name>n2</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>power</string>
+          <string>3V3</string>
+        </localLabels>
+        <localVariables />
+        <X>50</X>
+        <Y>40</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+
+      <node xsi:type="ruleNode">
+        <name>n3</name>
+        <localLabels>
+          <string>pwr</string>
+          <string>0v</string>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>50</X>
+        <Y>-40</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+
+      <node xsi:type="ruleNode">
+        <name>n4</name>
+        <localLabels>
+          <string>digital</string>
+          <string>gpio</string>
+          <string>gpio0</string>
+        </localLabels>
+        <localVariables />
+        <X>100</X>
+        <Y>20</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+
+      <node xsi:type="ruleNode">
+        <name>n5</name>
+        <localLabels>
+          <string>digital</string>
+          <string>gpio</string>
+          <string>gpio1</string>
+        </localLabels>
+        <localVariables />
+        <X>100</X>
+        <Y>-20</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
+
+    <hyperarcs />
+  </R>
+
+  <spanning>false</spanning>
+  <induced>false</induced>
+  <negateLabels />
+  <containsAllGlobalLabels>false</containsAllGlobalLabels>
+  <OrderedGlobalLabels>false</OrderedGlobalLabels>
+  <UseShapeRestrictions>false</UseShapeRestrictions>
+  <RestrictToNodeShapeMatch>false</RestrictToNodeShapeMatch>
+  <TransformNodePositions>true</TransformNodePositions>
+  <TransformNodeShapes>false</TransformNodeShapes>
+  <Translate>XYZIndependent</Translate>
+  <Scale>XYZIndependent</Scale>
+  <Skew>Prohibited</Skew>
+  <Flip>Prohibited</Flip>
+  <Rotate>XYZIndependent</Rotate>
+  <Projection>Prohibited</Projection>
+</GraphSynth:grammarRule>

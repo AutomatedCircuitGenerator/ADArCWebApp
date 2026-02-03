@@ -591,6 +591,33 @@ namespace ADArCWebApp.Shared
                         "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")
                     .Finish()
             },
+
+            {
+                28,
+                new ComponentDataBuilder(
+                        "Raspberry Pi Pico",
+                        false,
+                        "Arduino",
+                        0.33,
+                        280,
+                        210,
+                        typeof(RazorRaspberryPiPico),
+                        codeForGen: new()
+                        {
+                            { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+                            { "delayLoop", "" }, { "delayTime", "" }
+                        },
+                        pins:
+                        [
+                            "gnd", "3V3", "VBUS",
+                            "gp0", "gp1", "gp2", "gp3", "gp4", "gp5", "gp6", "gp7", "gp8", "gp9",
+                            "gp10", "gp11", "gp12", "gp13", "gp14", "gp15", "gp16", "gp17", "gp18", "gp19",
+                            "gp20", "gp21", "gp22", "gp26", "gp27", "gp28"
+                        ],
+                        gsNodeName: "raspberryPiPico")
+                    .Finish()
+            },
+
             {
                 29,
                 new ComponentDataBuilder("Arcade push button", true, "Input/Buttons and Switches", 1, 75, 75,
