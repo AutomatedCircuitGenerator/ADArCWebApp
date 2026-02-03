@@ -737,7 +737,7 @@ namespace ADArCWebApp.Shared
                         },
                         pins: ["Vcc", "gnd", "STEP", "DIR"], gsNodeName: "nema17",
                         warning:
-                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Property("stepsPerRev", 200)
                     .Finish()
             }
         };
