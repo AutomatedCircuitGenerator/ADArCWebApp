@@ -9,7 +9,7 @@ export class NEMA17 extends Controller {
     private stepsPerRev: number;
 
     override update(state: Record<string, any>) {
-        this.stepsPerRev = Math.max(0, state.stepsPerRev || 200);
+        this.stepsPerRev = Math.max(0, state.stepsperrev || 200);
     }
     
     setup() {
