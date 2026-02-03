@@ -4,13 +4,20 @@
     public ElementPin[] pinInfo {
         get
         {
-            return new ElementPin[]{ // 
+            return new ElementPin[]{ 
 
               new ElementPin(name: "Vcc", x: 44, y: 181, signals: new PinSignalInfo[] { }, number: 1),
               new ElementPin(name: "dir_minus", x: 37, y: 181, signals: new PinSignalInfo[] { }, number: 2),
               new ElementPin(name: "pul_minus", x: 60, y: 181, signals: new PinSignalInfo[] { }, number: 3),
-    };
+            };
         }
+    }
+    
+    [ValueSetting("Steps/Revolution", 400, 0, 99999999)]
+    public int stepsPerRev
+    {   
+        get;
+        set;
     }
 }
 
