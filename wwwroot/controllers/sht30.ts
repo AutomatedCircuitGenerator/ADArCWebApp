@@ -1,6 +1,8 @@
 import { Controller } from "@controllers/controller";
 import { I2CController } from "@lib/i2c-bus";
 
+
+const SHT30_ADDR = 0x44;
 export class SHT30 extends Controller implements I2CController {
     /* Buffers */
     private commandBuffer: number[] = [];
@@ -12,7 +14,7 @@ export class SHT30 extends Controller implements I2CController {
     private humidityRH = 50.0;
 
     setup(): void {
-        this.pins.sda[0].twi.registerController(this.id, this);
+        this.pins.sda[0].twi.registerController(SHT30_ADDR, this);
     }
 
     // TODO: Add clamping
@@ -22,7 +24,7 @@ export class SHT30 extends Controller implements I2CController {
     }
 
     i2cConnect(addr: number, _write: boolean): boolean {
-        return addr === this.id;
+        return addr === SHT30_ADDR;
     }
 
     i2cDisconnect(): void {
@@ -106,7 +108,7 @@ export class SHT30 extends Controller implements I2CController {
 
         // Convert temperature (°C) to raw 16-bit sensor value
         // SHT30 datasheet formula: T_raw = (T + 45) * (2^16 - 1) / 175
-        const tempRaw = Math.round((temp + 45) * (175 / 0xFFFF));
+        const tempRaw = Math.round((temp + 45) * (0xFFFF / 175));
 
         // Convert relative humidity (%) to raw 16-bit sensor value
         // SHT30 datasheet formula: RH_raw = RH * (2^16 - 1) / 100
