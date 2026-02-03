@@ -626,8 +626,49 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            // {
+            //     31,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
             {
                 32,
+                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
+                    paneHoverText: "SRV-PH",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        {
+                            "global",
+                            "#define SRVPH_PIN@ ~\"ADC\""
+                        },
+                        {
+                            "setup",
+                            ""
+                        },
+                        {
+                            "loopMain",
+                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
+                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
+                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
+                            "\tSerial.print(\"Sensor Value: \");\n" +
+                            "\tSerial.print(sensorValue@);\n\n" + 
+                            "\tSerial.print(\"\tVoltage: \");\n" +
+                            "\tSerial.print(voltage@);\n\n" +
+                            "\tSerial.print(\"\tpH: \");\n" + 
+                            "\tSerial.println(pH);\n" +
+                            "\tdelay(2000); // wait 2s for next reading"
+                        },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
                 new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
@@ -676,57 +717,8 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
-            
             {
-                31,
-                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
-                    paneHoverText: "SRV-PH",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        {
-                            "global",
-                            "#define SRVPH_PIN@ ~\"ADC\""
-                        },
-                        {
-                            "setup",
-                            ""
-                        },
-                        {
-                            "loopMain",
-                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
-                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
-                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
-                            "\tSerial.print(\"Sensor Value: \");\n" +
-                            "\tSerial.print(sensorValue@);\n\n" + 
-                            "\tSerial.print(\"\tVoltage: \");\n" +
-                            "\tSerial.print(voltage@);\n\n" +
-                            "\tSerial.print(\"\tpH: \");\n" + 
-                            "\tSerial.println(pH);\n" +
-                            "\tdelay(2000); // wait 2s for next reading"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            },
-            // {
-            //     33,
-            //     new ComponentDataBuilder("T-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
-            //             75, typeof(RazorMAX31856), paneHoverText: "MAX31856",
-            //             codeForGen: new()
-            //             {
-            //                 { "include", "#include <MAX31856.h> // Include library for MAX31856 T-type thermocouple" },
-            //                 { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX31856 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
-            //                 { "setup", "" },
-            //                 {
-            //                     "loopMain",
-            //                     "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
-            //                 },
-            //                 { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-            //             }, pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"], gsNodeName: "max31856").Property("temperature", -4.0)
-            //         .Finish()
-            // },
-            {
-                33,
+                34,
                 new ComponentDataBuilder(
                         "T-type thermocouple",
                         true,
