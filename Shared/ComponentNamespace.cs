@@ -709,7 +709,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                33, 
+                34, 
                 new ComponentDataBuilder("2.4GHz Transceiver", true, "Input/Other Sensors", 0.5, -1, -1, typeof(RazorNRF24L01),
                     paneHoverText: "nRF24L01",
                     codeForGen: new ()
