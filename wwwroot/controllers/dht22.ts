@@ -2,6 +2,7 @@ import {Controller} from "./controller";
 import {AVRRunner} from "@lib/execute";
 import {PinState} from "@lib/avr8js";
 import {CPU, Digital} from "../boards/board";
+
 export class DHT22 extends Controller {
     
     private temperature: number = 20;
@@ -88,8 +89,8 @@ export class DHT22 extends Controller {
         schedule(() => {}, 250);
 
         // ACK sequence: 80us LOW, 80us HIGH
-        schedule(() => this.signal.state = false, 80); 
-        schedule(() => this.signal.state = true, 80);  
+        schedule(() => this.signal.state = PinState.Low, 80); 
+        schedule(() => this.signal.state = PinState.High, 80);  
         
         
         // 40-bit data sequence
@@ -99,17 +100,17 @@ export class DHT22 extends Controller {
             console.log("Sending bit " + bit + " (" + (i + 1) + "/" + 40 + ")");
             
             // 50 us LOW for every bit
-            schedule(() => this.signal.state = false, 50);
+            schedule(() => this.signal.state = PinState.Low, 50);
 
             // HIGH duration encodes the bit: 27 us = 0, 70 µs = 1
-            schedule(() => this.signal.state = true, bit ? 70 : 27);
+            schedule(() => this.signal.state = PinState.High, bit ? 70 : 27);
         }
         
         // Briefly set to LOW to end transmission
-        schedule(() => this.signal.state = false, 0);
+        schedule(() => this.signal.state = PinState.Low, 0);
         
         // Return to idle state (HIGH)
-        schedule(() => this.signal.state = true, 0);
+        schedule(() => this.signal.state = PinState.Input, 0);
     }
 
     /**
