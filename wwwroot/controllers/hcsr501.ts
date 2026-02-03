@@ -53,10 +53,10 @@ export class HCSR501 extends Controller {
         if (this.triggerMode) {
             if (!this.isInTimeWindow) {
                 //if we are starting a new time window. Easy to think of this as just the other mode
-                this.pins.digital_out[0].digital.state = true;
+                this.pins.digital_out[0].digital.state = PinState.High;
                 this.isInTimeWindow = true;
                 this.motionTimeoutId = setTimeout(() => {
-                    this.pins.digital_out[0].digital.state = false;
+                    this.pins.digital_out[0].digital.state = PinState.Low;
                     this.isMotionDetected = false;
                     this.isInTimeWindow = false;
                     this.motionTimeoutId = 0;
@@ -66,7 +66,7 @@ export class HCSR501 extends Controller {
                 //if we are in the previous time window and get triggered again
                 clearTimeout(this.motionTimeoutId);
                 this.motionTimeoutId = this.motionTimeoutId = setTimeout(() => {
-                    this.pins.digital_out[0].digital.state = false;
+                    this.pins.digital_out[0].digital.state = PinState.Low;
                     this.isMotionDetected = false;
                     this.isInTimeWindow = false;
                     this.motionTimeoutId = 0;
@@ -79,9 +79,9 @@ export class HCSR501 extends Controller {
                 return
             } else {
                 this.isInTimeWindow = true;
-                this.pins.digital_out[0].digital.state = true;
+                this.pins.digital_out[0].digital.state = PinState.High;
                 this.motionTimeoutId = setTimeout(() => {
-                    this.pins.digital_out[0].digital.state = false;
+                    this.pins.digital_out[0].digital.state = PinState.High;
                     this.isMotionDetected = false;
                     this.isInTimeWindow = false;
                     this.motionTimeoutId = 0;
