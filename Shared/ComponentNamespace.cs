@@ -706,6 +706,24 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
                     .Property("humidity", 512.0).Finish()
+            },
+            {
+                34, 
+                new ComponentDataBuilder("2.4GHz Transceiver", true, "Input/Other Sensors", 0.5, -1, -1, typeof(RazorNRF24L01),
+                    paneHoverText: "nRF24L01",
+                    codeForGen: new ()
+                    {
+                        {
+                            "include",
+                            ""
+                        }
+                    },
+                    pins: ["CE", "CSN", "SCK", "MOSI", "MISO",
+                        "IRQ", "VDD", "VSS", "XC2", "XC1", 
+                        "VDD_PA", "ANT1", "ANT2", "VSS", 
+                        "VDD", "IREF", "VSS", "VDD", "DVDD", "VSS"],
+                    gsNodeName: "nrf24l01"
+                ).Finish()
             }
         };
     }
