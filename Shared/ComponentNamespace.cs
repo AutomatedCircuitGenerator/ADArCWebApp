@@ -709,13 +709,37 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                33,
+                34,
                 new ComponentDataBuilder("NEMA 23", true, "Output/Motors/Stepper Motor", .4, 75, 75,
                         typeof(RazorNEMA23), paneHoverText: "NEMA23",
                         codeForGen: new()
                         {
+                            { "include", "#include <AccelStepper.h>\n" },
+                            {
+                                "global",
+                                "int dirPin@ = ~\"dir_minus\"; // Define direction pin for stepper motor\n" +
+                                "int stepPin@ = ~\"pul_minus\"; // Define step pin for stepper motor\n\n" +
+                                
+                                "#define motorInterfaceType@ 1\n" +
+                                "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor with pin configuration\n\n"
+                            },
+                            {
+                                "setup",
+                                "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor\n" +
+                                "\tstepper@.setAcceleration(500); // Set maximum acceleration\n"
+                            },
+                            {
+                                "loopMain",
+                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
+                            },
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
+                            { "delayTime", "" }
                         },
-                        pins: ["Vcc", "dir_minus", "pul_minus"], gsNodeName: "nema23").Finish()
+                        pins: ["Vcc", "dir_minus", "pul_minus"], gsNodeName: "nema23", 
+                        warning:
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Property("stepsPerRev", 400)
+                    .Finish()
             },
         };
     }
