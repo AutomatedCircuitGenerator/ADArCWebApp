@@ -1,6 +1,6 @@
 ﻿@code {
 
-    private double mmToPix = 3.78;
+    /*private double mmToPix = 3.78;
     // Most likely the most buggy one
     [Parameter] public double angle { get; set;  } = 0;
     [Parameter] public string arrow { get; set; } = "";
@@ -30,7 +30,7 @@
 
     // these offsets match the transform in renderFace
     double xOff => (frameSize / 2 - 3.75) * mmToPix + 1;
-    double yOff => (frameSize + 5) * mmToPix;
+    double yOff => (frameSize + 5) * mmToPix;*/
 
     public ElementPin[] pinInfo {
         get
@@ -44,7 +44,16 @@
               };
         }
     }
-
+    
+    [Parameter]
+    [ValueSetting("Steps/Revolution", 200, 0, 99999999)]
+    public int stepsPerRev
+    {   
+        get;
+        set;
+    }
+    
+    
     public static async void translate(ComponentInstance comp, long pinChangeCycle)
     {
         bool dir = false;
