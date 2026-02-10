@@ -4,7 +4,7 @@ import { PinState } from "@lib/avr8js";
 
 export class J305B extends Controller {
 
-    private _cpm: number = 0;          // counts per minute
+    private _cpm: number = 10;          // counts per minute
     private pulseIntervalCycles = 0;   // CPU cycles between pulses
 
     override update(state: Record<string, any>) {
