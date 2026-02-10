@@ -680,7 +680,6 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
 
-
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
