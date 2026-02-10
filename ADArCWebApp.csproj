@@ -44,7 +44,7 @@
     <None Include="wwwroot\rules\add_mq3.grxml" />
     <None Include="wwwroot\rules\add_pca9685.grxml" />
     <None Include="wwwroot\rules\add_rplidar.grxml" />
-      <None Include="wwwroot\rules\add_sen0114.grxml" />
+    <None Include="wwwroot\rules\add_sen0114.grxml" />
     <None Include="wwwroot\rules\add_sdCard.grxml" />
     <None Include="wwwroot\rules\add_servo.grxml" />
     <None Include="wwwroot\rules\add_servo_9g.grxml" />
@@ -90,7 +90,7 @@
     <None Include="wwwroot\rules\nema_l298n.grxml" />
     <None Include="wwwroot\rules\pca9685_arduino.grxml" />
     <None Include="wwwroot\rules\rplidar_arduino.grxml" />
-      <None Include="wwwroot\rules\sen0114_arduino.grxml" />
+    <None Include="wwwroot\rules\sen0114_arduino.grxml" />
     <None Include="wwwroot\rules\sdCard_arduino.grxml" />
     <None Include="wwwroot\rules\servo_arduino.grxml" />
     <None Include="wwwroot\rules\servo_pca9685.grxml" />
@@ -117,19 +117,19 @@
     <Folder Include="wwwroot\lib\intro.js\" />
   </ItemGroup>
 
+  <!-- Keep your explicit TS removals -->
   <ItemGroup>
     <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
     <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
   </ItemGroup>
 
-  <ItemGroup>
-    <Content Remove="wwwroot\build\build.js" />
-    <Content Remove="wwwroot\build\build.js.map" />
-  </ItemGroup>
+  <!-- IMPORTANT: DO NOT remove the bundle from content -->
+  <!-- (deleted the Content Remove for wwwroot\build\build.js and .map) -->
 
+  <!-- IMPORTANT: Compile all .ts so execute.ts / compile-util.ts get into build/build.js -->
   <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\controllers\srvph.ts" />
+    <TypeScriptCompile Include="wwwroot\**\*.ts" />
   </ItemGroup>
 
 </Project>
