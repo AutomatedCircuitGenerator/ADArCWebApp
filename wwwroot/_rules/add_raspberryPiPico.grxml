@@ -13,17 +13,11 @@
     <arcs />
     <nodes>
       <node xsi:type="ruleNode">
-        <name>n0</name>
-        <localLabels>
-          <string>user_raspberryPiPico</string>
-        </localLabels>
+        <name>u0</name>
+        <localLabels><string>user_raspberryPiPico</string></localLabels>
         <localVariables />
-        <X>0</X>
-        <Y>0</Y>
-        <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <X>0</X><Y>0</Y><Z>0</Z>
+        <negateLabels><string>connected</string></negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -39,11 +33,11 @@
 
     <arcs>
       <arc xsi:type="ruleArc">
-        <name>0</name>
+        <name>board</name>
         <localLabels />
         <localVariables />
-        <From>n0</From>
-        <To>n1</To>
+        <From>u0</From>
+        <To>b0</To>
         <directed>false</directed>
         <doublyDirected>false</doublyDirected>
         <negateLabels />
@@ -54,82 +48,23 @@
         <nullMeansNull>false</nullMeansNull>
       </arc>
 
-      <arc xsi:type="ruleArc">
-        <name>1</name>
-        <localLabels />
-        <localVariables />
-        <From>n2</From>
-        <To>n1</To>
-        <directed>false</directed>
-        <doublyDirected>false</doublyDirected>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <directionIsEqual>false</directionIsEqual>
-        <nullMeansNull>false</nullMeansNull>
-      </arc>
+      <!-- Power -->
+      <arc xsi:type="ruleArc"><name>gnd</name><localLabels /><localVariables /><From>p_gnd</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
+      <arc xsi:type="ruleArc"><name>3V3</name><localLabels /><localVariables /><From>p_3v3</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
+      <arc xsi:type="ruleArc"><name>VBUS</name><localLabels /><localVariables /><From>p_vbus</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
 
-      <arc xsi:type="ruleArc">
-        <name>gnd</name>
-        <localLabels />
-        <localVariables />
-        <From>n3</From>
-        <To>n1</To>
-        <directed>false</directed>
-        <doublyDirected>false</doublyDirected>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <directionIsEqual>false</directionIsEqual>
-        <nullMeansNull>false</nullMeansNull>
-      </arc>
-
-      <arc xsi:type="ruleArc">
-        <name>gpio0</name>
-        <localLabels />
-        <localVariables />
-        <From>n4</From>
-        <To>n1</To>
-        <directed>false</directed>
-        <doublyDirected>false</doublyDirected>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <directionIsEqual>false</directionIsEqual>
-        <nullMeansNull>false</nullMeansNull>
-      </arc>
-
-      <arc xsi:type="ruleArc">
-        <name>gpio1</name>
-        <localLabels />
-        <localVariables />
-        <From>n5</From>
-        <To>n1</To>
-        <directed>false</directed>
-        <doublyDirected>false</doublyDirected>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <directionIsEqual>false</directionIsEqual>
-        <nullMeansNull>false</nullMeansNull>
-      </arc>
+      <!-- GPIO (minimum set for your rules) -->
+      <arc xsi:type="ruleArc"><name>gp0</name><localLabels /><localVariables /><From>g0</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
+      <arc xsi:type="ruleArc"><name>gp1</name><localLabels /><localVariables /><From>g1</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
+      <arc xsi:type="ruleArc"><name>gp28</name><localLabels /><localVariables /><From>g28</From><To>b0</To><directed>false</directed><doublyDirected>false</doublyDirected><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><directionIsEqual>false</directionIsEqual><nullMeansNull>false</nullMeansNull></arc>
     </arcs>
 
     <nodes>
       <node xsi:type="ruleNode">
-        <name>n0</name>
-        <localLabels>
-          <string>connected</string>
-          <string>user_raspberryPiPico</string>
-        </localLabels>
+        <name>u0</name>
+        <localLabels><string>connected</string><string>user_raspberryPiPico</string></localLabels>
         <localVariables />
-        <X>0</X>
-        <Y>0</Y>
-        <Z>0</Z>
+        <X>0</X><Y>0</Y><Z>0</Z>
         <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
@@ -138,15 +73,10 @@
       </node>
 
       <node xsi:type="ruleNode">
-        <name>n1</name>
-        <localLabels>
-          <string>raspberry</string>
-          <string>pico</string>
-        </localLabels>
+        <name>b0</name>
+        <localLabels><string>raspberryPiPico</string></localLabels>
         <localVariables />
-        <X>50</X>
-        <Y>0</Y>
-        <Z>0</Z>
+        <X>60</X><Y>0</Y><Z>0</Z>
         <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
@@ -154,95 +84,15 @@
         <strictDegreeMatch>false</strictDegreeMatch>
       </node>
 
-      <node xsi:type="ruleNode">
-        <name>n2</name>
-        <localLabels>
-          <string>pwr</string>
-          <string>power</string>
-          <string>3V3</string>
-        </localLabels>
-        <localVariables />
-        <X>50</X>
-        <Y>40</Y>
-        <Z>0</Z>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <strictDegreeMatch>false</strictDegreeMatch>
-      </node>
+      <node xsi:type="ruleNode"><name>p_gnd</name><localLabels><string>gnd</string><string>0v</string></localLabels><localVariables /><X>60</X><Y>-20</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
+      <node xsi:type="ruleNode"><name>p_3v3</name><localLabels><string>3V3</string><string>power</string></localLabels><localVariables /><X>60</X><Y>20</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
+      <node xsi:type="ruleNode"><name>p_vbus</name><localLabels><string>VBUS</string><string>power</string></localLabels><localVariables /><X>60</X><Y>35</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
 
-      <node xsi:type="ruleNode">
-        <name>n3</name>
-        <localLabels>
-          <string>pwr</string>
-          <string>0v</string>
-          <string>gnd</string>
-        </localLabels>
-        <localVariables />
-        <X>50</X>
-        <Y>-40</Y>
-        <Z>0</Z>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <strictDegreeMatch>false</strictDegreeMatch>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <name>n4</name>
-        <localLabels>
-          <string>digital</string>
-          <string>gpio</string>
-          <string>gpio0</string>
-        </localLabels>
-        <localVariables />
-        <X>100</X>
-        <Y>20</Y>
-        <Z>0</Z>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <strictDegreeMatch>false</strictDegreeMatch>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <name>n5</name>
-        <localLabels>
-          <string>digital</string>
-          <string>gpio</string>
-          <string>gpio1</string>
-        </localLabels>
-        <localVariables />
-        <X>100</X>
-        <Y>-20</Y>
-        <Z>0</Z>
-        <negateLabels />
-        <NotExist>false</NotExist>
-        <containsAllLocalLabels>false</containsAllLocalLabels>
-        <TargetType />
-        <strictDegreeMatch>false</strictDegreeMatch>
-      </node>
+      <node xsi:type="ruleNode"><name>g0</name><localLabels><string>gp0</string><string>gpio</string><string>digital</string><string>i2c</string><string>sda</string></localLabels><localVariables /><X>120</X><Y>25</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
+      <node xsi:type="ruleNode"><name>g1</name><localLabels><string>gp1</string><string>gpio</string><string>digital</string><string>i2c</string><string>scl</string></localLabels><localVariables /><X>120</X><Y>15</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
+      <node xsi:type="ruleNode"><name>g28</name><localLabels><string>gp28</string><string>gpio</string><string>digital</string></localLabels><localVariables /><X>120</X><Y>-5</Y><Z>0</Z><negateLabels /><NotExist>false</NotExist><containsAllLocalLabels>false</containsAllLocalLabels><TargetType /><strictDegreeMatch>false</strictDegreeMatch></node>
     </nodes>
 
     <hyperarcs />
   </R>
-
-  <spanning>false</spanning>
-  <induced>false</induced>
-  <negateLabels />
-  <containsAllGlobalLabels>false</containsAllGlobalLabels>
-  <OrderedGlobalLabels>false</OrderedGlobalLabels>
-  <UseShapeRestrictions>false</UseShapeRestrictions>
-  <RestrictToNodeShapeMatch>false</RestrictToNodeShapeMatch>
-  <TransformNodePositions>true</TransformNodePositions>
-  <TransformNodeShapes>false</TransformNodeShapes>
-  <Translate>XYZIndependent</Translate>
-  <Scale>XYZIndependent</Scale>
-  <Skew>Prohibited</Skew>
-  <Flip>Prohibited</Flip>
-  <Rotate>XYZIndependent</Rotate>
-  <Projection>Prohibited</Projection>
 </GraphSynth:grammarRule>

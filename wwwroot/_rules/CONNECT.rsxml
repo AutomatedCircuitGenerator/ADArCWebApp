@@ -40,6 +40,7 @@
     <string>sdCard_arduino.grxml</string>
     <string>servo_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
+    <string>dht11_pico.grxml</string>
 	<string>7segment_arduino.grxml</string>
 	<string>arcade_pushbutton_arduino.grxml</string>
 	<string>ky008_arduino.grxml</string>
