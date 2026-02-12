@@ -44,6 +44,7 @@
     <None Include="wwwroot\rules\add_mq3.grxml" />
     <None Include="wwwroot\rules\add_pca9685.grxml" />
     <None Include="wwwroot\rules\add_rplidar.grxml" />
+      <None Include="wwwroot\rules\add_sen0114.grxml" />
     <None Include="wwwroot\rules\add_sdCard.grxml" />
     <None Include="wwwroot\rules\add_servo.grxml" />
     <None Include="wwwroot\rules\add_servo_9g.grxml" />
@@ -89,6 +90,7 @@
     <None Include="wwwroot\rules\nema_l298n.grxml" />
     <None Include="wwwroot\rules\pca9685_arduino.grxml" />
     <None Include="wwwroot\rules\rplidar_arduino.grxml" />
+      <None Include="wwwroot\rules\sen0114_arduino.grxml" />
     <None Include="wwwroot\rules\sdCard_arduino.grxml" />
     <None Include="wwwroot\rules\servo_arduino.grxml" />
     <None Include="wwwroot\rules\servo_pca9685.grxml" />
@@ -124,6 +126,10 @@
   <ItemGroup>
     <Content Remove="wwwroot\build\build.js" />
     <Content Remove="wwwroot\build\build.js.map" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <TypeScriptCompile Include="wwwroot\controllers\srvph.ts" />
   </ItemGroup>
 
 </Project>
