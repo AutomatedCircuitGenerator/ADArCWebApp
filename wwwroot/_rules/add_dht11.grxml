@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="utf-8"?>
+<grammarRule xmlns="http://schemas.datacontract.org/2004/07/GraphSynth.Representation"
+             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+
+  <name>add_dht11</name>
+
+  <L>
+    <designGraph>
+      <nodes>
+        <node>
+          <name>n0</name>
+          <localLabels>
+            <string>user_dht11</string>
+          </localLabels>
+        </node>
+      </nodes>
+    </designGraph>
+  </L>
+
+  <R>
+    <designGraph>
+
+      <nodes>
+
+        <node>
+          <name>sensor</name>
+          <localLabels>
+            <string>dht11</string>
+            <string>sensor</string>
+          </localLabels>
+        </node>
+
+        <node>
+          <name>vcc</name>
+          <localLabels>
+            <string>Vcc</string>
+            <string>power</string>
+          </localLabels>
+        </node>
+
+        <node>
+          <name>gnd</name>
+          <localLabels>
+            <string>GND</string>
+            <string>0V</string>
+          </localLabels>
+        </node>
+
+        <node>
+          <name>data</name>
+          <localLabels>
+            <string>DATA</string>
+            <string>digital_out</string>
+          </localLabels>
+        </node>
+
+      </nodes>
+
+      <arcs>
+
+        <arc>
+          <from>sensor</from>
+          <to>vcc</to>
+        </arc>
+
+        <arc>
+          <from>sensor</from>
+          <to>gnd</to>
+        </arc>
+
+        <arc>
+          <from>sensor</from>
+          <to>data</to>
+        </arc>
+
+      </arcs>
+
+    </designGraph>
+  </R>
+
+</grammarRule>

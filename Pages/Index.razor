@@ -446,6 +446,7 @@
             if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
 
             GraphSynthInvoke.Add();
+
             if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
             {
                 moverOffsetLeft = 0;
@@ -454,6 +455,8 @@
                 GraphSynthInvoke.RemoveConnectedComponent(n);
                 return;
             }
+
+
 
             //label all new nodes and connections with the localid of the component that added them.
             GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
