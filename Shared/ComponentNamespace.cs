@@ -739,14 +739,14 @@ namespace ADArCWebApp.Shared
             {
                 33,
                 new ComponentDataBuilder(
-                        "DHT11 / DHT22",
+                        "DHT11",
                         true,
                         "Input/Temperature and Humidity Sensors",
                         0.8,  // scale factor (tweak later)
                         75,   // right offset (tweak later)
                         75,   // bottom offset (tweak later)
-                        typeof(ADArCWebApp.Shared.Components.RazorDHT22),
-                        paneHoverText: "DHT11 / DHT22",
+                        typeof(ADArCWebApp.Shared.Components.RazorDHT11),
+                        paneHoverText: "DHT11",
                         codeForGen: new()
                         {
                             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
@@ -760,6 +760,7 @@ namespace ADArCWebApp.Shared
                     .Property("humidity", 50.0)
                     .Finish()
             },
+
 
         };
     }
