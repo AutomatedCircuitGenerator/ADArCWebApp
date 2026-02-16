@@ -734,7 +734,33 @@ namespace ADArCWebApp.Shared
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            }
+            },
+
+            {
+                33,
+                new ComponentDataBuilder(
+                        "DHT11 / DHT22",
+                        true,
+                        "Input/Temperature and Humidity Sensors",
+                        0.8,  // scale factor (tweak later)
+                        75,   // right offset (tweak later)
+                        75,   // bottom offset (tweak later)
+                        typeof(ADArCWebApp.Shared.Components.RazorDHT22),
+                        paneHoverText: "DHT11 / DHT22",
+                        codeForGen: new()
+                        {
+                            { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+                            { "delayLoop", "" }, { "delayTime", "" }
+                        },
+                        // Keep these aligned with your existing add/connect rules:
+                        pins: ["5V", "gnd", "digital_out"],
+                        gsNodeName: "dht11"
+                    )
+                    .Property("temperature", 20.0)
+                    .Property("humidity", 50.0)
+                    .Finish()
+            },
+
         };
     }
 }

@@ -52,6 +52,7 @@
     <string>add_ky008.grxml</string>
     <string>add_raspberryPiPico.grxml</string>
     <string>add_dht11.grxml</string>
+    
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>
