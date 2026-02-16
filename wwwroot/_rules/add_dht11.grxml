@@ -1,82 +1,205 @@
 <?xml version="1.0" encoding="utf-8"?>
-<grammarRule xmlns="http://schemas.datacontract.org/2004/07/GraphSynth.Representation"
-             xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-             xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-
+<GraphSynth:grammarRule xmlns:GraphSynth="clr-namespace:GraphSynth.Representation;assembly=GraphSynth.Representation"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
   <name>add_dht11</name>
+  <termination>false</termination>
 
   <L>
-    <designGraph>
-      <nodes>
-        <node>
-          <name>n0</name>
-          <localLabels>
-            <string>user_dht11</string>
-          </localLabels>
-        </node>
-      </nodes>
-    </designGraph>
+    <globalLabels />
+    <globalVariables />
+    <arcs />
+    <nodes>
+      <node xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>user_dht11</string>
+          <string>dht11</string>
+        </localLabels>
+        <localVariables />
+        <X>48</X>
+        <Y>24</Y>
+        <Z>0</Z>
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
+    <hyperarcs />
   </L>
 
   <R>
-    <designGraph>
+    <globalLabels />
+    <globalVariables />
+    <arcs>
+      <arc xsi:type="ruleArc">
+        <name>a0</name>
+        <localLabels />
+        <localVariables />
+        <From>n1</From>
+        <To>n0</To>
+        <directed>false</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
 
-      <nodes>
+      <arc xsi:type="ruleArc">
+        <name>a1</name>
+        <localLabels />
+        <localVariables />
+        <From>n1</From>
+        <To>n2</To>
+        <directed>true</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
 
-        <node>
-          <name>sensor</name>
-          <localLabels>
-            <string>dht11</string>
-            <string>sensor</string>
-          </localLabels>
-        </node>
+      <arc xsi:type="ruleArc">
+        <name>a3</name>
+        <localLabels />
+        <localVariables />
+        <From>n1</From>
+        <To>n3</To>
+        <directed>true</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
 
-        <node>
-          <name>vcc</name>
-          <localLabels>
-            <string>Vcc</string>
-            <string>power</string>
-          </localLabels>
-        </node>
+      <arc xsi:type="ruleArc">
+        <name>a4</name>
+        <localLabels />
+        <localVariables />
+        <From>n1</From>
+        <To>n4</To>
+        <directed>true</directed>
+        <doublyDirected>false</doublyDirected>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <directionIsEqual>false</directionIsEqual>
+        <nullMeansNull>false</nullMeansNull>
+      </arc>
+    </arcs>
 
-        <node>
-          <name>gnd</name>
-          <localLabels>
-            <string>GND</string>
-            <string>0V</string>
-          </localLabels>
-        </node>
+    <nodes>
+      <node xsi:type="ruleNode">
+        <name>n0</name>
+        <localLabels>
+          <string>user_dht11</string>
+          <string>dht11</string>
+          <string>connected</string>
+        </localLabels>
+        <localVariables />
+        <X>48</X>
+        <Y>24</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
 
-        <node>
-          <name>data</name>
-          <localLabels>
-            <string>DATA</string>
-            <string>digital_out</string>
-          </localLabels>
-        </node>
+      <node xsi:type="ruleNode">
+        <name>n1</name>
+        <localLabels>
+          <string>dht11</string>
+        </localLabels>
+        <localVariables />
+        <X>96</X>
+        <Y>72</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
 
-      </nodes>
+      <node xsi:type="ruleNode">
+        <name>n2</name>
+        <localLabels>
+          <string>5V</string>
+        </localLabels>
+        <localVariables />
+        <X>0</X>
+        <Y>120</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
 
-      <arcs>
+      <node xsi:type="ruleNode">
+        <name>n3</name>
+        <localLabels>
+          <string>gnd</string>
+        </localLabels>
+        <localVariables />
+        <X>24</X>
+        <Y>168</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
 
-        <arc>
-          <from>sensor</from>
-          <to>vcc</to>
-        </arc>
+      <node xsi:type="ruleNode">
+        <name>n4</name>
+        <localLabels>
+          <string>digital_out</string>
+        </localLabels>
+        <localVariables />
+        <X>72</X>
+        <Y>192</Y>
+        <Z>0</Z>
+        <negateLabels />
+        <NotExist>false</NotExist>
+        <containsAllLocalLabels>false</containsAllLocalLabels>
+        <TargetType />
+        <strictDegreeMatch>false</strictDegreeMatch>
+      </node>
+    </nodes>
 
-        <arc>
-          <from>sensor</from>
-          <to>gnd</to>
-        </arc>
-
-        <arc>
-          <from>sensor</from>
-          <to>data</to>
-        </arc>
-
-      </arcs>
-
-    </designGraph>
+    <hyperarcs />
   </R>
 
-</grammarRule>
+  <spanning>false</spanning>
+  <induced>false</induced>
+  <negateLabels />
+  <containsAllGlobalLabels>false</containsAllGlobalLabels>
+  <OrderedGlobalLabels>false</OrderedGlobalLabels>
+  <UseShapeRestrictions>false</UseShapeRestrictions>
+  <RestrictToNodeShapeMatch>false</RestrictToNodeShapeMatch>
+  <TransformNodePositions>true</TransformNodePositions>
+  <TransformNodeShapes>false</TransformNodeShapes>
+  <Translate>XYZIndependent</Translate>
+  <Scale>XYZIndependent</Scale>
+  <Skew>Prohibited</Skew>
+  <Flip>Prohibited</Flip>
+  <Rotate>XYZIndependent</Rotate>
+  <Projection>Prohibited</Projection>
+</GraphSynth:grammarRule>

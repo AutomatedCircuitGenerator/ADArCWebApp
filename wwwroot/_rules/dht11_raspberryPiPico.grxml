@@ -1,137 +1,112 @@
-<?xml version="1.0"?>
-<grammarRule xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <name>dht11_raspberryPiPico</name>
+<?xml version="1.0" encoding="utf-8"?>
+<GraphSynth:grammarRule xmlns:GraphSynth="clr-namespace:GraphSynth.Representation;assembly=GraphSynth.Representation"
+                        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+
+  <name>dht11_pico</name>
+  <termination>false</termination>
 
   <L>
+    <globalLabels />
+    <globalVariables />
+
     <nodes>
+
       <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>user_component</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>user_component</string></localLabels>
+        <name>n0</name>
+        <localLabels>
+          <string>raspberryPiPico</string>
+        </localLabels>
       </node>
 
-      <!-- DHT11 pins -->
       <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>5V</string><string>power</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>gnd</string><string>ground</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>digital_out</string><string>signal</string></localLabels>
+        <name>n1</name>
+        <localLabels>
+          <string>dht11</string>
+        </localLabels>
       </node>
 
-      <!-- Pico pins -->
       <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>VBUS</string><string>power</string></localLabels>
+        <name>n2</name>
+        <localLabels>
+          <string>3.3V</string>
+        </localLabels>
       </node>
+
       <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gnd</string><string>ground</string></localLabels>
+        <name>n3</name>
+        <localLabels>
+          <string>GND</string>
+        </localLabels>
       </node>
+
       <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gp28</string><string>gpio</string></localLabels>
+        <name>n4</name>
+        <localLabels>
+          <string>gpio</string>
+        </localLabels>
       </node>
+
+      <node xsi:type="ruleNode">
+        <name>n5</name>
+        <localLabels>
+          <string>digital_out</string>
+        </localLabels>
+      </node>
+
     </nodes>
 
-    <arcs>
-      <!-- component-to-pin arcs exist already in the graph; the rule only needs the connection arcs -->
-    </arcs>
+    <arcs />
+    <hyperarcs />
   </L>
 
-  <K>
-    <nodes>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>user_component</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>user_component</string></localLabels>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>5V</string><string>power</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>gnd</string><string>ground</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>digital_out</string><string>signal</string></localLabels>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>VBUS</string><string>power</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gnd</string><string>ground</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gp28</string><string>gpio</string></localLabels>
-      </node>
-    </nodes>
-    <arcs />
-  </K>
-
   <R>
-    <nodes>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>user_component</string></localLabels>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>user_component</string></localLabels>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>5V</string><string>power</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>gnd</string><string>ground</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>dht11</string><string>digital_out</string><string>signal</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>VBUS</string><string>power</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gnd</string><string>ground</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-      <node xsi:type="ruleNode">
-        <localLabels><string>raspberryPiPico</string><string>gp28</string><string>gpio</string></localLabels>
-        <newLabel>connected</newLabel>
-      </node>
-    </nodes>
+    <globalLabels />
+    <globalVariables />
 
     <arcs>
-      <!-- VCC -> VBUS -->
+
       <arc xsi:type="ruleArc">
-        <localLabels><string>connection</string></localLabels>
-        <from><string>dht11</string><string>5V</string></from>
-        <to><string>raspberryPiPico</string><string>VBUS</string></to>
+        <name>a0</name>
+        <localLabels>
+          <string>connection</string>
+        </localLabels>
+        <From>n2</From>
+        <To>n1</To>
+        <directed>false</directed>
       </arc>
 
-      <!-- GND -> GND -->
       <arc xsi:type="ruleArc">
-        <localLabels><string>connection</string></localLabels>
-        <from><string>dht11</string><string>gnd</string></from>
-        <to><string>raspberryPiPico</string><string>gnd</string></to>
+        <name>a1</name>
+        <localLabels>
+          <string>connection</string>
+        </localLabels>
+        <From>n3</From>
+        <To>n1</To>
+        <directed>false</directed>
       </arc>
 
-      <!-- DATA -> gp28 -->
       <arc xsi:type="ruleArc">
-        <localLabels><string>connection</string></localLabels>
-        <from><string>dht11</string><string>digital_out</string></from>
-        <to><string>raspberryPiPico</string><string>gp28</string></to>
+        <name>a2</name>
+        <localLabels>
+          <string>connection</string>
+        </localLabels>
+        <From>n4</From>
+        <To>n5</To>
+        <directed>false</directed>
       </arc>
+
     </arcs>
+
+    <nodes>
+      <node xsi:type="ruleNode"><name>n0</name></node>
+      <node xsi:type="ruleNode"><name>n1</name></node>
+      <node xsi:type="ruleNode"><name>n2</name></node>
+      <node xsi:type="ruleNode"><name>n3</name></node>
+      <node xsi:type="ruleNode"><name>n4</name></node>
+      <node xsi:type="ruleNode"><name>n5</name></node>
+    </nodes>
+
+    <hyperarcs />
   </R>
 
-  <ruleRepresentation>
-    <text x="10" y="10" Text="dht11 ↔ raspberryPiPico (VBUS, gnd, gp28)" />
-  </ruleRepresentation>
-</grammarRule>
+</GraphSynth:grammarRule>

@@ -7,7 +7,7 @@
     <string>capacitor_breadboard.grxml</string>
     <string>diode_breadboard.grxml</string>
     <string>dht11_arduino.grxml</string>
-    <string>dht11_pico.grxml</string>
+    <string>dht11_raspberryPiPico.grxml</string>
     <string>irRemote_arduino.grxml</string>
     <string>joystick_arduino.grxml</string>
     <string>keyPad_arduino.grxml</string>

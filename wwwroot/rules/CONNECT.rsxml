@@ -5,6 +5,8 @@
     <string>adxl345_arduino.grxml</string>
     <string>arcadePushButton_arduino.grxml</string>
     <string>bno055_arduino.grxml</string>
+    <string>dht11_arduino.grxml</string>
+    <string>dht11_pico.grxml</string>
     <string>dht22_arduino.grxml</string>
     <string>ds18b20_arduino.grxml</string>
     <string>encoder_arduino.grxml</string>
