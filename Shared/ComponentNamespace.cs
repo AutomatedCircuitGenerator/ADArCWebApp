@@ -706,6 +706,47 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
                     .Property("humidity", 512.0).Finish()
+            },
+            {
+                34,
+                new ComponentDataBuilder("Humidity and Temperature Sensor", true, "Input/Temperature and Humidity Sensors", 0.5, -20, -20, typeof(RazorSHT30),
+                    paneHoverText: "SHT30",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <SHT3x.h>" },
+                        { "global",
+                            "#define SHT30_ADDR 0x44\n\n" +
+                            "SHT3x sht30(SHT30_ADDR, SHT3x::PrevValue, 255, SHT3x::SHT30, SHT3x::Single_HighRep_ClockStretch);"
+                        },
+                        { "setup",
+                            "\t// Initialize SHT3x library\n" +
+                            "\tsht30.Begin();"
+                        },
+                        { "loopMain",
+                            "\t// Set mode (optional, here High Repeatability, Clock Stretch)\n" +
+                            "\tsht30.SetMode(SHT3x::Single_HighRep_ClockStretch);\n\n" +
+                            "\t// Trigger measurement\n" +
+                            "\tsht30.UpdateData();\n\n" +
+                            "\t// Check errors\n" +
+                            "\tif (sht30.GetError() != 0) {\n" +
+                            "\t\tSerial.print(\"Library Error: \");\n" +
+                            "\t\tSerial.println(sht30.GetError());\n" +
+                            "\t} else {\n" +
+                            "\t\tfloat temp = sht30.GetTemperature(); // Celsius\n" +
+                            "\t\tfloat humidity  = sht30.GetRelHumidity(); // %\n" +
+                            "\t\tSerial.print(\"Temperature: \");" +
+                            " Serial.print(temp, 2);\n" +
+                            "\t\tSerial.print(\" °C  Humidity: \");" +
+                            " Serial.print(humidity, 2);" +
+                            " Serial.println(\" %\");\n" +
+                            "\t}\n\n" +
+                            "\tSerial.println(\"-----------------------------\\n\");\n" +
+                            "\tdelay(1000); // Wait before next read"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    } , pins: ["Vcc", "gnd", "scl", "sda", "int"], gsNodeName: "sht30").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
             }
         };
     }
