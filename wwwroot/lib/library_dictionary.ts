@@ -7340,5 +7340,6 @@
     "placeholder_7339": "zForce Air Library",
     "placeholder_7340": "zlib_turbo",
     "ph_surveyor.h": "local/ph_surveyor",
-    "base_surveyor.h": "local/base_surveyor"
+    "base_surveyor.h": "local/base_surveyor",
+    "SHT3x.h": "local/SHT3x"
 };
