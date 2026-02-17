@@ -3,7 +3,7 @@ import { PinState } from "@lib/avr8js";
 
 export class MPS20N0040D extends Controller {
 
-    private pressure = 0;
+    private pressure = 10;
     private offset = 8388608;
     private scale = 100000;
 
@@ -20,6 +20,11 @@ export class MPS20N0040D extends Controller {
     }
 
     setup() {
+        if (!this.pins?.SCK?.[0] || !this.pins?.DOUT?.[0]) {
+            console.error("Pins not initialized yet:", this.pins);
+            return;
+        }
+
         const sck = this.pins.SCK[0].digital;
         const dout = this.pins.DOUT[0].digital;
 
@@ -33,6 +38,7 @@ export class MPS20N0040D extends Controller {
 
         this.computeADC();
     }
+
 
     private computeADC() {
         let value = Math.floor(this.offset + this.pressure * this.scale);
