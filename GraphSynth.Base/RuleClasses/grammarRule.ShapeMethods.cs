@@ -310,19 +310,32 @@ namespace GraphSynth.Representation
         #region Recognize Methods
 
         private Boolean findTransform(IList<node> locatedNodes, out double[,] T)
-        {
-            if (UseShapeRestrictions && Skew == transfromType.Prohibited && Projection == transfromType.Prohibited)
-                return find3DTransform(locatedNodes, out T);
-            var result = General2DTransform(locatedNodes, out T);
-            if (result)
             {
-                if (_threeDimensional) return false;
-                var zCoord = locatedNodes[0].Z;
-                if (locatedNodes.All(n => n.Z == zCoord)) return false;
-                return true;
+                if (locatedNodes == null || locatedNodes.Count < 2)
+                {
+                    T = MatrixMath.Identity(4);
+                    return true;
+                }
+
+                if (UseShapeRestrictions && Skew == transfromType.Prohibited && Projection == transfromType.Prohibited)
+                    return find3DTransform(locatedNodes, out T);
+
+                var result = General2DTransform(locatedNodes, out T);
+
+                if (result)
+                {
+                    if (_threeDimensional) return false;
+
+                    var zCoord = locatedNodes[0].Z;
+
+                    if (locatedNodes.All(n => n.Z == zCoord)) return true;
+
+                    return false;
+                }
+
+                return false;
             }
-            return false;
-        }
+
 
         private Boolean General2DTransform(IList<node> locatedNodes, out double[,] T)
         {

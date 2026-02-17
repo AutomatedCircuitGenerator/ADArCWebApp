@@ -170,7 +170,7 @@ namespace ADArCWebApp
             foreach (var arc in rule.R.arcs)
             {
                 // only look at arcs that represent new connections
-                if (!arc.localLabels.Contains("connection")) continue;
+                    if (!(arc.localLabels.Contains("connection") || arc.localLabels.Contains("connected"))) continue;
                 var isFrom = (arc.From.arcsFrom.Any(a => a.To.localLabels.Contains(to)) ||
                               arc.From.arcsTo.Any(a => a.From.localLabels.Contains(to)));
 

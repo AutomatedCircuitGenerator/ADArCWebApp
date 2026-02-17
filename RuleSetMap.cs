@@ -3,6 +3,8 @@ using Microsoft.AspNetCore.Components;
 using System.Collections.Immutable;
 using System.Xml.Linq;
 using System.Xml.Serialization;
+using System.Linq;
+
 
 namespace ADArCWebApp
 {
@@ -85,13 +87,24 @@ namespace ADArCWebApp
             string ruleText = await ruleResponse.Content.ReadAsStringAsync();
 
             XElement xeRule = XElement.Parse(ruleText);
-            XElement? temp = xeRule.Element("{ignorableUri}" + "grammarRule");
+
+            XElement? temp = xeRule.Descendants().FirstOrDefault(e => e.Name.LocalName == "grammarRule");
+
             grammarRule openRule = new();
 
             if (temp != null)
             {
-                openRule = DeSerializeRuleFromXml(RemoveXamLns(RemoveIgnorablePrefix(temp.ToString())));
+                var xml = temp.ToString();
+
+                // Remove the GraphSynth prefix and any GraphSynth namespace declarations we might encounter
+                xml = xml.Replace("GraphSynth:", "");
+                xml = xml.Replace("xmlns=\"ignorableUri\"", "");
+                xml = xml.Replace("xmlns:GraphSynth=\"ignorableUri\"", "");
+                xml = xml.Replace("xmlns:GraphSynth=\"clr-namespace:GraphSynth\"", "");
+
+                openRule = DeSerializeRuleFromXml(xml);
             }
+
 
             RemoveNullWhiteSpaceEmptyLabels(openRule.L);
             RemoveNullWhiteSpaceEmptyLabels(openRule.R);
