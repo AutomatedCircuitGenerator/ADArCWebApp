@@ -46,4 +46,5 @@
   <generationAfterCycleLimit>Stop</generationAfterCycleLimit>
   <generationAfterNoRules>Stop</generationAfterNoRules>
   <generationAfterTriggerRule>Stop</generationAfterTriggerRule>
+  <string>raspberryPiPico_arduino.grxml</string>
 </ruleSet>
