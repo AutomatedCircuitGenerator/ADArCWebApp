@@ -15,6 +15,6 @@ export class KY003 extends Controller {
     setFieldDetected(isFieldDetected: boolean) {
         this.isFieldDetected = isFieldDetected;
         if (this.pins.digital_out)
-            isFieldDetected ? this.pins.digital_out[0].digital.state = PinState.High : this.pins.digital_out[0].digital.state = PinState.Low;
+            this.pins.digital_out[0].digital.state = isFieldDetected ? PinState.High : PinState.Low;
     }
 }
