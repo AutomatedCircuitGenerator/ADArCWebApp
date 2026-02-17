@@ -1,4 +1,4 @@
-import {Controller} from "./controller";
+import {Controller} from "@controllers/controller";
 export class SEN0189 extends Controller {
     
     private turbidity: number = 0;
@@ -19,20 +19,20 @@ export class SEN0189 extends Controller {
             this.turbidity = turbidity;
 
         if (!this.inSimulation) {
-            return;
+            return; 
         }
 
-        this.pins.ADC[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
+        this.pins.analog_out[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
     }
 
     setup() {
         this.inSimulation = true;
-        this.pins.ADC[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
+        this.pins.analog_out[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
     }
     
     turbidityToVoltage(turbidity: number){
         let discriminant = (5742.3 * 5742.3) -
-            (4 * -1120.4 * (-(4352.9 + turbidity)));
+            (4 * -1120.4 * (4352.9 - turbidity));
 
         if (discriminant < 0) {
             return 0;
@@ -44,6 +44,7 @@ export class SEN0189 extends Controller {
         let v2 = (-5742.3 - sqrtDisc) / (2 * -1120.4);
 
         // choose the voltage in a valid range (adjust if needed)
-        return (v1 >= 0 && v1 <= 5) ? v1 : v2;
+        let voltage = Math.max(v1, v2);
+        return voltage;
     }
 }

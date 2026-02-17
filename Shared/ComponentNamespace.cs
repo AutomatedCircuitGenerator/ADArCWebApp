@@ -643,7 +643,7 @@ namespace ADArCWebApp.Shared
                     -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
                     codeForGen: new()
                     {
-                        { "include", "#include <turbdity_surveyor.h>" }, 
+                        { "include", "" }, 
                         { "global", "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)" }, 
                         { "setup", "" }, 
                         { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
@@ -653,7 +653,7 @@ namespace ADArCWebApp.Shared
                                       + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
                                       + "  delay(500); // Wait 500ms" }, 
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Property("turbidity", 0).Finish()
+                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Property("turbidity", 0.0).Finish()
             },
             // {
             //     32,
