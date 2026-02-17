@@ -1,0 +1,11 @@
+﻿text {
+    font-size: 2px;
+    font-family: monospace;
+    user-select: none;
+}
+
+circle[tabindex]:hover,
+circle[tabindex]:focus {
+    stroke: white;
+    outline: none;
+}
