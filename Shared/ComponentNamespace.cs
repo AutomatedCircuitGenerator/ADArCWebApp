@@ -785,40 +785,6 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
-            }, 
-            {
-                35,
-                new ComponentDataBuilder("Temperature and Humidity Sensor", true,
-                        "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
-                        paneHoverText: "DHT22",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <DHT.h>\n" },
-                            { 
-                                "global", 
-                                "#define DHTPIN@ ~\"signal\"\n" + 
-                                "#define DHTTYPE DHT22\n" +
-                                "DHT dht@(DHTPIN@, DHTTYPE);" 
-                            },
-                            { "setup", "\tdht@.begin();" },
-                            {
-                                "loopMain",
-                                "\tfloat humidity@ = dht@.readHumidity();\n" +
-                                "\tfloat temperature@ = dht@.readTemperature();\n" +
-                                "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
-                                "\t\tSerial.println(\"Failed to read from DHT22 sensor!\");\n" +
-                                "\t} else {\n" +
-                                "\t\tSerial.print(\"Humidity: \");\n" +
-                                "\t\tSerial.print(humidity@);\n" +
-                                "\t\tSerial.print(\"% | Temperature: \");\n" +
-                                "\t\tSerial.print(temperature@);\n" +
-                                "\t\tSerial.println(\"°C\");\n" +
-                                "\t}\n" +
-                                "\tdelay(2000);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
-                    .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
             }
         };
     }
