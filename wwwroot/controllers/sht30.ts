@@ -19,8 +19,11 @@ export class SHT30 extends Controller implements I2CController {
 
     // TODO: Add clamping
     override update(state: Record<string, any>) {
-        this.temperatureC = state.temperature;
-        this.humidityRH = state.humidity;
+        // Clamp temperature between -40 and 125 C
+        this.temperatureC = Math.min(125, Math.max(-40, state.temperature));
+
+        // Clamp humidity between 0 and 100 %RH
+        this.humidityRH = Math.min(100, Math.max(0, state.humidity));
     }
 
     i2cConnect(addr: number, _write: boolean): boolean {
