@@ -718,8 +718,8 @@ namespace ADArCWebApp.Shared
                             { 
                                 "global", 
                                 "// Pin configuration for NEMA23 stepper motor\n" +
-                                "int dirPin@ = ~\"dir_minus\";  // Direction pin\n" +
-                                "int stepPin@ = ~\"pul_minus\"; // Step pin\n\n" +
+                                "int dirPin@ = ~\"DIR\";  // Direction pin\n" +
+                                "int stepPin@ = ~\"STEP\"; // Step pin\n\n" +
                                 "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
                                 "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor\n" +
                                 "\n// Variables for stepper state (optional)\n" +
