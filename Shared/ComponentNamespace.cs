@@ -639,32 +639,18 @@ namespace ADArCWebApp.Shared
                         paneHoverText: "VL53L4CD",
                         codeForGen: new()
                         {
-                            {
+                                {
                                 "include",
-                                "#include <Arduino.h>\n#include <Wire.h>"
+                                "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0"
                             },
                             {
                                 "global",
-                                "//\nuint16_t tofDist@ = 0;\n"
-                                + "//\nuint16_t demoDist@ = 500;"
+                                "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters"
                             },
-                            {
-                                "setup",
-                                "Wire.begin();\nSerial.begin(115200);"
-                            },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
                             {
                                 "loopMain",
-                                "\n"
-                                + "Wire.beginTransmission(0x29);\n"
-                                + "Wire.write(0x96);\n"
-                                + "Wire.endTransmission(false);\n"
-                                + "Wire.requestFrom(0x29, 2);\n"
-                                + "if (Wire.available() >= 2) {\n"
-                                + "    tofDist@ = (Wire.read() << 8) | Wire.read();\n"
-                                + "}\n\n"
-                                + "Serial.print(\"Distance (mm): \");\n"
-                                + "Serial.println(tofDist@);\n"
-                                + "delay(100);\n"
+                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);"
                             },
                             {
                                 "functions",
