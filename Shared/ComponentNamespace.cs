@@ -708,7 +708,7 @@ namespace ADArCWebApp.Shared
                     .Property("humidity", 512.0).Finish()
             },
             {
-                1,
+                34,
                 new ComponentDataBuilder("Nano", false, "Arduino", 0.33, 280, 210, typeof(RazorArduinoNano),
                     codeForGen: new()
                     {
