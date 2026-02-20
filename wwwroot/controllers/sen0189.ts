@@ -6,9 +6,12 @@ export class SEN0189 extends Controller {
 
     override update(state: Record<string, any>) {
         this.setturbidity(state.turbidity);
+        console.log("STATE RECEIVED:", state);
     }
     
     setturbidity(turbidity: number) {
+
+        console.log("SET TURBIDITY CALLED:", turbidity);
         
         // Clamp turbidity, sensor's range is only 0-3000
         if (turbidity < 0)
@@ -22,6 +25,7 @@ export class SEN0189 extends Controller {
             return; 
         }
 
+        console.log("SETTING VOLTAGE:", this.turbidityToVoltage(this.turbidity));
         this.pins.analog_out[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
     }
 
@@ -31,8 +35,11 @@ export class SEN0189 extends Controller {
     }
     
     turbidityToVoltage(turbidity: number){
-        let discriminant = (5742.3 * 5742.3) -
-            (4 * -1120.4 * (4352.9 - turbidity));
+        let a = -1120.4;
+        let b = 5742.3;
+        let c = -4352.9 - turbidity;
+
+        let discriminant = (b * b) - (4 * a * c);
 
         if (discriminant < 0) {
             return 0;
@@ -40,11 +47,16 @@ export class SEN0189 extends Controller {
 
         let sqrtDisc = Math.sqrt(discriminant);
 
-        let v1 = (-5742.3 + sqrtDisc) / (2 * -1120.4);
-        let v2 = (-5742.3 - sqrtDisc) / (2 * -1120.4);
+        let v1 = (-b + sqrtDisc) / (2 * a);
+        let v2 = (-b - sqrtDisc) / (2 * a);
 
-        // choose the voltage in a valid range (adjust if needed)
+        // choose the larger (physical) root
         let voltage = Math.max(v1, v2);
+
+        // clamp to Arduino range
+        if (voltage < 0) voltage = 0;
+        if (voltage > 5) voltage = 5;
+
         return voltage;
     }
 }
