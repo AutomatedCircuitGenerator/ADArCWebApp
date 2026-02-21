@@ -753,7 +753,7 @@ namespace ADArCWebApp.Shared
                         pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
                         gsNodeName: "max31856"
                     )
-                    .Property("temperature", -4.0)
+                    .Property("temperature", -20.0)
                     .Finish()
             },
         };

@@ -1,44 +1,69 @@
-import {Controller} from "./controller";
-import {AVRRunner} from "@lib/execute";
-import {PinState} from "@lib/avr8js";
+import { Controller } from "./controller";
+import { AVRRunner } from "@lib/execute";
+import { PinState } from "@lib/avr8js";
 
 export class MAX31856 extends Controller {
+    private _temperature: number = 0;
 
-    private _temperature: number;
+    override setup() {
+        const spi = AVRRunner.getInstance().board.spis[0];
+        if (spi) {
+            spi.addListener(this.spiCallback);
+            console.log("MAX31856 SPI listener attached");
+        }
+
+        console.log("MAX31856 setup called");
+    }
 
     override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
+        if (state.temperature != null) {
+            this._temperature = state.temperature;
+        }
     }
 
-    setTemperature = (temperature: number) => {
-        this._temperature = temperature
-    }
+    private transferIndex = 0;
+    private activeSession = false;
 
-    setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
-    }
+    private spiCallback = (byte: number) => {
+        const spi = AVRRunner.getInstance().board.spis[0];
+        if (!spi || !this.pins.cs?.[0]) return;
 
-    private get shouldReadSPI(): boolean {
-        return this.pins.cs[0].digital.state == PinState.Low;
-    }
+        const csState = this.pins.cs[0].digital.state ?? PinState.High;
 
-    private nextByteIsHigh = false;
+        // Detect start of SPI transaction
+        if (csState === PinState.Low && !this.activeSession) {
+            this.activeSession = true;
+            this.transferIndex = 0;
+        }
 
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
+        // Detect end of SPI transaction
+        if (csState !== PinState.Low && this.activeSession) {
+            this.activeSession = false;
+            this.transferIndex = 0;
             return;
         }
-        if (this._temperature == undefined) {
-            console.log("Undefined\n")
+
+        // Ignore if not active
+        if (!this.activeSession) return;
+
+        const raw = Math.round(this._temperature / 0.25);
+
+        let byteToSend = 0;
+        switch (this.transferIndex) {
+            case 0:
+                byteToSend = 0; // Config dummy byte
+                break;
+            case 1:
+                byteToSend = (raw >> 8) & 0xff; // MSB
+                break;
+            case 2:
+                byteToSend = raw & 0xff; // LSB
+                break;
+            default:
+                byteToSend = 0;
         }
-        let temperature = Math.round((this._temperature / 0.25) << 3);
-        let byteToSend: number;
-        if (!this.nextByteIsHigh) {
-            byteToSend = (temperature >> 8) & 0xFF;
-        } else {
-            byteToSend = temperature & 0xFF;
-        }
-        this.nextByteIsHigh = !this.nextByteIsHigh;
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), AVRRunner.getInstance().board.spis[0].transferCycles);
-    }
+
+        this.transferIndex++;
+        spi.completeTransfer(byteToSend);
+    };
 }
