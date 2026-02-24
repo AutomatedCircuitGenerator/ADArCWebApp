@@ -53,6 +53,7 @@ public class BoardService(IJSRuntime js)
         {
             Board.ArduinoUno => new ComponentInstance(1, null, 829, 219),
             Board.ArduinoMega => new ComponentInstance(2, null, 829, 219),
+            Board.ArduinoNano => new ComponentInstance(3, null, 829, 219),
             _ => null
         };
     }
