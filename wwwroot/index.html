@@ -21,30 +21,12 @@
   <!-- BlazorMonaco interop -->
   <script src="_content/BlazorMonaco/jsInterop.js"></script>
 
-  <!-- Monaco AMD loader -->
+  <script src="_content/BlazorMonaco/jsInterop.js"></script>
   <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
+  <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
 
-  <script>
-    // Configure Monaco's AMD loader
-    require.config({
-      paths: {
-        vs: "_content/BlazorMonaco/lib/monaco-editor/min/vs"
-      }
-    });
-
-    // Load Monaco first, then load our AMD bundle, then start interopManager.
-    // This avoids the loader trying to fetch /lib/execute.js etc.
-    require(["vs/editor/editor.main"], function () {
-      // Load your compiled AMD bundle (defines lib/execute, lib/compile-util, interopManager, etc.)
-      var s = document.createElement("script");
-      s.src = "build/build.js";
-      s.onload = function () {
-        // Start your app module after build.js has registered all defines
-        require(["interopManager"], function () { });
-      };
-      document.head.appendChild(s);
-    });
-  </script>
+  <script data-main="main" src="require.js"></script>
+  <script src="build/build.js"></script>
 
   <!-- Optional: local intro css override (only keep if the file exists) -->
   <!-- <link rel="stylesheet" href="lib/intro.js/introjs.css"> -->

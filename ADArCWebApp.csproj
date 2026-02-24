@@ -124,12 +124,19 @@
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
   </ItemGroup>
 
-  <!-- IMPORTANT: DO NOT remove the bundle from content -->
-  <!-- (deleted the Content Remove for wwwroot\build\build.js and .map) -->
+ <ItemGroup>
+  <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
+  <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
+  <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
+</ItemGroup>
 
-  <!-- IMPORTANT: Compile all .ts so execute.ts / compile-util.ts get into build/build.js -->
-  <ItemGroup>
-    <TypeScriptCompile Include="wwwroot\**\*.ts" />
-  </ItemGroup>
+<ItemGroup>
+  <Content Remove="wwwroot\build\build.js" />
+  <Content Remove="wwwroot\build\build.js.map" />
+</ItemGroup>
+
+<ItemGroup>
+  <TypeScriptCompile Include="wwwroot\controllers\srvph.ts" />
+</ItemGroup>
 
 </Project>
