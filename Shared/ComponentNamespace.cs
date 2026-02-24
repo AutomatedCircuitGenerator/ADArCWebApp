@@ -715,44 +715,36 @@ namespace ADArCWebApp.Shared
                      {
                          { 
                              "include",
-                             "#include \"SoftwareSerial.h\"\n" +
-                             "#include \"SparkFun_DE2120_Arduino_Library.h\" //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n" 
+                             "#include <SoftwareSerial.h>\n" +
+                             "#include <SparkFun_DE2120_Arduino_Library.h> //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n" 
                          },
                          {
-                             "global", 
+                             "global",
                              "#define BUFFER_LEN 40\n" +
-                             "SoftwareSerial softSerial(~\"rxd\", ~\"txd\"); //RX, TX: Connect Arduino pin 2 to scanner TX pin. Connect Arduino pin 3 to scanner RX pin.\n" +
+                             "SoftwareSerial softSerial(~\"rxd\", ~\"txd\");\n" +
                              "DE2120 scanner;\n" +
-                             "char scanBuffer[BUFFER_LEN];"
+                             "char scanBuffer[BUFFER_LEN];\n"
                          },
                          {
-                             "setup", 
-                             "void setup()\n" +
-                             "{\n  " +
-                             "\tSerial.begin(115200);\n  " +
-                             "\tSerial.println(\"DE2120 Scanner Example\");\n\n  " +
-                             "\tif (scanner.begin(softSerial) == false)\n  " +
-                             "\t{\n    " +
-                             "\t\tSerial.println(\"Scanner did not respond. Please check wiring. Did you scan the POR232 barcode? Freezing...\");\n    " +
-                             "\t\twhile (1)\n      " +
-                             "\t\t\t;\n  " +
-                             "\t}\n  " +
-                             "\tSerial.println(\"Scanner online!\");\n" +
-                             "}"
+                             "setup",
+                             "Serial.begin(115200);\n" +
+                             "softSerial.begin(9600);\n" +
+                             "Serial.println(\"DE2120 Scanner Example\");\n\n" +
+                             "if (scanner.begin(softSerial) == false)\n" +
+                             "{\n" +
+                             "    Serial.println(\"Scanner did not respond. Check wiring.\");\n" +
+                             "    while (1);\n" +
+                             "}\n\n" +
+                             "Serial.println(\"Scanner online!\");\n"
                          },
                          {
                              "loopMain",
-                             "void loop()\n" +
-                             "{\n  " +
-                             "\tif (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n  " +
-                             "\t{\n    " +
-                             "\t\tSerial.print(\"Code found: \");\n    " +
-                             "\t\tfor (int i = 0; i < strlen(scanBuffer); i++)\n      " +
-                             "\t\t\tSerial.print(scanBuffer[i]);\n    " +
-                             "\t\tSerial.println();\n  " +
-                             "}\n\n  " +
-                             "\tdelay(200);\n" +
-                             "}"
+                             "if (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n" +
+                             "{\n" +
+                             "    Serial.print(\"Code found: \");\n" +
+                             "    Serial.println(scanBuffer);\n" +
+                             "}\n\n" +
+                             "delay(200);\n"
                          },
                          {
                              "functions", ""
