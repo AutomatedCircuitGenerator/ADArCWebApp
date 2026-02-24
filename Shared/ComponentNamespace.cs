@@ -720,7 +720,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "global",
-                                "#define DHTPIN@ ~\"data\"        // Data pin connected to DHT11\n#define DHTTYPE@ DHT11\nDHT dht@(DHTPIN@, DHTTYPE@);"
+                                "#define DHTPIN@ ~\"digital_out\"        // Data pin connected to DHT11\n#define DHTTYPE@ DHT11\nDHT dht@(DHTPIN@, DHTTYPE@);"
                             },
                             {
                                 "setup",
@@ -728,18 +728,13 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "  float humidity@ = dht@.readHumidity();\n" +
-                                "  float temperature@ = dht@.readTemperature(); // Celsius\n\n" +
-                                "  // Check if any reads failed\n" +
-                                "  if (isnan(humidity@) || isnan(temperature@)) {\n" +
-                                "    Serial.println(\"Failed to read from DHT11 sensor!\");\n" +
-                                "    return;\n" +
-                                "  }\n\n" +
-                                "  Serial.print(\"Humidity: \");\n" +
-                                "  Serial.print(humidity@);\n" +
+                                "  float humidity2 = humidity@;\n" +
+                                "  float temperature2 = temperature@;\n\n" +
+                                "  Serial.print(\"Humidity@: \");\n" +
+                                "  Serial.print(humidity2);\n" +
                                 "  Serial.print(\" %\");\n" +
-                                "  Serial.print(\"  Temperature: \");\n" +
-                                "  Serial.print(temperature@);\n" +
+                                "  Serial.print(\"  Temperature@: \");\n" +
+                                "  Serial.print(temperature2);\n" +
                                 "  Serial.println(\" °C\");\n\n" +
                                 "  delay(1000);"
                             },
