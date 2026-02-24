@@ -604,15 +604,25 @@ namespace ADArCWebApp.Shared
                         typeof(RazorRaspberryPiPico),
                         codeForGen: new()
                         {
-                            { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                            { "delayLoop", "" }, { "delayTime", "" }
+                            { "include", "" },
+                            { "global", "" },
+                            { "setup", "" },
+                            { "loopMain", "" },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
                         },
                         pins:
                         [
-                            "gnd", "3V3", "VBUS",
-                            "gp0", "gp1", "gp2", "gp3", "gp4", "gp5", "gp6", "gp7", "gp8", "gp9",
-                            "gp10", "gp11", "gp12", "gp13", "gp14", "gp15", "gp16", "gp17", "gp18", "gp19",
-                            "gp20", "gp21", "gp22", "gp26", "gp27", "gp28"
+                            /* Power / Control */
+                            "VSYS", "VBUS", "3V3", "3V3_EN", "ADC_VREF", "RUN", "gnd",
+
+                            /* GPIO */
+                            "gp0", "gp1", "gp2", "gp3", "gp4", "gp5", "gp6", "gp7",
+                            "gp8", "gp9", "gp10", "gp11", "gp12", "gp13", "gp14", "gp15",
+                            "gp16", "gp17", "gp18", "gp19", "gp20", "gp21", "gp22",
+                            "gp23", "gp24", "gp25",
+                            "gp26", "gp27", "gp28"
                         ],
                         gsNodeName: "raspberryPiPico")
                     .Finish()
