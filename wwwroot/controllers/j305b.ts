@@ -44,13 +44,17 @@ export class J305B extends Controller {
     }
 
     private emitPulse() {
-        const vin = this.pins.VIN[0].digital;
+        const vin = this.pins.vin[0].digital;
 
-        // Generate a short HIGH pulse
-        vin.state = Boolean(PinState.High);
+        // Ensure LOW first
+        vin.state = false;
 
         AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-            vin.state = Boolean(PinState.Low);
-        }, 100); // very short pulse width
+            vin.state = true;
+
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                vin.state = false;
+            }, 200); // slightly longer pulse
+        }, 50);
     }
 }

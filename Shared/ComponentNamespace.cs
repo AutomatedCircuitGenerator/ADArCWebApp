@@ -727,13 +727,15 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "setup",
+                            "  Serial.begin(9600);\n" +
                             "  pinMode(geigerPin@, INPUT);\n" +
                             "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerISR@, RISING);\n" +
                             "  geigerLastTime@ = millis();"
+                         
                         },
                         {
                             "loopMain",
-                            "  if (millis() - geigerLastTime@ >= 60000) {\n" +
+                            "  if (millis() - geigerLastTime@ >= 2000) {\n" +
                             "      cpm@ = geigerCount@;\n" +
                             "      geigerCount@ = 0;\n" +
                             "      geigerLastTime@ = millis();\n" +
