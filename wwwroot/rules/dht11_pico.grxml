@@ -3,7 +3,6 @@ NOTE:
 This file is intentionally aligned to the same connection pattern used by dht22_arduino.grxml,
 but with dht11 naming, and Pico power pin naming (3V3).
 -->
-<?xml version="1.0" encoding="utf-8"?>
 <Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:GraphSynth="clr-namespace:GraphSynth"

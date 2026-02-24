@@ -6,7 +6,6 @@ This file is intentionally aligned to the same pin-label pattern used by add_dht
 - Vcc pin node labeled: Vcc
 - gnd pin node labeled: gnd
 -->
-<?xml version="1.0" encoding="utf-8"?>
 <Page xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
       xmlns:GraphSynth="clr-namespace:GraphSynth"
