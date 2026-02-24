@@ -11,6 +11,7 @@
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
 
+
 <PageTitle>Home | ADArC</PageTitle>
 <body>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
@@ -203,6 +204,9 @@
 
     private FrequencyVector<int> _componentFrequencies = new();
 
+    private const bool DEBUG_SKIP_RULESET_LOADING = false; 
+
+
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
@@ -215,7 +219,7 @@
     /// </summary>
     int rightPaneAlign => isRightExpanded ? 0 : -39;
 
-    string runStopText = "▶️ Run";
+    string runStopText = "Run";
     public bool IsRunning;
 
     void ToggleLeftSidebar()
@@ -233,30 +237,34 @@
         StateHasChanged();
     }
 
-    private void HandleBoardSelect(Board board)
+private async Task HandleBoardSelect(Board board)
+{
+    Console.WriteLine("HandleBoardSelect: start");
+    Console.WriteLine($"Selected board enum = {board}");
+
+    BoardService.Board = board;
+    Console.WriteLine("After BoardService.Board set");
+
+    var inst = BoardService.GetComponentInstance();
+    if (inst == null)
     {
-        Console.WriteLine($"HandleBoardSelect called with board: {board}");
-
-        // Normal board selection flow - no auto-selection check needed
-        BoardService.Board = board;
-        Comps[0] = BoardService.GetComponentInstance();
-        Console.WriteLine($"Board set to {board}, component instance created");
-
-        if (LoadingProgress == -1)
-        {
-            Console.WriteLine("Loading progress complete, setting up bench from JSON");
-            SetupBenchFromJsonString(BoardService.GetJson());
-            CompPane!.ReleaseLockout();
-            selLockedOut = false;
-            StateHasChanged();
-        }
-        else
-        {
-            Console.WriteLine("Loading in progress, scheduling bench setup");
-            _scheduleBenchSetup = true;
-        }
+        Console.WriteLine("ERROR: BoardService.GetComponentInstance returned null");
+        return;
     }
 
+    Comps[0] = inst;
+    Console.WriteLine($"After Comps[0] set, GlobalId={inst.GlobalId}");
+
+    // IMPORTANT: do NOT restore from JSON on normal board select
+    // SetupBenchFromJsonString(BoardService.GetJson());
+
+    selLockedOut = false;
+    CompPane?.ReleaseLockout();
+    shouldShowBoardSelect = false;
+    StateHasChanged();
+
+    Console.WriteLine("HandleBoardSelect: done (no bench restore)");
+}
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -273,7 +281,7 @@
             if (response.stderr != "")
             {
                 CodePane?.UpdateConsoleOutput(response.stderr, false);
-                runStopText = "▶️ Run";
+                runStopText = "Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
                 if (caps.Count > 0)
@@ -306,7 +314,7 @@
             AppInterop.StopWrapper();
             CodePane!.CommitBuffer();
             CodePane!.UpdateConsoleOutput("Stopped.\n", false);
-            runStopText = "▶️ Run";
+            runStopText = "Run";
             IsRunning = false;
         }
     }
@@ -713,11 +721,18 @@
         // Only lock selection if we're not loading from URL uhm
         // selLockedOut = !hasUrlParam;
 
-        Console.WriteLine("Loading rulesets...");
-        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 62);
-        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 62);
+        if (!DEBUG_SKIP_RULESET_LOADING)
+        {
+            Console.WriteLine("Loading rulesets...");
+            var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 62);
+            await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 62);
 
-        GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+            GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+        }
+        else
+        {
+            Console.WriteLine("DEBUG: Skipping RuleSet loading (ADD/CONNECT).");
+        }
         
         if (hasUrlParam)
         {
@@ -1105,8 +1120,11 @@
                 Console.WriteLine($"Removing component {comp.Key}");
                 SelectedComponent = comp.Key;
                 RemoveComp(true);
-                SelectedComponent = -1;
             }
+            SelectedComponent = -1;
+
+            Comps.Clear();
+
 
             BuildCanvas!.ConnLines.Clear();
             BuildCanvas.ResetTransform();
