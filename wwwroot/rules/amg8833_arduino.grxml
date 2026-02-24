@@ -482,6 +482,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>a9</name>
         <localLabels>
           <string>connection</string>
+          <string>RD</string>
         </localLabels>
         <localVariables />
         <From>n5</From>
@@ -500,6 +501,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>a10</name>
         <localLabels>
           <string>connection</string>
+          <string>DB</string>
         </localLabels>
         <localVariables />
         <From>n18</From>
@@ -518,6 +520,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>a11</name>
         <localLabels>
           <string>connection</string>
+          <string>DB</string>
         </localLabels>
         <localVariables />
         <From>n14</From>
