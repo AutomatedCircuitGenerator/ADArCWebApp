@@ -239,31 +239,48 @@
 
 private async Task HandleBoardSelect(Board board)
 {
-    Console.WriteLine("HandleBoardSelect: start");
-    Console.WriteLine($"Selected board enum = {board}");
-
-    BoardService.Board = board;
-    Console.WriteLine("After BoardService.Board set");
-
-    var inst = BoardService.GetComponentInstance();
-    if (inst == null)
+    try
     {
-        Console.WriteLine("ERROR: BoardService.GetComponentInstance returned null");
-        return;
+        Console.WriteLine("=== HandleBoardSelect START ===");
+        Console.WriteLine($"board={board}, LoadingProgress={LoadingProgress}, selLockedOut={selLockedOut}");
+        Console.WriteLine($"Before: Comps.Count={Comps.Count}, Nodes={GraphSynthInvoke.GetNodes()?.Count}, Arcs={GraphSynthInvoke.GetArcs()?.Count}");
+
+        // Yield once so console flushes before any heavy JS/GraphSynth work
+        await Task.Yield();
+        Console.WriteLine("Checkpoint A: after yield");
+
+        // 1) Set board (may call JS interop)
+        BoardService.Board = board;
+        Console.WriteLine("Checkpoint B: after BoardService.Board set");
+
+        // 2) Create board instance
+        var inst = BoardService.GetComponentInstance();
+        Console.WriteLine($"Checkpoint C: after GetComponentInstance (null? {inst == null})");
+        if (inst == null) return;
+
+        Console.WriteLine($"Board instance: GlobalId={inst.GlobalId}, nodeName={inst.Data?.nodeName ?? "<null>"}");
+
+        // 3) Put it in Comps WITHOUT touching GraphSynth yet
+        Comps[0] = inst; // keep your current behavior for now
+        Console.WriteLine("Checkpoint D: after Comps[0] set");
+
+        Console.WriteLine($"After: Comps.Count={Comps.Count}, Nodes={GraphSynthInvoke.GetNodes()?.Count}, Arcs={GraphSynthInvoke.GetArcs()?.Count}");
+
+        // 4) Unlock UI
+        selLockedOut = false;
+        CompPane?.ReleaseLockout();
+        shouldShowBoardSelect = false;
+        StateHasChanged();
+        Console.WriteLine("Checkpoint E: after unlock + StateHasChanged");
+
+        Console.WriteLine("=== HandleBoardSelect END ===");
     }
-
-    Comps[0] = inst;
-    Console.WriteLine($"After Comps[0] set, GlobalId={inst.GlobalId}");
-
-    // IMPORTANT: do NOT restore from JSON on normal board select
-    // SetupBenchFromJsonString(BoardService.GetJson());
-
-    selLockedOut = false;
-    CompPane?.ReleaseLockout();
-    shouldShowBoardSelect = false;
-    StateHasChanged();
-
-    Console.WriteLine("HandleBoardSelect: done (no bench restore)");
+    catch (Exception ex)
+    {
+        Console.WriteLine("!!! HandleBoardSelect EXCEPTION !!!");
+        Console.WriteLine(ex.ToString());
+        throw;
+    }
 }
 
     /// <summary>
