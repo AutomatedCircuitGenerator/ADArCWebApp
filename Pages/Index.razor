@@ -206,6 +206,11 @@
 
     private const bool DEBUG_SKIP_RULESET_LOADING = false; 
 
+    private void LogGraph(string tag)
+    {
+        Console.WriteLine($"{tag}: Nodes={(GraphSynthInvoke.GetNodes()?.Count ?? 0)}, Arcs={(GraphSynthInvoke.GetArcs()?.Count ?? 0)}");
+    }
+
 
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
@@ -261,8 +266,8 @@ private async Task HandleBoardSelect(Board board)
         Console.WriteLine($"Board instance: GlobalId={inst.GlobalId}, nodeName={inst.Data?.nodeName ?? "<null>"}");
 
         // 3) Put it in Comps WITHOUT touching GraphSynth yet
-        Comps[0] = inst; // keep your current behavior for now
-        Console.WriteLine("Checkpoint D: after Comps[0] set");
+        Comps[1] = inst; // keep your current behavior for now
+        Console.WriteLine("Checkpoint D: after Comps[1] set");
 
         Console.WriteLine($"After: Comps.Count={Comps.Count}, Nodes={GraphSynthInvoke.GetNodes()?.Count}, Arcs={GraphSynthInvoke.GetArcs()?.Count}");
 
@@ -467,9 +472,11 @@ private async Task HandleBoardSelect(Board board)
             n.localLabels.Add("user_" + componentData.nodeName);
 
             GraphSynthInvoke.GetNodes().Add(n);
+            LogGraph($"DRAG: node created localId={localIds} type={componentData.nodeName}");
             if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
 
             GraphSynthInvoke.Add();
+            LogGraph($"DRAG: after GraphSynthInvoke.Add() localId={localIds}");
 
             if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
             {
@@ -1069,34 +1076,19 @@ private async Task HandleBoardSelect(Board board)
     /// Handles most of the setup process of the bench after import.
     /// </summary>
     /// <param name="json">The full JSON to deserialize.</param>
-    private static Data? DeserializeJson(string jsonString)
+    private string DeserializeJson(string json)
     {
-        Console.WriteLine("Starting JSON deserialization");
         try
         {
-            var options = new JsonSerializerOptions
-            {
-                IncludeFields = true,
-                WriteIndented = true
-            };
-            options.Converters.Add(new ParamSerializer());
+            // your existing logic here...
+            // if you currently "return ..." in some branches, keep them
 
-            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
-
-            if (canvasData == null)
-            {
-                Console.WriteLine("Deserialization returned null");
-                return null;
-            }
-
-            Console.WriteLine($"Deserialization successful. Component count: {canvasData.Comps?.Count ?? 0}");
-            return canvasData;
+            return json; // <-- TEMP safe fallback if you don’t know what else yet
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Error during deserialization: {ex.Message}");
-            Console.WriteLine($"JSON content: {jsonString.Substring(0, Math.Min(200, jsonString.Length))}..."); // Show start of JSON for debugging
-            return null;
+            Console.WriteLine(ex);
+            return json; // <-- or return string.Empty;
         }
     }
 
@@ -1161,6 +1153,7 @@ private async Task HandleBoardSelect(Board board)
                 kv.Value.GsNode = n;
 
                 GraphSynthInvoke.GetNodes().Add(n);
+                LogGraph($"IMPORT: node created localId={kv.Key} type={kv.Value.Data.nodeName}");
                 if (kv.Value.Data.nodeName != null)
                 {
                     GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
@@ -1169,6 +1162,7 @@ private async Task HandleBoardSelect(Board board)
 
                 // Add and connect each component
                 GraphSynthInvoke.Add();
+                LogGraph($"IMPORT: after GraphSynthInvoke.Add() localId={kv.Key}");
                 if (kv.Value.Data.nodeName != null && !kv.Value.IsArduino())
                 {
                     var connected = GraphSynthInvoke.Connect(kv.Value.Data.nodeName, "arduino", SelectArduinoNode);
