@@ -3,9 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-  <title>Automated Design Tool for Arduino Circuits, ADArC</title>
+  <title>ADArC</title>
 
-  <!-- "/" for local testing; "/ADArCWebApp/" in deployment -->
   <base href="/" />
 
   <link href="css/bootstrap/bootstrap.min.css" rel="stylesheet" />
@@ -14,12 +13,8 @@
   <link href="manifest.json" rel="manifest" />
   <link rel="icon" type="image/x-icon" href="favicon.ico" />
 
-  <!-- Intro.js (CDN) -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
   <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
-
-  <!-- BlazorMonaco interop -->
-  <script src="_content/BlazorMonaco/jsInterop.js"></script>
 
   <script src="_content/BlazorMonaco/jsInterop.js"></script>
   <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/loader.js"></script>
@@ -27,9 +22,6 @@
 
   <script data-main="main" src="require.js"></script>
   <script src="build/build.js"></script>
-
-  <!-- Optional: local intro css override (only keep if the file exists) -->
-  <!-- <link rel="stylesheet" href="lib/intro.js/introjs.css"> -->
 </head>
 
 <body>
@@ -41,14 +33,8 @@
     <div class="loading-progress-text"></div>
   </div>
 
-  <!-- Clear cache on load -->
   <script>
-    caches.delete("blazor-resources-/").then(function () {
-      console.log("'blazor-resources-/' cache deleted");
-    });
-  </script>
-
-  <script>
+    caches.delete("blazor-resources-/");
     window.triggerClick = (elt) => elt.click();
   </script>
 

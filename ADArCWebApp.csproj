@@ -124,12 +124,6 @@
     <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
   </ItemGroup>
 
- <ItemGroup>
-  <TypeScriptCompile Remove="wwwroot\lib\components\lcd1602i2c.ts" />
-  <TypeScriptCompile Remove="wwwroot\dotnet.d.ts" />
-  <TypeScriptCompile Remove="wwwroot\lib\lcd1602i2c.ts" />
-</ItemGroup>
-
 <ItemGroup>
   <Content Remove="wwwroot\build\build.js" />
   <Content Remove="wwwroot\build\build.js.map" />
