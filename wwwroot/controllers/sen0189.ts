@@ -6,12 +6,9 @@ export class SEN0189 extends Controller {
 
     override update(state: Record<string, any>) {
         this.setturbidity(state.turbidity);
-        console.log("STATE RECEIVED:", state);
     }
     
     setturbidity(turbidity: number) {
-
-        console.log("SET TURBIDITY CALLED:", turbidity);
         
         // Clamp turbidity, sensor's range is only 0-3000
         if (turbidity < 0)
@@ -24,8 +21,7 @@ export class SEN0189 extends Controller {
         if (!this.inSimulation) {
             return; 
         }
-
-        console.log("SETTING VOLTAGE:", this.turbidityToVoltage(this.turbidity));
+        
         this.pins.analog_out[0].analog.voltage = this.turbidityToVoltage(this.turbidity);
     }
 
