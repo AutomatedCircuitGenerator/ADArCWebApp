@@ -736,7 +736,7 @@ namespace ADArCWebApp.Shared
                         {
                             "loopMain",
                             "  if (millis() - geigerLastTime@ >= 2000) {\n" +
-                            "      cpm@ = geigerCount@;\n" +
+                            "      cpm@ = geigerCount@ * 30;\n" +
                             "      geigerCount@ = 0;\n" +
                             "      geigerLastTime@ = millis();\n" +
                             "      Serial.print(\"CPM: \");\n" +
