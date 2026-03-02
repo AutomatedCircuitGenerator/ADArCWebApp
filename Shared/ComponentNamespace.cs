@@ -709,7 +709,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 34,
-                new ComponentDataBuilder("NEMA 23", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                new ComponentDataBuilder("NEMA 23", true, "Output/Motors/Stepper Motor", .16, 75, 75,
                         typeof(RazorNEMA23), paneHoverText: "NEMA23",
                         codeForGen: new()
                         {
@@ -754,26 +754,23 @@ namespace ADArCWebApp.Shared
                                 "\t// stepper@.runToPosition(); // Blocks until target is reached\n" +
                                 "\t// stepper@.runToNewPosition(800); // Blocks until new target is reached\n\n" +
                                 "\t// --- Query motor state ---\n" +
-                                "\tcurrentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
-                                "\ttargetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
-                                "\tlong remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
-                                "\tspeed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
+                                "\t// currentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
+                                "\t// targetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
+                                "\t// long remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
+                                "\t// speed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
                                 "\t// Print motor info to Serial for debugging\n" +
                                 "\t//Serial.print(\"Current: \"); \n" +
-                                "\tSerial.print(currentPos@);\n" +
-                                "\tSerial.print(\" Target: \");\n" +
-                                "\tSerial.print(targetPos@);\n" +
-                                "\tSerial.print(\" Remaining: \");" +
-                                "\tSerial.print(remaining@);\n" +
-                                "\tSerial.print(\" Speed: \"); " +
-                                "\tSerial.println(speed@);\n\n" +
-                                "\tdelay(100); // Small delay to reduce Serial flooding"
+                                "\t// Serial.print(currentPos@);\n" +
+                                "\t// Serial.print(\" Target: \");\n" +
+                                "\t// Serial.print(targetPos@);\n" +
+                                "\t// Serial.print(\" Remaining: \");" +
+                                "\t// Serial.print(remaining@);\n" +
+                                "\t// Serial.print(\" Speed: \"); " +
+                                "\t// Serial.println(speed@);\n\n" +
+                                "\t// delay(100); // Small delay to reduce Serial flooding"
                             },
-                            
-                            { "functions", "" },
-                            
-                            { "delayLoop", "" },
-                            
+                            { "functions", "" }, 
+                            { "delayLoop", "" }, 
                             { "delayTime", "" }
                         },
                         pins: ["Vcc", "dir_minus", "pul_minus"], gsNodeName: "nema23", 
