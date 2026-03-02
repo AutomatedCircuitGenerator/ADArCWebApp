@@ -709,7 +709,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 34,
-                new ComponentDataBuilder("NEMA 17 Stepper Motor", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                new ComponentDataBuilder("NEMA 17 Stepper Motor", true, "Output/Motors/Stepper Motor", .25, 75, 75,
                         typeof(RazorNEMA17), paneHoverText: "NEMA17",
                         codeForGen: new()
                         {
