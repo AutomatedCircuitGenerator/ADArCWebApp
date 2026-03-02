@@ -31,22 +31,9 @@
 			return (typeof(T), Value);
         }
 
-        public void SetValue<T1>(T1 obj)
-		{
-			//Console.WriteLine(typeof(T1) + ", " + typeof(T));
-
-			if (typeof(T1) is T)
-			{
-				Value = (T)Convert.ChangeType(obj, typeof(T));
-			}
-			else if (typeof(T1) == typeof(T)) {
-				Value = (T)(object)obj;			//ugly but valid I think
-			}
-			else
-			{
-				throw new InvalidCastException();
-			}
-		}
+        public void SetValue<TInput>(TInput obj) {
+	        Value = (T)Convert.ChangeType(obj, typeof(T));
+        }
 
 		//Ran into some problems with template vs object params, this was created to fix that.
 		public IComponentParameter Copy()
