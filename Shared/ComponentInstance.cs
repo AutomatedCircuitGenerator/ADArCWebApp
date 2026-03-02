@@ -187,7 +187,7 @@ namespace ADArCWebApp.Shared
 
         public bool IsArduino()
         {
-            return GlobalId is 1 or 2;
+            return GlobalId is 1 or 2 or 34;
         }
     }
 
