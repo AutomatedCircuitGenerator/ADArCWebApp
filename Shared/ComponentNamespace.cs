@@ -717,7 +717,7 @@ namespace ADArCWebApp.Shared
                             
                             { 
                                 "global", 
-                                "// Pin configuration for NEMA23 stepper motor\n" +
+                                "// Pin configuration for NEMA17 stepper motor\n" +
                                 "int dirPin@ = ~\"DIR\";  // Direction pin\n" +
                                 "int stepPin@ = ~\"STEP\"; // Step pin\n\n" +
                                 "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
