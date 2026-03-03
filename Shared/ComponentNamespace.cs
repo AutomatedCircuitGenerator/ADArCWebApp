@@ -641,7 +641,7 @@ namespace ADArCWebApp.Shared
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
             {
-                32,
+                31,
                 new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
                     paneHoverText: "SRV-PH",
                     codeForGen: new()
@@ -672,7 +672,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                33,
+                32,
                 new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
@@ -712,7 +712,7 @@ namespace ADArCWebApp.Shared
                     .Property("humidity", 512.0).Finish()
             },
             {
-                34,
+                33,
                 new ComponentDataBuilder("Humidity and Temperature Sensor", true, "Input/Temperature and Humidity Sensors", 0.5, -20, -20, typeof(RazorSHT30),
                     paneHoverText: "SHT30",
                     codeForGen: new()
@@ -753,7 +753,7 @@ namespace ADArCWebApp.Shared
                     } , pins: ["Vcc", "gnd", "scl", "sda", "int"], gsNodeName: "sht30").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
             }, 
             {
-                35,
+                34,
                 new ComponentDataBuilder("Temperature and Humidity Sensor", true,
                         "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
                         paneHoverText: "DHT22",
@@ -785,6 +785,57 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
+            },
+            {
+                35,
+                new ComponentDataBuilder("Barcode scanner", true, "Input/Other Sensors", 1, 18.5, 19.154,
+                    typeof(RazorDE2120), paneHoverText: "DE2120",
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <SoftwareSerial.h>\n" +
+                            "#include <SparkFun_DE2120_Arduino_Library.h> //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n"
+                        },
+                        {
+                            "global",
+                            "#define BUFFER_LEN 40\n" +
+                            "SoftwareSerial softSerial(~\"rxd\", ~\"txd\");\n" +
+                            "DE2120 scanner;\n" +
+                            "char scanBuffer[BUFFER_LEN];\n"
+                        },
+                        {
+                            "setup",
+                            "Serial.begin(115200);\n" +
+                            "softSerial.begin(9600);\n" +
+                            "Serial.println(\"DE2120 Scanner Example\");\n\n" +
+                            "if (scanner.begin(softSerial) == false)\n" +
+                            "{\n" +
+                            "    Serial.println(\"Scanner did not respond. Check wiring.\");\n" +
+                            "    while (1);\n" +
+                            "}\n\n" +
+                            "Serial.println(\"Scanner online!\");\n"
+                        },
+                        {
+                            "loopMain",
+                            "if (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n" +
+                            "{\n" +
+                            "    Serial.print(\"Code found: \");\n" +
+                            "    Serial.println(scanBuffer);\n" +
+                            "}\n\n" +
+                            "delay(200);\n"
+                        },
+                        {
+                            "functions", ""
+                        },
+                        {
+                            "delayLoop", ""
+                        },
+                        {
+                            "delayTime", ""
+                        }
+                    },
+                    pins: ["Vcc", "gnd", "rxd", "txd"], gsNodeName: "de2120").Property("encodedvalue", 0).Finish()
             }
         };
     }
