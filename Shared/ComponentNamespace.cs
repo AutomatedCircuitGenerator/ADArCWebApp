@@ -639,18 +639,18 @@ namespace ADArCWebApp.Shared
                         paneHoverText: "VL53L4CD",
                         codeForGen: new()
                         {
-                                {
+                            {
                                 "include",
-                                "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0"
+                                "#include <Arduino.h>\n#include <Wire.h>"
                             },
                             {
                                 "global",
-                                "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters"
+                                "int16_t tfDist@; // distance in centimeters"
                             },
                             { "setup", "  Wire.begin(); // initialize Wire library" },
                             {
                                 "loopMain",
-                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);"
+                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
                             },
                             {
                                 "functions",

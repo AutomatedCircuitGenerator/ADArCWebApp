@@ -5043,7 +5043,7 @@
     "placeholder_5042": "STM32duino VL53L1",
     "placeholder_5043": "STM32duino VL53L1X",
     "placeholder_5044": "STM32duino VL53L3CX",
-    "VL53L4CD.h": "STM32duino VL53L4CD",
+    "STM32duino_VL53L4CD.h": "STM32duino VL53L4CD",
     "placeholder_5046": "STM32duino VL53L4CX",
     "placeholder_5047": "STM32duino VL53L4ED",
     "placeholder_5048": "STM32duino VL53L5CX",

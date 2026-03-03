@@ -3,10 +3,8 @@ import {AVRRunner} from "@lib/execute";
 import {I2CController} from "@lib/i2c-bus";
 import {Memory} from "@controllers/memory";
 
-// I2C address must match Razor component and CodeForGen
 const TOF_I2C_ADDRESS = 0x29;
 
-// Register definitions - addresses and sizes
 const REGISTERS = {
     DIST: { address: 0x00, size: 2 },
     FLUX: { address: 0x02, size: 2 },
@@ -16,131 +14,106 @@ const REGISTERS = {
 } as const;
 
 export class TOF extends Controller implements I2CController {
-    private i2cAddress: number | null = null;
+    private i2cAddressPointer: number | null = null;
     private memory = new Memory(128);
     private startTime: number = 0;
 
-    /**
-     * Setup the controller - called before simulation starts
-     * Initializes I2C registration and default register values
-     * Abstract method required by Controller base class
-     */
     setup(): void {
         this.registerWithI2C();
         this.startTime = Date.now();
         this.initializeRegisters();
     }
 
-    /**
-     * Update distance register from simulation state
-     * Called by AVRRunner during execution loop when environmental settings change
-     * Optional override of Controller base class method
-     */
     update(state: Record<string, any>): void {
         if (state.distance !== undefined) {
-            this.setRegister("DIST", state.distance);
+            this.writeRegister("DIST", state.distance);
+        }
+    }
+    
+    setRegister(register: string, value: number) {
+        this.memory.write(REGISTERS[register], value);
+    }
+
+
+    cleanup(): void {
+        this.i2cAddressPointer = null;
+    }
+
+    private registerWithI2C(): void {
+        const i2cBus = AVRRunner.getInstance().board.twis[0];
+        i2cBus.registerController(TOF_I2C_ADDRESS, this);
+    }
+
+    private initializeRegisters(): void {
+        this.writeRegister("DIST", 100);  // Test value
+        this.writeRegister("FLUX", 200);
+        this.writeRegister("TEMP", 2500);
+        this.writeRegister("ERROR", 0);
+    }
+
+    private writeRegister(register: keyof typeof REGISTERS, value: number): void {
+        const reg = REGISTERS[register];
+        // Write as little-endian 16-bit value
+        this.memory[reg.address] = value & 0xFF;
+        this.memory[reg.address + 1] = (value >> 8) & 0xFF;
+    }
+
+    private readRegister(register: keyof typeof REGISTERS): number {
+        const reg = REGISTERS[register];
+        // Read as little-endian 16-bit value
+        return this.memory[reg.address] | (this.memory[reg.address + 1] << 8);
+    }
+
+    i2cConnect(addr: number, write: boolean): boolean {
+        if (addr === TOF_I2C_ADDRESS) {
+            if (write) {
+                // Write mode: reset address pointer on connect
+                this.i2cAddressPointer = null;
+            } else {
+                // Read mode: address pointer should already be set from previous write
+            }
+            return true;
+        }
+        return false;
+    }
+
+    i2cDisconnect(): void {
+        // Don't reset - keep state for next transaction
+    }
+
+    i2cWriteByte(value: number): boolean {
+        if (this.i2cAddressPointer === null) {
+            // First byte: set the address pointer
+            this.i2cAddressPointer = value;
+            return true;
+        } else {
+            // Subsequent bytes: write to memory
+            this.memory[this.i2cAddressPointer] = value;
+            this.i2cAddressPointer++;
+            return true;
         }
     }
 
-    /**
-     * Cleanup when simulation stops
-     * Resets the I2C address pointer
-     * Optional override of Controller base class method
-     */
-    cleanup(): void {
-        this.i2cAddress = null;
-    }
-
-    /**
-     * Register this controller with the I2C bus
-     */
-    private registerWithI2C(): void {
-        const i2cBus = AVRRunner.getInstance().board.twis[0];
-        i2cBus.registerController(this.id, this);
-    }
-
-    /**
-     * Initialize default register values
-     */
-    private initializeRegisters(): void {
-        this.setRegister("FLUX", 200);
-        this.setRegister("TEMP", 2500);
-        this.setRegister("ERROR", 0);
-    }
-
-    /**
-     * Write a value to a register
-     */
-    private setRegister(register: keyof typeof REGISTERS, value: number): void {
-        const reg = REGISTERS[register];
-        this.memory.write(reg, value);
-    }
-
-    /**
-     * I2C Connection handler
-     * Accepts connections on our I2C address (0x29)
-     */
-    i2cConnect(addr: number, write: boolean): boolean {
-        return addr === TOF_I2C_ADDRESS;
-    }
-
-    /**
-     * I2C Disconnection handler
-     * Clears the address pointer when connection ends
-     */
-    i2cDisconnect(): void {
-        this.i2cAddress = null;
-    }
-
-    /**
-     * I2C Read byte
-     * Returns the byte at the current address pointer
-     * Auto-increments address on ACK, clears on NACK
-     */
     i2cReadByte(acked: boolean): number {
         this.updateTime();
-        let byte: number;
 
-        if (this.i2cAddress !== null) {
-            // Address pointer is set, return the byte at that address
-            byte = this.memory[this.i2cAddress];
+        if (this.i2cAddressPointer === null) {
+            return 0xFF;
+        }
 
-            // If master sends ACK, increment address for sequential read
-            // If NACK (not acked), clear address pointer
-            if (acked) {
-                this.i2cAddress = (this.i2cAddress + 1) % this.memory.size;
-            } else {
-                this.i2cAddress = null;
-            }
-        } else {
-            // Error state: address pointer not set
-            byte = 0xFF;
+        const byte = this.memory[this.i2cAddressPointer];
+
+        // Auto-increment on ACK
+        if (acked) {
+            this.i2cAddressPointer++;
         }
 
         return byte;
     }
 
-    /**
-     * I2C Write byte
-     * First write sets the address pointer, subsequent writes write to memory
-     */
-    i2cWriteByte(value: number): boolean {
-        if (this.i2cAddress === null) {
-            // First write: set the address pointer
-            this.i2cAddress = value;
-        } else {
-            // Subsequent write: write to memory at current address
-            this.memory[this.i2cAddress] = value;
-            this.i2cAddress = null;
-        }
-        return true;
-    }
-
-    /**
-     * Update the TICK register with elapsed time
-     */
-    private updateTime(): void {
+    private updateTime() {
         const elapsedTime = Date.now() - this.startTime;
         this.setRegister("TICK", elapsedTime);
     }
+
 }
