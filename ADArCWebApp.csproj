@@ -114,6 +114,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <Folder Include="wwwroot\libraries\turbidity_surveryor\" />
     <Folder Include="wwwroot\lib\intro.js\" />
   </ItemGroup>
 

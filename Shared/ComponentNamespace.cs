@@ -32,8 +32,19 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("MEGA 2560", false, "Arduino", 0.3, 390, 195, typeof(RazorArduinoMega),
                     codeForGen: new()
                     {
-                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
+                        { "include", "" },
+                        { "global", "#define TURB_PIN@ ~\"analog_in\" // Turbidity sensor pin (DFRobot SEN0189)" },
+                        { "setup", ""},
+                        { "loopMain",
+                            "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
+                            + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
+                            + "  Serial.print(\"Turbidity Voltage = \"); // Print label\n"
+                            + "  Serial.println(voltage@, 3); // Print voltage with 3 decimals\n"
+                            + "  delay(500); // Wait 500ms"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
                     },
                     pins:
                     [
@@ -630,8 +641,26 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                31,
+                new ComponentDataBuilder("Turbidity sensor", true, "Input/Light Sensors", 0.35, -100,
+                    -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
+                    codeForGen: new()
+                    {
+                        { "include", "" }, 
+                        { "global", "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)" }, 
+                        { "setup", "" }, 
+                        { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
+                                      + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
+                                      + "  float turbNTU@ = -1120.4*voltage@*voltage@ + 5742.3*voltage@ - 4352.9; //Convert voltage to turbidity in NTU (Nephelometric Turbidity Units)\n"
+                                      + "  Serial.print(\"Turbidity in NTU = \"); // Print label\n"
+                                      + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
+                                      + "  delay(500); // Wait 500ms" }, 
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Property("turbidity", 0.0).Finish()
+            },
             // {
-            //     31,
+            //     32,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
             //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
             //         codeForGen: new()

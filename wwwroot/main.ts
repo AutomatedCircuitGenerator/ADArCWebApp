@@ -31,6 +31,7 @@ import {SEN0114} from "@controllers/sen0114";
 import {SRVPH} from "@controllers/srvph";
 import {SHT30} from "@controllers/sht30";
 import {DHT22} from "@controllers/dht22";
+import {SEN0189} from "@controllers/sen0189";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -66,4 +67,5 @@ import {DHT22} from "@controllers/dht22";
 (<any>window).SEN0114 = SEN0114;
 (<any>window).SRVPH = SRVPH;
 (<any>window).SHT30 = SHT30;
-(<any>window).DHT22 = DHT22
+(<any>window).DHT22 = DHT22;
+(<any>window).SEN0189 = SEN0189;
