@@ -657,7 +657,7 @@ namespace ADArCWebApp.Shared
                                       + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
                                       + "  delay(500); // Wait 500ms" }, 
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189").Property("turbidity", 0.0).Finish()
+                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
             // {
             //     32,
