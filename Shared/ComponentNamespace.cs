@@ -677,68 +677,63 @@ namespace ADArCWebApp.Shared
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
             
-            {
-                31,
-                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
-                    paneHoverText: "SRV-PH",
+         {
+            33,
+            new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
+                    .5, -20, -20, typeof(RazorAMG8833),
+                    paneHoverText: "AMG8833",
                     codeForGen: new()
                     {
-                        { "include", "" },
+                        { "include", "#include <Wire.h>\n#include <Adafruit_AMG88xx.h>" },
                         {
                             "global",
-                            "#define SRVPH_PIN@ ~\"ADC\""
+                            "#define AMG8833_I2C_ADDR 0x69\n" +
+                            "Adafruit_AMG88xx amg;\n" +
+                            "float pixels[AMG88xx_PIXEL_ARRAY_SIZE];"
                         },
                         {
                             "setup",
-                            ""
+                            "Wire.begin();\n\t" +
+                            "if (!amg.begin(AMG8833_I2C_ADDR)) {\n\t\t" +
+                            "Serial.println(\"AMG8833 not found!\");\n\t\t" +
+                            "while (1);\n\t" +
+                            "}"
                         },
                         {
                             "loopMain",
-                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
-                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
-                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
-                            "\tSerial.print(\"Sensor Value: \");\n" +
-                            "\tSerial.print(sensorValue@);\n\n" + 
-                            "\tSerial.print(\"\tVoltage: \");\n" +
-                            "\tSerial.print(voltage@);\n\n" +
-                            "\tSerial.print(\"\tpH: \");\n" + 
-                            "\tSerial.println(pH);\n" +
-                            "\tdelay(2000); // wait 2s for next reading"
+                            "\t// Read 8x8 thermal pixel array (64 pixels flattened)\n" +
+                            "\tamg.readPixels(pixels);\n\n" +
+                            "\tSerial.println(\"=== AMG8833 Thermal Grid ===\");\n" +
+                            "\tfor (int row = 0; row < 8; row++) {\n" +
+                            "\t\tfor (int col = 0; col < 8; col++) {\n" +
+                            "\t\t\tint idx = row * 8 + col;\n" +
+                            "\t\t\tSerial.print(pixels[idx], 1);\n" +
+                            "\t\t\tSerial.print(\"C \");\n" +
+                            "\t\t}\n" +
+                            "\t\tSerial.println();\n" +
+                            "\t}\n" +
+                            "\tSerial.println();\n" +
+                            "\tdelay(2000);"
                         },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            },
-            {
-                33,
-                new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
-                        .5, -20, -20, typeof(RazorAMG8833),
-                        paneHoverText: "AMG8833",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <Wire.h>" },
-                            {
-                                "global",
-                                "#define AMG8833_I2C_ADDR@ 0x69 // default I2C address"
-                            },
-                            {
-                                "setup",
-                                "Wire.begin(); // initialize I2C"
-                            },
-                            {
-                                "loopMain",
-                                "\t// Fake temperature reading for simulation\n" +
-                                "\tfloat tempC@ = 25.0 + (rand() % 500) / 100.0; // 25.00 - 30.00 °C\n\n" +
-                                "\tSerial.print(\"AMG8833 Temp: \");\n" +
-                                "\tSerial.print(tempC@);\n" +
-                                "\tSerial.println(\" °C\");\n" +
-                                "\tdelay(500); // update rate"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        },
-                        pins: ["5V", "gnd", "scl", "sda"],
-                        gsNodeName: "amg8833")
-                    .Property("temperature", 25.0)
-                    .Finish()
+                        { "functions", "" }, 
+                        { "delayLoop", "" }, 
+                        { "delayTime", "" }
+                    },
+                    pins: ["5V", "gnd", "scl", "sda"],
+                    gsNodeName: "amg8833")
+                .Property("temperature", 25.0)
+                .Property("pixels", new double[][]
+                {
+                    new double[] { 25.0, 25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5 },
+                    new double[] { 25.5, 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0 },
+                    new double[] { 26.0, 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5 },
+                    new double[] { 26.5, 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0 },
+                    new double[] { 27.0, 27.5, 28.0, 28.5, 29.0, 29.5, 30.0, 30.5 },
+                    new double[] { 27.5, 28.0, 28.5, 29.0, 29.5, 30.0, 30.5, 31.0 },
+                    new double[] { 28.0, 28.5, 29.0, 29.5, 30.0, 30.5, 31.0, 31.5 },
+                    new double[] { 28.5, 29.0, 29.5, 30.0, 30.5, 31.0, 31.5, 32.0 }
+                })
+                .Finish()
             },
         };
     }

@@ -1,79 +1,109 @@
 import { Controller } from "./controller";
 import { AVRRunner } from "@lib/execute";
-import { PinState } from "@lib/avr8js";
+import { I2CController } from "@lib/i2c-bus";
 
-export class AMG8833 extends Controller {
+export class AMG8833 extends Controller implements I2CController {
 
-    private _pixels: number[][] = [];   // 8x8 grid
+    private _pixels: number[][] = [];
+    private _temperature: number = 25;
+    private _i2cAddress: number = 0x69;
+
+    private _currentRegister: number = 0x00;
+    private _byteIndex: number = 0;
+    private _writeMode: boolean = false;
 
     override update(state: Record<string, any>) {
-        // Expecting: state.pixels = [[... 8 numbers ...], ... 8 rows ...]
-        if (state.pixels) {
+        if (state.pixels && Array.isArray(state.pixels)) {
             this.setPixels(state.pixels);
+        }
+        if (state.temperature !== undefined) {
+            this._temperature = state.temperature;
         }
     }
 
-    setPixels = (pixels: number[][]) => {
-        this._pixels = pixels;
+    setPixels = (pixels: number[][]): void => {
+        if (pixels.length === 8 && pixels.every(row => Array.isArray(row) && row.length === 8)) {
+            this._pixels = pixels;
+        } else {
+            console.warn("Invalid pixel grid: expected 8x8 array");
+        }
+    }
+
+    getPixels = (): number[][] => {
+        return this._pixels;
+    }
+
+    getTemperature = (): number => {
+        return this._temperature;
     }
 
     setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
-    }
-
-    private get shouldReadSPI(): boolean {
-        // identical style to MAX6675
-        return this.pins.cs[0].digital.state == PinState.Low;
-    }
-
-    private nextByteIsHigh = false;
-    private currentRow = 0;
-    private currentCol = 0;
-
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
-            return;
-        }
-
-        if (!this._pixels || this._pixels.length === 0) {
-            console.log("Undefined AMG8833 pixel grid\n");
-            return;
-        }
-
-        // Read current pixel
-        const rawPixel = this._pixels[this.currentRow][this.currentCol];
-
-        // For consistency with MAX6675 shifting:
-        // Send each pixel as a 16-bit value (high byte then low byte)
-        const pixelValue = Math.round(rawPixel * 10); // arbitrary scaling
-
-        let byteToSend: number;
-
-        if (!this.nextByteIsHigh) {
-            byteToSend = (pixelValue >> 8) & 0xFF;
+        const board = AVRRunner.getInstance().board;
+        if (board.twis && board.twis.length > 0) {
+            board.twis[0].registerController(this._i2cAddress, this);
+            console.log(`AMG8833 registered at I2C address 0x${this._i2cAddress.toString(16)}`);
         } else {
-            byteToSend = pixelValue & 0xFF;
+            console.error("TWI/I2C bus not available on this board");
+        }
+    }
 
-            // After sending low byte, move to next pixel
-            this.currentCol++;
-            if (this.currentCol >= 8) {
-                this.currentCol = 0;
-                this.currentRow++;
-                if (this.currentRow >= 8) {
-                    this.currentRow = 0;
-                }
-            }
+    i2cConnect(addr: number, write: boolean): boolean {
+        this._writeMode = write;
+        this._byteIndex = 0;
+        console.log(`AMG8833: I2C ${write ? 'write' : 'read'} connection at 0x${addr.toString(16)}`);
+        return true;
+    }
+
+    i2cReadByte(acked: boolean): number {
+        if (!this._pixels || this._pixels.length === 0) {
+            console.warn("AMG8833: No pixel data available, returning 0xFF");
+            return 0xFF;
         }
 
-        this.nextByteIsHigh = !this.nextByteIsHigh;
+        const pixelIndex = Math.floor(this._byteIndex / 2);
+        const byteInPixel = this._byteIndex % 2;
 
-        AVRRunner
-            .getInstance()
-            .board
-            .cpu
-            .addClockEvent(
-                () => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend),
-                AVRRunner.getInstance().board.spis[0].transferCycles
-            );
+        if (pixelIndex >= 64) {
+            this._byteIndex = 0;
+            return 0x00;
+        }
+
+        const row = Math.floor(pixelIndex / 8);
+        const col = pixelIndex % 8;
+        const pixelTemp = this._pixels[row][col];
+
+        const tempValue = Math.max(0, Math.min(4095, Math.round((pixelTemp / 80) * 4095)));
+
+        let byteToReturn: number;
+        if (byteInPixel === 0) {
+            byteToReturn = (tempValue >> 4) & 0xFF;
+        } else {
+            byteToReturn = ((tempValue & 0x0F) << 4) | 0x0F;
+        }
+
+        this._byteIndex++;
+
+        if (!acked) {
+            this._byteIndex = 0;
+        }
+
+        return byteToReturn;
+    }
+
+    i2cWriteByte(value: number): boolean {
+        if (this._byteIndex === 0) {
+            this._currentRegister = value;
+            console.log(`AMG8833: Register 0x${value.toString(16)} selected`);
+        } else {
+            console.log(`AMG8833: Write data 0x${value.toString(16)} to register 0x${this._currentRegister.toString(16)}`);
+        }
+
+        this._byteIndex++;
+        return true;
+    }
+
+    i2cDisconnect(): void {
+        this._byteIndex = 0;
+        console.log("AMG8833: I2C transaction ended");
     }
 }
