@@ -641,7 +641,7 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder(
                         "CO2 Sensor",
                         true,
-                        "Input/Other Sensors",
+                        "Input/Gas Sensors",
                         0.7,
                         100,
                         75,
