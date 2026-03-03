@@ -666,7 +666,7 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "loopMain",
-                            "// In simulation, DO NOT call real I2C reads\n" +
+                            "\n" +
                             "// Values are pushed in from the TS controller\n\n" +
                             "Serial.print(\"VOC Index: \");\n" +
                             "Serial.print(vocIndex);\n" +

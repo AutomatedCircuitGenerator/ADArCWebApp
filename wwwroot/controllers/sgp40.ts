@@ -5,12 +5,7 @@ export class SGP40 extends Controller {
     private _vocIndex: number = 0;
     private _temperature: number = 25.0;
     private _humidity: number = 50.0;
-
-    /**
-     * Called whenever environmental data is updated from C#
-     * Example:
-     * { "vocIndex": 43, "temperature": 24.7, "humidity": 48.2 }
-     */
+    
     override update(state: Record<string, any>) {
 
         if (state.vocIndex !== undefined) {
@@ -32,10 +27,7 @@ export class SGP40 extends Controller {
             humidity: this._humidity
         });
     }
-
-    /**
-     * No AVR hooks needed — SGP40 is logical/simulated
-     */
+    
     override setup(): void {
         // nothing to wire up
     }
