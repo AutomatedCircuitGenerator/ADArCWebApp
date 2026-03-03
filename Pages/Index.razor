@@ -11,9 +11,9 @@
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
 
-
 <PageTitle>Home | ADArC</PageTitle>
 <body>
+<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 @if (_isMobileUser)
 {
@@ -204,14 +204,6 @@
 
     private FrequencyVector<int> _componentFrequencies = new();
 
-    private const bool DEBUG_SKIP_RULESET_LOADING = false; 
-
-    private void LogGraph(string tag)
-    {
-        Console.WriteLine($"{tag}: Nodes={(GraphSynthInvoke.GetNodes()?.Count ?? 0)}, Arcs={(GraphSynthInvoke.GetArcs()?.Count ?? 0)}");
-    }
-
-
     /// <summary>
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
@@ -224,7 +216,7 @@
     /// </summary>
     int rightPaneAlign => isRightExpanded ? 0 : -39;
 
-    string runStopText = "Run";
+    string runStopText = "▶️ Run";
     public bool IsRunning;
 
     void ToggleLeftSidebar()
@@ -242,51 +234,29 @@
         StateHasChanged();
     }
 
-private async Task HandleBoardSelect(Board board)
-{
-    try
+    private void HandleBoardSelect(Board board)
     {
-        Console.WriteLine("=== HandleBoardSelect START ===");
-        Console.WriteLine($"board={board}, LoadingProgress={LoadingProgress}, selLockedOut={selLockedOut}");
-        Console.WriteLine($"Before: Comps.Count={Comps.Count}, Nodes={GraphSynthInvoke.GetNodes()?.Count}, Arcs={GraphSynthInvoke.GetArcs()?.Count}");
+        Console.WriteLine($"HandleBoardSelect called with board: {board}");
 
-        // Yield once so console flushes before any heavy JS/GraphSynth work
-        await Task.Yield();
-        Console.WriteLine("Checkpoint A: after yield");
-
-        // 1) Set board (may call JS interop)
         BoardService.Board = board;
-        Console.WriteLine("Checkpoint B: after BoardService.Board set");
 
-        // 2) Create board instance
-        var inst = BoardService.GetComponentInstance();
-        Console.WriteLine($"Checkpoint C: after GetComponentInstance (null? {inst == null})");
-        if (inst == null) return;
+        // put board at key 1 (consistent with import/url logic)
+        Comps[1] = BoardService.GetComponentInstance();
 
-        Console.WriteLine($"Board instance: GlobalId={inst.GlobalId}, nodeName={inst.Data?.nodeName ?? "<null>"}");
-
-        // 3) Put it in Comps WITHOUT touching GraphSynth yet
-        Comps[1] = inst; // keep your current behavior for now
-        Console.WriteLine("Checkpoint D: after Comps[1] set");
-
-        Console.WriteLine($"After: Comps.Count={Comps.Count}, Nodes={GraphSynthInvoke.GetNodes()?.Count}, Arcs={GraphSynthInvoke.GetArcs()?.Count}");
-
-        // 4) Unlock UI
-        selLockedOut = false;
-        CompPane?.ReleaseLockout();
-        shouldShowBoardSelect = false;
-        StateHasChanged();
-        Console.WriteLine("Checkpoint E: after unlock + StateHasChanged");
-
-        Console.WriteLine("=== HandleBoardSelect END ===");
+        if (LoadingProgress == -1)
+        {
+            SetupBenchFromJsonString(BoardService.GetJson());
+            CompPane!.ReleaseLockout();
+            selLockedOut = false;
+            shouldShowBoardSelect = false;
+            StateHasChanged();
+        }
+        else
+        {
+            _scheduleBenchSetup = true;
+        }
     }
-    catch (Exception ex)
-    {
-        Console.WriteLine("!!! HandleBoardSelect EXCEPTION !!!");
-        Console.WriteLine(ex.ToString());
-        throw;
-    }
-}
+
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -303,7 +273,7 @@ private async Task HandleBoardSelect(Board board)
             if (response.stderr != "")
             {
                 CodePane?.UpdateConsoleOutput(response.stderr, false);
-                runStopText = "Run";
+                runStopText = "▶️ Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
                 if (caps.Count > 0)
@@ -336,7 +306,7 @@ private async Task HandleBoardSelect(Board board)
             AppInterop.StopWrapper();
             CodePane!.CommitBuffer();
             CodePane!.UpdateConsoleOutput("Stopped.\n", false);
-            runStopText = "Run";
+            runStopText = "▶️ Run";
             IsRunning = false;
         }
     }
@@ -472,12 +442,9 @@ private async Task HandleBoardSelect(Board board)
             n.localLabels.Add("user_" + componentData.nodeName);
 
             GraphSynthInvoke.GetNodes().Add(n);
-            LogGraph($"DRAG: node created localId={localIds} type={componentData.nodeName}");
             if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
 
             GraphSynthInvoke.Add();
-            LogGraph($"DRAG: after GraphSynthInvoke.Add() localId={localIds}");
-
             if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
             {
                 moverOffsetLeft = 0;
@@ -486,8 +453,6 @@ private async Task HandleBoardSelect(Board board)
                 GraphSynthInvoke.RemoveConnectedComponent(n);
                 return;
             }
-
-
 
             //label all new nodes and connections with the localid of the component that added them.
             GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
@@ -745,18 +710,11 @@ private async Task HandleBoardSelect(Board board)
         // Only lock selection if we're not loading from URL uhm
         // selLockedOut = !hasUrlParam;
 
-        if (!DEBUG_SKIP_RULESET_LOADING)
-        {
-            Console.WriteLine("Loading rulesets...");
-            var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 62);
-            await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 62);
+        Console.WriteLine("Loading rulesets...");
+        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
+        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
 
-            GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
-        }
-        else
-        {
-            Console.WriteLine("DEBUG: Skipping RuleSet loading (ADD/CONNECT).");
-        }
+        GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
         
         if (hasUrlParam)
         {
@@ -1076,19 +1034,34 @@ private async Task HandleBoardSelect(Board board)
     /// Handles most of the setup process of the bench after import.
     /// </summary>
     /// <param name="json">The full JSON to deserialize.</param>
-    private string DeserializeJson(string json)
+    private static Data? DeserializeJson(string jsonString)
     {
+        Console.WriteLine("Starting JSON deserialization");
         try
         {
-            // your existing logic here...
-            // if you currently "return ..." in some branches, keep them
+            var options = new JsonSerializerOptions
+            {
+                IncludeFields = true,
+                WriteIndented = true
+            };
+            options.Converters.Add(new ParamSerializer());
 
-            return json; // <-- TEMP safe fallback if you don’t know what else yet
+            Data? canvasData = JsonSerializer.Deserialize<Data>(jsonString, options);
+
+            if (canvasData == null)
+            {
+                Console.WriteLine("Deserialization returned null");
+                return null;
+            }
+
+            Console.WriteLine($"Deserialization successful. Component count: {canvasData.Comps?.Count ?? 0}");
+            return canvasData;
         }
         catch (Exception ex)
         {
-            Console.WriteLine(ex);
-            return json; // <-- or return string.Empty;
+            Console.WriteLine($"Error during deserialization: {ex.Message}");
+            Console.WriteLine($"JSON content: {jsonString.Substring(0, Math.Min(200, jsonString.Length))}..."); // Show start of JSON for debugging
+            return null;
         }
     }
 
@@ -1129,11 +1102,8 @@ private async Task HandleBoardSelect(Board board)
                 Console.WriteLine($"Removing component {comp.Key}");
                 SelectedComponent = comp.Key;
                 RemoveComp(true);
+                SelectedComponent = -1;
             }
-            SelectedComponent = -1;
-
-            Comps.Clear();
-
 
             BuildCanvas!.ConnLines.Clear();
             BuildCanvas.ResetTransform();
@@ -1153,7 +1123,6 @@ private async Task HandleBoardSelect(Board board)
                 kv.Value.GsNode = n;
 
                 GraphSynthInvoke.GetNodes().Add(n);
-                LogGraph($"IMPORT: node created localId={kv.Key} type={kv.Value.Data.nodeName}");
                 if (kv.Value.Data.nodeName != null)
                 {
                     GraphSynthInvoke.Inputs.Add(kv.Value.Data.nodeName);
@@ -1162,7 +1131,6 @@ private async Task HandleBoardSelect(Board board)
 
                 // Add and connect each component
                 GraphSynthInvoke.Add();
-                LogGraph($"IMPORT: after GraphSynthInvoke.Add() localId={kv.Key}");
                 if (kv.Value.Data.nodeName != null && !kv.Value.IsArduino())
                 {
                     var connected = GraphSynthInvoke.Connect(kv.Value.Data.nodeName, "arduino", SelectArduinoNode);
