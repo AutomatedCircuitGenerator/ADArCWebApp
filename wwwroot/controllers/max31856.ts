@@ -3,7 +3,7 @@ import { AVRRunner } from "@lib/execute";
 import { PinState } from "@lib/avr8js";
 
 export class MAX31856 extends Controller {
-    private _temperature: number = 0;
+    private temperature: number = 35;
 
     override setup() {
         const spi = AVRRunner.getInstance().board.spis[0];
@@ -17,7 +17,7 @@ export class MAX31856 extends Controller {
 
     override update(state: Record<string, any>) {
         if (state.temperature != null) {
-            this._temperature = state.temperature;
+            this.temperature = state.temperature;
         }
     }
 
@@ -46,7 +46,7 @@ export class MAX31856 extends Controller {
         // Ignore if not active
         if (!this.activeSession) return;
 
-        const raw = Math.round(this._temperature / 0.25);
+        const raw = Math.round(this.temperature / 0.25);
 
         let byteToSend = 0;
         switch (this.transferIndex) {
