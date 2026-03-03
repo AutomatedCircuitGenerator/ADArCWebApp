@@ -5,7 +5,6 @@ using System.Xml.Linq;
 using System.Xml.Serialization;
 using System.Linq;
 
-
 namespace ADArCWebApp
 {
     public sealed class RuleSetMap
@@ -23,8 +22,7 @@ namespace ADArCWebApp
             Rulesets = new Dictionary<string, ruleSet>();
             //Setup set of rules which need to be modified
             //Inherited from BOGLWeb, probably not necessary
-            modifiedRules = ImmutableHashSet.Create(
-                "BIG1");
+            modifiedRules = ImmutableHashSet.Create("BIG1");
             numLoaded = 0;
         }
 
@@ -53,8 +51,7 @@ namespace ADArCWebApp
             client.BaseAddress = new(navigationManager.BaseUri + "rules/");
 
             // Load the ruleset, parse file contents rules, and save them for iteration to download individually
-            HttpResponseMessage ruleSetResponse =
-                await client.GetAsync(name + ".rsxml");
+            HttpResponseMessage ruleSetResponse = await client.GetAsync(name + ".rsxml");
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
             var ruleReader = new StreamReader(ruleSetFileContent);
@@ -88,23 +85,16 @@ namespace ADArCWebApp
 
             XElement xeRule = XElement.Parse(ruleText);
 
+            // Robust: find grammarRule regardless of namespace prefix
             XElement? temp = xeRule.Descendants().FirstOrDefault(e => e.Name.LocalName == "grammarRule");
 
             grammarRule openRule = new();
 
             if (temp != null)
             {
-                var xml = temp.ToString();
-
-                // Remove the GraphSynth prefix and any GraphSynth namespace declarations we might encounter
-                xml = xml.Replace("GraphSynth:", "");
-                xml = xml.Replace("xmlns=\"ignorableUri\"", "");
-                xml = xml.Replace("xmlns:GraphSynth=\"ignorableUri\"", "");
-                xml = xml.Replace("xmlns:GraphSynth=\"clr-namespace:GraphSynth\"", "");
-
-                openRule = DeSerializeRuleFromXml(xml);
+                // Use the proven cleanup pipeline from the working branch
+                openRule = DeSerializeRuleFromXml(RemoveXamLns(RemoveIgnorablePrefix(temp.ToString())));
             }
-
 
             RemoveNullWhiteSpaceEmptyLabels(openRule.L);
             RemoveNullWhiteSpaceEmptyLabels(openRule.R);
@@ -158,6 +148,7 @@ namespace ADArCWebApp
             StringReader stringReader = new StringReader(xmlString);
             XmlSerializer ruleDeserializer = new XmlSerializer(typeof(grammarRule));
             grammarRule? newGrammarRule = (grammarRule)ruleDeserializer.Deserialize(stringReader);
+
             if (newGrammarRule.L == null)
             {
                 newGrammarRule.L = new designGraph();
@@ -193,6 +184,7 @@ namespace ADArCWebApp
         private static void RemoveNullWhiteSpaceEmptyLabels(designGraph g)
         {
             g.globalLabels.RemoveAll(string.IsNullOrWhiteSpace);
+
             foreach (arc a in g.arcs)
             {
                 a.localLabels.RemoveAll(string.IsNullOrWhiteSpace);
