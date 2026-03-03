@@ -730,21 +730,34 @@ namespace ADArCWebApp.Shared
                         paneHoverText: "MAX31856",
                         codeForGen: new()
                         {
-                            { "include", "#include <SPI.h> // SPI library instead of MAX31856.h" },
-                            { "global", "// Define chip select for thermocouple\n#define CS_PIN@ ~\"cs\"\nfloat temperature@ = 0.0;" },
-                            { "setup", "SPI.begin();\npinMode(CS_PIN@, OUTPUT);\ndigitalWrite(CS_PIN@, HIGH);" },
+                            { "include", "#include <SPI.h>" },
+                            { 
+                                "global", 
+                                "#define CS_PIN@ ~\"cs\"\n" +
+                                "byte tempMSB@ = 0;\n" +
+                                "byte tempLSB@ = 0;\n" +
+                                "float temperature@ = 0.0;"
+                            },
+                            { 
+                                "setup", 
+                                "  SPI.begin();\n" +
+                                "  pinMode(CS_PIN@, OUTPUT);\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);"
+                            },
                             {
                                 "loopMain",
-                                "// Read temperature from MAX31856 via SPI\n" +
-                                "digitalWrite(CS_PIN@, LOW);\n" +
-                                "byte config@ = SPI.transfer(0x00); // Example: send config/read command\n" +
-                                "byte tempMSB@ = SPI.transfer(0x00);\n" +
-                                "byte tempLSB@ = SPI.transfer(0x00);\n" +
-                                "digitalWrite(CS_PIN@, HIGH);\n" +
-                                "temperature@ = ((tempMSB@ << 8) | tempLSB@) * 0.25; // Convert to Celsius\n" +
-                                "Serial.print(\"Temperature = \");\n" +
-                                "Serial.println(temperature@);\n" +
-                                "delay(500);"
+                                "  digitalWrite(CS_PIN@, LOW);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  byte config@ = SPI.transfer(0x00); // Config read\n" +
+                                "  tempMSB@ = SPI.transfer(0x00); // Read MSB (don't re-declare)\n" +
+                                "  tempLSB@ = SPI.transfer(0x00); // Read LSB (don't re-declare)\n\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  int raw@ = ((int)tempMSB@ << 8) | tempLSB@;\n" +
+                                "  temperature@ = raw@ * 0.25;\n\n" +
+                                "  Serial.print(\"Temperature = \");\n" +
+                                "  Serial.println(temperature@);\n" +
+                                "  delay(500);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },

@@ -3,7 +3,15 @@ import { AVRRunner } from "@lib/execute";
 import { PinState } from "@lib/avr8js";
 
 export class MAX31856 extends Controller {
-    private temperature: number = 35;
+    private _temperature: number = -20;
+    private byteCount = 0; // 0, 1, 2, then back to 0
+
+    override update(state: Record<string, any>) {
+        if (state.temperature != null) {
+            this._temperature = state.temperature;
+            console.log("MAX31856 temperature updated to:", this._temperature);
+        }
+    }
 
     override setup() {
         const spi = AVRRunner.getInstance().board.spis[0];
@@ -11,59 +19,50 @@ export class MAX31856 extends Controller {
             spi.addListener(this.spiCallback);
             console.log("MAX31856 SPI listener attached");
         }
-
-        console.log("MAX31856 setup called");
     }
 
-    override update(state: Record<string, any>) {
-        if (state.temperature != null) {
-            this.temperature = state.temperature;
-        }
+    private get shouldReadSPI(): boolean {
+        return this.pins.cs[0].digital.state === PinState.Low;
     }
-
-    private transferIndex = 0;
-    private activeSession = false;
 
     private spiCallback = (byte: number) => {
-        const spi = AVRRunner.getInstance().board.spis[0];
-        if (!spi || !this.pins.cs?.[0]) return;
-
-        const csState = this.pins.cs[0].digital.state ?? PinState.High;
-
-        // Detect start of SPI transaction
-        if (csState === PinState.Low && !this.activeSession) {
-            this.activeSession = true;
-            this.transferIndex = 0;
-        }
-
-        // Detect end of SPI transaction
-        if (csState !== PinState.Low && this.activeSession) {
-            this.activeSession = false;
-            this.transferIndex = 0;
+        if (!this.shouldReadSPI) {
+            this.byteCount = 0; // Reset when CS is HIGH
             return;
         }
 
-        // Ignore if not active
-        if (!this.activeSession) return;
-
-        const raw = Math.round(this.temperature / 0.25);
-
-        let byteToSend = 0;
-        switch (this.transferIndex) {
-            case 0:
-                byteToSend = 0; // Config dummy byte
-                break;
-            case 1:
-                byteToSend = (raw >> 8) & 0xff; // MSB
-                break;
-            case 2:
-                byteToSend = raw & 0xff; // LSB
-                break;
-            default:
-                byteToSend = 0;
+        if (this._temperature === undefined) {
+            console.log("Temperature undefined");
+            return;
         }
 
-        this.transferIndex++;
-        spi.completeTransfer(byteToSend);
+        // Convert temperature to raw value (0.25°C per LSB)
+        const raw = Math.round(this._temperature / 0.25);
+
+        let byteToSend = 0;
+
+        switch (this.byteCount) {
+            case 0:
+                byteToSend = 0; // Config dummy byte
+                console.log("SPI byte 0 - sending config dummy: 0");
+                break;
+            case 1:
+                byteToSend = (raw >> 8) & 0xFF; // MSB
+                console.log("SPI byte 1 - sending MSB:", byteToSend, "for temp:", this._temperature);
+                break;
+            case 2:
+                byteToSend = raw & 0xFF; // LSB
+                console.log("SPI byte 2 - sending LSB:", byteToSend, "for temp:", this._temperature);
+                break;
+        }
+
+        this.byteCount = (this.byteCount + 1) % 3; // Cycle: 0 → 1 → 2 → 0
+
+        // Schedule the response on the next SPI clock cycle
+        const spi = AVRRunner.getInstance().board.spis[0];
+        AVRRunner.getInstance().board.cpu.addClockEvent(
+            () => spi.completeTransfer(byteToSend),
+            spi.transferCycles
+        );
     };
 }
