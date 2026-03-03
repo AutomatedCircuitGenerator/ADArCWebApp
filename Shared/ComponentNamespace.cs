@@ -641,8 +641,8 @@ namespace ADArCWebApp.Shared
                                        "\tSerial.println(\"Relay ON\");\n" +
                                        "\tdelay(1000); // Wait for 1 second\n" +
                                        "\n" +
-                                       "\tdigitalWrite(relayPin@, HIGH); // Turn relay OFF\n" +
-                                       "\tSerial.println(\"Relay OFF\");\n" +
+                                       "\t//digitalWrite(relayPin@, HIGH); // uncomment this to Turn relay OFF- sim only\n" +
+                                       "\t//Serial.println(\"Relay OFF\");\n" +
                                        "\tdelay(1000); // Wait for 1 second" }, 
                          { "functions", "" },
                          { "delayLoop", "" }, 
