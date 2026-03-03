@@ -708,56 +708,67 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
-            {
+           {
                 33,
                 new ComponentDataBuilder("Pressure Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorMPS20N0040D),
                     paneHoverText: "MPS20N0040D",
                     codeForGen: new()
                     {
                         { "include", "#include <Arduino.h>" },
-
                         {
                             "global",
-                            "int pressureSCK@ = @;\n" +
-                            "int pressureDOUT@ = @;\n" +
+                            "#define pressureSCK@ ~\"sck\"\n" +
+                            "#define pressureDOUT@ ~\"dout\"\n" +
                             "long pressureRaw@ = 0;"
                         },
-
                         {
                             "setup",
                             "  pinMode(pressureSCK@, OUTPUT);\n" +
                             "  pinMode(pressureDOUT@, INPUT);\n" +
                             "  digitalWrite(pressureSCK@, LOW);"
                         },
-
                         {
                             "loopMain",
                             "  pressureRaw@ = readPressureADC@();\n" +
+                            "  \n" +
                             "  Serial.print(\"Raw Pressure ADC: \");\n" +
-                            "  Serial.println(pressureRaw@);\n"
+                            "  Serial.println(pressureRaw@);\n" +
+                            "  \n" +
+                            "  // Convert ADC to pressure (in kPa)\n" +
+                            "  // pressure = (ADC - offset) / scale\n" +
+                            "  float pressure@ = (pressureRaw@ - 8388608.0) / 100000.0;\n" +
+                            "  Serial.print(\"Pressure: \");\n" +
+                            "  Serial.print(pressure@);\n" +
+                            "  Serial.println(\" kPa\");"
                         },
-
                         {
                             "functions",
                             "long readPressureADC@() {\n" +
                             "  long value = 0;\n" +
-                            "  while (digitalRead(pressureDOUT@) == HIGH);\n" +
+                            "  int timeout@ = 0;\n" +
+                            "  \n" +
+                            "  // Wait for DOUT to go LOW (data ready)\n" +
+                            "  while (digitalRead(pressureDOUT@) == HIGH && timeout@ < 100000) {\n" +
+                            "    timeout@++;\n" +
+                            "  }\n" +
+                            "  \n" +
+                            "  // Read 24 bits one at a time\n" +
                             "  for (int i = 0; i < 24; i++) {\n" +
                             "    digitalWrite(pressureSCK@, HIGH);\n" +
+                            "    delayMicroseconds(10);\n" +
                             "    value = (value << 1) | digitalRead(pressureDOUT@);\n" +
                             "    digitalWrite(pressureSCK@, LOW);\n" +
+                            "    delayMicroseconds(10);\n" +
                             "  }\n" +
-                            "  if (value & 0x800000) value |= 0xFF000000;\n" +
+                            "  \n" +
                             "  return value;\n" +
                             "}"
                         },
-
                         { "delayLoop", "delay(500);" },
                         { "delayTime", "" }
                     }
-                    , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Property("pressure", 0.0)
-                    .Property("offset", 8388608.0)
-                    .Property("scale", 100000.0)
+                    , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d")
+                    .Property("pressure", 0.0)
                     .Finish()
             }
         };
