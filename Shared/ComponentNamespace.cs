@@ -720,8 +720,8 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "global",
-                            "int dustLEDPin@ = @;   // LED control pin\n" +
-                            "int dustAnalogPin@ = @; // VOUT pin\n" +
+                            "#define dustLEDPin@ ~\"led\"\n" +
+                            "#define dustAnalogPin@ ~\"vout\"\n" +
                             "float dustDensity@ = 0.0;"
                         },
                         {
@@ -733,12 +733,11 @@ namespace ADArCWebApp.Shared
                             "loopMain",
                             "  digitalWrite(dustLEDPin@, LOW);\n" +
                             "  delayMicroseconds(280);\n\n" +
-                            "  int adcValue = analogRead(dustAnalogPin@);\n" +
+                            "  int dustDensity@ = analogRead(dustAnalogPin@);\n" +
                             "  digitalWrite(dustLEDPin@, HIGH);\n\n" +
                             "  delayMicroseconds(40);\n" +
-                            "  delay(10);\n\n" +
-                            "  float voltage = adcValue * (5.0 / 1023.0);\n" +
-                            "  dustDensity@ = (voltage - 0.9) * 1000.0 / 5.0;\n\n" +
+                            "  delay(1000);\n\n" +
+                            "  dustDensity@ = (dustDensity@ / 1023.0) * 1000.0;\n\n" +
                             "  Serial.print(\"Dust Density (ug/m3): \");\n" +
                             "  Serial.println(dustDensity@);"
                         },
@@ -746,7 +745,9 @@ namespace ADArCWebApp.Shared
                         { "delayLoop", "" },
                         { "delayTime", "" }
                     }
-                    , pins: ["Vcc", "gnd", "led", "vout"], gsNodeName: "gp2y1014au0f").Property("dustdensity", 0.0).Finish()
+                    , pins: ["Vcc", "gnd", "led", "vout"], 
+                    listenOn: ["vout"],  
+                    gsNodeName: "gp2y1014au0f").Property("dustdensity", 30.0).Finish()
             }
         };
     }
