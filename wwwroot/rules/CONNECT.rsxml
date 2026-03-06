@@ -44,6 +44,7 @@
     <string>vl53l0x_arduino.grxml</string>
     <string>irdetector_arduino.grxml</string>
     <string>ssd1306_arduino.grxml</string>
+    <string>pms5003_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
