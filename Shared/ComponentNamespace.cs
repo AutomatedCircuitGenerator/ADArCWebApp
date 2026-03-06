@@ -650,7 +650,7 @@ namespace ADArCWebApp.Shared
                                 "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "pms5003").Property("temperature", 20.0)
+                        }, pins: ["Vcc", "gnd", "txd", "rxd"], gsNodeName: "pms5003").Property("temperature", 20.0)
                     .Finish()
                 
             }
