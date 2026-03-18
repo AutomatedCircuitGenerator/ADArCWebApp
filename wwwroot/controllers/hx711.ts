@@ -25,7 +25,7 @@ export class HX711 extends Controller {
     }
     private handleClock(state: PinState) {
         if (state === PinState.Low) {
-            this.data.state = ((this.weight >> this.bitIndex) & 1) === 1;
+            this.data.state = ((this.weight >> this.bitIndex) & 1) === 1 ? PinState.High : PinState.Low;
             this.bitIndex--;
 
             if (this.bitIndex < 0) {
