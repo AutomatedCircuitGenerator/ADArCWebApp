@@ -660,7 +660,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
             // {
-            //     32,
+            //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
             //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
             //         codeForGen: new()
@@ -814,7 +814,69 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
-            }
+            },
+            {
+                36,
+                new ComponentDataBuilder(
+                        "T-type thermocouple",
+                        true,
+                        "Input/Temperature and Humidity Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorMAX31856),
+                        paneHoverText: "MAX31856",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <SPI.h>" },
+                            { 
+                                "global", 
+                                "#define CS_PIN@ ~\"cs\"\n" +
+                                "byte tempMSB@ = 0;\n" +
+                                "byte tempLSB@ = 0;\n" +
+                                "float temperature@ = 0.0;"
+                            },
+                            { 
+                                "setup", 
+                                "  SPI.begin();\n" +
+                                "  pinMode(CS_PIN@, OUTPUT);\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);"
+                            },
+                            {
+                                "loopMain",
+                                "  digitalWrite(CS_PIN@, LOW);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  byte config@ = SPI.transfer(0x00); // Config read\n" +
+                                "  tempMSB@ = SPI.transfer(0x00); // Read MSB (don't re-declare)\n" +
+                                "  tempLSB@ = SPI.transfer(0x00); // Read LSB (don't re-declare)\n\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  int raw@ = ((int)tempMSB@ << 8) | tempLSB@;\n" +
+                                "  temperature@ = raw@ * 0.25;\n\n" +
+                                "  Serial.print(\"Temperature = \");\n" +
+                                "  Serial.println(temperature@);\n" +
+                                "  delay(500);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
+                        gsNodeName: "max31856"
+                    )
+                    .Property("temperature", -20.0)
+                    .Finish()
+            },
+            // {
+            //     37,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
         };
     }
 }
