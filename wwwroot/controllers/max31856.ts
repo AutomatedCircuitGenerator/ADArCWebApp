@@ -8,7 +8,17 @@ export class MAX31856 extends Controller {
 
     override update(state: Record<string, any>) {
         if (state.temperature != null) {
+
+            // hard code max and min boundaries
+            if (state.temperature > 350) {
+                state.temperature = 350;
+            }
+            else if (state.temperature < -200) {
+                state.temperature = -200;
+            }
+            
             this._temperature = state.temperature;
+            
             console.log("MAX31856 temperature updated to:", this._temperature);
         }
     }

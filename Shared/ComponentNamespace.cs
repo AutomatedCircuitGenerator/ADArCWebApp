@@ -814,18 +814,7 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
-            }
             },
-            // {
-            //     31,
-            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
-            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
-            //         codeForGen: new()
-            //         {
-            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-            //             { "delayLoop", "" }, { "delayTime", "" }
-            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
-            // }
             {
                 36,
                 new ComponentDataBuilder(
@@ -878,6 +867,16 @@ namespace ADArCWebApp.Shared
                     .Property("temperature", -20.0)
                     .Finish()
             },
+            // {
+            //     37,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
         };
     }
 }
