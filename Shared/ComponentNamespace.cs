@@ -850,7 +850,7 @@ namespace ADArCWebApp.Shared
                                 "    }\n" +
                                 "    \n" +
                                 "   int centerRaw@ = (pixelData@[28] << 8) | pixelData@[27];\n" +
-                                "   centerTemp@ = (centerRaw@ / 4.0) - 40.0;\n" +
+                                "   centerTemp@ = (centerRaw@ / 4.0) - 40;\n" +
                                 "    \n" +
                                 "    Serial.println(\"Center Temp: \");\n" +
                                 "    Serial.println(centerTemp@);\n" +
