@@ -660,7 +660,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
             // {
-            //     32,
+            //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
             //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
             //         codeForGen: new()

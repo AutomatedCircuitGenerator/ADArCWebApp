@@ -3453,6 +3453,7 @@
     "placeholder_3452": "MAX6675",
     "placeholder_3453": "MAX6675 library",
     "MAX6675.h": "MAX6675 with hardware SPI",
+    "MAX31856.h": "Adafruit MAX31856 library",
     "placeholder_3455": "MAX6675_Thermocouple",
     "placeholder_3456": "MAX6816",
     "placeholder_3457": "MAX7219Segment",

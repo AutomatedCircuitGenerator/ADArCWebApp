@@ -32,6 +32,7 @@
     <string>sen0114_arduino.grxml</string>
     <string>srv-ph_arduino.grxml</string>
     <string>amg8833_arduino.grxml</string>
+    <string>max31856_arduino.grxml</string>
     <string>sht30_arduino.grxml</string>
     <string>sen0189_arduino.grxml</string>
   </ruleFileNames>
