@@ -259,7 +259,7 @@
     "placeholder_258": "Adafruit AM radio library",
     "placeholder_259": "Adafruit AM2315",
     "placeholder_260": "Adafruit AM2320 sensor library",
-    "placeholder_261": "Adafruit AMG88xx Library",
+    "Adafruit_AMG88xx.h": "Adafruit AMG88xx Library",
     "placeholder_262": "Adafruit APDS9960 Library",
     "placeholder_263": "Adafruit AS726X",
     "placeholder_264": "Adafruit AS7341",

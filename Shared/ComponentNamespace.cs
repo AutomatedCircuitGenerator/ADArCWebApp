@@ -817,66 +817,56 @@ namespace ADArCWebApp.Shared
             },
             {
                 36,
-                new ComponentDataBuilder(
-                        "T-type thermocouple",
-                        true,
-                        "Input/Temperature and Humidity Sensors",
-                        0.7,
-                        100,
-                        75,
-                        typeof(RazorMAX31856),
-                        paneHoverText: "MAX31856",
+                new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
+                        .5, -20, -20, typeof(RazorAMG8833),
+                        paneHoverText: "AMG8833",
                         codeForGen: new()
                         {
-                            { "include", "#include <SPI.h>" },
-                            { 
-                                "global", 
-                                "#define CS_PIN@ ~\"cs\"\n" +
-                                "byte tempMSB@ = 0;\n" +
-                                "byte tempLSB@ = 0;\n" +
-                                "float temperature@ = 0.0;"
+                            { "include", "#include <Wire.h>" },
+                            {
+                                "global",
+                                "#define AMG8833_I2C_ADDR@ 0x69\n" +
+                                "byte pixelData@[128];\n" +
+                                "float centerTemp@ = 0.0;\n" +
+                                "unsigned long lastReadTime@ = 0;"
                             },
-                            { 
-                                "setup", 
-                                "  SPI.begin();\n" +
-                                "  pinMode(CS_PIN@, OUTPUT);\n" +
-                                "  digitalWrite(CS_PIN@, HIGH);"
+                            {
+                                "setup",
+                                "  Wire.begin();\n" +
+                                "  Serial.println(\"AMG8833 Ready\");"
                             },
                             {
                                 "loopMain",
-                                "  digitalWrite(CS_PIN@, LOW);\n" +
-                                "  delayMicroseconds(10);\n\n" +
-                                "  byte config@ = SPI.transfer(0x00); // Config read\n" +
-                                "  tempMSB@ = SPI.transfer(0x00); // Read MSB (don't re-declare)\n" +
-                                "  tempLSB@ = SPI.transfer(0x00); // Read LSB (don't re-declare)\n\n" +
-                                "  digitalWrite(CS_PIN@, HIGH);\n" +
-                                "  delayMicroseconds(10);\n\n" +
-                                "  int raw@ = ((int)tempMSB@ << 8) | tempLSB@;\n" +
-                                "  temperature@ = raw@ * 0.25;\n\n" +
-                                "  Serial.print(\"Temperature = \");\n" +
-                                "  Serial.println(temperature@);\n" +
-                                "  delay(500);"
+                                "  if (millis() - lastReadTime@ >= 500) {\n" +
+                                "    lastReadTime@ = millis();\n" +
+                                "    \n" +
+                                "    Wire.beginTransmission(AMG8833_I2C_ADDR@);\n" +
+                                "    Wire.write(0x80);\n" +
+                                "    Wire.endTransmission();\n" +
+                                "    \n" +
+                                "    Wire.requestFrom(AMG8833_I2C_ADDR@, 128);\n" +
+                                "    for (int i = 0; i < 128 && Wire.available(); i++) {\n" +
+                                "      pixelData@[i] = Wire.read();\n" +
+                                "    }\n" +
+                                "    \n" +
+                                "   int centerRaw@ = (pixelData@[28] << 8) | pixelData@[27];\n" +
+                                "   centerTemp@ = (centerRaw@ / 4.0) - 40;\n" +
+                                "    \n" +
+                                "    Serial.println(\"Center Temp: \");\n" +
+                                "    Serial.println(centerTemp@);\n" +
+                                "    Serial.println(\" C\");\n" +
+                                "  delay(2000);\n" +
+                                "  }"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
-                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
-                        gsNodeName: "max31856"
-                    )
-                    .Property("temperature", -20.0)
+                        pins: ["5V", "gnd", "scl", "sda"],
+                        gsNodeName: "amg8833")
+                    .Property("temperature", 25.0)
                     .Finish()
             },
-            // {
-            //     37,
-            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
-            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
-            //         codeForGen: new()
-            //         {
-            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-            //             { "delayLoop", "" }, { "delayTime", "" }
-            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
-            // }
         };
     }
 }
