@@ -709,51 +709,53 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                35,
-                new ComponentDataBuilder("Geiger counter", true, "Input/Other Sensors", 1, 18.5,
-                    19.154, typeof(RazorJ305B), paneHoverText: "J305B",
-                    codeForGen: new()
-                    {
+                39,
+                new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 1, 75, 75,
+                        typeof(RazorJ305B), paneHoverText: "J305B",
+                        codeForGen: new()
                         {
-                            "include",
-                            "#include <Arduino.h>"
+                            {
+                                "include",
+                                "#include <Arduino.h>"
+                            },
+                            {
+                                "global",
+                                "volatile unsigned long geigerCount@ = 0;\n" +
+                                "unsigned long geigerLastTime@ = 0;\n" +
+                                "unsigned int cpm@ = 0;\n" +
+                                "int geigerPin@ = ~\"vin\";"
+                            },
+                            {
+                                "setup",
+                                "  pinMode(geigerPin@, INPUT);\n" +
+                                "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerISR@, RISING);\n" +
+                                "  geigerLastTime@ = millis();"
+                            },
+                            {
+                                "loopMain",
+                                "  static unsigned long lastPrint@ = 0;\n" +
+                                "  if (millis() - lastPrint@ >= 2000) {\n" +
+                                "    lastPrint@ = millis();\n" +
+                                "    cpm@ = geigerCount@ * 30;\n" +
+                                "    Serial.print(\"CPM: \");\n" +
+                                "    Serial.println(cpm@);\n" +
+                                "    geigerCount@ = 0;\n" +
+                                "  }"
+                            },
+                            {
+                                "functions",
+                                "void geigerISR@() {\n" +
+                                "  geigerCount@++;\n" +
+                                "}"
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
                         },
-                        {
-                            "global",
-                            "volatile unsigned long geigerCount@ = 0;\n" +
-                            "unsigned long geigerLastTime@ = 0;\n" +
-                            "unsigned int cpm@ = 0;\n" +
-                            "int geigerPin@ = @;"
-                        },
-                        {
-                            "setup",
-                            "  Serial.begin(9600);\n" +
-                            "  pinMode(geigerPin@, INPUT);\n" +
-                            "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerISR@, RISING);\n" +
-                            "  geigerLastTime@ = millis();"
-                         
-                        },
-                        {
-                            "loopMain",
-                            "  if (millis() - geigerLastTime@ >= 2000) {\n" +
-                            "      cpm@ = geigerCount@ * 30;\n" +
-                            "      geigerCount@ = 0;\n" +
-                            "      geigerLastTime@ = millis();\n" +
-                            "      Serial.print(\"CPM: \");\n" +
-                            "      Serial.println(cpm@);\n" +
-                            "  }"
-                        },
-                        {
-                            "functions",
-                            "void geigerISR@() {\n" +
-                            "  geigerCount@++;\n" +
-                            "}"
-                        },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    }, pins: ["Vcc", "gnd", "vin"], gsNodeName: "j305b").Property("cpm", 15.0).Finish()
-                 }
-                
+                        pins: ["Vcc", "gnd", "vin"],
+                        gsNodeName: "j305b")
+                    .Property("cpm", 15.0)
+                    .Finish()
+            }
         };
     }
 }
