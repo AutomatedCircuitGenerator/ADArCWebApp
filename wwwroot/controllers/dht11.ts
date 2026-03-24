@@ -64,36 +64,49 @@ export class DHT11 extends Controller {
         schedule(() => {}, 250);
 
         // ACK: 50us LOW, 80us HIGH
-        schedule(() => this.signal.state = Boolean(PinState.Low), 50);
-        schedule(() => this.signal.state = Boolean(PinState.High), 80);
+        schedule(() => this.signal.state = (PinState.Low), 50);
+        schedule(() => this.signal.state = (PinState.High), 80);
 
         // 40-bit data
         for (let i = 0; i < 40; i++) {
             const byte = dataBytes[Math.floor(i / 8)];
             const bit = (byte >> (7 - (i % 8))) & 1;
 
-            schedule(() => this.signal.state = Boolean(PinState.Low), 50);
-            schedule(() => this.signal.state = Boolean(PinState.High), bit ? 70 : 26);
+            schedule(() => this.signal.state = (PinState.Low), 50);
+            schedule(() => this.signal.state = (PinState.High), bit ? 70 : 26);
         }
 
-        schedule(() => this.signal.state = Boolean(PinState.Low), 0);
-        schedule(() => this.signal.state = Boolean(PinState.Input), 0);
+        schedule(() => this.signal.state = (PinState.Low), 0);
+        schedule(() => this.signal.state = (PinState.Input), 0);
         console.log("[DHT11] Data transmission complete");
     }
 
     private valuesToDigitalSignal(): number[] {
         const humInt = Math.round(this.humidity);
         const humDec = 0;
-        const tempInt = Math.round(this.temperature);
+        let tempInt = Math.round(this.temperature);
         const tempDec = 0;
 
-        const checksum = (humInt + humDec + tempInt + tempDec) & 0xFF;
+        // Handle negative temperatures with sign bit
+        let tempHigh: number;
+        let tempLow: number;
+
+        if (tempInt < 0) {
+            tempInt = -tempInt;
+            tempHigh = ((tempInt >> 8) | 0x80) & 0xFF; // Set sign bit and mask to 8-bit
+        } else {
+            tempHigh = (tempInt >> 8) & 0x7F; // Clear sign bit and mask to 8-bit
+        }
+
+        tempLow = tempInt & 0xFF;
+
+        const checksum = (humInt + humDec + tempHigh + tempLow) & 0xFF;
 
         return [
-            humInt,
-            humDec,
-            tempInt,
-            tempDec,
+            humInt & 0xFF,
+            humDec & 0xFF,
+            tempHigh,
+            tempLow,
             checksum
         ];
     }
