@@ -62,13 +62,13 @@ export class J305B extends Controller {
         const vin = this.pins.vin[0].digital;
 
         // Send RISING pulse for interrupt detection
-        vin.state = false;
+        vin.state = 0;
 
         AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-            vin.state = true;
+            vin.state = 1;
 
             AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                vin.state = false;
+                vin.state = 0;
             }, 100);
         }, 50);
     }
