@@ -709,7 +709,7 @@ namespace ADArCWebApp.Shared
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
             {
-                33,
+                37,
                 new ComponentDataBuilder("DHT11", true, "Input/Temperature and Humidity Sensors", 1, 75, 75,
                         typeof(RazorDHT11),
                         codeForGen: new()
