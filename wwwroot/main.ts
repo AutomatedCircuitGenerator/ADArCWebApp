@@ -33,6 +33,7 @@ import {MAX31856} from "@controllers/max31856";
 import {SHT30} from "@controllers/sht30";
 import {DHT22} from "@controllers/dht22";
 import {SEN0189} from "@controllers/sen0189";
+import {DHT11} from "@controllers/dht11";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -71,3 +72,4 @@ import {SEN0189} from "@controllers/sen0189";
 (<any>window).SHT30 = SHT30;
 (<any>window).DHT22 = DHT22;
 (<any>window).SEN0189 = SEN0189;
+(<any>window).DHT11 = DHT11;
