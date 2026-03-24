@@ -714,29 +714,28 @@ namespace ADArCWebApp.Shared
                         typeof(RazorDHT11),
                         codeForGen: new()
                         {
-                            {
-                                "include",
-                                "#include <DHT.h>"
-                            },
+                            { "include", "#include <DHT.h>\n" },
                             {
                                 "global",
-                                "#define DHTPIN@ ~\"digital_out\"        // Data pin connected to DHT11\n#define DHTTYPE@ DHT11\nDHT dht@(DHTPIN@, DHTTYPE@);"
+                                "#define DHTPIN@ ~\"digital_out\"\n" +
+                                "#define DHTTYPE DHT11\n" +
+                                "DHT dht@(DHTPIN@, DHTTYPE);"
                             },
-                            {
-                                "setup",
-                                "  dht@.begin(); // Initialize DHT11 sensor"
-                            },
+                            { "setup", "\tdht@.begin();" },
                             {
                                 "loopMain",
-                                "  float humidity2 = humidity@;\n" +
-                                "  float temperature2 = temperature@;\n\n" +
-                                "  Serial.print(\"Humidity@: \");\n" +
-                                "  Serial.print(humidity2);\n" +
-                                "  Serial.print(\" %\");\n" +
-                                "  Serial.print(\"  Temperature@: \");\n" +
-                                "  Serial.print(temperature2);\n" +
-                                "  Serial.println(\" °C\");\n\n" +
-                                "  delay(1000);"
+                                "\tfloat humidity@ = dht@.readHumidity();\n" +
+                                "\tfloat temperature@ = dht@.readTemperature();\n" +
+                                "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
+                                "\t\tSerial.println(\"Failed to read from DHT11 sensor!\");\n" +
+                                "\t} else {\n" +
+                                "\t\tSerial.print(\"Humidity: \");\n" +
+                                "\t\tSerial.print(humidity@);\n" +
+                                "\t\tSerial.print(\"% | Temperature: \");\n" +
+                                "\t\tSerial.print(temperature@);\n" +
+                                "\t\tSerial.println(\"°C\");\n" +
+                                "\t}\n" +
+                                "\tdelay(2000);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
@@ -748,7 +747,6 @@ namespace ADArCWebApp.Shared
                     .Property("humidity", 50.0)
                     .Finish()
             }
-
         };
     }
 }

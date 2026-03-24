@@ -1,121 +1,100 @@
 import { Controller } from "./controller";
 import { AVRRunner } from "@lib/execute";
 import { PinState } from "@lib/avr8js";
+import { CPU, Digital } from "../boards/board";
 
 export class DHT11 extends Controller {
 
-    private _temperature: number = 22; // default matches Razor component
-    private _humidity: number = 50;    // default matches Razor component
-
-    override update(state: Record<string, any>) {
-        if (state.temperature !== undefined) {
-            this._temperature = state.temperature;
-        }
-        if (state.humidity !== undefined) {
-            this._humidity = state.humidity;
-        }
-    }
+    private temperature: number = 22;
+    private humidity: number = 50;
+    private signal: Digital;
+    private cpu: CPU;
+    private lastFallingEdge: number | null = null;
 
     setup() {
-        // Listen for MCU starting the handshake on the data pin
-        const dataPin = this.pins.digital_out[0].digital;
-        dataPin.addListener(this.dataListener);
+        this.signal = this.pins.digital_out[0].digital;
+        this.cpu = AVRRunner.getInstance().board.cpu;
+        this.signal.addListener(this.handleSignalChange.bind(this));
+        console.log("[DHT11] Setup complete, listening on digital_out");
     }
 
-    /**
-     * Detects the DHT11 "start" signal:
-     * MCU pulls DATA LOW for 18ms, then releases HIGH.
-     */
-    private dataListener = () => {
-        const dataPin = this.pins.digital_out[0].digital;
+    private handleSignalChange(state: PinState) {
+        const now = this.cpu.cycles / this.cpu.frequency * 1_000_000;
 
-        if (dataPin.state === PinState.Low) {
-            // Wait for rising edge
-            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                if (dataPin.state === PinState.High) {
-                    this.startTransmission();
-                }
-            }, 500); // small polling delay
+        if (state === PinState.Low) {
+            this.lastFallingEdge = now;
+            console.log("[DHT11] MCU pulled line LOW, waiting for 1ms...");
         }
-    };
 
-    /**
-     * Sends the full DHT11 transmission:
-     * - 80µs LOW
-     * - 80µs HIGH
-     * - 40 bits (humidity int, humidity dec, temp int, temp dec, checksum)
-     */
-    private startTransmission() {
-        const board = AVRRunner.getInstance().board;
-        const dataPin = this.pins.digital_out[0].digital;
-
-        // Pull LOW for 80µs
-        board.cpu.addClockEvent(() => {
-            dataPin.state = Boolean(PinState.Low);
-        }, 1);
-
-        // HIGH for 80µs
-        board.cpu.addClockEvent(() => {
-            dataPin.state = Boolean(PinState.High);
-        }, 80);
-
-        // Send the 40 data bits
-        board.cpu.addClockEvent(() => {
-            this.sendData();
-        }, 160);
+        if (state === PinState.Input && this.lastFallingEdge !== null) {
+            const durationUs = now - this.lastFallingEdge;
+            console.log(`[DHT11] Line released, duration: ${durationUs}us`);
+            if (durationUs >= 1000) {
+                console.log("[DHT11] Start signal detected! Sending ACK and data...");
+                this.lastFallingEdge = null;
+                this.sendAckAndData();
+            }
+        }
     }
 
-    /**
-     * Builds and sends the DHT11 40-bit payload.
-     */
-    private sendData() {
-        const board = AVRRunner.getInstance().board;
-        const dataPin = this.pins.digital_out[0].digital;
+    override update(state: Record<string, any>) {
+        if (state.humidity !== undefined) {
+            this.humidity = Math.min(100, Math.max(0, state.humidity));
+            console.log("[DHT11] Humidity:", this.humidity);
+        }
+        if (state.temperature !== undefined) {
+            this.temperature = Math.min(60, Math.max(-20, state.temperature));
+            console.log("[DHT11] Temperature:", this.temperature);
+        }
+    }
 
-        const humInt = Math.round(this._humidity);
+    private sendAckAndData() {
+        let counter = 0;
+        const dataBytes = this.valuesToDigitalSignal();
+        console.log("[DHT11] Sending data bytes:", dataBytes.map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+
+        const usToCycles = (us: number) => AVRRunner.getInstance().usToCycles(us);
+
+        const schedule = (callback: () => void, us: number) => {
+            const cycles = counter + usToCycles(us);
+            this.cpu.addClockEvent(callback, counter);
+            counter = cycles;
+        };
+
+        schedule(() => {}, 250);
+
+        // ACK: 50us LOW, 80us HIGH
+        schedule(() => this.signal.state = Boolean(PinState.Low), 50);
+        schedule(() => this.signal.state = Boolean(PinState.High), 80);
+
+        // 40-bit data
+        for (let i = 0; i < 40; i++) {
+            const byte = dataBytes[Math.floor(i / 8)];
+            const bit = (byte >> (7 - (i % 8))) & 1;
+
+            schedule(() => this.signal.state = Boolean(PinState.Low), 50);
+            schedule(() => this.signal.state = Boolean(PinState.High), bit ? 70 : 26);
+        }
+
+        schedule(() => this.signal.state = Boolean(PinState.Low), 0);
+        schedule(() => this.signal.state = Boolean(PinState.Input), 0);
+        console.log("[DHT11] Data transmission complete");
+    }
+
+    private valuesToDigitalSignal(): number[] {
+        const humInt = Math.round(this.humidity);
         const humDec = 0;
-        const tempInt = Math.round(this._temperature);
+        const tempInt = Math.round(this.temperature);
         const tempDec = 0;
+
         const checksum = (humInt + humDec + tempInt + tempDec) & 0xFF;
 
-        const bits = [
-            ...this.byteToBits(humInt),
-            ...this.byteToBits(humDec),
-            ...this.byteToBits(tempInt),
-            ...this.byteToBits(tempDec),
-            ...this.byteToBits(checksum)
+        return [
+            humInt,
+            humDec,
+            tempInt,
+            tempDec,
+            checksum
         ];
-
-        let time = 0;
-
-        bits.forEach(bit => {
-            // Always LOW for ~50µs
-            board.cpu.addClockEvent(() => {
-                dataPin.state = Boolean(PinState.Low);
-            }, time);
-            time += 50;
-
-            // HIGH timing encodes the bit: 26µs = 0, 70µs = 1
-            const highTime = bit === 1 ? 70 : 26;
-
-            board.cpu.addClockEvent(() => {
-                dataPin.state = Boolean(PinState.High);
-            }, time);
-
-            time += highTime;
-        });
-
-        // Release line at the end
-        board.cpu.addClockEvent(() => {
-            dataPin.state = Boolean(PinState.High);
-        }, time + 50);
-    }
-
-    private byteToBits(byte: number): number[] {
-        const bits: number[] = [];
-        for (let i = 7; i >= 0; i--) {
-            bits.push((byte >> i) & 1);
-        }
-        return bits;
     }
 }
