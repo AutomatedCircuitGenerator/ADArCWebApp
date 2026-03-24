@@ -1,51 +1,92 @@
-import {Controller} from "./controller";
-import {AVRRunner} from "@lib/execute";
-import {PinState} from "@lib/avr8js";
+import { Controller } from "./controller";
+import { AVRRunner } from "@lib/execute";
+import { PinState } from "@lib/avr8js";
 
 export class NPK extends Controller {
 
-    private _n: number = 0;
-    private _p: number = 0;
-    private _k: number = 0;
+    private _nitrogen: number = 0;
+    private _phosphorus: number = 0;
+    private _potassium: number = 0;
 
     override update(state: Record<string, any>) {
-        if (state.nitrogen !== undefined)  this._n = state.nitrogen;
-        if (state.phosphorus !== undefined) this._p = state.phosphorus;
-        if (state.potassium !== undefined)  this._k = state.potassium;
+        if (state.nitrogen !== undefined) {
+            this._nitrogen = Math.max(0, Math.min(1024, state.nitrogen));
+            console.log("[NPK] Nitrogen updated to:", this._nitrogen, "ppm");
+        }
+        if (state.phosphorus !== undefined) {
+            this._phosphorus = Math.max(0, Math.min(1024, state.phosphorus));
+            console.log("[NPK] Phosphorus updated to:", this._phosphorus, "ppm");
+        }
+        if (state.potassium !== undefined) {
+            this._potassium = Math.max(0, Math.min(1024, state.potassium));
+            console.log("[NPK] Potassium updated to:", this._potassium, "ppm");
+        }
     }
 
     setup() {
-        // Periodically simulate sending a Modbus-style response
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => this.sendPacket(), 500000);
+        console.log("[NPK] Setup complete - N:", this._nitrogen, "P:", this._phosphorus, "K:", this._potassium);
+        this.scheduleResponses();
     }
 
-    private sendPacket() {
-        // RO line is incoming to MCU — must check if receiver enabled
-        const reEnabled = this.pins.RE[0].digital.state == PinState.Low;
-        const deDisabled = this.pins.DE[0].digital.state == PinState.Low;
+    private scheduleResponses() {
+        const scheduleNext = () => {
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                this.checkAndSendPacket();
+                scheduleNext();
+            }, 500000); // Check every ~500k cycles
+        };
+        scheduleNext();
+    }
 
-        if (!reEnabled || !deDisabled) {
-            return; // Receiver not active
+    private checkAndSendPacket() {
+        // RE = Receiver Enable (LOW = enabled)
+        // DE = Driver Enable (HIGH = enabled)
+        const reEnabled = this.pins.RE[0].digital.state === PinState.Low;
+        const deEnabled = this.pins.DE[0].digital.state === PinState.High;
+
+        if (reEnabled && deEnabled) {
+            const response = this.buildPacket();
+            this.sendToUART(response);
+        }
+    }
+
+    private sendToUART(bytes: number[]) {
+        const uart = AVRRunner.getInstance().board.usarts[0];
+        if (!uart) {
+            console.error("[NPK] UART not available");
+            return;
         }
 
-        const response = this.buildPacket();
-        const uart = AVRRunner.getInstance().board.usarts[0];
-
-        for (const byte of response) {
+        let delayCounter = 0;
+        for (const byte of bytes) {
             AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                uart?.writeByte(byte,true);
-            }, 2000);
+                uart.writeByte(byte, true);
+                console.log(`[NPK] Sent byte: 0x${byte.toString(16).padStart(2, '0')}`);
+            }, delayCounter);
+            delayCounter += 2000; // Space out byte transmission
         }
     }
 
     private buildPacket(): number[] {
-        // Modbus response: ID 0x01, function 0x03, byte count 0x06, then N,P,K (2 bytes each)
-        return [
-            0x01, 0x03, 0x06,
-            (this._n >> 8) & 0xFF, this._n & 0xFF,
-            (this._p >> 8) & 0xFF, this._p & 0xFF,
-            (this._k >> 8) & 0xFF, this._k & 0xFF,
-            0x00, 0x00 // CRC placeholder (not needed for simulation)
+        // Modbus RTU response: Slave ID, Function code, byte count, then data
+        const nHigh = (this._nitrogen >> 8) & 0xFF;
+        const nLow = this._nitrogen & 0xFF;
+        const pHigh = (this._phosphorus >> 8) & 0xFF;
+        const pLow = this._phosphorus & 0xFF;
+        const kHigh = (this._potassium >> 8) & 0xFF;
+        const kLow = this._potassium & 0xFF;
+
+        // Simplified Modbus response (CRC omitted for simulation)
+        const response = [
+            0x01,      // Slave ID
+            0x03,      // Function code (read holding registers)
+            0x06,      // Byte count
+            nHigh, nLow,
+            pHigh, pLow,
+            kHigh, kLow
         ];
+
+        console.log("[NPK] Sending packet:", response.map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+        return response;
     }
 }
