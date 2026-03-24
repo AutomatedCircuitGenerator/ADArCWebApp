@@ -11,64 +11,70 @@ export class NPK extends Controller {
     override update(state: Record<string, any>) {
         if (state.nitrogen !== undefined) {
             this._nitrogen = Math.max(0, Math.min(1024, state.nitrogen));
-            console.log("[NPK] Nitrogen updated to:", this._nitrogen, "ppm");
+            console.log("[NPK] Nitrogen:", this._nitrogen, "ppm");
         }
         if (state.phosphorus !== undefined) {
             this._phosphorus = Math.max(0, Math.min(1024, state.phosphorus));
-            console.log("[NPK] Phosphorus updated to:", this._phosphorus, "ppm");
+            console.log("[NPK] Phosphorus:", this._phosphorus, "ppm");
         }
         if (state.potassium !== undefined) {
             this._potassium = Math.max(0, Math.min(1024, state.potassium));
-            console.log("[NPK] Potassium updated to:", this._potassium, "ppm");
+            console.log("[NPK] Potassium:", this._potassium, "ppm");
         }
     }
 
     setup() {
-        console.log("[NPK] Setup complete - N:", this._nitrogen, "P:", this._phosphorus, "K:", this._potassium);
-        this.scheduleResponses();
+        console.log("[NPK] Setup complete");
+        this.scheduleDataSending();
     }
 
-    private scheduleResponses() {
-        const scheduleNext = () => {
-            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                this.checkAndSendPacket();
-                scheduleNext();
-            }, 500000); // Check every ~500k cycles
+    private scheduleDataSending() {
+        const sendData = () => {
+            this.checkAndSendData();
+            AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 1000000);
         };
-        scheduleNext();
+        AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 1000000);
     }
 
-    private checkAndSendPacket() {
-        // RE = Receiver Enable (LOW = enabled)
-        // DE = Driver Enable (HIGH = enabled)
-        const reEnabled = this.pins.RE[0].digital.state === PinState.Low;
-        const deEnabled = this.pins.DE[0].digital.state === PinState.High;
+    private checkAndSendData() {
+        // Check if MCU is ready to receive (DE high = transmit mode, RE low = receive mode)
+        const dePin = this.pins.DE[0].digital.state;
+        const rePin = this.pins.RE[0].digital.state;
 
-        if (reEnabled && deEnabled) {
-            const response = this.buildPacket();
-            this.sendToUART(response);
+        // If DE is HIGH and RE is LOW, sensor should transmit
+        if (dePin === PinState.High && rePin === PinState.Low) {
+            this.sendModbusResponse();
         }
     }
 
-    private sendToUART(bytes: number[]) {
+    private sendModbusResponse() {
         const uart = AVRRunner.getInstance().board.usarts[0];
         if (!uart) {
             console.error("[NPK] UART not available");
             return;
         }
 
-        let delayCounter = 0;
-        for (const byte of bytes) {
+        const packet = this.buildModbusPacket();
+        console.log("[NPK] Sending packet:", packet.map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
+
+        const usToCycles = (us: number) => AVRRunner.getInstance().usToCycles(us);
+        let cumulativeCycles = 0;
+
+        for (let i = 0; i < packet.length; i++) {
+            const byte = packet[i];
+
             AVRRunner.getInstance().board.cpu.addClockEvent(() => {
                 uart.writeByte(byte, true);
-                console.log(`[NPK] Sent byte: 0x${byte.toString(16).padStart(2, '0')}`);
-            }, delayCounter);
-            delayCounter += 2000; // Space out byte transmission
+            }, cumulativeCycles);
+
+            cumulativeCycles += usToCycles(1200); // 1200us between each byte
         }
     }
 
-    private buildPacket(): number[] {
-        // Modbus RTU response: Slave ID, Function code, byte count, then data
+    private buildModbusPacket(): number[] {
+        // Modbus RTU response format for NPK sensor
+        // Slave ID (1) | Function Code (3) | Byte Count (6) | Data (6) | CRC (2)
+
         const nHigh = (this._nitrogen >> 8) & 0xFF;
         const nLow = this._nitrogen & 0xFF;
         const pHigh = (this._phosphorus >> 8) & 0xFF;
@@ -76,17 +82,16 @@ export class NPK extends Controller {
         const kHigh = (this._potassium >> 8) & 0xFF;
         const kLow = this._potassium & 0xFF;
 
-        // Simplified Modbus response (CRC omitted for simulation)
-        const response = [
-            0x01,      // Slave ID
-            0x03,      // Function code (read holding registers)
-            0x06,      // Byte count
+        const packet = [
+            0x01,        // Slave ID
+            0x03,        // Function Code (Read Holding Registers)
+            0x06,        // Byte Count
             nHigh, nLow,
             pHigh, pLow,
-            kHigh, kLow
+            kHigh, kLow,
+            0x00, 0x00   // CRC placeholder (not validated in simulation)
         ];
 
-        console.log("[NPK] Sending packet:", response.map(b => '0x' + b.toString(16).padStart(2, '0')).join(' '));
-        return response;
+        return packet;
     }
 }

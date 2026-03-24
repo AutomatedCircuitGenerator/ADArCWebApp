@@ -909,66 +909,76 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
             },
-            {
-                38,
-                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
-                        typeof(RazorNPK),
-                        codeForGen: new()
+          {
+            38,
+            new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
+                    typeof(RazorNPK),
+                    codeForGen: new()
+                    {
                         {
-                            {
-                                "include",
-                                "#include <Arduino.h>\n#include <SoftwareSerial.h>"
-                            },
-                            {
-                                "global",
-                                "SoftwareSerial npkSerial@(~\"RO\", ~\"DI\");\n" +
-                                "uint16_t npkN@ = 0, npkP@ = 0, npkK@ = 0;"
-                            },
-                            {
-                                "setup",
-                                "  pinMode(~\"DE\", OUTPUT);\n" +
-                                "  pinMode(~\"RE\", OUTPUT);\n" +
-                                "  digitalWrite(~\"DE\", LOW);\n" +
-                                "  digitalWrite(~\"RE\", HIGH);\n" +
-                                "  npkSerial@.begin(9600);\n" +
-                                "  delay(200);"
-                            },
-                            {
-                                "loopMain",
-                                "  digitalWrite(~\"DE\", HIGH);\n" +
-                                "  digitalWrite(~\"RE\", LOW);\n" +
-                                "  uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
-                                "  npkSerial@.write(request, sizeof(request));\n" +
-                                "  delay(100);\n\n" +
-                                "  digitalWrite(~\"DE\", LOW);\n" +
-                                "  digitalWrite(~\"RE\", HIGH);\n" +
-                                "  if (npkSerial@.available() >= 9) {\n" +
-                                "    uint8_t response[9];\n" +
-                                "    npkSerial@.readBytes(response, 9);\n" +
-                                "    npkN@ = (response[3] << 8) | response[4];\n" +
-                                "    npkP@ = (response[5] << 8) | response[6];\n" +
-                                "    npkK@ = (response[7] << 8) | response[8];\n" +
-                                "    Serial.print(\"N: \");\n" +
-                                "    Serial.print(npkN@);\n" +
-                                "    Serial.print(\" ppm  P: \");\n" +
-                                "    Serial.print(npkP@);\n" +
-                                "    Serial.print(\" ppm  K: \");\n" +
-                                "    Serial.print(npkK@);\n" +
-                                "    Serial.println(\" ppm\");\n" +
-                                "  }\n" +
-                                "  delay(1000);"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
+                            "include",
+                            "#include <Arduino.h>"
                         },
-                        pins: ["Vcc", "gnd", "RO", "DI", "DE", "RE"],
-                        gsNodeName: "npk")
-                    .Property("nitrogen", 0.0)
-                    .Property("phosphorus", 0.0)
-                    .Property("potassium", 0.0)
-                    .Finish()
-            }
+                        {
+                            "global",
+                            "uint16_t npkN@ = 0, npkP@ = 0, npkK@ = 0;\n" +
+                            "unsigned long lastRead@ = 0;"
+                        },
+                        {
+                            "setup",
+                            "  pinMode(~\"DE\", OUTPUT);\n" +
+                            "  pinMode(~\"RE\", OUTPUT);\n" +
+                            "  digitalWrite(~\"DE\", LOW);\n" +
+                            "  digitalWrite(~\"RE\", HIGH);"
+                        },
+                        {
+                            "loopMain",
+                            "  if (millis() - lastRead@ >= 2000) {\n" +
+                            "    lastRead@ = millis();\n" +
+                            "    \n" +
+                            "    digitalWrite(~\"DE\", HIGH);\n" +
+                            "    digitalWrite(~\"RE\", LOW);\n" +
+                            "    delay(50);\n" +
+                            "    \n" +
+                            "    uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
+                            "    Serial.write(request, sizeof(request));\n" +
+                            "    delay(300);\n" +
+                            "    \n" +
+                            "    digitalWrite(~\"DE\", LOW);\n" +
+                            "    digitalWrite(~\"RE\", HIGH);\n" +
+                            "    delay(300);\n" +
+                            "    \n" +
+                            "    uint8_t response[10] = {0};\n" +
+                            "    for (int i = 0; i < 10; i++) {\n" +
+                            "      if (Serial.available()) {\n" +
+                            "        response[i] = Serial.read();\n" +
+                            "      }\n" +
+                            "    }\n" +
+                            "    \n" +
+                            "    npkN@ = (response[3] << 8) | response[4];\n" +
+                            "    npkP@ = (response[5] << 8) | response[6];\n" +
+                            "    npkK@ = (response[7] << 8) | response[8];\n" +
+                            "    \n" +
+                            "    Serial.print(\"N: \");\n" +
+                            "    Serial.print(npkN@);\n" +
+                            "    Serial.print(\" ppm  P: \");\n" +
+                            "    Serial.print(npkP@);\n" +
+                            "    Serial.print(\" ppm  K: \");\n" +
+                            "    Serial.print(npkK@);\n" +
+                            "    Serial.println(\" ppm\");\n" +
+                            "  }"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["Vcc", "gnd", "RO", "DI", "DE", "RE"],
+                    gsNodeName: "npk")
+                .Property("nitrogen", 0.0)
+                .Property("phosphorus", 0.0)
+                .Property("potassium", 0.0)
+                .Finish()
+         }
         };
     }
 }
