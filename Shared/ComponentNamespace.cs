@@ -722,19 +722,20 @@ namespace ADArCWebApp.Shared
                         {
                             {
                                 "include",
-                                "#include <Arduino.h>\n#include <Adafruit_GPS.h>\n#include <SoftwareSerial.h>"
+                                "#include <Arduino.h>"
                             },
                             {
                                 "global",
-                                "SoftwareSerial gpsSerial@(10, 11);\nAdafruit_GPS GPS@(&gpsSerial@);"
+                                "#define LAT_PIN@ ~\"rxd\"\n"+
+                                "#define LON_PIN@ ~\"txd\"\n"
                             },
                             {
                                 "setup",
-                                "gpsSerial@.begin(9600);\nGPS@.begin(9600);\nGPS@.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);\nGPS@.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);\ndelay(1000);"
+                                "pinMode(LAT_PIN@, INPUT);\npinMode(LON_PIN@, INPUT);"
                             },
                             {
                                 "loopMain",
-                                "char c = GPS@.read();\nif (GPS@.newNMEAreceived()) {\n  GPS@.parse(GPS@.lastNMEA());\n}\nSerial.print(\"Latitude: \"); Serial.println(GPS@.latitude, 6);\nSerial.print(\"Longitude: \"); Serial.println(GPS@.longitude, 6);\ndelay(1000);"
+                                "Serial.print(\"Latitude: \"); Serial.println(analogRead(LAT_PIN@));\nSerial.print(\"Longitude: \"); Serial.println(analogRead(LON_PIN@));\n\ndelay(1000);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },

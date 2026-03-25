@@ -3,8 +3,8 @@ import { AVRRunner } from "@lib/execute";
 
 export class GPS extends Controller {
 
-    private _latitude: number = 0.0;
-    private _longitude: number = 0.0;
+    private _latitude: number = 20.0;
+    private _longitude: number = 40.0;
 
     override update(state: Record<string, any>) {
         if (typeof state.latitude === "number") {
@@ -17,16 +17,25 @@ export class GPS extends Controller {
     }
 
     setup() {
-        // Print once per second (matches Arduino loop delay)
         AVRRunner.getInstance().board.cpu.addClockEvent(
-            () => this.tick(),
+            () => this.writeToPins(),
             1000
         );
     }
 
-    private tick() {
-        console.log(
-            `[GPS] Latitude: ${this._latitude.toFixed(6)}, Longitude: ${this._longitude.toFixed(6)}`
-        );
+    private writeToPins() {
+        // Latitude → RXD
+        this.pins["rxd"]?.forEach(pin => {
+            if (pin.analog) {
+                pin.analog.voltage = this._latitude;
+            }
+        });
+
+        // Longitude → TXD
+        this.pins["txd"]?.forEach(pin => {
+            if (pin.analog) {
+                pin.analog.voltage = this._longitude;
+            }
+        });
     }
 }
