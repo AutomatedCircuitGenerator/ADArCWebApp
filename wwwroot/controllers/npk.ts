@@ -7,19 +7,29 @@ export class NPK extends Controller {
     private _nitrogen: number = 0;
     private _phosphorus: number = 0;
     private _potassium: number = 0;
+    private valuesChanged: boolean = false;
 
     override update(state: Record<string, any>) {
+        let changed = false;
+
         if (state.nitrogen !== undefined) {
             this._nitrogen = Math.max(0, Math.min(1024, state.nitrogen));
             console.log("[NPK] Nitrogen:", this._nitrogen, "ppm");
+            changed = true;
         }
         if (state.phosphorus !== undefined) {
             this._phosphorus = Math.max(0, Math.min(1024, state.phosphorus));
             console.log("[NPK] Phosphorus:", this._phosphorus, "ppm");
+            changed = true;
         }
         if (state.potassium !== undefined) {
             this._potassium = Math.max(0, Math.min(1024, state.potassium));
             console.log("[NPK] Potassium:", this._potassium, "ppm");
+            changed = true;
+        }
+
+        if (changed) {
+            this.valuesChanged = true;
         }
     }
 
@@ -31,9 +41,9 @@ export class NPK extends Controller {
     private scheduleDataSending() {
         const sendData = () => {
             this.checkAndSendData();
-            AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 1000000);
+            AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 500000); // Check more frequently
         };
-        AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 1000000);
+        AVRRunner.getInstance().board.cpu.addClockEvent(sendData, 500000);
     }
 
     private checkAndSendData() {
@@ -44,6 +54,7 @@ export class NPK extends Controller {
         // If DE is HIGH and RE is LOW, sensor should transmit
         if (dePin === PinState.High && rePin === PinState.Low) {
             this.sendModbusResponse();
+            this.valuesChanged = false; // Reset flag after sending
         }
     }
 
@@ -67,14 +78,11 @@ export class NPK extends Controller {
                 uart.writeByte(byte, true);
             }, cumulativeCycles);
 
-            cumulativeCycles += usToCycles(1200); // 1200us between each byte
+            cumulativeCycles += usToCycles(1200);
         }
     }
 
     private buildModbusPacket(): number[] {
-        // Modbus RTU response format for NPK sensor
-        // Slave ID (1) | Function Code (3) | Byte Count (6) | Data (6) | CRC (2)
-
         const nHigh = (this._nitrogen >> 8) & 0xFF;
         const nLow = this._nitrogen & 0xFF;
         const pHigh = (this._phosphorus >> 8) & 0xFF;
@@ -83,13 +91,13 @@ export class NPK extends Controller {
         const kLow = this._potassium & 0xFF;
 
         const packet = [
-            0x01,        // Slave ID
-            0x03,        // Function Code (Read Holding Registers)
-            0x06,        // Byte Count
+            0x01,
+            0x03,
+            0x06,
             nHigh, nLow,
             pHigh, pLow,
             kHigh, kLow,
-            0x00, 0x00   // CRC placeholder (not validated in simulation)
+            0x00, 0x00
         ];
 
         return packet;

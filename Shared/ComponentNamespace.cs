@@ -936,20 +936,27 @@ namespace ADArCWebApp.Shared
                             "  if (millis() - lastRead@ >= 2000) {\n" +
                             "    lastRead@ = millis();\n" +
                             "    \n" +
+                            "    while (Serial.available()) Serial.read();\n" +
+                            "    delay(50);\n" +
+                            "    \n" +
                             "    digitalWrite(~\"DE\", HIGH);\n" +
                             "    digitalWrite(~\"RE\", LOW);\n" +
                             "    delay(50);\n" +
                             "    \n" +
                             "    uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
                             "    Serial.write(request, sizeof(request));\n" +
-                            "    delay(300);\n" +
+                            "    delay(500);\n" +
                             "    \n" +
                             "    digitalWrite(~\"DE\", LOW);\n" +
                             "    digitalWrite(~\"RE\", HIGH);\n" +
-                            "    delay(300);\n" +
+                            "    delay(500);\n" +
+                            "    \n" +
+                            "    while (Serial.available()) Serial.read();\n" +
+                            "    delay(100);\n" +
                             "    \n" +
                             "    uint8_t response[10] = {0};\n" +
                             "    for (int i = 0; i < 10; i++) {\n" +
+                            "      delay(80);\n" +
                             "      if (Serial.available()) {\n" +
                             "        response[i] = Serial.read();\n" +
                             "      }\n" +
@@ -978,7 +985,7 @@ namespace ADArCWebApp.Shared
                 .Property("phosphorus", 0.0)
                 .Property("potassium", 0.0)
                 .Finish()
-         }
+          }
         };
     }
 }
