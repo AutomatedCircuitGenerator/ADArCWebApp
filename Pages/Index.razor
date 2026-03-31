@@ -989,7 +989,8 @@
 
                 if (data?.Comps != null && data.Comps.ContainsKey(1))
                 {
-                    var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                    var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : 
+                        (data.Comps[1].GlobalId == 2 ? Board.ArduinoMega : Board.ArduinoNano);
                     Console.WriteLine($"Detected board type from file: {boardType}");
 
                     Console.WriteLine("Setting board type");
@@ -1471,7 +1472,11 @@
 
                     if (data?.Comps != null && data.Comps.ContainsKey(1))
                     {
-                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno :
+                            data.Comps[1].GlobalId == 2 ? Board.ArduinoMega :
+                            data.Comps[1].GlobalId == 34 ? Board.ArduinoNano :
+                            Board.ArduinoUno; 
+
                         Console.WriteLine($"Detected board type from URL data: {boardType}");
 
                         await App.InvokeAsync(async () =>

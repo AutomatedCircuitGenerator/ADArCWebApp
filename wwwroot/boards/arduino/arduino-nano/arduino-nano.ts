@@ -35,6 +35,7 @@ import {
     ArduinoUSART,
     MHZ
 } from "../arduino";
+import { loadHex} from "@lib/compile-util";
 
 export class ArduinoNano implements Board {
     cpu: CPU;
@@ -83,6 +84,9 @@ export class ArduinoNano implements Board {
             {analog: new ArduinoAnalog(adc, 3), digital: new ArduinoDigital(portC, 3)},  // Pin A3 / Pin 17
             {analog: new ArduinoAnalog(adc, 4), digital: new ArduinoDigital(portC, 4), twi: this.twis[0]},  // Pin A4 / Pin 18 (SDA)
             {analog: new ArduinoAnalog(adc, 5), digital: new ArduinoDigital(portC, 5), twi: this.twis[0]},  // Pin A5 / Pin 19 (SCL)
+            {analog: new ArduinoAnalog(adc, 6)},  // Pin A6 / Pin 20
+            {analog: new ArduinoAnalog(adc, 7)},  // Pin A7 / Pin 21
+
         ];
     }
 }

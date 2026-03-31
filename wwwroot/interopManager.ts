@@ -4,7 +4,8 @@ import {buildHex} from "./lib/compile-util";
 import {AVRRunner, BoardType} from "./lib/execute";
 import {ArduinoUno} from "./boards/arduino/arduino-uno/arduino-uno";
 import {ArduinoMega} from "./boards/arduino/arduino-mega/arduino-mega";
-import {Board, BoardConstructor} from "./boards/board";
+import {ArduinoNano} from "./boards/arduino/arduino-nano/arduino-nano";
+import {BoardConstructor} from "./boards/board";
 /*declare var introJs: any;*/
 
 export namespace interopManager {
@@ -258,6 +259,9 @@ export namespace interopManager {
                     break;
                 case BoardType.ArduinoMega:
                     boardConstructor = ArduinoMega;
+                    break;
+                case BoardType.ArduinoNano:
+                    boardConstructor = ArduinoNano;
                     break;
             }
             this.runner.boardConstructor = boardConstructor;

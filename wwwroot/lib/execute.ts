@@ -3,10 +3,12 @@ import {loadHex} from "./compile-util";
 import {Controller} from "@controllers/controller";
 import {Board, BoardConstructor, CPU} from "../boards/board";
 import {ArduinoUno} from "../boards/arduino/arduino-uno/arduino-uno";
+import {ArduinoNano} from "../boards/arduino/arduino-nano/arduino-nano";
 
 export enum BoardType {
     ArduinoUno,
     ArduinoMega,
+    ArduinoNano,
 }
 
 /**
