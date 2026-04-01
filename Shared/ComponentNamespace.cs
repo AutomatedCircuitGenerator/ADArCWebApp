@@ -653,6 +653,7 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
+            
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
@@ -871,6 +872,46 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                40,
+                new ComponentDataBuilder(
+                        "Time of Flight (VL53L4CD)",
+                        true,
+                        "Input/Distance Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorTOF),
+                        paneHoverText: "VL53L4CD",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <Wire.h>"
+                            },
+                            {
+                                "global",
+                                "int16_t tfDist@; // distance in centimeters"
+                            },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {
+                                "loopMain",
+                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
+                        gsNodeName: "tof"
+                    )
+                    .Property("distance", 0.0)
+                    .Finish()
+            },
+
         };
     }
 }
