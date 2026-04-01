@@ -871,6 +871,51 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                39,
+                new ComponentDataBuilder(
+                        "CO2 Sensor",
+                        true,
+                        "Input/Gas Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorSEN0219),
+                        paneHoverText: "CO2 Sensor",
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+
+                            {
+                                "global",
+                                "#define AOUT_PIN@ ~\"analog_out\" // Analog output pin from CO2 sensor\n" +
+                                "int co2Value@ = 0;"
+                            },
+
+                            {
+                                "setup",
+                                "pinMode(AOUT_PIN@, INPUT);\n" 
+                            },
+
+                            {
+                                "loopMain",
+                                "co2Value@ = analogRead(AOUT_PIN@);\n" +
+                                "float co2Ppm@ = (co2Value@ / 1023.0) * 5000.0;\n" +
+                                "Serial.print(\"co2 = \");\n" +
+                                "Serial.println(co2Ppm@);\n" +
+                                "delay(500);"
+                            },
+
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["gnd", "5V", "analog_out"],
+                        gsNodeName: "sen0219"
+                    )
+                    .Property("co2", 400.0)
+                    .Finish()
+            },
         };
     }
 }
