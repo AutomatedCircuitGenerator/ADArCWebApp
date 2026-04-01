@@ -912,6 +912,46 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
 
+            {
+                37,
+                new ComponentDataBuilder(
+                        "PMS5003",
+                        true,
+                        "Input/Other Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorPMS5003),
+                        paneHoverText: "PMS5003",
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            { "global", "" },
+                            { "setup", "" },
+                            { "loopMain",
+                                "\tint pm1_0_raw@ = analogRead(~\"txd\");\n" +
+                                "\tint pm2_5_raw@ = analogRead(~\"rxd\");\n" +
+                                "\tint pm10_raw@ = digitalRead(~\"rxd\");\n" +
+                                "\tint pm1_0@ = map(pm1_0_raw@, 0, 1023, 0, 1000);\n" +
+                                "\tint pm2_5@ = map(pm2_5_raw@, 0, 1023, 0, 1000);\n" +
+                                "\tint pm10@ = map(pm10_raw@, 0, 1, 0, 1000);\n" +
+                                "\tSerial.print(\"PM1.0: \"); Serial.print(pm1_0@);\n" +
+                                "\tSerial.print(\" PM2.5: \"); Serial.print(pm2_5@);\n" +
+                                "\tSerial.print(\" PM10: \"); Serial.println(pm10@);\n" +
+                                "\tdelay(500);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "txd", "rxd"],
+                        gsNodeName: "pms5003"
+                    )
+                    .Property("pm1_0", 0.0)
+                    .Property("pm2_5", 0.0)
+                    .Property("pm10", 0.0)
+                    .Finish()
+            }
         };
     }
 }
