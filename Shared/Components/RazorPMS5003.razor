@@ -15,14 +15,18 @@
             };
         }
     }
-    
+
     [Parameter]
-    [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
-    public double temperature
-    {
-        get;
-        set;
-    }
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm1_0 { get; set; } = 0.0;
+
+    [Parameter]
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm2_5 { get; set; } = 0.0;
+
+    [Parameter]
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm10 { get; set; } = 0.0;
 }
 
 <svg xmlns="http://www.w3.org/2000/svg"
