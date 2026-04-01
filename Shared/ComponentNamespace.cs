@@ -878,7 +878,7 @@ namespace ADArCWebApp.Shared
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
             {
-                38,
+                39,
                 new ComponentDataBuilder(
                         "CO2 Sensor",
                         true,
@@ -900,14 +900,15 @@ namespace ADArCWebApp.Shared
 
                             {
                                 "setup",
-                                "pinMode(AOUT_PIN@, INPUT);\n" +
-                                "Serial.begin(9600);"
+                                "pinMode(AOUT_PIN@, INPUT);\n" 
                             },
 
                             {
                                 "loopMain",
                                 "co2Value@ = analogRead(AOUT_PIN@);\n" +
-                                "Serial.print(\"CO2 value: \"); Serial.println(co2Value@);\n" +
+                                "float co2Ppm@ = (co2Value@ / 1023.0) * 5000.0;\n" +
+                                "Serial.print(\"co2 = \");\n" +
+                                "Serial.println(co2Ppm@);\n" +
                                 "delay(500);"
                             },
 

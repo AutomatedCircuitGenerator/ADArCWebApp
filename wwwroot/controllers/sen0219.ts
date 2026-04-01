@@ -42,15 +42,39 @@ export class SEN0219 extends Controller {
             analogPin.voltage = initial;
         }
 
-        // Optional periodic debug logging
-        const updateReading = () => {
-            console.log(`[CO2 Sensor] CO2: ${this._co2} ppm`);
-            AVRRunner.getInstance()
-                .board
-                .cpu
-                .addClockEvent(() => updateReading(), 500000);
-        };
+        // Schedule periodic serial output
+        this.scheduleSerialOutput();
+    }
 
-        updateReading();
+    private scheduleSerialOutput() {
+        const sendOutput = () => {
+            this.sendSerialOutput();
+            AVRRunner.getInstance().board.cpu.addClockEvent(sendOutput, 500000);
+        };
+        AVRRunner.getInstance().board.cpu.addClockEvent(sendOutput, 500000);
+    }
+
+    private sendSerialOutput() {
+        const uart = AVRRunner.getInstance().board.usarts[0];
+        if (!uart) {
+            console.error("[CO2 Sensor] UART not available");
+            return;
+        }
+
+        const message = `co2 = ${this._co2}\n`;
+        const usToCycles = (us: number) => AVRRunner.getInstance().usToCycles(us);
+        let cumulativeCycles = 0;
+
+        for (let i = 0; i < message.length; i++) {
+            const byte = message.charCodeAt(i);
+
+            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
+                uart.writeByte(byte, true);
+            }, cumulativeCycles);
+
+            cumulativeCycles += usToCycles(1200);
+        }
+
+        console.log(`[CO2 Sensor] CO2: ${this._co2} ppm`);
     }
 }
