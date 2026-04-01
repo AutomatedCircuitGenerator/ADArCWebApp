@@ -873,7 +873,7 @@ namespace ADArCWebApp.Shared
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
             {
-                40,
+                38,
                 new ComponentDataBuilder(
                         "Time of Flight (VL53L4CD)",
                         true,
