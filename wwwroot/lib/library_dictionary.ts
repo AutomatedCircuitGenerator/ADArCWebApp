@@ -3453,6 +3453,7 @@
     "placeholder_3452": "MAX6675",
     "placeholder_3453": "MAX6675 library",
     "MAX6675.h": "MAX6675 with hardware SPI",
+    "MAX31856.h": "Adafruit MAX31856 library",
     "placeholder_3455": "MAX6675_Thermocouple",
     "placeholder_3456": "MAX6816",
     "placeholder_3457": "MAX7219Segment",
@@ -7339,4 +7340,8 @@
     "placeholder_7338": "youkey_stepper",
     "placeholder_7339": "zForce Air Library",
     "placeholder_7340": "zlib_turbo",
+    "ph_surveyor.h": "local/ph_surveyor",
+    "base_surveyor.h": "local/base_surveyor",
+    "SHT3x.h": "local/SHT3x",
+    "turbidity_surveyor.h": "local/turbidity_surveyor"
 };

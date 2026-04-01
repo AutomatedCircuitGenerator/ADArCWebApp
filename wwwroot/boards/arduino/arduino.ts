@@ -135,8 +135,8 @@ export class ArduinoDigital implements Digital {
         });
     }
 
-    set state(state: boolean) {
-        this.port.setPin(this.index, state);
+    set state(state: PinState) {
+        this.port.setPin(this.index, state === PinState.High);
     }
 
     constructor(port: AVRIOPort, index: number) {
