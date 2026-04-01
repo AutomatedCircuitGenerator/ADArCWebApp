@@ -871,6 +871,48 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            
+           
+            {
+                37,
+                new ComponentDataBuilder(
+                        "Adafruit Ultimate GPS Breakout",
+                        true,
+                        "Input/Other Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorGPS),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>"
+                            },
+                            {
+                                "global",
+                                "#define LAT_PIN@ ~\"rxd\"\n"+
+                                "#define LON_PIN@ ~\"txd\"\n"
+                            },
+                            {
+                                "setup",
+                                "pinMode(LAT_PIN@, INPUT);\npinMode(LON_PIN@, INPUT);"
+                            },
+                            {
+                                "loopMain",
+                                "Serial.print(\"Latitude: \"); Serial.println(analogRead(LAT_PIN@));\nSerial.print(\"Longitude: \"); Serial.println(analogRead(LON_PIN@));\n\ndelay(1000);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["gnd", "Vcc", "rxd", "txd"],
+                        gsNodeName: "gps"
+                    )
+                    .Property("latitude", 20.0)
+                    .Property("longitude", 40.0)
+                    .Finish()
+            },
         };
     }
 }

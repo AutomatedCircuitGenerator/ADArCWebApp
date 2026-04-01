@@ -318,7 +318,7 @@
     "placeholder_317": "Adafruit FreeTouch Library",
     "placeholder_318": "Adafruit GC9A01A",
     "placeholder_319": "Adafruit GFX Library",
-    "placeholder_320": "Adafruit GPS Library",
+    "Adafruit_GPS.h": "Adafruit GPS Library",
     "placeholder_321": "Adafruit Graphic VFD Display Library",
     "placeholder_322": "Adafruit HDC1000 Library",
     "placeholder_323": "Adafruit HDC302x",
