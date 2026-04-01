@@ -32,8 +32,13 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("MEGA 2560", false, "Arduino", 0.3, 390, 195, typeof(RazorArduinoMega),
                     codeForGen: new()
                     {
-                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
+                        { "include", "" },
+                        { "global", "" },
+                        { "setup", ""},
+                        { "loopMain", ""},
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
                     },
                     pins:
                     [
@@ -284,7 +289,10 @@ namespace ADArCWebApp.Shared
                         codeForGen: new()
                         {
                             { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
-                            { "global", "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor" },
+                            {
+                                "global",
+                                "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor"
+                            },
                             { "setup", "" },
                             {
                                 "loopMain",
@@ -313,7 +321,8 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
                         environmentalSettingsType: typeof(PIRButton))
-                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0).Finish()
+                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0)
+                    .Finish()
             },
             {
                 16,
@@ -379,15 +388,15 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, typeof(RazorLED),
                     codeForGen: new()
                     {
-                        { "include", "" }, 
-                        { "global", "" }, 
+                        { "include", "" },
+                        { "global", "" },
                         { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
                         {
                             "loopMain",
                             "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
             },
@@ -416,8 +425,8 @@ namespace ADArCWebApp.Shared
                             "loopMain",
                             "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed").Finish()
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
@@ -426,15 +435,15 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder("Laser diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
                     codeForGen: new()
                     {
-                        { "include", "" }, 
+                        { "include", "" },
                         { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
                         { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
                         {
                             "loopMain",
                             "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating"
                         },
-                        { "functions", "" }, 
-                        { "delayLoop", "" }, 
+                        { "functions", "" },
+                        { "delayLoop", "" },
                         { "delayTime", "" }
                     }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
             },
@@ -508,9 +517,9 @@ namespace ADArCWebApp.Shared
                 25,
                 new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
                         typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
-                        codeForGen: new ()
+                        codeForGen: new()
                         {
-                            { "include", "" }, 
+                            { "include", "" },
                             {
                                 "global",
                                 "int ena@ = ~\"ena\"; // Enable pin for motor speed control\nint in1@ = ~\"in1\"; // Control pin 1 for motor direction\nint in2@ = ~\"in2\"; // Control pin 2 for motor direction"
@@ -523,8 +532,8 @@ namespace ADArCWebApp.Shared
                                 "loopMain",
                                 "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating"
                             },
-                            { "functions", "" }, 
-                            { "delayLoop", "" }, 
+                            { "functions", "" },
+                            { "delayLoop", "" },
                             { "delayTime", "" }
                         },
                         gsNodeName: "l298n",
@@ -582,8 +591,8 @@ namespace ADArCWebApp.Shared
                                 "loopMain",
                                 "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
                             },
-                            { "functions", "" }, 
-                            { "delayLoop", "" }, 
+                            { "functions", "" },
+                            { "delayLoop", "" },
                             { "delayTime", "" }
                         },
                         pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003",
@@ -626,6 +635,25 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
             },
+            {
+                31,
+                new ComponentDataBuilder("Turbidity sensor", true, "Input/Light Sensors", 0.35, -100,
+                    -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
+                    codeForGen: new()
+                    {
+                        { "include", "" }, 
+                        { "global", "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)" }, 
+                        { "setup", "" }, 
+                        { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
+                                      + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
+                                      + "  float turbNTU@ = -1120.4*voltage@*voltage@ + 5742.3*voltage@ - 4352.9; //Convert voltage to turbidity in NTU (Nephelometric Turbidity Units)\n"
+                                      + "  Serial.print(\"Turbidity in NTU = \"); // Print label\n"
+                                      + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
+                                      + "  delay(500); // Wait 500ms" }, 
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
+            },
+            
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
@@ -636,6 +664,254 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                32,
+                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
+                    paneHoverText: "SRV-PH",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        {
+                            "global",
+                            "#define SRVPH_PIN@ ~\"ADC\""
+                        },
+                        {
+                            "setup",
+                            ""
+                        },
+                        {
+                            "loopMain",
+                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
+                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
+                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
+                            "\tSerial.print(\"Sensor Value: \");\n" +
+                            "\tSerial.print(sensorValue@);\n\n" + 
+                            "\tSerial.print(\"\tVoltage: \");\n" +
+                            "\tSerial.print(voltage@);\n\n" +
+                            "\tSerial.print(\"\tpH: \");\n" + 
+                            "\tSerial.println(pH);\n" +
+                            "\tdelay(2000); // wait 2s for next reading"
+                        },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
+            },
+            {
+                33,
+                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            {
+                                "global",
+                                "/* Example code for the moisture sensor\n" +
+                                "Sensor value descriptions:\n" +
+                                "\t 0 - 300: Dry soil\n" +
+                                "\t 300 - 700: Humid soil\n" +
+                                "\t 700 - 950: In water\n*/\n" +
+                                "#define moisturePin@ ~\"analog_out\"\n" +
+                                "int moistureValue@ = 0;"
+                            },
+                            {
+                                "setup",
+                                ""
+                            },
+                            {
+                                "loopMain",
+                                "\tmoistureValue@ = analogRead(moisturePin@);\n" +
+                                "\tSerial.print(\"Moisture Sensor Value: \");\n" +
+                                "\tSerial.println(moistureValue@);\n\n" +
+                                "\t// Interpret the sensor value\n" +
+                                "\tSerial.print(\"Status: \");\n" +
+                                "\tif (moistureValue@ < 300) {\n" +
+                                "\t\tSerial.println(\"Dry soil\");\n" +
+                                "\t} else if (moistureValue@ < 700) {\n" +
+                                "\t\tSerial.println(\"Humid soil\");\n" +
+                                "\t} else {\n" +
+                                "\t\tSerial.println(\"In water\");\n" +
+                                "\t}\n" +
+                                "\tdelay(1000);"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
+                    .Property("humidity", 512.0).Finish()
+            },
+            {
+                34,
+                new ComponentDataBuilder("Humidity and Temperature Sensor", true, "Input/Temperature and Humidity Sensors", 0.5, -20, -20, typeof(RazorSHT30),
+                    paneHoverText: "SHT30",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <SHT3x.h>" },
+                        { "global",
+                            "#define SHT30_ADDR 0x44\n\n" +
+                            "SHT3x sht30(SHT30_ADDR, SHT3x::PrevValue, 255, SHT3x::SHT30, SHT3x::Single_HighRep_ClockStretch);"
+                        },
+                        { "setup",
+                            "\t// Initialize SHT3x library\n" +
+                            "\tsht30.Begin();"
+                        },
+                        { "loopMain",
+                            "\t// Set mode (optional, here High Repeatability, Clock Stretch)\n" +
+                            "\tsht30.SetMode(SHT3x::Single_HighRep_ClockStretch);\n\n" +
+                            "\t// Trigger measurement\n" +
+                            "\tsht30.UpdateData();\n\n" +
+                            "\t// Check errors\n" +
+                            "\tif (sht30.GetError() != 0) {\n" +
+                            "\t\tSerial.print(\"Library Error: \");\n" +
+                            "\t\tSerial.println(sht30.GetError());\n" +
+                            "\t} else {\n" +
+                            "\t\tfloat temp = sht30.GetTemperature(); // Celsius\n" +
+                            "\t\tfloat humidity  = sht30.GetRelHumidity(); // %\n" +
+                            "\t\tSerial.print(\"Temperature: \");" +
+                            " Serial.print(temp, 2);\n" +
+                            "\t\tSerial.print(\" °C  Humidity: \");" +
+                            " Serial.print(humidity, 2);" +
+                            " Serial.println(\" %\");\n" +
+                            "\t}\n\n" +
+                            "\tSerial.println(\"-----------------------------\\n\");\n" +
+                            "\tdelay(1000); // Wait before next read"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    } , pins: ["Vcc", "gnd", "scl", "sda", "int"], gsNodeName: "sht30").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
+            }, 
+            {
+                35,
+                new ComponentDataBuilder("Temperature and Humidity Sensor", true,
+                        "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
+                        paneHoverText: "DHT22",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <DHT.h>\n" },
+                            { 
+                                "global", 
+                                "#define DHTPIN@ ~\"signal\"\n" + 
+                                "#define DHTTYPE DHT22\n" +
+                                "DHT dht@(DHTPIN@, DHTTYPE);" 
+                            },
+                            { "setup", "\tdht@.begin();" },
+                            {
+                                "loopMain",
+                                "\tfloat humidity@ = dht@.readHumidity();\n" +
+                                "\tfloat temperature@ = dht@.readTemperature();\n" +
+                                "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
+                                "\t\tSerial.println(\"Failed to read from DHT22 sensor!\");\n" +
+                                "\t} else {\n" +
+                                "\t\tSerial.print(\"Humidity: \");\n" +
+                                "\t\tSerial.print(humidity@);\n" +
+                                "\t\tSerial.print(\"% | Temperature: \");\n" +
+                                "\t\tSerial.print(temperature@);\n" +
+                                "\t\tSerial.println(\"°C\");\n" +
+                                "\t}\n" +
+                                "\tdelay(2000);"
+                            },
+                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                        }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
+                    .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
+            },
+            {
+                36,
+                new ComponentDataBuilder(
+                        "T-type thermocouple",
+                        true,
+                        "Input/Temperature and Humidity Sensors",
+                        0.7,
+                        100,
+                        75,
+                        typeof(RazorMAX31856),
+                        paneHoverText: "MAX31856",
+                        codeForGen: new()
+                        {
+                            { "include", "#include <SPI.h>" },
+                            { 
+                                "global", 
+                                "#define CS_PIN@ ~\"cs\"\n" +
+                                "byte tempMSB@ = 0;\n" +
+                                "byte tempLSB@ = 0;\n" +
+                                "float temperature@ = 0.0;"
+                            },
+                            { 
+                                "setup", 
+                                "  SPI.begin();\n" +
+                                "  pinMode(CS_PIN@, OUTPUT);\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);"
+                            },
+                            {
+                                "loopMain",
+                                "  digitalWrite(CS_PIN@, LOW);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  byte config@ = SPI.transfer(0x00); // Config read\n" +
+                                "  tempMSB@ = SPI.transfer(0x00); // Read MSB (don't re-declare)\n" +
+                                "  tempLSB@ = SPI.transfer(0x00); // Read LSB (don't re-declare)\n\n" +
+                                "  digitalWrite(CS_PIN@, HIGH);\n" +
+                                "  delayMicroseconds(10);\n\n" +
+                                "  int raw@ = ((int)tempMSB@ << 8) | tempLSB@;\n" +
+                                "  temperature@ = raw@ * 0.25;\n\n" +
+                                "  Serial.print(\"Temperature = \");\n" +
+                                "  Serial.println(temperature@);\n" +
+                                "  delay(500);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
+                        gsNodeName: "max31856"
+                    )
+                    .Property("temperature", -20.0)
+                    .Finish()
+            },
+            // {
+            //     37,
+            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
+            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
+            //         codeForGen: new()
+            //         {
+            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
+            //             { "delayLoop", "" }, { "delayTime", "" }
+            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
+            // }
+            {
+                38,
+                new ComponentDataBuilder(
+                        "Time of Flight (VL53L4CD)",
+                        true,
+                        "Input/Distance Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorTOF),
+                        paneHoverText: "VL53L4CD",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <Wire.h>"
+                            },
+                            {
+                                "global",
+                                "int16_t tfDist@; // distance in centimeters"
+                            },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {
+                                "loopMain",
+                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
+                        gsNodeName: "tof"
+                    )
+                    .Property("distance", 0.0)
+                    .Finish()
+            },
+
             {
                 37,
                 new ComponentDataBuilder(

@@ -27,6 +27,13 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
+import {TOF} from "@controllers/tof";
+import {SEN0114} from "@controllers/sen0114";
+import {SRVPH} from "@controllers/srvph";
+import {MAX31856} from "@controllers/max31856";
+import {SHT30} from "@controllers/sht30";
+import {DHT22} from "@controllers/dht22";
+import {SEN0189} from "@controllers/sen0189";
 import {PMS5003} from "@controllers/pms5003";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
@@ -61,3 +68,10 @@ import {PMS5003} from "@controllers/pms5003";
 (<any>window).HX711 = HX711;
 (<any>window).PMS5003 = PMS5003;
 (<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;
+(<any>window).SEN0114 = SEN0114;
+(<any>window).SRVPH = SRVPH;
+(<any>window).MAX31856 = MAX31856;
+(<any>window).SHT30 = SHT30;
+(<any>window).DHT22 = DHT22;
+(<any>window).SEN0189 = SEN0189;
+(<any>window).TOF = TOF;
