@@ -3453,6 +3453,7 @@
     "placeholder_3452": "MAX6675",
     "placeholder_3453": "MAX6675 library",
     "MAX6675.h": "MAX6675 with hardware SPI",
+    "MAX31856.h": "Adafruit MAX31856 library",
     "placeholder_3455": "MAX6675_Thermocouple",
     "placeholder_3456": "MAX6816",
     "placeholder_3457": "MAX7219Segment",
@@ -5043,7 +5044,7 @@
     "placeholder_5042": "STM32duino VL53L1",
     "placeholder_5043": "STM32duino VL53L1X",
     "placeholder_5044": "STM32duino VL53L3CX",
-    "placeholder_5045": "STM32duino VL53L4CD",
+    "STM32duino_VL53L4CD.h": "STM32duino VL53L4CD",
     "placeholder_5046": "STM32duino VL53L4CX",
     "placeholder_5047": "STM32duino VL53L4ED",
     "placeholder_5048": "STM32duino VL53L5CX",
@@ -7339,4 +7340,8 @@
     "placeholder_7338": "youkey_stepper",
     "placeholder_7339": "zForce Air Library",
     "placeholder_7340": "zlib_turbo",
+    "ph_surveyor.h": "local/ph_surveyor",
+    "base_surveyor.h": "local/base_surveyor",
+    "SHT3x.h": "local/SHT3x",
+    "turbidity_surveyor.h": "local/turbidity_surveyor"
 };
