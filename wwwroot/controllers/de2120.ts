@@ -1,34 +1,21 @@
-import {Controller} from "@controllers/controller";
-import {USART} from "../boards/board";
+import { Controller } from "@controllers/controller";
+import { USART } from "../boards/board";
+import {PinState} from "@lib/avr8js";
 
 export class DE2120 extends Controller {
-    private _encodedValue: number;
+    private _encodedValue: number = 0;
     private _usart: USART | null = null;
-    private _rxBuffer: string = "";
 
     override update(state: Record<string, any>) {
         if (state.encodedvalue !== undefined) {
             this.setEncodedValue(Number(state.encodedvalue));
-            this.scan();
+            this.sendToPin();
         }
-        console.log("update triggered");
+        console.log("DE2120: update triggered with value", this._encodedValue);
     }
 
-    setEncodedValue = (encodedValue: number) => {
-        this._encodedValue = encodedValue;
-    }
-
-    scan() {
-        if (this._usart === null) {
-            console.warn("DE2120: scan() called but _usart is null");
-            return;
-        }
-        console.log("DE2120: scan() called, sending value:", this._encodedValue);
-        const payload = `${this._encodedValue}\r\n`;
-
-        for (const char of payload) {
-            this._usart.writeByte(char.charCodeAt(0), false);
-        }
+    setEncodedValue(value: number) {
+        this._encodedValue = value;
     }
 
     setup() {
@@ -37,30 +24,20 @@ export class DE2120 extends Controller {
             this._usart = txdInterfaces[0].usart ?? null;
         }
 
-        if (this._usart) {
-            this._usart.onByteTransmit = (byte: number) => {
-                console.log(`DE2120: Received byte from USART: ${byte}`);
-                this.handleIncomingByte(byte);
-            };
-        } else {
-            console.warn("DE2120: no USART interface found on component pins.");
+        if (!this._usart) {
+            console.warn("DE2120: no USART interface found on txd pin.");
         }
-
-        this._encodedValue = 0;
     }
 
-    private handleIncomingByte(byte: number) {
-        const char = String.fromCharCode(byte);
-        this._rxBuffer += char;
+    private sendToPin() {
+        if (!this._usart) return;
 
-        if (char === '.') {
-            console.log(`DE2120: Received command from Arduino: ${this._rxBuffer}`);
+        const payload = `${this._encodedValue}\r\n`;
 
-            if (this._usart) {
-                this._usart.writeByte(0x06, false);
-            }
-
-            this._rxBuffer = "";
+        for (const char of payload) {
+            this._usart.writeByte(char.charCodeAt(0), false);
         }
+
+        console.log("DE2120: sent to txd pin:", this._encodedValue);
     }
 }

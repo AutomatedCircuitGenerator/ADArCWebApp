@@ -788,54 +788,55 @@ namespace ADArCWebApp.Shared
             },
             {
                 35,
-                new ComponentDataBuilder("Barcode scanner", true, "Input/Other Sensors", 1, 18.5, 19.154,
-                    typeof(RazorDE2120), paneHoverText: "DE2120",
-                    codeForGen: new()
-                    {
+                new ComponentDataBuilder(
+                        "Barcode scanner",
+                        true,
+                        "Input/Other Sensors",
+                        1,
+                        18.5,
+                        19.154,
+                        typeof(RazorDE2120),
+                        paneHoverText: "DE2120",
+                        codeForGen: new()
                         {
-                            "include",
-                            "#include <SoftwareSerial.h>\n" +
-                            "#include <SparkFun_DE2120_Arduino_Library.h> //Click here to get the library: http://librarymanager/All#SparkFun_DE2120\n"
+                            {
+                                "include",
+                                "#include <SoftwareSerial.h>\n" +
+                                "#include <SparkFun_DE2120_Arduino_Library.h>\n"
+                            },
+                            {
+                                "global",
+                                "SoftwareSerial softSerial(~\"rxd\", ~\"txd\");\n" +
+                                "DE2120 scanner;\n" +
+                                "int lastPrintedValue = -1;\n"
+                            },
+                            {
+                                "setup",
+                                "softSerial.begin(9600);\n" +
+                                "Serial.println(\"DE2120 Scanner Example\");\n" +
+                                "Serial.println(\"Scanner online!\");\n"
+                            },
+                            {
+                                "loopMain",
+                                "// Fetch the encodedValue set by the controller\n" +
+                                "int encodedvalue = encodedvalue;\n" +
+                                "if (encodedvalue != lastPrintedValue)\n" +
+                                "{\n" +
+                                "    Serial.print(\"Encoded value: \");\n" +
+                                "    Serial.println(encodedvalue);\n" +
+                                "    lastPrintedValue = encodedvalue;\n" +
+                                "}\n" +
+                                "delay(200);\n"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
                         },
-                        {
-                            "global",
-                            "#define BUFFER_LEN 40\n" +
-                            "SoftwareSerial softSerial(~\"rxd\", ~\"txd\");\n" +
-                            "DE2120 scanner;\n" +
-                            "char scanBuffer[BUFFER_LEN];\n"
-                        },
-                        {
-                            "setup",
-                            "Serial.begin(115200);\n" +
-                            "softSerial.begin(9600);\n" +
-                            "Serial.println(\"DE2120 Scanner Example\");\n\n" +
-                            "if (scanner.begin(softSerial) == false)\n" +
-                            "{\n" +
-                            "    Serial.println(\"Scanner did not respond. Check wiring.\");\n" +
-                            "    while (1);\n" +
-                            "}\n\n" +
-                            "Serial.println(\"Scanner online!\");\n"
-                        },
-                        {
-                            "loopMain",
-                            "if (scanner.readBarcode(scanBuffer, BUFFER_LEN))\n" +
-                            "{\n" +
-                            "    Serial.print(\"Code found: \");\n" +
-                            "    Serial.println(scanBuffer);\n" +
-                            "}\n\n" +
-                            "delay(200);\n"
-                        },
-                        {
-                            "functions", ""
-                        },
-                        {
-                            "delayLoop", ""
-                        },
-                        {
-                            "delayTime", ""
-                        }
-                    },
-                    pins: ["3V3", "gnd", "rxd", "txd"], gsNodeName: "de2120").Property("encodedvalue", 0).Finish()
+                        pins: ["3V3", "gnd", "rxd", "txd"],
+                        gsNodeName: "de2120"
+                    )
+                    .Property("encodedvalue", 0)
+                    .Finish()
             }
         };
     }
