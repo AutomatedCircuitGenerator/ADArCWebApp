@@ -24,9 +24,21 @@ export class TOF extends Controller implements I2CController {
         this.initializeRegisters();
     }
 
-    update(state: Record<string, any>): void {
+    private initializeRegisters(): void {
+        // Don't hardcode 100 - it should come from the property
+        this.writeRegister("FLUX", 200);
+        this.writeRegister("TEMP", 2500);
+        this.writeRegister("ERROR", 0);
+    }
+
+    override update(state: Record<string, any>): void {
         if (state.distance !== undefined) {
-            this.writeRegister("DIST", state.distance);
+            // Clamp to 0-5000 range
+            let distance = state.distance;
+            if (distance < 0) distance = 0;
+            if (distance > 5000) distance = 5000;
+
+            this.writeRegister("DIST", distance);
         }
     }
     
@@ -42,13 +54,6 @@ export class TOF extends Controller implements I2CController {
     private registerWithI2C(): void {
         const i2cBus = AVRRunner.getInstance().board.twis[0];
         i2cBus.registerController(TOF_I2C_ADDRESS, this);
-    }
-
-    private initializeRegisters(): void {
-        this.writeRegister("DIST", 100);  // Test value
-        this.writeRegister("FLUX", 200);
-        this.writeRegister("TEMP", 2500);
-        this.writeRegister("ERROR", 0);
     }
 
     private writeRegister(register: keyof typeof REGISTERS, value: number): void {
