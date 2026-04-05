@@ -718,8 +718,10 @@ namespace ADArCWebApp.Shared
 
                         {
                             "global",
-                            "int pressureSCK@ = @;\n" +
-                            "int pressureDOUT@ = @;\n" +
+                            "int pressureSCK@ = 13;\n" +
+                            "int pressureDOUT@ = 2;\n" +
+                            "long offset@ = 8388608; // hardcoded rn but this needs to come from env setting\n"  +
+                            "float scale@ = 500; // hardcoded rn but this needs to come from env setting\n" +
                             "long pressureRaw@ = 0;"
                         },
 
@@ -733,21 +735,24 @@ namespace ADArCWebApp.Shared
                         {
                             "loopMain",
                             "  pressureRaw@ = readPressureADC@();\n" +
-                            "  Serial.print(\"Raw Pressure ADC: \");\n" +
-                            "  Serial.println(pressureRaw@);\n"
+                            "  float pressure@ = (pressureRaw@ - offset@) / scale@;\n" +
+                            "  Serial.print(\"Pressure (kPa): \");\n" +
+                            "  Serial.println(pressure@);\n" +
+                            "  delay(500);"
                         },
 
                         {
                             "functions",
                             "long readPressureADC@() {\n" +
                             "  long value = 0;\n" +
-                            "  while (digitalRead(pressureDOUT@) == HIGH);\n" +
+                            "  while (digitalRead(pressureDOUT@) == HIGH); // wait for ready\n" +
                             "  for (int i = 0; i < 24; i++) {\n" +
                             "    digitalWrite(pressureSCK@, HIGH);\n" +
                             "    value = (value << 1) | digitalRead(pressureDOUT@);\n" +
                             "    digitalWrite(pressureSCK@, LOW);\n" +
                             "  }\n" +
-                            "  if (value & 0x800000) value |= 0xFF000000;\n" +
+                            "  digitalWrite(pressureSCK@, HIGH);\n" +
+                            "  digitalWrite(pressureSCK@, LOW);\n" +
                             "  return value;\n" +
                             "}"
                         },
@@ -757,7 +762,7 @@ namespace ADArCWebApp.Shared
                     }
                     , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Property("pressure", 0.0)
                     .Property("offset", 8388608.0)
-                    .Property("scale", 100000.0)
+                    .Property("scale", 500.0)
                     .Finish()
             }
         };

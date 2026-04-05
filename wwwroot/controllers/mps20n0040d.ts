@@ -17,6 +17,16 @@ export class MPS20N0040D extends Controller {
             console.log("MPS20N0040D pressure updated to:", this.pressure);
             this.computeADC();
         }
+        if (state.offset !== undefined) {
+            this.offset = state.offset;
+            console.log("MPS20N0040D offset updated to:", this.offset);
+            this.computeADC();
+        }
+        if (state.scale !== undefined) {
+            this.scale = state.scale;
+            console.log("MPS20N0040D scale updated to:", this.scale);
+            this.computeADC(); 
+        }
     }
 
     setup() {
@@ -39,10 +49,16 @@ export class MPS20N0040D extends Controller {
         });
 
         console.log("MPS20N0040D setup complete");
-        this.computeADC();
+        console.log("SCK pin object:", sck); // debugging
+
+        setTimeout(() => {
+            this.shifting = false;   // reset
+            this.computeADC();       // force correct value
+        }, 1000);
     }
 
     private computeADC() {
+        
         // Convert pressure to 24-bit ADC value
         let value = Math.floor(this.offset + this.pressure * this.scale);
 
@@ -68,6 +84,8 @@ export class MPS20N0040D extends Controller {
 
         // Extract the current bit (MSB first)
         const bit = (this.adcValue >> this.bitIndex) & 1;
+
+        console.log("Sending bit:", bit); // debugging
 
         // Set DOUT to the bit value AFTER clock goes high
         dout.state = bit === 1 ? PinState.High : PinState.Low;
