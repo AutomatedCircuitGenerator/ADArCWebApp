@@ -818,14 +818,11 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "loopMain",
-                                "// Fetch the encodedValue set by the controller\n" +
-                                "int encodedvalue = encodedvalue;\n" +
-                                "if (encodedvalue != lastPrintedValue)\n" +
-                                "{\n" +
-                                "    Serial.print(\"Encoded value: \");\n" +
-                                "    Serial.println(encodedvalue);\n" +
-                                "    lastPrintedValue = encodedvalue;\n" +
-                                "}\n" +
+                                "// Read value sent by the controller via softSerial\n" +
+                                "  int encodedvalue = softSerial.parseInt();\n" +
+                                "  Serial.print(\"Encoded value: \");\n" +
+                                "  Serial.println(encodedvalue);\n" +
+                                "  lastPrintedValue = encodedvalue;\n" +
                                 "delay(200);\n"
                             },
                             { "functions", "" },

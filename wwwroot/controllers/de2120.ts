@@ -1,21 +1,17 @@
 import { Controller } from "@controllers/controller";
 import { USART } from "../boards/board";
-import {PinState} from "@lib/avr8js";
 
 export class DE2120 extends Controller {
-    private _encodedValue: number = 0;
+
+    private encodedValue: number = 0;
     private _usart: USART | null = null;
 
     override update(state: Record<string, any>) {
         if (state.encodedvalue !== undefined) {
-            this.setEncodedValue(Number(state.encodedvalue));
+            this.encodedValue = Number(state.encodedvalue);
             this.sendToPin();
         }
-        console.log("DE2120: update triggered with value", this._encodedValue);
-    }
-
-    setEncodedValue(value: number) {
-        this._encodedValue = value;
+        console.log("DE2120: update triggered with value", this.encodedValue);
     }
 
     setup() {
@@ -32,12 +28,11 @@ export class DE2120 extends Controller {
     private sendToPin() {
         if (!this._usart) return;
 
-        const payload = `${this._encodedValue}\r\n`;
-
+        const payload = `${this.encodedValue}\r\n`;
         for (const char of payload) {
             this._usart.writeByte(char.charCodeAt(0), false);
         }
 
-        console.log("DE2120: sent to txd pin:", this._encodedValue);
+        console.log("DE2120: sent to txd pin:", this.encodedValue);
     }
 }
