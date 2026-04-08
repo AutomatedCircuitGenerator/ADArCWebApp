@@ -18,24 +18,87 @@ export class GPS extends Controller {
 
     setup() {
         AVRRunner.getInstance().board.cpu.addClockEvent(
-            () => this.writeToPins(),
-            1000
+            () => this.sendSerialNMEA(),
+            1000000
         );
     }
 
-    private writeToPins() {
-        // Latitude → RXD
-        this.pins["rxd"]?.forEach(pin => {
-            if (pin.analog) {
-                pin.analog.voltage = this._latitude;
-            }
-        });
+    private sendSerialNMEA() {
+        const runner = AVRRunner.getInstance();
+        const usart = runner.board.usarts[0];
+        
+        // debug
+        if(!usart) {
+            console.error("No USART found");
+        } else {
+            console.log("Sending NMEA sentence");
+        }
+        
+        const sentence = this.generateGPRMC(this._latitude, this._longitude);
+        console.log("Generated NMEA sentence:", sentence);
 
-        // Longitude → TXD
-        this.pins["txd"]?.forEach(pin => {
-            if (pin.analog) {
-                pin.analog.voltage = this._longitude;
-            }
-        });
+        // push byte into usart
+        for (let i = 0; i < sentence.length; i++) {
+            const byte = sentence.charCodeAt(i);
+            const accepted = usart.writeByte(byte, false);
+            
+            console.log(`Sent byte ${byte} to USART. Accepted: ${accepted}`);
+        }
+
+        // push terminating chars
+        usart.writeByte(13, true); // \r
+        usart.writeByte(10, true); // \n
+
+        // re-run sendSerialNMEA
+        runner.board.cpu.addClockEvent(
+            () => this.sendSerialNMEA(),
+            1000000
+        );
+    }
+
+    private generateGPRMC(lat: number, lon: number): string {
+        const latDir = lat >= 0 ? "N" : "S";
+        const lonDir = lon >= 0 ? "E" : "W";
+
+        // deg to NMEA DDMM.MMMM
+        const formatCoord = (coord: number, isLat: boolean) => {
+            const absolute = Math.abs(coord);
+            const degrees = Math.floor(absolute);
+            const minutes = (absolute - degrees) * 60;
+            const degreeString = degrees.toString().padStart(isLat ? 2 : 3, "0");
+            return `${degreeString}${minutes.toFixed(4)}`;
+        };
+
+        const time = "120000"; // placeholder timestamp (12:00 utc)
+        const latStr = formatCoord(lat, true);
+        const lonStr = formatCoord(lon, false);
+
+        const payload = `GPRMC,${time},A,${latStr},${latDir},${lonStr},${lonDir},000.0,000.0,080426,,,A`;
+
+        // xor checksum for NMEA standards
+        let checksum = 0;
+        for (let i = 0; i < payload.length; i++) {
+            checksum ^= payload.charCodeAt(i);
+        }
+
+        return `$${payload}*${checksum.toString(16).toUpperCase().padStart(2, "0")}`;
     }
 }
+
+/* use this code in the sim code panel -- refraining for now on changing codeForGen in ComponentNamescpace.ts
+#include <Arduino.h>
+
+void setup() {
+    Serial.begin(9600);
+}
+
+void loop() {
+  int bytesWaiting = Serial.available();
+  
+  if (bytesWaiting > 0) {
+    char incomingByte = Serial.read();
+    
+    Serial.print(incomingByte);
+  }
+}
+ */
