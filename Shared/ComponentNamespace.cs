@@ -445,7 +445,7 @@ namespace ADArCWebApp.Shared
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
-                    }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
+                    }, paneHoverText: "KY-008", pins: ["digital_in", "gnd", "Vcc"], gsNodeName: "ky008").Finish()
             },
             {
                 22,
@@ -633,7 +633,7 @@ namespace ADArCWebApp.Shared
                             "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
                         },
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
+                    }, pins: ["digital_out", "gnd", "Vcc"], gsNodeName: "ky012").Finish()
             },
             {
                 31,

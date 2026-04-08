@@ -30,7 +30,14 @@
                     x: 42,
                     y: 107,
                     signals: new PinSignalInfo[] { PinSignalInfo.GND() },
-                    number: 3)
+                    number: 3),
+                // Ground pin - completes the circuit
+                new ElementPin(
+                    name: "Vcc",
+                    x: 51,
+                    y: 107,
+                    signals: new PinSignalInfo[] { PinSignalInfo.VCC() },
+                    number: 4)
             };
         }
     }
