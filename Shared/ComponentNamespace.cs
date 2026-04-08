@@ -653,7 +653,6 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
-            
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
@@ -912,6 +911,48 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
 
+            
+           
+            {
+                37,
+                new ComponentDataBuilder(
+                        "Adafruit Ultimate GPS Breakout",
+                        true,
+                        "Input/Other Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorGPS),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>"
+                            },
+                            {
+                                "global",
+                                "#define LAT_PIN@ ~\"rxd\"\n"+
+                                "#define LON_PIN@ ~\"txd\"\n"
+                            },
+                            {
+                                "setup",
+                                "pinMode(LAT_PIN@, INPUT);\npinMode(LON_PIN@, INPUT);"
+                            },
+                            {
+                                "loopMain",
+                                "Serial.print(\"Latitude: \"); Serial.println(analogRead(LAT_PIN@));\nSerial.print(\"Longitude: \"); Serial.println(analogRead(LON_PIN@));\n\ndelay(1000);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["gnd", "Vcc", "rxd", "txd"],
+                        gsNodeName: "gps"
+                    )
+                    .Property("latitude", 20.0)
+                    .Property("longitude", 40.0)
+                    .Finish()
+            },
         };
     }
 }
