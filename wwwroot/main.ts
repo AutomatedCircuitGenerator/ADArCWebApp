@@ -27,6 +27,7 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
+import {TOF} from "@controllers/tof";
 import {SEN0114} from "@controllers/sen0114";
 import {SRVPH} from "@controllers/srvph";
 import {MAX31856} from "@controllers/max31856";
@@ -72,5 +73,6 @@ import {J305B} from "@controllers/j305b";
 (<any>window).SHT30 = SHT30;
 (<any>window).DHT22 = DHT22;
 (<any>window).SEN0189 = SEN0189;
+(<any>window).TOF = TOF;
 
 (<any>window).J305B = J305B;

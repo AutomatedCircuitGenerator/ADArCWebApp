@@ -33,15 +33,9 @@ namespace ADArCWebApp.Shared
                     codeForGen: new()
                     {
                         { "include", "" },
-                        { "global", "#define TURB_PIN@ ~\"analog_in\" // Turbidity sensor pin (DFRobot SEN0189)" },
+                        { "global", "" },
                         { "setup", ""},
-                        { "loopMain",
-                            "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
-                            + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
-                            + "  Serial.print(\"Turbidity Voltage = \"); // Print label\n"
-                            + "  Serial.println(voltage@, 3); // Print voltage with 3 decimals\n"
-                            + "  delay(500); // Wait 500ms"
-                        },
+                        { "loopMain", ""},
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
@@ -327,7 +321,8 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
                         environmentalSettingsType: typeof(PIRButton))
-                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0).Finish()
+                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0)
+                    .Finish()
             },
             {
                 16,
@@ -658,6 +653,7 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
+            
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
@@ -876,6 +872,46 @@ namespace ADArCWebApp.Shared
             //             { "delayLoop", "" }, { "delayTime", "" }
             //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
             // }
+            {
+                38,
+                new ComponentDataBuilder(
+                        "Time of Flight (VL53L4CD)",
+                        true,
+                        "Input/Distance Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorTOF),
+                        paneHoverText: "VL53L4CD",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <Wire.h>"
+                            },
+                            {
+                                "global",
+                                "int16_t tfDist@; // distance in centimeters"
+                            },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {
+                                "loopMain",
+                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
+                        gsNodeName: "tof"
+                    )
+                    .Property("distance", 0.0)
+                    .Finish()
+            },
+
             {
                 38,
                 new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 1, 75, 75,
