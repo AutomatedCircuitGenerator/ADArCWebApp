@@ -912,6 +912,55 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
 
+
+            {
+                31,
+                new ComponentDataBuilder("SGP40", true, "Input/Air Quality Sensors", 1, 75, 75, typeof(RazorSGP40),
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <Arduino.h>\n" +
+                            "#include <Wire.h>\n" +
+                            "#include <SensirionI2CSgp40.h>"
+                        },
+                        { "global",
+                            "SensirionI2CSgp40 sgp40;\n\n" +
+                            "// Values injected by TS controller\n" +
+                            "uint16_t vocIndex = 0;\n" +
+                            "float temperature = 25.0f;\n" +
+                            "float humidity = 50.0f;\n\n" +
+                            "// Simulation flag\n" +
+                            "bool sgp40Simulated = true;"
+                            
+                        },
+                        {
+                            "setup",
+                            "Wire.begin();\n" +
+                            "sgp40.begin(Wire);\n\n" +
+                            "Serial.println(\"SGP40 initialized (simulation mode)\");"
+                        },
+                        {
+                            "loopMain",
+                            "\n" +
+                            "// Values are pushed in from the TS controller\n\n" +
+                            "Serial.print(\"VOC Index: \");\n" +
+                            "Serial.print(vocIndex);\n" +
+                            "Serial.print(\" | Temp: \");\n" +
+                            "Serial.print(temperature);\n" +
+                            "Serial.print(\" C | RH: \");\n" +
+                            "Serial.println(humidity);\n\n" +
+                            "delay(1000);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["Vcc", "gnd", "sda", "scl"],
+                    gsNodeName: "sgp40"
+                ).Property("gas", "VOC")
+                .Finish()
+            }
         };
     }
 }
