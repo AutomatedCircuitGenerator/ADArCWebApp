@@ -35,6 +35,7 @@
     <string>max31856_arduino.grxml</string>
     <string>sht30_arduino.grxml</string>
     <string>sen0189_arduino.grxml</string>
+    <string>j305b_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
