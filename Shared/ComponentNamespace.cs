@@ -35,7 +35,7 @@ namespace ADArCWebApp.Shared
                         { "include", "" },
                         { "global", "" },
                         { "setup", ""},
-                        { "loopMain","" },
+                        { "loopMain", ""},
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
@@ -653,6 +653,7 @@ namespace ADArCWebApp.Shared
                         { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                     }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
             },
+            
             // {
             //     31,
             //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
@@ -873,6 +874,116 @@ namespace ADArCWebApp.Shared
             // }
             {
                 38,
+                new ComponentDataBuilder(
+                        "Time of Flight (VL53L4CD)",
+                        true,
+                        "Input/Distance Sensors",
+                        1,
+                        75,
+                        75,
+                        typeof(RazorTOF),
+                        paneHoverText: "VL53L4CD",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Arduino.h>\n#include <Wire.h>"
+                            },
+                            {
+                                "global",
+                                "int16_t tfDist@; // distance in centimeters"
+                            },
+                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {
+                                "loopMain",
+                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                            },
+                            {
+                                "functions",
+                                ""
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
+                        gsNodeName: "tof"
+                    )
+                    .Property("distance", 0.0)
+                    .Finish()
+            },
+
+            {
+                41,
+                new ComponentDataBuilder(
+                    "RS485 Transceiver",
+                    true,
+                    "Input/Other Sensors",
+                    1,
+                    75,
+                    75,
+                    typeof(RazorTRANSCEIVER),
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <Arduino.h>"
+                        },
+
+                        {
+                            "global",
+                            "int ce_pin@ = ~\"ce\";\n" +
+                            "int csn_pin@ = ~\"csn\";\n" +
+                            "int sck_pin@ = ~\"sck\";\n" +
+                            "int mosi_pin@ = ~\"mosi\";\n" +
+                            "int miso_pin@ = ~\"miso\";\n" +
+                            "\n" +
+                            "int lastMode = -1; // track previous mode"
+                        },
+
+                        {
+                            "setup",
+                            "pinMode(ce_pin@, OUTPUT);\n" +
+                            "pinMode(csn_pin@, INPUT); // controller drives this\n" +
+                            "pinMode(sck_pin@, OUTPUT);\n" +
+                            "pinMode(mosi_pin@, OUTPUT);\n" +
+                            "pinMode(miso_pin@, INPUT);\n" +
+                            "\n" +
+                            "Serial.println(\"[Transceiver] Setup complete\");"
+                        },
+
+                        {
+                            "loopMain",
+                            "int mode = digitalRead(csn_pin@);\n" +
+                            "\n" +
+                            "// Only act when mode changes\n" +
+                            "if (mode != lastMode) {\n" +
+                            "\n" +
+                            "    if(mode == LOW) {\n" +
+                            "        digitalWrite(ce_pin@, LOW);\n" +
+                            "        Serial.println(\"[Transceiver] Receive mode enabled\");\n" +
+                            "    } else {\n" +
+                            "        digitalWrite(ce_pin@, HIGH);\n" +
+                            "        Serial.println(\"[Transceiver] Transmit mode enabled\");\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    lastMode = mode;\n" +
+                            "}"
+                        },
+
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+
+                    pins: ["gnd", "Vcc", "csn", "ce", "sck", "mosi", "miso"],
+                    gsNodeName: "transceiver",
+                    environmentalSettingsType: typeof(TRANSCEIVERSettings)
+                )
+                .Property("mode", 0)
+                .Finish()
+            },
+            {
+                38,
                 new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
                         typeof(RazorNPK),
                         codeForGen: new()
@@ -948,4 +1059,5 @@ namespace ADArCWebApp.Shared
             }
         };
     }
+    
 }
