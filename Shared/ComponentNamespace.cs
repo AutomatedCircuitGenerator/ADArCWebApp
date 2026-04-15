@@ -33,15 +33,9 @@ namespace ADArCWebApp.Shared
                     codeForGen: new()
                     {
                         { "include", "" },
-                        { "global", "#define TURB_PIN@ ~\"analog_in\" // Turbidity sensor pin (DFRobot SEN0189)" },
+                        { "global", "" },
                         { "setup", ""},
-                        { "loopMain",
-                            "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
-                            + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
-                            + "  Serial.print(\"Turbidity Voltage = \"); // Print label\n"
-                            + "  Serial.println(voltage@, 3); // Print voltage with 3 decimals\n"
-                            + "  delay(500); // Wait 500ms"
-                        },
+                        { "loopMain","" },
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
