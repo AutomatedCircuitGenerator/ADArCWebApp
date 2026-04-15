@@ -983,7 +983,7 @@ namespace ADArCWebApp.Shared
                 .Finish()
             },
             {
-                38,
+                39,
                 new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
                         typeof(RazorNPK),
                         codeForGen: new()
