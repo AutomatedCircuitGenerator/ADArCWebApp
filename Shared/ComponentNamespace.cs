@@ -912,6 +912,77 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
 
+            {
+                41,
+                new ComponentDataBuilder(
+                    "RS485 Transceiver",
+                    true,
+                    "Input/Other Sensors",
+                    1,
+                    75,
+                    75,
+                    typeof(RazorTRANSCEIVER),
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <Arduino.h>"
+                        },
+
+                        {
+                            "global",
+                            "int ce_pin@ = ~\"ce\";\n" +
+                            "int csn_pin@ = ~\"csn\";\n" +
+                            "int sck_pin@ = ~\"sck\";\n" +
+                            "int mosi_pin@ = ~\"mosi\";\n" +
+                            "int miso_pin@ = ~\"miso\";\n" +
+                            "\n" +
+                            "int lastMode = -1; // track previous mode"
+                        },
+
+                        {
+                            "setup",
+                            "pinMode(ce_pin@, OUTPUT);\n" +
+                            "pinMode(csn_pin@, INPUT); // controller drives this\n" +
+                            "pinMode(sck_pin@, OUTPUT);\n" +
+                            "pinMode(mosi_pin@, OUTPUT);\n" +
+                            "pinMode(miso_pin@, INPUT);\n" +
+                            "\n" +
+                            "Serial.println(\"[Transceiver] Setup complete\");"
+                        },
+
+                        {
+                            "loopMain",
+                            "int mode = digitalRead(csn_pin@);\n" +
+                            "\n" +
+                            "// Only act when mode changes\n" +
+                            "if (mode != lastMode) {\n" +
+                            "\n" +
+                            "    if(mode == LOW) {\n" +
+                            "        digitalWrite(ce_pin@, LOW);\n" +
+                            "        Serial.println(\"[Transceiver] Receive mode enabled\");\n" +
+                            "    } else {\n" +
+                            "        digitalWrite(ce_pin@, HIGH);\n" +
+                            "        Serial.println(\"[Transceiver] Transmit mode enabled\");\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    lastMode = mode;\n" +
+                            "}"
+                        },
+
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+
+                    pins: ["gnd", "Vcc", "csn", "ce", "sck", "mosi", "miso"],
+                    gsNodeName: "transceiver",
+                    environmentalSettingsType: typeof(TRANSCEIVERSettings)
+                )
+                .Property("mode", 0)
+                .Finish()
+            }
         };
     }
+    
 }
