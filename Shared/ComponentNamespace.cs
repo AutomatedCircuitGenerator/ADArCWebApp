@@ -1018,7 +1018,6 @@ namespace ADArCWebApp.Shared
                                 "    delay(50);\n" +
                                 "    \n" +
                                 "    uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
-                                "    Serial.write(request, sizeof(request));\n" +
                                 "    delay(500);\n" +
                                 "    \n" +
                                 "    digitalWrite(~\"DE\", LOW);\n" +
