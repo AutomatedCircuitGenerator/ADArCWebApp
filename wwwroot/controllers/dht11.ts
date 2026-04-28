@@ -82,31 +82,24 @@ export class DHT11 extends Controller {
     }
 
     private valuesToDigitalSignal(): number[] {
-        const humInt = Math.round(this.humidity);
-        const humDec = 0;
-        let tempInt = Math.round(this.temperature);
-        const tempDec = 0;
+        // Clamp to DHT11 valid ranges
+        let humidity = Math.min(90, Math.max(20, this.humidity));
+        let temperature = Math.min(50, Math.max(0, this.temperature));
 
-        // Handle negative temperatures with sign bit
-        let tempHigh: number;
-        let tempLow: number;
+        const humInt = Math.floor(humidity);
+        const humDec = 0;                     // DHT11 has no fractional humidity
 
-        if (tempInt < 0) {
-            tempInt = -tempInt;
-            tempHigh = ((tempInt >> 8) | 0x80) & 0xFF; // Set sign bit and mask to 8-bit
-        } else {
-            tempHigh = (tempInt >> 8) & 0x7F; // Clear sign bit and mask to 8-bit
-        }
+        const tempInt = Math.floor(temperature);
+        const tempDec = 0;                    // DHT11 has no fractional temperature
 
-        tempLow = tempInt & 0xFF;
-
-        const checksum = (humInt + humDec + tempHigh + tempLow) & 0xFF;
+        // Checksum = (humInt + humDec + tempInt + tempDec) & 0xFF
+        const checksum = (humInt + humDec + tempInt + tempDec) & 0xFF;
 
         return [
             humInt & 0xFF,
             humDec & 0xFF,
-            tempHigh,
-            tempLow,
+            tempInt & 0xFF,
+            tempDec & 0xFF,
             checksum
         ];
     }
