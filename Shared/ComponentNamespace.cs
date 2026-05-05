@@ -852,9 +852,9 @@ namespace ADArCWebApp.Shared
                                 "   int centerRaw@ = (pixelData@[28] << 8) | pixelData@[27];\n" +
                                 "   centerTemp@ = (centerRaw@ / 4.0) - 40;\n" +
                                 "    \n" +
-                                "    Serial.println(\"Center Temp: \");\n" +
-                                "    Serial.println(centerTemp@);\n" +
-                                "    Serial.println(\" C\");\n" +
+                                "    Serial.print(\"Center Temp: \");\n" +
+                                "    Serial.print(centerTemp@);\n" +
+                                "    Serial.println(\"°C\");\n" +
                                 "  delay(2000);\n" +
                                 "  }"
                             },
