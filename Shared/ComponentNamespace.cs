@@ -1055,6 +1055,51 @@ namespace ADArCWebApp.Shared
                     .Property("phosphorus", 0.0)
                     .Property("potassium", 0.0)
                     .Finish()
+            },
+            {
+                40,
+                new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
+                    codeForGen: new()
+                    {
+                        {
+                            "include", 
+                            "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>"
+                        },
+                        {
+                            "global",
+                            "#define SCREEN_WIDTH 128\n" +
+                            "#define SCREEN_HEIGHT 64\n" +
+                            "\n" +
+                            "Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);"
+                        },
+                        {
+                            "setup",
+                            "  delay(500);\n" +
+                            "  \n" +
+                            "  If(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C));  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally\n" +
+                            "  {\n" +
+                            "    while(true);\n" +
+                            "  }\n" +
+                            "  display.clearDisplay();\n" +
+                            "  display.setTextSize(1);\n" +
+                            "  display.setTextColor(SSD1306_WHITE);\n" +
+                            "  display.setCursor(0, 10);\n" +
+                            "  display.println(\"Hello, World!\");\n" +
+                            "  display.display();"
+                        },
+                        {
+                            "loopMain", ""
+                        },
+                        {
+                            "functions", ""
+                        },
+                        {
+                            "delayLoop", ""
+                        },
+                        {
+                            "delayTime", ""
+                        }
+                    }, pins: ["scl", "sda", "Vcc", "gnd"], gsNodeName: "ssd1306").Finish()
             }
         };
     }
