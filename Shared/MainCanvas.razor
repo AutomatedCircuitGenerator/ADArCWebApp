@@ -1,5 +1,5 @@
 @using System.Text
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @foreach (var c in comps)
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
@@ -215,6 +215,11 @@
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
     {
+        var mouse = (x: e.ClientX, y: e.ClientY);
+        var worldX = (mouse.x - zoomOrigin.x) / zoomFactor + zoomOrigin.x - transform.translate.x * (1 / zoomFactor);
+        var worldY = (mouse.y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - transform.translate.y * (1 / zoomFactor);
+        zoomOrigin.x = worldX;
+        zoomOrigin.y = worldY;
         zoomFactor += e.DeltaY / -1000;
 
         zoomFactor = Math.Clamp(zoomFactor, .4, 3);
