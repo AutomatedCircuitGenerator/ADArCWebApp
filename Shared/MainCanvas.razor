@@ -210,20 +210,43 @@
     }
 
     /// <summary>
+    /// Currently unused. Sets the component back to center.
+    /// </summary>
+    private void CenterView()
+    {
+        if (comps.Count == 0) return;
+        
+        var minX = comps.Values.Min(c => c.X);
+        var minY = comps.Values.Min(c => c.Y);
+        
+        var maxX = comps.Values.Max(c => c.X);
+        var maxY = comps.Values.Max(c => c.Y);
+        
+        var centerX = (minX + maxX) / 2;
+        var centerY = (minY + maxY) / 2;
+        
+        transform.translate.x = 1920/2 - centerX * zoomFactor;
+        transform.translate.y = 1080/2 - centerY * zoomFactor;
+    }
+
+    /// <summary>
     /// Currently unused. Handles scrollwheel zooming.
     /// </summary>
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
     {
+        var oldZoom = zoomFactor;
         var mouse = (x: e.ClientX, y: e.ClientY);
-        var worldX = (mouse.x - zoomOrigin.x) / zoomFactor + zoomOrigin.x - transform.translate.x * (1 / zoomFactor);
-        var worldY = (mouse.y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - transform.translate.y * (1 / zoomFactor);
-        zoomOrigin.x = worldX;
-        zoomOrigin.y = worldY;
+        var worldX = (mouse.x - zoomOrigin.x) / oldZoom + zoomOrigin.x - transform.translate.x * (1 / oldZoom);
+        var worldY = (mouse.y - zoomOrigin.y) / oldZoom + zoomOrigin.y - transform.translate.y * (1 / oldZoom);
+        
         zoomFactor += e.DeltaY / -1000;
-
         zoomFactor = Math.Clamp(zoomFactor, .4, 3);
-
+        
+        if (oldZoom == zoomFactor) return;
+        
+        zoomOrigin.x = worldX; 
+        zoomOrigin.y = worldY;
 
         foreach (var comp in comps.Values)
         {
