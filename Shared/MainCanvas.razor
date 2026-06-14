@@ -236,32 +236,22 @@
     private void UpdZoom(WheelEventArgs e)
     {
         var oldZoom = zoomFactor;
-        var scale = zoomFactor / oldZoom;
-        var mouse = (x: e.ClientX, y: e.ClientY);
-        var worldX = (mouse.x - zoomOrigin.x) / oldZoom + zoomOrigin.x - transform.translate.x * (1 / oldZoom);
-        var worldY = (mouse.y - zoomOrigin.y) / oldZoom + zoomOrigin.y - transform.translate.y * (1 / oldZoom);
-        var worldB = (mouse.x - transform.translate.x - zoomOrigin.x)/oldZoom + zoomOrigin.x;
         
         zoomFactor += e.DeltaY / -1000;
         zoomFactor = Math.Clamp(zoomFactor, .4, 3);
         
         if (oldZoom == zoomFactor) return;
         
-        zoomOrigin.x += (worldX - zoomOrigin.x); 
-        zoomOrigin.y += (worldY - zoomOrigin.y);
-        // transform.translate.x = mouse.x - scale * (mouse.x - transform.translate.x);
-        // transform.translate.y = mouse.y - scale * (mouse.y - transform.translate.y);
+        var scale = zoomFactor / oldZoom;
+        var mouse = (x: e.ClientX, y: e.ClientY);
+        
+        transform.translate.x = mouse.x - scale * (mouse.x - transform.translate.x);
+        transform.translate.y = mouse.y - scale * (mouse.y - transform.translate.y);
 
         foreach (var comp in comps.Values)
         {
             AdjustCompToZoom(comp);
         }
-        Console.WriteLine($"mouse=({e.ClientX},{e.ClientY})");
-        Console.WriteLine($"worldA={worldX},worldB={worldB}");
-        Console.WriteLine($"zoomFactor={zoomFactor}");
-        Console.WriteLine(
-            $"translate={transform.translate.x}"
-        );
     }
 
     /// <summary>
@@ -269,7 +259,7 @@
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
+    public ComponentInstance AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
@@ -288,10 +278,8 @@
     /// <returns>the zoomed coordinate.</returns>
     private (double x, double y) ZoomCoord((double x, double y) coord)
     {
-        coord.x = (coord.x + (transform.translate.x * (1 / zoomFactor)) - zoomOrigin.x) * zoomFactor + zoomOrigin.x;
-        coord.y = (coord.y + (transform.translate.y * (1 / zoomFactor)) - zoomOrigin.y) * zoomFactor + zoomOrigin.y;
-        // coord.x = coord.x *  zoomFactor + transform.translate.x;
-        // coord.y = coord.y *  zoomFactor + transform.translate.y;
+        coord.x = coord.x *  zoomFactor + transform.translate.x;
+        coord.y = coord.y *  zoomFactor + transform.translate.y;
 
         return coord;
     }
