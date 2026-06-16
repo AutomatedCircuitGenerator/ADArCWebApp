@@ -1099,7 +1099,7 @@ namespace ADArCWebApp.Shared
                         {
                             "delayTime", ""
                         }
-                    }, pins: ["scl", "sda", "Vcc", "gnd"], gsNodeName: "ssd1306").Finish()
+                    }, pins: ["scl", "sda", "5V", "gnd"], gsNodeName: "ssd1306").Finish()
             }
         };
     }
