@@ -230,7 +230,7 @@
     }
 
     /// <summary>
-    /// Currently unused. Handles scrollwheel zooming.
+    /// Handles scrollwheel zooming.
     /// </summary>
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
@@ -259,7 +259,7 @@
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    public ComponentInstance AdjustCompToZoom(ComponentInstance comp)
+    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
@@ -291,10 +291,9 @@
     /// <returns>the component, now returned to normal.</returns>
     public ComponentInstance UnZoom(ComponentInstance comp)
     {
-        comp.X = (comp.X - zoomOrigin.x) / zoomFactor + zoomOrigin.x - (transform.translate.x * (1 / zoomFactor));
-        comp.Y = (comp.Y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - (transform.translate.y * (1 / zoomFactor));
-
-
+        comp.X = (comp.X - transform.translate.x) / zoomFactor;
+        comp.Y = (comp.Y - transform.translate.y) / zoomFactor;
+        
         return comp;
     }
 
