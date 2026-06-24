@@ -1076,7 +1076,7 @@ namespace ADArCWebApp.Shared
                             "setup",
                             "  delay(500);\n" +
                             "  \n" +
-                            "  If(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C));  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally\n" +
+                            "  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C));  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally\n" +
                             "  {\n" +
                             "    while(true);\n" +
                             "  }\n" +

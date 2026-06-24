@@ -1,44 +1,57 @@
-import {Controller} from "./controller";
-import {AVRRunner} from "@lib/execute";
-import {PinState} from "@lib/avr8js";
+import { I2CController } from "@lib/i2c-bus";
+import { Controller } from "@controllers/controller";
 
-export class SSD1306 extends Controller {
+export class SSD1306 extends Controller implements I2CController {
 
-    private _temperature: number;
-
-    override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
-    }
-
-    setTemperature = (temperature: number) => {
-        this._temperature = temperature
-    }
+    private updated = true;
+    private displayText = "SSD1306";
 
     setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
+        console.log("SSD1306 setup");
+        console.log("registering at", 0x3C);
+        this.pins.scl[0].twi.registerController(0x3C, this);
+        this.render();
     }
 
-    private get shouldReadSPI(): boolean {
-        return this.pins.cs[0].digital.state == PinState.Low;
+    cleanup() {}
+
+    update() {
+        if (this.updated) {
+            this.render();
+            this.updated = false;
+        }
     }
 
-    private nextByteIsHigh = false;
+    render() {
+        console.log("displayText =", this.displayText);
+        const text = this.element.querySelector("#oledText");
+        console.log("text =", text);
 
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
-            return;
+        if (text) {
+            text.textContent = this.displayText;
         }
-        if (this._temperature == undefined) {
-            console.log("Undefined\n")
-        }
-        let temperature = Math.round((this._temperature / 0.25) << 3);
-        let byteToSend: number;
-        if (!this.nextByteIsHigh) {
-            byteToSend = (temperature >> 8) & 0xFF;
-        } else {
-            byteToSend = temperature & 0xFF;
-        }
-        this.nextByteIsHigh = !this.nextByteIsHigh;
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), AVRRunner.getInstance().board.spis[0].transferCycles);
+        console.log("render");
+    }
+
+    i2cConnect() {
+        console.log("I2C CONNECT");
+        return true;
+    }
+
+    i2cDisconnect() {}
+
+    i2cReadByte(): number {
+        return 0xff;
+    }
+
+    i2cWriteByte(value: number) {
+        console.log("SSD1306 I2C:", value.toString(16));
+
+        this.displayText = value.toString(16);
+
+        this.updated = true;
+        this.update();
+
+        return true;
     }
 }
