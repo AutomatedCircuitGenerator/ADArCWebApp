@@ -2,25 +2,33 @@ import { I2CController } from "@lib/i2c-bus";
 import { Controller } from "@controllers/controller";
 
 export class SSD1306 extends Controller implements I2CController {
-
-    private displayText = "SSD1306";
+    
     private updated = true;
     private buffer = new Uint8Array(128 * 64);
+    private page = 0;
+    private column = 0;
+    // private mode: "command" | "data" = "command";
+    private dataCount = 0;
+    private isDataMode = false;
+    private dataIndex = 0;
+    private expectingControlByte = true;
+    private mode = "command";
+    private powered = false;
 
     setup() {
         console.log("SSD1306 setup");
-
+        this.powered = true;
+        this.buffer.fill(0);
         this.pins.scl[0].twi.registerController(0x3C, this);
-        
-        for(let x=0;x<128;x++){
-            this.buffer[32 * 128 + x] = 1;
-        }
-
+        console.log("registered");
         this.render();
     }
 
     cleanup() {
         console.log("SSD1306 cleanup");
+        this.powered = false;
+        this.buffer.fill(0);
+        this.render();
     }
 
     update() {
@@ -31,54 +39,52 @@ export class SSD1306 extends Controller implements I2CController {
     }
 
     render() {
-
-        const pixelGroup =
-            this.element.querySelector("#oledPixels");
-
-        if (!pixelGroup) {
+        const pixels = this.element.querySelector("#oledPixels");
+        let litPixels = 0;
+        if (!this.powered) {
+            pixels.innerHTML = "";
             return;
         }
 
-        pixelGroup.innerHTML = "";
+        if (!pixels) {
+            return;
+        }
 
-        const startX = 612;
-        const startY = 350;
+        pixels.innerHTML = "";
 
-        const pixelWidth = 386 / 128;
-        const pixelHeight = 197 / 64;
+        for(let page=0; page<8; page++) {
+            for(let x=0; x<128; x++) {
+                const b = this.buffer[page * 128 + x];
+                for(let bit=0; bit<8; bit++) {
+                    if(b & (1 << bit)) {
+                        litPixels++;
+                        const y = page * 8 + bit;
+                        const pixel = document.createElementNS("http://www.w3.org/2000/svg", "rect");
 
-        for (let y = 0; y < 64; y++) {
-
-            for (let x = 0; x < 128; x++) {
-
-                if (!this.buffer[y * 128 + x]) {
-                    continue;
+                        pixel.setAttribute("x", (625 + x * 2.82).toString());
+                        pixel.setAttribute("y", (355 + y * 3.0).toString());
+                        pixel.setAttribute("width", "2.82");
+                        pixel.setAttribute("height", "3");
+                        pixel.setAttribute("fill", "white");
+                        pixels.appendChild(pixel);
+                    }
                 }
-
-                const rect = document.createElementNS("http://www.w3.org/2000/svg", "rect");
-
-                rect.setAttribute("x", (startX + x * pixelWidth).toString());
-
-                rect.setAttribute("y", (startY + y * pixelHeight).toString());
-
-                rect.setAttribute("width", pixelWidth.toString());
-
-                rect.setAttribute("height", pixelHeight.toString());
-
-                rect.setAttribute("fill", "#88aaff");
-
-                pixelGroup.appendChild(rect);
             }
         }
+        console.log("litPixels =", litPixels);
     }
 
     i2cConnect() {
         console.log("I2C CONNECT");
+        this.expectingControlByte = true;
         return true;
     }
 
     i2cDisconnect() {
         console.log("I2C DISCONNECT");
+        console.log("I2C DISCONNECT dataIndex=", this.dataIndex);
+        this.render();
+        return true;
     }
 
     i2cReadByte(): number {
@@ -86,14 +92,29 @@ export class SSD1306 extends Controller implements I2CController {
     }
 
     i2cWriteByte(value: number) {
+        if(this.expectingControlByte) {
+            console.log("CONTROL:", value.toString(16));
+            this.expectingControlByte = false;
+            if(value === 0x40) {
+                this.mode = "data";
+            }
+            else {
+                this.mode = "command";
+            }
+            return true;
+        }
 
-        console.log("SSD1306 I2C:", value.toString(16));
-
-        this.displayText = value.toString(16);
-
-        this.updated = true;
-        this.update();
+        if(this.mode === "data") {
+            this.buffer[this.dataIndex++] = value;
+            if(this.dataIndex % 100 === 0) {
+                console.log("dataIndex", this.dataIndex);
+            }
+        }
 
         return true;
+    }
+
+    display() {
+        this.render();
     }
 }
