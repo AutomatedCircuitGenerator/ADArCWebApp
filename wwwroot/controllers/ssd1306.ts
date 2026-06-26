@@ -16,6 +16,9 @@ export class SSD1306 extends Controller implements I2CController {
     private columnEnd = 127;
     private currentColumn = 0;
     private currentPage = 0;
+    private displayOn = true;
+    private inverted = false;
+    private entireDisplayOn = false;
 
     setup() {
         console.log("SSD1306 setup");
@@ -31,6 +34,8 @@ export class SSD1306 extends Controller implements I2CController {
         this.pageEnd = 7;
         this.currentColumn = 0;
         this.currentPage = 0;
+        this.displayOn = true;
+        this.inverted = false;
         this.pins.scl[0].twi.registerController(0x3C, this);
         console.log("registered");
         this.render();
@@ -44,6 +49,8 @@ export class SSD1306 extends Controller implements I2CController {
         this.mode = "command";
         this.currentCommand = -1;
         this.commandBytesRemaining = 0;
+        this.displayOn = true;
+        this.inverted = false;
         this.render();
     }
 
@@ -57,7 +64,7 @@ export class SSD1306 extends Controller implements I2CController {
     render() {
         const pixels = this.element.querySelector("#oledPixels");
         let litPixels = 0;
-        if (!this.powered) {
+        if (!this.powered || !this.displayOn) {
             pixels.innerHTML = "";
             return;
         }
@@ -72,7 +79,11 @@ export class SSD1306 extends Controller implements I2CController {
             for(let x=0; x<128; x++) {
                 const b = this.buffer[page * 128 + x];
                 for(let bit=0; bit<8; bit++) {
-                    if(b & (1 << bit)) {
+                    let pixelOn = this.entireDisplayOn || (b & (1 << bit)) !== 0;
+                    if (this.inverted) {
+                        pixelOn = !pixelOn;
+                    }
+                    if(pixelOn) {
                         litPixels++;
                         const y = page * 8 + bit;
                         const pixel = document.createElementNS("http://www.w3.org/2000/svg", "rect");
@@ -135,6 +146,7 @@ export class SSD1306 extends Controller implements I2CController {
         }
 
         if (this.mode === "command") {
+            console.log("COMMAND:", "0x" + value.toString(16).padStart(2, "0"));
             if (this.commandBytesRemaining > 0) {
                 this.handleCommandParameter(value);
                 return true;
@@ -149,6 +161,36 @@ export class SSD1306 extends Controller implements I2CController {
                 case 0x22:      // PAGEADDR
                     this.currentCommand = 0x22;
                     this.commandBytesRemaining = 2;
+                    break;
+
+                case 0xAE:
+                    this.displayOn = false;
+                    this.render();
+                    break;
+
+                case 0xAF:
+                    this.displayOn = true;
+                    this.render();
+                    break;
+
+                case 0xA6:
+                    this.inverted = false;
+                    this.render();
+                    break;
+
+                case 0xA7:
+                    this.inverted = true;
+                    this.render();
+                    break;
+
+                case 0xA4:
+                    this.entireDisplayOn = false;
+                    this.render();
+                    break;
+
+                case 0xA5:
+                    this.entireDisplayOn = true;
+                    this.render();
                     break;
 
                 default:
@@ -184,6 +226,17 @@ export class SSD1306 extends Controller implements I2CController {
         if(this.commandBytesRemaining===0){
             this.currentCommand=-1;
         }
+
+        console.log(
+            "COLUMN",
+            this.columnStart,
+            this.columnEnd
+        );
+        console.log(
+            "PAGE",
+            this.pageStart,
+            this.pageEnd
+        );
     }
 
     display() {
