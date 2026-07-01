@@ -33,6 +33,7 @@ export class SSD1306 extends Controller implements I2CController {
     private comScanDirection = false;
     private displayStartLine = 0;
     private comScanReverse = false;
+    // horizontal scroll
     private scrollDirection = 0;   // 1=right -1=left
     private scrollStartPage = 0;
     private scrollEndPage = 7;
@@ -40,6 +41,12 @@ export class SSD1306 extends Controller implements I2CController {
     private scrollEnabled = false;
     private scrollOffset = 0;
     private scrollTimer: number | null = null;
+    // vertical scroll
+    private verticalScrollTopFixed = 0;
+    private verticalScrollRows = 64;
+    private scrollVerticalOffset = 0;
+    private scrollUseVertical = false;
+    private pixelColor = "#BFEFFF";
 
     setup() {
         console.log("SSD1306 setup");
@@ -108,6 +115,11 @@ export class SSD1306 extends Controller implements I2CController {
         this.scrollStartPage = 0;
         this.scrollEndPage = 7;
         this.scrollInterval = 0;
+        this.verticalScrollTopFixed = 0;
+        this.verticalScrollRows = 64;
+        this.scrollVerticalOffset = 0;
+        this.scrollUseVertical = false;
+        this.pixelColor = "#BFEFFF";
     }
 
     update() {
@@ -141,22 +153,36 @@ export class SSD1306 extends Controller implements I2CController {
                     }
                     if(pixelOn) {
                         litPixels++;
-                        const logicalY = (page * 8 + bit + this.displayStartLine) % 64;
-                        const y = (logicalY + this.displayOffset) % 64;
+                        let logicalY = page * 8 + bit;
+                        // Start Line
+                        logicalY = (logicalY + this.displayStartLine) % 64;
+                        // Display Offset
+                        logicalY = (logicalY + this.displayOffset) % 64;
+                        if (this.scrollEnabled && this.scrollUseVertical) {
+                            const top = this.verticalScrollTopFixed;
+                            const rows = this.verticalScrollRows;
+                            if (logicalY >= top && logicalY < top + rows) {
+                                let localY = logicalY - top;
+                                localY = (localY + this.scrollOffset * this.scrollVerticalOffset + rows) % rows;
+                                logicalY = top + localY;
+                            }
+                        }
                         const pixel = document.createElementNS("http://www.w3.org/2000/svg", "rect");
                         // The SVG coordinate direction is opposite to the SSD1306 SEG direction.
                         // Therefore, A1 (Segment Remap) corresponds to no flipping in SVG,
                         // while A0 corresponds to horizontal flipping in SVG.
                         let drawX = this.segmentRemap ? 127 - x : x;
-                        const drawY = this.comScanReverse ? 63 - y : y;
-                        if(this.scrollEnabled && page >= this.scrollStartPage && page <= this.scrollEndPage){
+                        const drawY = this.comScanReverse ? 63 - logicalY : logicalY;
+                        const currentPage = logicalY >> 3;
+                        if(this.scrollEnabled && currentPage >= this.scrollStartPage &&
+                            currentPage <= this.scrollEndPage){
                             drawX = (drawX + this.scrollOffset + 128) % 128;
                         }
                         pixel.setAttribute("x", (625 + drawX * 2.82).toString());
                         pixel.setAttribute("y", (355 + drawY * 3.0).toString());
                         pixel.setAttribute("width", "2.82");
                         pixel.setAttribute("height", "3");
-                        pixel.setAttribute("fill", "white");
+                        pixel.setAttribute("fill", this.pixelColor);
                         pixels.appendChild(pixel);
                     }
                 }
@@ -376,6 +402,7 @@ export class SSD1306 extends Controller implements I2CController {
                     console.log("NOP");
                     break;
 
+                    // horizontal scroll
                 case 0x26:
                     this.currentCommand = 0x26;
                     this.commandBytesRemaining = 6;
@@ -402,6 +429,27 @@ export class SSD1306 extends Controller implements I2CController {
                     this.startScroll();
                     break;
 
+                    // vertical scroll area
+                case 0xA3:
+                    this.currentCommand = 0xA3;
+                    this.commandBytesRemaining = 2;
+                    break;
+
+                    // actual vertical scroll
+                case 0x29:
+                    this.scrollDirection = 1;
+                    this.scrollUseVertical = true;
+                    this.currentCommand = 0x29;
+                    this.commandBytesRemaining = 5;
+                    break;
+
+                case 0x2A:
+                    this.scrollDirection = -1;
+                    this.scrollUseVertical = true;
+                    this.currentCommand = 0x2A;
+                    this.commandBytesRemaining = 5;
+                    break;
+                    
                 default:
                     console.warn("Unhandled SSD1306 command:", "0x" + value.toString(16).padStart(2, "0"));
                     break;
@@ -480,11 +528,10 @@ export class SSD1306 extends Controller implements I2CController {
                 console.log("VCOMH =", value.toString(16));
                 break;
 
-                // scroll
+                // horizontal scroll
             case 0x26:    
             case 0x27:
                 switch(this.commandBytesRemaining){
-
                     case 6:
                         // dummy
                         break;
@@ -512,7 +559,33 @@ export class SSD1306 extends Controller implements I2CController {
                         break;
                 }
                 console.log("Scroll:", this.scrollStartPage, this.scrollEndPage, this.scrollInterval);
+                break;
 
+            case 0xA3:
+                if(this.commandBytesRemaining === 2){
+                    this.verticalScrollTopFixed = value;
+                }else{
+                    this.verticalScrollRows = value;
+                    console.log("Vertical Scroll Area:", this.verticalScrollTopFixed, this.verticalScrollRows);
+                }
+                break;
+                
+                // vertical scroll
+            case 0x29:
+            case 0x2A:
+                switch(this.commandBytesRemaining){
+                    case 4:
+                        this.scrollStartPage = value & 0x07;
+                        break;
+
+                    case 2:
+                        this.scrollEndPage = value & 0x07;
+                        break;
+
+                    case 1:
+                        this.scrollVerticalOffset = value & 0x3F;
+                        break;
+                }
                 break;
         }
 
