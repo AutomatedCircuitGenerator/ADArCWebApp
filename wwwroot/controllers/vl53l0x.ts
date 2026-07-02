@@ -2,17 +2,22 @@ import {Controller} from "./controller";
 import {AVRRunner} from "@lib/execute";
 import {PinState} from "@lib/avr8js";
 
-export class MAX6675 extends Controller {
+export class Vl53l0x extends Controller {
 
-    private _temperature: number;
+    private registers = new Uint8Array(256);
+
+    private currentRegister = 0;
+
+    private expectingRegisterAddress = true;
+
+    private address = 0x29;
+
+    constructor(...)
 
     override update(state: Record<string, any>) {
         this.setTemperature(state.temperature);
     }
-
-    setTemperature = (temperature: number) => {
-        this._temperature = temperature
-    }
+    
 
     setup() {
         AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
