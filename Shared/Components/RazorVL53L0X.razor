@@ -1,4 +1,4 @@
-<h3>RazorVL53L0X</h3>
+@inherits RazorComponent
 
 @code {
     public static ElementPin[] pinInfo
@@ -7,25 +7,24 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "VCC", x: 44, y: 181, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 37, y: 181, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "SCL", x: 67, y: 181, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "SDA", x: 60, y: 181, signals: new PinSignalInfo[] { }, number: 4), //chip select. pull low to enable serial interface
+                new ElementPin(name: "Vcc", x: 59, y: 96, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 75.5, y: 96, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "scl", x: 92.1, y: 96, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "sda", x: 108.8, y: 96, signals: new PinSignalInfo[] { }, number: 4), 
             };
         }
     }
     
     [Parameter]
-    [ValueSetting("°C", 20, 0, 1024)] // 1023.75*
-    public double temperature
+    [ValueSetting("mm", 100, 30, 2000)]
+    public double distance
     {
         get;
         set;
     }
 }
 
-<?xml version='1.0' encoding='UTF-8' standalone='no'?>
-<svg xmlns="http://www.w3.org/2000/svg" gorn="0" version="1.1"  width="22.99962mm" id="svg8" height="11.999785mm" viewBox="0 0 22.99962 11.999785">
+<svg xmlns="http://www.w3.org/2000/svg" gorn="0" version="1.1"  width="40mm" id="svg8" height="20.8695361mm" viewBox="0 0 22.99962 11.999785">
     <desc >
         <referenceFile >vl503lox.svg</referenceFile>
     </desc>

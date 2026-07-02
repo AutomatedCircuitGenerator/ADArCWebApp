@@ -1057,14 +1057,14 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
-                41,
-                new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Soil Sensors", 1, 75, 75,
+                40,
+                new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
                         typeof(RazorVL53L0X),
                         codeForGen: new()
                         {
                             {
                                 "include",
-                                "#include <Arduino.h>"
+                                "#include <Adafruit_VL53L0X.h>\nAdafruit_VL53L0X lox = Adafruit_VL53L0X();"
                             },
                             {
                                 "global",
@@ -1072,62 +1072,38 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "setup",
-                                "  pinMode(~\"DE\", OUTPUT);\n" +
-                                "  pinMode(~\"RE\", OUTPUT);\n" +
-                                "  digitalWrite(~\"DE\", LOW);\n" +
-                                "  digitalWrite(~\"RE\", HIGH);"
+                                "    Serial.begin(115200);\n" + 
+                                "    // Wait for the serial port to open\n" +
+                                "    while (!Serial) {\n" + 
+                                "      delay(1);\n" +
+                                "    }\n" +
+                                "    Serial.println(\"Adafruit VL53L0X Test\");\n" +
+                                "    if (!lox.begin()) {\n" +
+                                "    Serial.println(F(\"Failed to boot VL53L0X\"));\n" +
+                                "    while(1);\n" +
+                                "    }\n" +
+                                "    Serial.println(F(\"VL53L0X API Simple Ranging example\"));"
                             },
                             {
                                 "loopMain",
-                                "  static unsigned long lastRead@ = 0;\n" +
-                                "  \n" +
-                                "  if (millis() - lastRead@ >= 2000) {\n" +
-                                "    lastRead@ = millis();\n" +
-                                "    \n" +
-                                "    while (Serial.available()) Serial.read();\n" +
-                                "    delay(50);\n" +
-                                "    \n" +
-                                "    digitalWrite(~\"DE\", HIGH);\n" +
-                                "    digitalWrite(~\"RE\", LOW);\n" +
-                                "    delay(50);\n" +
-                                "    \n" +
-                                "    uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
-                                "    delay(500);\n" +
-                                "    \n" +
-                                "    digitalWrite(~\"DE\", LOW);\n" +
-                                "    digitalWrite(~\"RE\", HIGH);\n" +
-                                "    delay(500);\n" +
-                                "    \n" +
-                                "    uint8_t response[10] = {0};\n" +
-                                "    int bytesRead = 0;\n" +
-                                "    while (Serial.available() && bytesRead < 10) {\n" +
-                                "      response[bytesRead++] = Serial.read();\n" +
-                                "      delay(10);\n" +
-                                "    }\n" +
-                                "    \n" +
-                                "    if (bytesRead >= 9) {\n" +
-                                "      uint16_t nitrogen = (response[3] << 8) | response[4];\n" +
-                                "      uint16_t phosphorus = (response[5] << 8) | response[6];\n" +
-                                "      uint16_t potassium = (response[7] << 8) | response[8];\n" +
-                                "      \n" +
-                                "      Serial.print(\"nitrogen = \");\n" +
-                                "      Serial.print(nitrogen);\n" +
-                                "      Serial.print(\" | phosphorus = \");\n" +
-                                "      Serial.print(phosphorus);\n" +
-                                "      Serial.print(\" | potassium = \");\n" +
-                                "      Serial.println(potassium);\n" +
-                                "    }\n" +
-                                "  }"
+                                "  VL53L0X_RangingMeasurementData_t measure;\n" +
+                                "  Serial.print(\"Reading measurement... \");\n" +
+                                "  lox.rangingTest(&measure, false);\n" +
+                                "  if (measure.RangeStatus != 4) {\n" +
+                                "    Serial.print(\"Distance (mm): \");\n" +
+                                "    Serial.println(measure.RangeMilliMeter);\n" +
+                                "  } else {\n" +
+                                "    Serial.println(\"Out of range\");" +
+                                "  }\n" +
+                                "  delay(100);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
-                        pins: ["Vcc", "gnd", "RO", "DI", "DE", "RE"],
+                        pins: ["5V", "gnd", "scl", "sda"],
                         gsNodeName: "vl53l0x")
-                    .Property("nitrogen", 0.0)
-                    .Property("phosphorus", 0.0)
-                    .Property("potassium", 0.0)
+                    .Property("distance", 100)
                     .Finish()
             }
         };
