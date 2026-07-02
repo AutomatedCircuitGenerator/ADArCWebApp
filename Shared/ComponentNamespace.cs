@@ -1103,7 +1103,7 @@ namespace ADArCWebApp.Shared
                         },
                         pins: ["5V", "gnd", "scl", "sda"],
                         gsNodeName: "vl53l0x")
-                    .Property("distance", 100)
+                   // .Property("distance", 100)
                     .Finish()
             }
         };
