@@ -37,7 +37,6 @@ export class SSD1306 extends Controller implements I2CController {
     private scrollDirection = 0;   // 1=right -1=left
     private scrollStartPage = 0;
     private scrollEndPage = 7;
-    private scrollInterval = 0;
     private scrollEnabled = false;
     private scrollOffset = 0;
     private scrollTimer: number | null = null;
@@ -47,6 +46,8 @@ export class SSD1306 extends Controller implements I2CController {
     private scrollVerticalOffset = 0;
     private scrollUseVertical = false;
     private pixelColor = "#BFEFFF";
+    private readonly frameIntervals = [5, 64, 128, 256, 3, 4, 25, 2,];
+    private scrollFrameCode = 0;
 
     setup() {
         console.log("SSD1306 setup");
@@ -114,7 +115,6 @@ export class SSD1306 extends Controller implements I2CController {
         this.scrollDirection = 1;
         this.scrollStartPage = 0;
         this.scrollEndPage = 7;
-        this.scrollInterval = 0;
         this.verticalScrollTopFixed = 0;
         this.verticalScrollRows = 64;
         this.scrollVerticalOffset = 0;
@@ -541,7 +541,7 @@ export class SSD1306 extends Controller implements I2CController {
                         break;
 
                     case 4:
-                        this.scrollInterval = value;
+                        this.scrollFrameCode = value & 0x07;
                         break;
 
                     case 3:
@@ -555,10 +555,10 @@ export class SSD1306 extends Controller implements I2CController {
                     case 1:
                         // dummy
                         this.scrollDirection = (this.currentCommand == 0x26) ? 1 : -1;
-                        console.log("Horizontal Scroll", this.scrollDirection == 1 ? "Right":"Left", "Pages", this.scrollStartPage, "-", this.scrollEndPage, "Interval", this.scrollInterval);
+                        console.log("Horizontal Scroll", this.scrollDirection == 1 ? "Right":"Left", "Pages", this.scrollStartPage, "-", this.scrollEndPage, "Interval", this.scrollFrameCode);
                         break;
                 }
-                console.log("Scroll:", this.scrollStartPage, this.scrollEndPage, this.scrollInterval);
+                console.log("Scroll:", this.scrollStartPage, this.scrollEndPage, this.scrollFrameCode);
                 break;
 
             case 0xA3:
@@ -576,6 +576,10 @@ export class SSD1306 extends Controller implements I2CController {
                 switch(this.commandBytesRemaining){
                     case 4:
                         this.scrollStartPage = value & 0x07;
+                        break;
+
+                    case 3:
+                        this.scrollFrameCode = value & 0x07;
                         break;
 
                     case 2:
@@ -597,6 +601,8 @@ export class SSD1306 extends Controller implements I2CController {
     }
 
     private startScroll() {
+        const frames = this.frameIntervals[this.scrollFrameCode];
+        const interval = frames * 10;   // 10ms
         if(this.scrollTimer != null) {
             clearInterval(this.scrollTimer);
         }
@@ -608,7 +614,8 @@ export class SSD1306 extends Controller implements I2CController {
                 this.scrollOffset--;
             }
             this.render();
-            },50);
+            },interval);
+        console.log("FrameCode =", this.scrollFrameCode, "Interval =", interval);
     }
 
     display() {
