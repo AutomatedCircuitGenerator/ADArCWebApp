@@ -753,12 +753,11 @@
     /// completion is perceptible before it disappears, instead of vanishing the instant it fills.
     /// Runs unawaited so it doesn't block app usability, which is already unlocked by this point.
     /// </summary>
-    private async Task HideLoadingBarAfterDelay()
-    {
-        await Task.Delay(1000);
-        LoadingProgress = -1;
-        await StateChanged();
-    }
+private async Task HideLoadingBarAfterDelay()
+{
+    try { await Task.Delay(1000); LoadingProgress = -1; await StateChanged(); }
+    catch (ObjectDisposedException) { }
+}
 
     /// <summary>
     /// sets up a components pin bindings to an arduino.
