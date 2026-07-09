@@ -712,11 +712,14 @@
         // selLockedOut = !hasUrlParam;
 
         Console.WriteLine("Loading rulesets...");
-        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 73);
-        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 73);
+        var ruleSetMap = RuleSetMap.GetInstance();
+        await ruleSetMap.RegisterRuleSet("ADD", navMan);
+        await ruleSetMap.RegisterRuleSet("CONNECT", navMan);
+        await ruleSetMap.LoadRuleSet("ADD", navMan, this);
+        await ruleSetMap.LoadRuleSet("CONNECT", navMan, this);
 
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
-        
+
         if (hasUrlParam)
         {
             await LoadFromUrl(queryParams["c"], isExample);

@@ -14,7 +14,13 @@ namespace ADArCWebApp
 
         public static Dictionary<string, ruleSet> Rulesets;
         private readonly ImmutableHashSet<string> modifiedRules;
-        int numLoaded;
+        private readonly HashSet<string> loadedRuleSets;
+
+        // Total rule count across every registered ruleset, and how many have loaded so far.
+        // RegisterRuleSet must be called for every ruleset before LoadRuleSet starts downloading
+        // rule files, so this denominator is fixed up front and progress reporting never regresses.
+        private int totalRuleCount;
+        private int totalLoaded;
 
         RuleSetMap()
         {
@@ -23,7 +29,9 @@ namespace ADArCWebApp
             //Inherited from BOGLWeb, probably not necessary
             modifiedRules = ImmutableHashSet.Create(
                 "BIG1");
-            numLoaded = 0;
+            loadedRuleSets = new HashSet<string>();
+            totalRuleCount = 0;
+            totalLoaded = 0;
         }
 
         /// <summary>
@@ -38,10 +46,41 @@ namespace ADArCWebApp
             }
         }
 
-        public async Task<int> LoadRuleSet(string name, NavigationManager navigationManager, Pages.Index main,
-            int current, int total)
+        /// <summary>
+        /// Fetches a ruleset's manifest (its list of rule file names) without downloading the
+        /// individual rule files themselves. Must be called for every ruleset that will be
+        /// loaded before the first call to LoadRuleSet, so that the total rule count used for
+        /// progress reporting is known up front and doesn't grow mid-load.
+        /// </summary>
+        public async Task RegisterRuleSet(string name, NavigationManager navigationManager)
         {
             if (Rulesets.ContainsKey(name))
+            {
+                return;
+            }
+
+            HttpClient client = new HttpClient();
+            client.BaseAddress = new(navigationManager.BaseUri + "rules/");
+
+            HttpResponseMessage ruleSetResponse =
+                await client.GetAsync(name + ".rsxml");
+            XmlSerializer ruleDeserializer = new(typeof(ruleSet));
+            Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
+            var ruleReader = new StreamReader(ruleSetFileContent);
+            Rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
+
+            totalRuleCount += Rulesets[name].ruleFileNames.Count;
+        }
+
+        public async Task<int> LoadRuleSet(string name, NavigationManager navigationManager, Pages.Index main)
+        {
+            if (!Rulesets.ContainsKey(name))
+            {
+                throw new InvalidOperationException(
+                    "Ruleset " + name + " must be registered via RegisterRuleSet before it can be loaded.");
+            }
+
+            if (!loadedRuleSets.Add(name))
             {
                 Console.WriteLine("Rule " + name + " already loaded.");
                 return 0;
@@ -50,35 +89,25 @@ namespace ADArCWebApp
             HttpClient client = new HttpClient();
             client.BaseAddress = new(navigationManager.BaseUri + "rules/");
 
-            // Load the ruleset, parse file contents rules, and save them for iteration to download individually
-            HttpResponseMessage ruleSetResponse =
-                await client.GetAsync(name + ".rsxml");
-            XmlSerializer ruleDeserializer = new(typeof(ruleSet));
-            Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
-            var ruleReader = new StreamReader(ruleSetFileContent);
-            Rulesets.Add(name, (ruleSet)ruleDeserializer.Deserialize(ruleReader));
-
             List<string> ruleFileNames = Rulesets[name].ruleFileNames;
 
             List<grammarRule> rules = new();
-            numLoaded = 0;
 
             List<Task> loadTasks = new();
 
             foreach (string rulePath in ruleFileNames)
             {
-                loadTasks.Add(LoadRuleFile(client, rulePath, rules, main, current, total));
+                loadTasks.Add(LoadRuleFile(client, rulePath, rules, main));
             }
 
             await Task.WhenAll(loadTasks);
 
             Rulesets[name].rules = rules;
 
-            return numLoaded;
+            return rules.Count;
         }
 
-        private async Task LoadRuleFile(HttpClient client, string rulePath, List<grammarRule> rules, Pages.Index main,
-            int current, int total)
+        private async Task LoadRuleFile(HttpClient client, string rulePath, List<grammarRule> rules, Pages.Index main)
         {
             HttpResponseMessage ruleResponse = await client.GetAsync(rulePath);
             Console.WriteLine(rulePath + " Fetched");
@@ -102,8 +131,8 @@ namespace ADArCWebApp
             }
 
             Console.WriteLine(rulePath + " Loaded");
-            Interlocked.Increment(ref numLoaded);
-            main.LoadingProgress = (double)(numLoaded + current) / total * 100;
+            Interlocked.Increment(ref totalLoaded);
+            main.LoadingProgress = (double)totalLoaded / totalRuleCount * 100;
             main.StateChanged();
         }
 
