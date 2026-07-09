@@ -131,8 +131,8 @@ namespace ADArCWebApp
             }
 
             Console.WriteLine(rulePath + " Loaded");
-            Interlocked.Increment(ref totalLoaded);
-            main.LoadingProgress = (double)totalLoaded / totalRuleCount * 100;
+            int loaded = Interlocked.Increment(ref totalLoaded);
+            main.LoadingProgress = totalRuleCount == 0 ? 100 : (double)loaded / totalRuleCount * 100;
             main.StateChanged();
         }
 
