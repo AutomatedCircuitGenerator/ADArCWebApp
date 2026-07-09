@@ -22,6 +22,11 @@ namespace ADArCWebApp
         private int totalRuleCount;
         private int totalLoaded;
 
+        // True once the first LoadRuleSet call has started. RegisterRuleSet refuses to run after
+        // this point, since registering more rulesets mid-load would change totalRuleCount and
+        // make progress reporting regress or become inconsistent.
+        private bool loadingStarted;
+
         RuleSetMap()
         {
             Rulesets = new Dictionary<string, ruleSet>();
@@ -32,6 +37,7 @@ namespace ADArCWebApp
             loadedRuleSets = new HashSet<string>();
             totalRuleCount = 0;
             totalLoaded = 0;
+            loadingStarted = false;
         }
 
         /// <summary>
@@ -54,6 +60,12 @@ namespace ADArCWebApp
         /// </summary>
         public async Task RegisterRuleSet(string name, NavigationManager navigationManager)
         {
+            if (loadingStarted)
+            {
+                throw new InvalidOperationException(
+                    "Cannot register ruleset " + name + " after rule loading has already started.");
+            }
+
             if (Rulesets.ContainsKey(name))
             {
                 return;
@@ -74,6 +86,8 @@ namespace ADArCWebApp
 
         public async Task<int> LoadRuleSet(string name, NavigationManager navigationManager, Pages.Index main)
         {
+            loadingStarted = true;
+
             if (!Rulesets.ContainsKey(name))
             {
                 throw new InvalidOperationException(
