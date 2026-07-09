@@ -243,7 +243,7 @@
         Comps[0] = BoardService.GetComponentInstance();
         Console.WriteLine($"Board set to {board}, component instance created");
 
-        if (LoadingProgress == -1)
+        if (_rulesLoaded)
         {
             Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
@@ -678,6 +678,12 @@
     /// </summary>
     private bool selLockedOut = true;
 
+    /// <summary>
+    /// True once rule loading has finished. Distinct from LoadingProgress reaching -1, which
+    /// only controls how long the visual progress bar stays on screen.
+    /// </summary>
+    private bool _rulesLoaded;
+
     private bool _isMobileUser;
 
     /// <summary>
@@ -719,6 +725,7 @@
         await ruleSetMap.LoadRuleSet("CONNECT", navMan, this);
 
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
+        _rulesLoaded = true;
 
         if (hasUrlParam)
         {
@@ -735,10 +742,22 @@
             StateHasChanged();
         }
 
-        LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
 
         StateHasChanged();
+        _ = HideLoadingBarAfterDelay();
+    }
+
+    /// <summary>
+    /// Keeps the loading bar visible at 100% for a moment after rule loading finishes, so its
+    /// completion is perceptible before it disappears, instead of vanishing the instant it fills.
+    /// Runs unawaited so it doesn't block app usability, which is already unlocked by this point.
+    /// </summary>
+    private async Task HideLoadingBarAfterDelay()
+    {
+        await Task.Delay(1000);
+        LoadingProgress = -1;
+        await StateChanged();
     }
 
     /// <summary>
