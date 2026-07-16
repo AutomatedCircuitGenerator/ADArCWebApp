@@ -887,21 +887,30 @@ namespace ADArCWebApp.Shared
                         {
                             {
                                 "include",
-                                "#include <Arduino.h>\n#include <Wire.h>"
+                                "#include <Wire.h>\n#include <STM32duino_VL53L4CD.h>"
                             },
                             {
                                 "global",
-                                "int16_t tfDist@; // distance in centimeters"
+                                "VL53L4CD sensor;\n"
                             },
-                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {   
+                                "setup", 
+                                "  Serial.begin(115200);\n" +
+                                "  Wire.begin();\n" +
+                                "  sensor.begin();\n" +
+                                "  sensor.startRanging();\n"
+                            },
                             {
                                 "loopMain",
-                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                                "  if(sensor.checkForDataReady())\n" +
+                                "  {\n" +
+                                "    uint16_t distance=sensor.getDistance();\n" +
+                                "    Serial.println(distance);\n" +
+                                "    sensor.clearInterrupt();\n" +
+                                "    sensor.startRanging();\n" +
+                                "  }"
                             },
-                            {
-                                "functions",
-                                ""
-                            },
+                            { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },

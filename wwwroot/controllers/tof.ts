@@ -1,21 +1,19 @@
 import {Controller} from "@controllers/controller";
 import {AVRRunner} from "@lib/execute";
 import {I2CController} from "@lib/i2c-bus";
-import {Memory} from "@controllers/memory";
 
 const TOF_I2C_ADDRESS = 0x29;
 
-const REGISTERS = {
-    DIST: { address: 0x00, size: 2 },
-    FLUX: { address: 0x02, size: 2 },
-    TEMP: { address: 0x04, size: 2 },
-    TICK: { address: 0x06, size: 2 },
-    ERROR: { address: 0x08, size: 2 },
-} as const;
+
 
 export class TOF extends Controller implements I2CController {
-    private i2cAddressPointer: number | null = null;
-    private memory = new Memory(128);
+    private registerPointer = 0;
+    private registerHighByte = 0;
+    private expectingHighByte = true;
+    private expectingLowByte = false;
+    private expectingData = false;
+    
+    private memory = new Uint8Array(65536);
     private startTime: number = 0;
 
     setup(): void {
@@ -24,11 +22,26 @@ export class TOF extends Controller implements I2CController {
         this.initializeRegisters();
     }
 
+    private read8(address: number): number {
+        return this.memory[address];
+    }
+
+    private write8(address: number, value: number): void {
+        this.memory[address] = value & 0xFF;
+    }
+
+    private read16(address: number): number {
+        return this.memory[address] |
+            (this.memory[address + 1] << 8);
+    }
+
+    private write16(address: number, value: number): void {
+        this.memory[address] = value & 0xFF;
+        this.memory[address + 1] = (value >> 8) & 0xFF;
+    }
+
     private initializeRegisters(): void {
-        // Don't hardcode 100 - it should come from the property
-        this.writeRegister("FLUX", 200);
-        this.writeRegister("TEMP", 2500);
-        this.writeRegister("ERROR", 0);
+
     }
 
     override update(state: Record<string, any>): void {
@@ -38,17 +51,15 @@ export class TOF extends Controller implements I2CController {
             if (distance < 0) distance = 0;
             if (distance > 5000) distance = 5000;
 
-            this.writeRegister("DIST", distance);
         }
     }
     
     setRegister(register: string, value: number) {
-        this.memory.write(REGISTERS[register], value);
     }
 
 
     cleanup(): void {
-        this.i2cAddressPointer = null;
+
     }
 
     private registerWithI2C(): void {
@@ -56,30 +67,16 @@ export class TOF extends Controller implements I2CController {
         i2cBus.registerController(TOF_I2C_ADDRESS, this);
     }
 
-    private writeRegister(register: keyof typeof REGISTERS, value: number): void {
-        const reg = REGISTERS[register];
-        // Write as little-endian 16-bit value
-        this.memory[reg.address] = value & 0xFF;
-        this.memory[reg.address + 1] = (value >> 8) & 0xFF;
-    }
-
-    private readRegister(register: keyof typeof REGISTERS): number {
-        const reg = REGISTERS[register];
-        // Read as little-endian 16-bit value
-        return this.memory[reg.address] | (this.memory[reg.address + 1] << 8);
-    }
-
     i2cConnect(addr: number, write: boolean): boolean {
-        if (addr === TOF_I2C_ADDRESS) {
-            if (write) {
-                // Write mode: reset address pointer on connect
-                this.i2cAddressPointer = null;
-            } else {
-                // Read mode: address pointer should already be set from previous write
-            }
-            return true;
+        console.log("CONNECT");
+        if (addr !== TOF_I2C_ADDRESS)
+            return false;
+        if (write) {
+            this.expectingHighByte = true;
+            this.expectingLowByte = false;
+            this.expectingData = false;
         }
-        return false;
+        return true;
     }
 
     i2cDisconnect(): void {
@@ -87,33 +84,38 @@ export class TOF extends Controller implements I2CController {
     }
 
     i2cWriteByte(value: number): boolean {
-        if (this.i2cAddressPointer === null) {
-            // First byte: set the address pointer
-            this.i2cAddressPointer = value;
-            return true;
-        } else {
-            // Subsequent bytes: write to memory
-            this.memory[this.i2cAddressPointer] = value;
-            this.i2cAddressPointer++;
+        console.log("WRITE", this.registerPointer.toString(16), value.toString(16));
+        if (this.expectingHighByte) {
+            this.registerHighByte = value;
+            this.expectingHighByte = false;
+            this.expectingLowByte = true;
             return true;
         }
+
+        if (this.expectingLowByte) {
+            this.registerPointer = (this.registerHighByte << 8) | value;
+            this.expectingLowByte = false;
+            this.expectingData = true;
+            return true;
+        }
+
+        this.write8(this.registerPointer, value);
+        this.registerPointer++;
+        return true;
     }
 
     i2cReadByte(acked: boolean): number {
-        this.updateTime();
-
-        if (this.i2cAddressPointer === null) {
-            return 0xFF;
-        }
-
-        const byte = this.memory[this.i2cAddressPointer];
-
-        // Auto-increment on ACK
+        console.log("READ");
+        this.updateRegisters();
+        const value = this.read8(this.registerPointer);
         if (acked) {
-            this.i2cAddressPointer++;
+            this.registerPointer++;
         }
+        return value;
+    }
 
-        return byte;
+    private updateRegisters(): void {
+
     }
 
     private updateTime() {
