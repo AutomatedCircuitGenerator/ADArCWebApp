@@ -1,0 +1,600 @@
+@code {
+    // DHT22 Module
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "VCC", x:40, y: 139, signals: new PinSignalInfo[]{ }, number: 1),
+                new ElementPin(name: "SDA",  x: 49.8, y: 139, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "GND", x: 69.4, y: 139, signals: new PinSignalInfo[] { }, number: 4),
+
+            };
+        }
+    }
+
+    //have the same name as in the actual component
+    [Parameter] [ValueSetting("%", 40, 0, 100)]
+    public double humidity { get; set; }
+
+    [Parameter] [ValueSetting("°C", 20, -40, 80)]
+    public double temperature { get; set; }
+
+    //16 bits humidity: 400 = 40%, 16 bits temp deg C: 200 = 20%, 8 bits checksum = last 8 sum prev
+    //output sig: 0b0000 0001 1001 0000 0000 0000 1100 1000 0101 1000
+    static byte[] getSignal(ComponentInstance comp)
+    {
+        byte[] ret = new byte[5];
+        int rh = Convert.ToInt32((double)comp.CompParams["humidity"].GetValue() * 10);
+        int t = Convert.ToInt32((double)comp.CompParams["temperature"].GetValue() * 10);
+        byte orig1 = (byte)((rh & 0b1111111100000000) >>> 8);
+        byte orig2 = (byte)(rh & 0b0000000011111111);
+        byte orig3 = (byte)((t & 0b1111111100000000) >>> 8);
+        byte orig4 = (byte)(t & 0b0000000011111111);
+
+        ret[0] = ReverseWithLookupTable(orig1);
+        ret[1] = ReverseWithLookupTable(orig2);
+        ret[2] = ReverseWithLookupTable(orig3);
+        ret[3] = ReverseWithLookupTable(orig4);
+        ret[4] = ReverseWithLookupTable((byte)(orig1 + orig2 + orig3 + orig4));
+
+        return ret;
+    }
+
+    private static byte[] BitReverseTable =
+    {
+    0x00, 0x80, 0x40, 0xc0, 0x20, 0xa0, 0x60, 0xe0,
+    0x10, 0x90, 0x50, 0xd0, 0x30, 0xb0, 0x70, 0xf0,
+    0x08, 0x88, 0x48, 0xc8, 0x28, 0xa8, 0x68, 0xe8,
+    0x18, 0x98, 0x58, 0xd8, 0x38, 0xb8, 0x78, 0xf8,
+    0x04, 0x84, 0x44, 0xc4, 0x24, 0xa4, 0x64, 0xe4,
+    0x14, 0x94, 0x54, 0xd4, 0x34, 0xb4, 0x74, 0xf4,
+    0x0c, 0x8c, 0x4c, 0xcc, 0x2c, 0xac, 0x6c, 0xec,
+    0x1c, 0x9c, 0x5c, 0xdc, 0x3c, 0xbc, 0x7c, 0xfc,
+    0x02, 0x82, 0x42, 0xc2, 0x22, 0xa2, 0x62, 0xe2,
+    0x12, 0x92, 0x52, 0xd2, 0x32, 0xb2, 0x72, 0xf2,
+    0x0a, 0x8a, 0x4a, 0xca, 0x2a, 0xaa, 0x6a, 0xea,
+    0x1a, 0x9a, 0x5a, 0xda, 0x3a, 0xba, 0x7a, 0xfa,
+    0x06, 0x86, 0x46, 0xc6, 0x26, 0xa6, 0x66, 0xe6,
+    0x16, 0x96, 0x56, 0xd6, 0x36, 0xb6, 0x76, 0xf6,
+    0x0e, 0x8e, 0x4e, 0xce, 0x2e, 0xae, 0x6e, 0xee,
+    0x1e, 0x9e, 0x5e, 0xde, 0x3e, 0xbe, 0x7e, 0xfe,
+    0x01, 0x81, 0x41, 0xc1, 0x21, 0xa1, 0x61, 0xe1,
+    0x11, 0x91, 0x51, 0xd1, 0x31, 0xb1, 0x71, 0xf1,
+    0x09, 0x89, 0x49, 0xc9, 0x29, 0xa9, 0x69, 0xe9,
+    0x19, 0x99, 0x59, 0xd9, 0x39, 0xb9, 0x79, 0xf9,
+    0x05, 0x85, 0x45, 0xc5, 0x25, 0xa5, 0x65, 0xe5,
+    0x15, 0x95, 0x55, 0xd5, 0x35, 0xb5, 0x75, 0xf5,
+    0x0d, 0x8d, 0x4d, 0xcd, 0x2d, 0xad, 0x6d, 0xed,
+    0x1d, 0x9d, 0x5d, 0xdd, 0x3d, 0xbd, 0x7d, 0xfd,
+    0x03, 0x83, 0x43, 0xc3, 0x23, 0xa3, 0x63, 0xe3,
+    0x13, 0x93, 0x53, 0xd3, 0x33, 0xb3, 0x73, 0xf3,
+    0x0b, 0x8b, 0x4b, 0xcb, 0x2b, 0xab, 0x6b, 0xeb,
+    0x1b, 0x9b, 0x5b, 0xdb, 0x3b, 0xbb, 0x7b, 0xfb,
+    0x07, 0x87, 0x47, 0xc7, 0x27, 0xa7, 0x67, 0xe7,
+    0x17, 0x97, 0x57, 0xd7, 0x37, 0xb7, 0x77, 0xf7,
+    0x0f, 0x8f, 0x4f, 0xcf, 0x2f, 0xaf, 0x6f, 0xef,
+    0x1f, 0x9f, 0x5f, 0xdf, 0x3f, 0xbf, 0x7f, 0xff
+};
+    private static byte ReverseWithLookupTable(byte toReverse)
+    {
+        return BitReverseTable[toReverse];
+    }
+
+    public static async void translate(ComponentInstance comp, long pinChangeCycle)
+    {
+        bool pin = false;
+        if (0 == comp.GetConnection("signal", out InstanceConnection? conn, out List<InstanceConnection>? all))
+        {
+            pin = await AvrCPU.getPinState(conn!.ToId);
+        }
+        //pullup
+        if (pin && comp.midSignal == 0)
+        {
+            AvrCPU.setPinState(pinChangeCycle, conn!.ToId, true);//dummy response
+        }
+        //pulldown
+        if (!pin && comp.midSignal == 0)
+        {
+            comp.midSignal = 1;
+            AvrCPU.setPinState(pinChangeCycle, conn!.ToId, false);//dummy response
+        }
+        if (pin && comp.midSignal == 1)//pullup
+        {
+            comp.midSignal = 2;
+            sendSignal(pinChangeCycle, comp, conn!.ToId);
+        }
+        // false 1ms+ -> true (20-40us) trigger
+        //then send
+    }
+
+
+    static void sendSignal(long originCycles, ComponentInstance comp, int id)
+    {
+        //false (80us) -> true (80us) ack
+        //data -> for each bit -> false (50us), then 26-28us = 0, 70us = 1
+        var pkt = new TimingPacket(originCycles);
+        var inst = pkt.addInstruction(new(id, false, 1));//1 us delay, shouldn't matter that much
+        inst = pkt.addInstruction(new(inst, 80, true)); //80 us after prev, change the line state (to true)
+
+
+        inst = pkt.addInstruction(new(inst, 80, true));//another 80 us, change line state (to false)
+
+        byte[] sig = getSignal(comp);
+        Console.WriteLine("Signal:" + sig[0] + " " + sig[1] + " " + sig[2] + " " + sig[3] + " " + sig[4]);
+        for (int i = 0; i < 40; i++)
+        {
+            bool res = (sig[i / 8] & (1 << (i % 8))) >0;
+            inst = pkt.addInstruction(new(inst, 50, true));//entry is false, wait 50 us, then change (to high)
+
+            if (res)
+            {
+                inst = pkt.addInstruction(new(inst, 70, true));//run true for 70 us, then change (to false)
+            }
+            else
+            {
+                inst = pkt.addInstruction(new(inst, 27, true));//see above, but only 27 us for 0
+            }
+        }
+
+        //state exits loop in false state, no need to change.
+
+        AppInterop.SendInstructionsToArduino(pkt);
+        comp.midSignal = 0;
+    }
+
+}
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   width="22.65mm"
+   height="46.3275mm"
+   version="1.1"
+   viewBox="0 0 15.1 30.885"
+   id="svg4"
+   sodipodi:docname="dht22（3pin）.svg"
+   inkscape:version="1.4.4 (dcaf3e7, 2026-05-05)"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="mm"
+     inkscape:zoom="76.567938"
+     inkscape:cx="28.321254"
+     inkscape:cy="80.582032"
+     inkscape:window-width="1920"
+     inkscape:window-height="992"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg4" />
+  <defs
+     id="defs4" />
+  <rect
+     style="fill:#000000;stroke-width:0.219082"
+     id="rect5"
+     width="8.5226974"
+     height="7.8580823"
+     x="3.2886517"
+     y="16.419874" />
+  <rect
+     style="fill:#ffffff;stroke-width:0.442495"
+     id="rect29"
+     width="6.1379051"
+     height="0.10029431"
+     x="4.4810476"
+     y="16.5338" />
+  <g
+     id="g32"
+     transform="matrix(1,0,0,0.89286813,-0.01954689,1.7473449)">
+    <g
+       id="g45"
+       transform="translate(-0.02643282)">
+      <rect
+         style="fill:#ffffff;stroke-width:0.510543"
+         id="rect28"
+         width="8.1708422"
+         height="0.10029431"
+         x="3.4645793"
+         y="17.198414"
+         transform="matrix(1,0,0,1.1199862,0.01954689,-1.9570022)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.187677"
+         id="rect31"
+         width="1.1041385"
+         height="0.10029425"
+         x="16.31349"
+         y="-11.622063"
+         transform="matrix(0.00492441,0.99998788,-0.99999997,2.6389753e-4,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.180081"
+         id="rect32"
+         width="1.0165702"
+         height="0.10029425"
+         x="16.402597"
+         y="-3.5022893"
+         transform="matrix(0.0053486,0.9999857,-0.99999997,2.429675e-4,0,0)" />
+    </g>
+    <g
+       id="g34"
+       transform="matrix(1,0,0,1.1199862,0.01949011,-1.8694306)">
+      <rect
+         style="fill:#ffffff;stroke-width:0.390067"
+         id="rect30"
+         width="4.7695827"
+         height="0.10029431"
+         x="5.1652088"
+         y="22.63261" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.217772"
+         id="rect33"
+         width="1.4867157"
+         height="0.10028998"
+         x="22.461946"
+         y="-9.9243221"
+         transform="matrix(4.7077943e-4,0.99999989,-0.99967314,-0.02556586,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.223421"
+         id="rect34"
+         width="1.5648303"
+         height="0.10029091"
+         x="22.486748"
+         y="-5.3447957"
+         transform="matrix(-0.00348618,0.99999392,-0.99956285,-0.0295653,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.223097"
+         id="rect35"
+         width="1.5602729"
+         height="0.1002918"
+         x="22.474995"
+         y="-6.7835007"
+         transform="matrix(0.00158454,0.99999874,-0.99968799,-0.02497855,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.218277"
+         id="rect36"
+         width="1.4936141"
+         height="0.10029034"
+         x="22.475012"
+         y="-8.4393272"
+         transform="matrix(-0.00183203,0.99999832,-0.99960798,-0.02799786,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.159139"
+         id="rect6"
+         width="0.79417485"
+         height="0.10025836"
+         x="21.320108"
+         y="-6.1344638"
+         transform="matrix(-0.00686911,0.99997641,-0.99988735,-0.01500944,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.159139"
+         id="rect7"
+         width="0.79417485"
+         height="0.10025836"
+         x="5.67801"
+         y="21.768633"
+         transform="matrix(0.99999856,-0.00169601,-0.00644478,0.99997923,0,0)" />
+      <rect
+         style="fill:#ffffff;stroke-width:0.159139"
+         id="rect8"
+         width="0.79417485"
+         height="0.10025836"
+         x="8.9228668"
+         y="21.764362"
+         transform="matrix(0.99999856,-0.00169601,-0.00644478,0.99997923,0,0)" />
+    </g>
+    <g
+       id="g41"
+       style="fill:#333333"
+       transform="matrix(1.0511748,0,0,1.1953634,2.7192605,-3.8093269)">
+      <ellipse
+         style="fill:#333333;stroke-width:0.133535"
+         id="ellipse40"
+         cx="6.834507"
+         cy="23.360682"
+         rx="0.74281025"
+         ry="0.73693448"
+         transform="matrix(0.99948913,0.03196065,-0.03030657,0.99954065,0,0)" />
+    </g>
+  </g>
+  <g
+     id="g26"
+     transform="matrix(1,0,0,0.53340749,-0.01486979,7.6431492)">
+    <rect
+       style="fill:#ffffff;stroke-width:0.324047"
+       id="rect25"
+       width="0.11728481"
+       height="2.8148353"
+       x="4.4959178"
+       y="16.419874" />
+    <rect
+       style="fill:#ffffff;stroke-width:0.324047"
+       id="rect26"
+       width="0.11728481"
+       height="2.8148353"
+       x="10.516538"
+       y="16.380779" />
+    <rect
+       style="fill:#ffffff;stroke-width:0.605869"
+       id="rect27"
+       width="6.1379051"
+       height="0.18802568"
+       x="4.4959173"
+       y="19.159607" />
+    <g
+       id="g42"
+       style="fill:#333333"
+       transform="matrix(1.0511748,0,0,2.0009128,-0.46451055,-17.416553)">
+      <ellipse
+         style="fill:#333333;stroke-width:0.133535"
+         id="ellipse41"
+         cx="6.834507"
+         cy="23.360682"
+         rx="0.74281025"
+         ry="0.73693448"
+         transform="matrix(0.99948913,0.03196065,-0.03030657,0.99954065,0,0)" />
+    </g>
+  </g>
+  <ellipse
+     style="fill:#b3b3b3;stroke-width:0.0881324"
+     id="ellipse11"
+     cx="5.6212573"
+     cy="17.012157"
+     rx="0.46917573"
+     ry="0.50820464"
+     transform="matrix(0.99939089,0.03489795,-0.02775505,0.99961475,0,0)" />
+  <ellipse
+     style="fill:#b3b3b3;stroke-width:0.0881324"
+     id="ellipse8"
+     cx="7.2246594"
+     cy="16.995289"
+     rx="0.46917573"
+     ry="0.50820464"
+     transform="matrix(0.99939089,0.03489795,-0.02775505,0.99961475,0,0)" />
+  <ellipse
+     style="fill:#b3b3b3;stroke-width:0.0881324"
+     id="ellipse9"
+     cx="8.8269749"
+     cy="16.93935"
+     rx="0.46917573"
+     ry="0.50820464"
+     transform="matrix(0.99939089,0.03489795,-0.02775505,0.99961475,0,0)" />
+  <ellipse
+     style="fill:#b3b3b3;stroke-width:0.0881324"
+     id="ellipse10"
+     cx="10.46837"
+     cy="16.882048"
+     rx="0.46917573"
+     ry="0.50820464"
+     transform="matrix(0.99939088,0.03489795,-0.02775505,0.99961475,0,0)" />
+  <g
+     fill="#cccccc"
+     stroke-linecap="round"
+     stroke-width="0.21"
+     id="g4"
+     transform="matrix(0.63567441,0,0,0.13991139,2.6203453,12.958799)">
+    <rect
+       x="3.5699999"
+       y="23.885"
+       width="0.75"
+       height="7"
+       rx="0.2"
+       id="rect1" />
+    <rect
+       x="6.1100001"
+       y="23.885"
+       width="0.75"
+       height="7"
+       rx="0.2"
+       id="rect2" />
+    <rect
+       x="8.6499996"
+       y="23.885"
+       width="0.75"
+       height="7"
+       rx="0.2"
+       id="rect3" />
+    <rect
+       x="11.19"
+       y="23.885"
+       width="0.75"
+       height="7"
+       rx="0.2"
+       id="rect4" />
+  </g>
+  <path
+     d="M 12.893324,16.250841 V 3.385955 m 0,0 c 0,-0.072595 -0.761601,-3.36649957 -1.896524,-3.36514265 l -6.8287674,0.0115337 c -1.1470334,0 -1.9613559,3.28101425 -1.9613559,3.35360895 v 12.864886 c 0,0.07259 0.06127,0.130264 0.136789,0.130264 H 12.756534 a 0.13678908,0.13026359 0 0 0 0.13679,-0.130264 M 7.5963089,0.61446152 h 0.00285 c 0.7694385,0 1.3935387,0.57465238 1.3935387,1.28363908 0,0.7089867 -0.6241002,1.2836391 -1.3935387,1.2836391 -0.7694386,0 -1.3935389,-0.5746524 -1.3935389,-1.2836391 0,-0.7083083 0.621963,-1.28228217 1.3906889,-1.28363908 z M 5.7097595,5.8467156 H 6.3744689 A 0.14961306,0.1424758 0 0 1 6.5247944,5.9891915 V 6.623548 A 0.14961306,0.1424758 0 0 1 6.3751814,6.7660238 H 5.7097595 A 0.14961306,0.1424758 0 0 1 5.5587216,6.623548 V 5.9891915 A 0.14961306,0.1424758 0 0 1 5.7097595,5.8460372 Z m 1.5445767,0 H 7.919758 A 0.14961306,0.1424758 0 0 1 8.0693712,5.9891915 V 6.623548 A 0.14961306,0.1424758 0 0 1 7.919758,6.7660238 H 7.2543362 A 0.14961306,0.1424758 0 0 1 7.1047232,6.623548 V 5.9891915 a 0.14961306,0.1424758 0 0 1 0.149613,-0.1431543 z m 1.5331777,0 h 0.6661342 a 0.14961306,0.1424758 0 0 1 0.149613,0.1424759 V 6.623548 A 0.14961306,0.1424758 0 0 1 9.4536481,6.7660238 H 8.7875139 A 0.14961306,0.1424758 0 0 1 8.6379008,6.623548 V 5.9891915 A 0.14961306,0.1424758 0 0 1 8.7875139,5.8460372 Z m 4.1015351,0 v 0.9199866 m 0,0 H 10.59712 A 0.39398105,0.37518628 0 0 1 10.202426,6.3908374 V 6.2219019 A 0.39184372,0.3731509 0 0 1 10.59712,5.8467156 h 2.291929 m -10.6823723,0 H 4.544915 c 0.21872,0 0.3946934,0.1675788 0.3946934,0.3751863 V 6.391516 A 0.39326861,0.37450782 0 0 1 4.544915,6.7667022 H 2.2066767 m 0,0.7150928 H 4.544915 c 0.21872,0 0.3946934,0.1675787 0.3946934,0.3758648 V 8.0265953 A 0.39326861,0.37450782 0 0 1 4.544915,8.4024601 H 2.2066767 M 5.7097595,7.481795 h 0.6647094 a 0.14961306,0.1424758 0 0 1 0.1503255,0.1431544 v 0.633678 A 0.14961306,0.1424758 0 0 1 6.3751814,8.4017817 H 5.7097595 A 0.14961306,0.1424758 0 0 1 5.5587216,8.259306 V 7.6249494 A 0.14961306,0.1424758 0 0 1 5.7097595,7.4824735 Z m 1.5445767,0 H 7.919758 a 0.14961306,0.1424758 0 0 1 0.1503256,0.1431544 v 0.633678 A 0.14961306,0.1424758 0 0 1 7.919758,8.4017817 H 7.2543362 A 0.14961306,0.1424758 0 0 1 7.1047232,8.259306 V 7.6249494 a 0.14961306,0.1424758 0 0 1 0.149613,-0.1424759 z m 1.53389,0 h 0.6654219 a 0.14961306,0.1424758 0 0 1 0.149613,0.1431544 v 0.633678 A 0.14961306,0.1424758 0 0 1 9.4536481,8.4017817 H 8.7882262 A 0.14961306,0.1424758 0 0 1 8.6379008,8.259306 V 7.6249494 A 0.14961306,0.1424758 0 0 1 8.7875139,7.4824735 Z m 1.8088938,0 h 2.291929 V 8.4017817 H 10.59712 A 0.39326861,0.37450782 0 0 1 10.202426,8.0265953 V 7.8569814 c 0,-0.2076077 0.175974,-0.3751864 0.394694,-0.3751864 z M 2.2066767,9.162331 H 4.544915 c 0.21872,0 0.3939811,0.1675788 0.3939811,0.3758648 V 9.7071314 A 0.39326861,0.37450782 0 0 1 4.544915,10.082318 H 2.2066767 M 5.709047,9.162331 H 6.3744689 A 0.14961306,0.1424758 0 0 1 6.5247944,9.3054853 V 9.9391631 A 0.14961306,0.1424758 0 0 1 6.3751814,10.082318 H 5.709047 A 0.14961306,0.1424758 0 0 1 5.5594339,9.9398421 V 9.3054853 A 0.14961306,0.1424758 0 0 1 5.709047,9.1630095 Z m 1.5452892,0 H 7.9190457 A 0.14961306,0.1424758 0 0 1 8.0700836,9.3054853 V 9.9391631 A 0.14961306,0.1424758 0 0 1 7.9190457,10.082318 H 7.2543362 A 0.14961306,0.1424758 0 0 1 7.1040108,9.9398421 V 9.3054853 a 0.14961306,0.1424758 0 0 1 0.149613,-0.1424758 z m 1.5331777,0 H 9.4529357 A 0.14961306,0.1424758 0 0 1 9.6032611,9.3054853 V 9.9391631 A 0.14961306,0.1424758 0 0 1 9.4536481,10.082318 H 8.7875139 A 0.14961306,0.1424758 0 0 1 8.6379008,9.9398421 V 9.3054853 A 0.14961306,0.1424758 0 0 1 8.7875139,9.1630095 Z m 4.1015351,0.919987 H 10.59712 A 0.39326861,0.37450782 0 0 1 10.202426,9.7071314 v -0.169614 c 0,-0.2076076 0.175974,-0.3751864 0.394694,-0.3751864 h 2.291929 m 0,2.572028 h -2.292642 a 0.39398105,0.37518628 0 0 1 -0.393981,-0.375865 v -0.168936 c 0,-0.207607 0.175974,-0.375186 0.393981,-0.375186 h 2.292642 m -10.6823723,0 H 4.544915 c 0.21872,0 0.3939811,0.167579 0.3939811,0.375186 v 0.169615 A 0.39326861,0.37450782 0 0 1 4.544915,11.734359 H 2.2066767 M 5.709047,10.814372 h 0.6654219 a 0.14961306,0.1424758 0 0 1 0.1503255,0.143154 v 0.633679 A 0.14961306,0.1424758 0 0 1 6.3751814,11.73368 H 5.709047 A 0.14961306,0.1424758 0 0 1 5.5594339,11.591205 V 10.957526 A 0.14961306,0.1424758 0 0 1 5.709047,10.81505 Z m 1.5452892,0 H 7.919758 a 0.14961306,0.1424758 0 0 1 0.1496132,0.143154 v 0.633679 A 0.14961306,0.1424758 0 0 1 7.919758,11.73368 H 7.2543362 A 0.14961306,0.1424758 0 0 1 7.1040108,11.591205 V 10.957526 A 0.14961306,0.1424758 0 0 1 7.2543362,10.81505 Z m 1.5331777,0 h 0.6654218 a 0.14961306,0.1424758 0 0 1 0.1503254,0.143154 v 0.633679 A 0.14961306,0.1424758 0 0 1 9.4536481,11.73368 H 8.7875139 A 0.14961306,0.1424758 0 0 1 8.6379008,11.591205 V 10.957526 A 0.14961306,0.1424758 0 0 1 8.7875139,10.81505 Z M 2.2066767,12.429097 H 4.544915 c 0.21872,0 0.3939811,0.167579 0.3939811,0.375866 v 0.169613 A 0.39326861,0.37450782 0 0 1 4.544915,13.349085 H 2.2066767 M 5.709047,12.429777 h 0.6654219 a 0.14961306,0.1424758 0 0 1 0.1503255,0.142475 v 0.633678 a 0.14961306,0.1424758 0 0 1 -0.149613,0.143155 H 5.709047 A 0.14961306,0.1424758 0 0 1 5.5594339,13.206608 V 12.57293 A 0.14961306,0.1424758 0 0 1 5.709047,12.429777 Z m 1.5452892,0 h 0.6647095 a 0.14961306,0.1424758 0 0 1 0.1510379,0.142475 V 13.20593 A 0.14961306,0.1424758 0 0 1 7.9190457,13.349085 H 7.2543362 A 0.14961306,0.1424758 0 0 1 7.1040108,13.206608 V 12.57293 a 0.14961306,0.1424758 0 0 1 0.149613,-0.143153 z m 1.5331777,0 h 0.6654218 a 0.14961306,0.1424758 0 0 1 0.1503254,0.142475 v 0.633678 a 0.14961306,0.1424758 0 0 1 -0.149613,0.143155 H 8.7875139 A 0.14961306,0.1424758 0 0 1 8.6379008,13.206608 V 12.57293 a 0.14961306,0.1424758 0 0 1 0.1496131,-0.143153 z m 4.1015351,0.919308 h -2.292642 a 0.39326861,0.37450782 0 0 1 -0.393981,-0.375187 v -0.169615 c 0,-0.207607 0.175974,-0.374506 0.393981,-0.374506 h 2.292642 M 9.6445828,3.4015595 V 4.9307999 A 0.13678908,0.13026359 0 0 1 9.5070814,5.0617418 H 8.9015046 A 0.13678908,0.13026359 0 0 1 8.7640032,4.9307999 V 3.4015595 H 8.0344614 V 4.9525104 A 0.13678908,0.13026359 0 0 1 7.8976723,5.082774 H 7.2913833 A 0.13678908,0.13026359 0 0 1 7.1538818,4.9525104 V 3.4015595 H 6.4029667 V 4.9525104 A 0.13678908,0.13026359 0 0 1 6.2654651,5.082774 H 5.6598885 A 0.13678908,0.13026359 0 0 1 5.5223869,4.9525104 V 3.4015595 C 2.1945651,3.3805275 2.2066767,3.3859555 2.2066767,3.3859555 m 10.6866473,0 -3.2487412,0.015604 v 0"
+     fill="#f2f2f2"
+     stroke="#000000"
+     stroke-linecap="round"
+     stroke-width="0.111412"
+     id="path4" />
+  <text
+     x="5.1119776"
+     y="15.141792"
+     fill="#000000"
+     font-family="sans-serif"
+     font-size="1.49018px"
+     stroke-width="0.0338678"
+     style="line-height:1.25"
+     id="text4"
+     transform="scale(0.98347467,1.016803)">DHT22</text>
+  <ellipse
+     style="fill:#b3b3b3;stroke-width:0.234611"
+     id="ellipse7"
+     cx="8.1527023"
+     cy="19.610657"
+     rx="1.3097106"
+     ry="1.290103"
+     transform="matrix(0.99949638,0.03173297,-0.03052403,0.99953403,0,0)" />
+  <ellipse
+     style="fill:#ffffff;stroke-width:0.149933"
+     id="path6"
+     cx="7.5500002"
+     cy="19.840679"
+     rx="0.82099366"
+     ry="0.84054112" />
+  <g
+     id="g18"
+     style="fill:#333333"
+     transform="matrix(1.0511748,0,0,1.0673019,1.1239888,-1.6538817)">
+    <ellipse
+       style="fill:#333333;stroke-width:0.133535"
+       id="ellipse18"
+       cx="6.834507"
+       cy="23.360682"
+       rx="0.74281025"
+       ry="0.73693448"
+       transform="matrix(0.99948913,0.03196065,-0.03030657,0.99954065,0,0)" />
+  </g>
+  <g
+     fill="#cccccc"
+     stroke-linecap="round"
+     stroke-width="0.21"
+     id="g14"
+     transform="matrix(0.63567441,0,0,0.12969609,3.2067694,21.04288)">
+    <g
+       id="g15"
+       transform="matrix(1,0,0,7.1074629,0.34747748,-151.46528)">
+      <rect
+         x="3.5699999"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect11" />
+      <rect
+         x="6.1100001"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect12" />
+      <rect
+         x="8.6499996"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect13" />
+    </g>
+  </g>
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="path18"
+     cx="7.5500002"
+     cy="18.806257"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle18"
+     cx="7.5500002"
+     cy="20.888063"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle19"
+     cx="8.5811291"
+     cy="19.856934"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle20"
+     cx="6.5139847"
+     cy="19.881367"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle21"
+     cx="8.3123522"
+     cy="19.148338"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle22"
+     cx="8.3221254"
+     cy="20.604624"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle23"
+     cx="6.7974234"
+     cy="19.138565"
+     r="0.058642406" />
+  <circle
+     style="fill:#000000;stroke-width:0.264583"
+     id="circle24"
+     cx="6.8316317"
+     cy="20.619286"
+     r="0.058642406" />
+  <g
+     fill="#cccccc"
+     stroke-linecap="round"
+     stroke-width="0.21"
+     id="g40"
+     transform="matrix(0.63567441,0,0,0.12969609,3.2067694,21.04288)">
+    <g
+       id="g39"
+       transform="matrix(1,0,0,7.1074629,0.34747748,-151.46528)">
+      <rect
+         x="3.5699999"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect37" />
+      <rect
+         x="6.1100001"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect38" />
+      <rect
+         x="8.6499996"
+         y="23.885"
+         width="0.75"
+         height="7"
+         rx="0.2"
+         id="rect39" />
+    </g>
+  </g>
+  <rect
+     style="fill:#000000;stroke-width:0.3186"
+     id="rect42"
+     width="0.2834383"
+     height="0.43981802"
+     x="7.4082808"
+     y="16.380777" />
+  <rect
+     style="fill:#000000;stroke-width:0.3186"
+     id="rect43"
+     width="0.2834383"
+     height="0.43981802"
+     x="5.8151622"
+     y="16.361229" />
+  <rect
+     style="fill:#000000;stroke-width:0.3186"
+     id="rect44"
+     width="0.2834383"
+     height="0.43981802"
+     x="9.0307207"
+     y="16.380777" />
+  <text
+     xml:space="preserve"
+     style="font-size:1.11431px;writing-mode:lr-tb;direction:ltr;fill:#ffffff;stroke-width:0.0928591"
+     x="7.0853076"
+     y="21.434212"
+     id="text44"
+     transform="scale(0.96197894,1.0395238)"><tspan
+       id="tspan44"
+       style="fill:#ffffff;stroke-width:0.0928591"
+       x="7.0853076"
+       y="21.434212">out </tspan></text>
+</svg>
