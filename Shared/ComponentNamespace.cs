@@ -697,7 +697,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 33,
-                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
+                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Soil Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -984,7 +984,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 39,
-                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
+                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 0.45, 150, 200,
                         typeof(RazorNPK),
                         codeForGen: new()
                         {
