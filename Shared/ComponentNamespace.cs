@@ -887,7 +887,7 @@ namespace ADArCWebApp.Shared
                         {
                             {
                                 "include",
-                                "#include <Wire.h>\n#include <STM32duino_VL53L4CD.h>"
+                                "#include <Wire.h>\n#include <vl53l4cd_class.h>"
                             },
                             {
                                 "global",
