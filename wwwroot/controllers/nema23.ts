@@ -30,8 +30,6 @@ export class NEMA23 extends Controller {
 
         // Every falling edge on STEP triggers a step
         this.stepPin.addListener(this.onStep.bind(this));
-
-        this.onStep(PinState.Low);
     }
 
     private onStep(state: PinState) {
