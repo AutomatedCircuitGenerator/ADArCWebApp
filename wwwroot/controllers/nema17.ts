@@ -43,12 +43,12 @@ export class NEMA17 extends Controller {
         this.currentPos += direction;
         this.currentPos %= this.stepsPerRev;
         
-        // Keep motor position positive
+        // Keep motor position positived/
         if (this.currentPos < 0) 
             this.currentPos += this.stepsPerRev;
         const angle = (this.currentPos / this.stepsPerRev) * 2 * Math.PI;
 
-        const radius = 0.1; // Radius of the rotation, this is just what looked good
+        const radius = 0.4; // Radius of the rotation, this is just what looked good
         
         const dx = radius * Math.cos(angle) * Math.cos(Math.PI / 4); // Scale the x displacement because the shaft is at an angle to the viewbox
         const dy = radius * Math.sin(angle);
