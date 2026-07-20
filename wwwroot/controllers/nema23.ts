@@ -13,7 +13,8 @@ export class NEMA23 extends Controller {
     private originalTransform: string;
 
     override update(state: Record<string, any>) {
-        this.stepsPerRev = Math.max(0, state.stepsperrev || 200);
+        const steps = Number(state.stepsperrev ?? 400);
+        this.stepsPerRev = Math.max(1, Math.round(steps));
     }
 
     setup() {
