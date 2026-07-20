@@ -37,6 +37,7 @@
     <string>sht30_arduino.grxml</string>
     <string>sen0189_arduino.grxml</string>
     <string>transceiver_arduino.grxml</string>
+    <string>ssd1306_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
