@@ -27,8 +27,15 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
+import {TRANSCEIVER} from "@controllers/transceiver";
+import {TOF} from "@controllers/tof";
 import {SEN0114} from "@controllers/sen0114";
 import {SRVPH} from "@controllers/srvph";
+import {NPK} from "@controllers/npk";
+import {MAX31856} from "@controllers/max31856";
+import {SHT30} from "@controllers/sht30";
+import {DHT22} from "@controllers/dht22";
+import {SEN0189} from "@controllers/sen0189";
 import {NEMA17} from "@controllers/nema17";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
@@ -64,4 +71,11 @@ import {NEMA17} from "@controllers/nema17";
 (<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;
 (<any>window).SEN0114 = SEN0114;
 (<any>window).SRVPH = SRVPH;
+(<any>window).MAX31856 = MAX31856;
+(<any>window).SHT30 = SHT30;
+(<any>window).DHT22 = DHT22;
+(<any>window).SEN0189 = SEN0189;
+(<any>window).TOF = TOF;
+(<any>window).TRANSCEIVER = TRANSCEIVER;
+(<any>window).NPK = NPK;
 (<any>window).NEMA17 = NEMA17;
