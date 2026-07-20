@@ -74,8 +74,10 @@ namespace ADArCWebApp
             HttpClient client = new HttpClient();
             client.BaseAddress = new(navigationManager.BaseUri + "rules/");
 
-            HttpResponseMessage ruleSetResponse =
-                await client.GetAsync(name + ".rsxml");
+            // Load the ruleset, parse file contents rules, and save them for iteration to download individually
+            var manifestRequest = new HttpRequestMessage(HttpMethod.Get, name + ".rsxml");
+            manifestRequest.Headers.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue { NoCache = true };
+            HttpResponseMessage ruleSetResponse = await client.SendAsync(manifestRequest);
             XmlSerializer ruleDeserializer = new(typeof(ruleSet));
             Stream ruleSetFileContent = await ruleSetResponse.Content.ReadAsStreamAsync();
             var ruleReader = new StreamReader(ruleSetFileContent);
