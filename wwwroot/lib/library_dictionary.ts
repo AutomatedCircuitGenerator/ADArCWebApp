@@ -7343,5 +7343,6 @@
     "ph_surveyor.h": "local/ph_surveyor",
     "base_surveyor.h": "local/base_surveyor",
     "SHT3x.h": "local/SHT3x",
-    "turbidity_surveyor.h": "local/turbidity_surveyor"
+    "turbidity_surveyor.h": "local/turbidity_surveyor",
+    "VL53L4CD.h": "local/VL53L4CD"
 };
