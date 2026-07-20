@@ -1,5 +1,5 @@
 @using System.Text
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @foreach (var c in comps)
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
@@ -210,15 +210,43 @@
     }
 
     /// <summary>
-    /// Currently unused. Handles scrollwheel zooming.
+    /// Currently unused. Sets the component back to center.
+    /// </summary>
+    private void CenterView()
+    {
+        if (comps.Count == 0) return;
+        
+        var minX = comps.Values.Min(c => c.X);
+        var minY = comps.Values.Min(c => c.Y);
+        
+        var maxX = comps.Values.Max(c => c.X);
+        var maxY = comps.Values.Max(c => c.Y);
+        
+        var centerX = (minX + maxX) / 2;
+        var centerY = (minY + maxY) / 2;
+        
+        transform.translate.x = 1920/2 - centerX * zoomFactor;
+        transform.translate.y = 1080/2 - centerY * zoomFactor;
+    }
+
+    /// <summary>
+    /// Handles scrollwheel zooming.
     /// </summary>
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
     {
+        var oldZoom = zoomFactor;
+        
         zoomFactor += e.DeltaY / -1000;
-
         zoomFactor = Math.Clamp(zoomFactor, .4, 3);
-
+        
+        if (oldZoom == zoomFactor) return;
+        
+        var scale = zoomFactor / oldZoom;
+        var mouse = (x: e.ClientX, y: e.ClientY);
+        
+        transform.translate.x = mouse.x - scale * (mouse.x - transform.translate.x);
+        transform.translate.y = mouse.y - scale * (mouse.y - transform.translate.y);
 
         foreach (var comp in comps.Values)
         {
@@ -250,8 +278,8 @@
     /// <returns>the zoomed coordinate.</returns>
     private (double x, double y) ZoomCoord((double x, double y) coord)
     {
-        coord.x = (coord.x + (transform.translate.x * (1 / zoomFactor)) - zoomOrigin.x) * zoomFactor + zoomOrigin.x;
-        coord.y = (coord.y + (transform.translate.y * (1 / zoomFactor)) - zoomOrigin.y) * zoomFactor + zoomOrigin.y;
+        coord.x = coord.x *  zoomFactor + transform.translate.x;
+        coord.y = coord.y *  zoomFactor + transform.translate.y;
 
         return coord;
     }
@@ -263,10 +291,9 @@
     /// <returns>the component, now returned to normal.</returns>
     public ComponentInstance UnZoom(ComponentInstance comp)
     {
-        comp.X = (comp.X - zoomOrigin.x) / zoomFactor + zoomOrigin.x - (transform.translate.x * (1 / zoomFactor));
-        comp.Y = (comp.Y - zoomOrigin.y) / zoomFactor + zoomOrigin.y - (transform.translate.y * (1 / zoomFactor));
-
-
+        comp.X = (comp.X - transform.translate.x) / zoomFactor;
+        comp.Y = (comp.Y - transform.translate.y) / zoomFactor;
+        
         return comp;
     }
 
