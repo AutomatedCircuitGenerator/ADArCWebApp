@@ -27,9 +27,9 @@ export class HCSR04 extends Controller {
 
     echo() {
         // Echo pin stays high for about 58 us per cm to the target
-        this.pins.echo[0].digital.state = true;
+        this.pins.echo[0].digital.state = PinState.High;
         AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-            this.pins.echo[0].digital.state = false;
+            this.pins.echo[0].digital.state = PinState.Low;
         }, this.distance * 58 * (AVRRunner.getInstance().board.cpu.frequency / 1e6));
     }
 }
