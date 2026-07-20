@@ -73,6 +73,7 @@ import {SEN0189} from "@controllers/sen0189";
 (<any>window).MAX31856 = MAX31856;
 (<any>window).SHT30 = SHT30;
 (<any>window).DHT22 = DHT22;
+(<any>window).DHT22MODULE = DHT22;
 (<any>window).SEN0189 = SEN0189;
 (<any>window).TOF = TOF;
 (<any>window).TRANSCEIVER = TRANSCEIVER;
