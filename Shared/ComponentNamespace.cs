@@ -884,31 +884,89 @@ namespace ADArCWebApp.Shared
                         typeof(RazorTOF),
                         paneHoverText: "VL53L4CD",
                         codeForGen: new()
-                        {
+                        {   /*<h2><center>&copy; COPYRIGHT(c) 2021 STMicroelectronics</center></h2>*/
                             {
                                 "include",
-                                "#include <Wire.h>\n#include <vl53l4cd_class.h>"
+                                "#include <Arduino.h>\n" +
+                                "#include <Wire.h>\n" +
+                                "#include <vl53l4cd_class.h>\n" +
+                                "#include <string.h>\n" +
+                                "#include <stdlib.h>\n" +
+                                "#include <stdio.h>\n" +
+                                "#include <stdint.h>\n" +
+                                "#include <assert.h>\n" +
+                                "#include <stdlib.h>"
                             },
                             {
                                 "global",
-                                "VL53L4CD sensor;\n"
+                                "#define DEV_I2C Wire\n" +
+                                "#define SerialPort Serial\n" +
+                                "\n" +
+                                "#ifndef LED_BUILTIN\n" +
+                                "  #define LED_BUILTIN 13\n" +
+                                "#endif\n" +
+                                "#define LedPin LED_BUILTIN\n" +
+                                "\n" +
+                                "// Components.\n" +
+                                "VL53L4CD sensor_vl53l4cd_sat(&DEV_I2C, A1);"
                             },
                             {   
                                 "setup", 
-                                "  Serial.begin(115200);\n" +
-                                "  Wire.begin();\n" +
-                                "  sensor.begin();\n" +
-                                "  sensor.startRanging();\n"
+                                "  // Led.\n" +
+                                "  pinMode(LedPin, OUTPUT);\n" +
+                                "\n" +
+                                "  // Initialize serial for output.\n" +
+                                "  SerialPort.begin(115200);\n" +
+                                "  SerialPort.println(\"Starting...\");\n" +
+                                "\n" +
+                                "  // Initialize I2C bus.\n" +
+                                "  DEV_I2C.begin();\n" +
+                                "\n" +
+                                "  // Configure VL53L4CD satellite component.\n" +
+                                "  sensor_vl53l4cd_sat.begin();\n" +
+                                "\n" +
+                                "  // Switch off VL53L4CD satellite component.\n" +
+                                "  sensor_vl53l4cd_sat.VL53L4CD_Off();\n" +
+                                "\n" +
+                                "  //Initialize VL53L4CD satellite component.\n" +
+                                "  sensor_vl53l4cd_sat.InitSensor();\n" +
+                                "\n" +
+                                "  // Program the highest possible TimingBudget, without enabling the\n" +
+                                "  // low power mode. This should give the best accuracy\n" +
+                                "  sensor_vl53l4cd_sat.VL53L4CD_SetRangeTiming(200, 0);\n" +
+                                "\n" +
+                                "  // Start Measurements\n" +
+                                "  sensor_vl53l4cd_sat.VL53L4CD_StartRanging();"
                             },
                             {
                                 "loopMain",
-                                "  if(sensor.checkForDataReady())\n" +
-                                "  {\n" +
-                                "    uint16_t distance=sensor.getDistance();\n" +
-                                "    Serial.println(distance);\n" +
-                                "    sensor.clearInterrupt();\n" +
-                                "    sensor.startRanging();\n" +
-                                "  }"
+                                "  uint8_t NewDataReady = 0;\n" +
+                                "  VL53L4CD_Result_t results;\n" +
+                                "  uint8_t status;\n" +
+                                "  char report[64];\n" +
+                                "\n" +
+                                "  do {\n" +
+                                "    status = sensor_vl53l4cd_sat.VL53L4CD_CheckForDataReady(&NewDataReady);\n" +
+                                "  } while (!NewDataReady);\n" +
+                                "\n" +
+                                "  //Led on\n" +
+                                "  digitalWrite(LedPin, HIGH);\n" +
+                                "\n" +
+                                "  if ((!status) && (NewDataReady != 0)) {\n" +
+                                "    // (Mandatory) Clear HW interrupt to restart measurements\n" +
+                                "    sensor_vl53l4cd_sat.VL53L4CD_ClearInterrupt();\n" +
+                                "\n" +
+                                "    // Read measured distance. RangeStatus = 0 means valid data\n" +
+                                "    sensor_vl53l4cd_sat.VL53L4CD_GetResult(&results);\n" +
+                                "    snprintf(report, sizeof(report), \"Status = %3u, Distance = %5u mm, Signal = %6u kcps/spad\\r\\n\",\n" +
+                                "             results.range_status,\n" +
+                                "             results.distance_mm,\n" +
+                                "             results.signal_per_spad_kcps);\n" +
+                                "    SerialPort.print(report);\n" +
+                                "  }\n" +
+                                "\n" +
+                                "  //Led off\n" +
+                                "  digitalWrite(LedPin, LOW);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },

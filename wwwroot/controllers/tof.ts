@@ -121,6 +121,7 @@ export class TOF extends Controller implements I2CController {
     }
 
     private updateMeasurement(): void {
+        console.log("updateMeasurement", this.ranging, this.initialized, Date.now() - this.lastMeasurementTime);
         if (!this.ranging) {
             return;
         }
@@ -131,6 +132,7 @@ export class TOF extends Controller implements I2CController {
         this.lastMeasurementTime = now;
         this.calculateMeasurement();
         this.dataReady = true;
+        console.log("DATA READY!");
         this.interruptRaised = true;
         this.updateMeasurementRegisters();
         this.rawWrite8(REG.GPIO_TIO_HV_STATUS, 1);
@@ -180,9 +182,11 @@ export class TOF extends Controller implements I2CController {
 
     i2cReadByte(acked: boolean): number {
         console.log("READ");
+        console.log(this.registerPointer.toString(16), this.read8(this.registerPointer));
         this.updateMeasurement();
         if(this.registerPointer >= this.memory.length) return 0xFF;
         const value=this.read8(this.registerPointer);
+        console.log("READ", this.registerPointer.toString(16), value, "acked=", acked);
         if(acked){
             this.registerPointer++;
         }
@@ -192,6 +196,7 @@ export class TOF extends Controller implements I2CController {
     private handleRegisterWrite(address:number,value:number):void{
         switch(address){
             case REG.SYSTEM_START:
+                console.log("SYSTEM_START =", value.toString(16));
                 if(value==0x21 || value==0x40) {
                     this.initialized = true;
                     this.startRanging();
