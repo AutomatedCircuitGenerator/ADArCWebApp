@@ -884,24 +884,38 @@ namespace ADArCWebApp.Shared
                         typeof(RazorTOF),
                         paneHoverText: "VL53L4CD",
                         codeForGen: new()
-                        {
+                        {   
                             {
                                 "include",
-                                "#include <Arduino.h>\n#include <Wire.h>"
+                                "#include <Wire.h>\n#include <VL53L4CD.h>"
                             },
                             {
                                 "global",
-                                "int16_t tfDist@; // distance in centimeters"
+                                "VL53L4CD sensor;"
                             },
-                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {   
+                                "setup", 
+                                "  while (!Serial) {}\n" +
+                                "  // Serial.begin(115200);\n" +
+                                "  Wire.begin();\n" +
+                                "  Wire.setClock(400000); // use 400 kHz I2C\n" +
+                                "\n" +
+                                "  sensor.setTimeout(500);\n" +
+                                "  if (!sensor.init())\n" +
+                                "  {\n" +
+                                "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                "    while (1);\n" +
+                                "  }\n" +
+                                "  sensor.startContinuous();"
+                            },
                             {
                                 "loopMain",
-                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                                "  Serial.print(sensor.read());\n" +
+                                "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                "\n" +
+                                "  Serial.println();"
                             },
-                            {
-                                "functions",
-                                ""
-                            },
+                            { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
