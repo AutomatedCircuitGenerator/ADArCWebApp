@@ -306,7 +306,7 @@ export class TOF extends Controller implements I2CController {
         this.ranging = false;
         this.dataReady = false;
         this.interruptRaised = false;
-        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
+        const bus = AVRRunner.getInstance().board.twis[0];
         bus.changeControllerAddress(this.i2cAddress, 0x29);
         this.i2cAddress = 0x29;
         this.initializeRegisters();
@@ -314,7 +314,7 @@ export class TOF extends Controller implements I2CController {
 
     private setAddress(newAddr: number): void {
         newAddr &= 0x7F;
-        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
+        const bus = AVRRunner.getInstance().board.twis[0];
         bus.changeControllerAddress(this.i2cAddress, newAddr);
         this.i2cAddress = newAddr;
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, newAddr);

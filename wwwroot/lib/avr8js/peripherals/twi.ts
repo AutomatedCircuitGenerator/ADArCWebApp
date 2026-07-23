@@ -14,6 +14,8 @@ export interface TWIEventHandler {
   readByte(ack: boolean): void;
 
   registerController(addr: number, device: I2CController): void;
+
+  changeControllerAddress(oldAddr: number, newAddr: number): void;
 }
 
 export interface TWIConfig {
