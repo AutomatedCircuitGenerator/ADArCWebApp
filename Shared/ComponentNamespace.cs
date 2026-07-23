@@ -818,7 +818,7 @@ namespace ADArCWebApp.Shared
                                 "\tdelay(2000);"
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["Vcc", "signal", "gnd", "lead1", "lead2"], gsNodeName: "dht22").Property("humidity", 40.0)
+                        }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
             },
             {
