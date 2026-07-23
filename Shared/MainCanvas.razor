@@ -16,7 +16,9 @@
                   stroke-width="@(3 * zoomFactor)"
                   fill="none"
                   stroke-linejoin="round"
-                  class="segment @(highlighted ? "highlighted" : "")">
+                  class="segment @(highlighted ? "highlighted" : "")"
+                  style="--glow:@line.Color">
+                <title>@line.Tooltip</title>
             </path>
             <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
         }
@@ -90,7 +92,13 @@
 
     private record Segment(double x1, double y1, double x2, double y2);
 
-    private record GridLine(string Color, (double x, double y) Start, (double x, double y) End, int FromId, int ToId, List<Segment> Segments);
+    private record GridLine(string Color, 
+        (double x, double y) Start, 
+        (double x, double y) End, 
+        int FromId, 
+        int ToId, 
+        string Tooltip,
+        List<Segment> Segments);
     
     private string BuildPathData(List<Segment> segments, double cornerRadius = 10)
     {
@@ -158,7 +166,15 @@
             var fromPin = fromPins[connection.FromId];
             var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
             var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
-            lines.Add(new GridLine(connection.Color, start, end, connection.From.localId, connection.To.localId, []));
+            var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +
+                          $"{connection.To.Data.name} {toPin.name}";
+            lines.Add(new GridLine(connection.Color, 
+                start, 
+                end, 
+                connection.From.localId, 
+                connection.To.localId, 
+                tooltip,
+                []));
             var startId = connection.From.localId;
             var startX = (int)Math.Floor(start.x);
 
