@@ -36,22 +36,19 @@ export class TOF extends Controller implements I2CController {
     private initialized = false;
     private ranging = false;
     private dataReady = false;
-    private interruptRaised = false;
     private timingBudget = 50;
-    private interMeasurement = 0;
     private lastMeasurementTime = 0;
     private xshut = true;
     private i2cAddress = 0x29;
 
     setup(): void {
-        console.log(this.pins);
         this.registerWithI2C();
         this.initializeRegisters();
         this.lastMeasurementTime=Date.now();
-        // this.pins.xshut[0].digital?.addListener((state) => {
-        //     this.setXShut(state === PinState.High);
-        // });
-        this.setXShut(true);
+        this.setXShut(this.pins.xshut[0].digital.state === PinState.High);
+        this.pins.xshut[0].digital?.addListener((state) => {
+            this.setXShut(state === PinState.High);
+        });
     }
 
     private read8(address: number): number {
@@ -64,15 +61,6 @@ export class TOF extends Controller implements I2CController {
         this.handleRegisterWrite(address,value);
     }
 
-    private read16(address: number): number {
-        return (this.memory[address] << 8) | this.memory[address + 1];
-    }
-
-    private write16(address: number, value: number): void {
-        this.memory[address] = (value >> 8) & 0xFF;
-        this.memory[address + 1] = value & 0xFF;
-    }
-
     private rawWrite8(address: number, value: number) {
         this.memory[address] = value & 0xFF;
     }
@@ -80,13 +68,6 @@ export class TOF extends Controller implements I2CController {
     private rawWrite16(address: number, value: number) {
         this.memory[address] = (value >> 8) & 0xFF;
         this.memory[address + 1] = value & 0xFF;
-    }
-
-    private rawWrite32(address: number, value: number) {
-        this.memory[address] = (value >> 24) & 0xFF;
-        this.memory[address + 1] = (value >> 16) & 0xFF;
-        this.memory[address + 2] = (value >> 8) & 0xFF;
-        this.memory[address + 3] = value & 0xFF;
     }
 
     private initializeRegisters(): void {
@@ -115,7 +96,6 @@ export class TOF extends Controller implements I2CController {
         if (state.distance !== undefined) {
             this.distance = Math.max(0, Math.min(5000, state.distance));
             this.simulateMeasurement();
-            this.updateMeasurementRegisters();
         }
 
         if (state.signal !== undefined) {
@@ -140,7 +120,6 @@ export class TOF extends Controller implements I2CController {
         this.lastMeasurementTime = now;
         this.simulateMeasurement();
         this.dataReady = true;
-        this.interruptRaised = true;
         this.updateMeasurementRegisters();
     }
 
@@ -149,14 +128,10 @@ export class TOF extends Controller implements I2CController {
     }
 
     private registerWithI2C(): void {
-        const i2cBus = AVRRunner.getInstance().board.twis[0];
-        // Register on every possible 7-bit I2C address.
-        i2cBus.registerController(this.i2cAddress, this);
-
+        AVRRunner.getInstance().board.twis[0].registerController(this.i2cAddress, this);
     }
 
     i2cConnect(addr: number, write: boolean): boolean {
-        console.log("CONNECT");
         if (!this.xshut) {
             console.log("XSHUT OFF");
             return false;
@@ -198,7 +173,6 @@ export class TOF extends Controller implements I2CController {
     }
 
     i2cReadByte(acked: boolean): number {
-        console.log("READ");
         if (!this.xshut) return 0xFF;
         this.updateMeasurement();
         if(this.registerPointer >= this.memory.length) return 0xFF;
@@ -235,7 +209,6 @@ export class TOF extends Controller implements I2CController {
         if(!this.initialized) return;
         this.ranging=true;
         this.dataReady=false;
-        this.interruptRaised=false;
         this.lastMeasurementTime=Date.now();
         this.simulateMeasurement();
         this.updateMeasurementRegisters();
@@ -251,28 +224,19 @@ export class TOF extends Controller implements I2CController {
 
     private clearInterrupt(): void {
         this.dataReady = false;
-        this.interruptRaised = false;
         this.updateMeasurementRegisters();
     }
 
     private simulateMeasurement(): void {
-
-        // ---------- Signal ----------
         // Signal decreases as distance increases
         this.signalRate = Math.max(2000, 30000 - this.distance * 5);
 
-        // ---------- Ambient ----------
         // Keep ambient constant for now
         this.ambientRate = 6400;
 
-        // ---------- Sigma ----------
         // Sigma increases with distance
         this.sigma = Math.round(5 + this.distance / 500);
-
-        // ---------- Number of SPAD ----------
         this.numberOfSpad = 128;
-
-        // ---------- Raw Range Status ----------
         if (this.distance > 4000) {
             // Out of range
             this.rangeStatus = 4;
@@ -291,32 +255,34 @@ export class TOF extends Controller implements I2CController {
         }
     }
 
-    private powerOff() {
-        this.xshut = false;
+    private resetState() {
         this.initialized = false;
         this.ranging = false;
         this.dataReady = false;
-        this.interruptRaised = false;
+    }
+
+    private powerOff() {
+        this.xshut = false;
+        this.resetState();
         this.memory.fill(0);
     }
 
     private powerOn() {
         this.xshut = true;
-        this.initialized = false;
-        this.ranging = false;
-        this.dataReady = false;
-        this.interruptRaised = false;
+        this.resetState();
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
-        bus.changeControllerAddress(this.i2cAddress, 0x29);
         this.i2cAddress = 0x29;
+        bus.registerController(0x29, this);
         this.initializeRegisters();
     }
 
-    private setAddress(newAddr: number): void {
-        newAddr &= 0x7F;
-        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
-        bus.changeControllerAddress(this.i2cAddress, newAddr);
-        this.i2cAddress = newAddr;
+    private setAddress(newAddr:number){
+        newAddr &=0x7F;
+        if(newAddr==this.i2cAddress) return;
+        const bus=AVRRunner.getInstance().board.twis[0] as I2CBus;
+        bus.unregisterController(this.i2cAddress, this);
+        this.i2cAddress=newAddr;
+        bus.registerController(this.i2cAddress, this);
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, newAddr);
     }
 }

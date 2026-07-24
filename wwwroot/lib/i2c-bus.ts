@@ -13,7 +13,7 @@ export interface I2CController {
 }
 
 export class I2CBus implements TWIEventHandler {
-    readonly controllers: { [key: number]: I2CController } = {};
+    readonly controllers: { [key: number]: I2CController[] } = {};
     private activeController: I2CController | null = null;
     private writeMode = false;
 
@@ -22,20 +22,19 @@ export class I2CBus implements TWIEventHandler {
     }
 
     registerController(addr: number, device: I2CController) {
-        this.controllers[addr] = device;
-    }
-
-    unregisterController(addr: number) {
-        delete this.controllers[addr];
-    }
-
-    changeControllerAddress(oldAddr: number, newAddr: number) {
-        const device = this.controllers[oldAddr];
-        if (!device) {
-            return;
+        if(!this.controllers[addr]){
+            this.controllers[addr]=[];
         }
-        delete this.controllers[oldAddr];
-        this.controllers[newAddr] = device;
+        this.controllers[addr].push(device);
+    }
+
+    unregisterController(addr:number, device:I2CController){
+        const list=this.controllers[addr];
+        if(!list) return;
+        this.controllers[addr]=list.filter(d=>d!==device);
+        if(this.controllers[addr].length==0){
+            delete this.controllers[addr];
+        }
     }
 
     start(): void {
@@ -52,12 +51,15 @@ export class I2CBus implements TWIEventHandler {
 
     connectToSlave(addr: number, write: boolean): void {
         let result = false;
-        const device = this.controllers[addr];
-        if (device) {
-            result = device.i2cConnect(addr, write);
-            if (result) {
-                this.activeController = device;
-                this.writeMode = write;
+        const list=this.controllers[addr];
+        if(list){
+            for(const device of list){
+                if(device.i2cConnect(addr,write)){
+                    this.activeController=device;
+                    this.writeMode=write;
+                    result=true;
+                    break;
+                }
             }
         }
         this.twi.completeConnect(result);
