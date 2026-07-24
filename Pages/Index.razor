@@ -10,6 +10,7 @@
 @inject BoardService BoardService
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
+@inject NavigationManager Navigation
 
 <PageTitle>Home | ADArC</PageTitle>
 <body>
@@ -44,8 +45,8 @@
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
         <div class="logo-and-adarc">
-            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-            <span class="adarc-text">ADArC</span>
+            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">
+            <span class="adarc-text" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">ADArC</span>
         </div>
         
         <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
@@ -1616,6 +1617,11 @@
     {
         _lastExecutedAction = action;
         _lastUndoneAction = null; // Clear redo history whenever a new action is executed
+    }
+    
+    private async Task OpenNewTab()
+    {
+        await JsRuntime.InvokeVoidAsync("open", Navigation.BaseUri, "_blank");
     }
 
 
