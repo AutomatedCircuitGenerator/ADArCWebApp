@@ -10,6 +10,7 @@
 @inject BoardService BoardService
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
+@inject NavigationManager Navigation
 
 <PageTitle>Home | ADArC</PageTitle>
 <body>
@@ -44,8 +45,8 @@
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
         <div class="logo-and-adarc">
-            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-            <span class="adarc-text">ADArC</span>
+            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">
+            <span class="adarc-text" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">ADArC</span>
         </div>
         
         <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
@@ -243,7 +244,7 @@
         Comps[0] = BoardService.GetComponentInstance();
         Console.WriteLine($"Board set to {board}, component instance created");
 
-        if (LoadingProgress == -1)
+        if (_rulesLoaded)
         {
             Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
@@ -678,6 +679,12 @@
     /// </summary>
     private bool selLockedOut = true;
 
+    /// <summary>
+    /// True once rule loading has finished. Distinct from LoadingProgress reaching -1, which
+    /// only controls how long the visual progress bar stays on screen.
+    /// </summary>
+    private bool _rulesLoaded;
+
     private bool _isMobileUser;
 
     /// <summary>
@@ -712,11 +719,15 @@
         // selLockedOut = !hasUrlParam;
 
         Console.WriteLine("Loading rulesets...");
-        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 58);
-        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 58);
+        var ruleSetMap = RuleSetMap.GetInstance();
+        await ruleSetMap.RegisterRuleSet("ADD", navMan);
+        await ruleSetMap.RegisterRuleSet("CONNECT", navMan);
+        await ruleSetMap.LoadRuleSet("ADD", navMan, this);
+        await ruleSetMap.LoadRuleSet("CONNECT", navMan, this);
 
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
-        
+        _rulesLoaded = true;
+
         if (hasUrlParam)
         {
             await LoadFromUrl(queryParams["c"], isExample);
@@ -732,10 +743,28 @@
             StateHasChanged();
         }
 
-        LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
 
         StateHasChanged();
+        _ = HideLoadingBarAfterDelay();
+    }
+
+    /// <summary>
+    /// Keeps the loading bar visible at 100% for a moment after rule loading finishes, so its
+    /// completion is perceptible before it disappears, instead of vanishing the instant it fills.
+    /// Runs unawaited so it doesn't block app usability, which is already unlocked by this point.
+    /// </summary>
+    private async Task HideLoadingBarAfterDelay()
+    {
+        try
+        {
+            await Task.Delay(1000);
+            LoadingProgress = -1;
+            await StateChanged();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     /// <summary>
@@ -1588,6 +1617,11 @@
     {
         _lastExecutedAction = action;
         _lastUndoneAction = null; // Clear redo history whenever a new action is executed
+    }
+    
+    private async Task OpenNewTab()
+    {
+        await JsRuntime.InvokeVoidAsync("open", Navigation.BaseUri, "_blank");
     }
 
 

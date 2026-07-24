@@ -1,4 +1,5 @@
 import {Controller} from "./controller";
+import {PinState} from "@lib/avr8js";
 
 export class KY024 extends Controller {
     private gauss: number = 0; // Magnetic field strength in gauss
@@ -28,7 +29,7 @@ export class KY024 extends Controller {
         // Simulate magnetic field detection with a digital output
         this.isMagneticFieldDetected = isMagneticFieldDetected;
         if (this.isInSimulation) {
-            this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected;
+            this.pins.digital_out[0].digital.state = this.isMagneticFieldDetected ? PinState.High : PinState.Low;
         }
     }
 
