@@ -24,11 +24,15 @@ export class IRDETECTOR extends Controller {
 
     setup() {
         this.digitalOut = this.pins.out[0];
+        this.setPowerLed(true);
         this.evaluateObstacle();
         this.updateOutput();
     }
 
-    cleanup() { }
+    cleanup() {
+        this.setPowerLed(false);
+        this.setDetectLed(false);
+    }
 
     private evaluateObstacle() {
         this.obstacleDetected = this.distance <= this.threshold;
@@ -36,5 +40,18 @@ export class IRDETECTOR extends Controller {
 
     private updateOutput() {
         this.digitalOut.digital.state = this.obstacleDetected ? PinState.Low : PinState.High;
+        this.setDetectLed(this.obstacleDetected);
+    }
+
+    private setPowerLed(on: boolean) {
+        const display = on ? "inherit" : "none";
+        this.element.querySelector<HTMLElement>("#powerLED")!.style.display = display;
+        this.element.querySelector<HTMLElement>("#powerGlow")!.style.display = display;
+    }
+
+    private setDetectLed(on: boolean) {
+        const display = on ? "inherit" : "none";
+        this.element.querySelector<HTMLElement>("#detectLED")!.style.display = display;
+        this.element.querySelector<HTMLElement>("#detectGlow")!.style.display = display;
     }
 }
