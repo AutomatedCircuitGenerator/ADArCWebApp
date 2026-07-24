@@ -1,47 +1,40 @@
-import {Controller} from "./controller";
-import {AVRRunner} from "@lib/execute";
-import {PinState} from "@lib/avr8js";
+import { Controller } from "./controller";
+import { PinState } from "@lib/avr8js";
+import {Interfaces} from "../boards/board";
 
 export class IRDETECTOR extends Controller {
 
-    private powered = false;
+    private digitalOut: Interfaces;
+    private threshold = 15;  // abstract threshold, Datasheet: Detection Range 2~30 cm
+    private distance = 20;
     private obstacleDetected = false;
-    private threshold = 15;
-    private distance = 100;
 
     override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
-    }
+        if (state.distance !== undefined) {
+            this.distance = state.distance;
+        }
 
-    setTemperature = (temperature: number) => {
-        this._temperature = temperature
+        if (state.threshold !== undefined) {
+            this.threshold = state.threshold;
+        }
+
+        this.evaluateObstacle();
+        this.updateOutput();
     }
 
     setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
+        this.digitalOut = this.pins.out[0];
+        this.evaluateObstacle();
+        this.updateOutput();
     }
 
-    private get shouldReadSPI(): boolean {
-        return this.pins.cs[0].digital.state == PinState.Low;
+    cleanup() { }
+
+    private evaluateObstacle() {
+        this.obstacleDetected = this.distance <= this.threshold;
     }
 
-    private nextByteIsHigh = false;
-
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
-            return;
-        }
-        if (this._temperature == undefined) {
-            console.log("Undefined\n")
-        }
-        let temperature = Math.round((this._temperature / 0.25) << 3);
-        let byteToSend: number;
-        if (!this.nextByteIsHigh) {
-            byteToSend = (temperature >> 8) & 0xFF;
-        } else {
-            byteToSend = temperature & 0xFF;
-        }
-        this.nextByteIsHigh = !this.nextByteIsHigh;
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), AVRRunner.getInstance().board.spis[0].transferCycles);
+    private updateOutput() {
+        this.digitalOut.digital.state = this.obstacleDetected ? PinState.Low : PinState.High;
     }
 }

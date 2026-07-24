@@ -1086,6 +1086,7 @@ namespace ADArCWebApp.Shared
                         },
                         pins: ["Vcc", "gnd", "out"],
                         gsNodeName: "irdetector")
+                    .Property("distance", 50.0)
                     .Finish()
             }
         };
