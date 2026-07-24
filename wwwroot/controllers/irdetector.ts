@@ -5,7 +5,8 @@ import {Interfaces} from "../boards/board";
 export class IRDETECTOR extends Controller {
 
     private digitalOut: Interfaces;
-    private threshold = 15;  // abstract threshold, Datasheet: Detection Range 2~30 cm
+    private thresholdLow = 2;  // abstract threshold, Datasheet: Detection Range 2~30 cm
+    private thresholdHigh = 30;
     private distance = 20;
     private obstacleDetected = false;
 
@@ -14,8 +15,12 @@ export class IRDETECTOR extends Controller {
             this.distance = state.distance;
         }
 
-        if (state.threshold !== undefined) {
-            this.threshold = state.threshold;
+        if (state.thresholdLow !== undefined) {
+            this.thresholdLow = state.thresholdLow;
+        }
+
+        if (state.thresholdHigh !== undefined) {
+            this.thresholdHigh = state.thresholdHigh;
         }
 
         this.evaluateObstacle();
@@ -35,7 +40,7 @@ export class IRDETECTOR extends Controller {
     }
 
     private evaluateObstacle() {
-        this.obstacleDetected = this.distance <= this.threshold;
+        this.obstacleDetected = this.distance >= this.thresholdLow && this.distance <= this.thresholdHigh;
     }
 
     private updateOutput() {
