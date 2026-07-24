@@ -1055,6 +1055,38 @@ namespace ADArCWebApp.Shared
                     .Property("phosphorus", 0.0)
                     .Property("potassium", 0.0)
                     .Finish()
+            },
+            {
+                42,
+                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Other Sensors", 0.6, 150, 200,
+                        typeof(RazorIRDETECTOR),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                ""
+                            },
+                            {
+                                "global",
+                                "// Define the pin numbers for the Infrared obstacle avoidance sensor\n" +
+                                "const int sensorPin = 2;"
+                            },
+                            {
+                                "setup",
+                                "  pinMode(sensorPin, INPUT);  // Set sensorPin as input"
+                            },
+                            {
+                                "loopMain",
+                                "  Serial.println(digitalRead(sensorPin));  // Read the digital value from the sensor and print it to the serial monitor\n" +
+                                "  delay(50);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "out"],
+                        gsNodeName: "irdetector")
+                    .Finish()
             }
         };
     }

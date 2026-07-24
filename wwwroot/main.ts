@@ -36,6 +36,7 @@ import {MAX31856} from "@controllers/max31856";
 import {SHT30} from "@controllers/sht30";
 import {DHT22} from "@controllers/dht22";
 import {SEN0189} from "@controllers/sen0189";
+import {IRDETECTOR} from "@controllers/irdetector";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -77,3 +78,4 @@ import {SEN0189} from "@controllers/sen0189";
 (<any>window).TOF = TOF;
 (<any>window).TRANSCEIVER = TRANSCEIVER;
 (<any>window).NPK = NPK;
+(<any>window).IRDETECTOR = IRDETECTOR;
