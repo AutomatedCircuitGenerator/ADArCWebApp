@@ -49,48 +49,57 @@
             <span class="adarc-text" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">ADArC</span>
         </div>
         
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
-            💡 Tutorial
+        <button class="tutorial-button toolbar-button" title="Tutorial" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
+            💡
+            <span class="toolbar-text">Tutorial</span>
         </button>
         <div class="center-toolbar">
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Undo</span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg></span>
+                    <span class="toolbar-text">Undo</span>
                 </button>
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button" title="Redo" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastUndoneAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>Redo</span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg></span>
+                    <span class="toolbar-text">Redo</span>
                 </button>
             </div>
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
-                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
-                    <span>⬇️️ Import</span>
+                <label for="import-button" class="toolbar-button" title="Import" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
+                    <span>⬇️️</span>
+                    <span class="toolbar-text">Import</span>
                 </label>
-                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" disabled="@(IsRunning || selLockedOut)">
-                    <span>⬆️ Export</span>
+                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" title="Export" disabled="@(IsRunning || selLockedOut)">
+                    <span>⬆️</span>
+                    <span class="toolbar-text">Export</span>
                 </button>
             </div>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
+            <button class="toolbar-button" title="Generate URL" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
                     disabled="@selLockedOut">
-                <span>🔗 Generate URL</span>
+                <span>🔗</span>
+                <span class="toolbar-text">Generate URL</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
+            <button class="toolbar-button" title="Examples" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
                     disabled="@selLockedOut">
-                📖 Examples
+                📖
+                <span class="toolbar-text">Examples</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
+            <button class="toolbar-button" title="Report Bug" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
                     disabled="@selLockedOut">
-                <span>🐛 Report Bug</span>
+                <span>🐛</span>
+                <span class="toolbar-text">Report Bug</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
+            <button class="toolbar-button" title="Help" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
                     disabled="@selLockedOut">
-                <span>ℹ Help</span>
+                <span>ℹ</span>
+                <span class="toolbar-text">Help</span>
             </button>
 
             <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
@@ -113,7 +122,8 @@
             </Modal>
 
             <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
-                <span>@runStopText</span>
+                <span>@runStopButton</span>
+                <span class="toolbar-text">@runStopText</span>
             </button>
         </div>
     </div>
@@ -121,8 +131,10 @@
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
-        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
-            <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+        <div class="sidebar" style="left: @(leftPaneAlign)px" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
+        @if (!shouldShowBoardSelect)  // doesn't allow the left side palette to be expanded during board selection. 
+        {   // code might be able to be refactored.
+            <div class="expand-button expand-button-left" @onclick="@(shouldShowBoardSelect ? null : ToggleLeftSidebar)" style="left:100%;">
                 @if (isLeftExpanded)
                 {
                     <span>▶</span>
@@ -132,12 +144,15 @@
                     <span>◀</span>
                 }
             </div>
-            <ComponentPane host="@this"></ComponentPane>
+        }
+        <ComponentPane host="@this"></ComponentPane>
         </div>
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
-        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
+        <div class="sidebar-right" style="right: @(rightPaneAlign)px" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
+        @if (!shouldShowBoardSelect)  // same as left
+        {
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
                 @if (isRightExpanded)
                 {
@@ -148,7 +163,8 @@
                     <span>◀</span>
                 }
             </div>
-            <CodePane></CodePane>
+        }
+        <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
             <ExampleSelect ComponentFrequencies="_componentFrequencies" OnClose="() => _exampleModalOpen = false"></ExampleSelect>
@@ -197,7 +213,7 @@
     private BoardSelect boardSelect;
     private bool shouldShowBoardSelect;
 
-    bool isLeftExpanded = true;
+    bool isLeftExpanded = false;  
     private string generatedUrl = string.Empty;
     bool isRightExpanded;
 
@@ -209,15 +225,16 @@
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
     /// </summary>
-    int leftPaneAlign => isLeftExpanded ? 0 : -24;
+    int leftPaneAlign => isLeftExpanded ? 0 : -390;
 
     /// <summary>
     /// Percentage of screen that the right pane is pushed to the right.
     /// Default position (0) is fully on screen.
     /// </summary>
-    int rightPaneAlign => isRightExpanded ? 0 : -39;
+    int rightPaneAlign => isRightExpanded ? 0 : -590;
 
-    string runStopText = "▶️ Run";
+    string runStopButton = "▶️";
+    string runStopText = "Run";
     public bool IsRunning;
 
     void ToggleLeftSidebar()
@@ -257,8 +274,10 @@
             Console.WriteLine("Loading in progress, scheduling bench setup");
             _scheduleBenchSetup = true;
         }
+        shouldShowBoardSelect = false;
+        isLeftExpanded = true;     // reset palette position to original (left palette expanded)
+        StateHasChanged();    
     }
-
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -268,6 +287,7 @@
     {
         if (!IsRunning)
         {
+            runStopButton = "";
             runStopText = "Compiling...";
             var response = await AppInterop.CompileWrapper();
 
@@ -275,7 +295,8 @@
             if (response.stderr != "")
             {
                 CodePane?.UpdateConsoleOutput(response.stderr, false);
-                runStopText = "▶️ Run";
+                runStopButton = "▶️";
+                runStopText = "Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
                 if (caps.Count > 0)
@@ -299,7 +320,8 @@
                 CodePane?.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.ClearMonacoErrorsWrapper();
                 AppInterop.StartSimWrapper();
-                runStopText = "🟥 Stop";
+                runStopButton = "🟥";
+                runStopText = "Stop";
                 IsRunning = true;
             }
         }
@@ -308,7 +330,8 @@
             AppInterop.StopWrapper();
             CodePane!.CommitBuffer();
             CodePane!.UpdateConsoleOutput("Stopped.\n", false);
-            runStopText = "▶️ Run";
+            runStopButton = "▶️";
+            runStopText = "Run";
             IsRunning = false;
         }
     }
@@ -385,10 +408,14 @@
 
             AppInterop.Runtime = JsRuntime;
             AppInterop.JsModule = await AppInterop.GetModuleWrapper();
-
             AppInterop.UpdateScreenRatios(await AppInterop.GetWindowWidth(), await AppInterop.GetWindowHeight());
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
+            if (shouldShowBoardSelect)
+            {
+                isLeftExpanded = false;  // doesn't show palette when first loaded
+                StateHasChanged();
+            }
         }
     }
 
