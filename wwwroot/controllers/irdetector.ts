@@ -5,7 +5,7 @@ import {Interfaces} from "../boards/board";
 export class IRDETECTOR extends Controller {
 
     private digitalOut: Interfaces;
-    private thresholdLow = 2;  // abstract threshold, Datasheet: Detection Range 2~30 cm
+    private thresholdLow = 2;  // Detection Range 2~30 cm
     private thresholdHigh = 30;
     private distance = 20;
     private obstacleDetected = false;

@@ -1058,7 +1058,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 42,
-                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Other Sensors", 0.6, 150, 200,
+                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Distance Sensors", 0.6, 150, 200,
                         typeof(RazorIRDETECTOR),
                         codeForGen: new()
                         {
