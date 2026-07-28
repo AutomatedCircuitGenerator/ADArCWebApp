@@ -1,8 +1,7 @@
 import {Controller} from "@controllers/controller";
 import {AVRRunner} from "@lib/execute";
-import {I2CController} from "@lib/i2c-bus";
+import {I2CBus, I2CController} from "@lib/i2c-bus";
 import {PinState} from "@lib/avr8js/peripherals/gpio";
-import {I2CBus} from "@lib/i2c-bus";
 
 const REG = {
     IDENTIFICATION_MODEL_ID: 0x010F,
@@ -38,17 +37,21 @@ export class TOF extends Controller implements I2CController {
     private dataReady = false;
     private timingBudget = 50;
     private lastMeasurementTime = 0;
-    private xshut = true;
+    private xshut = false;
     private i2cAddress = 0x29;
 
     setup(): void {
-        this.registerWithI2C();
-        this.initializeRegisters();
+        console.log("TOF setup", this.id);
+        console.log(this.id, this.pins.xshut);
         this.lastMeasurementTime=Date.now();
-        this.setXShut(this.pins.xshut[0].digital.state === PinState.High);
-        this.pins.xshut[0].digital?.addListener((state) => {
-            this.setXShut(state === PinState.High);
-        });
+        this.setXShut(PinState.High);
+        this.pins.xshut[0].digital.addListener(() => this.setXShut(this.pins.xshut[0].digital.state));
+        console.log(
+            "Controller",
+            this.id,
+            "XSHUT pin",
+            this.pins.xshut[0]
+        );
     }
 
     private read8(address: number): number {
@@ -124,19 +127,16 @@ export class TOF extends Controller implements I2CController {
     }
 
     cleanup(): void {
-
+        this.powerOff();
     }
 
     private registerWithI2C(): void {
-        AVRRunner.getInstance().board.twis[0].registerController(this.i2cAddress, this);
+        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
+        bus.registerController(this.i2cAddress, this);
     }
 
     i2cConnect(addr: number, write: boolean): boolean {
-        if (!this.xshut) {
-            console.log("XSHUT OFF");
-            return false;
-        }
-
+        console.log("connect", addr, this.i2cAddress);
         if (addr != this.i2cAddress) {
             console.log("ADDR MISMATCH");
             return false;
@@ -155,15 +155,15 @@ export class TOF extends Controller implements I2CController {
 
     i2cWriteByte(value: number): boolean {
         if (!this.xshut) return false;
-        if(this.pointerBytesReceived==0){
-            this.registerPointer=value<<8;
-            this.pointerBytesReceived=1;
+        if(this.pointerBytesReceived == 0){
+            this.registerPointer = value << 8;
+            this.pointerBytesReceived = 1;
             return true;
         }
 
-        if(this.pointerBytesReceived==1){
-            this.registerPointer|=value;
-            this.pointerBytesReceived=2;
+        if(this.pointerBytesReceived == 1){
+            this.registerPointer |= value;
+            this.pointerBytesReceived = 2;
             return true;
         }
 
@@ -247,11 +247,11 @@ export class TOF extends Controller implements I2CController {
         }
     }
 
-    public setXShut(level: boolean) {
-        if (level) {
-            this.powerOn();
-        } else {
+    public setXShut(level: PinState) {
+        if (level == PinState.Low) {
             this.powerOff();
+        } else {
+            this.powerOn();
         }
     }
 
@@ -262,27 +262,35 @@ export class TOF extends Controller implements I2CController {
     }
 
     private powerOff() {
+        console.log("POWER OFF");
+        console.log(this.id);
         this.xshut = false;
         this.resetState();
+        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
+        bus.unregisterController(this.i2cAddress);
         this.memory.fill(0);
     }
 
     private powerOn() {
+        console.log("POWER ON");
+        console.log(this.id);
+        console.log(this.i2cAddress);
         this.xshut = true;
         this.resetState();
-        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
         this.i2cAddress = 0x29;
-        bus.registerController(0x29, this);
         this.initializeRegisters();
+        this.registerWithI2C();
     }
 
     private setAddress(newAddr:number){
+        console.log("SET ADDRESS");
         newAddr &=0x7F;
-        if(newAddr==this.i2cAddress) return;
-        const bus=AVRRunner.getInstance().board.twis[0] as I2CBus;
-        bus.unregisterController(this.i2cAddress, this);
+        if(newAddr == this.i2cAddress) return;
+        const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
+        bus.unregisterController(this.i2cAddress);
         this.i2cAddress=newAddr;
-        bus.registerController(this.i2cAddress, this);
+        this.registerWithI2C();
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, newAddr);
+        console.log("address changed");
     }
 }

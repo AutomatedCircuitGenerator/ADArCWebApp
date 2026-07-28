@@ -13,7 +13,7 @@ export interface I2CController {
 }
 
 export class I2CBus implements TWIEventHandler {
-    readonly controllers: { [key: number]: I2CController[] } = {};
+    readonly controllers: { [key: number]: I2CController } = {};
     private activeController: I2CController | null = null;
     private writeMode = false;
 
@@ -22,19 +22,11 @@ export class I2CBus implements TWIEventHandler {
     }
 
     registerController(addr: number, device: I2CController) {
-        if(!this.controllers[addr]){
-            this.controllers[addr]=[];
-        }
-        this.controllers[addr].push(device);
+        this.controllers[addr] = device;
     }
 
-    unregisterController(addr:number, device:I2CController){
-        const list=this.controllers[addr];
-        if(!list) return;
-        this.controllers[addr]=list.filter(d=>d!==device);
-        if(this.controllers[addr].length==0){
-            delete this.controllers[addr];
-        }
+    unregisterController(addr: number) {
+        delete this.controllers[addr];
     }
 
     start(): void {
@@ -51,15 +43,12 @@ export class I2CBus implements TWIEventHandler {
 
     connectToSlave(addr: number, write: boolean): void {
         let result = false;
-        const list=this.controllers[addr];
-        if(list){
-            for(const device of list){
-                if(device.i2cConnect(addr,write)){
-                    this.activeController=device;
-                    this.writeMode=write;
-                    result=true;
-                    break;
-                }
+        const device = this.controllers[addr];
+        if (device) {
+            result = device.i2cConnect(addr, write);
+            if (result) {
+                this.activeController = device;
+                this.writeMode = write;
             }
         }
         this.twi.completeConnect(result);
