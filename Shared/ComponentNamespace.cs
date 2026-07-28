@@ -1057,6 +1057,37 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
+                42,
+                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Distance Sensors", 0.6, 150, 200,
+                        typeof(RazorIRDETECTOR),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                ""
+                            },
+                            {
+                                "global",
+                                "// Define the pin numbers for the Infrared obstacle avoidance sensor\n" +
+                                "const int sensorPin = 2;"
+                            },
+                            {
+                                "setup",
+                                "  pinMode(sensorPin, INPUT);  // Set sensorPin as input"
+                            },
+                            {
+                                "loopMain",
+                                "  Serial.println(digitalRead(sensorPin));  // Read the digital value from the sensor and print it to the serial monitor\n" +
+                                "  delay(50);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "out"],
+                        gsNodeName: "irdetector")
+                    .Property("distance", 20.0)
+                    .Finish()
                 40,
                 new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
                     codeForGen: new()
