@@ -41,17 +41,9 @@ export class TOF extends Controller implements I2CController {
     private i2cAddress = 0x29;
 
     setup(): void {
-        console.log("TOF setup", this.id);
-        console.log(this.id, this.pins.xshut);
         this.lastMeasurementTime=Date.now();
         this.setXShut(PinState.High);
         this.pins.xshut[0].digital.addListener(() => this.setXShut(this.pins.xshut[0].digital.state));
-        console.log(
-            "Controller",
-            this.id,
-            "XSHUT pin",
-            this.pins.xshut[0]
-        );
     }
 
     private read8(address: number): number {
@@ -136,7 +128,6 @@ export class TOF extends Controller implements I2CController {
     }
 
     i2cConnect(addr: number, write: boolean): boolean {
-        console.log("connect", addr, this.i2cAddress);
         if (addr != this.i2cAddress) {
             console.log("ADDR MISMATCH");
             return false;
@@ -262,8 +253,6 @@ export class TOF extends Controller implements I2CController {
     }
 
     private powerOff() {
-        console.log("POWER OFF");
-        console.log(this.id);
         this.xshut = false;
         this.resetState();
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
@@ -272,9 +261,6 @@ export class TOF extends Controller implements I2CController {
     }
 
     private powerOn() {
-        console.log("POWER ON");
-        console.log(this.id);
-        console.log(this.i2cAddress);
         this.xshut = true;
         this.resetState();
         this.i2cAddress = 0x29;
@@ -283,7 +269,6 @@ export class TOF extends Controller implements I2CController {
     }
 
     private setAddress(newAddr:number){
-        console.log("SET ADDRESS");
         newAddr &=0x7F;
         if(newAddr == this.i2cAddress) return;
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
@@ -291,6 +276,5 @@ export class TOF extends Controller implements I2CController {
         this.i2cAddress=newAddr;
         this.registerWithI2C();
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, newAddr);
-        console.log("address changed");
     }
 }
