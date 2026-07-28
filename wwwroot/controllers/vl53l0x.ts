@@ -12,15 +12,9 @@ export class Vl53l0x extends Controller {
 
     private address = 0x29;
 
-    constructor(...)
-
-    override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
-    }
     
 
     setup() {
-        AVRRunner.getInstance().board.spis[0].addListener(this.spiCallback);
     }
 
     private get shouldReadSPI(): boolean {
@@ -29,21 +23,5 @@ export class Vl53l0x extends Controller {
 
     private nextByteIsHigh = false;
 
-    spiCallback = (byte: number) => {
-        if (!this.shouldReadSPI) {
-            return;
-        }
-        if (this._temperature == undefined) {
-            console.log("Undefined\n")
-        }
-        let temperature = Math.round((this._temperature / 0.25) << 3);
-        let byteToSend: number;
-        if (!this.nextByteIsHigh) {
-            byteToSend = (temperature >> 8) & 0xFF;
-        } else {
-            byteToSend = temperature & 0xFF;
-        }
-        this.nextByteIsHigh = !this.nextByteIsHigh;
-        AVRRunner.getInstance().board.cpu.addClockEvent(() => AVRRunner.getInstance().board.spis[0].completeTransfer(byteToSend), AVRRunner.getInstance().board.spis[0].transferCycles);
-    }
+    
 }
