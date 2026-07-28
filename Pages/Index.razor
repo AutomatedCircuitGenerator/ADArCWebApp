@@ -131,9 +131,7 @@
             <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
         </div>
         <div class="sidebar" style="left: @(leftPaneAlign)px" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
-        @if (!shouldShowBoardSelect)  // doesn't allow the left side palette to be expanded during board selection. 
-        {   // code might be able to be refactored.
-            <div class="expand-button expand-button-left" @onclick="@(shouldShowBoardSelect ? null : ToggleLeftSidebar)" style="left:100%;">
+            <div class="expand-button expand-button-left @(shouldShowBoardSelect && windowWidth <= 1350 ? "disabled" : "")" @onclick="@(ToggleLeftSidebar)" style="left:100%;">
                 @if (isLeftExpanded)
                 {
                     <span>▶</span>
@@ -143,15 +141,12 @@
                     <span>◀</span>
                 }
             </div>
-        }
         <ComponentPane host="@this"></ComponentPane>
         </div>
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
         <div class="sidebar-right" style="right: @(rightPaneAlign)px" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
-        @if (!shouldShowBoardSelect)  // same as left
-        {
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
                 @if (isRightExpanded)
                 {
@@ -162,7 +157,6 @@
                     <span>◀</span>
                 }
             </div>
-        }
         <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
@@ -235,17 +229,28 @@
     string runStopButton = "▶️";
     string runStopText = "Run";
     public bool IsRunning;
+    private int windowWidth;
 
-    void ToggleLeftSidebar()
+    private async Task ToggleLeftSidebar()
     {
+        windowWidth = await AppInterop.GetWindowWidth();
+        if (shouldShowBoardSelect && windowWidth <= 1350)
+        {
+            ToastService.AddToast("Please enlarge the window before opening the code panel.", Variant.Warning);
+            return;
+        }
         isLeftExpanded = !isLeftExpanded;
         isRightExpanded = false;
         StateHasChanged();
     }
-
-
+    
     void ToggleRightSidebar()
     {
+        if (shouldShowBoardSelect)
+        {
+            ToastService.AddToast("Please select an Arduino board before opening the code panel.", Variant.Warning);
+            return;
+        }
         isRightExpanded = !isRightExpanded;
         isLeftExpanded = false;
         StateHasChanged();
@@ -410,12 +415,17 @@
             AppInterop.UpdateScreenRatios(await AppInterop.GetWindowWidth(), await AppInterop.GetWindowHeight());
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
-            if (shouldShowBoardSelect)
-            {
-                isLeftExpanded = false;  // doesn't show palette when first loaded
-                StateHasChanged();
-            }
         }
+    }
+    
+    public void OnWindowResized(int width, int height)
+    {
+        windowWidth = width;
+        if (windowWidth < 1350)
+        {
+            isLeftExpanded = false;
+        }
+        InvokeAsync(StateHasChanged);
     }
 
 
