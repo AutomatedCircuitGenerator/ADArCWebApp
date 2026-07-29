@@ -89,7 +89,7 @@ export class TOF extends Controller implements I2CController {
 
     override update(state: Record<string, any>): void {
         if (state.distance !== undefined) {
-            this.distance = Math.max(0, Math.min(5000, state.distance));
+            this.distance = Math.max(1, Math.min(1300, state.distance));
             this.simulateMeasurement();
         }
 
@@ -228,7 +228,7 @@ export class TOF extends Controller implements I2CController {
         // Sigma increases with distance
         this.sigma = Math.round(5 + this.distance / 500);
         this.numberOfSpad = 128;
-        if (this.distance > 4000) {
+        if (this.distance > 1300) {
             // Out of range
             this.rangeStatus = 4;
         }
