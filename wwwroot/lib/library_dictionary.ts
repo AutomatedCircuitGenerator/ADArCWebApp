@@ -6282,7 +6282,7 @@
     "placeholder_6280": "VGAX",
     "placeholder_6281": "VGAXUA",
     "placeholder_6282": "VIDI-X_BQ24295",
-    "placeholder_6283": "VL53L0X",
+    "VL53L0X.h": "VL53L0X",
     "placeholder_6284": "VL53L0X_mod",
     "placeholder_6285": "VL53L1X",
     "placeholder_6286": "VL53L1X_ULD",

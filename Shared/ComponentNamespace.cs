@@ -1101,7 +1101,7 @@ namespace ADArCWebApp.Shared
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
-                        pins: ["5V", "gnd", "scl", "sda"],
+                        pins: ["5V", "gnd", "scl", "sda", "xshut", "gpio"],
                         gsNodeName: "vl53l0x")
                     .Property("distance", 100.0)
                     .Finish()

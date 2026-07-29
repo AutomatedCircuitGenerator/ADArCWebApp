@@ -12,12 +12,14 @@
                 new ElementPin(name: "gnd", x: 75.5, y: 96, signals: new PinSignalInfo[] { }, number: 2),
                 new ElementPin(name: "scl", x: 92.1, y: 96, signals: new PinSignalInfo[] { }, number: 3),
                 new ElementPin(name: "sda", x: 108.8, y: 96, signals: new PinSignalInfo[] { }, number: 4), 
+                new ElementPin(name: "xshut", x: 142.2, y: 96, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "gpio", x: 125.5, y: 96, signals: new PinSignalInfo[] { }, number: 6)
             };
         }
     }
     
     [Parameter]
-    [ValueSetting("mm", 100, 30, 2000)]
+    [ValueSetting("mm", 100, 30, 1200)]
     public double distance
     {
         get;
