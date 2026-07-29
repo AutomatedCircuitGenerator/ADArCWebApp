@@ -922,7 +922,7 @@ namespace ADArCWebApp.Shared
                         pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
                         gsNodeName: "tof"
                     )
-                    .Property("distance", 0.0)
+                    .Property("distance", 20.0)
                     .Finish()
             },
 
