@@ -26,7 +26,7 @@ export class TOF extends Controller implements I2CController {
     
     private memory = new Uint8Array(65536);
     
-    private distance = 0;          // mm
+    private distance = 20;          // mm
     private signalRate = 25600;     // kcps
     private numberOfSpad = 128;
     private ambientRate = 6400;
