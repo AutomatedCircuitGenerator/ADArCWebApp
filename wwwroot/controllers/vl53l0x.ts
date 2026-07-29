@@ -35,11 +35,8 @@ export class VL53L0X extends Controller implements I2CController {
     private stopVariable = 0;
 
     setup(): void {
-
         this.lastMeasurementTime = Date.now();
-
         this.setXShut(PinState.High);
-
         this.pins.xshut[0].digital.addListener(() =>
             this.setXShut(this.pins.xshut[0].digital.state)
         );
@@ -74,58 +71,35 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private initializeRegisters(): void {
-
-        // Model ID
         this.rawWrite8(REG.IDENTIFICATION_MODEL_ID, 0xEE);
-
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, this.i2cAddress);
-
         this.updateMeasurementRegisters();
     }
 
     private updateMeasurementRegisters(): void {
-
-        this.rawWrite8(REG.RESULT_INTERRUPT_STATUS,
-            this.dataReady ? 0x07 : 0x00);
-
-        this.rawWrite8(REG.RESULT_RANGE_STATUS,
-            this.rangeStatus);
-
+        this.rawWrite8(REG.RESULT_INTERRUPT_STATUS, this.dataReady ? 0x07 : 0x00);
+        this.rawWrite8(REG.RESULT_RANGE_STATUS,this.rangeStatus);
         // distance lives at RESULT_RANGE_STATUS + 10
-        this.rawWrite16(REG.RESULT_RANGE_STATUS + 10,
-            this.distance);
+        this.rawWrite16(REG.RESULT_RANGE_STATUS + 10, this.distance);
     }
 
     override update(state: Record<string, any>): void {
-
         if (state.distance !== undefined) {
-            this.distance = Math.max(
-                0,
-                Math.min(5000, state.distance)
-            );
-
+            this.distance = Math.max(0, Math.min(5000, state.distance));
             this.simulateMeasurement();
         }
-
         this.updateMeasurementRegisters();
     }
 
     private updateMeasurement(): void {
-
         if (!this.ranging) return;
-
         const now = Date.now();
-
         if (now - this.lastMeasurementTime < this.timingBudget) {
             return;
         }
-
         this.lastMeasurementTime = now;
-
         this.simulateMeasurement();
-
         this.dataReady = true;
-
         this.updateMeasurementRegisters();
     }
 
@@ -139,9 +113,7 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     i2cConnect(addr: number, write: boolean): boolean {
-
         if (!this.xshut) return false;
-
         return addr === this.i2cAddress;
     }
 
@@ -149,39 +121,27 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     i2cWriteByte(value: number): boolean {
-
         if (!this.xshut) return false;
-
         if (this.registerPointer === -1) {
             this.registerPointer = value;
             return true;
         }
-
         this.write8(this.registerPointer, value);
         this.registerPointer++;
-
         return true;
     }
 
     i2cReadByte(acked: boolean): number {
-
         if (!this.xshut) return 0xFF;
-
         this.updateMeasurement();
-
         const value = this.read8(this.registerPointer);
-
         if (acked) this.registerPointer++;
-
         return value;
     }
 
     private handleRegisterWrite(addr: number, value: number) {
-
         switch (addr) {
-
             case REG.SYSRANGE_START:
-
                 if (value == 0x01) {
                     this.initialized = true;
                     this.startRanging();
@@ -198,82 +158,56 @@ export class VL53L0X extends Controller implements I2CController {
                 this.setAddress(value);
                 break;
         }
-
     }
 
     private powerOff() {
-
         if (!this.xshut) return;
-
         this.xshut = false;
-
         this.initialized = false;
         this.ranging = false;
         this.dataReady = false;
-
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
-
         bus.unregisterController(this.i2cAddress);
-
         this.memory.fill(0);
     }
 
     private powerOn() {
-
         if (this.xshut) return;
-
         this.xshut = true;
-
         this.initialized = false;
         this.ranging = false;
         this.dataReady = false;
-
         this.i2cAddress = 0x29;
-
         this.initializeRegisters();
-
         this.registerWithI2C();
     }
 
     private setAddress(addr: number) {
-
         addr &= 0x7F;
-
         if (addr == this.i2cAddress) return;
-
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
-
         bus.unregisterController(this.i2cAddress);
-
         this.i2cAddress = addr;
-
         this.registerWithI2C();
-
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, addr);
     }
 
     private simulateMeasurement() {
-
         if (this.distance > 2000) {
             this.rangeStatus = 4;
         } else {
             this.rangeStatus = 0;
         }
-
         this.updateMeasurementRegisters();
     }
 
     private startContinuous(){
-
         this.ranging=true;
-
         this.lastMeasurementTime=Date.now();
-
         this.dataReady=false;
     }
 
     private clearInterrupt(){
-
         this.dataReady=false;
     }
 }
