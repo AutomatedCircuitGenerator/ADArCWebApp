@@ -118,15 +118,17 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     i2cDisconnect(): void {
+        this.pointerBytesReceived=0;
     }
 
     i2cWriteByte(value: number): boolean {
-        if (!this.xshut) return false;
-        if (this.registerPointer === -1) {
-            this.registerPointer = value;
+        if(!this.xshut) return false;
+        if(this.pointerBytesReceived==0){
+            this.registerPointer=value;
+            this.pointerBytesReceived=1;
             return true;
         }
-        this.write8(this.registerPointer, value);
+        this.write8(this.registerPointer,value);
         this.registerPointer++;
         return true;
     }
@@ -161,7 +163,6 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private powerOff() {
-        if (!this.xshut) return;
         this.xshut = false;
         this.initialized = false;
         this.ranging = false;
@@ -172,7 +173,6 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private powerOn() {
-        if (this.xshut) return;
         this.xshut = true;
         this.initialized = false;
         this.ranging = false;
@@ -193,7 +193,9 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private simulateMeasurement() {
-        if (this.distance > 2000) {
+        this.signalRate = Math.max(2000, 30000 - this.distance * 8);
+        this.ambientRate = 6000;
+        if (this.distance > 1200) {
             this.rangeStatus = 4;
         } else {
             this.rangeStatus = 0;
@@ -207,7 +209,28 @@ export class VL53L0X extends Controller implements I2CController {
         this.dataReady=false;
     }
 
+    private startRanging() {
+        if (!this.initialized) return;
+        this.ranging = true;
+        this.dataReady = false;
+        this.lastMeasurementTime = Date.now();
+        this.simulateMeasurement();
+        this.updateMeasurementRegisters();
+    }
+
+    private stopContinuous() {
+        this.ranging = false;
+    }
+
     private clearInterrupt(){
         this.dataReady=false;
+    }
+
+    public setXShut(level: PinState) {
+        if (level == PinState.Low) {
+            this.powerOff();
+        } else {
+            this.powerOn();
+        }
     }
 }
