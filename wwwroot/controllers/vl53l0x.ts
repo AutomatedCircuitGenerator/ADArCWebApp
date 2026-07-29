@@ -32,7 +32,7 @@ export class VL53L0X extends Controller implements I2CController {
     private lastMeasurementTime = 0;
     private xshut = false;
     private i2cAddress = 0x29;
-    private stopVariable = 0;
+    private continuousMode=false;
 
     setup(): void {
         this.lastMeasurementTime = Date.now();
@@ -50,15 +50,6 @@ export class VL53L0X extends Controller implements I2CController {
         value &= 0xFF;
         this.memory[address] = value;
         this.handleRegisterWrite(address, value);
-    }
-
-    private read16(address: number): number {
-        return (this.memory[address] << 8) | this.memory[address + 1];
-    }
-
-    private write16(address: number, value: number): void {
-        this.memory[address] = (value >> 8) & 0xFF;
-        this.memory[address + 1] = value & 0xFF;
     }
 
     private rawWrite8(address: number, value: number) {
@@ -88,7 +79,6 @@ export class VL53L0X extends Controller implements I2CController {
             this.distance = Math.max(0, Math.min(5000, state.distance));
             this.simulateMeasurement();
         }
-        this.updateMeasurementRegisters();
     }
 
     private updateMeasurement(): void {
@@ -100,7 +90,9 @@ export class VL53L0X extends Controller implements I2CController {
         this.lastMeasurementTime = now;
         this.simulateMeasurement();
         this.dataReady = true;
-        this.updateMeasurementRegisters();
+        if(!this.continuousMode){
+            this.ranging=false;
+        }
     }
 
     cleanup(): void {
@@ -114,18 +106,21 @@ export class VL53L0X extends Controller implements I2CController {
 
     i2cConnect(addr: number, write: boolean): boolean {
         if (!this.xshut) return false;
+        if(write){
+            this.pointerBytesReceived = 0;
+        }
         return addr === this.i2cAddress;
     }
 
     i2cDisconnect(): void {
-        this.pointerBytesReceived=0;
+        this.pointerBytesReceived = 0;
     }
 
     i2cWriteByte(value: number): boolean {
         if(!this.xshut) return false;
-        if(this.pointerBytesReceived==0){
-            this.registerPointer=value;
-            this.pointerBytesReceived=1;
+        if(this.pointerBytesReceived == 0){
+            this.registerPointer = value;
+            this.pointerBytesReceived = 1;
             return true;
         }
         this.write8(this.registerPointer,value);
@@ -164,9 +159,7 @@ export class VL53L0X extends Controller implements I2CController {
 
     private powerOff() {
         this.xshut = false;
-        this.initialized = false;
-        this.ranging = false;
-        this.dataReady = false;
+        this.resetState();
         const bus = AVRRunner.getInstance().board.twis[0] as I2CBus;
         bus.unregisterController(this.i2cAddress);
         this.memory.fill(0);
@@ -174,12 +167,19 @@ export class VL53L0X extends Controller implements I2CController {
 
     private powerOn() {
         this.xshut = true;
-        this.initialized = false;
-        this.ranging = false;
-        this.dataReady = false;
+        this.resetState();
         this.i2cAddress = 0x29;
         this.initializeRegisters();
         this.registerWithI2C();
+    }
+    
+    private resetState(): void {
+        this.initialized = false;
+        this.ranging = false;
+        this.dataReady = false;
+        this.continuousMode = false;
+        this.pointerBytesReceived=0;
+        this.registerPointer=0;
     }
 
     private setAddress(addr: number) {
@@ -204,22 +204,24 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private startContinuous(){
-        this.ranging=true;
-        this.lastMeasurementTime=Date.now();
-        this.dataReady=false;
+        this.continuousMode = true;
+        this.ranging = true;
+        this.dataReady = false;
+        this.lastMeasurementTime = Date.now();
     }
 
     private startRanging() {
         if (!this.initialized) return;
+        this.continuousMode=false;
         this.ranging = true;
         this.dataReady = false;
         this.lastMeasurementTime = Date.now();
         this.simulateMeasurement();
-        this.updateMeasurementRegisters();
     }
 
     private stopContinuous() {
         this.ranging = false;
+        this.continuousMode = false;
     }
 
     private clearInterrupt(){
