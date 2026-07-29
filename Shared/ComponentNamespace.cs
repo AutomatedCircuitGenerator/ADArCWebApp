@@ -1088,6 +1088,8 @@ namespace ADArCWebApp.Shared
                         gsNodeName: "irdetector")
                     .Property("distance", 20.0)
                     .Finish()
+            },
+            {
                 40,
                 new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
                     codeForGen: new()
