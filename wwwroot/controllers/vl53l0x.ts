@@ -80,7 +80,7 @@ export class VL53L0X extends Controller implements I2CController {
 
     override update(state: Record<string, any>): void {
         if (state.distance !== undefined) {
-            this.distance = Math.max(30, Math.min(1200, state.distance));
+            this.distance = Math.max(30, Math.min(2000, state.distance));
             this.simulateMeasurement();
         }
     }
