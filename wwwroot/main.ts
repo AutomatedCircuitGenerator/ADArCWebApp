@@ -37,6 +37,8 @@ import {SHT30} from "@controllers/sht30";
 import {DHT22} from "@controllers/dht22";
 import {SEN0189} from "@controllers/sen0189";
 import {VL53L0X} from "@controllers/vl53l0x";
+import {IRDETECTOR} from "@controllers/irdetector";
+import {SSD1306} from "@controllers/ssd1306";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -45,6 +47,7 @@ import {VL53L0X} from "@controllers/vl53l0x";
     await DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight())
 });
 //components
+(<any>window).SSD1306 = SSD1306;
 (<any>window).LCD1602I2C = LCD1602I2C;
 (<any>window).BNO055 = BNO055;
 (<any>window).MAX6675 = MAX6675;
@@ -79,3 +82,4 @@ import {VL53L0X} from "@controllers/vl53l0x";
 (<any>window).TRANSCEIVER = TRANSCEIVER;
 (<any>window).NPK = NPK;
 (<any>window).VL53L0X = VL53L0X;
+(<any>window).IRDETECTOR = IRDETECTOR;
