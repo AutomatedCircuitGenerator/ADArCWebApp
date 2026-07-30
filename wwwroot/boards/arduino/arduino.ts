@@ -97,8 +97,8 @@ export class ArduinoTWI implements TWI {
         this.twi.eventHandler.registerController(addr, device);
     }
     
-    unregisterController(addr: number, device: I2CController): void {
-        this.twi.eventHandler.unregisterController(addr, device);
+    unregisterController(addr: number) {
+        this.twi.eventHandler.unregisterController(addr);
     }
 }
 

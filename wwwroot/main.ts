@@ -36,6 +36,7 @@ import {MAX31856} from "@controllers/max31856";
 import {SHT30} from "@controllers/sht30";
 import {DHT22} from "@controllers/dht22";
 import {SEN0189} from "@controllers/sen0189";
+import {VL53L0X} from "@controllers/vl53l0x";
 import {IRDETECTOR} from "@controllers/irdetector";
 import {SSD1306} from "@controllers/ssd1306";
 
@@ -80,4 +81,5 @@ import {SSD1306} from "@controllers/ssd1306";
 (<any>window).TOF = TOF;
 (<any>window).TRANSCEIVER = TRANSCEIVER;
 (<any>window).NPK = NPK;
+(<any>window).VL53L0X = VL53L0X;
 (<any>window).IRDETECTOR = IRDETECTOR;

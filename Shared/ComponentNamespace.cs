@@ -1071,6 +1071,54 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
+                40,
+                new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
+                        typeof(RazorVL53L0X),
+                        paneHoverText: "VL53L0X",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Wire.h>\n#include <VL53L0X.h>"
+                            },
+                            {
+                                "global",
+                                "VL53L0X sensor;"
+                            },
+                            {
+                                "setup",
+                                "  Wire.begin();\n" +
+                                "\n" +
+                                "  sensor.setTimeout(500);\n" +
+                                "  if (!sensor.init())\n" +
+                                "  {\n" +
+                                "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                "    while (1) {}\n" +
+                                "  }\n" +
+                                "\n" +
+                                "  // Start continuous back-to-back mode (take readings as\n" +
+                                "  // fast as possible).  To use continuous timed mode\n" +
+                                "  // instead, provide a desired inter-measurement period in\n" +
+                                "  // ms (e.g. sensor.startContinuous(100)).\n" +
+                                "  sensor.startContinuous();"
+                            },
+                            {
+                                "loopMain",
+                                "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
+                                "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                "\n" +
+                                "  Serial.println();"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["5V", "gnd", "scl", "sda", "xshut", "gpio"],
+                        gsNodeName: "vl53l0x")
+                    .Property("distance", 100.0)
+                    .Finish()
+            },
+            {
                 42,
                 new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Distance Sensors", 0.6, 150, 200,
                         typeof(RazorIRDETECTOR),
