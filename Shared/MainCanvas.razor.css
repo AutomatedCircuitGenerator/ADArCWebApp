@@ -18,6 +18,13 @@ line {
 
 .segment, .node {
     transition: stroke-width 0.2s ease, filter 0.2s ease;
+    pointer-events: stroke;
+}
+
+.segment:hover {
+    filter: drop-shadow(0 0 1px var(--glow)) 
+    drop-shadow(0 0 2px var(--glow))
+    drop-shadow(0 0 4px var(--glow));
 }
 
 .segment.highlighted, .node.highlighted {
