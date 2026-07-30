@@ -1,5 +1,15 @@
 @using System.Text
+@inject BoardService BoardService
 <div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+    @if (BoardService.Board != Board.None)
+    {
+        <div class="zoom-control">
+            <button class="zoom-btn" @onclick="ZoomOut">−</button>
+            <span class="zoom-perc"> @ZoomPercent%</span>
+            <button class="zoom-btn" @onclick="ZoomIn">+</button>
+            <button class="reset-btn" @onclick="ResetZoom">Reset</button>
+        </div>
+    }
     @foreach (var c in comps)
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
@@ -235,23 +245,55 @@
     /// <param name="e">Provided scrollwheel event.</param>
     private void UpdZoom(WheelEventArgs e)
     {
-        var oldZoom = zoomFactor;
-        
-        zoomFactor += e.DeltaY / -1000;
-        zoomFactor = Math.Clamp(zoomFactor, .4, 3);
-        
-        if (oldZoom == zoomFactor) return;
-        
-        var scale = zoomFactor / oldZoom;
-        var mouse = (x: e.ClientX, y: e.ClientY);
-        
-        transform.translate.x = mouse.x - scale * (mouse.x - transform.translate.x);
-        transform.translate.y = mouse.y - scale * (mouse.y - transform.translate.y);
+        var delta = e.DeltaY / -1000;
+        SetZoom(zoomFactor + delta, e.ClientX, e.ClientY);
 
+    }
+    
+    /*
+     * helper function for updzoom
+     */
+    private void SetZoom(double newZoom, double centerX, double centerY)
+    {
+        var oldZoom = zoomFactor;
+        zoomFactor = Math.Clamp(newZoom, 0.4, 3);
+        if (oldZoom == zoomFactor) return;
+        var scale = zoomFactor / oldZoom;
+        transform.translate.x = centerX - scale * (centerX - transform.translate.x);
+        transform.translate.y = centerY - scale * (centerY - transform.translate.y);
         foreach (var comp in comps.Values)
         {
             AdjustCompToZoom(comp);
         }
+    }
+    
+    /*
+     * related zoom function
+     */
+    private void ZoomIn()
+    {
+        SetZoom(zoomFactor + 0.1, 1920 / 2, 1080 / 2);
+    }
+
+    /*
+     * related zoom function
+     */
+    private void ZoomOut()
+    {
+        SetZoom(zoomFactor - 0.1, 1920 / 2, 1080 / 2);
+    }
+    
+    /*
+     * related zoom function
+     */
+    private int ZoomPercent => (int)Math.Round(zoomFactor * 100);
+    
+    /*
+     * related zoom function
+     */
+    private void ResetZoom()
+    {
+        SetZoom(1, 1920 / 2, 1080 / 2);
     }
 
     /// <summary>
