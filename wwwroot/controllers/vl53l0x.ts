@@ -21,14 +21,13 @@ export class VL53L0X extends Controller implements I2CController {
     private registerPointer = 0;
     private pointerBytesReceived = 0;
     private memory = new Uint8Array(256);
-    private distance = 200;      // mm
+    private distance = 100;      // mm
     private signalRate = 30000;
     private ambientRate = 6000;
     private rangeStatus = 0;
     private initialized = false;
     private ranging = false;
     private dataReady = false;
-    private timingBudget = 50;
     private lastMeasurementTime = 0;
     private xshut = false;
     private i2cAddress = 0x29;
@@ -64,6 +63,11 @@ export class VL53L0X extends Controller implements I2CController {
     private initializeRegisters(): void {
         this.rawWrite8(REG.IDENTIFICATION_MODEL_ID, 0xEE);
         this.rawWrite8(REG.I2C_SLAVE_DEVICE_ADDRESS, this.i2cAddress);
+        this.rawWrite8(0x89, 0x00);
+        this.rawWrite8(0x83, 0x01);      
+        this.rawWrite8(0x92, 0x8C);
+        for (let i = 0; i < 6; i++)
+            this.rawWrite8(0xB0 + i, 0xFF);
         this.updateMeasurementRegisters();
     }
 
@@ -83,16 +87,11 @@ export class VL53L0X extends Controller implements I2CController {
 
     private updateMeasurement(): void {
         if (!this.ranging) return;
-        const now = Date.now();
-        if (now - this.lastMeasurementTime < this.timingBudget) {
-            return;
-        }
-        this.lastMeasurementTime = now;
-        this.simulateMeasurement();
+        this.rawWrite8(REG.SYSRANGE_START, 0);
         this.dataReady = true;
-        if(!this.continuousMode){
-            this.ranging=false;
-        }
+        this.simulateMeasurement();
+        if (!this.continuousMode)
+            this.ranging = false;
     }
 
     cleanup(): void {
@@ -137,13 +136,18 @@ export class VL53L0X extends Controller implements I2CController {
     }
 
     private handleRegisterWrite(addr: number, value: number) {
+        if (addr === 0x83 && value === 0x00) {
+            this.rawWrite8(0x83, 0x01);
+        }
         switch (addr) {
             case REG.SYSRANGE_START:
-                if (value == 0x01) {
+                if (value == 0) {
+                    this.stopContinuous();
+                } else if (value & 0x02) {
+                    this.startContinuous();
+                } else if (value & 0x01) {
                     this.initialized = true;
                     this.startRanging();
-                } else if (value == 0x02 || value == 0x04) {
-                    this.startContinuous();
                 }
                 break;
 
@@ -171,6 +175,7 @@ export class VL53L0X extends Controller implements I2CController {
         this.i2cAddress = 0x29;
         this.initializeRegisters();
         this.registerWithI2C();
+        this.updateMeasurementRegisters();
     }
     
     private resetState(): void {
@@ -180,6 +185,7 @@ export class VL53L0X extends Controller implements I2CController {
         this.continuousMode = false;
         this.pointerBytesReceived=0;
         this.registerPointer=0;
+        this.lastMeasurementTime = 0;
     }
 
     private setAddress(addr: number) {
@@ -216,16 +222,17 @@ export class VL53L0X extends Controller implements I2CController {
         this.ranging = true;
         this.dataReady = false;
         this.lastMeasurementTime = Date.now();
-        this.simulateMeasurement();
     }
 
     private stopContinuous() {
         this.ranging = false;
         this.continuousMode = false;
+        this.updateMeasurementRegisters();
     }
 
     private clearInterrupt(){
         this.dataReady=false;
+        this.updateMeasurementRegisters();
     }
 
     public setXShut(level: PinState) {

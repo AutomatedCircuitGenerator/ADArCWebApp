@@ -1060,42 +1060,40 @@ namespace ADArCWebApp.Shared
                 40,
                 new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
                         typeof(RazorVL53L0X),
+                        paneHoverText: "VL53L0X",
                         codeForGen: new()
                         {
                             {
                                 "include",
-                                "#include <Adafruit_VL53L0X.h>\nAdafruit_VL53L0X lox = Adafruit_VL53L0X();"
+                                "#include <Wire.h>\n#include <VL53L0X.h>"
                             },
                             {
                                 "global",
-                                ""
+                                "VL53L0X sensor;"
                             },
                             {
                                 "setup",
-                                "    Serial.begin(115200);\n" + 
-                                "    // Wait for the serial port to open\n" +
-                                "    while (!Serial) {\n" + 
-                                "      delay(1);\n" +
-                                "    }\n" +
-                                "    Serial.println(\"Adafruit VL53L0X Test\");\n" +
-                                "    if (!lox.begin()) {\n" +
-                                "    Serial.println(F(\"Failed to boot VL53L0X\"));\n" +
-                                "    while(1);\n" +
-                                "    }\n" +
-                                "    Serial.println(F(\"VL53L0X API Simple Ranging example\"));"
+                                "  Wire.begin();\n" +
+                                "\n" +
+                                "  sensor.setTimeout(500);\n" +
+                                "  if (!sensor.init())\n" +
+                                "  {\n" +
+                                "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                "    while (1) {}\n" +
+                                "  }\n" +
+                                "\n" +
+                                "  // Start continuous back-to-back mode (take readings as\n" +
+                                "  // fast as possible).  To use continuous timed mode\n" +
+                                "  // instead, provide a desired inter-measurement period in\n" +
+                                "  // ms (e.g. sensor.startContinuous(100)).\n" +
+                                "  sensor.startContinuous();"
                             },
                             {
                                 "loopMain",
-                                "  VL53L0X_RangingMeasurementData_t measure;\n" +
-                                "  Serial.print(\"Reading measurement... \");\n" +
-                                "  lox.rangingTest(&measure, false);\n" +
-                                "  if (measure.RangeStatus != 4) {\n" +
-                                "    Serial.print(\"Distance (mm): \");\n" +
-                                "    Serial.println(measure.RangeMilliMeter);\n" +
-                                "  } else {\n" +
-                                "    Serial.println(\"Out of range\");" +
-                                "  }\n" +
-                                "  delay(100);"
+                                "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
+                                "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                "\n" +
+                                "  Serial.println();"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },
