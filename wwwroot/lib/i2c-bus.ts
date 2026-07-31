@@ -29,10 +29,6 @@ export class I2CBus implements TWIEventHandler {
         delete this.controllers[addr];
     }
 
-    unregisterController(addr: number) {
-        delete this.controllers[addr];
-    }
-
     start(): void {
         this.twi.completeStart();
     }
