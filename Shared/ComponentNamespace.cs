@@ -702,8 +702,6 @@ namespace ADArCWebApp.Shared
             },
             {
                 33,
-                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75,
-                        75, typeof(RazorSEN0114),
                 new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Soil Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
@@ -1083,7 +1081,7 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
-                42,
+                44,
                 new ComponentDataBuilder("Temperature and Humidity Sensor Module", true,
                         "Input/Temperature and Humidity Sensors", 0.8, 18.5, 19.154, typeof(RazorDHT22MODULE),
                         paneHoverText: "DHT22 Module",
@@ -1114,7 +1112,11 @@ namespace ADArCWebApp.Shared
                             },
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22module").Property("humidity", 40.0)
-                    .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
+                    .Property("temperature", 20.0)
+                    .Property("humidity", 40.0)
+                    .Finish()
+            },
+            {
                 40,
                 new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
                         typeof(RazorVL53L0X),
