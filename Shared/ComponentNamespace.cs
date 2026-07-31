@@ -704,6 +704,7 @@ namespace ADArCWebApp.Shared
                 33,
                 new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75,
                         75, typeof(RazorSEN0114),
+                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Soil Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -895,31 +896,45 @@ namespace ADArCWebApp.Shared
                         typeof(RazorTOF),
                         paneHoverText: "VL53L4CD",
                         codeForGen: new()
-                        {
+                        {   
                             {
                                 "include",
-                                "#include <Arduino.h>\n#include <Wire.h>"
+                                "#include <Wire.h>\n#include <VL53L4CD.h>"
                             },
                             {
                                 "global",
-                                "int16_t tfDist@; // distance in centimeters"
+                                "VL53L4CD sensor;"
                             },
-                            { "setup", "  Wire.begin(); // initialize Wire library" },
+                            {   
+                                "setup", 
+                                "  while (!Serial) {}\n" +
+                                "  // Serial.begin(115200);\n" +
+                                "  Wire.begin();\n" +
+                                "  Wire.setClock(400000); // use 400 kHz I2C\n" +
+                                "\n" +
+                                "  sensor.setTimeout(500);\n" +
+                                "  if (!sensor.init())\n" +
+                                "  {\n" +
+                                "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                "    while (1);\n" +
+                                "  }\n" +
+                                "  sensor.startContinuous();"
+                            },
                             {
                                 "loopMain",
-                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
+                                "  Serial.print(sensor.read());\n" +
+                                "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                "\n" +
+                                "  Serial.println();"
                             },
-                            {
-                                "functions",
-                                ""
-                            },
+                            { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
                         pins: ["Vin", "xshut", "gnd", "gpio", "scl", "sda"],
                         gsNodeName: "tof"
                     )
-                    .Property("distance", 0.0)
+                    .Property("distance", 20.0)
                     .Finish()
             },
 
@@ -995,7 +1010,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 39,
-                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
+                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 0.45, 150, 200,
                         typeof(RazorNPK),
                         codeForGen: new()
                         {
@@ -1100,6 +1115,130 @@ namespace ADArCWebApp.Shared
                             { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
                         }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22module").Property("humidity", 40.0)
                     .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
+                40,
+                new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
+                        typeof(RazorVL53L0X),
+                        paneHoverText: "VL53L0X",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Wire.h>\n#include <VL53L0X.h>"
+                            },
+                            {
+                                "global",
+                                "VL53L0X sensor;"
+                            },
+                            {
+                                "setup",
+                                "  Wire.begin();\n" +
+                                "\n" +
+                                "  sensor.setTimeout(500);\n" +
+                                "  if (!sensor.init())\n" +
+                                "  {\n" +
+                                "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                "    while (1) {}\n" +
+                                "  }\n" +
+                                "\n" +
+                                "  // Start continuous back-to-back mode (take readings as\n" +
+                                "  // fast as possible).  To use continuous timed mode\n" +
+                                "  // instead, provide a desired inter-measurement period in\n" +
+                                "  // ms (e.g. sensor.startContinuous(100)).\n" +
+                                "  sensor.startContinuous();"
+                            },
+                            {
+                                "loopMain",
+                                "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
+                                "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                "\n" +
+                                "  Serial.println();"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["5V", "gnd", "scl", "sda", "xshut", "gpio"],
+                        gsNodeName: "vl53l0x")
+                    .Property("distance", 100.0)
+                    .Finish()
+            },
+            {
+                42,
+                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Distance Sensors", 0.6, 150, 200,
+                        typeof(RazorIRDETECTOR),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                ""
+                            },
+                            {
+                                "global",
+                                "// Define the pin numbers for the Infrared obstacle avoidance sensor\n" +
+                                "const int sensorPin = 2;"
+                            },
+                            {
+                                "setup",
+                                "  pinMode(sensorPin, INPUT);  // Set sensorPin as input"
+                            },
+                            {
+                                "loopMain",
+                                "  Serial.println(digitalRead(sensorPin));  // Read the digital value from the sensor and print it to the serial monitor\n" +
+                                "  delay(50);"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "out"],
+                        gsNodeName: "irdetector")
+                    .Property("distance", 20.0)
+                    .Finish()
+            },
+            {
+                40,
+                new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
+                    codeForGen: new()
+                    {
+                        {
+                            "include", 
+                            "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>"
+                        },
+                        {
+                            "global",
+                            "#define SCREEN_WIDTH 128\n" +
+                            "#define SCREEN_HEIGHT 64\n" +
+                            "\n" +
+                            "Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);"
+                        },
+                        {
+                            "setup",
+                            "  delay(500);\n" +
+                            "  \n" +
+                            "  if(!display.begin(SSD1306_SWITCHCAPVCC, 0x3C))  // SSD1306_SWITCHCAPVCC = generate display voltage from 3.3V internally\n" +
+                            "  {\n" +
+                            "    while(true);\n" +
+                            "  }\n" +
+                            "  display.clearDisplay();\n" +
+                            "  display.setTextSize(1);\n" +
+                            "  display.setTextColor(SSD1306_WHITE);\n" +
+                            "  display.setCursor(0, 10);\n" +
+                            "  display.println(\"Hello, World!\");\n" +
+                            "  display.display();"
+                        },
+                        {
+                            "loopMain", ""
+                        },
+                        {
+                            "functions", ""
+                        },
+                        {
+                            "delayLoop", ""
+                        },
+                        {
+                            "delayTime", ""
+                        }
+                    }, pins: ["scl", "sda", "5V", "gnd"], gsNodeName: "ssd1306").Finish()
             }
         };
     }
