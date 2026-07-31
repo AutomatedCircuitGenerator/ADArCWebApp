@@ -1196,7 +1196,7 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
-                40,
+                43,
                 new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
                     codeForGen: new()
                     {
