@@ -96,6 +96,10 @@ export class ArduinoTWI implements TWI {
     registerController(addr: number, device: I2CController): void {
         this.twi.eventHandler.registerController(addr, device);
     }
+    
+    unregisterController(addr: number) {
+        this.twi.eventHandler.unregisterController(addr);
+    }
 }
 
 export class ArduinoUSART implements USART {
@@ -135,8 +139,8 @@ export class ArduinoDigital implements Digital {
         });
     }
 
-    set state(state: boolean) {
-        this.port.setPin(this.index, state);
+    set state(state: PinState) {
+        this.port.setPin(this.index, state === PinState.High);
     }
 
     constructor(port: AVRIOPort, index: number) {

@@ -27,7 +27,19 @@ import {DCMotorL298N} from "@controllers/dcmotorl298n";
 import {PCA9685} from "@controllers/pca9685";
 import {HX711} from "@controllers/hx711";
 import {_28BYJ48ULN2003} from "@controllers/28byj48uln2003";
+import {TRANSCEIVER} from "@controllers/transceiver";
+import {TOF} from "@controllers/tof";
+import {SEN0114} from "@controllers/sen0114";
+import {SRVPH} from "@controllers/srvph";
+import {NPK} from "@controllers/npk";
+import {MAX31856} from "@controllers/max31856";
+import {SHT30} from "@controllers/sht30";
+import {DHT22} from "@controllers/dht22";
 import {SEN0189} from "@controllers/sen0189";
+import {DHT11} from "@controllers/dht11";
+import {VL53L0X} from "@controllers/vl53l0x";
+import {IRDETECTOR} from "@controllers/irdetector";
+import {SSD1306} from "@controllers/ssd1306";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -36,6 +48,7 @@ import {SEN0189} from "@controllers/sen0189";
     await DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight())
 });
 //components
+(<any>window).SSD1306 = SSD1306;
 (<any>window).LCD1602I2C = LCD1602I2C;
 (<any>window).BNO055 = BNO055;
 (<any>window).MAX6675 = MAX6675;
@@ -60,4 +73,16 @@ import {SEN0189} from "@controllers/sen0189";
 (<any>window).SG90PCA9685 = PCA9685;
 (<any>window).HX711 = HX711;
 (<any>window)._28BYJ48ULN2003 = _28BYJ48ULN2003;
+(<any>window).SEN0114 = SEN0114;
+(<any>window).SRVPH = SRVPH;
+(<any>window).MAX31856 = MAX31856;
+(<any>window).SHT30 = SHT30;
+(<any>window).DHT22 = DHT22;
+(<any>window).DHT22MODULE = DHT22;
 (<any>window).SEN0189 = SEN0189;
+(<any>window).DHT11 = DHT11;
+(<any>window).TOF = TOF;
+(<any>window).TRANSCEIVER = TRANSCEIVER;
+(<any>window).NPK = NPK;
+(<any>window).VL53L0X = VL53L0X;
+(<any>window).IRDETECTOR = IRDETECTOR;

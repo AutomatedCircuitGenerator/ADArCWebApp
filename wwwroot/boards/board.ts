@@ -48,7 +48,7 @@ export interface Timer {
 export interface Digital {
     get state(): PinState;
 
-    set state(state: boolean);
+    set state(state: PinState);
 
     addListener(listener: PinListener): void;
 }
@@ -67,6 +67,8 @@ export interface USART {
 
 export interface TWI {
     registerController(addr: number, device: I2CController): void;
+    
+    unregisterController(addr: number): void;
 }
 
 export interface SPI {
