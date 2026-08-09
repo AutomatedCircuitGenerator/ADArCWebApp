@@ -1385,20 +1385,41 @@ namespace ADArCWebApp.Shared
                             { "include", "" },
                             {
                                 "global",
-                                "#define AOUT_PIN@ ~\"analog_out\" // Analog output pin from CO2 sensor\n" +
-                                "int co2Value@ = 0;"
+                                "const int co2_pin@ = ~\"analog_out\";\n"
                             },
                             {
                                 "setup",
-                                "pinMode(AOUT_PIN@, INPUT);\n" 
+                                "pinMode(co2_pin@, INPUT);\n" +
+                                "Serial.println(\"====================================\");\n" +
+                                "Serial.println(\"Gravity NDIR CO2 Sensor Initialized\");\n" +
+                                "Serial.print(\"Reading signal on Analog/Digital Pin \");\n" +
+                                "Serial.print(co2_pin@);\n" +
+                                "Serial.println(\"...\");\n" +
+                                "Serial.println(\"====================================\");"
                             },
                             {
                                 "loopMain",
-                                "co2Value@ = analogRead(AOUT_PIN@);\n" +
-                                "float co2Ppm@ = (co2Value@ / 1023.0) * 5000.0;\n" +
-                                "Serial.print(\"co2 = \");\n" +
-                                "Serial.println(co2Ppm@);\n" +
-                                "delay(500);"
+                                "unsigned long durationHigh@ = pulseIn(co2_pin@, HIGH, 2000000);\n" +
+                                "unsigned long durationLow@  = pulseIn(co2_pin@, LOW, 2000000);\n\n" +
+                                "if (durationHigh@ == 0 || durationLow@ == 0) {\n" +
+                                "  Serial.print(\"Error: No PWM signal detected on Pin \");\n" +
+                                "  Serial.print(co2_pin@);\n" +
+                                "  Serial.println(\". Check wiring/power.\");\n" +
+                                "} else {\n" +
+                                "  float tHigh@ = durationHigh@ / 1000.0;\n" +
+                                "  float tLow@  = durationLow@ / 1000.0;\n" +
+                                "  float tCycle@ = tHigh@ + tLow@;\n\n" +
+                                "  float co2Ppm@ = 5000.0 * (tHigh@ - 2.0) / (tCycle@ - 4.0);\n" +
+                                "  co2Ppm@ = constrain(co2Ppm@, 400.0, 5000.0);\n\n" +
+                                "  Serial.print(\"High: \");\n" +
+                                "  Serial.print(tHigh@, 1);\n" +
+                                "  Serial.print(\" ms | Cycle: \");\n" +
+                                "  Serial.print(tCycle@, 1);\n" +
+                                "  Serial.print(\" ms | CO2: \");\n" +
+                                "  Serial.print(co2Ppm@, 0);\n" +
+                                "  Serial.println(\" ppm\");\n" +
+                                "}\n" +
+                                "delay(1500);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },

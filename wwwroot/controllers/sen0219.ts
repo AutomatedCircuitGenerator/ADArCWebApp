@@ -5,6 +5,7 @@ export class SEN0219 extends Controller {
 
     private _co2: number = 400; // default starting CO2 ppm
     private inSimulation: boolean = false;
+    private cycleActive: boolean = false;
 
     override update(state: Record<string, any>) {
         if (state.co2 !== undefined) {
@@ -18,63 +19,62 @@ export class SEN0219 extends Controller {
         if (co2 > 5000) co2 = 5000;
 
         this._co2 = co2;
-
-        if (!this.inSimulation) return;
-
-        // Convert ppm to voltage (0–5V)
-        const voltage = this._co2 * 5 / 5000;
-
-        // Write to analog_out pin
-        const analogPin = this.pins?.analog_out?.[0]?.analog;
-        if (analogPin) {
-            analogPin.voltage = voltage;
-        }
     }
 
     setup() {
         if (this.inSimulation) return;
         this.inSimulation = true;
 
-        // Initialize output voltage
-        const initial = this._co2 * 5 / 5000;
-        const analogPin = this.pins?.analog_out?.[0]?.analog;
-        if (analogPin) {
-            analogPin.voltage = initial;
-        }
-
-        // Schedule periodic serial output
-        this.scheduleSerialOutput();
+        // Start the PWM cycle generation
+        this.startPWMCycle();
     }
 
-    private scheduleSerialOutput() {
-        const sendOutput = () => {
-            this.sendSerialOutput();
-            AVRRunner.getInstance().board.cpu.addClockEvent(sendOutput, 500000);
-        };
-        AVRRunner.getInstance().board.cpu.addClockEvent(sendOutput, 500000);
+    private startPWMCycle() {
+        this.cycleActive = true;
+        this.cycleEvent();
     }
 
-    private sendSerialOutput() {
-        const uart = AVRRunner.getInstance().board.usarts[0];
-        if (!uart) {
-            console.error("[CO2 Sensor] UART not available");
+    private cycleEvent() {
+        if (!this.inSimulation || !this.cycleActive) return;
+
+        // Calculate tHigh and tLow based on current CO2 ppm
+        // tHigh = (co2Ppm / 5.0) + 2.0 (ms)
+        const tHighMs = (this._co2 / 5.0) + 2.0;
+        const tCycleMs = 1004.0;
+        const tLowMs = tCycleMs - tHighMs;
+
+        const runner = AVRRunner.getInstance();
+        if (!runner || !runner.board || !runner.board.cpu) {
+            // If simulator is not fully initialized, retry in a bit
+            setTimeout(() => this.cycleEvent(), 100);
             return;
         }
 
-        const message = `co2 = ${this._co2}\n`;
-        const usToCycles = (us: number) => AVRRunner.getInstance().usToCycles(us);
-        let cumulativeCycles = 0;
+        const cpu = runner.board.cpu;
+        const freq = cpu.frequency; // e.g. 16000000 (16MHz)
 
-        for (let i = 0; i < message.length; i++) {
-            const byte = message.charCodeAt(i);
+        const tHighCycles = (tHighMs / 1000.0) * freq;
+        const tLowCycles = (tLowMs / 1000.0) * freq;
 
-            AVRRunner.getInstance().board.cpu.addClockEvent(() => {
-                uart.writeByte(byte, true);
-            }, cumulativeCycles);
-
-            cumulativeCycles += usToCycles(1200);
+        const pin = this.pins?.analog_out?.[0]?.analog;
+        if (!pin) {
+            // Pin not connected/available yet, retry
+            setTimeout(() => this.cycleEvent(), 100);
+            return;
         }
 
-        console.log(`[CO2 Sensor] CO2: ${this._co2} ppm`);
+        // Set 5.0V (HIGH)
+        pin.voltage = 5.0;
+
+        // Schedule 0.0V (LOW)
+        cpu.addClockEvent(() => {
+            pin.voltage = 0.0;
+            
+            // Schedule the next cycle
+            cpu.addClockEvent(() => {
+                this.cycleEvent();
+            }, tLowCycles);
+            
+        }, tHighCycles);
     }
 }
