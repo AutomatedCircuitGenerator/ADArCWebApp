@@ -4,7 +4,7 @@ import { PinState } from "@lib/avr8js";
 
 export class SEN0219 extends Controller {
 
-    private _co2: number = 400; // default starting CO2 ppm
+    private _co2: number = 550; // default starting CO2 ppm
     private inSimulation: boolean = false;
     private cycleActive: boolean = false;
 
@@ -16,7 +16,7 @@ export class SEN0219 extends Controller {
 
     setCO2(co2: number) {
         // Clamp to realistic range
-        if (co2 < 0) co2 = 0;
+        if (co2 < 400) co2 = 400;
         if (co2 > 5000) co2 = 5000;
 
         this._co2 = co2;
