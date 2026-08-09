@@ -199,13 +199,18 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n9</name>
         <localLabels>
-          <string>d1</string>
+          <string>digital</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>144</X>
         <Y>384</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+         <string>connected</string>
+         <string>d0</string>
+         <string>d1</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -297,13 +302,18 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n8</name>
         <localLabels>
-          <string>d0</string>
+          <string>digital</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>96</X>
         <Y>384</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+                 <string>connected</string>
+                 <string>d0</string>
+                 <string>d1</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -656,7 +666,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n8</name>
         <localLabels>
-          <string>rx</string>
+          <string>digital</string>
+          <string>connected</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>96</X>
@@ -672,7 +684,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n9</name>
         <localLabels>
-          <string>tx</string>
+          <string>digital</string>
+          <string>connected</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>144</X>

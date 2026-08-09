@@ -39,6 +39,11 @@ export class GPS extends Controller {
     }
 
     setup() {
+        const txdPin = this.pins.txd ? this.pins.txd[0] : null;
+        if (txdPin && txdPin.digital) {
+            txdPin.digital.state = PinState.High;
+        }
+
         // Trigger first send quickly after boot (1,000,000 cycles ~ 62ms), then every 1s
         AVRRunner.getInstance().board.cpu.addClockEvent(
             () => this.sendSerialNMEA(),

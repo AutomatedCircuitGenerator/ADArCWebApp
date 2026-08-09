@@ -1084,8 +1084,8 @@ namespace ADArCWebApp.Shared
                         true,
                         "Input/Other Sensors",
                         1,
-                        75,
-                        75,
+                        135,
+                        180,
                         typeof(RazorGPS),
                         codeForGen: new()
                         {
@@ -1101,7 +1101,7 @@ namespace ADArCWebApp.Shared
                             },
                             {
                                 "setup",
-                                "  Serial.begin(115200);\n" +
+                                "  \n" +
                                 "  while (!Serial) {\n" +
                                 "    ; // Wait for serial port to connect (needed for native USB)\n" +
                                 "  }\n" +
@@ -1155,7 +1155,8 @@ namespace ADArCWebApp.Shared
                             { "delayTime", "" }
                         },
                         pins: ["gnd", "Vcc", "rxd", "txd"],
-                        gsNodeName: "gps"
+                        gsNodeName: "gps",
+                        warning: "Simulation is not supported for the GPS Breakout board on the Arduino Mega due to use of Software Serial. If Hardware Serial is used (using pins 19 and 18), then the simulation will work. But Software Serial will work on actual hardware."
                     )
                     .Property("latitude", 20.0)
                     .Property("longitude", 40.0)
