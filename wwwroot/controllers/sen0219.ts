@@ -1,5 +1,6 @@
 import { Controller } from "@controllers/controller";
 import { AVRRunner } from "@lib/execute";
+import { PinState } from "@lib/avr8js";
 
 export class SEN0219 extends Controller {
 
@@ -56,19 +57,19 @@ export class SEN0219 extends Controller {
         const tHighCycles = (tHighMs / 1000.0) * freq;
         const tLowCycles = (tLowMs / 1000.0) * freq;
 
-        const pin = this.pins?.analog_out?.[0]?.analog;
+        const pin = this.pins?.analog_out?.[0]?.digital;
         if (!pin) {
             // Pin not connected/available yet, retry
             setTimeout(() => this.cycleEvent(), 100);
             return;
         }
 
-        // Set 5.0V (HIGH)
-        pin.voltage = 5.0;
+        // Set HIGH
+        pin.state = PinState.High;
 
-        // Schedule 0.0V (LOW)
+        // Schedule LOW
         cpu.addClockEvent(() => {
-            pin.voltage = 0.0;
+            pin.state = PinState.Low;
             
             // Schedule the next cycle
             cpu.addClockEvent(() => {
