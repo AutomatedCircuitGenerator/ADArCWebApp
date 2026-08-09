@@ -1,4 +1,4 @@
-using ADArCWebApp.Shared.Components;
+﻿using ADArCWebApp.Shared.Components;
 using ADArCWebApp.Shared.EnvironmentalSettings;
 
 namespace ADArCWebApp.Shared
@@ -1075,6 +1075,97 @@ namespace ADArCWebApp.Shared
                     .Property("nitrogen", 0.0)
                     .Property("phosphorus", 0.0)
                     .Property("potassium", 0.0)
+                    .Finish()
+            },
+            {
+                37,
+                new ComponentDataBuilder(
+                        "Adafruit Ultimate GPS Breakout",
+                        true,
+                        "Input/Other Sensors",
+                        1,
+                        135,
+                        180,
+                        typeof(RazorGPS),
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                "#include <Adafruit_GPS.h>\n" +
+                                "#include <SoftwareSerial.h>"
+                            },
+                            {
+                                "global",
+                                "SoftwareSerial mySerial(~\"txd\", ~\"rxd\");\n" +
+                                "Adafruit_GPS GPS(&mySerial);"
+                            },
+                            {
+                                "setup",
+                                "  \n" +
+                                "  while (!Serial) {\n" +
+                                "    ; // Wait for serial port to connect (needed for native USB)\n" +
+                                "  }\n" +
+                                "  Serial.println(\"Initializing Adafruit Ultimate GPS...\");\n" +
+                                "  GPS.begin(9600);\n" +
+                                "  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);\n" +
+                                "  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);\n" +
+                                "  GPS.sendCommand(PGCMD_ANTENNA);\n" +
+                                "  delay(1000);"
+                            },
+                            {
+                                "loopMain",
+                                "  char c = GPS.read();\n" +
+                                "  if (GPS.newNMEAreceived()) {\n" +
+                                "    if (!GPS.parse(GPS.lastNMEA())) {\n" +
+                                "      return;\n" +
+                                "    }\n" +
+                                "  }\n" +
+                                "  static uint32_t timer = millis();\n" +
+                                "  if (millis() - timer > 2000) {\n" +
+                                "    timer = millis();\n" +
+                                "    Serial.print(\"\\nTime: \");\n" +
+                                "    if (GPS.hour < 10) Serial.print('0');\n" +
+                                "    Serial.print(GPS.hour, DEC); Serial.print(':');\n" +
+                                "    if (GPS.minute < 10) Serial.print('0');\n" +
+                                "    Serial.print(GPS.minute, DEC); Serial.print(':');\n" +
+                                "    if (GPS.seconds < 10) Serial.print('0');\n" +
+                                "    Serial.print(GPS.seconds, DEC);\n" +
+                                "    Serial.print(\" | Date: \");\n" +
+                                "    Serial.print(GPS.day, DEC); Serial.print('/');\n" +
+                                "    Serial.print(GPS.month, DEC); Serial.print(\"/20\");\n" +
+                                "    Serial.println(GPS.year, DEC);\n" +
+                                "    Serial.print(\"Fix: \"); Serial.print((int)GPS.fix);\n" +
+                                "    Serial.print(\" | Quality: \"); Serial.println((int)GPS.fixquality);\n" +
+                                "    if (GPS.fix) {\n" +
+                                "      Serial.print(\"Location: \");\n" +
+                                "      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);\n" +
+                                "      Serial.print(\", \");\n" +
+                                "      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);\n" +
+                                "      Serial.print(\"Speed (knots): \"); Serial.println(GPS.speed);\n" +
+                                "      Serial.print(\"Angle: \"); Serial.println(GPS.angle);\n" +
+                                "      Serial.print(\"Altitude (m): \"); Serial.println(GPS.altitude);\n" +
+                                "      Serial.print(\"Satellites: \"); Serial.println((int)GPS.satellites);\n" +
+                                "    } else {\n" +
+                                "      Serial.println(\"Acquiring satellite lock...\");\n" +
+                                "    }\n" +
+                                "  }"
+                            },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["gnd", "Vcc", "rxd", "txd"],
+                        gsNodeName: "gps",
+                        warning: "Simulation is not supported for the GPS Breakout board on the Arduino Mega due to use of Software Serial. If Hardware Serial is used (using pins 19 and 18), then the simulation will work. But Software Serial will work on actual hardware."
+                    )
+                    .Property("latitude", 20.0)
+                    .Property("longitude", 40.0)
+                    .Property("fix", 1.0)
+                    .Property("quality", 1.0)
+                    .Property("speed", 0.0)
+                    .Property("angle", 0.0)
+                    .Property("altitude", 100.0)
+                    .Property("satellites", 8.0)
                     .Finish()
             },
             {
