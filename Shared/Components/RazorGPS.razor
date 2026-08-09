@@ -10,6 +10,30 @@
   [ValueSetting("(deg)", 0, -180, 180)]
   public double longitude { get; set; }
 
+  [Parameter]
+  [ValueSetting("", 1, 0, 1)]
+  public double fix { get; set; }
+
+  [Parameter]
+  [ValueSetting("", 1, 0, 2)]
+  public double quality { get; set; }
+
+  [Parameter]
+  [ValueSetting("knots", 0, 0, 500)]
+  public double speed { get; set; }
+
+  [Parameter]
+  [ValueSetting("deg", 0, 0, 360)]
+  public double angle { get; set; }
+
+  [Parameter]
+  [ValueSetting("m", 100, -500, 10000)]
+  public double altitude { get; set; }
+
+  [Parameter]
+  [ValueSetting("", 8, 0, 24)]
+  public double satellites { get; set; }
+
   // TODO: wires may not draw; no errors expected
   public static ElementPin[] pinInfo
   {
