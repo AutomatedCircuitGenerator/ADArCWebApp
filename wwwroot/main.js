@@ -1,0 +1,95 @@
+"use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+var getInteropManager = interopManager_1.interopManager.getInteropManager;
+const interopManager_1 = require("./interopManager");
+const lcd1602i2c_1 = require("@controllers/lcd1602i2c");
+const max6675_1 = require("@controllers/max6675");
+const ky012_1 = require("@controllers/ky012");
+const bno055_1 = require("@controllers/bno055");
+const hcsr501_1 = require("@controllers/hcsr501");
+const ky018_1 = require("@controllers/ky018");
+const arcade_push_button_1 = require("@controllers/arcade-push-button");
+const sg90_1 = require("@controllers/sg90");
+const tf_luna_lidar_i2c_1 = require("@controllers/tf-luna-lidar-i2c");
+const ky008_1 = require("@controllers/ky008");
+const adxl345i2c_1 = require("@controllers/adxl345i2c");
+const mq3_1 = require("@controllers/mq3");
+const hcsr04_1 = require("@controllers/hcsr04");
+const ky003_1 = require("@controllers/ky003");
+const ky022_1 = require("@controllers/ky022");
+const led_1 = require("@controllers/led");
+const mpu6050_1 = require("@controllers/mpu6050");
+const ky024_1 = require("@controllers/ky024");
+const ky001_1 = require("@controllers/ky001");
+const rgbled_1 = require("@controllers/rgbled");
+const dcmotorl298n_1 = require("@controllers/dcmotorl298n");
+const pca9685_1 = require("@controllers/pca9685");
+const hx711_1 = require("@controllers/hx711");
+const _28byj48uln2003_1 = require("@controllers/28byj48uln2003");
+const transceiver_1 = require("@controllers/transceiver");
+const tof_1 = require("@controllers/tof");
+const sen0114_1 = require("@controllers/sen0114");
+const srvph_1 = require("@controllers/srvph");
+const gps_1 = require("@controllers/gps");
+const npk_1 = require("@controllers/npk");
+const max31856_1 = require("@controllers/max31856");
+const sht30_1 = require("@controllers/sht30");
+const dht22_1 = require("@controllers/dht22");
+const sen0189_1 = require("@controllers/sen0189");
+const dht11_1 = require("@controllers/dht11");
+const vl53l0x_1 = require("@controllers/vl53l0x");
+const irdetector_1 = require("@controllers/irdetector");
+const ssd1306_1 = require("@controllers/ssd1306");
+window.interopManager = interopManager_1.interopManager;
+window.addEventListener("resize", (e) => __awaiter(void 0, void 0, void 0, function* () {
+    yield DotNet.invokeMethodAsync("ADArCWebApp", "UpdateScreenRatios", getInteropManager().getWindowWidth(), getInteropManager().getWindowHeight());
+}));
+window.SSD1306 = ssd1306_1.SSD1306;
+window.LCD1602I2C = lcd1602i2c_1.LCD1602I2C;
+window.BNO055 = bno055_1.BNO055;
+window.MAX6675 = max6675_1.MAX6675;
+window.KY012 = ky012_1.KY012;
+window.ArcadePushButton = arcade_push_button_1.ArcadePushButton;
+window.SG90 = sg90_1.SG90;
+window.HCSR501 = hcsr501_1.HCSR501;
+window.KY018 = ky018_1.KY018;
+window.TFLunaLidarI2C = tf_luna_lidar_i2c_1.TFLunaLidarI2C;
+window.KY008 = ky008_1.KY008;
+window.ADXL345I2C = adxl345i2c_1.ADXL345I2C;
+window.MQ3 = mq3_1.MQ3;
+window.HCSR04 = hcsr04_1.HCSR04;
+window.KY003 = ky003_1.KY003;
+window.KY022 = ky022_1.KY022;
+window.LED = led_1.LED;
+window.MPU6050 = mpu6050_1.MPU6050;
+window.KY024 = ky024_1.KY024;
+window.KY001 = ky001_1.KY001;
+window.RGBLED = rgbled_1.RGBLED;
+window.DCMotorL298N = dcmotorl298n_1.DCMotorL298N;
+window.SG90PCA9685 = pca9685_1.PCA9685;
+window.HX711 = hx711_1.HX711;
+window._28BYJ48ULN2003 = _28byj48uln2003_1._28BYJ48ULN2003;
+window.SEN0114 = sen0114_1.SEN0114;
+window.SRVPH = srvph_1.SRVPH;
+window.GPS = gps_1.GPS;
+window.MAX31856 = max31856_1.MAX31856;
+window.SHT30 = sht30_1.SHT30;
+window.DHT22 = dht22_1.DHT22;
+window.DHT22MODULE = dht22_1.DHT22;
+window.SEN0189 = sen0189_1.SEN0189;
+window.DHT11 = dht11_1.DHT11;
+window.TOF = tof_1.TOF;
+window.TRANSCEIVER = transceiver_1.TRANSCEIVER;
+window.NPK = npk_1.NPK;
+window.VL53L0X = vl53l0x_1.VL53L0X;
+window.IRDETECTOR = irdetector_1.IRDETECTOR;
+//# sourceMappingURL=main.js.map

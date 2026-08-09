@@ -19,10 +19,14 @@
     transition: left .3s, right .3s;
     padding: 10px 10px 0;
     position: absolute;
+    width:400px;  /*left side palette width*/
+    z-index: 101;
 }
 
 .sidebar-right {
     right: 0;
+    width:600px;  /*right side code panel width*/
+    z-index: 100;
 }
 
 .main-canvas {
@@ -40,7 +44,7 @@
 .toolbar {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     background-color: #949494;
     color: black;
     height: 50px;
@@ -50,20 +54,28 @@
     left: 0;
     z-index: 1000;
     padding: 0 20px;
-    overflow-x: scroll;
+    overflow-x: hidden;
     overflow-y: hidden;
 }
 
 .center-toolbar {
     display: flex;
     align-items: center;
+    gap:8px;
+    flex:1;
+    justify-content:flex-end;
+    flex-wrap:nowrap;
+}
+
+.center-toolbar > * {
+    flex-shrink: 0;
 }
 
 .toolbar-button {
     background-color: #989494;
     color: black !important;
     border: none;
-    padding: 10px 15px;
+    padding: 3px 8px;
     cursor: pointer;
     display: flex;
     align-items: center;
@@ -71,6 +83,33 @@
     margin: 0 5px;
     height: 10px;
     overflow-wrap: unset;
+    gap:8px;
+}
+
+.toolbar-text{
+    display:inline;
+}
+
+@media (max-width:1330px){
+    .toolbar-text{
+        display: none;
+    }
+}
+
+@media (max-width:710px) {
+    .adarc-text {
+        display: none;
+    }
+}
+
+@media (max-width: 650px) {
+    .center-toolbar {
+        gap: 3px;
+    }
+
+    .toolbar-button {
+        padding: 2px 5px;
+    }
 }
 
 .toolbar-button:disabled {
@@ -127,7 +166,8 @@
 .logo-and-adarc {
     flex-wrap: nowrap;
     display: flex;
-    overflow: hidden;
+    align-items:center;
+    flex-shrink:0;
 }
 
 .adarc-text {
@@ -202,8 +242,7 @@ div, span {
 }
 
 .toolbar-button {
-    flex-direction: row;
-
+    flex-shrink:0;
 }
 
 .rotate180 {
