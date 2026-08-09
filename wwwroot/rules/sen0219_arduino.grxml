@@ -138,8 +138,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n6</name>
         <localLabels>
           <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
+          <string>pwm</string>
         </localLabels>
         <localVariables />
         <X>168</X>
@@ -526,8 +525,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n6</name>
         <localLabels>
           <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
+          <string>pwm</string>
+          <string>connected</string>
+        
         </localLabels>
         <localVariables />
         <X>168</X>
