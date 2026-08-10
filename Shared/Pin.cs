@@ -82,7 +82,7 @@
 
     public class ElementPin
     {
-        string name;
+        public string name;
         public double x;
         public double y;
         PinSignalInfo[] signals;

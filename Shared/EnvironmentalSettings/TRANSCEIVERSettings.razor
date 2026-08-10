@@ -1,0 +1,40 @@
+<div style="display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1rem;">
+    <h2 style="font-size: 20px">RS485 Transceiver Mode</h2>
+
+    <div style="display: flex; gap: 1rem;">
+        <button 
+            @onclick="() => SetMode(0)" 
+            style="padding: 0.5rem 1rem; @(currentMode == 0 ? "background-color: #4CAF50; color: white;" : "")">
+            Receive
+        </button>
+
+        <button 
+            @onclick="() => SetMode(1)" 
+            style="padding: 0.5rem 1rem; @(currentMode == 1 ? "background-color: #FF9800; color: white;" : "")">
+            Transmit
+        </button>
+    </div>
+
+    <p style="font-size: smaller;">
+        @(currentMode == 0 ? "Mode: Receive" : "Mode: Transmit")
+    </p>
+</div>
+
+@code {
+    [Parameter] public IJSObjectReference? Controller { get; set; }
+
+    private int currentMode = 0;
+
+    private async Task SetMode(int mode)
+    {
+        currentMode = mode;
+
+        if (Controller != null)
+        {
+            // ✅ FIX: call setMode (must exist in TS)
+            await Controller.InvokeVoidAsync("setMode", mode);
+        }
+
+        Console.WriteLine($"[Blazor] Selected mode: {mode}");
+    }
+}

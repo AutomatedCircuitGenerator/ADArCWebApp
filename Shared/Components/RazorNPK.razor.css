@@ -1,0 +1,19 @@
+﻿:host {
+    display: inline-block;
+}
+
+.led-container {
+    display: flex;
+    flex-direction: column;
+    width: 40px;
+    /*position: absolute;*/
+}
+
+.led-label {
+    font-size: 10px;
+    text-align: center;
+    color: gray;
+    position: relative;
+    line-height: 1;
+    top: -8px;
+}
