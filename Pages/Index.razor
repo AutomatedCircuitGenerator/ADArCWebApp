@@ -265,6 +265,7 @@
         BoardService.Board = board;
         Comps[0] = BoardService.GetComponentInstance();
         Console.WriteLine($"Board set to {board}, component instance created");
+        CheckForDualSoftwareSerialWarning();
 
         if (_rulesLoaded)
         {
@@ -526,18 +527,9 @@
             ToastService.AddToast("Code panel updated.", Variant.Info);
             if (comp.Data.Warning != null)
             {
-                if (comp.GlobalId == 37) // GPS Breakout
-                {
-                    if (BoardService.Board == Board.ArduinoMega)
-                    {
-                        ToastService.AddToast(comp.Data.Warning, Variant.Warning);
-                    }
-                }
-                else
-                {
-                    ToastService.AddToast(comp.Data.Warning, Variant.Warning);
-                }
+                ToastService.AddToast(comp.Data.Warning, Variant.Warning);
             }
+            CheckForDualSoftwareSerialWarning();
             if (trackHistory)
             {
                 ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
@@ -1145,6 +1137,27 @@
         }
     }
 
+    private void CheckForDualSoftwareSerialWarning()
+    {
+        int swSerialCount = Comps.Values.Count(c => 
+            c.Data != null && 
+            c.Data.codeForGen != null && 
+            c.Data.codeForGen.Values.Any(v => v != null && v.Contains("SoftwareSerial"))
+        );
+        
+        if (swSerialCount >= 2)
+        {
+            if (BoardService.Board == Board.ArduinoUno)
+            {
+                ToastService.AddToast("Arduino Uno cannot handle if multiple devices require software serial. It takes a lot of memory and Arduino Uno is not designed to handle it. It may work better on Arduino Mega", Variant.Warning);
+            }
+            else if (BoardService.Board == Board.ArduinoMega)
+            {
+                ToastService.AddToast("Multiple Software Serial connections are not supported on Arduino Mega. Instead, recommend using hardware serial.", Variant.Warning);
+            }
+        }
+    }
+
     private async Task SetupBenchFromJsonString(string json)
     {
         Console.WriteLine("Starting bench setup from JSON");
@@ -1256,6 +1269,7 @@
             BuildCanvas.ResetTransform();
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
+            CheckForDualSoftwareSerialWarning();
             StateHasChanged();
             Console.WriteLine("Bench setup complete");
         }

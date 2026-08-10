@@ -1155,8 +1155,8 @@ namespace ADArCWebApp.Shared
                             { "delayTime", "" }
                         },
                         pins: ["gnd", "Vcc", "rxd", "txd"],
-                        gsNodeName: "gps",
-                        warning: "Simulation is not supported for the GPS Breakout board on the Arduino Mega due to use of Software Serial. If Hardware Serial is used (using pins 19 and 18), then the simulation will work. But Software Serial will work on actual hardware."
+                        gsNodeName: "gps"
+                        
                     )
                     .Property("latitude", 20.0)
                     .Property("longitude", 40.0)
@@ -1442,22 +1442,61 @@ namespace ADArCWebApp.Shared
                         paneHoverText: "PMS5003",
                         codeForGen: new()
                         {
-                            { "include", "" },
-                            { "global", "" },
-                            { "setup", "" },
+                            { "include", "#include <SoftwareSerial.h>" },
+                            { "global", "SoftwareSerial pmsSerial@(~\"txd\", ~\"rxd\");\n" +
+                                        "struct pms5003Data@ {\n" +
+                                        "  uint16_t framelen;\n" +
+                                        "  uint16_t pm10_standard, pm25_standard, pm100_standard;\n" +
+                                        "  uint16_t pm10_env, pm25_env, pm100_env;\n" +
+                                        "  uint16_t particles_03, particles_05, particles_10, particles_25, particles_50, particles_100;\n" +
+                                        "  uint16_t checksum;\n" +
+                                        "};\n" +
+                                        "struct pms5003Data@ data@;" },
+                            { "setup", "pmsSerial@.begin(9600);\n" +
+                                       "Serial.println(\"PMS5003 Sensor Initialized. Reading data...\");" },
                             { "loopMain",
-                                "\tint pm1_0_raw@ = analogRead(~\"txd\");\n" + 
-                                "\tint pm2_5_raw@ = analogRead(~\"rxd\");\n" + 
-                                "\tint pm10_raw@ = digitalRead(~\"rxd\");\n" + 
-                                "\tint pm1_0@ = map(pm1_0_raw@, 0, 1023, 0, 1000);\n" +
-                                "\tint pm2_5@ = map(pm2_5_raw@, 0, 1023, 0, 1000);\n" +
-                                "\tint pm10@ = map(pm10_raw@, 0, 1, 0, 1000);\n" +
-                                "\tSerial.print(\"PM1.0: \"); Serial.print(pm1_0@);\n" +
-                                "\tSerial.print(\" PM2.5: \"); Serial.print(pm2_5@);\n" +
-                                "\tSerial.print(\" PM10: \"); Serial.println(pm10@);\n" +
-                                "\tdelay(500);"
+                                "if (readPMSdata@(&pmsSerial@)) {\n" +
+                                "  Serial.println(\"--- Air Quality Data ---\");\n" +
+                                "  Serial.print(\"PM 1.0: \"); Serial.print(data@.pm10_standard); Serial.println(\" ug/m3\");\n" +
+                                "  Serial.print(\"PM 2.5: \"); Serial.print(data@.pm25_standard); Serial.println(\" ug/m3\");\n" +
+                                "  Serial.print(\"PM 10 : \"); Serial.print(data@.pm100_standard); Serial.println(\" ug/m3\");\n" +
+                                "  Serial.println();\n" +
+                                "  delay(3000);\n" +
+                                "}"
                             },
-                            { "functions", "" },
+                            { "functions",
+                                "boolean readPMSdata@(Stream *pms) {\n" +
+                                "  if (!pms->available()) {\n" +
+                                "    return false;\n" +
+                                "  }\n" +
+                                "  if (pms->peek() != 0x42) {\n" +
+                                "    pms->read();\n" +
+                                "    return false;\n" +
+                                "  }\n" +
+                                "  if (pms->available() < 32) {\n" +
+                                "    return false;\n" +
+                                "  }\n" +
+                                "  uint8_t buffer[32];\n" +
+                                "  uint16_t sum = 0;\n" +
+                                "  pms->readBytes(buffer, 32);\n" +
+                                "  if (buffer[0] != 0x42 || buffer[1] != 0x4D) {\n" +
+                                "    return false;\n" +
+                                "  }\n" +
+                                "  for (uint8_t i = 0; i < 30; i++) {\n" +
+                                "    sum += buffer[i];\n" +
+                                "  }\n" +
+                                "  uint16_t calculated_checksum = (buffer[30] << 8) | buffer[31];\n" +
+                                "  if (sum != calculated_checksum) {\n" +
+                                "    Serial.println(\"Checksum failure.\");\n" +
+                                "    return false;\n" +
+                                "  }\n" +
+                                "  data@.framelen = (buffer[2] << 8) | buffer[3];\n" +
+                                "  data@.pm10_standard = (buffer[4] << 8) | buffer[5];\n" +
+                                "  data@.pm25_standard = (buffer[6] << 8) | buffer[7];\n" +
+                                "  data@.pm100_standard = (buffer[8] << 8) | buffer[9];\n" +
+                                "  return true;\n" +
+                                "}"
+                            },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
