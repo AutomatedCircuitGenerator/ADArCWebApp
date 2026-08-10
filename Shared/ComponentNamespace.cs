@@ -1176,37 +1176,59 @@ namespace ADArCWebApp.Shared
                         {
                             {
                                 "include",
-                                "#include <Arduino.h>"
+                                ""
                             },
                             {
                                 "global",
-                                "volatile unsigned long geigerCount@ = 0;\n" +
-                                "unsigned long geigerLastTime@ = 0;\n" +
-                                "unsigned int cpm@ = 0;\n" +
-                                "int geigerPin@ = ~\"vin\";"
+                                "const int geigerPin@ = ~\"vin\";\n" +
+                                "const float J305B_CONVERSION_FACTOR@ = 0.00812;\n" +
+                                "volatile unsigned long geigerCounts@ = 0;\n" +
+                                "unsigned long geigerPreviousMillis@ = 0;\n" +
+                                "const int GEIGER_SAMPLE_WINDOW@ = 10;\n" +
+                                "unsigned long geigerCountsBuffer@[GEIGER_SAMPLE_WINDOW@] = {0};\n" +
+                                "int geigerBufferIndex@ = 0;"
                             },
                             {
                                 "setup",
-                                "  pinMode(geigerPin@, INPUT);\n" +
-                                "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerISR@, RISING);\n" +
-                                "  geigerLastTime@ = millis();"
+                                "  pinMode(geigerPin@, INPUT_PULLUP);\n" +
+                                "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerImpulse@, FALLING);\n" +
+                                "  Serial.println(\"=========================================\");\n" +
+                                "  Serial.println(\"   Geiger Counter Started - J305b Tube   \");\n" +
+                                "  Serial.println(\"=========================================\");"
                             },
                             {
                                 "loopMain",
-                                "  static unsigned long lastPrint@ = 0;\n" +
-                                "  if (millis() - lastPrint@ >= 2000) {\n" +
-                                "    lastPrint@ = millis();\n" +
-                                "    cpm@ = geigerCount@ * 30;\n" +
-                                "    Serial.print(\"CPM: \");\n" +
-                                "    Serial.println(cpm@);\n" +
-                                "    geigerCount@ = 0;\n" +
+                                "  unsigned long currentMillis@ = millis();\n" +
+                                "  if (currentMillis@ - geigerPreviousMillis@ >= 1000) {\n" +
+                                "    geigerPreviousMillis@ = currentMillis@;\n" +
+                                "    noInterrupts();\n" +
+                                "    unsigned long currentCount@ = geigerCounts@;\n" +
+                                "    geigerCounts@ = 0;\n" +
+                                "    interrupts();\n" +
+                                "    geigerCountsBuffer@[geigerBufferIndex@] = currentCount@;\n" +
+                                "    geigerBufferIndex@ = (geigerBufferIndex@ + 1) % GEIGER_SAMPLE_WINDOW@;\n" +
+                                "    unsigned long tenSecTotal@ = 0;\n" +
+                                "    for (int i = 0; i < GEIGER_SAMPLE_WINDOW@; i++) {\n" +
+                                "      tenSecTotal@ += geigerCountsBuffer@[i];\n" +
+                                "    }\n" +
+                                "    float cpm@ = (tenSecTotal@ / (float)GEIGER_SAMPLE_WINDOW@) * 60.0;\n" +
+                                "    float uSv@ = cpm@ * J305B_CONVERSION_FACTOR@;\n" +
+                                "    Serial.print(\"Count/sec: \");\n" +
+                                "    Serial.print(currentCount@);\n" +
+                                "    Serial.print(\" | CPM: \");\n" +
+                                "    Serial.print(cpm@, 1);\n" +
+                                "    Serial.print(\" | Radiation: \");\n" +
+                                "    Serial.print(uSv@, 3);\n" +
+                                "    Serial.println(\" uSv/h\");\n" +
                                 "  }"
                             },
                             {
                                 "functions",
-                                "void geigerISR@() {\n" +
-                                "  geigerCount@++;\n" +
-                                "}"
+                                "#if defined(ESP8266) || defined(ESP32)\n" +
+                                "void IRAM_ATTR geigerImpulse@() { geigerCounts@++; }\n" +
+                                "#else\n" +
+                                "void geigerImpulse@() { geigerCounts@++; }\n" +
+                                "#endif"
                             },
                             { "delayLoop", "" },
                             { "delayTime", "" }
