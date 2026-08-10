@@ -1169,7 +1169,7 @@ namespace ADArCWebApp.Shared
                     .Finish()
             },
             {
-                39,
+                48,
                 new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 1, 75, 75,
                         typeof(RazorJ305B), paneHoverText: "J305B",
                         codeForGen: new()
