@@ -2697,6 +2697,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d3</string>
           <string>pwm</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2716,6 +2717,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d2</string>
           <string>pwm</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2851,6 +2853,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d18</string>
           <string>tx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2870,6 +2873,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d19</string>
           <string>rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2889,6 +2893,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d20</string>
           <string>sda</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2908,6 +2913,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d21</string>
           <string>scl</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
