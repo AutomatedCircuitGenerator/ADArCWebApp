@@ -1080,13 +1080,14 @@ namespace ADArCWebApp.Shared
             {
                 37,
                 new ComponentDataBuilder(
-                        "Adafruit Ultimate GPS Breakout",
+                        "Ultimate GPS",
                         true,
                         "Input/Other Sensors",
                         1,
                         135,
                         180,
                         typeof(RazorGPS),
+                        paneHoverText: "PA1616S",
                         codeForGen: new()
                         {
                             {
@@ -1503,7 +1504,7 @@ namespace ADArCWebApp.Shared
             {
                 47,
                 new ComponentDataBuilder(
-                        "PMS5003",
+                        "Air Quality Sensor",
                         true,
                         "Input/Other Sensors",
                         0.7,
