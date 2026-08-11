@@ -1,6 +1,7 @@
 import {Controller} from "@controllers/controller";
 import {AVRRunner} from "@lib/execute";
 import {CPU, Digital} from "../boards/board";
+import {PinState} from "@lib/avr8js";
 
 const ADDRESS = 0x10;
 
@@ -15,7 +16,7 @@ export class KY022 extends Controller {
     setup() {
         this.signal = this.pins.digital_out[0].digital;
         this.cpu = AVRRunner.getInstance().board.cpu;
-        this.signal.state = true;
+        this.signal.state = PinState.High;
         this.simulationStarted = true;
     }
     
@@ -57,15 +58,15 @@ export class KY022 extends Controller {
     
     private pulse(ms: number) {
         if (this.counter === 0) {
-            this.signal.state = false;
+            this.signal.state = PinState.Low;
         } else {
             this.cpu.addClockEvent(() => {
-                this.signal.state = false;
+                this.signal.state = PinState.Low;
             }, this.counter);
         }
         this.counter += this.msToCycles(ms);
         this.cpu.addClockEvent(() => {
-            this.signal.state = true;
+            this.signal.state = PinState.High;
         }, this.counter);
     }
     
