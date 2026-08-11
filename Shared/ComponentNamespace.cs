@@ -1234,7 +1234,8 @@ namespace ADArCWebApp.Shared
                             { "delayTime", "" }
                         },
                         pins: ["Vcc", "gnd", "vin"],
-                        gsNodeName: "j305b")
+                        gsNodeName: "j305b",
+                        warning: "Please connect an external power supply to the Geiger Counter.")
                     .Property("cpm", 15.0)
                     .Finish()
             },
