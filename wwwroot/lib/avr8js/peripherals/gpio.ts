@@ -69,7 +69,7 @@ export const INT4: AVRExternalInterrupt = {
   EIFR: 0x3c,
   index: 4,
   iscOffset: 0,
-  interrupt: 6,
+  interrupt: 10,
 };
 
 export const INT5: AVRExternalInterrupt = {
@@ -78,7 +78,7 @@ export const INT5: AVRExternalInterrupt = {
   EIFR: 0x3c,
   index: 5,
   iscOffset: 2,
-  interrupt: 7,
+  interrupt: 12,
 };
 
 export const PCINT0 = {
