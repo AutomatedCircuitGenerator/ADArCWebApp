@@ -38,6 +38,7 @@
     <string>max31856_arduino.grxml</string>
     <string>sht30_arduino.grxml</string>
     <string>sen0189_arduino.grxml</string>
+    <string>j305b_arduino.grxml</string>
     <string>dht11_arduino.grxml</string>
     <string>transceiver_arduino.grxml</string>
     <string>dht22module_arduino.grxml</string>

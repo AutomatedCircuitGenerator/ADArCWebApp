@@ -40,6 +40,7 @@
     <string>add_max31856.grxml</string>
     <string>add_sht30.grxml</string>
     <string>add_sen0189.grxml</string>
+    <string>add_j305b.grxml</string>
     <string>add_dht11.grxml</string>
     <string>add_transceiver.grxml</string>
     <string>add_dht22module.grxml</string>

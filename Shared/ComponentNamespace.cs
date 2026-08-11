@@ -1080,13 +1080,14 @@ namespace ADArCWebApp.Shared
             {
                 37,
                 new ComponentDataBuilder(
-                        "Adafruit Ultimate GPS Breakout",
+                        "Ultimate GPS",
                         true,
                         "Input/Other Sensors",
                         1,
                         135,
                         180,
                         typeof(RazorGPS),
+                        paneHoverText: "PA1616S",
                         codeForGen: new()
                         {
                             {
@@ -1166,6 +1167,77 @@ namespace ADArCWebApp.Shared
                     .Property("angle", 0.0)
                     .Property("altitude", 100.0)
                     .Property("satellites", 8.0)
+                    .Finish()
+            },
+            {
+                48,
+                new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 0.35, 250, 150,
+                        typeof(RazorJ305B), paneHoverText: "J305B",
+                        codeForGen: new()
+                        {
+                            {
+                                "include",
+                                ""
+                            },
+                            {
+                                "global",
+                                "const int geigerPin@ = ~\"vin\";\n" +
+                                "const float J305B_CONVERSION_FACTOR@ = 0.00812;\n" +
+                                "volatile unsigned long geigerCounts@ = 0;\n" +
+                                "unsigned long geigerPreviousMillis@ = 0;\n" +
+                                "const int GEIGER_SAMPLE_WINDOW@ = 10;\n" +
+                                "unsigned long geigerCountsBuffer@[GEIGER_SAMPLE_WINDOW@] = {0};\n" +
+                                "int geigerBufferIndex@ = 0;"
+                            },
+                            {
+                                "setup",
+                                "  pinMode(geigerPin@, INPUT_PULLUP);\n" +
+                                "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerImpulse@, FALLING);\n" +
+                                "  Serial.println(\"=========================================\");\n" +
+                                "  Serial.println(\"   Geiger Counter Started - J305b Tube   \");\n" +
+                                "  Serial.println(\"=========================================\");"
+                            },
+                            {
+                                "loopMain",
+                                "  unsigned long currentMillis@ = millis();\n" +
+                                "  if (currentMillis@ - geigerPreviousMillis@ >= 1000) {\n" +
+                                "    geigerPreviousMillis@ = currentMillis@;\n" +
+                                "    noInterrupts();\n" +
+                                "    unsigned long currentCount@ = geigerCounts@;\n" +
+                                "    geigerCounts@ = 0;\n" +
+                                "    interrupts();\n" +
+                                "    geigerCountsBuffer@[geigerBufferIndex@] = currentCount@;\n" +
+                                "    geigerBufferIndex@ = (geigerBufferIndex@ + 1) % GEIGER_SAMPLE_WINDOW@;\n" +
+                                "    unsigned long tenSecTotal@ = 0;\n" +
+                                "    for (int i = 0; i < GEIGER_SAMPLE_WINDOW@; i++) {\n" +
+                                "      tenSecTotal@ += geigerCountsBuffer@[i];\n" +
+                                "    }\n" +
+                                "    float cpm@ = (tenSecTotal@ / (float)GEIGER_SAMPLE_WINDOW@) * 60.0;\n" +
+                                "    float uSv@ = cpm@ * J305B_CONVERSION_FACTOR@;\n" +
+                                "    Serial.print(\"Count/sec: \");\n" +
+                                "    Serial.print(currentCount@);\n" +
+                                "    Serial.print(\" | CPM: \");\n" +
+                                "    Serial.print(cpm@, 1);\n" +
+                                "    Serial.print(\" | Radiation: \");\n" +
+                                "    Serial.print(uSv@, 3);\n" +
+                                "    Serial.println(\" uSv/h\");\n" +
+                                "  }"
+                            },
+                            {
+                                "functions",
+                                "#if defined(ESP8266) || defined(ESP32)\n" +
+                                "void IRAM_ATTR geigerImpulse@() { geigerCounts@++; }\n" +
+                                "#else\n" +
+                                "void geigerImpulse@() { geigerCounts@++; }\n" +
+                                "#endif"
+                            },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        pins: ["Vcc", "gnd", "vin"],
+                        gsNodeName: "j305b",
+                        warning: "Please connect an external power supply to the Geiger Counter.")
+                    .Property("cpm", 15.0)
                     .Finish()
             },
             {
@@ -1432,7 +1504,7 @@ namespace ADArCWebApp.Shared
             {
                 47,
                 new ComponentDataBuilder(
-                        "PMS5003",
+                        "Air Quality Sensor",
                         true,
                         "Input/Other Sensors",
                         0.7,

@@ -677,6 +677,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d2</string>
           <string>sw_rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>800</X>
@@ -736,6 +737,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>pwm</string>
           <string>d3</string>
           <string>sw_rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>800</X>
