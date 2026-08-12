@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.AVRIOPort = exports.PinOverrideMode = exports.PinState = exports.portLConfig = exports.portKConfig = exports.portJConfig = exports.portHConfig = exports.portGConfig = exports.portFConfig = exports.portEConfig = exports.portDConfig = exports.portCConfig = exports.portBConfig = exports.portAConfig = exports.PCINT2 = exports.PCINT1 = exports.PCINT0 = exports.INT1 = exports.INT0 = void 0;
+exports.AVRIOPort = exports.PinOverrideMode = exports.PinState = exports.portLConfig = exports.portKConfig = exports.portJConfig = exports.portHConfig = exports.portGConfig = exports.portFConfig = exports.portEConfig = exports.portDConfig = exports.portCConfig = exports.portBConfig = exports.portAConfig = exports.PCINT2 = exports.PCINT1 = exports.PCINT0 = exports.INT5 = exports.INT4 = exports.INT1 = exports.INT0 = void 0;
 exports.INT0 = {
     EICR: 0x69,
     EIMSK: 0x3d,
@@ -16,6 +16,22 @@ exports.INT1 = {
     index: 1,
     iscOffset: 2,
     interrupt: 4,
+};
+exports.INT4 = {
+    EICR: 0x6a,
+    EIMSK: 0x3d,
+    EIFR: 0x3c,
+    index: 4,
+    iscOffset: 0,
+    interrupt: 10,
+};
+exports.INT5 = {
+    EICR: 0x6a,
+    EIMSK: 0x3d,
+    EIFR: 0x3c,
+    index: 5,
+    iscOffset: 2,
+    interrupt: 12,
 };
 exports.PCINT0 = {
     PCIE: 0,
@@ -75,7 +91,7 @@ exports.portEConfig = {
     PIN: 0x2c,
     DDR: 0x2d,
     PORT: 0x2e,
-    externalInterrupts: [],
+    externalInterrupts: [null, null, null, null, exports.INT4, exports.INT5],
 };
 exports.portFConfig = {
     PIN: 0x2f,

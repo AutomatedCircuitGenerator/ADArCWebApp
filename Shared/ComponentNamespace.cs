@@ -1582,36 +1582,50 @@ namespace ADArCWebApp.Shared
             },
             {
                 49,
-                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorGP2Y1014AU0F),
+                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .25, 240, 435, typeof(RazorGP2Y1014AU0F),
                     paneHoverText: "GP2Y1014AU0F",
                     codeForGen: new()
                     {
                         {
                             "include",
-                            "#include <Arduino.h>"
+                            ""
                         },
                         {
                             "global",
-                            "#define dustLEDPin@ ~\"led\"\n" +
-                            "#define dustAnalogPin@ ~\"vout\"\n" +
-                            "float dustDensity@ = 0.0;"
+                            "const int ledPin@ = ~\"led\";\n" +
+                            "const int voPin@ = ~\"vout\";\n\n" +
+                            "const int samplingTime@ = 280;\n" +
+                            "const int deltaTime@ = 40;\n" +
+                            "const int sleepTime@ = 9680;\n\n" +
+                            "float voMeasured@ = 0;\n" +
+                            "float calcVoltage@ = 0;\n" +
+                            "float dustDensity@ = 0;"
                         },
                         {
                             "setup",
-                            "  pinMode(dustLEDPin@, OUTPUT);\n" +
-                            "  digitalWrite(dustLEDPin@, HIGH);"
+                            "  pinMode(ledPin@, OUTPUT);"
                         },
                         {
                             "loopMain",
-                            "  digitalWrite(dustLEDPin@, LOW);\n" +
-                            "  delayMicroseconds(280);\n\n" +
-                            "  int dustDensity@ = analogRead(dustAnalogPin@);\n" +
-                            "  digitalWrite(dustLEDPin@, HIGH);\n\n" +
-                            "  delayMicroseconds(40);\n" +
-                            "  delay(1000);\n\n" +
-                            "  dustDensity@ = (dustDensity@ / 1023.0) * 1000.0;\n\n" +
-                            "  Serial.print(\"Dust Density (ug/m3): \");\n" +
-                            "  Serial.println(dustDensity@);"
+                            "  digitalWrite(ledPin@, LOW);\n" +
+                            "  delayMicroseconds(samplingTime@);\n\n" +
+                            "  voMeasured@ = analogRead(voPin@);\n\n" +
+                            "  delayMicroseconds(deltaTime@);\n\n" +
+                            "  digitalWrite(ledPin@, HIGH);\n" +
+                            "  delayMicroseconds(sleepTime@);\n\n" +
+                            "  calcVoltage@ = voMeasured@ * (5.0 / 1024.0);\n" +
+                            "  dustDensity@ = 0.17 * calcVoltage@ - 0.1;\n\n" +
+                            "  if (dustDensity@ < 0) {\n" +
+                            "    dustDensity@ = 0.0;\n" +
+                            "  }\n\n" +
+                            "  Serial.print(\"Raw Value: \");\n" +
+                            "  Serial.print(voMeasured@);\n" +
+                            "  Serial.print(\" | Voltage: \");\n" +
+                            "  Serial.print(calcVoltage@);\n" +
+                            "  Serial.print(\" V | Dust Density: \");\n" +
+                            "  Serial.print(dustDensity@ * 1000);\n" +
+                            "  Serial.println(\" µg/m³\");\n\n" +
+                            "  delay(1000);"
                         },
                         { "functions", "" },
                         { "delayLoop", "" },
@@ -1619,7 +1633,7 @@ namespace ADArCWebApp.Shared
                     }
                     , pins: ["Vcc", "gnd", "led", "vout"], 
                     listenOn: ["vout"],  
-                    gsNodeName: "gp2y1014au0f").Property("dustdensity", 30.0).Finish()
+                    gsNodeName: "gp2y1014au0f").Property("dustdensity", 15.0).Finish()
             }
         };
     }

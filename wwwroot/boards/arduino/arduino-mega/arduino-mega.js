@@ -9,15 +9,42 @@ class ArduinoMega {
         const avrCPU = new avr8js_1.CPU(program, 0x2200);
         const adc = new avr8js_1.AVRADC(avrCPU, configs_1.adcConfig);
         const portA = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portAConfig);
-        const portB = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portBConfig);
+        const megaPortBConfig = Object.assign(Object.assign({}, avr8js_1.portBConfig), { pinChange: {
+                PCIE: 0,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6b,
+                pinChangeInterrupt: 18,
+                mask: 0xff,
+                offset: 0,
+            } });
+        const portB = new avr8js_1.AVRIOPort(avrCPU, megaPortBConfig);
         const portC = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portCConfig);
         const portD = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portDConfig);
         const portE = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portEConfig);
         const portF = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portFConfig);
         const portG = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portGConfig);
         const portH = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portHConfig);
-        const portJ = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portJConfig);
-        const portK = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portKConfig);
+        const megaPortJConfig = Object.assign(Object.assign({}, avr8js_1.portJConfig), { pinChange: {
+                PCIE: 1,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6c,
+                pinChangeInterrupt: 20,
+                mask: 0xff,
+                offset: 8,
+            } });
+        const portJ = new avr8js_1.AVRIOPort(avrCPU, megaPortJConfig);
+        const megaPortKConfig = Object.assign(Object.assign({}, avr8js_1.portKConfig), { pinChange: {
+                PCIE: 2,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6d,
+                pinChangeInterrupt: 22,
+                mask: 0xff,
+                offset: 16,
+            } });
+        const portK = new avr8js_1.AVRIOPort(avrCPU, megaPortKConfig);
         const portL = new avr8js_1.AVRIOPort(avrCPU, avr8js_1.portLConfig);
         this.cpu = new arduino_1.ArduinoCPU(avrCPU);
         this.spis = [new arduino_1.ArduinoSPI(new avr8js_1.AVRSPI(avrCPU, configs_1.spiConfig, arduino_1.MHZ))];

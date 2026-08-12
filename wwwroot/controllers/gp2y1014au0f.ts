@@ -34,8 +34,9 @@ export class GP2Y1014AU0F extends Controller {
             return;
         }
 
-        // Convert dust density to voltage (0-1000 ug/m3 = 0-5V)
-        let voltage = (this.dustdensity / 1000.0) * 5.0;
+        // Convert dust density to voltage using the inverse of the Arduino code's formula:
+        // dustDensity_mg_m3 = 0.17 * voltage - 0.1 => voltage = ((dustDensity_mg_m3) + 0.1) / 0.17
+        let voltage = ((this.dustdensity / 1000.0) + 0.1) / 0.17;
         voltage = Math.max(0, Math.min(5.0, voltage)); // Clamp to 0-5V
 
         console.log("Setting vout voltage to:", voltage, "V");
