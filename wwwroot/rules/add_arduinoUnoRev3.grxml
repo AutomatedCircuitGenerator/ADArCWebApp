@@ -499,6 +499,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d19</string>
           <string>a5</string>
+          
           <string>scl</string>
         </localLabels>
         <localVariables />
@@ -520,6 +521,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d18</string>
           <string>a4</string>
+         
           <string>sda</string>
         </localLabels>
         <localVariables />
@@ -541,6 +543,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d17</string>
           <string>a3</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>560</X>
@@ -561,6 +564,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d16</string>
           <string>a2</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>560</X>
@@ -599,6 +603,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>d15</string>
           <string>a1</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>560</X>
@@ -671,6 +676,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>gpio</string>
           <string>d2</string>
+          <string>sw_rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>800</X>
@@ -689,6 +696,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>gpio</string>
           <string>d4</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>800</X>
@@ -708,6 +716,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>pwm</string>
           <string>d5</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>800</X>
@@ -727,6 +736,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>pwm</string>
           <string>d3</string>
+          <string>sw_rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>800</X>
@@ -745,6 +756,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>gpio</string>
           <string>d7</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>760</X>
@@ -763,6 +775,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>gpio</string>
           <string>d8</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>680</X>
@@ -782,6 +795,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>pwm</string>
           <string>d9</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>600</X>
@@ -952,6 +966,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>gpio</string>
           <string>pwm</string>
           <string>d6</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>800</X>
