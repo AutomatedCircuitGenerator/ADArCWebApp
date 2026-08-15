@@ -1763,8 +1763,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 52,
-                new ComponentDataBuilder("Relay", true, "Input/Buttons and Switches", 1, 18.5,
-                     19.154, typeof(RazorRELAY), paneHoverText: "DPDT",
+                new ComponentDataBuilder("1-Channel Relay", true, "Input/Buttons and Switches", 1, 18.5,
+                     19.154, typeof(RazorRELAY), paneHoverText: "SRD-05VDC-SL-C",
                      codeForGen: new()
                      {
                          { "include", "" }, 
@@ -1782,7 +1782,7 @@ namespace ADArCWebApp.Shared
                          { "functions", "" },
                          { "delayLoop", "" }, 
                          { "delayTime", "" }
-                     }, pins: ["Vcc", "gnd", "IN"], gsNodeName: "relay").Finish()
+                     }, pins: ["Vcc", "gnd", "IN"], gsNodeName: "relay", warning: "The 1-Channel Relay requires a dedicated power supply. If the Relay is required to control another sensor or actuator, then the wiring should be through the Relay.").Finish()
             }
         };
     }
