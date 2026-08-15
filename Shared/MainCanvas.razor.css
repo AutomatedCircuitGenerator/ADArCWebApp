@@ -18,6 +18,13 @@ line {
 
 .segment, .node {
     transition: stroke-width 0.2s ease, filter 0.2s ease;
+    pointer-events: stroke;
+}
+
+.segment:hover {
+    filter: drop-shadow(0 0 1px var(--glow)) 
+    drop-shadow(0 0 2px var(--glow))
+    drop-shadow(0 0 4px var(--glow));
 }
 
 .segment.highlighted, .node.highlighted {
@@ -26,3 +33,46 @@ line {
     filter: drop-shadow(0px 0px 3px white);
 }
 
+.zoom-control{
+    position:fixed;
+    top:55px;
+    left:50%;
+    transform:translateX(-50%);
+    display:flex;
+    align-items:center;
+    background:white;
+    border:1px solid #d0d0d0;
+    border-radius:8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,.15);
+    z-index:100;
+}
+
+.zoom-btn{
+    width:36px;
+    height:32px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    font-size:20px;
+}
+
+.zoom-btn:hover{
+    background:#eeeeee;
+}
+
+.zoom-perc{
+    font-size:12px;
+}
+
+.reset-btn{
+    width:44px;
+    height:32px;
+    border:none;
+    background:transparent;
+    cursor:pointer;
+    font-size:12px;
+}
+
+.reset-btn:hover{
+    background:#eeeeee;
+}
