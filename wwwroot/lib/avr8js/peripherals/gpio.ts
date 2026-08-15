@@ -63,6 +63,24 @@ export const INT1: AVRExternalInterrupt = {
   interrupt: 4,
 };
 
+export const INT4: AVRExternalInterrupt = {
+  EICR: 0x6a,
+  EIMSK: 0x3d,
+  EIFR: 0x3c,
+  index: 4,
+  iscOffset: 0,
+  interrupt: 10,
+};
+
+export const INT5: AVRExternalInterrupt = {
+  EICR: 0x6a,
+  EIMSK: 0x3d,
+  EIFR: 0x3c,
+  index: 5,
+  iscOffset: 2,
+  interrupt: 12,
+};
+
 export const PCINT0 = {
   PCIE: 0,
   PCICR: 0x68,
@@ -137,7 +155,7 @@ export const portEConfig: AVRPortConfig = {
   PIN: 0x2c,
   DDR: 0x2d,
   PORT: 0x2e,
-  externalInterrupts: [],
+  externalInterrupts: [null, null, null, null, INT4, INT5],
 };
 
 export const portFConfig: AVRPortConfig = {
@@ -483,9 +501,9 @@ export class AVRIOPort {
         cpu.queueInterrupt({
           address: interrupt,
           flagRegister: EIFR,
-          flagMask: 1 << index,
+          flagMask: (1 << index),
           enableRegister: EIMSK,
-          enableMask: 1 << index,
+          enableMask: (1 << index),
           constant: true,
         });
       }

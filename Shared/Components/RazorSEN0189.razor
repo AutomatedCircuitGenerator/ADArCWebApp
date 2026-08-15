@@ -1,0 +1,276 @@
+@inherits RazorComponent
+
+@code {
+
+  public static ElementPin[] pinInfo
+  {
+    get
+    {
+      return new ElementPin[]
+      {
+        new ElementPin(name: "5V", x: 320, y: 128, signals: new PinSignalInfo[] { }, number: 1),
+        new ElementPin(name: "gnd", x: 320, y: 143.5, signals: new PinSignalInfo[] { }, number: 2),
+        new ElementPin(name: "analog_out", x: 320, y: 158.5, signals: new PinSignalInfo[] { }, number: 3),
+
+      };
+    }
+  }
+
+  [Parameter]
+  [ValueSetting("NTU", 0, 0, 3000)]
+  public double turbidity
+  {
+    get;
+    set;
+  }
+}
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="375" height="250" viewBox="0 0 2400 1500">
+
+  <title>DFrobot Turbidity PCB with Bottom-Mount Terminals</title>
+  <defs>
+    <style>
+      .board { fill:#151918; stroke:#050606; stroke-width:18; }
+      .gold { fill:#e5b84f; stroke:#080909; stroke-width:8; }
+      .pad  { fill:#f7f6ef; stroke:#080909; stroke-width:5; }
+      .silk { fill:none; stroke:#f3eee0; stroke-width:6; }
+      .text { font-family:Arial,Helvetica,sans-serif; fill:#f0c65a; font-weight:700; }
+      .label { font-family:Arial,Helvetica,sans-serif; fill:#f3eee0; font-weight:700; }
+      .metal { fill:#c9c7bf; stroke:#080909; stroke-width:6; }
+      .resistor { fill:#a87952; stroke:#080909; stroke-width:7; }
+      .connector { fill:#eee9d9; stroke:#080909; stroke-width:8; }
+      .chip { fill:#363a3b; stroke:#080909; stroke-width:8; }
+      .wire-outer { fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-width:14; stroke:#475569; }
+      .wire-inner { fill:none; stroke-linecap:round; stroke-linejoin:round; stroke-width:6; stroke:#94a3b8; }
+      /* Style for new metallic terminals from attached image */
+      .pin-metallic { fill:#e2e8f0; stroke:#64748b; stroke-width:3; }
+      .pin-detail-metallic { fill:#64748b; }
+      .sensor-housing-fill { fill:#e2e8f0; fill-opacity:0.65; }
+      .sensor-housing-stroke { stroke:#94a3b8; stroke-width:3; stroke-linejoin:round; fill:none; }
+      .sensor-holder-fill { fill:#2563eb; }
+      .sensor-holder-stroke { stroke:#1d4ed8; stroke-width:2; }
+      .sensor-clip-fill { fill:#3b82f6; }
+      .sensor-clip-stroke { stroke:#1d4ed8; stroke-width:1.5; }
+    </style>
+  </defs>
+
+  <!-- ==================== PCB BODY ==================== -->
+  <rect x="725" y="200" width="1254" height="944" rx="125" class="board"/>
+
+  <!-- ==================== MOUNTING HOLES ==================== -->
+  <g id="mounting-holes">
+    <g transform="translate(855 330)">
+      <circle r="108" class="gold"/>
+      <circle r="58" fill="#151918" stroke="#080909" stroke-width="6"/>
+      <circle cx="-55" cy="-55" r="12" class="pad"/><circle cx="0" cy="-78" r="12" class="pad"/>
+      <circle cx="55" cy="-55" r="12" class="pad"/><circle cx="78" cy="0" r="12" class="pad"/>
+      <circle cx="55" cy="55" r="12" class="pad"/><circle cx="0" cy="78" r="12" class="pad"/>
+      <circle cx="-55" cy="55" r="12" class="pad"/><circle cx="-78" cy="0" r="12" class="pad"/>
+    </g>
+    <g transform="translate(1848 330)">
+      <circle r="108" class="gold"/>
+      <circle r="58" fill="#151918" stroke="#080909" stroke-width="6"/>
+      <circle cx="-55" cy="-55" r="12" class="pad"/><circle cx="0" cy="-78" r="12" class="pad"/>
+      <circle cx="55" cy="-55" r="12" class="pad"/><circle cx="78" cy="0" r="12" class="pad"/>
+      <circle cx="55" cy="55" r="12" class="pad"/><circle cx="0" cy="78" r="12" class="pad"/>
+      <circle cx="-55" cy="55" r="12" class="pad"/><circle cx="-78" cy="0" r="12" class="pad"/>
+    </g>
+    <g transform="translate(855 1014)">
+      <circle r="108" class="gold"/>
+      <circle r="58" fill="#151918" stroke="#080909" stroke-width="6"/>
+      <circle cx="-55" cy="-55" r="12" class="pad"/><circle cx="0" cy="-78" r="12" class="pad"/>
+      <circle cx="55" cy="-55" r="12" class="pad"/><circle cx="78" cy="0" r="12" class="pad"/>
+      <circle cx="55" cy="55" r="12" class="pad"/><circle cx="0" cy="78" r="12" class="pad"/>
+      <circle cx="-55" cy="55" r="12" class="pad"/><circle cx="-78" cy="0" r="12" class="pad"/>
+    </g>
+    <g transform="translate(1848 1014)">
+      <circle r="108" class="gold"/>
+      <circle r="58" fill="#151918" stroke="#080909" stroke-width="6"/>
+      <circle cx="-55" cy="-55" r="12" class="pad"/><circle cx="0" cy="-78" r="12" class="pad"/>
+      <circle cx="55" cy="-55" r="12" class="pad"/><circle cx="78" cy="0" r="12" class="pad"/>
+      <circle cx="55" cy="55" r="12" class="pad"/><circle cx="0" cy="78" r="12" class="pad"/>
+      <circle cx="-55" cy="55" r="12" class="pad"/><circle cx="-78" cy="0" r="12" class="pad"/>
+    </g>
+  </g>
+
+  <!-- ==================== SILKSCREEN / TOP LABEL ==================== -->
+  <g id="top-label">
+    <text x="1100" y="262" class="text" font-size="58">D ↔ A</text>
+    <text x="1370" y="262" class="text" font-size="56">DFRobot</text>
+    <circle cx="1700" cy="263" r="30" class="gold"/>
+    <text x="1370" y="318" class="text" font-size="42">Turbidity sensor</text>
+    <text x="1645" y="370" class="text" font-size="38">V1.0</text>
+  </g>
+
+  <!-- ==================== MODE / SELECTION PADS ==================== -->
+  <g id="mode-pads">
+    <rect x="1065" y="295" width="295" height="110" class="silk"/>
+    <g class="gold">
+      <circle cx="1130" cy="300" r="27"/><circle cx="1210" cy="300" r="27"/>
+      <circle cx="1290" cy="300" r="27"/>
+      <circle cx="1130" cy="405" r="27"/><circle cx="1210" cy="405" r="27"/>
+      <circle cx="1290" cy="405" r="27"/>
+    </g>
+    <g class="pad">
+      <circle cx="1130" cy="300" r="11"/><circle cx="1210" cy="300" r="11"/>
+      <circle cx="1290" cy="300" r="11"/>
+      <circle cx="1130" cy="405" r="11"/><circle cx="1210" cy="405" r="11"/>
+      <circle cx="1290" cy="405" r="11"/>
+    </g>
+  </g>
+
+  <!-- ==================== LEFT TERMINAL BLOCK AREA ==================== -->
+  <g id="left-electrodes">
+    <path d="M730 550 H1120 V585 H1035 V860 H1120 V880 H730 Z" class="silk"/>
+    <g class="metal">
+      <rect x="700" y="600" width="160" height="22" rx="10"/>
+      <rect x="700" y="680" width="160" height="22" rx="10"/>
+      <rect x="700" y="760" width="160" height="22" rx="10"/>
+    </g>
+    <g class="gold">
+      <circle cx="1035" cy="625" r="28"/>
+      <circle cx="1035" cy="705" r="28"/>
+      <circle cx="1035" cy="785" r="28"/>
+    </g>
+    <g class="pad">
+      <circle cx="1035" cy="625" r="11"/>
+      <circle cx="1035" cy="705" r="11"/>
+      <circle cx="1035" cy="785" r="11"/>
+    </g>
+  </g>
+
+  <!-- ==================== CENTRAL COMPONENTS ==================== -->
+  <g id="central-circuit">
+    <!-- left resistor bank -->
+    <g class="resistor">
+      <rect x="1170" y="570" width="100" height="38" rx="8"/>
+      <rect x="1170" y="635" width="100" height="38" rx="8"/>
+      <rect x="1170" y="700" width="100" height="38" rx="8"/>
+      <rect x="1170" y="765" width="100" height="38" rx="8"/>
+      <rect x="1170" y="830" width="100" height="38" rx="8"/>
+    </g>
+
+    <!-- chip pins -->
+    <g class="gold">
+      <rect x="1320" y="555" width="28" height="62" rx="12"/>
+      <rect x="1358" y="555" width="28" height="62" rx="12"/>
+      <rect x="1396" y="555" width="28" height="62" rx="12"/>
+      <rect x="1434" y="555" width="28" height="62" rx="12"/>
+      <rect x="1320" y="755" width="28" height="62" rx="12"/>
+      <rect x="1358" y="755" width="28" height="62" rx="12"/>
+      <rect x="1396" y="755" width="28" height="62" rx="12"/>
+      <rect x="1434" y="755" width="28" height="62" rx="12"/>
+    </g>
+
+    <rect x="1300" y="610" width="185" height="145" rx="8" class="chip"/>
+    <circle cx="1325" cy="728" r="10" fill="#202324"/>
+
+    <!-- right components -->
+    <g class="resistor">
+      <rect x="1520" y="530" width="100" height="38" rx="8"/>
+      <rect x="1520" y="775" width="100" height="38" rx="8"/>
+    </g>
+    <g class="gold">
+      <rect x="1520" y="605" width="55" height="38"/>
+      <rect x="1590" y="605" width="55" height="38"/>
+      <rect x="1520" y="675" width="55" height="38"/>
+      <rect x="1590" y="675" width="55" height="38"/>
+    </g>
+    <text x="1505" y="522" class="label" font-size="42">PWR</text>
+    <text x="1620" y="810" class="label" font-size="42">Dout</text>
+
+    <!-- lower component pairs -->
+    <g class="gold">
+      <rect x="1305" y="845" width="55" height="38"/>
+      <rect x="1375" y="845" width="55" height="38"/>
+      <rect x="1455" y="845" width="55" height="38"/>
+      <rect x="1525" y="845" width="55" height="38"/>
+    </g>
+  </g>
+
+  <!-- ==================== RIGHT CONNECTOR ==================== -->
+  <g id="right-connector">
+    <path d="M1800 510 H1970 V880 H1800 V830 H1860 V780 H1800 V730 H1860 V680 H1800 V630 H1860 V580 H1800 Z" class="connector"/>
+    <g class="gold">
+      <rect x="1750" y="580" width="145" height="50"/>
+      <rect x="1750" y="680" width="145" height="50"/>
+      <rect x="1750" y="780" width="145" height="50"/>
+    </g>
+  </g>
+
+  <!-- ==================== LOWER ADJUSTMENT AREA ==================== -->
+  <g id="adjustment">
+    <rect x="1100" y="915" width="225" height="215" class="silk"/>
+    <circle cx="1215" cy="1025" r="42" class="silk"/>
+    <path d="M1215 990 V1060 M1180 1025 H1250" class="silk"/>
+    <circle cx="1130" cy="1030" r="20" class="gold"/>
+    <circle cx="1300" cy="1030" r="20" class="gold"/>
+    <circle cx="1215" cy="1100" r="20" class="gold"/>
+  </g>
+
+  <!-- ==================== LOWER SYMBOLS ==================== -->
+  <g id="lower-symbols" class="label">
+    <text x="1600" y="980" font-size="58">D</text>
+    <text x="1600" y="1045" font-size="58">&amp;</text>
+    <text x="1600" y="1110" font-size="58">A</text>
+  </g>
+
+  <!-- ==================== SMALL INDICATOR DOTS ==================== -->
+  <g id="indicator-dots" class="gold">
+    <circle cx="1350" cy="466" r="9"/>
+    <circle cx="1030" cy="1085" r="24"/>
+    <circle cx="1700" cy="263" r="9" fill="#f5cf63"/>
+  </g>
+
+  <!-- ==================== CONNECTING GREY WIRES ==================== -->
+  <g id="connecting-wires">
+    <!-- Wire 1 -->
+    <path d="M 360 500 V 610 H 700" class="wire-outer"/> 
+
+    <!-- Wire 2 -->
+    <path d="M 280 500 V 690 H 700" class="wire-outer"/> 
+
+    <!-- Wire 3 -->
+    <path d="M 200 500 V 770 H 700" class="wire-outer"/> 
+  </g>
+
+  <!-- ==================== ENLARGED BLUE SENSOR (ON THE LEFT) ==================== -->
+  <g id="turbidity-sensor-head" transform="translate(0 0) scale(1.4)">
+    <!-- Glass Housing -->
+    <g id="glass-housing" transform="translate(200 200)">
+      <path d="M-102 150V88c0 -16 10 -28 24 -30V25C-78 10 -65 0 -50 0s26 10 26 25V80h48V25C24 10 35 0 50 0s28 10 28 25V58c14 2 24 14 24 30v62Z" class="sensor-housing-fill sensor-housing-stroke"/>
+      <path d="M-24 80V35C-24 28 -18 22 -10 22H10c8 0 14 6 14 13V80" fill="none" stroke="#64748b" stroke-width="2.5"/>
+      <path d="M-98 92h196" stroke="#ffffff" stroke-width="4" stroke-linecap="round"/>
+    </g>
+
+    <!-- Blue Holder Shell -->
+    <g id="blue-holder" transform="translate(200 200)">
+      <path d="M-125 75h19V128h18v17h26V156h22v-11h24V156H16v-11h24V156h22v-11h26V128h18V75h19c3 0 5 2 5 5v95c0 7 -6 13 -14 13H-116c-8 0 -14 -6 -14 -13V80c0 -3 2 -5 5 -5Z" class="sensor-holder-fill sensor-holder-stroke"/>
+      <path d="M-130 80c0 -5 5 -8 10 -8h10c5 0 8 3 8 8v60h-28Z" class="sensor-clip-fill sensor-clip-stroke"/>
+      <path d="M102 80c0 -5 3 -8 8 -8h10c5 0 10 3 10 8v60H102Z" class="sensor-clip-fill sensor-clip-stroke"/>
+      <path d="M-128 76h24" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+      <path d="M104 76h24" stroke="#93c5fd" stroke-width="2" stroke-linecap="round"/>
+      <path d="M-100 130H100" stroke="#60a5fa" stroke-width="2"/>
+    </g>
+
+    <!-- Scaled Terminals from the attached image (dark block + metallic pins) -->
+    <g id="metallic-pins-block" transform="translate(150 355) rotate(90)">
+      <!-- metallic pins aligned Precisely to grey wire attachment Y-coordinates -->
+      <g id="metallic-pin-1">
+        <path class="pin-metallic" d="M12 18h20a2 2 0 0 0 2 -2v-20a2 2 0 0 0 -2 -2H12a2 2 0 0 0 -2 2v20a2 2 0 0 0 2 2z"/>
+        <circle class="pin-detail-metallic" cx="22" cy="7" r="3.5"/>
+      </g>
+      <g id="metallic-pin-2">
+        <path class="pin-metallic" d="M12 -39h20a2 2 0 0 0 2 -2v-20a2 2 0 0 0 -2 -2H12a2 2 0 0 0 -2 2v20a2 2 0 0 0 2 2z"/>
+        <circle class="pin-detail-metallic" cx="22" cy="-50" r="3.5"/>
+      </g>
+      <g id="metallic-pin-3">
+        <path class="pin-metallic" d="M12 -96h20a2 2 0 0 0 2 -2v-20a2 2 0 0 0 -2 -2H12a2 2 0 0 0 -2 2v20a2 2 0 0 0 2 2z"/>
+        <circle class="pin-detail-metallic" cx="22" cy="-107" r="3.5"/>
+      </g>
+    </g>
+  </g>
+</svg>
+
+

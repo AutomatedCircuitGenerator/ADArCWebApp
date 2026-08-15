@@ -1,0 +1,129 @@
+@inherits RazorComponent
+
+@code {
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "Vcc", x: 115.75, y: 108, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 106.25, y: 108, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "txd", x: 77.75, y: 108, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "rxd", x: 87.25, y: 108, signals: new PinSignalInfo[] { }, number: 4),
+            };
+        }
+    }
+
+    [Parameter]
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm1_0 { get; set; } = 0.0;
+
+    [Parameter]
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm2_5 { get; set; } = 0.0;
+
+    [Parameter]
+    [ValueSetting("μg/m³", 0, 0, 1000)]
+    public double pm10 { get; set; } = 0.0;
+}
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="200"
+     height="130"
+     viewBox="0 0 800 520"
+     preserveAspectRatio="xMidYMid meet">
+  <defs>
+    <style>
+      .pcb { fill: #1290FF; }
+      .pcb-edge { fill: #222222; }
+      .center-line { stroke: #1A1A1A; stroke-width: 2; }
+      .dark-mark { fill: #3D3D3D; }
+      .pin-bg { fill: #333333; rx: 4px; ry: 4px; }
+      .pin-hole { fill: #1A1A1A; stroke: #555555; stroke-width: 2; rx: 2px; ry: 2px; }
+      .pms-text { font-family: 'Arial', 'Helvetica Neue', Arial, sans-serif; font-weight: bold; fill: #E6E8EA; font-size: 34px; text-anchor: end; }
+      
+      /* Updated styling for the smaller on-board text labels */
+      .pcb-label-text { font-family: 'Arial Black', 'Helvetica Neue', Arial, sans-serif; font-weight: 900; fill: #1A1A1A; font-size: 13px; text-anchor: middle; dominant-baseline: central; }
+    </style>
+  </defs>
+
+  <!-- PCB Base -->
+  <g id="PCB">
+    <!-- Main Blue Board -->
+    <rect class="pcb" x="50" y="40" width="700" height="290" />
+    
+    <!-- Left & Right Black Board Ends -->
+    <rect class="pcb-edge" x="42" y="40" width="8" height="290" />
+    <rect class="pcb-edge" x="750" y="40" width="8" height="290" />
+
+    <!-- Text Label Top Right -->
+    <text class="pms-text" x="720" y="85">PMS5003</text>
+
+    <!-- Center Dividing Line -->
+    <line class="center-line" x1="50" y1="185" x2="750" y2="185" />
+
+    <!-- Perfectly Circular 4-Section Pattern (Centered at 230, 185) -->
+    <g class="dark-mark">
+      <!-- Top Arc -->
+      <path d="M 162.8 117.8 A 95 95 0 0 1 297.2 117.8 L 276.0 139.0 A 65 65 0 0 0 184.0 139.0 Z" />
+      <!-- Bottom Arc -->
+      <path d="M 162.8 252.2 A 95 95 0 0 0 297.2 252.2 L 276.0 231.0 A 65 65 0 0 1 184.0 231.0 Z" />
+      <!-- Left Arc -->
+      <path d="M 140.7 152.5 A 95 95 0 0 0 140.7 217.5 L 168.9 207.2 A 65 65 0 0 1 168.9 162.8 Z" />
+      <!-- Right Arc -->
+      <path d="M 319.3 152.5 A 95 95 0 0 1 319.3 217.5 L 291.1 207.2 A 65 65 0 0 0 291.1 162.8 Z" />
+    </g>
+
+    <!-- Small Square Markings -->
+    <rect class="dark-mark" x="65" y="150" width="20" height="20" />
+    <rect class="dark-mark" x="65" y="200" width="20" height="20" />
+
+    <rect class="dark-mark" x="385" y="150" width="20" height="20" />
+    <rect class="dark-mark" x="385" y="200" width="20" height="20" />
+
+    <rect class="dark-mark" x="680" y="150" width="20" height="20" />
+    <rect class="dark-mark" x="680" y="200" width="20" height="20" />
+
+    <!-- Bottom Right 4 Circles -->
+    <circle class="dark-mark" cx="510" cy="275" r="21" />
+    <circle class="dark-mark" cx="570" cy="275" r="21" />
+    <circle class="dark-mark" cx="630" cy="275" r="21" />
+    <circle class="dark-mark" cx="690" cy="275" r="21" />
+
+    <!-- New On-Board Text Labels positioned directly on the blue area above the pins -->
+    <g id="OnBoard-Labels">
+      <text class="pcb-label-text" x="173" y="298">RST</text>
+      <text class="pcb-label-text" x="211" y="298">TX</text>
+      <text class="pcb-label-text" x="249" y="298">RX</text>
+      <text class="pcb-label-text" x="287" y="298">SET</text>
+      <text class="pcb-label-text" x="325" y="298">GND</text>
+      <text class="pcb-label-text" x="363" y="298">VCC</text>
+    </g>
+  </g>
+
+  <!-- Pin Extension & Header Area -->
+  <g id="Pin-Header">
+    <!-- Top Pin Pads -->
+    <g id="Pin-Pads">
+      <rect class="pin-bg" x="156" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="166" y="325" width="14" height="14" />
+
+      <rect class="pin-bg" x="194" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="204" y="325" width="14" height="14" />
+
+      <rect class="pin-bg" x="232" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="242" y="325" width="14" height="14" />
+
+      <rect class="pin-bg" x="270" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="280" y="325" width="14" height="14" />
+
+      <rect class="pin-bg" x="308" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="318" y="325" width="14" height="14" />
+
+      <rect class="pin-bg" x="346" y="315" width="34" height="34" />
+      <rect class="pin-hole" x="356" y="325" width="14" height="14" />
+    </g>
+  </g>
+</svg>

@@ -1,0 +1,195 @@
+﻿@inherits RazorComponent
+
+@code {
+    
+    [Parameter]
+    [ValueSetting("CPM", 15, 10, 80)]
+    public double cpm { get; set; }
+
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "Vcc", x: 247, y: 104.5, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 247, y: 113.25, signals: new PinSignalInfo[] { }, number: 2),
+                new ElementPin(name: "vin", x: 247, y: 95.75, signals: new PinSignalInfo[] { }, number: 3)
+            };
+        }
+    }
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="250" height="150">
+  <defs>
+    <!-- Component Shadow Filter -->
+    <filter id="shadow" x="-5%" y="-5%" width="110%" height="110%">
+      <feDropShadow dx="2" dy="3" stdDeviation="3" flood-opacity="0.3"/>
+    </filter>
+  </defs>
+
+  <!-- Dark Background Canvas -->
+  <rect width="1000" height="600" fill="#0a0a0a"/>
+
+  <!-- Main PCB Board Base -->
+  <rect x="50" y="40" width="900" height="520" rx="8" fill="#086684" stroke="#05455a" stroke-width="2"/>
+
+  <!-- PCB Corner Mounting Holes -->
+  <g fill="#ffffff" stroke="#888888" stroke-width="1.5">
+    <circle cx="68" cy="58" r="8"/>
+    <circle cx="932" cy="58" r="8"/>
+    <circle cx="68" cy="542" r="8"/>
+    <circle cx="932" cy="542" r="8"/>
+  </g>
+
+  <!-- Top-Left Silkscreen Label (J305B) - White & Extra Large -->
+  <text x="80" y="70" fill="#ffffff" font-family="monospace" font-weight="bold" font-size="26">J305B</text>
+
+  <!-- Blue 2-Pin Terminal Block (Top Left) -->
+  <g filter="url(#shadow)">
+    <rect x="80" y="80" width="60" height="75" fill="#0080d0" rx="2"/>
+    <rect x="80" y="80" width="60" height="20" fill="#0060a0"/>
+    <!-- Terminal Holes -->
+    <circle cx="110" cy="110" r="12" fill="#222"/>
+    <circle cx="110" cy="140" r="12" fill="#222"/>
+    <circle cx="110" cy="110" r="7" fill="#d0d0d0"/>
+    <circle cx="110" cy="140" r="7" fill="#d0d0d0"/>
+    <!-- Screws -->
+    <line x1="105" y1="110" x2="115" y2="110" stroke="#555" stroke-width="2"/>
+    <line x1="105" y1="140" x2="115" y2="140" stroke="#555" stroke-width="2"/>
+  </g>
+
+  <!-- DC Power Jack (Left Side) -->
+  <g filter="url(#shadow)">
+    <rect x="35" y="180" width="100" height="70" fill="#1a1a1a" rx="3"/>
+    <rect x="35" y="190" width="80" height="50" fill="#2a2a2a"/>
+    <rect x="35" y="198" width="12" height="34" fill="#111"/>
+  </g>
+
+  <!-- DIP-8 IC Chip (Top Left) -->
+  <g filter="url(#shadow)">
+    <!-- Socket/Body -->
+    <rect x="200" y="110" width="70" height="75" fill="#181818" rx="2"/>
+    <rect x="208" y="113" width="54" height="69" fill="#222222"/>
+    <path d="M 230 113 A 5 5 0 0 1 240 113" fill="none" stroke="#444" stroke-width="2"/>
+    <!-- Pins Left -->
+    <path d="M 190 120 h 10 M 190 137 h 10 M 190 154 h 10 M 190 171 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+    <!-- Pins Right -->
+    <path d="M 270 120 h 10 M 270 137 h 10 M 270 154 h 10 M 270 171 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Toggle Switch & Small Components (Middle Left) -->
+  <rect x="85" y="270" width="30" height="60" fill="#888" rx="2"/>
+  <rect x="45" y="285" width="40" height="30" fill="#222"/>
+  <rect x="35" y="295" width="10" height="10" fill="#111"/>
+
+  <!-- Red LED (Left Side) -->
+  <circle cx="150" cy="310" r="14" fill="#ff1a1a" filter="url(#shadow)"/>
+  <circle cx="146" cy="306" r="4" fill="#ff9999" opacity="0.7"/>
+
+  <!-- SMD Resistor/Capacitor -->
+  <rect x="120" y="360" width="30" height="14" fill="#3a3a3a" rx="1"/>
+  <rect x="120" y="360" width="6" height="14" fill="#d0d0d0"/>
+  <rect x="144" y="360" width="6" height="14" fill="#d0d0d0"/>
+
+  <!-- Blue Vertical Potentiometer with Yellow Dial -->
+  <g filter="url(#shadow)">
+    <rect x="320" y="280" width="30" height="75" fill="#0099ff" rx="2"/>
+    <circle cx="335" cy="298" r="10" fill="#ffcc00"/>
+    <line x1="335" y1="293" x2="335" y2="303" stroke="#333" stroke-width="2"/>
+  </g>
+
+  <!-- Large Black Electrolytic Capacitors (Center Top) -->
+  <g filter="url(#shadow)">
+    <circle cx="475" cy="180" r="45" fill="#111111"/>
+    <circle cx="475" cy="180" r="41" fill="#222222"/>
+    <!-- Piezo Buzzer / Large Cap 2 -->
+    <circle cx="585" cy="125" r="55" fill="#0a0a0a"/>
+    <circle cx="585" cy="125" r="50" fill="#1a1a1a"/>
+    <circle cx="585" cy="125" r="12" fill="#ffffff"/>
+    <circle cx="585" cy="125" r="8" fill="#0a0a0a"/>
+  </g>
+
+  <!-- Central DIP-8 IC Chip -->
+  <g filter="url(#shadow)">
+    <rect x="555" y="285" width="70" height="75" fill="#181818" rx="2"/>
+    <rect x="563" y="288" width="54" height="69" fill="#222222"/>
+    <path d="M 585 288 A 5 5 0 0 1 595 288" fill="none" stroke="#444" stroke-width="2"/>
+    <!-- Pins Left -->
+    <path d="M 545 295 h 10 M 545 312 h 10 M 545 329 h 10 M 545 346 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+    <!-- Pins Right -->
+    <path d="M 625 295 h 10 M 625 312 h 10 M 625 329 h 10 M 625 346 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Top Right Red LED -->
+  <circle cx="810" cy="80" r="14" fill="#ff1a1a" filter="url(#shadow)"/>
+  <circle cx="806" cy="76" r="4" fill="#ff9999" opacity="0.7"/>
+
+  <!-- Right Side DIP-8 IC Chip -->
+  <g filter="url(#shadow)">
+    <rect x="730" y="150" width="70" height="75" fill="#181818" rx="2"/>
+    <rect x="738" y="153" width="54" height="69" fill="#222222"/>
+    <path d="M 760 153 A 5 5 0 0 1 770 153" fill="none" stroke="#444" stroke-width="2"/>
+    <!-- Pins Left -->
+    <path d="M 720 160 h 10 M 720 177 h 10 M 720 194 h 10 M 720 211 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+    <!-- Pins Right -->
+    <path d="M 800 160 h 10 M 800 177 h 10 M 800 194 h 10 M 800 211 h 10" stroke="#d0d0d0" stroke-width="5" stroke-linecap="round"/>
+  </g>
+
+  <!-- Audio / Power Jack (Top Right Corner) -->
+  <g filter="url(#shadow)">
+    <rect x="815" y="115" width="95" height="95" fill="#111"/>
+    <rect x="910" y="145" width="25" height="35" fill="#d0d0d0" rx="2"/>
+    <rect x="910" y="152" width="25" height="21" fill="#888"/>
+  </g>
+
+  <!-- Pin Header Contacts (Middle Right) -->
+  <g fill="#a68a56" stroke="#554422" stroke-width="1">
+    <rect x="880" y="240" width="16" height="16" rx="2"/>
+    <rect x="880" y="275" width="16" height="16" rx="2"/>
+    <rect x="880" y="310" width="16" height="16" rx="2"/>
+    <rect x="880" y="345" width="16" height="16" rx="2"/>
+  </g>
+  <g fill="#111">
+    <circle cx="888" cy="248" r="4"/>
+    <circle cx="888" cy="283" r="4"/>
+    <circle cx="888" cy="318" r="4"/>
+    <circle cx="888" cy="353" r="4"/>
+  </g>
+
+  <!-- Enlarged High-Contrast White Silk Screen Pin Labels -->
+  <g fill="#ffffff" font-family="monospace" font-weight="bold" font-size="28" text-anchor="end">
+    <text x="860" y="292">VIN</text>
+    <text x="860" y="327">5V</text>
+    <text x="860" y="362">GND</text>
+  </g>
+
+  <!-- Right Slide Switch -->
+  <g filter="url(#shadow)">
+    <rect x="850" y="445" width="45" height="40" fill="#999" rx="2"/>
+    <rect x="855" y="455" width="35" height="20" fill="#222"/>
+    <rect x="860" y="458" width="25" height="14" fill="#aaaaaa"/>
+    <!-- Metal Grip Lines -->
+    <line x1="868" y1="458" x2="868" y2="472" stroke="#666" stroke-width="2"/>
+    <line x1="872" y1="458" x2="872" y2="472" stroke="#666" stroke-width="2"/>
+    <line x1="876" y1="458" x2="876" y2="472" stroke="#666" stroke-width="2"/>
+  </g>
+
+  <!-- Large Glass Tube / Sensor Assembly (Bottom) -->
+  <g filter="url(#shadow)">
+    <!-- Metal End Clips (Left & Right Anchors) -->
+    <path d="M 80 430 h 50 v 80 h -50 z" fill="#aaaaaa" stroke="#666" stroke-width="2"/>
+    <path d="M 820 430 h 50 v 80 h -50 z" fill="#aaaaaa" stroke="#666" stroke-width="2"/>
+
+    <!-- Glass Capsule Body -->
+    <rect x="100" y="435" width="750" height="70" rx="35" fill="#ffffff" stroke="#d0d0d0" stroke-width="3"/>
+
+    <!-- Metallic End Caps of the Inner Tube -->
+    <rect x="90" y="440" width="45" height="60" rx="15" fill="#c0c0c0" stroke="#888" stroke-width="2"/>
+    <rect x="815" y="440" width="45" height="60" rx="15" fill="#c0c0c0" stroke="#888" stroke-width="2"/>
+
+    <!-- Inner Glass Highlight / Reflection -->
+    <path d="M 135 448 h 680 a 10 10 0 0 1 10 10 v 2 a 10 10 0 0 1 -10 10 h -680 a 10 10 0 0 1 -10 -10 v -2 a 10 10 0 0 1 10 -10 z" fill="#ffffff" opacity="0.6"/>
+  </g>
+</svg>

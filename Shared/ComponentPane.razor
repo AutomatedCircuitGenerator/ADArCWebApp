@@ -122,6 +122,7 @@
 
 		foreach (var (key, data) in ComponentDeclarations.Components)
 		{
+            Console.WriteLine($"Checking component: {data.name}, enabled: {data.enabled}, path: {data.directoryPath}");
 			var path = data.directoryPath;
 
 			if (path == ""  || !data.enabled)   //throw them out if they don't have a path or if they are disabled
