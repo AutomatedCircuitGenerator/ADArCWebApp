@@ -13,7 +13,7 @@ export class RELAY extends Controller {
 
         // Initialize relay to OFF state (HIGH = inactive)
         if (this.relayPin.digital) {
-            this.relayPin.digital.state = true; // HIGH = OFF
+            this.relayPin.digital.state = PinState.High; // HIGH = OFF
         }
 
         // Listen for changes to the pin from Arduino code
@@ -42,9 +42,9 @@ export class RELAY extends Controller {
      * Called when the Arduino code writes to the relay pin
      */
     private onPinStateChanged(pinState: PinState): void {
-        // pinState: true = HIGH (OFF), false = LOW (ON)
+        // pinState: PinState.High = HIGH (OFF), PinState.Low = LOW (ON)
         // because relay uses active-low logic
-        this.isRelayOn = !pinState;
+        this.isRelayOn = pinState === PinState.Low;
         this.updateRelayDisplay();
     }
 
@@ -55,7 +55,7 @@ export class RELAY extends Controller {
     private setRelayState(shouldBeOn: boolean): void {
         if (this.relayPin.digital) {
             // LOW = relay ON, HIGH = relay OFF
-            this.relayPin.digital.state = !shouldBeOn;
+            this.relayPin.digital.state = shouldBeOn ? PinState.Low : PinState.High;
             this.isRelayOn = shouldBeOn;
             this.updateRelayDisplay();
         }
