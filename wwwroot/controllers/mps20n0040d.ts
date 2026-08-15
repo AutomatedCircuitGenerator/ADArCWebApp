@@ -4,28 +4,27 @@ import {PinState} from "@lib/avr8js";
 export class MPS20N0040D extends Controller {
 
     private pressure = 0;
-    private offset = 8388608;
-    private scale = 100000;
+    private offset = 0; // bipolar 24-bit baseline at 0V (zero pressure)
+    private scale = 200;
 
     private adcValue = 0;
-    private bitIndex = 23;
+    private pulseCount = 0;
     private shifting = false;
 
     override update(state: Record<string, any>) {
         if (state.pressure !== undefined) {
             this.pressure = state.pressure;
             console.log("MPS20N0040D pressure updated to:", this.pressure);
-            this.computeADC();
-        }
-        if (state.offset !== undefined) {
-            this.offset = state.offset;
-            console.log("MPS20N0040D offset updated to:", this.offset);
-            this.computeADC();
+            if (!this.shifting) {
+                this.computeADC();
+            }
         }
         if (state.scale !== undefined) {
             this.scale = state.scale;
             console.log("MPS20N0040D scale updated to:", this.scale);
-            this.computeADC(); 
+            if (!this.shifting) {
+                this.computeADC();
+            }
         }
     }
 
@@ -44,12 +43,12 @@ export class MPS20N0040D extends Controller {
         // Listen to SCK clock pulses - on RISING edge, shift next bit
         sck.addListener((state: PinState) => {
             if (state === PinState.High) {
+                this.pulseCount++;
                 this.clockTick();
             }
         });
 
         console.log("MPS20N0040D setup complete");
-        console.log("SCK pin object:", sck); // debugging
 
         setTimeout(() => {
             this.shifting = false;   // reset
@@ -58,16 +57,15 @@ export class MPS20N0040D extends Controller {
     }
 
     private computeADC() {
-        
         // Convert pressure to 24-bit ADC value
         let value = Math.floor(this.offset + this.pressure * this.scale);
 
-        // Clamp to 24-bit unsigned
-        value = Math.max(0, Math.min(0xFFFFFF, value));
+        // Convert to 24-bit unsigned representation
+        value = ((value % 0x1000000) + 0x1000000) % 0x1000000;
 
         this.adcValue = value;
-        this.bitIndex = 23;
         this.shifting = true;
+        this.pulseCount = 0;
 
         // Signal data is ready by pulling DOUT LOW
         this.pins.dout[0].digital.state = PinState.Low;
@@ -76,27 +74,21 @@ export class MPS20N0040D extends Controller {
     }
 
     private clockTick() {
-        if (!this.shifting) {
-            return;
-        }
-
         const dout = this.pins.dout[0].digital;
 
-        // Extract the current bit (MSB first)
-        const bit = (this.adcValue >> this.bitIndex) & 1;
-
-        console.log("Sending bit:", bit); // debugging
-
-        // Set DOUT to the bit value AFTER clock goes high
-        dout.state = bit === 1 ? PinState.High : PinState.Low;
-
-        this.bitIndex--;
-
-        // After 24 bits, stop shifting and release DOUT (HIGH)
-        if (this.bitIndex < 0) {
+        if (this.pulseCount <= 24) {
+            // Extract the current bit (MSB first)
+            const bit = (this.adcValue >> (24 - this.pulseCount)) & 1;
+            dout.state = bit === 1 ? PinState.High : PinState.Low;
+        } else if (this.pulseCount === 25) {
+            // 25th pulse is complete. Stop shifting.
             this.shifting = false;
             dout.state = PinState.High; // Release DOUT (HIGH = not ready)
-            console.log("Transmission complete");
+            
+            // Schedule next conversion ready in 50ms
+            setTimeout(() => {
+                this.computeADC();
+            }, 50);
         }
     }
 }

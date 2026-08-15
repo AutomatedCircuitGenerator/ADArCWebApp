@@ -1684,54 +1684,82 @@ namespace ADArCWebApp.Shared
             },
             {
                 51,
-                new ComponentDataBuilder("Pressure Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorMPS20N0040D),
+                new ComponentDataBuilder("Pressure with ADC", true, "Input/Other Sensors", 1.0, -20, -20, typeof(RazorMPS20N0040D),
                     paneHoverText: "MPS20N0040D",
                     codeForGen: new()
                     {
                         { "include", "#include <Arduino.h>" },
                         {
                             "global",
-                            "int pressureSCK@ = 13;\n" +
-                            "int pressureDOUT@ = 2;\n" +
-                            "long offset@ = 8388608; // hardcoded rn but this needs to come from env setting\n"  +
-                            "float scale@ = 500; // hardcoded rn but this needs to come from env setting\n" +
-                            "long pressureRaw@ = 0;"
+                            "#define HX710B_DOUT@ ~\"dout\"\n" +
+                            "#define HX710B_SCK@ ~\"sck\"\n\n" +
+                            "long offset@ = 0; // Tare / zero calibration value"
                         },
                         {
                             "setup",
-                            "  pinMode(pressureSCK@, OUTPUT);\n" +
-                            "  pinMode(pressureDOUT@, INPUT);\n" +
-                            "  digitalWrite(pressureSCK@, LOW);"
+                            "  pinMode(HX710B_DOUT@, INPUT);\n" +
+                            "  pinMode(HX710B_SCK@, OUTPUT);\n" +
+                            "  digitalWrite(HX710B_SCK@, LOW);\n\n" +
+                            "  delay(500);\n\n" +
+                            "  // Zero calibration routine (tare at ambient room pressure)\n" +
+                            "  Serial.println(\"Zeroing pressure sensor... ensure zero pressure is applied.\");\n" +
+                            "  long sum@ = 0;\n" +
+                            "  for (int i = 0; i < 10; i++) {\n" +
+                            "    sum@ += readHX710B@();\n" +
+                            "    delay(50);\n" +
+                            "  }\n" +
+                            "  offset@ = sum@ / 10;\n" +
+                            "  Serial.print(\"Offset value: \");\n" +
+                            "  Serial.println(offset@);"
                         },
                         {
                             "loopMain",
-                            "  pressureRaw@ = readPressureADC@();\n" +
-                            "  float pressure@ = (pressureRaw@ - offset@) / scale@;\n" +
-                            "  Serial.print(\"Pressure (kPa): \");\n" +
-                            "  Serial.println(pressure@);\n" +
-                            "  delay(500);"
+                            "  long rawValue@ = readHX710B@();\n" +
+                            "  long delta@ = rawValue@ - offset@;\n\n" +
+                            "  // Approximate conversion factor (scale factor varies by board/excitation; calibrate for accuracy)\n" +
+                            "  // Scale factor roughly ~ 200 counts per kPa for standard 40kPa sensors on HX710B\n" +
+                            "  float scaleFactor@ = 200.0;\n" +
+                            "  float pressure_kPa@ = (float)delta@ / scaleFactor@;\n" +
+                            "  float pressure_psi@ = pressure_kPa@ * 0.145038;\n\n" +
+                            "  Serial.print(\"Raw: \");\n" +
+                            "  Serial.print(rawValue@);\n" +
+                            "  Serial.print(\" | Pressure: \");\n" +
+                            "  Serial.print(pressure_kPa@, 2);\n" +
+                            "  Serial.print(\" kPa (\");\n" +
+                            "  Serial.print(pressure_psi@, 2);\n" +
+                            "  Serial.println(\" PSI)\");\n\n" +
+                            "  delay(200);"
                         },
                         {
                             "functions",
-                            "long readPressureADC@() {\n" +
-                            "  long value = 0;\n" +
-                            "  while (digitalRead(pressureDOUT@) == HIGH); // wait for ready\n" +
+                            "// Function to read raw 24-bit signed integer from HX710B\n" +
+                            "long readHX710B@() {\n" +
+                            "  while (digitalRead(HX710B_DOUT@) == HIGH); // Wait until conversion is ready (DOUT goes LOW)\n\n" +
+                            "  unsigned long count = 0;\n" +
                             "  for (int i = 0; i < 24; i++) {\n" +
-                            "    digitalWrite(pressureSCK@, HIGH);\n" +
-                            "    value = (value << 1) | digitalRead(pressureDOUT@);\n" +
-                            "    digitalWrite(pressureSCK@, LOW);\n" +
-                            "  }\n" +
-                            "  digitalWrite(pressureSCK@, HIGH);\n" +
-                            "  digitalWrite(pressureSCK@, LOW);\n" +
-                            "  return value;\n" +
+                            "    digitalWrite(HX710B_SCK@, HIGH);\n" +
+                            "    delayMicroseconds(1);\n" +
+                            "    count = (count << 1) | digitalRead(HX710B_DOUT@);\n" +
+                            "    digitalWrite(HX710B_SCK@, LOW);\n" +
+                            "    delayMicroseconds(1);\n" +
+                            "  }\n\n" +
+                            "  // 25th pulse sets gain to 128 (default) and powers board for next conversion\n" +
+                            "  digitalWrite(HX710B_SCK@, HIGH);\n" +
+                            "  delayMicroseconds(1);\n" +
+                            "  digitalWrite(HX710B_SCK@, LOW);\n" +
+                            "  delayMicroseconds(1);\n\n" +
+                            "  // Convert 24-bit two's complement integer to 32-bit signed long\n" +
+                            "  if (count & 0x800000) {\n" +
+                            "    count |= 0xFF000000;\n" +
+                            "  }\n\n" +
+                            "  return (long)count;\n" +
                             "}"
                         },
-                        { "delayLoop", "delay(500);" },
+                        { "delayLoop", "delay(200);" },
                         { "delayTime", "" }
                     }
-                    , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d").Property("pressure", 0.0)
-                    .Property("offset", 8388608.0)
-                    .Property("scale", 500.0)
+                    , pins: ["Vcc", "gnd", "sck", "dout"], gsNodeName: "mps20n0040d", warning: "Calibration is required to determine the scale factor.").Property("pressure", 0.0)
+                    .Property("scale", 200.0)
                     .Finish()
             }
         };
