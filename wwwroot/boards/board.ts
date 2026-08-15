@@ -67,6 +67,8 @@ export interface USART {
 
 export interface TWI {
     registerController(addr: number, device: I2CController): void;
+    
+    unregisterController(addr: number): void;
 }
 
 export interface SPI {
