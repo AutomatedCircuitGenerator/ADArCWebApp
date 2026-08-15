@@ -52,8 +52,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 3,
-                new ComponentDataBuilder("ADXL345", true, "Input/Acceleration Sensors", 1, 75, 75,
-                    typeof(RazorADXL345I2C),
+                new ComponentDataBuilder("3-Axis", true, "Input/Acceleration Sensors", 1, 75, 75,
+                    typeof(RazorADXL345I2C),paneHoverText: "ADXL345",
                     codeForGen: new()
                     {
                         {
@@ -74,8 +74,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 4,
-                new ComponentDataBuilder("MPU6050", true, "Input/Acceleration Sensors", 1.3, 85, 65,
-                        typeof(RazorMPU6050),
+                new ComponentDataBuilder("6-DoF with Gyro", true, "Input/Acceleration Sensors", 1.3, 85, 65,
+                        typeof(RazorMPU6050), paneHoverText: "MPU6050",
                         codeForGen: new()
                         {
                             {
@@ -102,7 +102,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 5,
-                new ComponentDataBuilder("BNO055", true, "Input/Acceleration Sensors", 1, 120, 90, typeof(RazorBNO055),
+                new ComponentDataBuilder("9-DoF IMU", true, "Input/Acceleration Sensors", 1, 120, 90, typeof(RazorBNO055), paneHoverText: "BNO055",
                         codeForGen: new()
                         {
                             {
@@ -135,8 +135,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 6,
-                new ComponentDataBuilder("TF-Luna LiDAR - I2C", true, "Input/Distance Sensors", 1, 75, 75,
-                        typeof(RazorTFLunaLidarI2C),
+                new ComponentDataBuilder("TF-Luna Time-of-Flight", true, "Input/Distance Sensors", 1, 75, 75,
+                        typeof(RazorTFLunaLidarI2C), paneHoverText: "TF-Luna",
                         codeForGen: new()
                         {
                             {
@@ -187,7 +187,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 9,
-                new ComponentDataBuilder("Alcohol Sensor", true, "Input/Gas Sensors", .66, 75, 75, typeof(RazorMQ3),
+                new ComponentDataBuilder("Alcohol", true, "Input/Gas Sensors", 0.9, 75, 75, typeof(RazorMQ3),
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -241,7 +241,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 12,
-                new ComponentDataBuilder("Hall effect sensor", true, "Input/Other Sensors", .8, 75, 75,
+                new ComponentDataBuilder("Hall Effect", true, "Input/Other Sensors", .8, 75, 75,
                         typeof(RazorKY024), paneHoverText: "KY-024",
                         codeForGen: new()
                         {
@@ -264,7 +264,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 13,
-                new ComponentDataBuilder("Hall effect sensor", true, "Input/Other Sensors", 1.15, 60, 115,
+                new ComponentDataBuilder("Hall Effect", true, "Input/Other Sensors", 1.15, 60, 115,
                         typeof(RazorKY003), paneHoverText: "KY-003",
                         codeForGen: new()
                         {
@@ -284,7 +284,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 14,
-                new ComponentDataBuilder("K-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
+                new ComponentDataBuilder("K-Type Thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
                         75, typeof(RazorMAX6675), paneHoverText: "MAX6675",
                         codeForGen: new()
                         {
@@ -301,7 +301,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 15,
-                new ComponentDataBuilder("PIR motion sensor", true, "Input/Other Sensors", 1, 75, 75,
+                new ComponentDataBuilder("PIR Motion", true, "Input/Other Sensors", 1, 75, 75,
                         typeof(RazorHCSR501), paneHoverText: "HC-SR501",
                         codeForGen: new()
                         {
@@ -323,7 +323,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 16,
-                new ComponentDataBuilder("IR receiver", true, "Input/Other Sensors", 1.3, 65, 90, typeof(RazorKY022),
+                new ComponentDataBuilder("IR Receiver", true, "Input/Other Sensors", 1.3, 65, 90, typeof(RazorKY022),
                     paneHoverText: "KY-022",
                     codeForGen: new()
                     {
@@ -349,7 +349,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 17,
-                new ComponentDataBuilder("Load Cell(HX711)", true, "Input/Other Sensors", .6, 200, 100,
+                new ComponentDataBuilder("Load Cell with HX711 ADC", true, "Input/Other Sensors", .8, 200, 100,
                         typeof(RazorHX711), paneHoverText: "TAL221",
                         codeForGen: new()
                         {
@@ -429,7 +429,7 @@ namespace ADArCWebApp.Shared
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
             {
                 21,
-                new ComponentDataBuilder("Laser diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
+                new ComponentDataBuilder("Laser Diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
                     codeForGen: new()
                     {
                         { "include", "" },
@@ -446,8 +446,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 22,
-                new ComponentDataBuilder("LCD1602 - I2C", true, "Output/Displays/LCD", 0.35, 310, 140,
-                        typeof(RazorLCD1602I2C),
+                new ComponentDataBuilder("16x2 Character LCD", true, "Output/Displays", 0.7, 310, 140,
+                        typeof(RazorLCD1602I2C),paneHoverText: "LCD1602",
                         codeForGen: new()
                         {
                             { "include", "#include <LiquidCrystal_I2C.h>" },
@@ -512,7 +512,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 25,
-                new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
+                new ComponentDataBuilder("Brushed DC Motor with Driver", true, "Output/Motors/DC Motor", .8, 75, 75,
                         typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
                         codeForGen: new()
                         {
@@ -571,7 +571,7 @@ namespace ADArCWebApp.Shared
             }, //TODO this connection doesnt make sense. out until looked at
             {
                 27,
-                new ComponentDataBuilder("Stepper motor with driver", true, "Output/Motors/Stepper Motor", .4, 75, 75,
+                new ComponentDataBuilder("Stepper Motor with Driver", true, "Output/Motors/Stepper Motor", .8, 75, 75,
                         typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
                         codeForGen: new()
                         {
@@ -599,7 +599,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 29,
-                new ComponentDataBuilder("Arcade push button", true, "Input/Buttons and Switches", 1, 75, 75,
+                new ComponentDataBuilder("Arcade Push Button", true, "Input/Buttons and Switches", 1, 75, 75,
                         typeof(RazorArcadePushButton), "Push Button",
                         codeForGen: new()
                         {
@@ -634,8 +634,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 31,
-                new ComponentDataBuilder("Turbidity sensor", true, "Input/Light Sensors", 0.35, -100,
-                        -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
+                new ComponentDataBuilder("Turbidity", true, "Input/Light Sensors", 1.3, -1,
+                        -20, typeof(RazorSEN0189), paneHoverText: "SEN0189",
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -668,7 +668,7 @@ namespace ADArCWebApp.Shared
             // }
             {
                 32,
-                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
+                new ComponentDataBuilder("Analog pH Meter", true, "Input/Other Sensors", .8, -20, -20, typeof(RazorSRVPH),
                     paneHoverText: "SRV-PH",
                     codeForGen: new()
                     {
@@ -699,7 +699,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 33,
-                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Soil Sensors", .5, 75, 75, typeof(RazorSEN0114),
+                new ComponentDataBuilder("Soil Moisture", true, "Input/Soil Sensors", .5, 75, 75, typeof(RazorSEN0114),
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -739,8 +739,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 34,
-                new ComponentDataBuilder("Humidity and Temperature Sensor", true,
-                        "Input/Temperature and Humidity Sensors", 0.5, -20, -20, typeof(RazorSHT30),
+                new ComponentDataBuilder("Digital Temp & Humidity", true,
+                        "Input/Temperature and Humidity Sensors", 0.9, -20, -20, typeof(RazorSHT30),
                         paneHoverText: "SHT30",
                         codeForGen: new()
                         {
@@ -785,8 +785,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 35,
-                new ComponentDataBuilder("Temperature and Humidity Sensor", true,
-                        "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
+                new ComponentDataBuilder("Temp & Humidity", true,
+                        "Input/Temperature and Humidity Sensors", 0.9, 18.5, 19.154, typeof(RazorDHT22),
                         paneHoverText: "DHT22",
                         codeForGen: new()
                         {
@@ -820,7 +820,7 @@ namespace ADArCWebApp.Shared
             {
                 36,
                 new ComponentDataBuilder(
-                        "T-type thermocouple",
+                        "T-Type Thermocouple",
                         true,
                         "Input/Temperature and Humidity Sensors",
                         0.7,
@@ -882,7 +882,7 @@ namespace ADArCWebApp.Shared
             {
                 38,
                 new ComponentDataBuilder(
-                        "Time of Flight (VL53L4CD)",
+                        "Time-of-Flight",
                         true,
                         "Input/Distance Sensors",
                         1,
@@ -936,13 +936,14 @@ namespace ADArCWebApp.Shared
             {
                 41,
                 new ComponentDataBuilder(
-                        "RS485 Transceiver",
+                        "2.4 GHz Transceiver Module",
                         true,
                         "Input/Other Sensors",
                         1,
                         75,
                         75,
                         typeof(RazorTRANSCEIVER),
+                        paneHoverText: "nRF24L01",
                         codeForGen: new()
                         {
                             {
@@ -1005,8 +1006,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 39,
-                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 0.45, 150, 200,
-                        typeof(RazorNPK),
+                new ComponentDataBuilder("Soil NPK", true, "Input/Soil Sensors", 1.5, 150, 200,
+                        typeof(RazorNPK),paneHoverText: "RS-485",
                         codeForGen: new()
                         {
                             {
@@ -1083,7 +1084,7 @@ namespace ADArCWebApp.Shared
                         "Ultimate GPS",
                         true,
                         "Input/Other Sensors",
-                        1,
+                        0.8,
                         135,
                         180,
                         typeof(RazorGPS),
@@ -1171,7 +1172,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 48,
-                new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 0.35, 250, 150,
+                new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 0.9, 250, 150,
                         typeof(RazorJ305B), paneHoverText: "J305B",
                         codeForGen: new()
                         {
@@ -1242,8 +1243,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 44,
-                new ComponentDataBuilder("Temperature and Humidity Sensor Module", true,
-                        "Input/Temperature and Humidity Sensors", 0.8, 18.5, 19.154, typeof(RazorDHT22MODULE),
+                new ComponentDataBuilder("Temp & Humidity Module", true,
+                        "Input/Temperature and Humidity Sensors", 0.7, 18.5, 19.154, typeof(RazorDHT22MODULE),
                         paneHoverText: "DHT22 Module",
                         codeForGen: new()
                         {
@@ -1278,7 +1279,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 40,
-                new ComponentDataBuilder("Time-of-Flight Ranging Sensor", true, "Input/Distance Sensors", 0.8, 10, 90,
+                new ComponentDataBuilder("Time-of-Flight", true, "Input/Distance Sensors", 1.0, 10, 90,
                         typeof(RazorVL53L0X),
                         paneHoverText: "VL53L0X",
                         codeForGen: new()
@@ -1326,8 +1327,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 42,
-                new ComponentDataBuilder("IR Obstacle Avoidance Sensor Module", true, "Input/Distance Sensors", 0.6, 150, 200,
-                        typeof(RazorIRDETECTOR),
+                new ComponentDataBuilder("IR Obstacle Avoidance", true, "Input/Distance Sensors", 1.0, 150, 200,
+                        typeof(RazorIRDETECTOR), paneHoverText: "FC-51",
                         codeForGen: new()
                         {
                             {
@@ -1359,8 +1360,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 43,
-                new ComponentDataBuilder("SSD1306 I2C", true, "Output/Displays/SSD", 1, 75, 75, typeof(RazorSSD1306),
-                    codeForGen: new()
+                new ComponentDataBuilder("OLED", true, "Output/Displays", 1, 75, 75, typeof(RazorSSD1306), 
+                    paneHoverText: "SSD1306",codeForGen: new()
                     {
                         {
                             "include", 
@@ -1404,8 +1405,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 45,
-                new ComponentDataBuilder("DHT11", true, "Input/Temperature and Humidity Sensors", 1, 75, 75,
-                        typeof(RazorDHT11),
+                new ComponentDataBuilder("Basic Temp & Humidity", true, "Input/Temperature and Humidity Sensors", 1, 75, 75,
+                        typeof(RazorDHT11), paneHoverText: "DHT11",
                         codeForGen: new()
                         {
                             { "include", "#include <DHT.h>\n" },
@@ -1444,14 +1445,14 @@ namespace ADArCWebApp.Shared
             {
                 46,
                 new ComponentDataBuilder(
-                        "CO2 Sensor",
+                        "CO2",
                         true,
                         "Input/Gas Sensors",
-                        0.7,
+                        0.9,
                         100,
                         75,
                         typeof(RazorSEN0219),
-                        paneHoverText: "CO2 Sensor",
+                        paneHoverText: "SEN0219",
                         codeForGen: new()
                         {
                             { "include", "" },
@@ -1504,10 +1505,10 @@ namespace ADArCWebApp.Shared
             {
                 47,
                 new ComponentDataBuilder(
-                        "Air Quality Sensor",
+                        "Air Quality",
                         true,
                         "Input/Other Sensors",
-                        0.7,
+                        0.9,
                         100,
                         75,
                         typeof(RazorPMS5003),
@@ -1582,7 +1583,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 49,
-                new ComponentDataBuilder("Dust Sensor", true, "Input/Other Sensors", .25, 240, 435, typeof(RazorGP2Y1014AU0F),
+                new ComponentDataBuilder("Dust", true, "Input/Other Sensors", .5, 240, 435, typeof(RazorGP2Y1014AU0F),
                     paneHoverText: "GP2Y1014AU0F",
                     codeForGen: new()
                     {
@@ -1637,46 +1638,40 @@ namespace ADArCWebApp.Shared
             },
             {
                 50,
-                new ComponentDataBuilder("AMG8833 Thermal Camera", true, "Input/Temperature and Humidity Sensors",
-                        .5, -20, -20, typeof(RazorAMG8833),
+                new ComponentDataBuilder("IR Thermal Camera", true, "Input/Temperature and Humidity Sensors",
+                        1.0, 100, 92.4, typeof(RazorAMG8833),
                         paneHoverText: "AMG8833",
                         codeForGen: new()
                         {
-                            { "include", "#include <Wire.h>" },
+                            { "include", "#include <Wire.h>\n#include <Adafruit_AMG88xx.h>" },
                             {
                                 "global",
-                                "#define AMG8833_I2C_ADDR@ 0x69\n" +
-                                "byte pixelData@[128];\n" +
-                                "float centerTemp@ = 0.0;\n" +
-                                "unsigned long lastReadTime@ = 0;"
+                                "Adafruit_AMG88xx amg@;"
                             },
                             {
                                 "setup",
-                                "  Wire.begin();\n" +
-                                "  Serial.println(\"AMG8833 Ready\");"
+                                "  Serial.println(F(\"Initializing AMG8833...\"));\n" +
+                                "  if (!amg@.begin()) {\n" +
+                                "    Serial.println(\"Could not find a valid AMG8833 sensor. Check wiring or I2C address!\");\n" +
+                                "    while (1);\n" +
+                                "  }\n" +
+                                "  Serial.println(\"AMG8833 online!\");\n" +
+                                "  delay(100);"
                             },
                             {
                                 "loopMain",
-                                "  if (millis() - lastReadTime@ >= 500) {\n" +
-                                "    lastReadTime@ = millis();\n" +
-                                "    \n" +
-                                "    Wire.beginTransmission(AMG8833_I2C_ADDR@);\n" +
-                                "    Wire.write(0x80);\n" +
-                                "    Wire.endTransmission();\n" +
-                                "    \n" +
-                                "    Wire.requestFrom(AMG8833_I2C_ADDR@, 128);\n" +
-                                "    for (int i = 0; i < 128 && Wire.available(); i++) {\n" +
-                                "      pixelData@[i] = Wire.read();\n" +
+                                "  float pixels@[AMG88xx_PIXEL_ARRAY_SIZE];\n" +
+                                "  amg@.readPixels(pixels@);\n\n" +
+                                "  Serial.println(\"--- Thermal Array (8x8 Grid in °C) ---\");\n" +
+                                "  for (int i = 0; i < AMG88xx_PIXEL_ARRAY_SIZE; i++) {\n" +
+                                "    Serial.print(pixels@[i], 1);\n" +
+                                "    Serial.print(\"\\t\");\n" +
+                                "    if ((i + 1) % 8 == 0) {\n" +
+                                "      Serial.println();\n" +
                                 "    }\n" +
-                                "    \n" +
-                                "   int centerRaw@ = (pixelData@[28] << 8) | pixelData@[27];\n" +
-                                "   centerTemp@ = (centerRaw@ / 4.0) - 40;\n" +
-                                "    \n" +
-                                "    Serial.print(\"Center Temp: \");\n" +
-                                "    Serial.print(centerTemp@);\n" +
-                                "    Serial.println(\"°C\");\n" +
-                                "  delay(2000);\n" +
-                                "  }"
+                                "  }\n" +
+                                "  Serial.println();\n" +
+                                "  delay(1000);"
                             },
                             { "functions", "" },
                             { "delayLoop", "" },

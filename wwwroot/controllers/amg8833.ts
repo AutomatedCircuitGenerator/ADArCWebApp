@@ -59,8 +59,8 @@ export class AMG8833 extends Controller implements I2CController {
         const col = pixelIndex % 8;
         const temp = this._pixels[row][col];
 
-        // Convert temperature to 12-bit signed value with proper offset
-        let rawValue = Math.round((temp + 42.5) * 4);
+        // Convert temperature to 12-bit signed value with proper resolution (0.25°C per LSB, no offset)
+        let rawValue = Math.round(temp * 4);
 
         // Handle negative numbers with two's complement
         if (rawValue < 0) {
@@ -71,9 +71,9 @@ export class AMG8833 extends Controller implements I2CController {
 
         let byteToReturn = 0;
         if (this.readIndex % 2 === 0) {
-            byteToReturn = (rawValue >> 8) & 0xFF;
+            byteToReturn = rawValue & 0xFF; // Low byte first
         } else {
-            byteToReturn = rawValue & 0xFF;
+            byteToReturn = (rawValue >> 8) & 0xFF; // High byte second
         }
 
         this.readIndex++;

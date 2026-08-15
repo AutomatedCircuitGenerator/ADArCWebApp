@@ -171,7 +171,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>144</X>
         <Y>48</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+            <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -201,9 +203,6 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n14</name>
         <localLabels>
-          <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
           <string>scl</string>
         </localLabels>
         <localVariables />
@@ -290,9 +289,6 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n18</name>
         <localLabels>
-          <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
           <string>sda</string>
         </localLabels>
         <localVariables />
@@ -312,7 +308,6 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n13</name>
         <localLabels>
           <string>arduino</string>
-          <string>uno</string>
         </localLabels>
         <localVariables />
         <X>72</X>
@@ -591,6 +586,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n3</name>
         <localLabels>
           <string>sda</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>96</X>
@@ -607,6 +603,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n4</name>
         <localLabels>
           <string>scl</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>144</X>
@@ -674,10 +671,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n18</name>
         <localLabels>
-          <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
           <string>sda</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>96</X>
@@ -693,10 +688,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n14</name>
         <localLabels>
-          <string>digital</string>
-          <string>analog</string>
-          <string>gpio</string>
           <string>scl</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>144</X>
