@@ -1837,7 +1837,7 @@ namespace ADArCWebApp.Shared
                     },
                     pins: ["Vcc", "gnd", "sda", "scl"],
                     gsNodeName: "sgp40"
-                ).Property("gas", 100)
+                ).Property("gas", 100.0)
                 .Finish()
             }
         };
