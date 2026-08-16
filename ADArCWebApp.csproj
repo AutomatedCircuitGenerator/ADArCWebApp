@@ -133,4 +133,8 @@
     <TypeScriptCompile Include="wwwroot\controllers\srvph.ts" />
   </ItemGroup>
 
+  <ItemGroup>
+    <ClCompile Include="wwwroot\libraries\DFRobot_SGP40\DFRobot_SGP40.cpp" />
+  </ItemGroup>
+
 </Project>

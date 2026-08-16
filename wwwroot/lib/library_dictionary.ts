@@ -1601,7 +1601,7 @@
     "placeholder_1600": "DFRobot_RainfallSensor",
     "placeholder_1601": "DFRobot_SCD4X",
     "placeholder_1602": "DFRobot_SGP40",
-    "DFRobot_SGP40.h": "DFRobot_SGP40",
+    "DFRobot_SGP40.h": "local/DFRobot_SGP40",
     "placeholder_1603": "DFRobot_SHT20",
     "placeholder_1604": "DFRobot_SIM",
     "placeholder_1605": "DFRobot_SIM7000",

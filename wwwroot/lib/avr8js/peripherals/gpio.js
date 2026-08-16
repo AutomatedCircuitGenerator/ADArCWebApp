@@ -395,9 +395,9 @@ class AVRIOPort {
                 cpu.queueInterrupt({
                     address: interrupt,
                     flagRegister: EIFR,
-                    flagMask: 1 << index,
+                    flagMask: (1 << index),
                     enableRegister: EIMSK,
-                    enableMask: 1 << index,
+                    enableMask: (1 << index),
                     constant: true,
                 });
             }

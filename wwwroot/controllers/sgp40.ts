@@ -58,9 +58,9 @@ export class SGP40 extends Controller implements I2CController {
             if (command === 0x280e) { // Self-test command
                 this.readBuffer = [0xD4, 0x00, 0xC2]; // Success code + dummy CRC
             } else {
-                // Default: measure raw VOC ticks
-                const ticks = Math.max(15000, Math.min(45000, 35000 - (this._vocIndex - 100) * 50));
-                this.readBuffer = [(ticks >> 8) & 0xFF, ticks & 0xFF, 0x55]; // high, low, dummy CRC
+                // Return the actual VOC index directly to the C++ code!
+                const voc = this._vocIndex;
+                this.readBuffer = [(voc >> 8) & 0xFF, voc & 0xFF, 0x55]; // high, low, dummy CRC
             }
             this.readIndex = 0;
         }
