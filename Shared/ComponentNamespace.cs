@@ -1171,7 +1171,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 48,
-                new ComponentDataBuilder("Geiger Counter", true, "Input/Other Sensors", 0.9, 250, 150,
+                new ComponentDataBuilder("Geiger Counter", true, "Input/Air Quality Sensors", 0.9, 250, 150,
                         typeof(RazorJ305B), paneHoverText: "J305B",
                         codeForGen: new()
                         {
@@ -1506,7 +1506,7 @@ namespace ADArCWebApp.Shared
                 new ComponentDataBuilder(
                         "Air Quality",
                         true,
-                        "Input/Other Sensors",
+                        "Input/Air Quality Sensors",
                         0.9,
                         100,
                         75,
@@ -1582,7 +1582,7 @@ namespace ADArCWebApp.Shared
             },
             {
                 49,
-                new ComponentDataBuilder("Dust", true, "Input/Other Sensors", .5, 240, 435, typeof(RazorGP2Y1014AU0F),
+                new ComponentDataBuilder("Dust", true, "Input/Air Quality Sensors", .5, 240, 435, typeof(RazorGP2Y1014AU0F),
                     paneHoverText: "GP2Y1014AU0F",
                     codeForGen: new()
                     {
@@ -1783,6 +1783,62 @@ namespace ADArCWebApp.Shared
                          { "delayLoop", "" }, 
                          { "delayTime", "" }
                      }, pins: ["Vcc", "gnd", "IN"], gsNodeName: "relay", warning: "The 1-Channel Relay requires a dedicated power supply. If the Relay is required to control another sensor or actuator, then the wiring should be through the Relay.").Finish()
+            },
+            {
+                53,
+                new ComponentDataBuilder("VoC Air Quality", true, "Input/Air Quality Sensors", 1, 75, 75, typeof(RazorSGP40), paneHoverText:"SEN0392-SGP40",
+                    codeForGen: new()
+                    {
+                        {
+                            "include",
+                            "#include <DFRobot_SGP40.h>\n\n" +
+                            "// Compatibility macro to support both DFRobot typo and user function\n" +
+                            "#define getVocalIndex(rh, temp) getVoclndex()"
+                        },
+                        { "global",
+                            "// Create SGP40 sensor object using default I2C address (0x59)\n" +
+                            "DFRobot_SGP40 sgp40;"
+                        },
+                        {
+                            "setup",
+                            "  while (!Serial) { ; } // Wait for serial console to open\n\n" +
+                            "  Serial.println(\"Initializing SGP40 VOC Sensor...\");\n\n" +
+                            "  // Initialize sensor\n" +
+                            "  while (!sgp40.begin(/*duration = */ 10000)) {\n" +
+                            "    Serial.println(\"Sensor initialization failed! Checking connections...\");\n" +
+                            "    delay(1000);\n" +
+                            "  }\n\n" +
+                            "  Serial.println(\"SGP40 initialized successfully!\");"
+                        },
+                        {
+                            "loopMain",
+                            "  /*\n" +
+                            "   * The VOC Index algorithm normalizes VOC readings on a 0–500 scale:\n" +
+                            "   *   100  = Normal/Typical clean air baseline\n" +
+                            "   * > 100  = Worse air quality (increased VOCs)\n" +
+                            "   * < 100  = Better air quality\n" +
+                            "   *\n" +
+                            "   * Optional: You can supply temperature (C) and humidity (%) for \n" +
+                            "   * environmental compensation. Default is 25.0 C and 50.0 %RH.\n" +
+                            "   */\n\n" +
+                            "  float relativeHumidity = 50.0; // %RH\n" +
+                            "  float temperatureC     = 25.0; // deg C\n\n" +
+                            "  // Get raw VOC index (processed by Sensirion algorithm)\n" +
+                            "  uint16_t vocIndex = sgp40.getVocalIndex(relativeHumidity, temperatureC);\n\n" +
+                            "  // Print results\n" +
+                            "  Serial.print(\"VOC Index: \");\n" +
+                            "  Serial.println(vocIndex);\n\n" +
+                            "  // The sensor should be sampled once every 1 second for optimal algorithm stability\n" +
+                            "  delay(1000);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["Vcc", "gnd", "sda", "scl"],
+                    gsNodeName: "sgp40"
+                ).Property("gas", 100.0)
+                .Finish()
             }
         };
     }
