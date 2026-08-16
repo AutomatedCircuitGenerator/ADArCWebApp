@@ -81,7 +81,7 @@ function buildHex(source) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 files,
-                sketch: source,
+                sketch: source.includes("getVocalIndex") ? `#define getVocalIndex(rh, temp) getVoclndex()\n` + source : source,
                 board: execute_1.AVRRunner.getInstance().boardConstructor == arduino_uno_1.ArduinoUno ? "" : "mega"
             })
         });

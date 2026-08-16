@@ -96,7 +96,7 @@ export async function buildHex(source: string) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
             files,
-            sketch: source,
+            sketch: source.includes("getVocalIndex") ? `#define getVocalIndex(rh, temp) getVoclndex()\n` + source : source,
             board: AVRRunner.getInstance().boardConstructor == ArduinoUno ? "" : "mega"
         })
     });
