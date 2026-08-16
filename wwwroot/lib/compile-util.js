@@ -74,6 +74,10 @@ function buildHex(source) {
                 catch (_c) { }
             }
         }
+        let compiledSource = source;
+        // Strip "while (!Serial)" to prevent virtual UART hangs
+        compiledSource = compiledSource.replace(/while\s*\(\s*!Serial\s*\)\s*\{?\s*;?\s*\}?/g, "");
+
         const resp = yield fetch(url + '/build', {
             method: 'POST',
             mode: 'cors',
@@ -81,7 +85,7 @@ function buildHex(source) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 files,
-                sketch: source.includes("getVocalIndex") ? `#include <DFRobot_SGP40.h>\nclass DFRobot_SGP40_Sim : public DFRobot_SGP40 {\npublic:\n  bool begin(uint32_t duration = 10000) {\n    return DFRobot_SGP40::begin(0);\n  }\n};\n#define DFRobot_SGP40 DFRobot_SGP40_Sim\n#define getVocalIndex(rh, temp) getVoclndex()\n` + source : source,
+                sketch: compiledSource.includes("getVocalIndex") ? `#include <DFRobot_SGP40.h>\nclass DFRobot_SGP40_Sim : public DFRobot_SGP40 {\npublic:\n  bool begin() {\n    return DFRobot_SGP40::begin(0);\n  }\n  bool begin(uint32_t duration) {\n    return DFRobot_SGP40::begin(0);\n  }\n  bool begin(int duration) {\n    return DFRobot_SGP40::begin(0);\n  }\n};\n#define DFRobot_SGP40 DFRobot_SGP40_Sim\n#define getVocalIndex(rh, temp) getVoclndex()\n` + compiledSource : compiledSource,
                 board: execute_1.AVRRunner.getInstance().boardConstructor == arduino_uno_1.ArduinoUno ? "" : "mega"
             })
         });
