@@ -1791,7 +1791,7 @@ namespace ADArCWebApp.Shared
                     {
                         {
                             "include",
-                            "#include \"DFRobot_SGP40.h\"\n\n" +
+                            "#include <DFRobot_SGP40.h>\n\n" +
                             "// Compatibility macro to support both DFRobot typo and user function\n" +
                             "#define getVocalIndex(rh, temp) getVoclndex()"
                         },
