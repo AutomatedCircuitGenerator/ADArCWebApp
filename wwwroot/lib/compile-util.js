@@ -81,7 +81,7 @@ function buildHex(source) {
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
                 files,
-                sketch: source.includes("getVocalIndex") ? `#define getVocalIndex(rh, temp) getVoclndex()\n` + source : source,
+                sketch: source.includes("getVocalIndex") ? `#include <DFRobot_SGP40.h>\nclass DFRobot_SGP40_Sim : public DFRobot_SGP40 {\npublic:\n  bool begin(uint32_t duration = 10000) {\n    return DFRobot_SGP40::begin(0);\n  }\n};\n#define DFRobot_SGP40 DFRobot_SGP40_Sim\n#define getVocalIndex(rh, temp) getVoclndex()\n` + source : source,
                 board: execute_1.AVRRunner.getInstance().boardConstructor == arduino_uno_1.ArduinoUno ? "" : "mega"
             })
         });
