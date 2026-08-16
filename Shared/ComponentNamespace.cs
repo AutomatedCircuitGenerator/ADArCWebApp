@@ -1801,7 +1801,6 @@ namespace ADArCWebApp.Shared
                         },
                         {
                             "setup",
-                            "  Serial.begin(115200);\n" +
                             "  while (!Serial) { ; } // Wait for serial console to open\n\n" +
                             "  Serial.println(\"Initializing SGP40 VOC Sensor...\");\n\n" +
                             "  // Initialize sensor\n" +
@@ -1838,7 +1837,7 @@ namespace ADArCWebApp.Shared
                     },
                     pins: ["Vcc", "gnd", "sda", "scl"],
                     gsNodeName: "sgp40"
-                ).Property("gas", "VOC")
+                ).Property("gas", 100)
                 .Finish()
             }
         };

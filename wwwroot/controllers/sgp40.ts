@@ -14,7 +14,9 @@ export class SGP40 extends Controller implements I2CController {
     
     override update(state: Record<string, any>) {
 
-        if (state.vocIndex !== undefined) {
+        if (state.gas !== undefined) {
+            this._vocIndex = Math.max(0, Math.min(500, Math.round(state.gas)));
+        } else if (state.vocIndex !== undefined) {
             this._vocIndex = Math.max(0, Math.round(state.vocIndex));
         }
 
