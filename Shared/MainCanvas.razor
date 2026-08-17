@@ -14,23 +14,50 @@
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
-
-
+    
+    
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))
         {
             var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
-            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.First().x1" cy="@line.Segments.First().y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
-            <path d="@BuildPathData(line.Segments)"
-                  stroke="@line.Color"
-                  stroke-width="@(3 * zoomFactor)"
-                  fill="none"
-                  stroke-linejoin="round"
-                  class="segment @(highlighted ? "highlighted" : "")"
-                  style="--glow:@line.Color">
-                <title>@line.Tooltip</title>
-            </path>
-            <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+            <g class="wire" style="--dash-size:@(7 * zoomFactor)px; --dash-offset:@(14 * zoomFactor)px;">
+                <circle class="hover-outline node-outline" 
+                        cx="@line.Segments.First().x1" 
+                        cy="@line.Segments.First().y1" 
+                        r="@(4 * zoomFactor)" 
+                        stroke-width="@(2 * zoomFactor)"></circle>
+                <path class="hover-outline hover-outline-a"
+                      d="@BuildPathData(line.Segments)"
+                      stroke-width="@(7 * zoomFactor)"
+                      fill="none"
+                      style="--glow:@line.Color">
+                    <title>@line.Tooltip</title>
+                </path>
+                <path class="hover-outline hover-outline-b"
+                      d="@BuildPathData(line.Segments)"
+                      stroke-width="@(7 * zoomFactor)"
+                      fill="none"
+                      style="--glow:@line.Color">
+                    <title>@line.Tooltip</title>
+                </path>
+                <circle class="hover-outline node-outline" 
+                        cx="@line.Segments.Last().x2" 
+                        cy="@line.Segments.Last().y2" 
+                        r="@(4 * zoomFactor)" 
+                        stroke-width="@(2 * zoomFactor)"></circle>
+
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.First().x1" cy="@line.Segments.First().y1" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+                <path d="@BuildPathData(line.Segments)"
+                      stroke="@line.Color"
+                      stroke-width="@(3 * zoomFactor)"
+                      fill="none"
+                      stroke-linejoin="round"
+                      class="segment @(highlighted ? "highlighted" : "")"
+                      style="--glow:@line.Color">
+                    <title>@line.Tooltip</title>
+                </path>
+                <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
+            </g>
         }
     </svg>
 
