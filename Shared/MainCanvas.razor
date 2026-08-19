@@ -4,10 +4,11 @@
     @if (BoardService.Board != Board.None)
     {
         <div class="zoom-control">
+            <span class="zoom-sign">🔍</span>
             <button class="zoom-btn" @onclick="ZoomOut">−</button>
             <span class="zoom-perc"> @ZoomPercent%</span>
             <button class="zoom-btn" @onclick="ZoomIn">+</button>
-            <button class="reset-btn" @onclick="ResetZoom">Reset</button>
+            <button class="reset-btn" @onclick="ResetZoom">↻</button>
         </div>
     }
     @foreach (var c in comps)
