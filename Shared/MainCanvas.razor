@@ -1,3 +1,4 @@
+@using System.Security.AccessControl
 @using System.Text
 @inject BoardService BoardService
 <div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
@@ -21,25 +22,25 @@
         {
             var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
             <g class="wire" style="--dash-size:@(7 * zoomFactor)px; --dash-offset:@(14 * zoomFactor)px;">
-                <circle class="hover-outline node-outline" 
-                        cx="@line.Segments.First().x1" 
-                        cy="@line.Segments.First().y1" 
-                        r="@(4 * zoomFactor)" 
-                        stroke-width="@(2 * zoomFactor)"></circle>
                 <path class="hover-outline hover-outline-a"
-                      d="@BuildPathData(line.Segments)"
-                      stroke-width="@(7 * zoomFactor)"
+                      d="@BorderPathData(BuildPathData(line.Segments),-1.5 * zoomFactor)"
+                      stroke-width="@(3 * zoomFactor)"
                       fill="none"
                       style="--glow:@line.Color">
                     <title>@line.Tooltip</title>
                 </path>
                 <path class="hover-outline hover-outline-b"
-                      d="@BuildPathData(line.Segments)"
-                      stroke-width="@(7 * zoomFactor)"
+                      d="@BorderPathData(BuildPathData(line.Segments),1.5 * zoomFactor)"
+                      stroke-width="@(3 * zoomFactor)"
                       fill="none"
                       style="--glow:@line.Color">
                     <title>@line.Tooltip</title>
                 </path>
+                <circle class="hover-outline node-outline" 
+                        cx="@line.Segments.First().x1" 
+                        cy="@line.Segments.First().y1" 
+                        r="@(4 * zoomFactor)" 
+                        stroke-width="@(2 * zoomFactor)"></circle>
                 <circle class="hover-outline node-outline" 
                         cx="@line.Segments.Last().x2" 
                         cy="@line.Segments.Last().y2" 
@@ -182,6 +183,165 @@
         path.Append($"L {lastSegment.x2} {lastSegment.y2} ");
 
         return path.ToString();
+    }
+    
+    private enum Direction
+    {
+        Right,
+        Left,
+        Down,
+        Up
+    }
+    /// <summary>
+    /// Build data for the gray dash border using the actual line, not the actual line
+    /// The algorithm is pretty intuitive and dumb, that this function can be refactored using a better algorithm later.
+    /// </summary>
+    /// <param name="path"></param>
+    /// <param name="offset"></param>
+    /// <returns></returns>
+    private string BorderPathData(string path, double offset) 
+    {
+        var tokens = path.Replace(",", " , ").Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        var result = new StringBuilder();
+        double currentX = double.Parse(tokens[1]);
+        double currentY = double.Parse(tokens[2]);
+        double startX = currentX;
+        double startY = currentY;
+        double nextX = double.Parse(tokens[4]);
+        double nextY = double.Parse(tokens[5]);
+        Direction direction;
+        if (nextX > startX) { 
+            startY -= offset;   // positive > top
+            direction = Direction.Right;
+        } else if (nextX < startX) { 
+            startY += offset;  // positive > bottom
+            direction = Direction.Left;
+        } else if (nextY > startY) {  
+            startX += offset;
+            direction = Direction.Down;
+        } else {  
+            startX -= offset;
+            direction = Direction.Up;
+        }
+        result.Append($"M {startX} {startY} ");
+        for (int i = 3; i < tokens.Length;) {
+            string command = tokens[i++];
+            if (command == "L")
+            {
+                double x = double.Parse(tokens[i++]);
+                double y = double.Parse(tokens[i++]);
+                switch (direction)
+                {
+                    case Direction.Right:
+                        y -= offset;
+                        break;
+
+                    case Direction.Left:
+                        y += offset;
+                        break;
+
+                    case Direction.Down:
+                        x += offset;
+                        break;
+
+                    case Direction.Up:
+                        x -= offset;
+                        break;
+                }
+                result.Append($"{command} {x} {y} ");
+            } else if (command == "Q") {
+                double centerX = double.Parse(tokens[i++]);
+                double centerY = double.Parse(tokens[i++]);
+                i++; // skip ","
+                double x = double.Parse(tokens[i++]);
+                double y = double.Parse(tokens[i++]);
+                direction = OffsetCorner(ref centerX, ref centerY, ref x, ref y, direction, offset);
+                result.Append($"Q {centerX} {centerY}, {x} {y} ");
+            }
+        }
+        return result.ToString();
+    }
+    
+    private static Direction OffsetCorner(ref double centerX, ref double centerY, ref double x, ref double y, Direction direction, double offset)
+    {
+        switch (direction)
+        {
+            case Direction.Right:
+                if (y < centerY) // Turn up
+                {
+                    centerX -= offset;
+                    centerY -= offset;
+                    x -= offset;
+                    return Direction.Up;
+                }
+
+                if (y > centerY) // Turn down
+                {
+                    centerX += offset;
+                    centerY -= offset;
+                    x += offset;
+                    return Direction.Down;
+                }
+
+                break;
+
+            case Direction.Left:
+                if (y < centerY) // Turn up
+                {
+                    centerX -= offset;
+                    centerY += offset;
+                    x -= offset;
+                    return Direction.Up;
+                }
+
+                if (y > centerY) // Turn down
+                {
+                    centerX += offset;
+                    centerY += offset;
+                    x += offset;
+                    return Direction.Down;
+                }
+
+                break;
+
+            case Direction.Down:
+                if (x > centerX) // Turn right
+                {
+                    centerX += offset;
+                    centerY -= offset;
+                    y -= offset;
+                    return Direction.Right;
+                }
+
+                if (x < centerX) // Turn left
+                {
+                    centerX += offset;
+                    centerY += offset;
+                    y += offset;
+                    return Direction.Left;
+                }
+
+                break;
+
+            case Direction.Up:
+                if (x > centerX) // Turn right
+                {
+                    centerX -= offset;
+                    centerY -= offset;
+                    y -= offset;
+                    return Direction.Right;
+                }
+
+                if (x < centerX) // Turn left
+                {
+                    centerX -= offset;
+                    centerY += offset;
+                    y += offset;
+                    return Direction.Left;
+                }
+                break;
+        }
+        return direction;
     }
     
     /// <summary>

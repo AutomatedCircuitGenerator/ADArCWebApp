@@ -94,15 +94,15 @@ line {
 }
 
 .wire:hover .hover-outline-a {
-    animation: marching-forward .8s linear infinite;
+    animation: marching-backward 1.2s linear infinite;
 }
 
 .wire:hover .hover-outline-b {
-    animation: marching-backward .8s linear infinite;
+    animation: marching-forward 1.2s linear infinite;
 }
 
 .wire:hover .node-outline {
-    animation: marching-forward .8s linear infinite;
+    animation: marching-forward 1.2s linear infinite;
 }
 
 @keyframes marching-forward {
