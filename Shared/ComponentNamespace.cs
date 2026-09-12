@@ -1839,7 +1839,41 @@ namespace ADArCWebApp.Shared
                     gsNodeName: "sgp40"
                 ).Property("gas", 100.0)
                 .Finish()
-            }
+            },
+            
+            
+            
+                // MY TEST STARTING HERE
+                {
+                    54,
+                    new ComponentDataBuilder(
+                        "A4988 Stepper Motor Driver",
+                        true,
+                        "Output/Motors/Stepper Motor",
+                        0.5,
+                        18.5,
+                        19.154,
+                        typeof(RazorA4988),
+                        paneHoverText: "A4988",
+
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            { "global", "" },
+                            { "setup", "" },
+                            { "loopMain", "" },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+
+                        pins: ["vdd", "gnd", "step", "dir"],
+                        gsNodeName: "a4988",
+
+                        warning:
+                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods."
+                    ).Finish()
+                }
         };
     }
 }
