@@ -1859,15 +1859,70 @@ namespace ADArCWebApp.Shared
                         codeForGen: new()
                         {
                             { "include", "" },
-                            { "global", "" },
-                            { "setup", "" },
-                            { "loopMain", "" },
+
+                            { "global",
+                                "const int stepPin@ = ~\"step\";\n" +
+                                "const int dirPin@ = ~\"dir\";\n" +
+                                "const int enPin@ = ~\"en\";\n" +
+                                "const int slpPin@ = ~\"slp\";\n" +
+                                "const int rstPin@ = ~\"rst\";\n" +
+                                "const int ms1Pin@ = ~\"ms1\";\n" +
+                                "const int ms2Pin@ = ~\"ms2\";\n" +
+                                "const int ms3Pin@ = ~\"ms3\";"
+                            },
+
+                            { "setup",
+                                "\tpinMode(stepPin@, OUTPUT);\n" +
+                                "\tpinMode(dirPin@, OUTPUT);\n" +
+                                "\tpinMode(enPin@, OUTPUT);\n" +
+                                "\tpinMode(slpPin@, OUTPUT);\n" +
+                                "\tpinMode(rstPin@, OUTPUT);\n" +
+                                "\tpinMode(ms1Pin@, OUTPUT);\n" +
+                                "\tpinMode(ms2Pin@, OUTPUT);\n" +
+                                "\tpinMode(ms3Pin@, OUTPUT);\n\n" +
+
+                                "\tdigitalWrite(enPin@, LOW);\n" +
+                                "\tdigitalWrite(slpPin@, HIGH);\n" +
+                                "\tdigitalWrite(rstPin@, HIGH);\n\n" +
+                                
+                                "\t// Change MS1, MS2, and MS3 outputs to select the step angle\n" +
+                                "\tdigitalWrite(ms1Pin@, LOW);\n" +
+                                "\tdigitalWrite(ms2Pin@, LOW);\n" +
+                                "\tdigitalWrite(ms3Pin@, LOW);\n\n"
+                            },
+
+                            { "loopMain",
+                                "\tSerial.println(\"Rotating clockwise\");\n" +
+                                "\tdigitalWrite(dirPin@, LOW);\n\n" +
+
+                                "\tfor (int i = 0; i < 100; i++) {\n" +
+                                "\t\tdigitalWrite(stepPin@, HIGH);\n" +
+                                "\t\tdelay(10);\n" +
+                                "\t\tdigitalWrite(stepPin@, LOW);\n" +
+                                "\t\tdelay(10);\n" +
+                                "\t}\n\n" +
+
+                                "\tdelay(1000);\n\n" +
+
+                                "\tSerial.println(\"Rotating counter-clockwise\");\n" +
+                                "\tdigitalWrite(dirPin@, HIGH);\n\n" +
+
+                                "\tfor (int i = 0; i < 100; i++) {\n" +
+                                "\t\tdigitalWrite(stepPin@, HIGH);\n" +
+                                "\t\tdelay(10);\n" +
+                                "\t\tdigitalWrite(stepPin@, LOW);\n" +
+                                "\t\tdelay(10);\n" +
+                                "\t}\n\n" +
+
+                                "\tdelay(1000);"
+                            },
+
                             { "functions", "" },
                             { "delayLoop", "" },
                             { "delayTime", "" }
                         },
 
-                        pins: ["vdd", "gnd", "step", "dir"],
+                        pins: ["vdd", "gnd", "step", "dir", "en", "slp", "rst", "ms1", "ms2", "ms3"],
                         gsNodeName: "a4988",
 
                         warning:
