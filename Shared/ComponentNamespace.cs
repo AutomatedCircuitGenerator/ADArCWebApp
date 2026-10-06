@@ -1839,6 +1839,52 @@ namespace ADArCWebApp.Shared
                     gsNodeName: "sgp40"
                 ).Property("gas", 100.0)
                 .Finish()
+            },
+            {
+                54,
+                new ComponentDataBuilder("Thermistor", true, "Input/Temperature and Humidity Sensors", 1, 75, 75, typeof(RazorThermistor), paneHoverText:"Thermistor",
+                    codeForGen: new()
+                    {
+                        {  "include",
+                            ""},
+                        { "global",
+                            "const int sensorPin@ = ~\"sig\";"+
+                            "// Define the analog pin connected to the OUT pin of the module\n"+
+                            "// Define the reference resistance and temperature constants\n"+
+                            "const float referenceResistance = 10000.0; // 10 kΩ at 25°C\n"+
+                            "const float nominalTemperature = 25.0;    // Nominal temperature in °C\n"+
+                            "const float betaCoefficient = 3950.0;     // Beta coefficient of the thermistor\n"+
+                            "const float seriesResistor = 10000.0;     // Value of the pull-up resistor (10 kΩ)"
+                        },
+                        {
+                            "setup", "pinMode(sensorPin@, INPUT);"
+                        },
+                        {
+                            "loopMain",
+                            "int analogValue = analogRead(sensorPin@); // Read the analog value\n"+
+                            "  float voltage = analogValue * (5.0 / 1023.0); // Convert to voltage\n  \n"+
+                            "  // Calculate the thermistor resistance\n"+
+                            "  float thermistorResistance = (seriesResistor * (5.0 - voltage)) / voltage;\n\n"+
+                            "  // Calculate the temperature in Kelvin using the Steinhart-Hart equation\n"+
+                            "  float temperatureKelvin = 1.0 / (1.0 / (nominalTemperature + 273.15) +\n"+
+                            "                                   (1.0 / betaCoefficient) *\n"+
+                            "                                   log(thermistorResistance / referenceResistance));\n\n"+
+                            "  // Convert temperature from Kelvin to Celsius\n"+
+                            "  float temperatureCelsius = temperatureKelvin - 273.15;\n\n"+
+                            "  // Print the temperature to the Serial Monitor\n"+
+                            "  Serial.print(\"Temperature: \");\n"+
+                            "  Serial.print(temperatureCelsius);\n"+
+                            "  Serial.println(\" °C\");\n\n"+
+                            "  delay(1000); // Wait for 1 second before the next reading"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["vcc", "gnd", "sig"],
+                    gsNodeName: "thermistor"
+                ).Property("temperature", 70.0)
+                .Finish()
             }
         };
     }

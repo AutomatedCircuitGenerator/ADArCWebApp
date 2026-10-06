@@ -11,7 +11,7 @@ export class Thermistor extends Controller {
     private isInSimulation: boolean = false;
 
     override update(state: Record<string, any>) {
-        this.setTemperature(state.Temperature);
+        this.setTemperature(state.temperature);
     }
 
     setTemperature(temperature: number) {
@@ -34,17 +34,15 @@ export class Thermistor extends Controller {
     }
 
     // See: https://docs.wokwi.com/parts/wokwi-photoresistor-sensor/
-    temperatureToVoltage(lux: number) {
-        
+    temperatureToVoltage(temperature: number) {
+        this.Temperature = temperature;
         let tempK = this.Temperature + 273.15;
         
-        let thermistorResistance = Math.pow(10, ( (this.betaCoefficient / tempK) 
+        let thermistorResistance = this.referenceResistance * Math.pow(10, ( (this.betaCoefficient / tempK) 
         - (this.betaCoefficient / (this.nominalTemperature + 273.15))));
         
-        let voltage = this.seriesResistor * 5.0 / (thermistorResistance + this.seriesResistor)
+        let voltage = this.seriesResistor * 5.0 / (thermistorResistance + this.seriesResistor);
         
-        let analogValue = voltage * (1023.0 / 5.0);
-        
-        this.pins.analog_out[0].analog.voltage = analogValue;
+        this.pins.sig[0].analog.voltage = voltage;
     }
 }
