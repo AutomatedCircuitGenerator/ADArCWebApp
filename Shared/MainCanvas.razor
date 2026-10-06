@@ -14,8 +14,7 @@
     {
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
-
-
+    <Breadboard></Breadboard>
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))
         {
@@ -483,5 +482,4 @@
             }
         }
     }
-
 }
