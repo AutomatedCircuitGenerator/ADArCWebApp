@@ -54,6 +54,11 @@
             <span class="toolbar-text">Tutorial</span>
         </button>
         <div class="center-toolbar">
+            <label class="breadboard-switch" title="Show or hide breadboard">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="3" fill="#F6E8CB" stroke="#000000" stroke-width="1"/><rect x="4" y="5" width="2" height="14" rx="1" fill="#F05A66"/><rect x="18" y="5" width="2" height="14" rx="1" fill="#438EE8"/><rect x="11.3" y="5" width="1.4" height="14" rx=".7" fill="#CEBFA7"/><g fill="#53535D"><circle cx="8.5" cy="7" r=".85"/><circle cx="15.5" cy="7" r=".85"/><circle cx="8.5" cy="10.3" r=".85"/><circle cx="15.5" cy="10.3" r=".85"/><circle cx="8.5" cy="13.6" r=".85"/><circle cx="15.5" cy="13.6" r=".85"/><circle cx="8.5" cy="17" r=".85"/><circle cx="15.5" cy="17" r=".85"/></g></svg></span>
+                <input type="checkbox" @bind="showBreadboard" />
+                <span class="slider"></span>
+            </label>
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
                 <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
@@ -129,7 +134,11 @@
     </div>
     <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true);}">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
-            <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
+            <MainCanvas comps="Comps"
+                        ShowBreadboard="showBreadboard"
+                        handleMouseEnter="() => allowDrop = true"
+                        handleMouseLeave="() => allowDrop = false">
+            </MainCanvas>
         </div>
         <div class="sidebar" style="left: @(leftPaneAlign)px" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
             <div class="expand-button expand-button-left @(shouldShowBoardSelect && windowWidth <= 1350 ? "disabled" : "")" @onclick="@(ToggleLeftSidebar)" style="left:100%;">
@@ -201,6 +210,8 @@
 @code{
     private Modal modal;
     private bool _exampleModalOpen;
+    
+    private bool showBreadboard = false;
 
     private ElementReference _mainCanvasContainer;
 
