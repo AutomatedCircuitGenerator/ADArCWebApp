@@ -17,10 +17,10 @@
     }
     @if (ShowBreadboard)
     {
-        <Breadboard Transform="transform" zoomFactor="@zoomFactor" />
+        <Breadboard Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" />
         @foreach (var c in comps)
         {
-            if(!c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered below
+            if(!c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered here
             <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
         }
     }
@@ -78,23 +78,19 @@
 
     private bool _dragging = false;
     private bool _hasTarget = false; //refers to whether or not a drag process has a target, meaning that a component is dragged
+    private bool _breadboardDrag = false;
     private KeyValuePair<int, ComponentInstance> _target;
 
     private Transform transform = new();
 
     /// <summary>
     /// Transform refers to the combination of fullscreen drag and zoom.
-    /// Zoom is currently disabled.
     /// This function resets both.
     /// </summary>
     public void ResetTransform()
     {
         transform = new Transform();
-
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
 
     private void CancelDrag()
@@ -288,10 +284,7 @@
         var scale = zoomFactor / oldZoom;
         transform.translate.x = centerX - scale * (centerX - transform.translate.x);
         transform.translate.y = centerY - scale * (centerY - transform.translate.y);
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
     
     /*
@@ -323,12 +316,21 @@
         SetZoom(1, 1920 / 2, 1080 / 2);
     }
 
+    public void AdjustZoom()
+    {
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);
+        }
+        AdjustBBToZoom();
+    }
+    
     /// <summary>
     /// Attempts to scale a component in place to account for zoom.
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
+    private void AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
@@ -336,9 +338,20 @@
 
         comp.zoomedX = z.x;
         comp.zoomedY = z.y;
-
-        return comp;
     }
+
+    public double BreadboardX = 0;
+    public double BreadboardY = 0;
+    public double BreadboardZoomX;
+    public double BreadboardZoomY; 
+    private void AdjustBBToZoom()
+    {
+        
+        var z = ZoomCoord((BreadboardX, BreadboardY));
+        BreadboardZoomX = z.x;
+        BreadboardZoomY = z.y;
+    }
+    
 
     /// <summary>
     /// Atteampts to calculate the total effect of zoom on a coordinate.
@@ -376,16 +389,15 @@
         this._target = target;
     }
 
-    /*
+    
     //Handle the start of dragging the breadboard
     private void DragBreadboardStart(MouseEventArgs e)
     {
         if (e.Button != 0) return;
         _dragging = true; //start drag, signal that there is a selected component, and remember it
-        _hasTarget = true;
-        this._target = new  KeyValuePair<int, ComponentInstance>(e.X, e.Y);
+        _breadboardDrag = true;
     }
-    */
+    
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
@@ -403,16 +415,16 @@
                 AdjustCompToZoom(_target.Value);
                 break;
             //dragging the canvas, all components
+            case true when _breadboardDrag:
+                BreadboardX += (e.MovementX / zoomFactor);
+                BreadboardY += (e.MovementY / zoomFactor);
+                AdjustBBToZoom();
+                break;
             case true:
             {
                 transform.translate.x += e.MovementX;
                 transform.translate.y += e.MovementY;
-                foreach (var t in comps)
-                {
-                    //t.Value.x += (e.MovementX / zoomFactor);
-                    //t.Value.y += (e.MovementY / zoomFactor);
-                    AdjustCompToZoom(t.Value);
-                }
+                AdjustZoom();
 
                 break;
             }
@@ -488,10 +500,7 @@
     public void TriggerRefresh()
     {
         StateHasChanged();
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp); // Apply transform/zoom to each component
-        }
+        AdjustZoom();
 
         ConnLines.Clear(); // Remove all wires
         foreach (var comp in comps.Values)

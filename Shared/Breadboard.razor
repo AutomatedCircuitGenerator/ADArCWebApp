@@ -9,7 +9,8 @@
     [Parameter] public EventCallback<MouseEventArgs> DragProgress { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> DragEnd { get; set; }
     [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
-
+    [Parameter] public double zoomedX { get; set; } = 0;
+    [Parameter] public double zoomedY { get; set; } = 0;
     [Parameter] public Transform? Transform { get; set; }
     // Test the connection
     protected override void OnInitialized()
@@ -442,7 +443,7 @@
 
 }
 
-<div  @oncontextmenu:preventDefault="true" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style=" position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
+<div  @oncontextmenu:preventDefault="true" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="540" height="380">
     <g transform="translate(0 760) rotate(270)"> 
@@ -453,7 +454,7 @@
 </style>
 
         <rect x="12" y="12" width="736" height="1056" rx="10"
-              fill="#f4f1e8" stroke="#d8d4c8" stroke-width="2"/>
+              fill="#f4f1e8" stroke="#d8d4c8" stroke-width="2"/>top:@(zoomedY)px; left:@(zoomedX)px;
 
         <!-- center trench -->
         <rect x="349" y="55" width="62" height="975" rx="3" fill="#ebe8df"/>
