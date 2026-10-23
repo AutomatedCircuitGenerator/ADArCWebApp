@@ -20,6 +20,8 @@ namespace ADArCWebApp.Shared
         public readonly int GlobalId;
         public double X;
         public double Y;
+
+        public virtual bool LivesOnBreadBoard => false;
         
         public Variant? Highlight {get; set;}
 

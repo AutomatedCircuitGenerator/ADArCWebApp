@@ -12,11 +12,17 @@
     }
     @foreach (var c in comps)
     {
+        if(c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered below
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
     @if (ShowBreadboard)
     {
-        <Breadboard />
+        <Breadboard Transform="transform" zoomFactor="@zoomFactor" />
+        @foreach (var c in comps)
+        {
+            if(!c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered below
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
     }
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))
@@ -370,6 +376,16 @@
         this._target = target;
     }
 
+    /*
+    //Handle the start of dragging the breadboard
+    private void DragBreadboardStart(MouseEventArgs e)
+    {
+        if (e.Button != 0) return;
+        _dragging = true; //start drag, signal that there is a selected component, and remember it
+        _hasTarget = true;
+        this._target = new  KeyValuePair<int, ComponentInstance>(e.X, e.Y);
+    }
+    */
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
@@ -402,6 +418,7 @@
             }
         }
     }
+
 
     bool dragEndFlag = false; //disable deselection at end of drag
 
