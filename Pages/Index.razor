@@ -56,7 +56,7 @@
         <div class="center-toolbar">
             <label class="breadboard-switch" title="Show or hide breadboard">
                 <span><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="3" fill="#F6E8CB" stroke="#000000" stroke-width="1"/><rect x="4" y="5" width="2" height="14" rx="1" fill="#F05A66"/><rect x="18" y="5" width="2" height="14" rx="1" fill="#438EE8"/><rect x="11.3" y="5" width="1.4" height="14" rx=".7" fill="#CEBFA7"/><g fill="#53535D"><circle cx="8.5" cy="7" r=".85"/><circle cx="15.5" cy="7" r=".85"/><circle cx="8.5" cy="10.3" r=".85"/><circle cx="15.5" cy="10.3" r=".85"/><circle cx="8.5" cy="13.6" r=".85"/><circle cx="15.5" cy="13.6" r=".85"/><circle cx="8.5" cy="17" r=".85"/><circle cx="15.5" cy="17" r=".85"/></g></svg></span>
-                <input type="checkbox" @bind="showBreadboard" />
+                <input type="checkbox" @bind="showBreadboard" @bind:after="EnsureBreadboardConnections"/>
                 <span class="slider"></span>
             </label>
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
@@ -212,6 +212,92 @@
     private bool _exampleModalOpen;
     
     private bool showBreadboard = false;
+   
+    private void EnsureBreadboardConnections()
+    {
+        if (!showBreadboard) return;
+
+        // Get all holes that are already used
+        var usedHoles = Comps.Values
+            .SelectMany(c => c.BreadboardConnections)
+            .Select(c => c.HoleId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Only use A and F since other holes on same row are connected
+        var signalHoles = (
+            from column in "af"
+            from row in Enumerable.Range(1, 30)
+            select $"{column}{row}"
+        ).ToList();
+
+        // Get all positive power rail holes
+        var positiveHoles = Enumerable.Range(1, 25)
+            .Select(i => $"LPLUS_{i}")
+            .ToList();
+
+        // Get all negative power rail holes
+        var negativeHoles = Enumerable.Range(1, 25)
+            .Select(i => $"LMINUS_{i}")
+            .ToList();
+
+        foreach (var comp in Comps.Values)
+        {
+            if (comp.IsArduino() || comp.localId == 0) continue; // Skip Arduino
+            
+            int pinCount = comp.Data.pinInfo.Count(); // Get total pins of this component
+            
+            for (int pinId = 0; pinId < pinCount; pinId++)
+            {
+                // Get the pin name
+                string pinName = comp.Data.pins
+                    .FirstOrDefault(p => p.Value == pinId).Key
+                    ?? comp.Data.pinInfo[pinId].name;
+
+                string name = pinName.Trim().ToUpperInvariant();
+
+                // VCC go to + rail, GND go to - rail, other pins go to A or F
+                var candidates = name switch
+                {
+                    "VCC" or "VDD" or "5V" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" => negativeHoles,
+                    _ => signalHoles
+                };
+
+                // Check if this pin already have a breadboard connection
+                var existing = comp.BreadboardConnections
+                    .FirstOrDefault(c => c.FromPinId == pinId);
+                
+                // Check if connection is correct
+                if (existing != null)
+                {
+                    // If it already connect to correct hole type, skip it
+                    if (candidates.Contains(
+                        existing.HoleId,
+                        StringComparer.OrdinalIgnoreCase))
+                        continue;
+
+                    // Remove old connection if it connect to wrong hole type
+                    comp.BreadboardConnections.Remove(existing);
+                    usedHoles.Remove(existing.HoleId);
+                }
+                
+                string? freeHole = candidates.FirstOrDefault(h => !usedHoles.Contains(h));  // Find a hole that is not used yet
+                
+                // Skip if no hole left
+                if (freeHole == null)
+                {
+                    Console.WriteLine(
+                        $"No available breadboard hole for {pinName}");
+                    continue;
+                }
+                
+                comp.BreadboardConnections.Add(new BreadboardConnection(pinId, freeHole, "red"));   // Add wire from component pin to the hole
+                
+                usedHoles.Add(freeHole);    // Mark this hole as used so other pins won't use it
+            }
+        }
+    }
+
 
     private ElementReference _mainCanvasContainer;
 
@@ -512,6 +598,7 @@
             var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
             comp.localId = localIds;
             Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
+            if (showBreadboard) EnsureBreadboardConnections();
             BuildCode.outputPins.Clear();
             BuildCanvas!.ConnLines.Clear();
             //reset the way that component pins are bound to the arduino.
