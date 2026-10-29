@@ -12,519 +12,530 @@
     [Parameter] public double zoomedX { get; set; } = 0;
     [Parameter] public double zoomedY { get; set; } = 0;
     [Parameter] public Transform? Transform { get; set; }
+    private bool enableBorder = false;
+    [Parameter] public bool forceBorder { get; set; } = false;
+    private string BorderClasses()
+    {
+        if (forceBorder)
+        {
+            return "a-border";
+        }
 
+        return enableBorder ? "b-border" : "";
+    }
 }
 
-<div  @oncontextmenu:preventDefault="true" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
-
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="540" height="380">
-    <g transform="translate(0 760) rotate(270)"> 
-        <style>
+<div class="comp-wrapper @(BorderClasses())" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @oncontextmenu:preventDefault="true" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
+    <div id="component-bb">
+    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="540" height="380">
+        <g transform="translate(0 760) rotate(270)"> 
+            <style>
     .txt { font-family: Arial, Helvetica, sans-serif; fill:#222; }
     .col { font-size:18px; }
     .row { font-size:15px; }
 </style>
 
-        <rect x="12" y="12" width="736" height="1056" rx="10"
-              fill="#f4f1e8" stroke="#d8d4c8" stroke-width="2"/>top:@(zoomedY)px; left:@(zoomedX)px;
+            <rect x="12" y="12" width="736" height="1056" rx="10"
+                  fill="#f4f1e8" stroke="#d8d4c8" stroke-width="2"/>top:@(zoomedY)px; left:@(zoomedX)px;
 
-        <!-- center trench -->
-        <rect x="349" y="55" width="62" height="975" rx="3" fill="#ebe8df"/>
+            <!-- center trench -->
+            <rect x="349" y="55" width="62" height="975" rx="3" fill="#ebe8df"/>
 
-        <!-- power rail guide lines -->
-        <line x1="42" y1="60" x2="42" y2="1018" stroke="#d74b58" stroke-width="3"/>
-        <line x1="122" y1="60" x2="122" y2="1018" stroke="#2786b8" stroke-width="3"/>
-        <line x1="638" y1="60" x2="638" y2="1018" stroke="#d74b58" stroke-width="3"/>
-        <line x1="718" y1="60" x2="718" y2="1018" stroke="#2786b8" stroke-width="3"/>
+            <!-- power rail guide lines -->
+            <line x1="42" y1="60" x2="42" y2="1018" stroke="#d74b58" stroke-width="3"/>
+            <line x1="122" y1="60" x2="122" y2="1018" stroke="#2786b8" stroke-width="3"/>
+            <line x1="638" y1="60" x2="638" y2="1018" stroke="#d74b58" stroke-width="3"/>
+            <line x1="718" y1="60" x2="718" y2="1018" stroke="#2786b8" stroke-width="3"/>
 
-        <text x="42" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
-        <text x="42" y="1052" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
-        <text x="122" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
-        <text x="122" y="1052" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
-        <text x="638" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
-        <text x="638" y="1052" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
-        <text x="718" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
-        <text x="718" y="1052" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
-        <rect id="a1" x="183.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b1" x="215.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c1" x="247.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d1" x="279.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e1" x="311.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f1" x="439.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g1" x="471.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h1" x="503.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i1" x="535.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j1" x="567.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a2" x="183.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b2" x="215.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c2" x="247.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d2" x="279.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e2" x="311.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f2" x="439.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g2" x="471.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h2" x="503.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i2" x="535.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j2" x="567.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a3" x="183.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b3" x="215.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c3" x="247.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d3" x="279.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e3" x="311.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f3" x="439.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g3" x="471.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h3" x="503.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i3" x="535.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j3" x="567.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a4" x="183.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b4" x="215.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c4" x="247.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d4" x="279.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e4" x="311.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f4" x="439.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g4" x="471.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h4" x="503.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i4" x="535.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j4" x="567.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a5" x="183.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b5" x="215.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c5" x="247.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d5" x="279.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e5" x="311.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f5" x="439.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g5" x="471.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h5" x="503.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i5" x="535.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j5" x="567.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a6" x="183.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b6" x="215.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c6" x="247.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d6" x="279.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e6" x="311.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f6" x="439.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g6" x="471.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h6" x="503.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i6" x="535.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j6" x="567.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a7" x="183.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b7" x="215.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c7" x="247.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d7" x="279.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e7" x="311.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f7" x="439.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g7" x="471.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h7" x="503.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i7" x="535.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j7" x="567.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a8" x="183.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b8" x="215.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c8" x="247.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d8" x="279.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e8" x="311.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f8" x="439.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g8" x="471.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h8" x="503.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i8" x="535.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j8" x="567.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a9" x="183.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b9" x="215.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c9" x="247.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d9" x="279.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e9" x="311.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f9" x="439.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g9" x="471.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h9" x="503.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i9" x="535.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j9" x="567.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a10" x="183.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b10" x="215.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c10" x="247.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d10" x="279.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e10" x="311.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f10" x="439.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g10" x="471.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h10" x="503.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i10" x="535.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j10" x="567.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a11" x="183.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b11" x="215.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c11" x="247.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d11" x="279.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e11" x="311.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f11" x="439.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g11" x="471.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h11" x="503.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i11" x="535.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j11" x="567.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a12" x="183.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b12" x="215.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c12" x="247.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d12" x="279.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e12" x="311.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f12" x="439.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g12" x="471.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h12" x="503.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i12" x="535.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j12" x="567.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a13" x="183.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b13" x="215.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c13" x="247.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d13" x="279.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e13" x="311.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f13" x="439.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g13" x="471.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h13" x="503.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i13" x="535.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j13" x="567.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a14" x="183.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b14" x="215.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c14" x="247.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d14" x="279.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e14" x="311.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f14" x="439.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g14" x="471.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h14" x="503.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i14" x="535.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j14" x="567.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a15" x="183.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b15" x="215.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c15" x="247.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d15" x="279.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e15" x="311.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f15" x="439.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g15" x="471.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h15" x="503.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i15" x="535.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j15" x="567.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a16" x="183.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b16" x="215.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c16" x="247.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d16" x="279.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e16" x="311.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f16" x="439.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g16" x="471.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h16" x="503.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i16" x="535.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j16" x="567.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a17" x="183.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b17" x="215.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c17" x="247.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d17" x="279.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e17" x="311.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f17" x="439.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g17" x="471.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h17" x="503.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i17" x="535.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j17" x="567.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a18" x="183.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b18" x="215.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c18" x="247.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d18" x="279.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e18" x="311.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f18" x="439.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g18" x="471.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h18" x="503.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i18" x="535.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j18" x="567.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a19" x="183.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b19" x="215.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c19" x="247.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d19" x="279.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e19" x="311.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f19" x="439.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g19" x="471.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h19" x="503.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i19" x="535.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j19" x="567.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a20" x="183.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b20" x="215.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c20" x="247.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d20" x="279.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e20" x="311.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f20" x="439.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g20" x="471.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h20" x="503.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i20" x="535.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j20" x="567.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a21" x="183.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b21" x="215.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c21" x="247.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d21" x="279.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e21" x="311.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f21" x="439.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g21" x="471.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h21" x="503.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i21" x="535.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j21" x="567.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a22" x="183.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b22" x="215.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c22" x="247.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d22" x="279.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e22" x="311.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f22" x="439.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g22" x="471.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h22" x="503.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i22" x="535.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j22" x="567.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a23" x="183.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b23" x="215.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c23" x="247.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d23" x="279.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e23" x="311.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f23" x="439.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g23" x="471.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h23" x="503.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i23" x="535.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j23" x="567.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a24" x="183.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b24" x="215.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c24" x="247.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d24" x="279.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e24" x="311.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f24" x="439.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g24" x="471.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h24" x="503.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i24" x="535.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j24" x="567.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a25" x="183.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b25" x="215.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c25" x="247.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d25" x="279.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e25" x="311.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f25" x="439.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g25" x="471.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h25" x="503.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i25" x="535.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j25" x="567.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a26" x="183.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b26" x="215.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c26" x="247.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d26" x="279.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e26" x="311.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f26" x="439.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g26" x="471.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h26" x="503.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i26" x="535.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j26" x="567.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a27" x="183.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b27" x="215.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c27" x="247.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d27" x="279.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e27" x="311.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f27" x="439.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g27" x="471.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h27" x="503.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i27" x="535.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j27" x="567.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a28" x="183.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b28" x="215.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c28" x="247.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d28" x="279.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e28" x="311.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f28" x="439.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g28" x="471.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h28" x="503.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i28" x="535.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j28" x="567.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a29" x="183.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b29" x="215.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c29" x="247.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d29" x="279.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e29" x="311.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f29" x="439.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g29" x="471.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h29" x="503.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i29" x="535.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j29" x="567.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="a30" x="183.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="b30" x="215.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="c30" x="247.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="d30" x="279.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="e30" x="311.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="f30" x="439.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="g30" x="471.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="h30" x="503.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="i30" x="535.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="j30" x="567.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_1" x="61.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_2" x="61.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_3" x="61.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_4" x="61.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_5" x="61.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_6" x="61.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_7" x="61.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_8" x="61.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_9" x="61.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_10" x="61.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_11" x="61.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_12" x="61.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_13" x="61.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_14" x="61.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_15" x="61.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_16" x="61.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_17" x="61.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_18" x="61.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_19" x="61.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_20" x="61.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_21" x="61.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_22" x="61.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_23" x="61.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_24" x="61.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LPLUS_25" x="61.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_1" x="91.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_2" x="91.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_3" x="91.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_4" x="91.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_5" x="91.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_6" x="91.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_7" x="91.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_8" x="91.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_9" x="91.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_10" x="91.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_11" x="91.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_12" x="91.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_13" x="91.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_14" x="91.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_15" x="91.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_16" x="91.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_17" x="91.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_18" x="91.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_19" x="91.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_20" x="91.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_21" x="91.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_22" x="91.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_23" x="91.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_24" x="91.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="LMINUS_25" x="91.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_1" x="659.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_2" x="659.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_3" x="659.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_4" x="659.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_5" x="659.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_6" x="659.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_7" x="659.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_8" x="659.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_9" x="659.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_10" x="659.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_11" x="659.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_12" x="659.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_13" x="659.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_14" x="659.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_15" x="659.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_16" x="659.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_17" x="659.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_18" x="659.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_19" x="659.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_20" x="659.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_21" x="659.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_22" x="659.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_23" x="659.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_24" x="659.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RPLUS_25" x="659.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_1" x="689.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_2" x="689.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_3" x="689.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_4" x="689.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_5" x="689.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_6" x="689.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_7" x="689.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_8" x="689.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_9" x="689.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_10" x="689.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_11" x="689.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_12" x="689.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_13" x="689.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_14" x="689.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_15" x="689.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_16" x="689.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_17" x="689.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_18" x="689.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_19" x="689.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_20" x="689.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_21" x="689.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_22" x="689.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_23" x="689.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_24" x="689.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <rect id="RMINUS_25" x="689.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
-        <text class="txt col" x="188" y="56" text-anchor="middle">a</text>
-        <text class="txt col" x="188" y="1050" text-anchor="middle">a</text>
-        <text class="txt col" x="220" y="56" text-anchor="middle">b</text>
-        <text class="txt col" x="220" y="1050" text-anchor="middle">b</text>
-        <text class="txt col" x="252" y="56" text-anchor="middle">c</text>
-        <text class="txt col" x="252" y="1050" text-anchor="middle">c</text>
-        <text class="txt col" x="284" y="56" text-anchor="middle">d</text>
-        <text class="txt col" x="284" y="1050" text-anchor="middle">d</text>
-        <text class="txt col" x="316" y="56" text-anchor="middle">e</text>
-        <text class="txt col" x="316" y="1050" text-anchor="middle">e</text>
-        <text class="txt col" x="444" y="56" text-anchor="middle">f</text>
-        <text class="txt col" x="444" y="1050" text-anchor="middle">f</text>
-        <text class="txt col" x="476" y="56" text-anchor="middle">g</text>
-        <text class="txt col" x="476" y="1050" text-anchor="middle">g</text>
-        <text class="txt col" x="508" y="56" text-anchor="middle">h</text>
-        <text class="txt col" x="508" y="1050" text-anchor="middle">h</text>
-        <text class="txt col" x="540" y="56" text-anchor="middle">i</text>
-        <text class="txt col" x="540" y="1050" text-anchor="middle">i</text>
-        <text class="txt col" x="572" y="56" text-anchor="middle">j</text>
-        <text class="txt col" x="572" y="1050" text-anchor="middle">j</text>
-        <text class="txt row" x="162" y="97" text-anchor="end">1</text>
-        <text class="txt row" x="598" y="97" text-anchor="start">1</text>
-        <text class="txt row" x="162" y="128" text-anchor="end">2</text>
-        <text class="txt row" x="598" y="128" text-anchor="start">2</text>
-        <text class="txt row" x="162" y="159" text-anchor="end">3</text>
-        <text class="txt row" x="598" y="159" text-anchor="start">3</text>
-        <text class="txt row" x="162" y="190" text-anchor="end">4</text>
-        <text class="txt row" x="598" y="190" text-anchor="start">4</text>
-        <text class="txt row" x="162" y="221" text-anchor="end">5</text>
-        <text class="txt row" x="598" y="221" text-anchor="start">5</text>
-        <text class="txt row" x="162" y="252" text-anchor="end">6</text>
-        <text class="txt row" x="598" y="252" text-anchor="start">6</text>
-        <text class="txt row" x="162" y="283" text-anchor="end">7</text>
-        <text class="txt row" x="598" y="283" text-anchor="start">7</text>
-        <text class="txt row" x="162" y="314" text-anchor="end">8</text>
-        <text class="txt row" x="598" y="314" text-anchor="start">8</text>
-        <text class="txt row" x="162" y="345" text-anchor="end">9</text>
-        <text class="txt row" x="598" y="345" text-anchor="start">9</text>
-        <text class="txt row" x="162" y="376" text-anchor="end">10</text>
-        <text class="txt row" x="598" y="376" text-anchor="start">10</text>
-        <text class="txt row" x="162" y="407" text-anchor="end">11</text>
-        <text class="txt row" x="598" y="407" text-anchor="start">11</text>
-        <text class="txt row" x="162" y="438" text-anchor="end">12</text>
-        <text class="txt row" x="598" y="438" text-anchor="start">12</text>
-        <text class="txt row" x="162" y="469" text-anchor="end">13</text>
-        <text class="txt row" x="598" y="469" text-anchor="start">13</text>
-        <text class="txt row" x="162" y="500" text-anchor="end">14</text>
-        <text class="txt row" x="598" y="500" text-anchor="start">14</text>
-        <text class="txt row" x="162" y="531" text-anchor="end">15</text>
-        <text class="txt row" x="598" y="531" text-anchor="start">15</text>
-        <text class="txt row" x="162" y="562" text-anchor="end">16</text>
-        <text class="txt row" x="598" y="562" text-anchor="start">16</text>
-        <text class="txt row" x="162" y="593" text-anchor="end">17</text>
-        <text class="txt row" x="598" y="593" text-anchor="start">17</text>
-        <text class="txt row" x="162" y="624" text-anchor="end">18</text>
-        <text class="txt row" x="598" y="624" text-anchor="start">18</text>
-        <text class="txt row" x="162" y="655" text-anchor="end">19</text>
-        <text class="txt row" x="598" y="655" text-anchor="start">19</text>
-        <text class="txt row" x="162" y="686" text-anchor="end">20</text>
-        <text class="txt row" x="598" y="686" text-anchor="start">20</text>
-        <text class="txt row" x="162" y="717" text-anchor="end">21</text>
-        <text class="txt row" x="598" y="717" text-anchor="start">21</text>
-        <text class="txt row" x="162" y="748" text-anchor="end">22</text>
-        <text class="txt row" x="598" y="748" text-anchor="start">22</text>
-        <text class="txt row" x="162" y="779" text-anchor="end">23</text>
-        <text class="txt row" x="598" y="779" text-anchor="start">23</text>
-        <text class="txt row" x="162" y="810" text-anchor="end">24</text>
-        <text class="txt row" x="598" y="810" text-anchor="start">24</text>
-        <text class="txt row" x="162" y="841" text-anchor="end">25</text>
-        <text class="txt row" x="598" y="841" text-anchor="start">25</text>
-        <text class="txt row" x="162" y="872" text-anchor="end">26</text>
-        <text class="txt row" x="598" y="872" text-anchor="start">26</text>
-        <text class="txt row" x="162" y="903" text-anchor="end">27</text>
-        <text class="txt row" x="598" y="903" text-anchor="start">27</text>
-        <text class="txt row" x="162" y="934" text-anchor="end">28</text>
-        <text class="txt row" x="598" y="934" text-anchor="start">28</text>
-        <text class="txt row" x="162" y="965" text-anchor="end">29</text>
-        <text class="txt row" x="598" y="965" text-anchor="start">29</text>
-        <text class="txt row" x="162" y="996" text-anchor="end">30</text>
-        <text class="txt row" x="598" y="996" text-anchor="start">30</text>
-    </g>
-</svg>
+            <text x="42" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+            <text x="42" y="1052" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+            <text x="122" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+            <text x="122" y="1052" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+            <text x="638" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+            <text x="638" y="1052" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+            <text x="718" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+            <text x="718" y="1052" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+            <rect id="a1" x="183.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b1" x="215.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c1" x="247.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d1" x="279.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e1" x="311.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f1" x="439.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g1" x="471.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h1" x="503.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i1" x="535.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j1" x="567.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a2" x="183.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b2" x="215.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c2" x="247.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d2" x="279.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e2" x="311.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f2" x="439.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g2" x="471.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h2" x="503.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i2" x="535.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j2" x="567.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a3" x="183.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b3" x="215.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c3" x="247.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d3" x="279.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e3" x="311.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f3" x="439.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g3" x="471.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h3" x="503.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i3" x="535.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j3" x="567.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a4" x="183.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b4" x="215.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c4" x="247.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d4" x="279.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e4" x="311.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f4" x="439.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g4" x="471.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h4" x="503.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i4" x="535.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j4" x="567.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a5" x="183.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b5" x="215.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c5" x="247.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d5" x="279.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e5" x="311.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f5" x="439.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g5" x="471.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h5" x="503.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i5" x="535.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j5" x="567.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a6" x="183.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b6" x="215.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c6" x="247.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d6" x="279.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e6" x="311.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f6" x="439.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g6" x="471.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h6" x="503.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i6" x="535.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j6" x="567.5" y="242.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a7" x="183.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b7" x="215.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c7" x="247.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d7" x="279.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e7" x="311.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f7" x="439.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g7" x="471.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h7" x="503.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i7" x="535.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j7" x="567.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a8" x="183.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b8" x="215.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c8" x="247.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d8" x="279.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e8" x="311.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f8" x="439.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g8" x="471.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h8" x="503.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i8" x="535.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j8" x="567.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a9" x="183.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b9" x="215.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c9" x="247.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d9" x="279.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e9" x="311.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f9" x="439.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g9" x="471.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h9" x="503.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i9" x="535.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j9" x="567.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a10" x="183.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b10" x="215.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c10" x="247.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d10" x="279.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e10" x="311.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f10" x="439.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g10" x="471.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h10" x="503.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i10" x="535.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j10" x="567.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a11" x="183.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b11" x="215.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c11" x="247.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d11" x="279.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e11" x="311.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f11" x="439.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g11" x="471.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h11" x="503.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i11" x="535.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j11" x="567.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a12" x="183.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b12" x="215.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c12" x="247.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d12" x="279.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e12" x="311.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f12" x="439.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g12" x="471.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h12" x="503.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i12" x="535.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j12" x="567.5" y="428.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a13" x="183.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b13" x="215.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c13" x="247.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d13" x="279.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e13" x="311.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f13" x="439.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g13" x="471.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h13" x="503.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i13" x="535.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j13" x="567.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a14" x="183.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b14" x="215.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c14" x="247.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d14" x="279.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e14" x="311.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f14" x="439.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g14" x="471.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h14" x="503.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i14" x="535.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j14" x="567.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a15" x="183.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b15" x="215.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c15" x="247.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d15" x="279.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e15" x="311.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f15" x="439.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g15" x="471.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h15" x="503.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i15" x="535.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j15" x="567.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a16" x="183.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b16" x="215.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c16" x="247.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d16" x="279.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e16" x="311.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f16" x="439.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g16" x="471.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h16" x="503.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i16" x="535.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j16" x="567.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a17" x="183.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b17" x="215.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c17" x="247.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d17" x="279.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e17" x="311.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f17" x="439.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g17" x="471.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h17" x="503.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i17" x="535.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j17" x="567.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a18" x="183.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b18" x="215.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c18" x="247.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d18" x="279.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e18" x="311.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f18" x="439.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g18" x="471.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h18" x="503.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i18" x="535.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j18" x="567.5" y="614.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a19" x="183.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b19" x="215.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c19" x="247.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d19" x="279.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e19" x="311.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f19" x="439.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g19" x="471.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h19" x="503.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i19" x="535.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j19" x="567.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a20" x="183.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b20" x="215.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c20" x="247.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d20" x="279.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e20" x="311.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f20" x="439.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g20" x="471.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h20" x="503.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i20" x="535.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j20" x="567.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a21" x="183.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b21" x="215.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c21" x="247.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d21" x="279.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e21" x="311.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f21" x="439.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g21" x="471.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h21" x="503.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i21" x="535.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j21" x="567.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a22" x="183.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b22" x="215.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c22" x="247.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d22" x="279.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e22" x="311.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f22" x="439.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g22" x="471.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h22" x="503.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i22" x="535.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j22" x="567.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a23" x="183.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b23" x="215.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c23" x="247.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d23" x="279.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e23" x="311.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f23" x="439.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g23" x="471.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h23" x="503.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i23" x="535.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j23" x="567.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a24" x="183.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b24" x="215.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c24" x="247.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d24" x="279.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e24" x="311.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f24" x="439.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g24" x="471.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h24" x="503.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i24" x="535.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j24" x="567.5" y="800.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a25" x="183.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b25" x="215.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c25" x="247.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d25" x="279.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e25" x="311.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f25" x="439.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g25" x="471.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h25" x="503.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i25" x="535.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j25" x="567.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a26" x="183.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b26" x="215.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c26" x="247.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d26" x="279.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e26" x="311.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f26" x="439.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g26" x="471.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h26" x="503.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i26" x="535.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j26" x="567.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a27" x="183.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b27" x="215.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c27" x="247.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d27" x="279.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e27" x="311.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f27" x="439.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g27" x="471.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h27" x="503.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i27" x="535.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j27" x="567.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a28" x="183.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b28" x="215.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c28" x="247.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d28" x="279.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e28" x="311.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f28" x="439.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g28" x="471.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h28" x="503.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i28" x="535.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j28" x="567.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a29" x="183.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b29" x="215.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c29" x="247.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d29" x="279.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e29" x="311.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f29" x="439.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g29" x="471.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h29" x="503.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i29" x="535.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j29" x="567.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="a30" x="183.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="b30" x="215.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="c30" x="247.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="d30" x="279.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="e30" x="311.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="f30" x="439.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="g30" x="471.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="h30" x="503.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="i30" x="535.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="j30" x="567.5" y="986.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_1" x="61.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_2" x="61.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_3" x="61.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_4" x="61.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_5" x="61.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_6" x="61.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_7" x="61.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_8" x="61.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_9" x="61.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_10" x="61.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_11" x="61.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_12" x="61.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_13" x="61.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_14" x="61.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_15" x="61.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_16" x="61.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_17" x="61.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_18" x="61.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_19" x="61.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_20" x="61.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_21" x="61.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_22" x="61.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_23" x="61.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_24" x="61.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LPLUS_25" x="61.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_1" x="91.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_2" x="91.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_3" x="91.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_4" x="91.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_5" x="91.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_6" x="91.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_7" x="91.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_8" x="91.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_9" x="91.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_10" x="91.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_11" x="91.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_12" x="91.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_13" x="91.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_14" x="91.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_15" x="91.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_16" x="91.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_17" x="91.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_18" x="91.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_19" x="91.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_20" x="91.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_21" x="91.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_22" x="91.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_23" x="91.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_24" x="91.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="LMINUS_25" x="91.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_1" x="659.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_2" x="659.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_3" x="659.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_4" x="659.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_5" x="659.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_6" x="659.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_7" x="659.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_8" x="659.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_9" x="659.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_10" x="659.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_11" x="659.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_12" x="659.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_13" x="659.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_14" x="659.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_15" x="659.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_16" x="659.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_17" x="659.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_18" x="659.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_19" x="659.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_20" x="659.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_21" x="659.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_22" x="659.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_23" x="659.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_24" x="659.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RPLUS_25" x="659.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_1" x="689.5" y="87.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_2" x="689.5" y="118.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_3" x="689.5" y="149.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_4" x="689.5" y="180.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_5" x="689.5" y="211.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_6" x="689.5" y="273.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_7" x="689.5" y="304.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_8" x="689.5" y="335.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_9" x="689.5" y="366.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_10" x="689.5" y="397.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_11" x="689.5" y="459.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_12" x="689.5" y="490.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_13" x="689.5" y="521.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_14" x="689.5" y="552.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_15" x="689.5" y="583.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_16" x="689.5" y="645.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_17" x="689.5" y="676.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_18" x="689.5" y="707.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_19" x="689.5" y="738.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_20" x="689.5" y="769.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_21" x="689.5" y="831.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_22" x="689.5" y="862.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_23" x="689.5" y="893.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_24" x="689.5" y="924.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <rect id="RMINUS_25" x="689.5" y="955.5" width="9" height="9" rx="1.2" fill="#202020"/>
+            <text class="txt col" x="188" y="56" text-anchor="middle">a</text>
+            <text class="txt col" x="188" y="1050" text-anchor="middle">a</text>
+            <text class="txt col" x="220" y="56" text-anchor="middle">b</text>
+            <text class="txt col" x="220" y="1050" text-anchor="middle">b</text>
+            <text class="txt col" x="252" y="56" text-anchor="middle">c</text>
+            <text class="txt col" x="252" y="1050" text-anchor="middle">c</text>
+            <text class="txt col" x="284" y="56" text-anchor="middle">d</text>
+            <text class="txt col" x="284" y="1050" text-anchor="middle">d</text>
+            <text class="txt col" x="316" y="56" text-anchor="middle">e</text>
+            <text class="txt col" x="316" y="1050" text-anchor="middle">e</text>
+            <text class="txt col" x="444" y="56" text-anchor="middle">f</text>
+            <text class="txt col" x="444" y="1050" text-anchor="middle">f</text>
+            <text class="txt col" x="476" y="56" text-anchor="middle">g</text>
+            <text class="txt col" x="476" y="1050" text-anchor="middle">g</text>
+            <text class="txt col" x="508" y="56" text-anchor="middle">h</text>
+            <text class="txt col" x="508" y="1050" text-anchor="middle">h</text>
+            <text class="txt col" x="540" y="56" text-anchor="middle">i</text>
+            <text class="txt col" x="540" y="1050" text-anchor="middle">i</text>
+            <text class="txt col" x="572" y="56" text-anchor="middle">j</text>
+            <text class="txt col" x="572" y="1050" text-anchor="middle">j</text>
+            <text class="txt row" x="162" y="97" text-anchor="end">1</text>
+            <text class="txt row" x="598" y="97" text-anchor="start">1</text>
+            <text class="txt row" x="162" y="128" text-anchor="end">2</text>
+            <text class="txt row" x="598" y="128" text-anchor="start">2</text>
+            <text class="txt row" x="162" y="159" text-anchor="end">3</text>
+            <text class="txt row" x="598" y="159" text-anchor="start">3</text>
+            <text class="txt row" x="162" y="190" text-anchor="end">4</text>
+            <text class="txt row" x="598" y="190" text-anchor="start">4</text>
+            <text class="txt row" x="162" y="221" text-anchor="end">5</text>
+            <text class="txt row" x="598" y="221" text-anchor="start">5</text>
+            <text class="txt row" x="162" y="252" text-anchor="end">6</text>
+            <text class="txt row" x="598" y="252" text-anchor="start">6</text>
+            <text class="txt row" x="162" y="283" text-anchor="end">7</text>
+            <text class="txt row" x="598" y="283" text-anchor="start">7</text>
+            <text class="txt row" x="162" y="314" text-anchor="end">8</text>
+            <text class="txt row" x="598" y="314" text-anchor="start">8</text>
+            <text class="txt row" x="162" y="345" text-anchor="end">9</text>
+            <text class="txt row" x="598" y="345" text-anchor="start">9</text>
+            <text class="txt row" x="162" y="376" text-anchor="end">10</text>
+            <text class="txt row" x="598" y="376" text-anchor="start">10</text>
+            <text class="txt row" x="162" y="407" text-anchor="end">11</text>
+            <text class="txt row" x="598" y="407" text-anchor="start">11</text>
+            <text class="txt row" x="162" y="438" text-anchor="end">12</text>
+            <text class="txt row" x="598" y="438" text-anchor="start">12</text>
+            <text class="txt row" x="162" y="469" text-anchor="end">13</text>
+            <text class="txt row" x="598" y="469" text-anchor="start">13</text>
+            <text class="txt row" x="162" y="500" text-anchor="end">14</text>
+            <text class="txt row" x="598" y="500" text-anchor="start">14</text>
+            <text class="txt row" x="162" y="531" text-anchor="end">15</text>
+            <text class="txt row" x="598" y="531" text-anchor="start">15</text>
+            <text class="txt row" x="162" y="562" text-anchor="end">16</text>
+            <text class="txt row" x="598" y="562" text-anchor="start">16</text>
+            <text class="txt row" x="162" y="593" text-anchor="end">17</text>
+            <text class="txt row" x="598" y="593" text-anchor="start">17</text>
+            <text class="txt row" x="162" y="624" text-anchor="end">18</text>
+            <text class="txt row" x="598" y="624" text-anchor="start">18</text>
+            <text class="txt row" x="162" y="655" text-anchor="end">19</text>
+            <text class="txt row" x="598" y="655" text-anchor="start">19</text>
+            <text class="txt row" x="162" y="686" text-anchor="end">20</text>
+            <text class="txt row" x="598" y="686" text-anchor="start">20</text>
+            <text class="txt row" x="162" y="717" text-anchor="end">21</text>
+            <text class="txt row" x="598" y="717" text-anchor="start">21</text>
+            <text class="txt row" x="162" y="748" text-anchor="end">22</text>
+            <text class="txt row" x="598" y="748" text-anchor="start">22</text>
+            <text class="txt row" x="162" y="779" text-anchor="end">23</text>
+            <text class="txt row" x="598" y="779" text-anchor="start">23</text>
+            <text class="txt row" x="162" y="810" text-anchor="end">24</text>
+            <text class="txt row" x="598" y="810" text-anchor="start">24</text>
+            <text class="txt row" x="162" y="841" text-anchor="end">25</text>
+            <text class="txt row" x="598" y="841" text-anchor="start">25</text>
+            <text class="txt row" x="162" y="872" text-anchor="end">26</text>
+            <text class="txt row" x="598" y="872" text-anchor="start">26</text>
+            <text class="txt row" x="162" y="903" text-anchor="end">27</text>
+            <text class="txt row" x="598" y="903" text-anchor="start">27</text>
+            <text class="txt row" x="162" y="934" text-anchor="end">28</text>
+            <text class="txt row" x="598" y="934" text-anchor="start">28</text>
+            <text class="txt row" x="162" y="965" text-anchor="end">29</text>
+            <text class="txt row" x="598" y="965" text-anchor="start">29</text>
+            <text class="txt row" x="162" y="996" text-anchor="end">30</text>
+            <text class="txt row" x="598" y="996" text-anchor="start">30</text>
+        </g>
+    </svg>
+</div>
 </div>

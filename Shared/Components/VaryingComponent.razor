@@ -1,7 +1,7 @@
 ﻿@using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(individualData?.rotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
@@ -26,6 +26,16 @@
                 <span style="padding-left: 3px">𝗶</span>
                 <span style="padding-left: 7px">￨ Component Information</span>
             </button>
+            <div>
+            <button id="component-rotate-left" @onclick="RotateLeft">
+                <span style="padding-left: 3px">𝗶</span>
+                <span style="padding-left: 7px">￨ Rotate Left</span>
+            </button>
+            <button id="component-rotate-right" @onclick="RotateRight">
+                <span style="padding-left: 3px">𝗶</span>
+                <span style="padding-left: 7px">￨ Rotate Right</span>
+            </button>
+            </div>
             @if (!Pages.Index.App!.IsRunning && !individualData.IsArduino())
             {
                 <button id="deletebutton" @onclick="Remove">
@@ -163,6 +173,16 @@
 
     [Parameter] public ComponentInstance? individualData { get; set; }
 
+    [Parameter] public double BreadBoard_X { get; set; }
+    [Parameter] public double BreadBoard_Y { get; set; }
+    public double RenderX
+    {
+        get => individualData.LivesOnBreadBoard ? BreadBoard_X : individualData.zoomedX;
+    }
+    public double RenderY
+    {
+        get => individualData.LivesOnBreadBoard ? BreadBoard_Y : individualData.zoomedY;
+    }
     [Parameter] public double zoomFactor { get; set; } = 1;
 
     [Parameter] public EventCallback CancelDrag { get; set; }
@@ -298,6 +318,7 @@
         _envSettingsY += e.MovementY;
     }
 
+    
     string GenerateLink(string nodeName)
     {
         Console.WriteLine($"nodeName: {nodeName}");
@@ -420,7 +441,18 @@
         }
     }
 
+    void RotateLeft()
+    {
+        individualData.rotation++;
+        if(individualData.rotation > 3) individualData.rotation = 0;
+    }
 
+    void RotateRight()
+    {
+        individualData.rotation--;
+        if(individualData.rotation < 0) individualData.rotation = 3;
+    }
+        
     void OpenLink(string url)
     {
         JsRuntime.InvokeVoidAsync("window.open", url, "_blank");

@@ -20,6 +20,10 @@ namespace ADArCWebApp.Shared
         public readonly int GlobalId;
         public double X;
         public double Y;
+        public double Width;
+        public int rotation;
+
+        public virtual bool LivesOnBreadBoard => false;
         
         public Variant? Highlight {get; set;}
 
@@ -28,19 +32,9 @@ namespace ADArCWebApp.Shared
 
         [JsonIgnore]
         public readonly Dictionary<int, List<InstanceConnection>> ConnMap = new(); //this.pinId -> connection
-        
+
         [JsonIgnore]
         public readonly List<BreadboardConnection> BreadboardConnections = new();
-
-        public void AddBreadboardConnection(
-            int fromPinId,
-            string holeId,
-            string color = "red")
-        {
-            BreadboardConnections.Add(
-                new BreadboardConnection(fromPinId, holeId, color)
-            );
-        }
         
         [JsonIgnore] public node GsNode;
         public int midSignal;

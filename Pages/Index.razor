@@ -1061,8 +1061,8 @@
         if (IsRunning) return;
         if (e.Key == "z" && e.CtrlKey) Undo();
         else if (e.Key == "y" && e.CtrlKey) Redo();
-        // 1 is the arduino, not sure what -2 or -1 is
-        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        // 1 is the arduino, -2 is the canvas or -1 is null (no component) -3 is breadboard
+        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -3 || SelectedComponent == -1 || SelectedComponent == 1) return;
         RemoveComp(false, true);
         SelectedComponent = -1;
     }

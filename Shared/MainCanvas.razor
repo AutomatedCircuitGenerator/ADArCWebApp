@@ -10,17 +10,32 @@
             <button class="reset-btn" @onclick="ResetZoom">Reset</button>
         </div>
     }
-    
-    @if (ShowBreadboard)
-    {
-        <Breadboard Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" />
-    }
-    
     @foreach (var c in comps)
     {
+        if(c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered below
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
-    
+    @if (ShowBreadboard)
+    {
+        <Breadboard Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent"/>
+        
+        {
+            double CurrentOffset = 0;
+            foreach(var c in comps)
+            {
+                if (!c.Value.LivesOnBreadBoard) continue; //Breadboard components rendered here
+                <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+                                  CanvasClick="CanvasClick" CancelDrag="CancelDrag"
+                                  forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
+                                  handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
+                                  BreadBoard_X=@(BreadboardZoomX + CurrentOffset) BreadBoard_Y=@BreadboardY 
+                                  individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
+                                  DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+
+                CurrentOffset += c.Value.Width;
+            }
+        }
+    }
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))
         {
@@ -38,6 +53,8 @@
             <circle class="node @(highlighted ? "highlighted" : "")" cx="@line.Segments.Last().x2" cy="@line.Segments.Last().y2" r="@(3 * zoomFactor)" fill="@line.Color"></circle>
         }
     </svg>
+
+
 </div>
 
 @code {
@@ -177,8 +194,10 @@
             var fromPins = connection.From.Data.pinInfo;
             var toPin = toPins[connection.ToId];
             var fromPin = fromPins[connection.FromId];
-            var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
-            var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
+            var startRot = connection.From.rotation;
+            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y), connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y)));
+            var endRot = connection.To.rotation;
+            var end = ZoomCoord((connection.To.X + RotateX(endRot, toPin.x, toPin.y), connection.To.Y + RotateY(endRot, toPin.x, toPin.y)));
             var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +
                           $"{connection.To.Data.name} {toPin.name}";
             lines.Add(new GridLine(connection.Color, 
@@ -201,7 +220,7 @@
                 routes[(startId, startX)] = true;
             }
         }
-        
+
         if (ShowBreadboard)
         {
             foreach (var comp in comps.Values)
@@ -212,7 +231,8 @@
                     var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
                     var pin = comp.Data.pinInfo[connection.FromPinId];  // Find the component pin position
                     var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId);    // Find the breadboard hole center
-                    var start = ZoomCoord((comp.X + pin.x, comp.Y + pin.y)); // Wire starting point at component pin
+                    var compRot = comp.rotation;
+                    var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
                     var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY));    // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
@@ -236,7 +256,7 @@
                 }
             }
         }
-
+        
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
@@ -246,6 +266,16 @@
         return lines;
     }
 
+    public double RotateX(int rot, double X, double Y)
+    {
+        return (3 > rot && rot > 0 ? -1 : 1) * (rot % 2 == 0 ? X : Y);
+    }
+    
+    public double RotateY(int rot, double X, double Y)
+    {
+        return (rot > 1 ? -1 : 1) * (rot % 2 == 0 ? Y : X);
+    }
+    
     /// <summary>
     /// Populates the segments for a given gridline
     /// </summary>
@@ -470,7 +500,6 @@
     {
         _dragging = false;
         _hasTarget = false;
-        _breadboardDrag = false;
         dragEndFlag = true;
     }
 
@@ -546,5 +575,5 @@
             }
         }
     }
-    
+
 }
