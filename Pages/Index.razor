@@ -244,22 +244,19 @@
         {
             if (comp.IsArduino() || comp.localId == 0) continue; // Skip Arduino
             
-            int pinCount = comp.Data.pinInfo.Count(); // Get total pins of this component
-            
-            for (int pinId = 0; pinId < pinCount; pinId++)
+            foreach (int pinId in comp.ConnMap.Keys.ToList())
             {
+                if (pinId < 0 || pinId >= comp.Data.pinInfo.Length) continue;
                 // Get the pin name
-                string pinName = comp.Data.pins
-                    .FirstOrDefault(p => p.Value == pinId).Key
-                    ?? comp.Data.pinInfo[pinId].name;
+                string pinName = comp.Data.pinInfo[pinId].name;
 
                 string name = pinName.Trim().ToUpperInvariant();
 
                 // VCC go to + rail, GND go to - rail, other pins go to A or F
                 var candidates = name switch
                 {
-                    "VCC" or "VDD" or "5V" => positiveHoles,
-                    "GND" or "VSS" or "GROUND" => negativeHoles,
+                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
                     _ => signalHoles
                 };
 
@@ -598,15 +595,15 @@
             var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
             comp.localId = localIds;
             Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
-            if (showBreadboard) EnsureBreadboardConnections();
             BuildCode.outputPins.Clear();
             BuildCanvas!.ConnLines.Clear();
-            //reset the way that component pins are bound to the arduino.
-            //TODO: check for performance improvements here.
             foreach (var c in Comps.Values)
             {
                 UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
             }
+            if (showBreadboard) EnsureBreadboardConnections();
+            //reset the way that component pins are bound to the arduino.
+            //TODO: check for performance improvements here.
 
             await comp.LinkController(JsRuntime);
             _componentFrequencies.IncrementFrequency(targetCardComponentId);
