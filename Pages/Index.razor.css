@@ -6,15 +6,15 @@
 }
 
 .page-content {
-    margin-top: 50px;
+    margin-top: 52px;
     position: absolute;
     width: 100%;
-    height: calc(100% - 50px);
+    height: calc(100% - 52px);
 }
 .sidebar,
 .sidebar-right {
     /*height of the top bar*/
-    height: calc(100vh - 3.125rem);
+    height: calc(100vh - 3.25rem);
     background-color: lightgray !important;
     transition: left .3s, right .3s;
     padding: 10px 10px 0;
@@ -44,55 +44,131 @@
 .toolbar {
     display: flex;
     align-items: center;
-    justify-content: flex-start;
-    background-color: #949494;
-    color: black;
-    height: 50px;
+    justify-content: space-between;
+    background-color: #90969b;
+    color: #1f2933;
+    height: 52px;
     width: 100%;
     position: fixed;
     top: 0;
     left: 0;
     z-index: 1000;
-    padding: 0 20px;
+    padding: 0 16px;
+    border-bottom: 1px solid rgba(31, 41, 51, 0.15);
+    font-size: 14px;
+    font-weight: 400;
     overflow-x: hidden;
     overflow-y: hidden;
 }
 
-.center-toolbar {
+.toolbar-left {
     display: flex;
     align-items: center;
-    gap:8px;
-    flex:1;
-    justify-content:flex-end;
-    flex-wrap:nowrap;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    overflow-y: hidden;
+    white-space: nowrap;
 }
 
-.center-toolbar > * {
+.toolbar-right {
+    display: flex;
+    align-items: center;
     flex-shrink: 0;
+    margin-left: 20px;
+}
+
+.toolbar-right .toolbar-divider {
+    margin: 0 14px 0 0;
+}
+
+.toolbar-group {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+}
+
+.toolbar-divider {
+    width: 1px;
+    height: 24px;
+    margin: 0 20px;
+    background-color: rgba(31, 41, 51, 0.2);
 }
 
 .toolbar-button {
-    background-color: #989494;
-    color: black !important;
+    background-color: transparent;
+    color: #1f2933 !important;
     border: none;
-    padding: 3px 8px;
+    border-radius: 6px;
+    padding: 8px 10px;
     cursor: pointer;
     display: flex;
     align-items: center;
-    justify-content: space-between;
-    margin: 0 5px;
-    height: 10px;
-    overflow-wrap: unset;
-    gap:8px;
+    justify-content: center;
+    margin: 0;
+    gap: 8px;
+    flex-shrink: 0;
+    line-height: 1;
+    font-size: 14px;
+    font-weight: 400;
+    text-decoration: none;
 }
 
-.toolbar-text{
-    display:inline;
+.toolbar-button:hover:not(:disabled) {
+    background-color: rgba(31, 41, 51, 0.08);
+}
+
+.toolbar-icon {
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    align-items: center;
+    justify-content: center;
+}
+
+.toolbar-icon svg {
+    width: 16px;
+    height: 16px;
+}
+
+.toolbar-icon svg * {
+    stroke: currentColor;
+    stroke-width: 1.75;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+    fill: none;
+}
+
+.toolbar-icon-spin {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.toolbar-button-primary {
+    background-color: #6b8aa8;
+    color: #ffffff !important;
+    border-radius: 8px;
+    padding: 9px 14px;
+}
+
+.toolbar-button-primary:hover:not(:disabled) {
+    background-color: #5f7f9e;
+}
+
+.toolbar-text {
+    display: inline;
 }
 
 @media (max-width:1330px){
     .toolbar-text{
         display: none;
+    }
+    .toolbar-divider {
+        margin: 0 12px;
     }
 }
 
@@ -103,23 +179,29 @@
 }
 
 @media (max-width: 650px) {
-    .center-toolbar {
-        gap: 3px;
+    .toolbar-button {
+        padding: 7px;
     }
 
-    .toolbar-button {
-        padding: 2px 5px;
+    .toolbar {
+        padding: 0 10px;
+    }
+
+    .toolbar-divider {
+        margin: 0 8px;
     }
 }
 
 .toolbar-button:disabled {
-    opacity: 0.25;
+    opacity: 0.45;
     cursor: not-allowed;
     pointer-events: none;
+    color: inherit;
 }
 
-.toolbar-button img {
-    margin-right: 10px;
+.toolbar-button-primary:disabled {
+    background-color: #6b8aa8;
+    color: #ffffff !important;
 }
 
 .expand-button {
@@ -164,25 +246,24 @@
 }
 
 .logo-and-adarc {
-    flex-wrap: nowrap;
     display: flex;
-    align-items:center;
-    flex-shrink:0;
+    align-items: center;
+    flex-shrink: 0;
+    gap: 8px;
 }
 
 .adarc-text {
-    font-size: 24px;
-    margin: 0px 15px;
+    font-size: 22px;
+    margin: 0;
     position: relative;
-    overflow: hidden;
+    cursor: pointer;
 }
 
 .logo {
-    max-height: 35px;
-    max-width: 35px;
+    max-height: 30px;
+    max-width: 30px;
     overflow: hidden;
-    margin-right: 10px;
-
+    cursor: pointer;
 }
 
 div, span {
@@ -299,8 +380,8 @@ div, span {
     width: 80px;
 }
 
-/* hides X-axis scrollbar in toolbar, but it is still scrollable */
-.toolbar::-webkit-scrollbar {
+/* hides X-axis scrollbar in toolbar groups, but it is still scrollable */
+.toolbar-left::-webkit-scrollbar {
     display: none;
 }
 
@@ -325,7 +406,7 @@ div, span {
 
 .Import-Export {
     display: flex;
-
+    gap: 2px;
 }
 
 /* Modal Backdrop */

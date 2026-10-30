@@ -44,88 +44,175 @@
 }
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
-        <div class="logo-and-adarc">
-            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">
-            <span class="adarc-text" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">ADArC</span>
-        </div>
-        
-        <button class="tutorial-button toolbar-button" title="Tutorial" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
-            💡
-            <span class="toolbar-text">Tutorial</span>
-        </button>
-        <div class="center-toolbar">
-            <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
+        <div class="toolbar-left">
+            <div class="logo-and-adarc">
+                <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo" @onclick="OpenNewTab">
+                <span class="adarc-text" @onclick="OpenNewTab">ADArC</span>
+            </div>
+
+            <div class="toolbar-divider" role="presentation"></div>
+
+            <div class="toolbar-group">
+                <button class="toolbar-button" title="Tutorial" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M15 14c.2-.6.7-1.2 1.2-1.7A6 6 0 1 0 7.8 12.3c.5.5 1 1.1 1.2 1.7" />
+                            <path d="M9 18h6" />
+                            <path d="M10 22h4" />
+                        </svg>
+                    </span>
+                    <span class="toolbar-text">Tutorial</span>
+                </button>
+                <button class="toolbar-button" title="Help" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
+                        disabled="@selLockedOut">
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <circle cx="12" cy="12" r="10" />
+                            <path d="M9.09 9a3 3 0 0 1 5.82 1c0 2-3 3-3 3" />
+                            <path d="M12 17h.01" />
+                        </svg>
+                    </span>
+                    <span class="toolbar-text">Help</span>
+                </button>
+            </div>
+
+            <div class="toolbar-divider" role="presentation"></div>
+
+            <div class="toolbar-group" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
                 <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg></span>
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M3 7v6h6" />
+                            <path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13" />
+                        </svg>
+                    </span>
                     <span class="toolbar-text">Undo</span>
                 </button>
                 <button class="toolbar-button" title="Redo" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastUndoneAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg></span>
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 7v6h-6" />
+                            <path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7" />
+                        </svg>
+                    </span>
                     <span class="toolbar-text">Redo</span>
                 </button>
             </div>
-            <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
+
+            <div class="toolbar-divider" role="presentation"></div>
+
+            <div class="toolbar-group Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
                 <label for="import-button" class="toolbar-button" title="Import" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
-                    <span>⬇️️</span>
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="7 10 12 15 17 10" />
+                            <line x1="12" y1="15" x2="12" y2="3" />
+                        </svg>
+                    </span>
                     <span class="toolbar-text">Import</span>
                 </label>
                 <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" title="Export" disabled="@(IsRunning || selLockedOut)">
-                    <span>⬆️</span>
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                            <polyline points="17 8 12 3 7 8" />
+                            <line x1="12" y1="3" x2="12" y2="15" />
+                        </svg>
+                    </span>
                     <span class="toolbar-text">Export</span>
+                </button>
+                <button class="toolbar-button" title="Generate URL" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
+                        disabled="@selLockedOut">
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71" />
+                            <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71" />
+                        </svg>
+                    </span>
+                    <span class="toolbar-text">Generate URL</span>
+                </button>
+                <button class="toolbar-button" title="Examples" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
+                        disabled="@selLockedOut">
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M2 6a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2z" />
+                            <path d="M17 4h3a2 2 0 0 1 2 2v14a2 2 0 0 0-2-2h-3" />
+                        </svg>
+                    </span>
+                    <span class="toolbar-text">Examples</span>
                 </button>
             </div>
 
-            <button class="toolbar-button" title="Generate URL" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
-                    disabled="@selLockedOut">
-                <span>🔗</span>
-                <span class="toolbar-text">Generate URL</span>
-            </button>
+            <div class="toolbar-divider" role="presentation"></div>
 
-            <button class="toolbar-button" title="Examples" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
-                    disabled="@selLockedOut">
-                📖
-                <span class="toolbar-text">Examples</span>
-            </button>
+            <div class="toolbar-group">
+                <button class="toolbar-button" title="Report Bug" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
+                        disabled="@selLockedOut">
+                    <span class="toolbar-icon" aria-hidden="true">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="m8 2 1.88 1.88" />
+                            <path d="M14.12 3.88 16 2" />
+                            <path d="M9 7.13v-1a3 3 0 1 1 6 0v1" />
+                            <path d="M12 20c-3.3 0-6-2.7-6-6v-3h12v3c0 3.3-2.7 6-6 6" />
+                            <path d="M12 20v-9" />
+                            <path d="M6.53 9C6.53 9 5 9 5 10.5S6.53 12 6.53 12" />
+                            <path d="M17.47 9S19 9 19 10.5 17.47 12 17.47 12" />
+                        </svg>
+                    </span>
+                    <span class="toolbar-text">Report Bug</span>
+                </button>
+            </div>
+        </div>
 
-            <button class="toolbar-button" title="Report Bug" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
-                    disabled="@selLockedOut">
-                <span>🐛</span>
-                <span class="toolbar-text">Report Bug</span>
-            </button>
-
-            <button class="toolbar-button" title="Help" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
-                    disabled="@selLockedOut">
-                <span>ℹ</span>
-                <span class="toolbar-text">Help</span>
-            </button>
-
-            <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
-                <div class="url-modal">
-                    <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
-                    <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
-                        <span>@copyButtonText</span>
-                    </button>
-                </div>
-            </Modal>
-
-            <Modal Open="@_reportBugModalOpen" OnClose="() => _reportBugModalOpen = false">
-                <div class="report-bug-modal">
-                    <p>You will be navigated to a separate Google Form. Would you like to proceed?</p>
-                    <div class="modal-buttons">
-                        <button class="no-button" @onclick="CloseReportBugModal">No</button>
-                        <button class="yes-button" @onclick="ProceedToReportBug">Yes</button>
-                    </div>
-                </div>
-            </Modal>
-
-            <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
-                <span>@runStopButton</span>
+        <div class="toolbar-right">
+            <div class="toolbar-divider" role="presentation"></div>
+            <button disabled="@selLockedOut" class="toolbar-button toolbar-button-primary" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
+                <span class="toolbar-icon" aria-hidden="true">
+                    @if (runStopText == "Stop")
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <rect x="7" y="7" width="10" height="10" rx="1.5" />
+                        </svg>
+                    }
+                    else if (runStopText == "Compiling...")
+                    {
+                        <svg class="toolbar-icon-spin" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none">
+                            <path d="M21 12a9 9 0 1 1-6.2-8.56" />
+                        </svg>
+                    }
+                    else
+                    {
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M8 6v12l10-6z" />
+                        </svg>
+                    }
+                </span>
                 <span class="toolbar-text">@runStopText</span>
             </button>
         </div>
+
+        <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
+            <div class="url-modal">
+                <input type="text" class="url-textbox" value="@generatedUrl" readonly/>
+                <button class="toolbar-button copy-button" @onclick="CopyUrlToClipboard">
+                    <span>@copyButtonText</span>
+                </button>
+            </div>
+        </Modal>
+
+        <Modal Open="@_reportBugModalOpen" OnClose="() => _reportBugModalOpen = false">
+            <div class="report-bug-modal">
+                <p>You will be navigated to a separate Google Form. Would you like to proceed?</p>
+                <div class="modal-buttons">
+                    <button class="no-button" @onclick="CloseReportBugModal">No</button>
+                    <button class="yes-button" @onclick="ProceedToReportBug">Yes</button>
+                </div>
+            </div>
+        </Modal>
     </div>
     <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true);}">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
