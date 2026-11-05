@@ -22,8 +22,6 @@ namespace ADArCWebApp.Shared
         public double Y;
         public double Width;
         public int rotation;
-
-        public virtual bool LivesOnBreadBoard => false;
         
         public Variant? Highlight {get; set;}
 

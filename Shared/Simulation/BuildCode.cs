@@ -190,8 +190,18 @@ namespace ADArCWebApp.Shared.Simulation
 			{
 				ret = Regex.Replace(prePin, "(~\"(.*?)\")", m =>
 				{
-					c.GetConnection(m.Value[2..^1], out InstanceConnection? conn, out List<InstanceConnection>? all);
-					return conn!.ToId.ToString();
+					try
+					{
+						c.GetConnection(m.Value[2..^1], out InstanceConnection? conn,
+							out List<InstanceConnection>? all);
+						return conn!.ToId.ToString();
+					}
+					catch (KeyNotFoundException e)
+					{
+						Console.WriteLine("Your code uses \'" + m + "\' but that is not a valid pin!");
+						throw e;//I dont care about CA2200, the only way we get here is the above msg
+					}
+
 				});
 			}
 			

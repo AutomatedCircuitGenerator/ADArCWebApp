@@ -945,6 +945,7 @@
             }
 
             var aPinName = "**NF**";
+            
 
             if ((ha.IsArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.IsArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
             {
@@ -952,7 +953,6 @@
             }
 
             string bPinName = "";
-
 
             if (aPinName == "**NF**")
             {
@@ -968,17 +968,11 @@
             if ((ha.IsArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
                 BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
-                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
             }
 
             if (aPinName == "**NF**")
             {
                 Console.WriteLine(ha.Data.name + " is missing a pin definition!");
-            }
-
-            if (bPinName == "**NF**")
-            {
-                Console.WriteLine(hb.Data.name + " is missing a pin definition!");
             }
 
             int i1 = ha.Data.pins[aPinName];

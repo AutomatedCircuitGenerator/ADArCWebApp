@@ -1,4 +1,5 @@
-﻿using ADArCWebApp.Shared.Components;
+﻿using System.Diagnostics;
+using ADArCWebApp.Shared.Components;
 
 namespace ADArCWebApp.Shared
 {
@@ -21,6 +22,7 @@ namespace ADArCWebApp.Shared
 		public List<string> pinNames => pins.Keys.ToList();
 		public string? nodeName;
 		public ElementPin[] pinInfo;
+		public bool LivesOnBreadBoard;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -46,6 +48,7 @@ namespace ADArCWebApp.Shared
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
 			pinInfo = builder.pinInfo;
+			LivesOnBreadBoard = builder.LivesOnBreadBoard;
 		}
 
     }
@@ -70,6 +73,8 @@ namespace ADArCWebApp.Shared
 		public string? nodeName;
 
 		public ElementPin[] pinInfo;
+
+		public bool LivesOnBreadBoard = false;
 		/* needs more later, good enough for now.*/
 		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null) {
 			this.name = name;
@@ -108,6 +113,22 @@ namespace ADArCWebApp.Shared
 				catch {
 					Console.WriteLine(name + " pinInfo setup failed!");
 				}
+				try {
+					var l_o_b = compType!.GetProperty("LivesOnBreadboard");
+					if ( l_o_b != null)
+					{
+						this.LivesOnBreadBoard = (bool)l_o_b.GetValue(compType.GetConstructors()[0].Invoke(new object[] { }));
+					}
+					else
+					{
+						this.LivesOnBreadBoard = false;
+					}
+				}
+				catch(Exception E) {
+					Console.WriteLine(E.ToString());
+					this.LivesOnBreadBoard = false;
+				}
+				Console.WriteLine("Lives on BreadBoard: {0}", this.LivesOnBreadBoard);
 			}
 		}
 

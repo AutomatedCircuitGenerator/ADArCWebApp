@@ -177,11 +177,11 @@
     [Parameter] public double BreadBoard_Y { get; set; }
     public double RenderX
     {
-        get => individualData.LivesOnBreadBoard ? BreadBoard_X : individualData.zoomedX;
+        get => individualData.Data.LivesOnBreadBoard ? BreadBoard_X : individualData.zoomedX;
     }
     public double RenderY
     {
-        get => individualData.LivesOnBreadBoard ? BreadBoard_Y : individualData.zoomedY;
+        get => individualData.Data.LivesOnBreadBoard ? BreadBoard_Y : individualData.zoomedY;
     }
     [Parameter] public double zoomFactor { get; set; } = 1;
 
@@ -277,7 +277,6 @@
     }
 
     private bool rightClickable = false;
-    private bool rightClick2 = false;
 
     [Parameter] public Action CanvasClick { get; set; }
 
@@ -287,14 +286,6 @@
         CanvasClick.Invoke();
         
         rightClickable = true;
-        if (rightClickable && forceBorder)
-        {
-            rightClick2 = true;
-        }
-        else
-        {
-            rightClick2 = false;
-        }
     }
 
     public void EndEnvSettingsDrag()

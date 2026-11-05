@@ -12,23 +12,28 @@
     }
     @foreach (var c in comps)
     {
-        if(c.Value.LivesOnBreadBoard)continue;//Breadboard components rendered below
+        if(c.Value.Data.LivesOnBreadBoard)continue;//Breadboard components rendered below
         <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
     }
     @if (ShowBreadboard)
     {
-        <Breadboard Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent"/>
-        
+        <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
+        <div class="right-click-container" style="top: @(BreadboardZoomX)px; left: @(BreadboardZoomY)px">
+            <button id="component-help-button" >
+                <span style="padding-left: 3px">𝗶</span>
+                <span style="padding-left: 7px">￨ Component Information</span>
+            </button>
+        </div>
         {
             double CurrentOffset = 0;
             foreach(var c in comps)
             {
-                if (!c.Value.LivesOnBreadBoard) continue; //Breadboard components rendered here
+                if (!c.Value.Data.LivesOnBreadBoard) continue; //Breadboard components rendered here
                 <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
                                   CanvasClick="CanvasClick" CancelDrag="CancelDrag"
                                   forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
                                   handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
-                                  BreadBoard_X=@(BreadboardZoomX + CurrentOffset) BreadBoard_Y=@BreadboardY 
+                                  BreadBoard_X=@(BreadboardZoomX + CurrentOffset) BreadBoard_Y=@BreadboardZoomY 
                                   individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
                                   DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 
@@ -62,6 +67,8 @@
     [Parameter]
     public bool ShowBreadboard { get; set; }
 
+
+    public int BreadboardRot;
     public MainCanvas()
     {
         Pages.Index.BuildCanvas = this;
@@ -186,7 +193,7 @@
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
         Dictionary<(int, int), bool> routes = new();
         var lines = new List<GridLine>();
-
+        
         foreach (var connection in connections)
         {
             if (ShowBreadboard && (connection.From.BreadboardConnections.Any(b => b.FromPinId == connection.FromId) || connection.To.BreadboardConnections.Any(b => b.FromPinId == connection.ToId))) continue;
@@ -233,7 +240,7 @@
                     var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId);    // Find the breadboard hole center
                     var compRot = comp.rotation;
                     var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
-                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY));    // Wire ending point at breadboard hole
+                    var end = ZoomCoord((BreadboardX + RotateX(BreadboardRot, holeX, holeY), BreadboardY + RotateY(BreadboardRot, holeX, holeY)));    // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
@@ -547,6 +554,12 @@
         }
     }
 
+    public void BreadboardSelection()
+    {
+        targetFound = true;
+        Pages.Index.App.SelectedComponent = -3;
+    }
+    
     //click on the canvas handler.
     private void CanvasClick()
     {

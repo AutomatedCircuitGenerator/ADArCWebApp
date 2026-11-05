@@ -387,15 +387,15 @@ namespace ADArCWebApp.Shared
                     {
                         { "include", "" },
                         { "global", "" },
-                        { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
+                        { "setup", "\tpinMode(~\"sig\", OUTPUT); // Set the LED anode pin as an output" },
                         {
                             "loopMain",
-                            "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
+                            "  digitalWrite(~\"sig\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"sig\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
                         },
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
-                    }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
+                    }, pins: ["sig", "gnd"], gsNodeName: "led").Property("color", "red").Finish()
             },
             // {
             //     19,
