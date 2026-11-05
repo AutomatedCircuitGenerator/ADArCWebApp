@@ -23,6 +23,7 @@ namespace ADArCWebApp.Shared
 		public string? nodeName;
 		public ElementPin[] pinInfo;
 		public bool LivesOnBreadBoard;
+		public double BreadboardOffsetX, BreadboardOffsetY, Width;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -49,6 +50,9 @@ namespace ADArCWebApp.Shared
 			pinsToListen = builder.pinsToListen;
 			pinInfo = builder.pinInfo;
 			LivesOnBreadBoard = builder.LivesOnBreadBoard;
+			BreadboardOffsetX = builder.BreadboardOffsetX;
+			BreadboardOffsetY = builder.BreadboardOffsetY;
+			Width = builder.Width;
 		}
 
     }
@@ -75,8 +79,11 @@ namespace ADArCWebApp.Shared
 		public ElementPin[] pinInfo;
 
 		public bool LivesOnBreadBoard = false;
+		public double BreadboardOffsetX, BreadboardOffsetY, Width;
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null) {
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null)
+		{
+			
 			this.name = name;
 			this.enabled = enabled;
 			this.directoryPath = directoryPath;
@@ -102,7 +109,7 @@ namespace ADArCWebApp.Shared
 
 			//quick hack to get the pinInfo from a component without having to setup a field in the namespace file.
 			//TODO: fix!
-			if (compType != typeof(InvalidComponent)) {
+			if (compType != typeof(InvalidComponent) && compType != null) {
 				try {
 					var p_i = compType!.GetProperty("pinInfo");
 					if (p_i != null)
@@ -129,6 +136,17 @@ namespace ADArCWebApp.Shared
 					this.LivesOnBreadBoard = false;
 				}
 				Console.WriteLine("Lives on BreadBoard: {0}", this.LivesOnBreadBoard);
+				
+				
+				foreach (var attribute in Attribute.GetCustomAttributes(compType))
+				{
+					if (attribute is BreadboardOffsetAttribute BBOA)//CANNOT BE SWITCH! sorry
+					{
+						BreadboardOffsetX = BBOA.leftOffset;
+						BreadboardOffsetY = BBOA.topOffset;
+						Width = BBOA.Width;
+					}
+				}
 			}
 		}
 
@@ -144,5 +162,19 @@ namespace ADArCWebApp.Shared
 		{
 			return new ComponentData(this);
 		}
+	}
+}
+
+public class BreadboardOffsetAttribute : Attribute
+{
+	public double leftOffset;
+	public double topOffset;
+	public double Width;
+	
+	public BreadboardOffsetAttribute(double leftOffset, double topOffset, double Width)
+	{
+		this.leftOffset = leftOffset;
+		this.topOffset = topOffset;
+		this.Width = Width;
 	}
 }
