@@ -120,22 +120,6 @@ namespace ADArCWebApp.Shared
 				catch {
 					Console.WriteLine(name + " pinInfo setup failed!");
 				}
-				try {
-					var l_o_b = compType!.GetProperty("LivesOnBreadboard");
-					if ( l_o_b != null)
-					{
-						this.LivesOnBreadBoard = (bool)l_o_b.GetValue(compType.GetConstructors()[0].Invoke(new object[] { }));
-					}
-					else
-					{
-						this.LivesOnBreadBoard = false;
-					}
-				}
-				catch(Exception E) {
-					Console.WriteLine(E.ToString());
-					this.LivesOnBreadBoard = false;
-				}
-				Console.WriteLine("Lives on BreadBoard: {0}", this.LivesOnBreadBoard);
 				
 				
 				foreach (var attribute in Attribute.GetCustomAttributes(compType))
@@ -145,6 +129,7 @@ namespace ADArCWebApp.Shared
 						BreadboardOffsetX = BBOA.leftOffset;
 						BreadboardOffsetY = BBOA.topOffset;
 						Width = BBOA.Width;
+						LivesOnBreadBoard = true;
 					}
 				}
 			}

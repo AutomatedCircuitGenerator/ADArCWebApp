@@ -241,6 +241,7 @@
                     var compRot = comp.rotation;
                     var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
                     var end = ZoomCoord((BreadboardX + RotateX(BreadboardRot, holeX, holeY), BreadboardY + RotateY(BreadboardRot, holeX, holeY)));    // Wire ending point at breadboard hole
+
                     lines.Add(new GridLine(
                         wireColor,
                         start,
