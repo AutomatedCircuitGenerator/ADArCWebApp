@@ -26,18 +26,14 @@ public static class BreadboardNet
             return $"RIGHT_{row}";
         }
         
-        // Power rails: l+1, l+2,..., r-25
-        char side = hole[0];    // same as column, just change var name for clarification
-        char polarity = hole[1];    // if not main breadboard holes, second char will be either '+' or '-'
-        int railHole = int.Parse(hole.Substring(2));
+        // Power rails: LPLUS_1, LMINUS_1,...
+        var parts = hole.Split('_');
+        if (parts.Length == 2 && (parts[0] == "lplus" || parts[0] == "lminus") && int.TryParse(parts[1], out int railHole) && railHole >= 1 && railHole <= 25)
+        {
+            return $"RAIL_{parts[0]}";
+        }
 
-        // Check invalid hole
-        if ((side != 'l' && side != 'r') ||
-            (polarity != '+' && polarity != '-') ||
-            railHole < 1 || railHole > 25)
-            throw new ArgumentException("Invalid rail hole");
-
-        return $"RAIL_{side}_{polarity}";
+        throw new ArgumentException("Invalid breadboard hole");
     }
     
     // Used to check whether two holes are connected

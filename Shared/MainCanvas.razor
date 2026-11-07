@@ -1,20 +1,6 @@
 @using System.Text
 @inject BoardService BoardService
 <div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
-    @if (BoardService.Board != Board.None)
-    {
-        <div class="zoom-control">
-            <button class="zoom-btn" @onclick="ZoomOut">−</button>
-            <span class="zoom-perc"> @ZoomPercent%</span>
-            <button class="zoom-btn" @onclick="ZoomIn">+</button>
-            <button class="reset-btn" @onclick="ResetZoom">Reset</button>
-        </div>
-    }
-    @foreach (var c in comps)
-    {
-        if(c.Value.Data.LivesOnBreadBoard)continue;//Breadboard components rendered below
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
-    }
     @if (ShowBreadboard)
     {
         <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
@@ -41,7 +27,20 @@
             }
         }
     }
-    <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
+    @if (BoardService.Board != Board.None)
+    {
+        <div class="zoom-control">
+            <button class="zoom-btn" @onclick="ZoomOut">−</button>
+            <span class="zoom-perc"> @ZoomPercent%</span>
+            <button class="zoom-btn" @onclick="ZoomIn">+</button>
+            <button class="reset-btn" @onclick="ResetZoom">Reset</button>
+        </div>
+    }
+    @foreach (var c in comps)
+    {
+        if(c.Value.Data.LivesOnBreadBoard)continue;//Breadboard components rendered below
+        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+    }
         @foreach (var line in GetAllGridLines(ConnLines))
         {
             var highlighted = _target.Value?.localId == line.FromId && line.FromId == Pages.Index.App!.SelectedComponent;
@@ -66,7 +65,6 @@
     
     [Parameter]
     public bool ShowBreadboard { get; set; }
-
 
     public int BreadboardRot;
     public MainCanvas()
@@ -193,7 +191,7 @@
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
         Dictionary<(int, int), bool> routes = new();
         var lines = new List<GridLine>();
-        
+
         foreach (var connection in connections)
         {
             if (ShowBreadboard && (connection.From.BreadboardConnections.Any(b => b.FromPinId == connection.FromId) || connection.To.BreadboardConnections.Any(b => b.FromPinId == connection.ToId))) continue;
@@ -230,18 +228,36 @@
 
         if (ShowBreadboard)
         {
+            // Holes already assigned to component wires
+            var usedHoles = comps.Values
+                .SelectMany(c => c.BreadboardConnections)
+                .Select(c => c.HoleId)
+                .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+            // All possible breadboard holes
+            var availableHoles = (
+                    from row in Enumerable.Range(1, 30)
+                    from column in "abcdefghij"
+                    select $"{column}{row}"
+                )
+                .Concat(Enumerable.Range(1, 25).Select(i => $"LPLUS_{i}"))
+                .Concat(Enumerable.Range(1, 25).Select(i => $"LMINUS_{i}"))
+                .ToList();
+
+            // Prevent duplicate Arduino wires on the same net
+            var drawnArduinoWires = new HashSet<(int, int, string)>();
+
             foreach (var comp in comps.Values)
             {
                 foreach (var connection in comp.BreadboardConnections)
                 {
-                    var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId));
+                    var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId)); // Searching for original connection for this pin
                     var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
                     var pin = comp.Data.pinInfo[connection.FromPinId];  // Find the component pin position
                     var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId);    // Find the breadboard hole center
                     var compRot = comp.rotation;
                     var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
-                    var end = ZoomCoord((BreadboardX + RotateX(BreadboardRot, holeX, holeY), BreadboardY + RotateY(BreadboardRot, holeX, holeY)));    // Wire ending point at breadboard hole
-
+                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY));    // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
@@ -251,6 +267,47 @@
                         $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
                         []
                     ));
+                    if (originalWire != null)
+                    {
+                        bool compIsFrom = originalWire.From.localId == comp.localId;    // Check if first pin of the connection is the component
+                        var arduino = compIsFrom ? originalWire.To : originalWire.From; // Store Arduino
+                        var arduinoPinId = compIsFrom ? originalWire.ToId : originalWire.FromId;    // Store pin ID of Arduino of the current connection
+                        var arduinoPin = arduino.Data.pinInfo[arduinoPinId];    // Store the Arduino pin of the current connection
+                        var arduinoStart = ZoomCoord((arduino.X + RotateX(arduino.rotation, arduinoPin.x, arduinoPin.y), arduino.Y + RotateY(arduino.rotation, arduinoPin.x, arduinoPin.y)));   // Calculate Arduino pin's position on the workbench
+                        string netId = BreadboardNet.GetNetId(connection.HoleId);   // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
+                        var wireKey = (arduino.localId, arduinoPinId, netId);   // Store the Arduino pin and its destination net
+                        if (!drawnArduinoWires.Contains(wireKey))   // Check if the wire already exist
+                        {
+                            string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId)); // Store the first free hole connected to the component hole
+                            if (arduinoHoleId != null)  // If a free hole is found
+                            {
+                                var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId);  // Find the relative position of available hole to breadboard
+                                var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY));   // Calculate the available hole position on workbench
+                                lines.Add(new GridLine(
+                                    wireColor,
+                                    arduinoStart,
+                                    arduinoEnd,
+                                    arduino.localId,
+                                    -1,
+                                    $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
+                                    []
+                                ));
+                                var arduinoStartId = arduino.localId;
+                                var arduinoStartX = (int)Math.Floor(arduinoStart.x);
+                                if (!routes.ContainsKey((arduinoStartId, arduinoStartX)))
+                                {
+                                    routes[(arduinoStartId, arduinoStartX)] = false;
+                                }
+                                else
+                                {
+                                    routes[(arduinoStartId, arduinoStartX)] = true;
+                                }
+                                // Reserve the new hole and record the wire so it won't redraw later
+                                usedHoles.Add(arduinoHoleId);
+                                drawnArduinoWires.Add(wireKey);
+                            }
+                        }
+                    }
                     var startId = comp.localId;
                     var startX = (int)Math.Floor(start.x);
                     if (!routes.ContainsKey((startId, startX)))
@@ -509,6 +566,7 @@
         _dragging = false;
         _hasTarget = false;
         dragEndFlag = true;
+        _breadboardDrag = false;
     }
 
     //canvas drag start, signal that there is a drag.

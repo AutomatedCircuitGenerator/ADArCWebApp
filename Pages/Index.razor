@@ -223,9 +223,9 @@
             .Select(c => c.HoleId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
-        // Only use A and F since other holes on same row are connected
+        // Only use B and F since other holes on same row are connected
         var signalHoles = (
-            from column in "af"
+            from column in "bf"
             from row in Enumerable.Range(1, 30)
             select $"{column}{row}"
         ).ToList();
