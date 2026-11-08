@@ -5,9 +5,16 @@
     {
         <div class="palette-right-click-container" style="z-index: 9999; position: absolute; top: 0; left: 0; font-size: 80%" @onmouseenter="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick">
             <div @onmousedown:stopPropagation style="width: 100%">
-                <button id="palette-component-help-button" style="font-size: 100%; width: 100%" @onclick="() => OpenLink(DocumentationMap.ResolveUrl(GlobalId))">
+                <a id="palette-component-help-button"
+                   href="@DocumentationMap.ResolveUrl(GlobalId)"
+                   target="_blank"
+                   rel="noopener noreferrer"
+                   style="font-size: 100%; width: 100%; display: flex; align-items: center; text-decoration: none; color: inherit;"
+                   @onclick="@(() => Console.WriteLine($"[ComponentCard] Navigating to: {DocumentationMap.ResolveUrl(GlobalId)}"))"
+                   @onclick:stopPropagation="true"
+                   @onmousedown:stopPropagation="true">
                     <span style="padding-left: 4px; font-size: 85%;">𝗶￨Component Info</span>
-                </button>
+                </a>
             </div>
         </div>
     }
@@ -21,73 +28,75 @@
     <div class="card-name">
         @Name
     </div>
-
-    @code {
-
-        [Parameter] public string Name { get; set; }
-        [Parameter] public int GlobalId { get; set; }
-        [Parameter] public bool Disabled { get; set; }
-        [Parameter] public string NodeName { get; set; }
-
-        [Parameter] public ComponentInstance IndividualData { get; set; }
-
-        public ComponentCard(int id)
-        {
-            GlobalId = id;
-            Name = ComponentDeclarations.Components[id].name;
-        }
-
-        public ComponentCard()
-        {
-        }
-
-        [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
-
-        // event handling for palette right click menu
-        private bool _showPaletteRightClick = false;
-
-        private void ShowPaletteRightClickFunc()
-        {
-            _showPaletteRightClick = true;
-            isPaletteHovered = true; // Set the flag to true when the mouse is over the palette
-        }
-
-        private void StartHidingPaletteRightClick()
-        {
-            isPaletteHovered = false; // Reset the flag when the mouse leaves the menu
-            Task.Delay(100).ContinueWith(_ =>
-            {
-                if (!isCardContainerHovered && !isPaletteHovered) // Only hide if the mouse is not over the card container and not over the menu
-                    _showPaletteRightClick = false;
-            }); // Delay hiding the menu to allow smooth transition
-        }
-
-        private bool isPaletteHovered = false;
-        private bool isCardContainerHovered = false;
-
-        // Event handler for mouse entering the card container
-        private void HandleMouseEnterCardContainer()
-        {
-            isCardContainerHovered = true;
-        }
-
-        // Event handler for mouse leaving the card container
-        private void HandleMouseLeaveCardContainer()
-        {
-            isCardContainerHovered = false;
-            StartHidingPaletteRightClick();
-        }
-
-    }
-
 </div>
 
 @code {
 
-    void OpenLink(string url)
+    [Parameter] public string Name { get; set; }
+    [Parameter] public int GlobalId { get; set; }
+    [Parameter] public bool Disabled { get; set; }
+    [Parameter] public string NodeName { get; set; }
+
+    [Parameter] public ComponentInstance IndividualData { get; set; }
+
+    public ComponentCard(int id)
     {
-        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+        GlobalId = id;
+        Name = ComponentDeclarations.Components[id].name;
     }
+
+    public ComponentCard()
+    {
+    }
+
+    [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
+
+    // event handling for palette right click menu
+    private bool _showPaletteRightClick = false;
+
+    private void ShowPaletteRightClickFunc()
+    {
+        _showPaletteRightClick = true;
+        isPaletteHovered = true; // Set the flag to true when the mouse is over the palette
+    }
+
+    private void StartHidingPaletteRightClick()
+    {
+        isPaletteHovered = false; // Reset the flag when the mouse leaves the menu
+        Task.Delay(100).ContinueWith(_ =>
+        {
+            if (!isCardContainerHovered && !isPaletteHovered) // Only hide if the mouse is not over the card container and not over the menu
+                _showPaletteRightClick = false;
+        }); // Delay hiding the menu to allow smooth transition
+    }
+
+    private bool isPaletteHovered = false;
+    private bool isCardContainerHovered = false;
+
+    // Event handler for mouse entering the card container
+    private void HandleMouseEnterCardContainer()
+    {
+        isCardContainerHovered = true;
+    }
+
+    // Event handler for mouse leaving the card container
+    private void HandleMouseLeaveCardContainer()
+    {
+        isCardContainerHovered = false;
+        StartHidingPaletteRightClick();
+    }
+
+    private async Task OpenLink(string url)
+    {
+        try
+        {
+            Console.WriteLine($"[ComponentCard] Opening documentation URL via JS interop: {url}");
+            await JsRuntime.InvokeVoidAsync("open", url, "_blank");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[ComponentCard] Error opening link via JS interop: {ex.Message}");
+        }
     }
 
 }

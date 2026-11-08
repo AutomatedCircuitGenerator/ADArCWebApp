@@ -14,19 +14,25 @@
 {
     @if (rightClickable)
     {
-        <div class="right-click-container" style="top: @(individualData.zoomedY)px; left: @(individualData.zoomedX)px">
-            @if (individualData.Data.templateParams.Count > 0 || individualData.Data.EnvironmentalSettingsType != null)
+        <div class="right-click-container" style="top: @(individualData?.zoomedY ?? 0)px; left: @(individualData?.zoomedX ?? 0)px" @onclick:stopPropagation="true" @onmousedown:stopPropagation="true">
+            @if (individualData?.Data.templateParams.Count > 0 || individualData?.Data.EnvironmentalSettingsType != null)
             {
                 <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
                     <span>⚙</span>
                     <span style="padding-left: 5px">￨ Environmental Settings</span>
                 </button>
             }
-            <button id="component-help-button" @onclick="@(() => OpenLink(DocumentationMap.ResolveUrl(individualData.GlobalId)))">
+            <a id="component-help-button"
+               href="@DocumentationMap.ResolveUrl(individualData)"
+               target="_blank"
+               rel="noopener noreferrer"
+               @onclick="@(() => Console.WriteLine($"[VaryingComponent] Navigating to: {DocumentationMap.ResolveUrl(individualData)}"))"
+               @onclick:stopPropagation="true"
+               @onmousedown:stopPropagation="true">
                 <span style="padding-left: 3px">𝗶</span>
                 <span style="padding-left: 7px">￨ Component Information</span>
-            </button>
-            @if (!Pages.Index.App!.IsRunning && !individualData.IsArduino())
+            </a>
+            @if (!Pages.Index.App!.IsRunning && !(individualData?.IsArduino() ?? false))
             {
                 <button id="deletebutton" @onclick="Remove">
                     <span>x</span>
@@ -298,9 +304,17 @@
         _envSettingsY += e.MovementY;
     }
 
-    void OpenLink(string url)
+    private async Task OpenLink(string url)
     {
-        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+        try
+        {
+            Console.WriteLine($"[VaryingComponent] Opening documentation URL via JS interop: {url}");
+            await JsRuntime.InvokeVoidAsync("open", url, "_blank");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[VaryingComponent] Error opening link via JS interop: {ex.Message}");
+        }
     }
 
 }

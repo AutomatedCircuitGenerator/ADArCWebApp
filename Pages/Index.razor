@@ -14,7 +14,6 @@
 
 <PageTitle>Home | ADArC</PageTitle>
 <body>
-<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 @if (_isMobileUser)
 {
@@ -187,7 +186,6 @@
             <button @onclick="HideRightClickTooltip">Got it!</button>
         </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 
 
 </div>
@@ -342,9 +340,17 @@
         }
     }
 
-    void OpenExternalHelp()
+    private async Task OpenExternalHelp()
     {
-        JsRuntime.InvokeVoidAsync("window.open", DocumentationMap.BaseUrl, "_blank");
+        try
+        {
+            Console.WriteLine($"[Index] Opening documentation URL via JS interop: {DocumentationMap.BaseUrl}");
+            await JsRuntime.InvokeVoidAsync("open", DocumentationMap.BaseUrl, "_blank");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Index] Error opening help: {ex.Message}");
+        }
     }
 
 
