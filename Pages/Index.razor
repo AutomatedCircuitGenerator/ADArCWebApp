@@ -344,8 +344,7 @@
 
     void OpenExternalHelp()
     {
-        const string url = "https://adarc-help.mech.website/";
-        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+        JsRuntime.InvokeVoidAsync("window.open", DocumentationMap.BaseUrl, "_blank");
     }
 
 
