@@ -223,29 +223,49 @@
             .Select(c => c.HoleId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
 
+        var breadboardDistanceBetweenHoles = 16;
+        int holesUsedByOnBoardComponents = (int)System.Math.Ceiling(Comps.Values.Where(c => c.Data.LivesOnBreadBoard).Select(x => x.Data.Width).Sum() / breadboardDistanceBetweenHoles);
+        
+        Console.WriteLine(holesUsedByOnBoardComponents);
         // Only use B and F since other holes on same row are connected
         var signalHoles = (
             from column in "bf"
-            from row in Enumerable.Range(1, 30)
+            from row in Enumerable.Range(holesUsedByOnBoardComponents + 1, 30)
             select $"{column}{row}"
         ).ToList();
 
+        var LivesOnBreadboardSignalHoles = new List<string>();//represents signal holes each breadboard hardwired component has access to, generated later
+        
         // Get all positive power rail holes
-        var positiveHoles = Enumerable.Range(1, 25)
+        var positiveHoles = Enumerable.Range(2, 25)
             .Select(i => $"LPLUS_{i}")
             .ToList();
 
         // Get all negative power rail holes
-        var negativeHoles = Enumerable.Range(1, 25)
+        var negativeHoles = Enumerable.Range(2, 25)
             .Select(i => $"LMINUS_{i}")
             .ToList();
-
+        
+        double LivesOnBreadBoardOffset = 0;
         foreach (var comp in Comps.Values)
         {
             if (comp.IsArduino() || comp.localId == 0) continue; // Skip Arduino
             
+            //DOESNT MATTER IF COMPONENT ISNT HARDWIRED ONTO THE BREADBOARD, this is which pins the glyth should have access to, depending on its horizontal index (we incement the width at the end lol)
+            int LBBoffset = (int)Math.Ceiling(LivesOnBreadBoardOffset / breadboardDistanceBetweenHoles);
+            int LBBwidth = (int)Math.Ceiling(comp.Data.Width / breadboardDistanceBetweenHoles);
+            LivesOnBreadboardSignalHoles = (
+                from row in Enumerable.Range(LBBoffset + 1, LBBoffset + LBBwidth + 1)//MUST BE ROW THEN COLLUM!!!!
+                from column in "abcdefghij"
+                select $"{column}{row}"
+            ).ToList();
+            
+
             foreach (int pinId in comp.ConnMap.Keys.ToList())
             {
+
+                
+                
                 if (pinId < 0 || pinId >= comp.Data.pinInfo.Length) continue;
                 // Get the pin name
                 string pinName = comp.Data.pinInfo[pinId].name;
@@ -257,7 +277,7 @@
                 {
                     "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
                     "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
-                    _ => signalHoles
+                    _ => comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles : signalHoles
                 };
 
                 // Check if this pin already have a breadboard connection
@@ -277,8 +297,10 @@
                     comp.BreadboardConnections.Remove(existing);
                     usedHoles.Remove(existing.HoleId);
                 }
-                
-                string? freeHole = candidates.FirstOrDefault(h => !usedHoles.Contains(h));  // Find a hole that is not used yet
+
+                int LLBindexInCanidatesList = 0;
+                if(comp.Data.LivesOnBreadBoard) LLBindexInCanidatesList = comp.Data.BreadboardPinData[pinId].Item2 * 10 + comp.Data.BreadboardPinData[pinId].Item3  ;// Item2 = which allocated row we use, Item 3 = the pin in that row, from the bottom!
+                string? freeHole = comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles[LLBindexInCanidatesList] : candidates.FirstOrDefault(h => !usedHoles.Contains(h));  // Find a hole that is not used yet
                 
                 // Skip if no hole left
                 if (freeHole == null)
@@ -287,11 +309,11 @@
                         $"No available breadboard hole for {pinName}");
                     continue;
                 }
-                
                 comp.BreadboardConnections.Add(new BreadboardConnection(pinId, freeHole, "red"));   // Add wire from component pin to the hole
                 
                 usedHoles.Add(freeHole);    // Mark this hole as used so other pins won't use it
             }
+            if(comp.Data.LivesOnBreadBoard)LivesOnBreadBoardOffset += comp.Data.Width;
         }
     }
 

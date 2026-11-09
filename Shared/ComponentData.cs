@@ -22,8 +22,9 @@ namespace ADArCWebApp.Shared
 		public List<string> pinNames => pins.Keys.ToList();
 		public string? nodeName;
 		public ElementPin[] pinInfo;
-		public bool LivesOnBreadBoard;
-		public double BreadboardOffsetX, BreadboardOffsetY, Width;
+		public readonly bool LivesOnBreadBoard;
+		public readonly double BreadboardOffsetX, BreadboardOffsetY, Width;
+		public List<(string, int, int)> BreadboardPinData;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -53,6 +54,7 @@ namespace ADArCWebApp.Shared
 			BreadboardOffsetX = builder.BreadboardOffsetX;
 			BreadboardOffsetY = builder.BreadboardOffsetY;
 			Width = builder.Width;
+			BreadboardPinData = builder.BreadboardPins;
 		}
 
     }
@@ -80,6 +82,8 @@ namespace ADArCWebApp.Shared
 
 		public bool LivesOnBreadBoard = false;
 		public double BreadboardOffsetX, BreadboardOffsetY, Width;
+
+		public List<(string, int, int)> BreadboardPins = new ();
 		/* needs more later, good enough for now.*/
 		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null)
 		{
@@ -131,6 +135,10 @@ namespace ADArCWebApp.Shared
 						Width = BBOA.Width;
 						LivesOnBreadBoard = true;
 					}
+					else if (attribute is BreadboardPinAttrubte BPA)
+					{
+						BreadboardPins.Add((BPA.description, BPA.pinOffset, BPA.pinNumber));
+					}
 				}
 			}
 		}
@@ -161,5 +169,22 @@ public class BreadboardOffsetAttribute : Attribute
 		this.leftOffset = leftOffset;
 		this.topOffset = topOffset;
 		this.Width = Width;
+	}
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class BreadboardPinAttrubte : Attribute
+{
+	public int pinOffset;
+	public int pinNumber;
+	public string name;
+	public string description;
+	
+	public BreadboardPinAttrubte(int offset, int number, string name, string description = "")
+	{
+		this.pinOffset = offset;
+		this.pinNumber = number;
+		this.name = name;
+		this.description = description;
 	}
 }

@@ -190,16 +190,33 @@
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
-        Dictionary<(int, int), bool> routes = new();
+        Dictionary<(int, int), (bool, bool)> routes = new();
         var lines = new List<GridLine>();
 
+        if (ShowBreadboard)
+        {
+            GetAllGridLines_BreadboardPresent(lines, connections, routes);
+        }
+        else
+        {
+            GetAllGridLines_NoBreadboardPresent(lines, connections, routes);
+        }
+        
+        for (var i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))]);
+        }
+
+        return lines;
+    }
+
+    private void GetAllGridLines_NoBreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    {
         foreach (var connection in connections)
         {
-            if (ShowBreadboard && (connection.From.BreadboardConnections.Any(b => b.FromPinId == connection.FromId) || connection.To.BreadboardConnections.Any(b => b.FromPinId == connection.ToId))) continue;
-            var toPins = connection.To.Data.pinInfo;
-            var fromPins = connection.From.Data.pinInfo;
-            var toPin = toPins[connection.ToId];
-            var fromPin = fromPins[connection.FromId];
+            var toPin = connection.To.Data.pinInfo[connection.ToId];
+            var fromPin = connection.From.Data.pinInfo[connection.FromId];
             var startRot = connection.From.rotation;
             var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y), connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y)));
             var endRot = connection.To.rotation;
@@ -213,52 +230,57 @@
                 connection.To.localId, 
                 tooltip,
                 []));
-            var startId = connection.From.localId;
-            var startX = (int)Math.Floor(start.x);
 
             // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
-            if (!routes.ContainsKey((startId, startX)))
-            {
-                routes[(startId, startX)] = false;
-            }
-            else
-            {
-                routes[(startId, startX)] = true;
-            }
+            RouteWire(routes, start.x, connection.From.localId);
         }
+    }
 
-        if (ShowBreadboard)
+    private void GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    {
+        // Holes already assigned to component wires
+        var usedHoles = comps.Values
+            .SelectMany(c => c.BreadboardConnections)
+            .Select(c => c.HoleId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Get all positive power rail holes
+        var positiveHoles = Enumerable.Range(1, 25)
+            .Select(i => $"LPLUS_{i}")
+        .ToList();
+
+        // Get all negative power rail holes
+        var negativeHoles = Enumerable.Range(1, 25)
+        .Select(i => $"LMINUS_{i}")
+        .ToList();        
+        
+        // All possible breadboard holes
+        var availableHoles = (
+                from row in Enumerable.Range(1, 30)
+                from column in "abcdefghij"
+                select $"{column}{row}"
+            )
+            .Concat(positiveHoles)
+            .Concat(negativeHoles)
+            .ToList();
+
+        // Prevent duplicate Arduino wires on the same net
+        var drawnArduinoWires = new HashSet<(int, int, string)>();
+        
+        foreach (var comp in comps.Values)
         {
-            // Holes already assigned to component wires
-            var usedHoles = comps.Values
-                .SelectMany(c => c.BreadboardConnections)
-                .Select(c => c.HoleId)
-                .ToHashSet(StringComparer.OrdinalIgnoreCase);
-
-            // All possible breadboard holes
-            var availableHoles = (
-                    from row in Enumerable.Range(1, 30)
-                    from column in "abcdefghij"
-                    select $"{column}{row}"
-                )
-                .Concat(Enumerable.Range(1, 25).Select(i => $"LPLUS_{i}"))
-                .Concat(Enumerable.Range(1, 25).Select(i => $"LMINUS_{i}"))
-                .ToList();
-
-            // Prevent duplicate Arduino wires on the same net
-            var drawnArduinoWires = new HashSet<(int, int, string)>();
-
-            foreach (var comp in comps.Values)
+            foreach (var connection in comp.BreadboardConnections)
             {
-                foreach (var connection in comp.BreadboardConnections)
-                {
-                    var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId)); // Searching for original connection for this pin
-                    var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
-                    var pin = comp.Data.pinInfo[connection.FromPinId];  // Find the component pin position
-                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId);    // Find the breadboard hole center
+                var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId)); // Searching for original connection for this pin
+                var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
+
+                if(!comp.Data.LivesOnBreadBoard){
+                    //Add Wire from component to Breadboard
+                    var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
+                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId); // Find the breadboard hole center
                     var compRot = comp.rotation;
                     var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
-                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY));    // Wire ending point at breadboard hole
+                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
@@ -268,87 +290,117 @@
                         $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
                         []
                     ));
-                    if (originalWire != null)
-                    {
-                        bool compIsFrom = originalWire.From.localId == comp.localId;    // Check if first pin of the connection is the component
-                        var arduino = compIsFrom ? originalWire.To : originalWire.From; // Store Arduino
-                        var arduinoPinId = compIsFrom ? originalWire.ToId : originalWire.FromId;    // Store pin ID of Arduino of the current connection
-                        var arduinoPin = arduino.Data.pinInfo[arduinoPinId];    // Store the Arduino pin of the current connection
-                        var arduinoStart = ZoomCoord((arduino.X + RotateX(arduino.rotation, arduinoPin.x, arduinoPin.y), arduino.Y + RotateY(arduino.rotation, arduinoPin.x, arduinoPin.y)));   // Calculate Arduino pin's position on the workbench
-                        string netId = BreadboardNet.GetNetId(connection.HoleId);   // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
-                        var wireKey = (arduino.localId, arduinoPinId, netId);   // Store the Arduino pin and its destination net
-                        if (!drawnArduinoWires.Contains(wireKey))   // Check if the wire already exist
-                        {
-                            string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId)); // Store the first free hole connected to the component hole
-                            if (arduinoHoleId != null)  // If a free hole is found
-                            {
-                                var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId);  // Find the relative position of available hole to breadboard
-                                var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY));   // Calculate the available hole position on workbench
-                                lines.Add(new GridLine(
-                                    wireColor,
-                                    arduinoStart,
-                                    arduinoEnd,
-                                    arduino.localId,
-                                    -1,
-                                    $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
-                                    []
-                                ));
-                                var arduinoStartId = arduino.localId;
-                                var arduinoStartX = (int)Math.Floor(arduinoStart.x);
-                                if (!routes.ContainsKey((arduinoStartId, arduinoStartX)))
-                                {
-                                    routes[(arduinoStartId, arduinoStartX)] = false;
-                                }
-                                else
-                                {
-                                    routes[(arduinoStartId, arduinoStartX)] = true;
-                                }
-                                // Reserve the new hole and record the wire so it won't redraw later
-                                usedHoles.Add(arduinoHoleId);
-                                drawnArduinoWires.Add(wireKey);
-                            }
-                        }
-                    }
-                    var startId = comp.localId;
-                    var startX = (int)Math.Floor(start.x);
-                    if (!routes.ContainsKey((startId, startX)))
-                    {
-                        routes[(startId, startX)] = false;
-                    }
-                    else
-                    {
-                        routes[(startId, startX)] = true;
-                    }
+                    RouteWire(routes, start.x, comp.localId);
                 }
+
+                if (originalWire == null) continue; //no connection to arduino i guess??? This causes a floating line
+                
+                var candidates = comp.Data.pinInfo[connection.FromPinId].name.Trim().ToUpperInvariant() switch
+                {
+                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
+                    _ => null
+                };
+                string? BreadboardPowerPin = null;
+                
+                if(comp.Data.LivesOnBreadBoard && candidates != null){
+                    //Wire from Lives on breadboard component to powerlines
+                    var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
+                    
+                    var BreadboardComponentPin = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId), null);
+                    if(BreadboardComponentPin == null)continue;
+                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(BreadboardComponentPin); // Find the breadboard hole center
+
+                    BreadboardPowerPin = candidates.FirstOrDefault
+                        (h => !usedHoles.Contains(h) && h != candidates[0], null);
+                    if(BreadboardPowerPin == null)continue;
+                    var (PholeX, PholeY) = BreadboardHoleCoordinates.GetCenter(BreadboardPowerPin); // Find the breadboard hole center
+                    
+                    Console.WriteLine("Orininal Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
+                    var start = ZoomCoord((BreadboardX + PholeX, BreadboardY + PholeY)); // Wire ending point at breadboard hole
+                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
+                    lines.Add(new GridLine(
+                        wireColor,
+                        start,
+                        end,
+                        comp.localId,
+                        -1,
+                        $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
+                        []
+                    ));
+                    usedHoles.Add(BreadboardComponentPin);
+                    usedHoles.Add(BreadboardPowerPin);
+                    RouteWire(routes, start.x, comp.localId);
+                    
+                }
+                
+                
+                {
+                    //Wire from arduino to breadboard!
+                    var holeId = BreadboardPowerPin == null ? connection.HoleId : BreadboardPowerPin;
+                    bool compIsFrom = originalWire.From.localId == comp.localId; // Check if first pin of the connection is the component
+                    var arduino = compIsFrom ? originalWire.To : originalWire.From; // Store Arduino
+                    var arduinoPinId = compIsFrom ? originalWire.ToId : originalWire.FromId; // Store pin ID of Arduino of the current connection
+                    var arduinoPin = arduino.Data.pinInfo[arduinoPinId]; // Store the Arduino pin of the current connection
+                    var arduinoStart = ZoomCoord((arduino.X + RotateX(arduino.rotation, arduinoPin.x, arduinoPin.y), arduino.Y + RotateY(arduino.rotation, arduinoPin.x, arduinoPin.y))); // Calculate Arduino pin's position on the workbench
+                    string netId = BreadboardNet.GetNetId(holeId); // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
+                    var wireKey = (arduino.localId, arduinoPinId, netId); // Store the Arduino pin and its destination net
+                    if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
+                    string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)); // Store the first free hole connected to the component hole
+                    if (arduinoHoleId == null) continue; // If a free hole is found
+                    var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId); // Find the relative position of available hole to breadboard
+                    var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY)); // Calculate the available hole position on workbench
+                    lines.Add(new GridLine(
+                        wireColor,
+                        arduinoStart,
+                        arduinoEnd,
+                        arduino.localId,
+                        -1,
+                        $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
+                        []
+                    ));
+                    RouteWire(routes, arduinoStart.x, arduino.localId, horizonalEnd: true);
+                    
+                    // Reserve the new hole and record the wire so it won't redraw later
+                    usedHoles.Add(arduinoHoleId);
+                    drawnArduinoWires.Add(wireKey);
+                }
+
             }
         }
-        
-        for (var i = 0; i < lines.Count; i++)
-        {
-            var line = lines[i];
-            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))]);
-        }
-
-        return lines;
     }
-
+    
+    //Make wires route horizontally if they share an X position with another wire
+    private void RouteWire(Dictionary<(int, int), (bool, bool)> routes, double x, int id, bool horizonalEnd = false)
+    {
+        var startX = (int)Math.Floor(x);
+        if (routes.ContainsKey((id, startX)))
+        {
+            routes[(id, startX)] = (true, horizonalEnd);
+        }
+        else
+        {
+            routes[(id, startX)] = (false, horizonalEnd);
+        }
+    }
+    
     public double RotateX(int rot, double X, double Y)
     {
         return (3 > rot && rot > 0 ? -1 : 1) * (rot % 2 == 0 ? X : Y);
     }
-    
+
     public double RotateY(int rot, double X, double Y)
     {
         return (rot > 1 ? -1 : 1) * (rot % 2 == 0 ? Y : X);
     }
-    
+
     /// <summary>
     /// Populates the segments for a given gridline
     /// </summary>
     /// <param name="line">the line to populate segments of</param>
     /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
     /// <param name="moveHorizontallyFirst">whether to move horizontally or vertically first</param>
-    private void GetGridSegments(GridLine line, double offset, bool moveHorizontallyFirst)
+    private void GetGridSegments(GridLine line, double offset, (bool, bool) moveHorizontallyAtEndPoints)
     {
         var start = line.Start;
         var end = line.End;
@@ -356,17 +408,31 @@
         var currentX = start.x;
         var currentY = start.y;
 
-        var midY = (start.y + end.y) / 2 + offset;
-
-        if (!moveHorizontallyFirst)
+        if (moveHorizontallyAtEndPoints.Item1)
         {
-            line.Segments.Add(new Segment(currentX, currentY, currentX, midY));
-            currentY = midY;
-        }
+            var nextX = moveHorizontallyAtEndPoints.Item2 ? (start.x + end.x) / 2 + offset : end.x;
+            line.Segments.Add(new Segment(currentX, currentY, nextX, currentY));
+            currentX = nextX;
 
-        line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
-        currentX = end.x;
-        line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+            if (moveHorizontallyAtEndPoints.Item2)
+            {
+                line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+                currentY = end.y;
+            }
+        }
+        else
+        {
+            var nextY = moveHorizontallyAtEndPoints.Item2 ? end.y : (start.y + end.y) / 2 + offset;
+            line.Segments.Add(new Segment(currentX, currentY, currentX, nextY));
+            currentY = nextY;
+
+            if (!moveHorizontallyAtEndPoints.Item2)
+            {
+                line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
+                currentX = end.x;
+            }
+        }
+        line.Segments.Add(new Segment(currentX, currentY, end.x, end.y));
     }
 
     /// <summary>
