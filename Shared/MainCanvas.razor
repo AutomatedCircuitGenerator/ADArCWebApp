@@ -10,22 +10,6 @@
                 <span style="padding-left: 7px">￨ Component Information</span>
             </button>
         </div>
-        {
-            double CurrentOffset = 0;
-            foreach(var c in comps)
-            {
-                if (!c.Value.Data.LivesOnBreadBoard) continue; //Breadboard components rendered here
-                <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
-                                  CanvasClick="CanvasClick" CancelDrag="CancelDrag"
-                                  forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
-                                  handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
-                                  BreadBoard_X=@(BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX* zoomFactor) BreadBoard_Y=@(BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor) 
-                                  individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
-                                  DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
-
-                CurrentOffset += c.Value.Data.Width;
-            }
-        }
     }
     @if (BoardService.Board != Board.None)
     {
@@ -36,10 +20,27 @@
             <button class="reset-btn" @onclick="ResetZoom">Reset</button>
         </div>
     }
+    @{
+        double CurrentOffset = 0;
+    }
     @foreach (var c in comps)
     {
-        if(c.Value.Data.LivesOnBreadBoard)continue;//Breadboard components rendered below
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        if (c.Value.Data.LivesOnBreadBoard)
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+                              CanvasClick="CanvasClick" CancelDrag="CancelDrag"
+                              forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
+                              handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
+                              BreadBoard_X=@(BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX* zoomFactor) BreadBoard_Y=@(BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor) 
+                              individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
+                              DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+
+            CurrentOffset += c.Value.Data.Width;
+        }
+        else
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
     }
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))

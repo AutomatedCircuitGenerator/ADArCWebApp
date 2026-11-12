@@ -18,11 +18,11 @@ export class LED extends Controller {
     }
 
     setup() {
-        this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));
+        this.pins.sig[0].digital.addListener((state) => this.toggleLed(state));
     }
 
     cleanup() {
-        this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "none";
+        this.element.querySelector<HTMLElement>("#ledOn").style.display = "none";
     }
 
     setColor(color: string) {
@@ -37,9 +37,9 @@ export class LED extends Controller {
 
     private toggleLed(state: PinState) {
         if (state == PinState.Low) {
-            this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "none";
+            this.element.querySelector<HTMLElement>("#ledOn").style.display = "none";
         } else if (state == PinState.High) {
-            this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "inherit";
+            this.element.querySelector<HTMLElement>("#ledOn").style.display = "inherit";
         }
     }
 }

@@ -167,6 +167,7 @@
 
     <!-- LED red color layer, change fill to change color of LED -->
     <path
+      id="ledColor"
       d="M 29.003,22.207
          L 29.003,16.294
          C 29.003,12.381 25.835,9.206 21.918,9.206
@@ -194,26 +195,33 @@
            C 1.417,21.975 2.202,22.422 3.076,22.763
            L 3.076,21.238
            C 2.198,20.901 1.419,20.456 0.768,19.926 Z" />
-    <!-- Glowing effect when turn on-->
-    <g id ="ledOn">
-    <circle
-      cx="7" cy="11" r="10"
-      fill="#ff7777"
-      opacity="0.95"
-      filter="url(#lr_ledGlowLarge)" />
-
-    <circle
-      cx="7" cy="11" r="2.5"
-      fill="#ffffff"
-      opacity="0.95"
-      filter="url(#lr_ledGlowSmall)" />
+      <!-- Glowing effect when turn on-->
     </g>
-  </g>
+    <g id="ledOn" transform="translate(14.83 9.2059)" style="display: none;">
+      <circle 
+        id="ledColorBrightness"
+        cx="7" cy="11"
+        r="10"
+        fill="#ff8080"
+        opacity="1"
+        filter="url(#lr_ledGlowLarge)" />
+      <circle 
+        cx="7" cy="11"
+        r="2"
+        fill="white"
+        filter="url(#lr_ledGlowSmall)" />
+      <circle 
+        cx="7" cy="11"
+        r="3"
+        fill="white"
+        opacity="1"
+        filter="url(#lr_ledGlowSmall)" />
+    </g>
 
   <!-- ===================== RESISTOR ===================== -->
   <!-- A matrix transform uses: x' = ax + cy + e and y' = bx + dy + f -->
 <!-- When a = 0 and d = 0, the object is rotated 90°. The b and c values control the rotation/scale, while e and f control the x and y position. -->
-  <g id="resistor_1k" transform="matrix(0 -2.3 3 0 22.3 100)">
+    <g id="resistor_1k" transform="matrix(0 -2.3 3 0 22.3 100)">
 
     <!-- Metal lead -->
     <rect
