@@ -1,20 +1,22 @@
 @inherits RazorComponent
 
+@attribute [Component("IR Obstacle Avoidance", "Input/Distance Sensors", "irdetector", true, 1, 150, 200, paneHoverText: "FC-51")]
+@attribute [ComponentCode(CodeType.Global, 
+  "// Define the pin numbers for the Infrared obstacle avoidance sensor\n" +
+  "const int sensorPin = 2;")]
+@attribute [ComponentCode(CodeType.LoopMain, "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
+                                             "  Serial.println(digitalRead(sensorPin));  // Read the digital value from the sensor and print it to the serial monitor\n" +
+                                             "  delay(50);")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(sensorPin, INPUT);  // Set sensorPin as input")]
+
+@attribute [ComponentPin("VCC","Vcc", 31, 85.7, number: 1)]
+@attribute [ComponentPin("GND","gnd", 31, 76, number: 2)]
+@attribute [ComponentPin("OUT","out", 31, 66.3, number: 3)]
+
+@attribute [ComponentProperty("distance", 20, typeof(double))]
+
 @code {
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "VCC", x: 31, y: 85.7, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 31, y: 76, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "OUT", x: 31, y: 66.3, signals: new PinSignalInfo[] { }, number: 5),
-            };
-        }
-    }
-    
     [Parameter]
     [ValueSetting("cm", 20, 2, 30)]
     public double distance

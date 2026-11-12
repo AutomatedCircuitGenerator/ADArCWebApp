@@ -1,19 +1,19 @@
-﻿@inherits RazorComponent
+﻿@using ADArCWebApp.Shared.EnvironmentalSettings
+@inherits RazorComponent
+
+@attribute [Component("IR Receiver", "Input/Other Sensors", "ky022", true, 1.3, 65, 90, paneHoverText: "KY-022")]
+@attribute [ComponentCode(CodeType.LoopMain, "// Main loop: continuously checks for incoming IR signals\n\n  // If an IR signal is received and decoded\n  if (IrReceiver.decode())\n\n  {\n\n    // Print the decoded IR command in hexadecimal format\n    Serial.println(IrReceiver.decodedIRData.command, HEX);\n\n    // Prepare the receiver for the next incoming signal\n    IrReceiver.resume();\n  }\n\n  // Delay to avoid flooding the serial output\n  delay(500);")]
+@attribute [ComponentCode(CodeType.Global, "// Global variable\n// Define the pin connected to the IR receiver\nint IRPIN@ = ~\"digital_out\"; // Pin for receiving IR signals")]
+@attribute [ComponentCode(CodeType.Setup, "// Setup function: runs once at startup\n\n  // Print a message to indicate IR receiver setup\n  Serial.println(\"Enabling IRin\");\n\n  // Initialize the IR receiver with feedback on LED activity\n  IrReceiver.begin(IRPIN@, ENABLE_LED_FEEDBACK);\n  // Confirm that the IR receiver has been initialized\n  Serial.println(\"Enabled IRin\");")]
+@attribute [ComponentCode(CodeType.Include, "#include <IRremote.hpp> // Include the IRremote library for handling IR communication")]
+
+@attribute [ComponentPin("gnd", "gnd", 46, 113, number: 1)]
+@attribute [ComponentPin("digital_out", "digital_out", 55, 113, number: 2)]
+@attribute [ComponentPin("5V", "5V",56, 113, number: 3)]
+
+@attribute [ComponentEnviormentSettingsType(typeof(KY022Settings))]
 
 @code {
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x: 46, y: 113, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-                new ElementPin(name: "5V", x: 56, y: 113, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "digital_out", x: 66, y: 113, signals: new PinSignalInfo[] { }, number: 3)
-            };
-        }
-    }
-
 }
 
 <svg version="1.1"

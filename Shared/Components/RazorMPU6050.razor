@@ -1,4 +1,21 @@
 ﻿@inherits RazorComponent
+@attribute [Component("6-DoF with Gyro", "Input/Acceleration Sensors", "mpu6050", true, 1.3, 85, 65, paneHoverText: "MPU6050")]
+@attribute [ComponentCode(CodeType.Include, "#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n#include <Wire.h>")]
+@attribute [ComponentCode(CodeType.Setup, "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");")]
+@attribute [ComponentCode(CodeType.LoopMain, "  /* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);")]
+@attribute [ComponentCode(CodeType.Global, "Adafruit_MPU6050 mpu@;")]
+
+
+@attribute [ComponentPin("5V", "5V", 100, 30, number: 1)]
+@attribute [ComponentPin("gnd", "gnd",90, 30, number: 2)]
+@attribute [ComponentPin("scl", "scl", 80, 30, number: 3)]
+@attribute [ComponentPin("sda", "sda",70, 30, number: 4)]
+@attribute [ComponentPin("xda", "xda",60, 30, number: 5)]
+@attribute [ComponentPin("xcl", "xcl",50, 30, number: 6)]
+@attribute [ComponentPin("add", "add", 40, 30, number: 7)]
+@attribute [ComponentPin("int", "int", 30, 30, number: 8)]
+
+@attribute [ComponentProperty("motion", "Static", typeof(string))]
 
 @code {
     [Parameter]
@@ -6,25 +23,7 @@
     public string motion
     {
         get;
-        set;
-    }
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "5V", x: 100, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "gnd", x: 90, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-                new ElementPin(name: "scl", x: 80, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, number: 3),
-                new ElementPin(name: "sda", x: 70, y: 30, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, number: 4),
-                new ElementPin(name: "xda", x: 60, y: 30, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "xcl", x: 50, y: 30, signals: new PinSignalInfo[] { }, number: 6),
-                new ElementPin(name: "add", x: 40, y: 30, signals: new PinSignalInfo[] { }, number: 7),
-                new ElementPin(name: "int", x: 30, y: 30, signals: new PinSignalInfo[] { }, number: 8),
-            };
-        }
+    set;
     }
 
 }

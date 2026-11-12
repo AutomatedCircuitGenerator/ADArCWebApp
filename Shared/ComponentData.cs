@@ -1,4 +1,5 @@
 ﻿using System.Diagnostics;
+using ADArCWebApp;
 using ADArCWebApp.Shared.Components;
 
 namespace ADArCWebApp.Shared
@@ -14,7 +15,7 @@ namespace ADArCWebApp.Shared
         public bool enabled;
         public string directoryPath;
         public string paneHoverText = "";
-        public Dictionary<string, string> codeForGen = new();
+        public Dictionary<CodeType, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
         public double bottomOffset;
@@ -66,7 +67,7 @@ namespace ADArCWebApp.Shared
 		public bool enabled;
 		public string directoryPath;
 		public string paneHoverText = "";
-		public Dictionary<string, string> codeForGen = new();
+		public Dictionary<CodeType, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
 		public double bottomOffset;
@@ -85,68 +86,76 @@ namespace ADArCWebApp.Shared
 
 		public List<(string, int, int)> BreadboardPins = new ();
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null)
+		public ComponentDataBuilder(Type compType = null, string paneHoverText = "", List<string>? listenOn = null, Type environmentalSettingsType = null, string warning = null)
 		{
-			
-			this.name = name;
-			this.enabled = enabled;
-			this.directoryPath = directoryPath;
 			this.paneHoverText = paneHoverText;
-			this.codeForGen = codeForGen;
 			this.compType = compType ?? typeof(InvalidComponent);
 			this.EnvironmentalSettingsType = environmentalSettingsType;
 			Warning = warning;
-			this.rightOffset = rightOff;
-			this.bottomOffset = bottomOff;
-			this.cardScaleFactor = cardScaleFactor;
-			if (pins != null)//create pin ids
-			{
-				for (int i = 0; i < pins.Count; i++)
-				{
-					this.pins.Add(pins[i], i);
-				}
-			}
 			if (listenOn != null) {
 				pinsToListen = listenOn;
 			}
-			this.nodeName = gsNodeName;
-
-			//quick hack to get the pinInfo from a component without having to setup a field in the namespace file.
-			//TODO: fix!
+			
 			if (compType != typeof(InvalidComponent) && compType != null) {
-				try {
-					var p_i = compType!.GetProperty("pinInfo");
-					if (p_i != null)
-					{
-						this.pinInfo = (ElementPin[])p_i.GetValue(compType.GetConstructors()[0].Invoke(new object[] { }));
-					}
-				}
-				catch {
-					Console.WriteLine(name + " pinInfo setup failed!");
-				}
-				
-				
+				List<ElementPin> pinsAttrs = new List<ElementPin>();
 				foreach (var attribute in Attribute.GetCustomAttributes(compType))
 				{
-					if (attribute is BreadboardOffsetAttribute BBOA)//CANNOT BE SWITCH! sorry
+					if (attribute is ComponentAttribute cA)
 					{
-						BreadboardOffsetX = BBOA.leftOffset;
-						BreadboardOffsetY = BBOA.topOffset;
+						this.name = cA.Name;
+						this.enabled = cA.Enabled;
+						this.directoryPath = cA.Path;
+						this.bottomOffset = cA.BottomOff;
+						this.rightOffset = cA.RightOff;
+						this.cardScaleFactor = cA.CardScaleFactor;
+						this.nodeName = cA.GsNodeName;
+						this.paneHoverText = cA.PaneHoverText;
+					}
+					else if (attribute is BreadboardOffsetAttribute BBOA)//CANNOT BE SWITCH! sorry
+					{
+						BreadboardOffsetX = BBOA.LeftOffset;
+						BreadboardOffsetY = BBOA.TopOffset;
 						Width = BBOA.Width;
 						LivesOnBreadBoard = true;
 					}
 					else if (attribute is BreadboardPinAttrubte BPA)
 					{
-						BreadboardPins.Add((BPA.description, BPA.pinOffset, BPA.pinNumber));
+						BreadboardPins.Add((BPA.Description, BPA.PinOffset, BPA.PinNumber));
+					}
+					else if (attribute is ComponentPinAttribute pin)
+					{
+						pinsAttrs.Add(new ElementPin(pin.Name, pin.X, pin.Y, description: pin.Description, number: pin.Number, noBreadboard: pin.NoBreadboard));
+						this.pins.Add(pin.gsName, this.pins.Count);
+					}
+					else if (attribute is ComponentCodeAttribute cC)
+					{
+						codeForGen[cC.Type] = cC.Code;
+					}
+					else if (attribute is ComponentPropertyAttribute CPA)
+					{
+						properties[CPA.Name] = new ComponentParameter(CPA.Type, CPA.Data);
+					}
+					else if (attribute is ComponentEnviormentSettingsType CEST)
+					{
+						this.EnvironmentalSettingsType = CEST.Type;
+					}
+					else if (attribute is ComponentPinsToListen CPTL)
+					{
+						pinsToListen = CPTL.pins;
+					}
+					else if (attribute is ComponentWarning CW)
+					{
+						Warning = CW.warn;
 					}
 				}
+				this.pinInfo = pinsAttrs.ToArray();
 			}
 		}
 
 
-		public ComponentDataBuilder Property<T>(string name, T data)
+		public ComponentDataBuilder Property(string name, Type type, object? data)
 		{
-			properties[name] = new ComponentParameter<T?>(data);
+			properties[name] = new ComponentParameter(type, data);
 			return this;
 		}
 
@@ -158,33 +167,86 @@ namespace ADArCWebApp.Shared
 	}
 }
 
-public class BreadboardOffsetAttribute : Attribute
+
+public class ComponentAttribute(string name, string path, string gsNodeName, bool enabled = true, double cardScaleFactor = 1, double rightOff = 0, double bottomOff = 0, string paneHoverText = "") : Attribute
 {
-	public double leftOffset;
-	public double topOffset;
-	public double Width;
-	
-	public BreadboardOffsetAttribute(double leftOffset, double topOffset, double Width)
-	{
-		this.leftOffset = leftOffset;
-		this.topOffset = topOffset;
-		this.Width = Width;
-	}
+	public bool Enabled = enabled;
+	public string Name = name;
+	public string Path = path;
+	public string GsNodeName = gsNodeName;
+	public double CardScaleFactor = cardScaleFactor;
+	public double RightOff = rightOff;
+	public double BottomOff = bottomOff;
+	public string PaneHoverText = paneHoverText;
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class BreadboardPinAttrubte : Attribute
+public class ComponentPropertyAttribute(string name, object data, Type type) : Attribute
 {
-	public int pinOffset;
-	public int pinNumber;
-	public string name;
-	public string description;
-	
-	public BreadboardPinAttrubte(int offset, int number, string name, string description = "")
-	{
-		this.pinOffset = offset;
-		this.pinNumber = number;
-		this.name = name;
-		this.description = description;
-	}
+	public string Name = name;
+	public object Data = data;
+	public Type Type = type;
+}
+
+public class BreadboardOffsetAttribute(double leftOffset, double topOffset, double width) : Attribute
+{
+	public double LeftOffset = leftOffset;
+	public double TopOffset = topOffset;
+	public double Width = width;
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class BreadboardPinAttrubte(int offset, int number, string name, string description = "")
+	: Attribute
+{
+	public int PinOffset = offset;
+	public int PinNumber = number;
+	public string Name = name;
+	public string Description = description;
+}
+
+public enum CodeType
+{
+	Include,
+	Global,
+	Setup,
+	LoopMain,
+	Functions,
+	DelayLoop,
+	DelayTime
+}
+
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ComponentCodeAttribute(CodeType type, string code) : Attribute
+{
+	public CodeType Type = type;
+	public string Code = code;
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ComponentPinAttribute(string name, string gsName, double x, double y, int number = 0, string description = "", bool noBreadboard = false)
+	: Attribute
+{
+	public string Name = name;
+	public string gsName = gsName;
+	public string Description = description;
+	public double X = x, Y = y;
+	public int Number = number;
+	public bool NoBreadboard = noBreadboard;
+}
+
+public class ComponentEnviormentSettingsType(Type? type) : Attribute
+{
+	public Type? Type = type;
+}
+
+public class ComponentPinsToListen(string pins) : Attribute
+{
+	public List<string> pins = [pins];
+}
+
+public class ComponentWarning(string warning) : Attribute
+{
+	public string warn = warning;
 }

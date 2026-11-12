@@ -1,4 +1,22 @@
 ﻿@inherits RazorComponent;
+@attribute [Component("9-Dof IMU", "Input/Acceleration Sensors", "bno055", true, 1, 120, 90, paneHoverText: "BNO055")]
+@attribute [ComponentCode(CodeType.Include, "// Include necessary libraries for the BNO055 sensor\n#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BNO055.h>\n#include <utility/imumaths.h>")]
+@attribute [ComponentCode(CodeType.Setup,                                 "  // Setup function: runs once at startup\n  while (!Serial) delay(10);  // Wait for serial port to open\n\n  Serial.println(\"Orientation Sensor Raw Data Test\");\n  Serial.println(\"\");\n\n  /* Initialize the sensor */\n  if(!bno@.begin())\n  {\n    // Error handling: if the sensor is not detected, print a message and halt\n    Serial.print(\"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!\");\n    while(1);\n  }\n\n  delay(1000); // Allow the sensor to stabilize\n\n  /* Display the current temperature from the sensor */\n  int8_t temp@ = bno@.getTemp();\n  Serial.print(\"Current Temperature: \");\n  Serial.print(temp@);\n  Serial.println(\" C\");\n  Serial.println(\"\");\n\n  // Use external crystal for better accuracy\n  bno@.setExtCrystalUse(true);\n\n  Serial.println(\"Calibration status values: 0=uncalibrated, 3=fully calibrated\");")]
+@attribute [ComponentCode(CodeType.Global,                                 "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n// id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);")]
+@attribute [ComponentCode(CodeType.LoopMain,                                 "  // Main loop: Continuously read sensor data\n\n  // Possible vector values can be:\n  // - VECTOR_ACCELEROMETER - m/s^2\n  // - VECTOR_MAGNETOMETER  - uT\n  // - VECTOR_GYROSCOPE     - rad/s\n  // - VECTOR_EULER         - degrees\n  // - VECTOR_LINEARACCEL   - m/s^2\n  // - VECTOR_GRAVITY       - m/s^2\n  \n  // Read Euler angles (heading, roll, pitch)\n  imu::Vector<3> euler@ = bno@.getVector(Adafruit_BNO055::VECTOR_EULER);\n\n  /* Display the floating point data */\n  Serial.print(\"X: \");\n  Serial.print(euler@.x());\n  Serial.print(\" Y: \");\n  Serial.print(euler@.y());\n  Serial.print(\" Z: \");\n  Serial.print(euler@.z());\n  Serial.print(\"\t\t\");\n\n  /* Uncomment the following block to display quaternion data */\n  /*\n  imu::Quaternion quat@ = bno@.getQuat();\n  Serial.print(\"qW: \");\n  Serial.print(quat@.w(), 4);\n  Serial.print(\" qX: \");\n  Serial.print(quat@.x(), 4);\n  Serial.print(\" qY: \");\n  Serial.print(quat@.y(), 4);\n  Serial.print(\" qZ: \");\n  Serial.print(quat@.z(), 4);\n  Serial.print(\"\t\t\");\n  */\n\n  /* Display calibration status for each sensor */\n  uint8_t system@, gyro@, accel@, mag@ = 0;\n  bno@.getCalibration(&system@, &gyro@, &accel@, &mag@);\n  Serial.print(\"CALIBRATION: Sys=\");\n  Serial.print(system@, DEC);\n  Serial.print(\" Gyro=\");\n  Serial.print(gyro@, DEC);\n  Serial.print(\" Accel=\");\n  Serial.print(accel@, DEC);\n  Serial.print(\" Mag=\");\n  Serial.println(mag@, DEC);\n\n  // Delay between readings to allow sensor data to refresh\n  delay(BNO055_SAMPLERATE_DELAY_MS@);")]
+
+@attribute [ComponentPin("INT","int",90.5, 31, number: 1)]
+@attribute [ComponentPin("ADR", "adr", 103, 31, number: 2)]
+@attribute [ComponentPin("Vin", "5V",54, 109, number: 3)]
+@attribute [ComponentPin("GND", "gnd",79, 109, number: 4)]
+@attribute [ComponentPin("RST", "rst",116, 109, number: 5)]
+@attribute [ComponentPin("SDA", "sda",91, 109, number: 6)]
+@attribute [ComponentPin("SCL", "scl",103.5, 109, number: 7)]
+@attribute [ComponentPin("PS0", "ps0",65.5, 31, number: 8)]
+@attribute [ComponentPin("PS1", "ps1",78, 31, number: 9)]
+@attribute [ComponentPin("3vo", "null i guess???",75.377, 109, number: 10)]
+
+@attribute [ComponentProperty("motion", "Static", typeof(string))]
 
 @code {
     [Parameter]
@@ -8,28 +26,6 @@
         get;
         set;
     }
-
-    /*  There may be an issue with the transformation details for the pins, otherwise ready to go - Gabe*/
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "INT", x: 90.5, y: 31, signals: new PinSignalInfo[] { }, number: 9),
-                new ElementPin(name: "ADR", x: 103, y: 31, signals: new PinSignalInfo[] { }, number: 10),
-                new ElementPin(name: "Vin", x: 54, y: 109, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "GND", x: 79, y: 109, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 3),
-                new ElementPin(name: "RST", x: 116, y: 109, signals: new PinSignalInfo[] { }, number: 6),
-                new ElementPin(name: "SDA", x: 91, y: 109, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "SCL", x: 103.5, y: 109, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "PS0", x: 65.5, y: 31, signals: new PinSignalInfo[] { }, number: 7),
-                new ElementPin(name: "PS1", x: 78, y: 31, signals: new PinSignalInfo[] { }, number: 8),
-                new ElementPin(name: "3vo", x: 75.377, y: 109, signals: new PinSignalInfo[] { }, number: 2),
-            };
-        }
-    }
-
 }
 
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>

@@ -1,5 +1,18 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Alcohol", "Input/Gas Sensors", "mq3", true, 0.9, 75, 75, paneHoverText: "MQ-3")]
+@attribute [ComponentCode(CodeType.Setup,   "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
+)]
+@attribute [ComponentCode(CodeType.LoopMain,                                 "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading")]
+@attribute [ComponentCode(CodeType.Global,                                 "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value")]
+
+
+@attribute [ComponentPin("gnd", "gnd", 200.9, 68.67, number: 1)]
+@attribute [ComponentPin("5V", "5V", 200.87, 79.615, number: 2)]
+@attribute [ComponentPin("analog_out", "analog_out", 200.91, 58.793, number: 3)]
+
+@attribute [ComponentProperty("alcohol", 0, typeof(double))]
+
 @code {
     [Parameter]
     [ValueSetting("", 0, 0, 1024)]
@@ -8,20 +21,6 @@
         get;
         set;
     }
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x: 200.9, y: 68.67, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-                new ElementPin(name: "5V", x: 200.87, y: 79.615, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-                new ElementPin(name: "analog_out", x: 200.91, y: 58.793, signals: new PinSignalInfo[] { }, number: 4)
-            };
-        }
-    }
-
 }
 
 <svg width="46.688mm" height="21mm" version="1.1" viewBox="0 0 46.688 21" xmlns="http://www.w3.org/2000/svg">

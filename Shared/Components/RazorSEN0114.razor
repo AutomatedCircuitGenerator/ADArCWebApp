@@ -1,4 +1,29 @@
 ﻿@inherits RazorComponent
+@attribute [Component("Soil Moisture", "Input/Soil Sensors", "sen0114", true, .5, 75, 75, paneHoverText: "SEN0114")]
+@attribute [ComponentCode(CodeType.Global, 
+    "/* Example code for the moisture sensor\n" +
+    "Sensor value descriptions:\n" +
+    "\t 0 - 300: Dry soil\n" +
+    "\t 300 - 700: Humid soil\n" +
+    "\t 700 - 950: In water\n*/\n" +
+    "#define moisturePin@ ~\"analog_out\"\n" +
+    "int moistureValue@ = 0;")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
+                                             "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
+                                             "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
+                                             "\tSerial.print(\"Sensor Value: \");\n" +
+                                             "\tSerial.print(sensorValue@);\n\n" +
+                                             "\tSerial.print(\"\tVoltage: \");\n" +
+                                             "\tSerial.print(voltage@);\n\n" +
+                                             "\tSerial.print(\"\tpH: \");\n" +
+                                             "\tSerial.println(pH);\n" +
+                                             "\tdelay(2000); // wait 2s for next reading")]
+
+@attribute [ComponentPin("gnd","gnd", 54, 59, number: 1)]
+@attribute [ComponentPin("5V","5V", 63, 59, number: 2)]
+@attribute [ComponentPin("analog_out","analog_out", 72, 59, number: 3)]
+
+@attribute [ComponentProperty("humidity", 512, typeof(double))]
 
 @code {
     [Parameter]
@@ -7,19 +32,6 @@
     {
         get;
         set;
-    }
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x:54, y: 59, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-                new ElementPin(name: "5V", x: 63, y: 59, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-                new ElementPin(name: "analog_out", x: 72, y: 59, signals: new PinSignalInfo[] { }, number: 4)
-            };
-        }
     }
 
 }

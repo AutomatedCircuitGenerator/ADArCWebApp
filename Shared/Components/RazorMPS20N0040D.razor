@@ -1,4 +1,72 @@
 ﻿@inherits RazorComponent
+@attribute [Component("Pressure with ADC", "Input/Other Sensors", "mps20n0040d", true, 1, -20, -20, paneHoverText: "MPS20N0040D")]
+@attribute [ComponentCode(CodeType.Global, 
+  "#define HX710B_DOUT@ ~\"dout\"\n" +
+  "#define HX710B_SCK@ ~\"sck\"\n\n" +
+  "long offset@ = 0; // Tare / zero calibration value")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(HX710B_DOUT@, INPUT);\n" +
+                                          "  pinMode(HX710B_SCK@, OUTPUT);\n" +
+                                          "  digitalWrite(HX710B_SCK@, LOW);\n\n" +
+                                          "  delay(500);\n\n" +
+                                          "  // Zero calibration routine (tare at ambient room pressure)\n" +
+                                          "  Serial.println(\"Zeroing pressure sensor... ensure zero pressure is applied.\");\n" +
+                                          "  long sum@ = 0;\n" +
+                                          "  for (int i = 0; i < 10; i++) {\n" +
+                                          "    sum@ += readHX710B@();\n" +
+                                          "    delay(50);\n" +
+                                          "  }\n" +
+                                          "  offset@ = sum@ / 10;\n" +
+                                          "  Serial.print(\"Offset value: \");\n" +
+                                          "  Serial.println(offset@);")]
+@attribute [ComponentCode(CodeType.LoopMain, "  long rawValue@ = readHX710B@();\n" +
+                                             "  long delta@ = rawValue@ - offset@;\n\n" +
+                                             "  // Approximate conversion factor (scale factor varies by board/excitation; calibrate for accuracy)\n" +
+                                             "  // Scale factor roughly ~ 200 counts per kPa for standard 40kPa sensors on HX710B\n" +
+                                             "  float scaleFactor@ = 200.0;\n" +
+                                             "  float pressure_kPa@ = (float)delta@ / scaleFactor@;\n" +
+                                             "  float pressure_psi@ = pressure_kPa@ * 0.145038;\n\n" +
+                                             "  Serial.print(\"Raw: \");\n" +
+                                             "  Serial.print(rawValue@);\n" +
+                                             "  Serial.print(\" | Pressure: \");\n" +
+                                             "  Serial.print(pressure_kPa@, 2);\n" +
+                                             "  Serial.print(\" kPa (\");\n" +
+                                             "  Serial.print(pressure_psi@, 2);\n" +
+                                             "  Serial.println(\" PSI)\");\n\n" +
+                                             "  delay(200);")]
+@attribute [ComponentCode(CodeType.Include, "#include <Arduino.h>")]
+@attribute [ComponentCode(CodeType.Functions,  "// Function to read raw 24-bit signed integer from HX710B\n" +
+                                               "long readHX710B@() {\n" +
+                                               "  while (digitalRead(HX710B_DOUT@) == HIGH); // Wait until conversion is ready (DOUT goes LOW)\n\n" +
+                                               "  unsigned long count = 0;\n" +
+                                               "  for (int i = 0; i < 24; i++) {\n" +
+                                               "    digitalWrite(HX710B_SCK@, HIGH);\n" +
+                                               "    delayMicroseconds(1);\n" +
+                                               "    count = (count << 1) | digitalRead(HX710B_DOUT@);\n" +
+                                               "    digitalWrite(HX710B_SCK@, LOW);\n" +
+                                               "    delayMicroseconds(1);\n" +
+                                               "  }\n\n" +
+                                               "  // 25th pulse sets gain to 128 (default) and powers board for next conversion\n" +
+                                               "  digitalWrite(HX710B_SCK@, HIGH);\n" +
+                                               "  delayMicroseconds(1);\n" +
+                                               "  digitalWrite(HX710B_SCK@, LOW);\n" +
+                                               "  delayMicroseconds(1);\n\n" +
+                                               "  // Convert 24-bit two's complement integer to 32-bit signed long\n" +
+                                               "  if (count & 0x800000) {\n" +
+                                               "    count |= 0xFF000000;\n" +
+                                               "  }\n\n" +
+                                               "  return (long)count;\n" +
+                                               "}")]
+@attribute [ComponentCode(CodeType.DelayLoop, "delay(200);")]
+
+@attribute [ComponentPin("Vcc","Vcc", 66.6, 195.5, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 160.3, 195.5, number: 2)]
+@attribute [ComponentPin("sck","sck", 96.8, 195.5, number: 3)]
+@attribute [ComponentPin("dout","dout", 126.7, 195.5, number: 3)]
+
+@attribute [ComponentProperty("pressure", 0, typeof(double))]
+@attribute [ComponentProperty("scale", 500, typeof(double))]
+
+@attribute [ComponentWarning( "Calibration is required to determine the scale factor.")]
 
 @code {
     
@@ -9,21 +77,7 @@
     [Parameter]
     [ValueSetting("ADC Scale", 500, 10, 10000)]
     public double scale { get; set; }
-
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 66.6, y: 195.5, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 160.3, y: 195.5, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "sck", x: 96.8, y: 195.5, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "dout", x: 126.7, y: 195.5, signals: new PinSignalInfo[] { }, number: 2)
-            };
-        }
-    }
+    
 }
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.5 41.25" width="168.75px" height="185.625px">

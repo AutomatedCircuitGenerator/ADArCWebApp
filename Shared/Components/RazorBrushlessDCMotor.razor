@@ -3,14 +3,16 @@
     [Parameter] public string speed { get; set; } = "";
     public static ElementPin[] pinInfo
     {
+        
+        //Not implemented at time of component repository switch
         get
         {
             return new ElementPin[]
             {
 
-				new ElementPin(name: "A", x: 78.566, y: 83.235, signals: new PinSignalInfo[]{ }, number: 1),
-				new ElementPin(name: "B", x: 79.947, y: 83.17, signals: new PinSignalInfo[] { }, number: 2),
-				new ElementPin(name: "C",  x: 81.27, y: 83.17, signals: new PinSignalInfo[] { }, number: 3)
+				//new ElementPin(name: "A", x: 78.566, y: 83.235, signals: new PinSignalInfo[]{ }, number: 1),
+				//new ElementPin(name: "B", x: 79.947, y: 83.17, signals: new PinSignalInfo[] { }, number: 2),
+				//new ElementPin(name: "C",  x: 81.27, y: 83.17, signals: new PinSignalInfo[] { }, number: 3)
             };
 
         }

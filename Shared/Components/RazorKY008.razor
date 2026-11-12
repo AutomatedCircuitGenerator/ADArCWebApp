@@ -1,18 +1,12 @@
 @inherits RazorComponent
+@attribute [Component("Laser Diode", "Output/LED", "ky008", true, 1, 75, 75, paneHoverText: "KY-008")]
+@attribute [ComponentCode(CodeType.Global, "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating")]
 
+@attribute [ComponentPin("digital_in","digital_in", 42, 128, number: 1)]
+@attribute [ComponentPin("gnd", "gnd",61, 128, number: 2)]
 @code {
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "digital_in", x: 42, y: 128, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 61, y: 128, signals: new PinSignalInfo[] { }, number: 2)
-            };
-        }
-    }
 
 }
 

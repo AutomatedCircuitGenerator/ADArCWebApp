@@ -1,20 +1,35 @@
 @inherits RazorComponent
+@attribute [Component("Thermistor", "Input/Temperature and Humidity Sensors", "thermistor", true, 1, 75, 75, paneHoverText: "Thermistor")]
+@attribute [ComponentCode(CodeType.Global,  "const int sensorPin@ = ~\"sig\";"+
+                                            "// Define the analog pin connected to the OUT pin of the module\n"+
+                                            "// Define the reference resistance and temperature constants\n"+
+                                            "const float referenceResistance = 10000.0; // 10 kΩ at 25°C\n"+
+                                            "const float nominalTemperature = 25.0;    // Nominal temperature in °C\n"+
+                                            "const float betaCoefficient = 3950.0;     // Beta coefficient of the thermistor\n"+
+                                            "const float seriesResistor = 10000.0;     // Value of the pull-up resistor (10 kΩ)")]
+@attribute [ComponentCode(CodeType.Setup,  "pinMode(sensorPin@, INPUT);")]
+@attribute [ComponentCode(CodeType.LoopMain, "int analogValue = analogRead(sensorPin@); // Read the analog value\n"+
+                                             "  float voltage = analogValue * (5.0 / 1023.0); // Convert to voltage\n  \n"+
+                                             "  // Calculate the thermistor resistance\n"+
+                                             "  float thermistorResistance = (seriesResistor * (5.0 - voltage)) / voltage;\n\n"+
+                                             "  // Calculate the temperature in Kelvin using the Steinhart-Hart equation\n"+
+                                             "  float temperatureKelvin = 1.0 / (1.0 / (nominalTemperature + 273.15) +\n"+
+                                             "                                   (1.0 / betaCoefficient) *\n"+
+                                             "                                   log(thermistorResistance / referenceResistance));\n\n"+
+                                             "  // Convert temperature from Kelvin to Celsius\n"+
+                                             "  float temperatureCelsius = temperatureKelvin - 273.15;\n\n"+
+                                             "  // Print the temperature to the Serial Monitor\n"+
+                                             "  Serial.print(\"Temperature: \");\n"+
+                                             "  Serial.print(temperatureCelsius);\n"+
+                                             "  Serial.println(\" °C\");\n\n"+
+                                             "  delay(1000); // Wait for 1 second before the next reading")]
 
+@attribute [ComponentPin("vcc","vcc", 88, 134, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 82, 134, number: 2)]
+@attribute [ComponentPin("sig","sig", 93, 134, number: 2)]
+
+@attribute [ComponentProperty("Temperature", 70, typeof(double))]
 @code {
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "vcc", x: 88, y: 134, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 82, y: 134, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "sig", x: 93, y: 134, signals: new PinSignalInfo[] { }, number: 1),
-            };
-        }
-    }
-
 
     [Parameter]
     [ValueSettingDouble("Temperature", 70.0, -300.0, 300.0)]

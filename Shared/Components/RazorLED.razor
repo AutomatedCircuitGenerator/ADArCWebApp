@@ -1,8 +1,18 @@
 ﻿@inherits RazorComponent
+@attribute [Component("LED", "Output/LED", "led", true, 1.5, 40, 50)]
+
 @attribute [BreadboardOffset(-25.5, -26, 31)]
 @attribute [BreadboardPinAttrubte(0, 8, "sig", "Anode")]
 @attribute [BreadboardPinAttrubte(1, 4, "gnd", "Cathode")]
 
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(~\"sig\", OUTPUT); // Set the LED anode pin as an output")]
+@attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"sig\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"sig\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]
+
+
+@attribute [ComponentPin("sig","sig", 50, 66, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 39, 66, number: 2)]
+
+@attribute [ComponentProperty("color", "red", typeof(string))]
 @code {
     [Parameter]
     [DropdownSetting(["red", "blue", "green", "yellow", "purple", "orange", "white"])]
@@ -12,20 +22,6 @@
         set;
     }
 
-    
-    
-    
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "sig", x: 50, y: 66, signals: new PinSignalInfo[] { }, description: "Anode"),
-                new ElementPin(name: "gnd", x: 39, y: 66, signals: new PinSignalInfo[] { }, description: "Cathode")
-            };
-        }
-    }
 }
 
 <div class="led-container">

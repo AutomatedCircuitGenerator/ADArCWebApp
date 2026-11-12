@@ -1,21 +1,20 @@
 @inherits RazorComponent
 
-@code {
+@attribute [Component("Stepper Motor with Driver", "Output/Motors/Stepper Motor", "servo", true, 0.8, 75, 75, paneHoverText: "28BYJ-48/ULN2003")]
+@attribute [ComponentCode(CodeType.Global, "int motorPin1_@ = ~\"in1\"; // Define control pin 1 for stepper motor\nint motorPin2_@ = ~\"in2\"; // Define control pin 2 for stepper motor\nint motorPin3_@ = ~\"in3\"; // Define control pin 3 for stepper motor\nint motorPin4_@ = ~\"in4\"; // Define control pin 4 for stepper motor\nint MotorInterfaceType@ = 8; // Define motor driver interface type\n\nAccelStepper stepper@ = AccelStepper(MotorInterfaceType@, motorPin1_@, motorPin3_@, motorPin2_@, motorPin4_@); // Initialize stepper motor with pin configuration\n")]
+@attribute [ComponentCode(CodeType.Setup, "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed")]
+@attribute [ComponentCode(CodeType.Include, "#include <AccelStepper.h>")]
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "in1", x: 50, y: 105, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "in2", x: 50, y: 115, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "in3", x: 50, y: 125, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "in4", x: 50, y: 135, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "pwr_gnd", x: 89, y: 245, signals: new PinSignalInfo[] { }, number: 6),
-            };
-        }
-    }
+@attribute [ComponentPin("in1","in1", 50, 105, number: 1)]
+@attribute [ComponentPin("in2","in2", 50, 115, number: 2)]
+@attribute [ComponentPin("in3","in3", 50, 125, number: 3)]
+@attribute [ComponentPin("in4","in4", 50, 135, number: 4)]
+@attribute [ComponentPin("pwr_gnd", "pwr_gnd", 89, 245, number: 6)]
+
+
+@code {
+    
 
 }
 

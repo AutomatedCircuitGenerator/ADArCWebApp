@@ -85,17 +85,15 @@
         public string name;
         public double x;
         public double y;
-        PinSignalInfo[] signals;
         int? number;
         string? description;
         bool? noBreadboard;
 
 
-        public ElementPin(string name, double x, double y, PinSignalInfo[] signals, int? number = null, string? description = null, bool noBreadboard = false) { 
+        public ElementPin(string name, double x, double y, int? number = null, string? description = null, bool noBreadboard = false) { 
             this.name = name;
             this.x = x;
             this.y = y;
-            this.signals = signals;
             this.number = number;
             this.description = description;
             this.noBreadboard = noBreadboard;

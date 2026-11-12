@@ -1,23 +1,39 @@
 @inherits RazorComponent
+@attribute [Component("Time-of-Flight", "Input/Distance Sensors", "vl53l0x", true, 1, 10, 90, paneHoverText: "VL53L0X")]
+@attribute [ComponentCode(CodeType.Global, 
+    "VL53L0X sensor;")]
+@attribute [ComponentCode(CodeType.LoopMain, "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
+                                             "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
+                                             "\n" +
+                                             "  Serial.println();")]
+@attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <VL53L0X.h>")]
+@attribute [ComponentCode(CodeType.Setup, "  Wire.begin();\n" +
+                                          "\n" +
+                                          "  sensor.setTimeout(500);\n" +
+                                          "  if (!sensor.init())\n" +
+                                          "  {\n" +
+                                          "    Serial.println(\"Failed to detect and initialize sensor!\");\n" +
+                                          "    while (1) {}\n" +
+                                          "  }\n" +
+                                          "\n" +
+                                          "  // Start continuous back-to-back mode (take readings as\n" +
+                                          "  // fast as possible).  To use continuous timed mode\n" +
+                                          "  // instead, provide a desired inter-measurement period in\n" +
+                                          "  // ms (e.g. sensor.startContinuous(100)).\n" +
+                                          "  sensor.startContinuous();")]
+
+@attribute [ComponentPin("Vcc","5V", 59, 96, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 72.5, 96, number: 2)]
+@attribute [ComponentPin("scl","scl", 92.1, 96, number: 3)]
+@attribute [ComponentPin("sda","sda", 108.8, 96, number: 1)]
+@attribute [ComponentPin("xshut","xshut", 142.2, 96, number: 2)]
+@attribute [ComponentPin("gpio","gpio", 125.5, 96, number: 3)]
+
+@attribute [ComponentProperty("distance", 100, typeof(double))]
 
 @code {
     
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 59, y: 96, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 75.5, y: 96, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "scl", x: 92.1, y: 96, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "sda", x: 108.8, y: 96, signals: new PinSignalInfo[] { }, number: 4), 
-                new ElementPin(name: "xshut", x: 142.2, y: 96, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "gpio", x: 125.5, y: 96, signals: new PinSignalInfo[] { }, number: 6)
-            };
-        }
-    }
-    
+  
     [Parameter]
     [ValueSetting("mm", 100, 30, 2000)]
     public double distance

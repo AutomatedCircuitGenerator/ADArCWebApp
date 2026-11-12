@@ -1,5 +1,18 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Ultrasonic", "Input/Distance Sensors", "hcsr04", true, 0.65, 170, 95, paneHoverText: "HC-SR04")]
+@attribute [ComponentCode(CodeType.Setup,                                     "  // Setup function: runs once at startup\n  // Configure the trigger pin as an OUTPUT and the echo pin as an INPUT\n  pinMode(trigPin@, OUTPUT); // Set trigger pin as output\n  pinMode(echoPin@, INPUT);  // Set echo pin as input")]
+@attribute [ComponentCode(CodeType.LoopMain,                                 "  // Main loop: continuously measures distance\n\n  // Ensure the trigger pin is LOW to start\n  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2); // Short delay to allow sensor stabilization\n\n  // Trigger the sensor by sending a HIGH pulse for 10 microseconds\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10); // Pulse duration\n  digitalWrite(trigPin@, LOW);\n\n  // Read the duration of the echo pulse (in microseconds)\n  duration@ = pulseIn(echoPin@, HIGH);\n\n  // Calculate the distance (cm) using the speed of sound (0.0343 cm/us)\n  // Dividing by 2 accounts for the round-trip distance\n  distance@ = (duration@ * 0.0343) / 2;\n\n  // Output the measured distance to the Serial Monitor\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n\n  // Short delay before the next measurement\n  delay(100);")]
+@attribute [ComponentCode(CodeType.Global,                                 "// Global variables and pin definitions\n// Define the pins for the HC-SR04 sensor\nconst int trigPin@ = ~\"trigger\"; // Pin that triggers the ultrasonic pulse\nconst int echoPin@ = ~\"echo\"; // Pin that receives the echo signal\n\n// Variables to store the pulse duration and calculated distance\nfloat duration@, distance@;")]
+
+
+@attribute [ComponentPin("vcc", "vcc", 96.3, 118, number: 1)]
+@attribute [ComponentPin("trigger", "trigger",106.3, 118, number: 2)]
+@attribute [ComponentPin("echo", "echo",116.3, 118, number: 3)]
+@attribute [ComponentPin("gnd", "gnd",126.3, 118, number: 4)]
+
+@attribute [ComponentProperty("distance", 20, typeof(double))]
+
 @code {
     [Parameter]
     [ValueSetting("cm", 20, 2, 400)]
@@ -7,21 +20,6 @@
     {
         get;
         set;
-    }
-
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "vcc", x: 96.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "trigger", x: 106.3, y: 118, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "echo", x: 116.3, y: 118, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "gnd", x: 126.3, y: 118, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 4)
-            };
-        }
     }
 
 }

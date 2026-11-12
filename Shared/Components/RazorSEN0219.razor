@@ -1,19 +1,42 @@
 @inherits RazorComponent
 
-@code {
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x: 35, y: 128, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-                new ElementPin(name: "5V", x: 35, y: 123, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-                new ElementPin(name: "analog_out", x: 35, y: 117, signals: new PinSignalInfo[] { }, number: 3)
-            };
-        }
-    }
+@attribute [Component("CO2", "Input/Gas Sensors", "sen0219", true, 0.9, 100, 75, paneHoverText: "SEN0219")]
+@attribute [ComponentCode(CodeType.Global, 
+    "const int co2_pin@ = ~\"analog_out\";\n")]
+@attribute [ComponentCode(CodeType.Setup, "pinMode(co2_pin@, INPUT);\n" +
+                                          "Serial.println(\"====================================\");\n" +
+                                          "Serial.println(\"Gravity NDIR CO2 Sensor Initialized\");\n" +
+                                          "Serial.print(\"Reading signal on Analog/Digital Pin \");\n" +
+                                          "Serial.print(co2_pin@);\n" +
+                                          "Serial.println(\"...\");\n" +
+                                          "Serial.println(\"====================================\");")]
+@attribute [ComponentCode(CodeType.LoopMain, "unsigned long durationHigh@ = pulseIn(co2_pin@, HIGH, 2000000);\n\n" +
+                                             "if (durationHigh@ == 0) {\n" +
+                                             "  Serial.print(\"Error: No PWM signal detected on Pin \");\n" +
+                                             "  Serial.print(co2_pin@);\n" +
+                                             "  Serial.println(\". Check wiring/power.\");\n" +
+                                             "} else {\n" +
+                                             "  float tHigh@ = durationHigh@ / 1000.0;\n" +
+                                             "  float tCycle@ = 1004.0;\n\n" +
+                                             "  float co2Ppm@ = 5000.0 * (tHigh@ - 2.0) / (tCycle@ - 4.0);\n" +
+                                             "  co2Ppm@ = constrain(co2Ppm@, 400.0, 5000.0);\n\n" +
+                                             "  Serial.print(\"High: \");\n" +
+                                             "  Serial.print(tHigh@, 1);\n" +
+                                             "  Serial.print(\" ms | Cycle: \");\n" +
+                                             "  Serial.print(tCycle@, 1);\n" +
+                                             "  Serial.print(\" ms | CO2: \");\n" +
+                                             "  Serial.print(co2Ppm@, 0);\n" +
+                                             "  Serial.println(\" ppm\");\n" +
+                                             "}\n" +
+                                             "delay(1500);")]
 
+@attribute [ComponentPin("gnd","gnd", 35, 128, number: 1)]
+@attribute [ComponentPin("5V","5V", 35, 123, number: 2)]
+@attribute [ComponentPin("analog_out","analog_out", 35, 117, number: 3)]
+
+@attribute [ComponentProperty("co2", 550, typeof(double))]
+
+@code {
     [Parameter]
     [ValueSetting("ppm", 550, 400, 5000)]
     public double co2 { get; set; }

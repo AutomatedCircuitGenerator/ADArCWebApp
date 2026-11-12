@@ -23,13 +23,13 @@ namespace ADArCWebApp.Shared.Simulation
 
 			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
-				if (c.Data?.codeForGen == null || !c.Data.codeForGen.ContainsKey("include"))
+				if (c.Data?.codeForGen == null || !c.Data.codeForGen.ContainsKey(CodeType.Include))
 				{
 					Console.WriteLine($"Skipping component: {c} due to missing 'include' data.");
 					continue;
 				}
 
-				var include = regex.Matches(c.Data.codeForGen["include"]).Select(m => m.Groups[1].Value).ToList();
+				var include = regex.Matches(c.Data.codeForGen[CodeType.Include]).Select(m => m.Groups[1].Value).ToList();
 				var output = regex.Matches(b.ToString()).Cast<Match>().Select(m => m.Groups[1].Value).ToList();
 
 				foreach (var inc1 in include)
@@ -52,7 +52,7 @@ namespace ADArCWebApp.Shared.Simulation
 			//insert global vars from components
 			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
-				b.Append(parseProvidedCode(c, "global", true));
+				b.Append(parseProvidedCode(c, CodeType.Global, true));
 
 			}
 			
@@ -71,7 +71,7 @@ namespace ADArCWebApp.Shared.Simulation
             //insert global vars from components
             foreach (ComponentInstance c in Pages.Index.Comps.Values)
             {
-                b.Append(parseProvidedCode(c, "setup", true));
+                b.Append(parseProvidedCode(c, CodeType.Setup, true));
 
             }
             b.AppendLine("}");
@@ -88,7 +88,7 @@ namespace ADArCWebApp.Shared.Simulation
 			//setup varying delay times in global var
 			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
-				var time = parseProvidedCode(c, "delayTime", false);
+				var time = parseProvidedCode(c, CodeType.DelayTime, false);
 				if (time != "" && !usedTimes.Keys.Contains(time))
 				{
 					b.AppendLine("long last" + usedTimes.Count + " = " + time + ";");
@@ -105,7 +105,7 @@ namespace ADArCWebApp.Shared.Simulation
 
 			b.AppendLine("void loop() {");
 			foreach (ComponentInstance c in Pages.Index.Comps.Values) {
-				b.Append(parseProvidedCode(c, "loopMain", false));
+				b.Append(parseProvidedCode(c, CodeType.LoopMain, false));
 			}
 
 			int i = 0;
@@ -116,7 +116,7 @@ namespace ADArCWebApp.Shared.Simulation
 
 				foreach (var v in kv.Value)
 				{
-					b.Append(parseProvidedCode(v, "delayLoop", true));
+					b.Append(parseProvidedCode(v, CodeType.DelayLoop, true));
 				}
 
 				b.AppendLine("  }");
@@ -133,7 +133,7 @@ namespace ADArCWebApp.Shared.Simulation
 			b.AppendLine(" ");
 			foreach (ComponentInstance c in Pages.Index.Comps.Values)
 			{
-				b.Append(parseProvidedCode(c, "functions", false));
+				b.Append(parseProvidedCode(c, CodeType.Functions, false));
 			}
 			return b.ToString();
 		}
@@ -162,16 +162,16 @@ namespace ADArCWebApp.Shared.Simulation
 		///Also updates the componentInstance with local Id.
 		///</summary>
 		///<param name="addNewLine">If the code exists, adds a newline to the end if true. Use true if AppendLine needed, false for Append.</param>
-		private static string parseProvidedCode(ComponentInstance c, string codeField, bool addNewLine) {
+		private static string parseProvidedCode(ComponentInstance c, CodeType codeType, bool addNewLine) {
 			string ret = "";
 			string prePin = "";
 			try
 			{
-				prePin = c.Data.codeForGen[codeField];
+				prePin = c.Data.codeForGen[codeType];
 			}
 			catch (NullReferenceException)
 			{
-				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeField + "\"-type code. Be careful!");
+				Console.WriteLine("Warn: " + c.Data.name + " component does not have \"" + codeType + "\"-type code. Be careful!");
 			}
 			
 			if (Regex.IsMatch(prePin, "@"))

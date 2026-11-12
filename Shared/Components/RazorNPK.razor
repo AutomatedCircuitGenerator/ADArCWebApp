@@ -1,5 +1,66 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Soil NPK", "Input/Soil Sensors", "npk", true, 1.5, 150, 200, paneHoverText: "RS-485")]
+
+@attribute [ComponentCode(CodeType.Setup,  
+  "  pinMode(~\"DE\", OUTPUT);\n" +
+  "  pinMode(~\"RE\", OUTPUT);\n" +
+  "  digitalWrite(~\"DE\", LOW);\n" +
+  "  digitalWrite(~\"RE\", HIGH);")]
+@attribute [ComponentCode(CodeType.Include, "#include <Arduino.h>")
+@attribute [ComponentCode(CodeType.LoopMain, 
+                                "  static unsigned long lastRead@ = 0;\n" +
+                                "  \n" +
+                                "  if (millis() - lastRead@ >= 2000) {\n" +
+                                "    lastRead@ = millis();\n" +
+                                "    \n" +
+                                "    while (Serial.available()) Serial.read();\n" +
+                                "    delay(50);\n" +
+                                "    \n" +
+                                "    digitalWrite(~\"DE\", HIGH);\n" +
+                                "    digitalWrite(~\"RE\", LOW);\n" +
+                                "    delay(50);\n" +
+                                "    \n" +
+                                "    uint8_t request\u005B] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
+                                "    delay(500);\n" +
+                                "    \n" +
+                                "    digitalWrite(~\"DE\", LOW);\n" +
+                                "    digitalWrite(~\"RE\", HIGH);\n" +
+                                "    delay(500);\n" +
+                                "    \n" +
+                                "    uint8_t response[10] = {0};\n" +
+                                "    int bytesRead = 0;\n" +
+                                "    while (Serial.available() && bytesRead < 10) {\n" +
+                                "      response[bytesRead++] = Serial.read();\n" +
+                                "      delay(10);\n" +
+                                "    }\n" +
+                                "    \n" +
+                                "    if (bytesRead >= 9) {\n" +
+                                "      uint16_t nitrogen = (response[3] << 8) | response[4];\n" +
+                                "      uint16_t phosphorus = (response[5] << 8) | response[6];\n" +
+                                "      uint16_t potassium = (response[7] << 8) | response[8];\n" +
+                                "      \n" +
+                                "      Serial.print(\"nitrogen = \");\n" +
+                                "      Serial.print(nitrogen);\n" +
+                                "      Serial.print(\" | phosphorus = \");\n" +
+                                "      Serial.print(phosphorus);\n" +
+                                "      Serial.print(\" | potassium = \");\n" +
+                                "      Serial.println(potassium);\n" +
+                                "    }\n" +
+                                "  }")]
+
+@attribute [ComponentPin("Vcc","Vcc", 170, 96, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 170, 114, number: 2)]
+@attribute [ComponentPin("RO","RO", 69, 96, number: 3)]
+@attribute [ComponentPin("DI","DI", 69, 114, number: 1)]
+@attribute [ComponentPin("DE","DE", 69, 108, number: 2)]
+@attribute [ComponentPin("RE","RE", 69, 101, number: 3)]
+
+@attribute [ComponentProperty("nitrogen", 0, typeof(double))]
+@attribute [ComponentProperty("phosphorus", 0, typeof(double))]
+@attribute [ComponentProperty("potassium", 0, typeof(double))]
+
+
 @code {
 
   [Parameter]
@@ -13,22 +74,6 @@
   [Parameter]
   [ValueSetting("ppm", 0, 0, 1024)]
   public double potassium { get; set; }
-
-  public static ElementPin[] pinInfo
-  {
-    get
-    {
-      return new ElementPin[]
-      {
-        new ElementPin(name: "Vcc", x: 170, y: 96, signals: new PinSignalInfo[] { }, number: 1),
-        new ElementPin(name: "gnd", x: 170, y: 114, signals: new PinSignalInfo[] { }, number: 4),
-        new ElementPin(name: "RO", x: 69, y: 96, signals: new PinSignalInfo[] { }, number: 5),
-        new ElementPin(name: "DI", x: 69, y: 114, signals: new PinSignalInfo[] { }, number: 6),
-        new ElementPin(name: "DE", x: 69, y: 108, signals: new PinSignalInfo[] { }, number: 7),
-        new ElementPin(name: "RE", x: 69, y: 101, signals: new PinSignalInfo[] { }, number: 8),
-      };
-    }
-  }
 
 }
 

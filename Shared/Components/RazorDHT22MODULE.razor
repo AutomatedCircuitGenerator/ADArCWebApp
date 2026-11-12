@@ -1,18 +1,41 @@
-@code {
-    // DHT22 Module
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "VCC", x:58.4, y: 194, signals: new PinSignalInfo[]{ }, number: 1),
-                new ElementPin(name: "SDA",  x: 67.8, y: 194, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "GND", x: 77.2, y: 194, signals: new PinSignalInfo[] { }, number: 4),
+@attribute [Component("Temp & Humidity Module", "Input/Temperature and Humidity Sensors", "dht22module", true, 0.7, 18.5, 19.154, paneHoverText: "DHT22 Module")]
 
-            };
-        }
-    }
+@attribute [ComponentCode(CodeType.Global, 
+   "#define DHTPIN@ ~\"signal\"\n" +
+   "#define DHTTYPE DHT22\n" +
+   "DHT dht@(DHTPIN@, DHTTYPE);")]
+
+@attribute [ComponentCode(CodeType.Setup,  "\tdht@.begin();")]
+
+@attribute [ComponentCode(CodeType.Include,  "#include <DHT.h>\n")]
+
+                                             
+@attribute [ComponentCode(CodeType.LoopMain,
+   "\tfloat humidity@ = dht@.readHumidity();\n" +
+   "\tfloat temperature@ = dht@.readTemperature();\n" +
+   "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
+   "\t\tSerial.println(\"Failed to read from DHT22 sensor!\");\n" +
+   "\t} else {\n" +
+   "\t\tSerial.print(\"Humidity: \");\n" +
+   "\t\tSerial.print(humidity@);\n" +
+   "\t\tSerial.print(\"% | Temperature: \");\n" +
+   "\t\tSerial.print(temperature@);\n" +
+   "\t\tSerial.println(\"°C\");\n" +
+   "\t}\n" +
+   "\tdelay(2000);")]
+  
+
+  
+@attribute [ComponentPin("VCC","Vcc", 58.4, 194, number: 1)]
+@attribute [ComponentPin("SDA","signal", 67.8, 194, number: 2)]
+@attribute [ComponentPin("GND","gnd", 77.2, 194, number: 3)]
+
+@attribute [ComponentProperty("humidity", 40, typeof(double))]
+@attribute [ComponentProperty("temperature", 20, typeof(double))]
+
+
+@code {
+
 
     //have the same name as in the actual component
     [Parameter] [ValueSetting("%", 40, 0, 100)]

@@ -1,39 +1,17 @@
 ﻿@using System.Text
 @inherits RazorComponent
 
-@code {
+@attribute [Component("Active Buzzer", "Output/Sound", "ky012", true, 1, 18.5, 19.154, paneHoverText: "KY-012")]
+@attribute [ComponentCode(CodeType.Global, "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds")]
 
-    /// <summary>
-    /// RazorKY012.razor
-    /// Defines the physical pins of the KY-012 Active Piezo-Buzzer:
-    /// - digital_out: Signal pin - when HIGH (≥3.3V), generates 2.5kHz tone - Just using ON/OFF
-    /// - +V: Not connected - this pin has no function
-    /// - gnd: Ground connection
-    /// </summary>
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                // Signal pin - controls buzzer state (ON/OFF)
-                new ElementPin(
-                    name: "digital_out",
-                    x: 60,
-                    y: 107,
-                    signals: new PinSignalInfo[] { },
-                    number: 1
-                ),
-                // Ground pin - completes the circuit
-                new ElementPin(
-                    name: "gnd",
-                    x: 42,
-                    y: 107,
-                    signals: new PinSignalInfo[] { PinSignalInfo.GND() },
-                    number: 3)
-            };
-        }
-    }
+@attribute [ComponentPin("digital_out","digital_out", 60, 107, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 42, 107, number: 2)]
+
+@attribute [ComponentProperty("pushed", "Released", typeof(string))]
+
+@code {
 
 }
 

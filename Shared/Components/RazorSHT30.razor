@@ -1,22 +1,44 @@
 @inherits RazorComponent
 
+@attribute [Component("Digital Temp & Humidity", "Input/Temperature and Humidity Sensors", "sht30", true, .9, -20, -20, paneHoverText: "SHT30")]
+@attribute [ComponentCode(CodeType.Include, "#include <SHT3x.h>")]
+@attribute [ComponentCode(CodeType.Global, "#define SHT30_ADDR 0x44\n\n" +
+                                           "SHT3x sht30(SHT30_ADDR, SHT3x::PrevValue, 255, SHT3x::SHT30, SHT3x::Single_HighRep_ClockStretch);")]
+@attribute [ComponentCode(CodeType.Setup,  "\t// Initialize SHT3x library\n" +
+                                           "\tsht30.Begin();")]
+@attribute [ComponentCode(CodeType.LoopMain, "\t// Set mode (optional, here High Repeatability, Clock Stretch)\n" +
+                                             "\tsht30.SetMode(SHT3x::Single_HighRep_ClockStretch);\n\n" +
+                                             "\t// Trigger measurement\n" +
+                                             "\tsht30.UpdateData();\n\n" +
+                                             "\t// Check errors\n" +
+                                             "\tif (sht30.GetError() != 0) {\n" +
+                                             "\t\tSerial.print(\"Library Error: \");\n" +
+                                             "\t\tSerial.println(sht30.GetError());\n" +
+                                             "\t} else {\n" +
+                                             "\t\tfloat temp = sht30.GetTemperature(); // Celsius\n" +
+                                             "\t\tfloat humidity  = sht30.GetRelHumidity(); // %\n" +
+                                             "\t\tSerial.print(\"Temperature: \");" +
+                                             " Serial.print(temp, 2);\n" +
+                                             "\t\tSerial.print(\" �C  Humidity: \");" +
+                                             " Serial.print(humidity, 2);" +
+                                             "\t\tSerial.println(\"°C\");\n" +
+                                             "\t}\n\n" +
+                                             "\tSerial.println(\"-----------------------------\\n\");\n" +
+                                             "\tdelay(1000); // Wait before next read")]
+
+@attribute [ComponentPin("VCC","Vcc", 43, 97, number: 1)]
+@attribute [ComponentPin("GND","gnd", 56, 97, number: 2)]
+@attribute [ComponentPin("SCL","scl", 68, 97, number: 3)]
+@attribute [ComponentPin("SDA","sda", 80, 97, number: 4)]
+@attribute [ComponentPin("INT","int", 92, 97, number: 5)]
+
+@attribute [ComponentProperty("humidity", 40, typeof(double))]
+@attribute [ComponentProperty("temperature", 20, typeof(double))]
+
+
+
 @code {
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[] // https://wiki.dfrobot.com/SHT30%20Digital%20temperature%20and%20Humidity%20Sensor%20SKU:%20SEN0330
-            {
-                new ElementPin(name: "VCC", x: 43, y: 97, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 56, y: 97, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "SCL", x: 68, y: 97, signals: new PinSignalInfo[] { }, number: 3), 
-                new ElementPin(name: "SDA", x: 80, y: 97, signals: new PinSignalInfo[] { }, number: 4), 
-                new ElementPin(name: "INT", x: 92, y: 97, signals: new PinSignalInfo[] { }, number: 5)
-            };
-        }
-    }
-    
     [Parameter] [ValueSetting("%", 40, 0, 100)]
     public double humidity { get; set; }
     [Parameter] [ValueSetting("°C", 20, -40, 125)]

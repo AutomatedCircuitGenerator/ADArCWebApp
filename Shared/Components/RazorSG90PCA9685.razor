@@ -1,21 +1,18 @@
 @inherits RazorComponent
+@attribute [Component("Servo with driver", "Output/Motors/Servo Motor", "pca9685", true, 0.48, 75, 75, paneHoverText: "SG90/PCA9685")]
+@attribute [ComponentCode(CodeType.Global, "Adafruit_PWMServoDriver board@ = Adafruit_PWMServoDriver(0x@); // Use the I2C address of your board\n\n#define SERVOMIN  125 // Minimum pulse length\n#define SERVOMAX  625 // Maximum pulse length\n\nint servoChannel@ = 0; // The servo channel you are using (0-15 for 16 channels on the board)\n")]
+@attribute [ComponentCode(CodeType.Setup, "\tboard@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)")]
+@attribute [ComponentCode(CodeType.LoopMain, "  // Move servo from 0 to 180 degrees\n  for (int angle = 0; angle <= 180; angle++) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move (depends on your servo's speed)\n  }\n\n  // Move servo back from 180 to 0 degrees\n  for (int angle = 180; angle >= 0; angle--) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move\n  }")]
+@attribute [ComponentCode(CodeType.Include, "#include <Adafruit_PWMServoDriver.h>\n" )]
+@attribute [ComponentCode(CodeType.Functions, "int angleToPulse@(int ang) {\n  // Maps angle (0-180 degrees) to pulse width (SERVOMIN - SERVOMAX)\n  int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);  \n  Serial.print(\"Angle: \");\n  Serial.print(ang);\n  Serial.print(\" pulse: \");\n  Serial.println(pulse);\n  return pulse;\n\n}" )]
+
+@attribute [ComponentPin("gnd","gnd", 44, 87, number: 1)]
+@attribute [ComponentPin("pwr_gnd","pwr_gnd", 113, 82, number: 2)]
+@attribute [ComponentPin("5V", "5V", 44, 110, number: 3)]
+@attribute [ComponentPin("scl", "scl", 44, 98, number: 3)]
+@attribute [ComponentPin("sda", "sda", 44, 103, number: 3)]
 
 @code {
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "gnd", x: 44, y: 87, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "pwr_gnd", x: 113, y: 82, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "5V", x: 44, y: 110, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "scl", x: 44, y: 98, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "sda", x: 44, y: 103, signals: new PinSignalInfo[] { }, number: 5),
-            };
-        }
-    }
 
 }
 

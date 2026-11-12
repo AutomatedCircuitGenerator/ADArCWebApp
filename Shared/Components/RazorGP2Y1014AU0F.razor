@@ -1,24 +1,52 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Dust", "Input/Air Quality Sensors", "gp2y1014au0f", true, 0.5, 240, 435, paneHoverText: "GP2Y1014AU0F")]
+@attribute [ComponentCode(CodeType.Global, 
+  "const int ledPin@ = ~\"led\";\n" +
+  "const int voPin@ = ~\"vout\";\n\n" +
+  "const int samplingTime@ = 280;\n" +
+  "const int deltaTime@ = 40;\n" +
+  "const int sleepTime@ = 9680;\n\n" +
+  "float voMeasured@ = 0;\n" +
+  "float calcVoltage@ = 0;\n" +
+  "float dustDensity@ = 0;")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(ledPin@, OUTPUT);")]
+@attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(ledPin@, LOW);\n" +
+                                             "  delayMicroseconds(samplingTime@);\n\n" +
+                                             "  voMeasured@ = analogRead(voPin@);\n\n" +
+                                             "  delayMicroseconds(deltaTime@);\n\n" +
+                                             "  digitalWrite(ledPin@, HIGH);\n" +
+                                             "  delayMicroseconds(sleepTime@);\n\n" +
+                                             "  calcVoltage@ = voMeasured@ * (5.0 / 1024.0);\n" +
+                                             "  dustDensity@ = 0.17 * calcVoltage@ - 0.1;\n\n" +
+                                             "  if (dustDensity@ < 0) {\n" +
+                                             "    dustDensity@ = 0.0;\n" +
+                                             "  }\n\n" +
+                                             "  Serial.print(\"Raw Value: \");\n" +
+                                             "  Serial.print(voMeasured@);\n" +
+                                             "  Serial.print(\" | Voltage: \");\n" +
+                                             "  Serial.print(calcVoltage@);\n" +
+                                             "  Serial.print(\" V | Dust Density: \");\n" +
+                                             "  Serial.print(dustDensity@ * 1000);\n" +
+                                             "  Serial.println(\" µg/m³\");\n\n" +
+                                             "  delay(1000);")]
+
+
+@attribute [ComponentPin("Vcc","Vcc", 115.75, 108, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 106.25, 108, number: 2)]
+@attribute [ComponentPin("led","led", 77.75, 108, number: 3)]
+@attribute [ComponentPin("vout","vout", 87.25, 108, number: 3)]
+
+@attribute [ComponentProperty("dustDensity", 15, typeof(double))]
+
+@attribute [ComponentPinsToListen("vout")]
+
 @code {
     
     [Parameter]
     [ValueSetting("µg/m³", 15, 0, 500)]
     public double dustDensity { get; set; }
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 148, y: 289, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 116.5, y: 289, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "led", x: 127, y: 289, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "vout", x: 137.5, y: 289, signals: new PinSignalInfo[] { }, number: 6)
-            };
-        }
-    }
 }
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1450" width="240" height="435" preserveAspectRatio="xMidYMid meet">

@@ -49,7 +49,7 @@ namespace ADArCWebApp
                 throw new JsonException();
             }
 
-            Type componentParameterType = typeof(ComponentParameter<>).MakeGenericType(valueType);
+            Type componentParameterType = typeof(ComponentParameter).MakeGenericType(valueType);
             return (IComponentParameter)Activator.CreateInstance(componentParameterType, value);
         }
 

@@ -1,19 +1,38 @@
 @inherits RazorComponent
 
+@attribute [Component("IR Thermal Camera", "Input/Temperature and Humidity Sensors", "amg8833", true, 1, 100, 92.4, paneHoverText: "AMG8833")]
+@attribute [ComponentCode(CodeType.Global, 
+    "Adafruit_AMG88xx amg@;")]
+@attribute [ComponentCode(CodeType.Setup,  "  Serial.println(F(\"Initializing AMG8833...\"));\n" +
+                                           "  if (!amg@.begin()) {\n" +
+                                           "    Serial.println(\"Could not find a valid AMG8833 sensor. Check wiring or I2C address!\");\n" +
+                                           "    while (1);\n" +
+                                           "  }\n" +
+                                           "  Serial.println(\"AMG8833 online!\");\n" +
+                                           "  delay(100);")]
+@attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <Adafruit_AMG88xx.h>" )]
+@attribute [ComponentCode(CodeType.LoopMain, "  float pixels@\u005bAMG88xx_PIXEL_ARRAY_SIZE];\n" +
+"  amg@.readPixels(pixels@);\n\n" +
+"  Serial.println(\"--- Thermal Array (8x8 Grid in °C) ---\");\n" +
+"  for (int i = 0; i < AMG88xx_PIXEL_ARRAY_SIZE; i++) {\n" +
+"    Serial.print(pixels@[i], 1);\n" +
+"    Serial.print(\"\\t\");\n" +
+"    if ((i + 1) % 8 == 0) {\n" +
+"      Serial.println();\n" +
+"    }\n" +
+"  }\n" +
+"  Serial.println();\n" +
+"  delay(1000);")]
+
+@attribute [ComponentPin("5V","5V", 52.0, 108.0, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 70, 108.0, number: 2)]
+@attribute [ComponentPin("scl","scl", 80.25, 108.0, number: 3)]
+@attribute [ComponentPin("sda","sda", 89.0, 108.0, number: 3)]
+
+@attribute [ComponentProperty("temperature", 25, typeof(double))]
+
+
 @code {
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "5V", x: 52.0, y: 108.0, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-                new ElementPin(name: "gnd", x: 70.0, y: 108.0, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-                new ElementPin(name: "scl", x: 80.25, y: 108.0, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) }, number: 3),
-                new ElementPin(name: "sda", x: 89.0, y: 108.0, signals: new PinSignalInfo[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }, number: 4),
-            };
-        }
-    }
 
     [Parameter]
     [ValueSetting("°C", 25, -40, 80)]

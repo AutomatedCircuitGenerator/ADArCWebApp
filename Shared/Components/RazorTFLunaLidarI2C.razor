@@ -1,24 +1,22 @@
 @inherits RazorComponent
+@attribute [Component("TF-Luna Time-of-Flight", "Input/Distance Sensors", "tfLunaLidarI2C", true, 1, 75, 75, paneHoverText: "TF-Luna")]
+@attribute [ComponentCode(CodeType.Include, 
+    "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0")]
+@attribute [ComponentCode(CodeType.Setup,     "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0")]
+@attribute [ComponentCode(CodeType.LoopMain, "// Get data from TF Luna at I2C address 0x@\\n  // Change this address to your TF address in real life!\\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\\n  {\\n      Serial.print(\\\"Dist: \\\");\\n      Serial.println(tfDist@);          // print the data...\\n  }\\n  else tflI2C@.printStatus();           // else, print error.\\n\\n  delay(50);")]
+@attribute [ComponentCode(CodeType.Global, "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters")]
 
+
+@attribute [ComponentPin("gnd", "gnd",100, 98, number: 2)]
+@attribute [ComponentPin("5V", "5V", 85, 98, number: 1)]
+@attribute [ComponentPin("rxd", "rxd",90, 98, number: 4)]
+@attribute [ComponentPin("txd", "txd",95, 98, number: 3)]
+
+@attribute [ComponentProperty("distance", 50, typeof(double))]
 @code {
     [Parameter]
     [ValueSetting("(cm)", 50, 20, 800)]
     public double distance { get; set; }
-
-    //TODO wires dont draw. no errors tho...
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "5V", x: 85, y: 98, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 100, y: 98, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-                new ElementPin(name: "txd", x: 95, y: 98, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "rxd", x: 90, y: 98, signals: new PinSignalInfo[] { }, number: 4),
-            };
-        }
-    }
 
 }
 

@@ -1,24 +1,71 @@
-﻿@inherits RazorComponent
+﻿@using ADArCWebApp.Shared.EnvironmentalSettings
+@inherits RazorComponent
+
+@attribute [Component("Geiger Counter", "Input/Air Quality Sensors", "j305b", true, 0.9, 250, 150, paneHoverText: "J305B")]
+
+@attribute [ComponentCode(CodeType.Global, 
+                                             "const int geigerPin@ = ~\"vin\";"+
+                                             "const float J305B_CONVERSION_FACTOR@ = 0.00812;"+
+                                             "volatile unsigned long geigerCounts@ = 0;"+
+                                             "unsigned long geigerPreviousMillis@ = 0;"+
+                                             "const int GEIGER_SAMPLE_WINDOW@ = 10;"+
+                                             "unsigned long geigerCountsBuffer@ \u005BGEIGER_SAMPLE_WINDOW@] = {0};"+
+                                             "int geigerBufferIndex@ = 0") 
+                                             ]
+
+@attribute [ComponentCode(CodeType.Setup,  "  pinMode(geigerPin@, INPUT_PULLUP);\n" +
+                                           "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerImpulse@, FALLING);\n" +
+                                           "  Serial.println(\"=========================================\");\n" +
+                                           "  Serial.println(\"   Geiger Counter Started - J305b Tube   \");\n" +
+                                           "  Serial.println(\"=========================================\");")]
+
+
+                                             
+@attribute [ComponentCode(CodeType.LoopMain,
+  "  unsigned long currentMillis@ = millis();\n" +
+  "  if (currentMillis@ - geigerPreviousMillis@ >= 1000) {\n" +
+  "    geigerPreviousMillis@ = currentMillis@;\n" +
+  "    noInterrupts();\n" +
+  "    unsigned long currentCount@ = geigerCounts@;\n" +
+  "    geigerCounts@ = 0;\n" +
+  "    interrupts();\n" +
+  "    geigerCountsBuffer@ \u005B geigerBufferIndex@ ] = currentCount@;\n" +
+  "    geigerBufferIndex@ = (geigerBufferIndex@ + 1) % GEIGER_SAMPLE_WINDOW@;\n" +
+  "    unsigned long tenSecTotal@ = 0;\n" +
+  "    for (int i = 0; i < GEIGER_SAMPLE_WINDOW@; i++) {\n" +
+  "      tenSecTotal@ += geigerCountsBuffer@ [i];\n" +
+  "    }\n" +
+  "    float cpm@ = (tenSecTotal@ / (float)GEIGER_SAMPLE_WINDOW@) * 60.0;\n" +
+  "    float uSv@ = cpm@ * J305B_CONVERSION_FACTOR@;\n" +
+  "    Serial.print(\"Count/sec: \");\n" +
+  "    Serial.print(currentCount@);\n" +
+  "    Serial.print(\" | CPM: \");\n" +
+  "    Serial.print(cpm@, 1);\n" +
+  "    Serial.print(\" | Radiation: \");\n" +
+  "    Serial.print(uSv@, 3);\n" +
+  "    Serial.println(\" uSv/h\");\n" +
+  "  }")]
+  
+@attribute [ComponentCode(CodeType.Functions,
+  "#if defined(ESP8266) || defined(ESP32)\n" +
+  "void IRAM_ATTR geigerImpulse@() { geigerCounts@++; }\n" +
+  "#else\n" +
+  "void geigerImpulse@() { geigerCounts@++; }\n" +
+  "#endif")]
+  
+@attribute [ComponentPin("Vcc","Vcc", 247, 104.5, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 247, 113.25, number: 2)]
+@attribute [ComponentPin("vin","vin", 247, 95.75, number: 3)]
+
+@attribute [ComponentWarning("Please connect an external power supply to the Geiger Counter.")]
+@attribute [ComponentProperty("cpm", 15, typeof(double))]
+
 
 @code {
     
     [Parameter]
     [ValueSetting("CPM", 15, 10, 80)]
     public double cpm { get; set; }
-
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 247, y: 104.5, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 247, y: 113.25, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "vin", x: 247, y: 95.75, signals: new PinSignalInfo[] { }, number: 3)
-            };
-        }
-    }
 }
 
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1000 600" width="250" height="150">

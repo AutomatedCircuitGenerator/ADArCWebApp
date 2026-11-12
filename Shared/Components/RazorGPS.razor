@@ -1,5 +1,72 @@
 @inherits RazorComponent
 
+@attribute [Component("Ultimate GPS", "Input/Other Sensors", "gps", true, .8, 135, 180, paneHoverText: "PA1616S")]
+@attribute [ComponentCode(CodeType.Global, 
+  "SoftwareSerial mySerial(~\"txd\", ~\"rxd\");\n" +
+  "Adafruit_GPS GPS(&mySerial);")]
+@attribute [ComponentCode(CodeType.Setup,  
+  "  \n" +
+  "  while (!Serial) {\n" +
+  "    ; // Wait for serial port to connect (needed for native USB)\n" +
+  "  }\n" +
+  "  Serial.println(\"Initializing Adafruit Ultimate GPS...\");\n" +
+  "  GPS.begin(9600);\n" +
+  "  GPS.sendCommand(PMTK_SET_NMEA_OUTPUT_RMCGGA);\n" +
+  "  GPS.sendCommand(PMTK_SET_NMEA_UPDATE_1HZ);\n" +
+  "  GPS.sendCommand(PGCMD_ANTENNA);\n" +
+  "  delay(1000);")]
+@attribute [ComponentCode(CodeType.Include, "#include <Adafruit_GPS.h>\n" +
+                                            "#include <SoftwareSerial.h>")]
+@attribute [ComponentCode(CodeType.LoopMain, "  char c = GPS.read();\n" +
+                                             "  if (GPS.newNMEAreceived()) {\n" +
+                                             "    if (!GPS.parse(GPS.lastNMEA())) {\n" +
+                                             "      return;\n" +
+                                             "    }\n" +
+                                             "  }\n" +
+                                             "  static uint32_t timer = millis();\n" +
+                                             "  if (millis() - timer > 2000) {\n" +
+                                             "    timer = millis();\n" +
+                                             "    Serial.print(\"\\nTime: \");\n" +
+                                             "    if (GPS.hour < 10) Serial.print('0');\n" +
+                                             "    Serial.print(GPS.hour, DEC); Serial.print(':');\n" +
+                                             "    if (GPS.minute < 10) Serial.print('0');\n" +
+                                             "    Serial.print(GPS.minute, DEC); Serial.print(':');\n" +
+                                             "    if (GPS.seconds < 10) Serial.print('0');\n" +
+                                             "    Serial.print(GPS.seconds, DEC);\n" +
+                                             "    Serial.print(\" | Date: \");\n" +
+                                             "    Serial.print(GPS.day, DEC); Serial.print('/');\n" +
+                                             "    Serial.print(GPS.month, DEC); Serial.print(\"/20\");\n" +
+                                             "    Serial.println(GPS.year, DEC);\n" +
+                                             "    Serial.print(\"Fix: \"); Serial.print((int)GPS.fix);\n" +
+                                             "    Serial.print(\" | Quality: \"); Serial.println((int)GPS.fixquality);\n" +
+                                             "    if (GPS.fix) {\n" +
+                                             "      Serial.print(\"Location: \");\n" +
+                                             "      Serial.print(GPS.latitude, 4); Serial.print(GPS.lat);\n" +
+                                             "      Serial.print(\", \");\n" +
+                                             "      Serial.print(GPS.longitude, 4); Serial.println(GPS.lon);\n" +
+                                             "      Serial.print(\"Speed (knots): \"); Serial.println(GPS.speed);\n" +
+                                             "      Serial.print(\"Angle: \"); Serial.println(GPS.angle);\n" +
+                                             "      Serial.print(\"Altitude (m): \"); Serial.println(GPS.altitude);\n" +
+                                             "      Serial.print(\"Satellites: \"); Serial.println((int)GPS.satellites);\n" +
+                                             "    } else {\n" +
+                                             "      Serial.println(\"Acquiring satellite lock...\");\n" +
+                                             "    }\n" +
+                                             "  }")]
+
+@attribute [ComponentPin("gnd","gnd", 119, 195, number: 1)]
+@attribute [ComponentPin("Vcc","Vcc", 132, 195, number: 2)]
+@attribute [ComponentPin("rxd","rxd", 106, 195, number: 3)]
+@attribute [ComponentPin("txd","txd", 93, 195, number: 4)]
+
+@attribute [ComponentProperty("latitude", 0, typeof(double))]
+@attribute [ComponentProperty("longitude", 0, typeof(double))]
+@attribute [ComponentProperty("fix", 1, typeof(double))]
+@attribute [ComponentProperty("quality", 1, typeof(double))]
+@attribute [ComponentProperty("speed", 0, typeof(double))]
+@attribute [ComponentProperty("angle", 0, typeof(double))]
+@attribute [ComponentProperty("altitude", 100, typeof(double))]
+@attribute [ComponentProperty("satellites", 8, typeof(double))]
+
 @code {
 
   [Parameter]
@@ -33,21 +100,6 @@
   [Parameter]
   [ValueSetting("", 8, 0, 24)]
   public double satellites { get; set; }
-
-  // TODO: wires may not draw; no errors expected
-  public static ElementPin[] pinInfo
-  {
-    get
-    {
-      return new ElementPin[]
-      {
-        new ElementPin(name: "gnd", x: 119, y: 195, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-        new ElementPin(name: "Vcc", x: 132, y: 195, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
-        new ElementPin(name: "rxd", x: 106, y: 195, signals: new PinSignalInfo[] { }, number: 3),
-        new ElementPin(name: "txd", x: 93, y: 195, signals: new PinSignalInfo[] { }, number: 4),
-      };
-    }
-  }
 
 }
 

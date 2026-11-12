@@ -1,20 +1,69 @@
 @inherits RazorComponent
 
-@code {
+@attribute [Component("Air Quality", "Input/Air Quality Sensors", "pms5003", true, 0.9, 100, 75, paneHoverText: "PMS5003")]
+@attribute [ComponentCode(CodeType.Global, 
+  "SoftwareSerial pmsSerial@(~\"txd\", ~\"rxd\");\n" +
+  "struct pms5003Data@ {\n" +
+  "  uint16_t framelen;\n" +
+  "  uint16_t pm10_standard, pm25_standard, pm100_standard;\n" +
+  "  uint16_t pm10_env, pm25_env, pm100_env;\n" +
+  "  uint16_t particles_03, particles_05, particles_10, particles_25, particles_50, particles_100;\n" +
+  "  uint16_t checksum;\n" +
+  "};\n" +
+  "struct pms5003Data@ data@;")]
+@attribute [ComponentCode(CodeType.Setup, "pmsSerial@.begin(9600);\n" +
+                                          "Serial.println(\"PMS5003 Sensor Initialized. Reading data...\");")]
+@attribute [ComponentCode(CodeType.LoopMain, "if (readPMSdata@(&pmsSerial@)) {\n" +
+                                             "  Serial.println(\"--- Air Quality Data ---\");\n" +
+                                             "  Serial.print(\"PM 1.0: \"); Serial.print(data@.pm10_standard); Serial.println(\" ug/m3\");\n" +
+                                             "  Serial.print(\"PM 2.5: \"); Serial.print(data@.pm25_standard); Serial.println(\" ug/m3\");\n" +
+                                             "  Serial.print(\"PM 10 : \"); Serial.print(data@.pm100_standard); Serial.println(\" ug/m3\");\n" +
+                                             "  Serial.println();\n" +
+                                             "  delay(3000);\n" +
+                                             "}")]
+@attribute [ComponentCode(CodeType.Include, "#include <SoftwareSerial.h>" )]
+@attribute [ComponentCode(CodeType.Functions, "boolean readPMSdata@(Stream *pms) {\n" +
+                                              "  if (!pms->available()) {\n" +
+                                              "    return false;\n" +
+                                              "  }\n" +
+                                              "  if (pms->peek() != 0x42) {\n" +
+                                              "    pms->read();\n" +
+                                              "    return false;\n" +
+                                              "  }\n" +
+                                              "  if (pms->available() < 32) {\n" +
+                                              "    return false;\n" +
+                                              "  }\n" +
+                                              "  uint8_t buffer\u005B32];\n" +
+                                              "  uint16_t sum = 0;\n" +
+                                              "  pms->readBytes(buffer, 32);\n" +
+                                              "  if (buffer[0] != 0x42 || buffer[1] != 0x4D) {\n" +
+                                              "    return false;\n" +
+                                              "  }\n" +
+                                              "  for (uint8_t i = 0; i < 30; i++) {\n" +
+                                              "    sum += buffer[i];\n" +
+                                              "  }\n" +
+                                              "  uint16_t calculated_checksum = (buffer[30] << 8) | buffer[31];\n" +
+                                              "  if (sum != calculated_checksum) {\n" +
+                                              "    Serial.println(\"Checksum failure.\");\n" +
+                                              "    return false;\n" +
+                                              "  }\n" +
+                                              "  data@.framelen = (buffer[2] << 8) | buffer[3];\n" +
+                                              "  data@.pm10_standard = (buffer[4] << 8) | buffer[5];\n" +
+                                              "  data@.pm25_standard = (buffer[6] << 8) | buffer[7];\n" +
+                                              "  data@.pm100_standard = (buffer[8] << 8) | buffer[9];\n" +
+                                              "  return true;\n" +
+                                              "}")]
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 115.75, y: 108, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 106.25, y: 108, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "txd", x: 77.75, y: 108, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "rxd", x: 87.25, y: 108, signals: new PinSignalInfo[] { }, number: 4),
-            };
-        }
-    }
+@attribute [ComponentPin("Vcc","Vcc", 115.75, 108, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 106.25, 108, number: 2)]
+@attribute [ComponentPin("txd","txd", 77.75, 108, number: 3)]
+@attribute [ComponentPin("rxd","rxd", 87.25, 108, number: 3)]
+
+@attribute [ComponentProperty("pm1_0", 0, typeof(double))]
+@attribute [ComponentProperty("pm2_5", 0, typeof(double))]
+@attribute [ComponentProperty("pm10", 0, typeof(double))]
+
+@code {
 
     [Parameter]
     [ValueSetting("μg/m³", 0, 0, 1000)]

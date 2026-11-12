@@ -1,23 +1,19 @@
 ﻿@inherits RazorComponent
+@attribute [Component("RGB LED", "Output/LED", "rgbLed", true, 1.5, 45, 80)]
+@attribute [ComponentCode(CodeType.Global, "const int blueLED@ = ~\"B\"; // Define pin for blue LED\nconst int greenLED@ = ~\"G\"; // Define pin for green LED\nconst int redLED@ = ~\"R\"; // Define pin for red LED")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(blueLED@, OUTPUT); // Set blue LED pin as an output\n  pinMode(greenLED@, OUTPUT); // Set green LED pin as an output\n  pinMode(redLED@, OUTPUT); // Set red LED pin as an output")]
+@attribute [ComponentCode(CodeType.LoopMain, "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating")]
+
+
+@attribute [ComponentPin("R","R", 34, 69, number: 1)]
+@attribute [ComponentPin("G","G", 52, 69, number: 2)]
+@attribute [ComponentPin("B", "B", 62, 69, number: 3)]
+@attribute [ComponentPin("COM", "cathode",43, 79, number: 4)]
 
 @code {
     // [Parameter] public int ledRed { get; set; } = 0;
     // [Parameter] public int ledGreen { get; set; } = 0;
     // [Parameter] public int ledBlue { get; set; } = 0;
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "R", x: 34, y: 69, number: 1, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "G", x: 52, y: 69, number: 3, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "B", x: 62, y: 69, number: 3, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "COM", x: 43, y: 79, number: 2, signals: new PinSignalInfo[] { }),
-            };
-        }
-    }
     // public static async void translate(ComponentInstance comp, long pinChangeCycle)
     // {
     //     var data = comp.Data;

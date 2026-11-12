@@ -1,20 +1,23 @@
 @inherits RazorComponent
 
+@attribute [Component("Turbidity", "Input/Light Sensors", "sen0189", true, 1.3, -1, -20, paneHoverText: "SEN0189")]
+@attribute [ComponentCode(CodeType.Global, "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n"
+                                             + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
+                                             + "  float turbNTU@ = -1120.4*voltage@*voltage@ + 5742.3*voltage@ - 4352.9; //Convert voltage to turbidity in NTU (Nephelometric Turbidity Units)\n"
+                                             + "  Serial.print(\"Turbidity in NTU = \"); // Print label\n"
+                                             + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
+                                             + "  delay(500); // Wait 500ms")]
+
+@attribute [ComponentPin("5V","5V", 320, 128, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 320, 143.5, number: 2)]
+@attribute [ComponentPin("analog_out","analog_out", 320, 158.5, number: 2)]
+
+@attribute [ComponentProperty("turbidity", 0, typeof(double))]
+
 @code {
 
-  public static ElementPin[] pinInfo
-  {
-    get
-    {
-      return new ElementPin[]
-      {
-        new ElementPin(name: "5V", x: 320, y: 128, signals: new PinSignalInfo[] { }, number: 1),
-        new ElementPin(name: "gnd", x: 320, y: 143.5, signals: new PinSignalInfo[] { }, number: 2),
-        new ElementPin(name: "analog_out", x: 320, y: 158.5, signals: new PinSignalInfo[] { }, number: 3),
-
-      };
-    }
-  }
 
   [Parameter]
   [ValueSetting("NTU", 0, 0, 3000)]

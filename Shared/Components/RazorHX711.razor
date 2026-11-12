@@ -1,5 +1,20 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Load Cell with HX711 ADC", "Input/Other Sensors", "hx711", true, .8, 200, 100, paneHoverText: "TAL221")]
+@attribute [ComponentCode(CodeType.LoopMain, "\"  // Main loop: continuously reads data from the HX711\\n\\n  // Check if the HX711 scale is ready for reading\\n  if (scale@.is_ready()) {\\n    // Read the data from the HX711\\n    long reading@ = scale@.read();\\n    // Output the reading to the Serial Monitor\\n    Serial.print(\\\"HX711 reading: \\\");\\n    Serial.println(reading@);\\n  } else {\\n    // If the HX711 is not ready, print an error message\\n    Serial.println(\\\"HX711 not found.\\\");\\n  }\\n\\n  // Delay before the next reading to allow stabilization\\n  delay(1000);\"")]
+@attribute [ComponentCode(CodeType.Global, "// Global variables and HX711 setup\n// Define the data and clock pins for the HX711 load cell\nconst int LOADCELL_DOUT_PIN@ = ~\"dat\"; // Data pin for the HX711\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";  // Clock pin for the HX711\n\n// Initialize the HX711 scale object\nHX711 scale@;")]
+@attribute [ComponentCode(CodeType.Setup,"  // Setup function: runs once at startup\n  // Initialize the HX711 scale with the data and clock pins\n  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@);")]
+@attribute [ComponentCode(CodeType.Include, "#include <HX711.h>")]
+
+@attribute [ComponentPin("VCC", "5V", 33, 80, number: 1)]
+@attribute [ComponentPin("DT", "dat",33, 60, number: 2)]
+@attribute [ComponentPin("SCK", "clk", 33, 70, number: 3)]
+@attribute [ComponentPin("GND", "gnd", 33, 50, number: 4)]
+
+@attribute [ComponentPinsToListen("dat")]
+
+@attribute [ComponentProperty("weight", 100, typeof(double))]
+
 @code {
     // HX711 5kg Load Cell Amplifier
 
@@ -12,20 +27,6 @@
     {
         get;
         set;
-    }
-    
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "VCC", x: 33, y: 80, signals: new PinSignalInfo[] {  }, number: 1),
-                new ElementPin(name: "DT", x: 33, y: 60, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "SCK", x: 33, y: 70, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "GND", x: 33, y: 50, signals: new PinSignalInfo[] {  }, number: 4)
-            };
-        }
     }
 }
 

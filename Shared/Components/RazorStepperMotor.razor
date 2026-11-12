@@ -1,5 +1,6 @@
 ﻿@code {
 
+  //Not implemented at time of component repository switch
     private double mmToPix = 3.78;
     // Most likely the most buggy one
     [Parameter] public double angle { get; set;  } = 0;
@@ -37,10 +38,10 @@
         {
             return new ElementPin[]{
 
-                new ElementPin(name: "A-", x: xOff, y: yOff, number: 1, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "A+", x: xOff + 2.54 * mmToPix, y: yOff, number: 2, signals: new PinSignalInfo[] { }),
-                new ElementPin( name: "B+", x: xOff + 5.08 * mmToPix, y: yOff, number: 3, signals: new PinSignalInfo[] { } ),
-                new ElementPin( name: "B-", x: xOff + 7.62 * mmToPix, y: yOff, number: 4, signals: new PinSignalInfo[] { } ),
+                //new ElementPin(name: "A-", x: xOff, y: yOff, number: 1, signals: new PinSignalInfo[] { }),
+                //new ElementPin(name: "A+", x: xOff + 2.54 * mmToPix, y: yOff, number: 2, signals: new PinSignalInfo[] { }),
+                //new ElementPin( name: "B+", x: xOff + 5.08 * mmToPix, y: yOff, number: 3, signals: new PinSignalInfo[] { } ),
+                //new ElementPin( name: "B-", x: xOff + 7.62 * mmToPix, y: yOff, number: 4, signals: new PinSignalInfo[] { } ),
     // new ElementPin( name: "Center Tap 2", x: 0, y: 69, number: 5, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
     // new ElementPin( name: "PWM", x: 0, y: 69, number: 6, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
     };

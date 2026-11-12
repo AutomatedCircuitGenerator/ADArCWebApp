@@ -1,26 +1,57 @@
 ﻿@using System.Text
+@using ADArCWebApp.Shared.EnvironmentalSettings
 @inherits RazorComponent
+
+@attribute [Component("2.4 GHz Transceiver Module", "Input/Other Sensors", "transceiver", true, 1, 75, 75, paneHoverText: "nRF24L01")]
+@attribute [ComponentCode(CodeType.Global, 
+   "int ce_pin@ = ~\"ce\";\n" +
+                                           "int csn_pin@ = ~\"csn\";\n" +
+                                           "int sck_pin@ = ~\"sck\";\n" +
+                                           "int mosi_pin@ = ~\"mosi\";\n" +
+                                           "int miso_pin@ = ~\"miso\";\n" +
+                                           "\n" + "int lastMode = -1; // track previous mode")]
+
+@attribute [ComponentCode(CodeType.Setup,  "pinMode(ce_pin@, OUTPUT);\n" +
+                                           "pinMode(csn_pin@, INPUT); // controller drives this\n" +
+                                           "pinMode(sck_pin@, OUTPUT);\n" +
+                                           "pinMode(mosi_pin@, OUTPUT);\n" +
+                                           "pinMode(miso_pin@, INPUT);\n" +"\n" +
+                                           "Serial.println(\"Transceiver Setup complete\");")]
+
+@attribute [ComponentCode(CodeType.Include, "#include <Arduino.h>")]
+
+@attribute [ComponentCode(CodeType.LoopMain,
+      "int mode = digitalRead(csn_pin@);\n" +
+      "\n" +
+      "// Only act when mode changes\n" +
+      "if (mode != lastMode) {\n" +
+      "\n" +
+      "    if(mode == LOW) {\n" +
+      "        digitalWrite(ce_pin@, LOW);\n" +
+      "        Serial.println(\"Transceiver Receive mode enabled\");\n" +
+      "    } else {\n" +
+      "        digitalWrite(ce_pin@, HIGH);\n" +
+      "        Serial.println(\"Transceiver Transmit mode enabled\");\n" +
+      "    }\n" +
+      "\n" +
+      "    lastMode = mode;\n" +
+      "}" )]
+                                             
+@attribute [ComponentPin("gnd","gnd", 32, 32, number: 1)]
+@attribute [ComponentPin("Vcc","Vcc", 41, 32, number: 2)]
+@attribute [ComponentPin("csn","csn", 41, 42, number: 3)]
+@attribute [ComponentPin("ce","ce", 32, 42, number: 1)]
+@attribute [ComponentPin("sck","ack", 32, 52, number: 2)]
+@attribute [ComponentPin("mosi","mosi", 41, 52, number: 3)]
+@attribute [ComponentPin("miso","miso", 32, 62, number: 3)]
+
+@attribute [ComponentEnviormentSettingsType(typeof(TRANSCEIVERSettings))]
+
+@attribute [ComponentProperty("mode", 0, typeof(int))]
 
 @code {
    [Parameter]
    public int mode { get; set; } = 0;
-
-   public static ElementPin[] pinInfo
-   {
-      get
-      {
-         return new ElementPin[]
-         {
-            new ElementPin(name: "gnd", x: 32, y: 32, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
-            new ElementPin(name: "Vcc", x: 41, y: 32, signals: new PinSignalInfo[] { PinSignalInfo.VCC(5) }, number: 2),
-            new ElementPin(name: "csn", x: 41, y: 42, signals: new PinSignalInfo[] { }, number: 3),
-            new ElementPin(name: "ce", x: 32, y: 42, signals: new PinSignalInfo[] { }, number: 4),
-            new ElementPin(name: "sck", x: 32, y: 52, signals: new PinSignalInfo[] { }, number: 5),
-            new ElementPin(name: "mosi", x: 41, y: 52, signals: new PinSignalInfo[] { }, number: 6),
-            new ElementPin(name: "miso", x: 32, y: 62, signals: new PinSignalInfo[] { }, number: 7)
-         };
-      }
-   }
 }
 
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>

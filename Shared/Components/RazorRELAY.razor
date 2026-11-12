@@ -1,19 +1,27 @@
 ﻿@inherits RazorComponent
 
-@code {
+@attribute [Component("1-Channel Relay", "Input/Buttons and Switches", "relay", true, 1, 18.5, 19.154, paneHoverText: "SRD-05VDC-SL-C")]
+@attribute [ComponentCode(CodeType.Global, 
+    "const int relayPin@ = ~\"IN\"; // The digital pin the relay module is connected to" )]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(relayPin@, OUTPUT); // Set relay pin as output\n" +
+                                          "\tdigitalWrite(relayPin@, HIGH); // Turn relay OFF (or LOW, depends on module's logic)\n" +
+                                          "\tSerial.println(\"Relay control started\");")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tdigitalWrite(relayPin@, LOW); // Turn relay ON (Commonly LOW for active-low modules)\n" +
+                                             "\tSerial.println(\"Relay ON\");\n" +
+                                             "\tdelay(1000); // Wait for 1 second\n" +
+                                             "\n" +
+                                             "\t//digitalWrite(relayPin@, HIGH); // uncomment this to Turn relay OFF- sim only\n" +
+                                             "\t//Serial.println(\"Relay OFF\");\n" +
+                                             "\tdelay(1000); // Wait for 1 second")]
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "Vcc", x: 30, y: 44.5, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 30, y: 54.5, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "IN", x: 30, y: 64.5, signals: new PinSignalInfo[] { }, number: 3),
-            };
-        }
-    }
+@attribute [ComponentPin("Vcc","Vcc", 30, 44.5, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 30, 54.5, number: 2)]
+@attribute [ComponentPin("IN","IN", 30, 64.5, number: 3)]
+
+@attribute [ComponentProperty("co2", 550, typeof(double))]
+@attribute [ComponentWarning("The 1-Channel Relay requires a dedicated power supply. If the Relay is required to control another sensor or actuator, then the wiring should be through the Relay.")]
+
+@code {
 }
 
 <svg width="128.001" height="58.239" viewBox="0 0 33.867 15.409" xml:space="preserve"

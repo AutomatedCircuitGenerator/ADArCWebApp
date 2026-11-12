@@ -1,21 +1,33 @@
 @inherits RazorComponent
 
+@attribute [Component("Basic Temp & Humidity", "Input/Temperature and Humidity Sensors", "dht11", true, 1, 75, 75, paneHoverText: "DHT11")]
+@attribute [ComponentCode(CodeType.Global, 
+  "#define DHTPIN@ ~\"digital_out\"\n" +
+  "#define DHTTYPE DHT11\n" +
+  "DHT dht@(DHTPIN@, DHTTYPE);")]
+@attribute [ComponentCode(CodeType.Setup,  "\tdht@.begin();")]
+@attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tfloat humidity@ = dht@.readHumidity();\n" +
+                                             "\tfloat temperature@ = dht@.readTemperature();\n" +
+                                             "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
+                                             "\t\tSerial.println(\"Failed to read from DHT11 sensor!\");\n" +
+                                             "\t} else {\n" +
+                                             "\t\tSerial.print(\"Humidity: \");\n" +
+                                             "\t\tSerial.print(humidity@);\n" +
+                                             "\t\tSerial.print(\"% | Temperature: \");\n" +
+                                             "\t\tSerial.print(temperature@);\n" +
+                                             "\t\tSerial.println(\"°C\");\n" +
+                                             "\t}\n" +
+                                             "\tdelay(2000);")]
+
+@attribute [ComponentPin("5V","5V", 59, 123, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 65, 123, number: 2)]
+@attribute [ComponentPin("digital_out","digital_out", 53, 123, number: 3)]
+
+@attribute [ComponentProperty("temperature", 22, typeof(double))]
+@attribute [ComponentProperty("humidity", 50, typeof(double))]
+
 @code {
-  public static ElementPin[] pinInfo
-  {
-    get
-    {
-      return new ElementPin[]
-      {
-        new ElementPin(name: "5V", x: 59, y: 123, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 1),
-        new ElementPin(name: "gnd", x: 65, y: 123, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
-        new ElementPin(name: "digital_out", x: 53, y: 123, signals: new PinSignalInfo[] { }, number: 3)
-      };
-    }
-  }
-
-
-
 
     [Parameter]
     [ValueSetting("°C", 22, 0, 50)]

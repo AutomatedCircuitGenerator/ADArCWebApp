@@ -1,21 +1,19 @@
 @inherits RazorComponent
+@attribute [Component("Hall Effect", "Input/Other Sensors", "ky024", true, 0.8, 75, 75, paneHoverText: "KY-024")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(digitalPin@, INPUT); // Set digital pin as input for magnetic field detection\n  pinMode(analogPin@, INPUT);   // Set analog pin as input for magnetic field strength")]
+@attribute [ComponentCode(CodeType.LoopMain, "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000);")]
+@attribute [ComponentCode(CodeType.Global, "int digitalPin@ = ~\"digital_out\"; // KY-024 Hall effect sensor digital output\nint analogPin@ = ~\"analog_out\"; // KY-024 Hall effect sensor analog output\nint digitalVal@; // variable for digital readings\nint analogVal@; // variable for analog readings")]
+
+
+@attribute [ComponentPin("digital_out", "digital_out",69, 185, number: 1)]
+@attribute [ComponentPin("5V", "5V", 59, 185, number: 2)]
+@attribute [ComponentPin("gnd", "gnd",49, 185, number: 3)]
+@attribute [ComponentPin("analog_out", "analog_out", 39, 185, number: 4)]
+
+@attribute [ComponentProperty("gauss", 0, typeof(double))]
 
 @code {
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "digital_out", x: 69, y: 185, signals: new PinSignalInfo[] { }, number: 1), // Digital output
-                new ElementPin(name: "5V", x: 59, y: 185, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "gnd", x: 49, y: 185, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "analog_out", x: 39, y: 185, signals: new PinSignalInfo[] { }, number: 4), // Analog output
-            };
-        }
-    }
-    
     [Parameter]
     [ValueSettingDouble("Gauss", 0, -1000, 1000)]
     public double gauss
