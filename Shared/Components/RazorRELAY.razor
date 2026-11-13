@@ -1,5 +1,7 @@
 ﻿@inherits RazorComponent
 
+
+
 @attribute [Component("1-Channel Relay", "Input/Buttons and Switches", "relay", true, 1, 18.5, 19.154, paneHoverText: "SRD-05VDC-SL-C")]
 @attribute [ComponentCode(CodeType.Global, 
     "const int relayPin@ = ~\"IN\"; // The digital pin the relay module is connected to" )]
@@ -19,6 +21,8 @@
 @attribute [ComponentPin("IN","IN", 30, 64.5, number: 3)]
 
 @attribute [ComponentWarning("The 1-Channel Relay requires a dedicated power supply. If the Relay is required to control another sensor or actuator, then the wiring should be through the Relay.")]
+
+
 
 @code {
 }
