@@ -16,7 +16,7 @@
    "  }\n" +
    "  sensor.startContinuous();")]
 
-@attribute [ComponentCode(CodeType.Include,  "#include <Wire.h>\n#include <VL53L4CD.h>")
+@attribute [ComponentCode(CodeType.Include,  "#include <Wire.h>\n#include <VL53L4CD.h>")]
 @attribute [ComponentCode(CodeType.LoopMain, "  Serial.print(sensor.read());\n" +
                                              "  if (sensor.timeoutOccurred()) { Serial.print(\" TIMEOUT\"); }\n" +
                                              "\n" +
@@ -29,7 +29,7 @@
 @attribute [ComponentPin("SDI","sdi", 98, 161, number: 2)]
 @attribute [ComponentPin("CS","cs", 110, 161, number: 3)]
 
-@attribute [ComponentProperty("distance", 20, typeof(double))]
+@attribute [ComponentProperty("distance", 20.0, typeof(double))]
 
 
 @code {

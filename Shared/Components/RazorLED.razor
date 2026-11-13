@@ -2,8 +2,8 @@
 @attribute [Component("LED", "Output/LED", "led", true, 1.5, 40, 50)]
 
 @attribute [BreadboardOffset(-25.5, -26, 31)]
-@attribute [BreadboardPinAttrubte(0, 8, "sig", "Anode")]
-@attribute [BreadboardPinAttrubte(1, 4, "gnd", "Cathode")]
+@attribute [BreadboardPin(0, 8, "sig")]
+@attribute [BreadboardPin(1, 4, "gnd")]
 
 @attribute [ComponentCode(CodeType.Setup, "\tpinMode(~\"sig\", OUTPUT); // Set the LED anode pin as an output")]
 @attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"sig\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"sig\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]

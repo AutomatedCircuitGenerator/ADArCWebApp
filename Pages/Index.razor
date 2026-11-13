@@ -299,7 +299,7 @@
                 }
 
                 int LLBindexInCanidatesList = 0;
-                if(comp.Data.LivesOnBreadBoard) LLBindexInCanidatesList = comp.Data.BreadboardPinData[pinId].Item2 * 10 + comp.Data.BreadboardPinData[pinId].Item3  ;// Item2 = which allocated row we use, Item 3 = the pin in that row, from the bottom!
+                if(comp.Data.LivesOnBreadBoard) LLBindexInCanidatesList = comp.Data.BreadboardPinData[pinId].Item1 * 10 + comp.Data.BreadboardPinData[pinId].Item2;// Item2 = which allocated row we use, Item 3 = the pin in that row, from the bottom!
                 string? freeHole = comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles[LLBindexInCanidatesList] : candidates.FirstOrDefault(h => !usedHoles.Contains(h));  // Find a hole that is not used yet
                 
                 // Skip if no hole left
@@ -310,7 +310,6 @@
                     continue;
                 }
                 comp.BreadboardConnections.Add(new BreadboardConnection(pinId, freeHole, "red"));   // Add wire from component pin to the hole
-                
                 usedHoles.Add(freeHole);    // Mark this hole as used so other pins won't use it
             }
             if(comp.Data.LivesOnBreadBoard)LivesOnBreadBoardOffset += comp.Data.Width;

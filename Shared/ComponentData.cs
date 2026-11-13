@@ -25,7 +25,7 @@ namespace ADArCWebApp.Shared
 		public ElementPin[] pinInfo;
 		public readonly bool LivesOnBreadBoard;
 		public readonly double BreadboardOffsetX, BreadboardOffsetY, Width;
-		public List<(string, int, int)> BreadboardPinData;
+		public List<(int, int)> BreadboardPinData;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -56,6 +56,7 @@ namespace ADArCWebApp.Shared
 			BreadboardOffsetY = builder.BreadboardOffsetY;
 			Width = builder.Width;
 			BreadboardPinData = builder.BreadboardPins;
+			
 		}
 
     }
@@ -84,16 +85,16 @@ namespace ADArCWebApp.Shared
 		public bool LivesOnBreadBoard = false;
 		public double BreadboardOffsetX, BreadboardOffsetY, Width;
 
-		public List<(string, int, int)> BreadboardPins = new ();
+		public List<(int, int)> BreadboardPins = new ();
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(Type compType = null, string paneHoverText = "", List<string>? listenOn = null, Type environmentalSettingsType = null, string warning = null)
+		public ComponentDataBuilder(Type compType = null)
 		{
 			this.paneHoverText = paneHoverText;
 			this.compType = compType ?? typeof(InvalidComponent);
-			this.EnvironmentalSettingsType = environmentalSettingsType;
-			Warning = warning;
-			if (listenOn != null) {
-				pinsToListen = listenOn;
+
+			foreach (CodeType type in Enum.GetValues(typeof(CodeType)))
+			{
+				codeForGen[type] = "";
 			}
 			
 			if (compType != typeof(InvalidComponent) && compType != null) {
@@ -111,29 +112,38 @@ namespace ADArCWebApp.Shared
 						this.nodeName = cA.GsNodeName;
 						this.paneHoverText = cA.PaneHoverText;
 					}
-					else if (attribute is BreadboardOffsetAttribute BBOA)//CANNOT BE SWITCH! sorry
+					else if (attribute is BreadboardOffset BBOA)//CANNOT BE SWITCH! sorry
 					{
 						BreadboardOffsetX = BBOA.LeftOffset;
 						BreadboardOffsetY = BBOA.TopOffset;
 						Width = BBOA.Width;
 						LivesOnBreadBoard = true;
 					}
-					else if (attribute is BreadboardPinAttrubte BPA)
+					else if (attribute is BreadboardPin BPA)
 					{
-						BreadboardPins.Add((BPA.Description, BPA.PinOffset, BPA.PinNumber));
+						BreadboardPins.Add((BPA.PinOffset, BPA.PinNumber));
 					}
-					else if (attribute is ComponentPinAttribute pin)
+					else if (attribute is ComponentPin pin)
 					{
 						pinsAttrs.Add(new ElementPin(pin.Name, pin.X, pin.Y, description: pin.Description, number: pin.Number, noBreadboard: pin.NoBreadboard));
-						this.pins.Add(pin.gsName, this.pins.Count);
+						try
+						{
+							this.pins.Add(pin.gsName, this.pins.Count);
+						}
+						catch (ArgumentException e)
+						{
+							Console.WriteLine(e.Message);
+							Console.WriteLine(e.StackTrace);
+							Console.WriteLine($"Component {name} has duplicate gsPin: {pin.gsName}, This is an error.");
+						}
 					}
-					else if (attribute is ComponentCodeAttribute cC)
+					else if (attribute is ComponentCode cC)
 					{
 						codeForGen[cC.Type] = cC.Code;
 					}
-					else if (attribute is ComponentPropertyAttribute CPA)
+					else if (attribute is ComponentProperty CPA)
 					{
-						properties[CPA.Name] = new ComponentParameter(CPA.Type, CPA.Data);
+						properties[CPA.Name.ToLower()] = new ComponentParameter(CPA.Type, CPA.Data);
 					}
 					else if (attribute is ComponentEnviormentSettingsType CEST)
 					{
@@ -151,14 +161,6 @@ namespace ADArCWebApp.Shared
 				this.pinInfo = pinsAttrs.ToArray();
 			}
 		}
-
-
-		public ComponentDataBuilder Property(string name, Type type, object? data)
-		{
-			properties[name] = new ComponentParameter(type, data);
-			return this;
-		}
-
 
 		public ComponentData Finish()
 		{
@@ -181,14 +183,14 @@ public class ComponentAttribute(string name, string path, string gsNodeName, boo
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ComponentPropertyAttribute(string name, object data, Type type) : Attribute
+public class ComponentProperty(string name, object data, Type type) : Attribute
 {
 	public string Name = name;
 	public object Data = data;
 	public Type Type = type;
 }
 
-public class BreadboardOffsetAttribute(double leftOffset, double topOffset, double width) : Attribute
+public class BreadboardOffset(double leftOffset, double topOffset, double width) : Attribute
 {
 	public double LeftOffset = leftOffset;
 	public double TopOffset = topOffset;
@@ -196,13 +198,12 @@ public class BreadboardOffsetAttribute(double leftOffset, double topOffset, doub
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class BreadboardPinAttrubte(int offset, int number, string name, string description = "")
+public class BreadboardPin(int offset, int number, string name)
 	: Attribute
 {
 	public int PinOffset = offset;
 	public int PinNumber = number;
 	public string Name = name;
-	public string Description = description;
 }
 
 public enum CodeType
@@ -218,14 +219,14 @@ public enum CodeType
 
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ComponentCodeAttribute(CodeType type, string code) : Attribute
+public class ComponentCode(CodeType type, string code) : Attribute
 {
 	public CodeType Type = type;
 	public string Code = code;
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
-public class ComponentPinAttribute(string name, string gsName, double x, double y, int number = 0, string description = "", bool noBreadboard = false)
+public class ComponentPin(string name, string gsName, double x, double y, int number = 0, string description = "", bool noBreadboard = false)
 	: Attribute
 {
 	public string Name = name;
