@@ -42,6 +42,7 @@
     <None Include="wwwroot\rules\add_max6675.grxml" />
     <None Include="wwwroot\rules\add_mpu6050.grxml" />
     <None Include="wwwroot\rules\add_mq3.grxml" />
+    <None Include="wwwroot\rules\add_gp2y0a.grxml" />
     <None Include="wwwroot\rules\add_pca9685.grxml" />
     <None Include="wwwroot\rules\add_rplidar.grxml" />
       <None Include="wwwroot\rules\add_sen0114.grxml" />
@@ -86,6 +87,7 @@
     <None Include="wwwroot\rules\max6675_arduino.grxml" />
     <None Include="wwwroot\rules\mpu6050_arduino.grxml" />
     <None Include="wwwroot\rules\mq3_arduino.grxml" />
+    <None Include="wwwroot\rules\gp2y0a_arduino.grxml" />
     <None Include="wwwroot\rules\nema_a4988.grxml" />
     <None Include="wwwroot\rules\nema_l298n.grxml" />
     <None Include="wwwroot\rules\pca9685_arduino.grxml" />
