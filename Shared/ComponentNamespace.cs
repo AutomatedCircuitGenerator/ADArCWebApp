@@ -1839,6 +1839,52 @@ namespace ADArCWebApp.Shared
                     gsNodeName: "sgp40"
                 ).Property("gas", 100.0)
                 .Finish()
+            },
+            {
+                54,
+                new ComponentDataBuilder("IR Distance (Sharp)", true, "Input/Distance Sensors", 1, 75, 75, typeof(RazorGP2Y0A),
+                    paneHoverText: "GP2Y0A21YK0F / GP2Y0A02YK0F",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        {
+                            "global",
+                            "// Sharp analog IR distance sensor.\n" +
+                            "// Set to 1 for GP2Y0A21YK0F (10-80 cm) or 0 for GP2Y0A02YK0F (20-150 cm).\n" +
+                            "// Keep this in sync with the model chosen in Environmental Settings.\n" +
+                            "#define SHARP_GP2Y0A21_@ 1\n" +
+                            "const int irPin@ = ~\"vo\";"
+                        },
+                        { "setup", "" },
+                        {
+                            "loopMain",
+                            "  int irRaw@ = analogRead(irPin@);\n" +
+                            "  float irVoltage@ = irRaw@ * (5.0 / 1023.0);\n" +
+                            "  float irDistance@ = 0;\n\n" +
+                            "  // Output voltage is roughly inversely proportional to distance (power-law fit of the datasheet curve)\n" +
+                            "  if (irVoltage@ > 0.1) {\n" +
+                            "#if SHARP_GP2Y0A21_@\n" +
+                            "    irDistance@ = 27.728 * pow(irVoltage@, -1.2045);\n" +
+                            "#else\n" +
+                            "    irDistance@ = 61.573 * pow(irVoltage@, -1.1068);\n" +
+                            "#endif\n" +
+                            "  }\n\n" +
+                            "  Serial.print(\"Voltage: \");\n" +
+                            "  Serial.print(irVoltage@);\n" +
+                            "  Serial.print(\" V | Distance: \");\n" +
+                            "  Serial.print(irDistance@);\n" +
+                            "  Serial.println(\" cm\");\n\n" +
+                            "  delay(500);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["vo", "gnd", "5V"],
+                    gsNodeName: "gp2y0a"
+                ).Property("model", "GP2Y0A21YK0F")
+                .Property("distance", 30.0)
+                .Finish()
             }
         };
     }
