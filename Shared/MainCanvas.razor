@@ -1,6 +1,6 @@
 @using System.Text
 @inject BoardService BoardService
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @if (ShowBreadboard)
     {
         <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
@@ -31,7 +31,8 @@
                               CanvasClick="CanvasClick" CancelDrag="CancelDrag"
                               forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
                               handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
-                              BreadBoard_X=@(BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX* zoomFactor) BreadBoard_Y=@(BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor) 
+                              BreadBoard_X="@(ShowBreadboard ? BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX * zoomFactor : c.Value.zoomedX)"
+                              BreadBoard_Y="@(ShowBreadboard ? BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor : c.Value.zoomedY)" 
                               individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
                               DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 
