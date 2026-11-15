@@ -4,12 +4,6 @@
     @if (ShowBreadboard)
     {
         <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
-        <div class="right-click-container" style="top: @(BreadboardZoomX)px; left: @(BreadboardZoomY)px">
-            <button id="component-help-button" >
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Component Information</span>
-            </button>
-        </div>
     }
     @if (BoardService.Board != Board.None)
     {

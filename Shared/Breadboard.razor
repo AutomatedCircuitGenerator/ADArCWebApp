@@ -572,21 +572,18 @@
 
 @if (forceBorder)
 {
-    if (true)
-    {
-        <div class="right-click-container" style="top: @(zoomedX)px; left: @(zoomedY)px">
-            <button id="component-help-button" >
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Component Information</span>
-            </button>
-            <button id="component-rotate-left" @onclick="RotateLeft">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Rotate Left</span>
-            </button>
-            <button id="component-rotate-right" @onclick="RotateRight">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Rotate Right</span>
-            </button>
-        </div>
-    }
+    <div class="right-click-container" style="top: @(zoomedX)px; left: @(zoomedY)px">
+        <button id="component-help-button" >
+            <span style="padding-left: 3px">𝗶</span>
+            <span style="padding-left: 7px">￨ Component Information</span>
+        </button>
+        <button id="component-rotate-left" @onclick="RotateLeft">
+            <span style="padding-left: 3px">𝗶</span>
+            <span style="padding-left: 7px">￨ Rotate Left</span>
+        </button>
+        <button id="component-rotate-right" @onclick="RotateRight">
+            <span style="padding-left: 3px">𝗶</span>
+            <span style="padding-left: 7px">￨ Rotate Right</span>
+        </button>
+    </div>
 }
