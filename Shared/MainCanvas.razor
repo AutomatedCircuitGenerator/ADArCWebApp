@@ -220,7 +220,8 @@
             var toPin = connection.To.Data.pinInfo[connection.ToId];
             var fromPin = connection.From.Data.pinInfo[connection.FromId];
             var startRot = connection.From.rotation;
-            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y), connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y)));
+            double scale = connection.From.Data.workbenchScaleFactor;
+            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y) * scale, connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y) * scale));
             var endRot = connection.To.rotation;
             var end = ZoomCoord((connection.To.X + RotateX(endRot, toPin.x, toPin.y), connection.To.Y + RotateY(endRot, toPin.x, toPin.y)));
             var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +

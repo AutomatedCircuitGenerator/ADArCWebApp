@@ -1,4 +1,9 @@
 ﻿@inherits RazorComponent
+@attribute [BreadboardOffset(-13.5, 0, 62)]
+@attribute [BreadboardPinAttrubte(0, 4, "R")]
+@attribute [BreadboardPinAttrubte(2, 4, "G")]
+@attribute [BreadboardPinAttrubte(3, 4, "B")]
+@attribute [BreadboardPinAttrubte(1, 8, "COM")]
 
 @code {
     // [Parameter] public int ledRed { get; set; } = 0;
@@ -11,10 +16,10 @@
         {
             return new ElementPin[]
             {
-                new ElementPin(name: "R", x: 34, y: 69, number: 1, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "G", x: 52, y: 69, number: 3, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "B", x: 62, y: 69, number: 3, signals: new PinSignalInfo[] { }),
-                new ElementPin(name: "COM", x: 43, y: 79, number: 2, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "R", x: 35.9, y: 136, number: 1, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "G", x: 54.6, y: 136, number: 3, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "B", x: 63.6, y: 136, number: 3, signals: new PinSignalInfo[] { }),
+                new ElementPin(name: "COM", x: 45, y: 75, number: 2, signals: new PinSignalInfo[] { }),
             };
         }
     }
@@ -78,104 +83,228 @@
     @* private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0; *@
 }
 
-<svg width="42.129"
-     height="72.582"
-     version="1.2"
-     viewBox="-17 -10 37.3425 57.5115"
-     xmlns="http://www.w3.org/2000/svg">
-    <!-- LED Legs -->
-    <g fill="none" stroke="#9D9999" stroke-linecap="round" stroke-width="1.5px">
-        <path d="m4.1 15.334 3.0611 9.971"/>
-        <path d="m8 14.4 5.9987 4.0518 1.1777 6.5679" stroke-linejoin="round"/>
-        <path d="m-4.3 14.184-5.0755 5.6592-0.10206 6.1694" stroke-linejoin="round"/>
-        <path d="m-1.1 15.607-0.33725 18.4"/>
-    </g>
 
-    <!-- LED Body -->
-    <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
-          opacity=".3"/>
-    <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
-          fill="#e6e6e6"
-          opacity=".5"/>
-    <path d="m8.3435 5.65v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
-          fill="#d1d1d1"
-          opacity=".9"/>
-    <g transform="translate(-5.8295 -7.351)">
-        <path d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
-              opacity=".7"/>
-        <path d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v3.1054c1.4738 1.6502 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586-7.4e-4 -1.1412-0.47444-2.2025-1.283-3.1047z"
-              opacity=".25"/>
-        <ellipse cx="7.0877" cy="16.106" rx="7.087" ry="4.9608" opacity=".25"/>
-    </g>
-    <polygon transform="translate(-5.8295 -7.351)"
-             points="3.1961 13.095 6.0156 13.095 10.012 8.8049 3.407 8.8049 2.2032 9.648 2.2032 16.107 3.1961 16.107"
-             fill="#666"/>
-    <polygon transform="translate(-5.8295 -7.351)"
-             points="11.06 13.095 11.06 16.107 11.974 16.107 11.974 8.5241 10.778 8.5241 11.215 9.0338 7.4117 13.095"
-             fill="#666"/>
-    <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
-          fill="white"
-          opacity=".65"/>
-    <g transform="translate(-5.8295 -7.351)" fill="#fff">
-        <path d="m10.388 3.7541 1.4364-0.2736c-0.84168-1.1318-2.0822-1.9577-3.5417-2.2385l0.25416 1.0807c0.76388 0.27072 1.4068 0.78048 1.8511 1.4314z"
-              opacity=".5"/>
-        <path d="m0.76824 19.926v1.5199c0.64872 0.5292 1.4335 0.97632 2.3076 1.3169v-1.525c-0.8784-0.33624-1.6567-0.78194-2.3076-1.3118z"
-              opacity=".5"/>
-        <path d="m11.073 20.21c-0.2556 0.1224-0.52992 0.22968-0.80568 0.32976-0.05832 0.01944-0.11736 0.04032-0.17784 0.05832-0.56376 0.17928-1.1614 0.31896-1.795 0.39456-0.07488 0.0094-0.1512 0.01872-0.22464 0.01944-0.3204 0.03024-0.64368 0.05832-0.97056 0.05832-0.14832 0-0.30744-0.01512-0.4716-0.02376-1.2002-0.05688-2.3306-0.31464-3.2976-0.73944l-2e-5 -8.3895v-4.8254c0-1.471 0.84816-2.7295 2.0736-3.3494l-0.02232-0.05328-1.2478-1.512c-1.6697 1.003-2.79 2.8224-2.79 4.9118v11.905c-0.04968-0.04968-0.30816-0.30888-0.48024-0.52992l-0.30744 0.6876c1.4011 1.4818 3.8088 2.4617 6.5426 2.4617 1.6798 0 3.2371-0.37368 4.5115-1.0022l-0.52704-0.40896-0.01006 0.0072z"
-              opacity=".5"/>
-    </g>
 
+
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="46" height="118.5" version="1.2"
+     viewBox="-17 -10 37.3425 105">
+  <defs>
+    <!-- RGB LED glow filters -->
     <filter id="ledFilter" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur stdDeviation="4"/>
+      <feGaussianBlur stdDeviation="4"/>
     </filter>
     <filter id="ledFilterRed" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur id="rgbRedBlur" stdDeviation="0"/> 
+      <feGaussianBlur id="rgbRedBlur" stdDeviation="0"/>
     </filter>
     <filter id="ledFilterGreen" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur id="rgbGreenBlur" stdDeviation="0"/> 
+      <feGaussianBlur id="rgbGreenBlur" stdDeviation="0"/>
     </filter>
     <filter id="ledFilterBlue" x="-0.8" y="-0.8" height="5.2" width="5.8">
-        <feGaussianBlur id="rgbBlueBlur" stdDeviation="0"/> 
+      <feGaussianBlur id="rgbBlueBlur" stdDeviation="0"/>
     </filter>
 
-    <circle id="rgbRedCircle"
-            cx="1.7"
-            cy="3"
-            r="2" 
-            fill="rgb(255, 0, 0)"
-            opacity="0" 
-            filter="url(#ledFilterRed)"/>
-    <circle id="rgbGreenCircle"
-            cx="2.7"
-            cy="5"
-            r="2" 
-            fill="rgb(0, 255, 0)"
-            opacity="0" 
-            filter="url(#ledFilterGreen)"/>
-    <circle id="rgbBlueCircle"
-            cx="0.7"
-            cy="5"
-            r="2" 
-            fill="rgb(1,85,253)"
-            opacity="0" 
-            filter="url(#ledFilterBlue)"/>
+    <!-- Resistor highlight -->
+    <linearGradient id="rgbResistorHighlight"
+                    x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#323232" stop-opacity="0.20"/>
+      <stop offset="50%" stop-color="#ffffff" stop-opacity="0.40"/>
+      <stop offset="100%" stop-color="#323232" stop-opacity="0.15"/>
+    </linearGradient>
 
-    <circle id="rgbMixedCircle"
-            cx="1.7"
-            cy="4"
-            r="10"
-            fill="rgb(0,0,0)"
-            filter="url(#ledFilter)"
-            opacity="0" />
+    <!-- Resistor body -->
+    <path id="rgbResistorBodyShape"
+          d="M 4.69,0
+             C 3.63,0 2.77,0.67 2.77,1.50
+             C 2.77,2.33 3.63,3.00 4.69,3.00
+             C 5.12,3.00 5.51,2.89 5.82,2.71
+             L 9.92,2.71
+             C 10.24,2.89 10.63,3.00 11.05,3.00
+             C 12.11,3.00 12.97,2.33 12.97,1.50
+             C 12.97,0.67 12.11,0.00 11.05,0.00
+             C 10.63,0.00 10.24,0.11 9.92,0.29
+             L 5.82,0.29
+             C 5.51,0.11 5.12,0.00 4.69,0.00 Z"/>
 
-    <!-- Grey hollow around the LED -->
-    <circle id="rgbHollowCircle"
-            cx="1.7"
-            cy="4"
-            r="13"
-            stroke="#666"
-            stroke-width="1"
-            fill="none"
-            filter="url(#ledFilter)"
-            opacity="0" />
+    <clipPath id="rgbResistorBodyClip">
+      <use href="#rgbResistorBodyShape"/>
+    </clipPath>
+
+    <!-- Reusable 1k resistor -->
+    <g id="rgbResistorTemplate">
+      <rect x="0" y="1.1759"
+            width="15.558" height="0.63826"
+            fill="#aaaaaa"/>
+
+      <use href="#rgbResistorBodyShape"
+           fill="#d5b597"/>
+
+      <use href="#rgbResistorBodyShape"
+           fill="url(#rgbResistorHighlight)"
+           opacity="0.45"/>
+
+      <!-- Brown -->
+      <rect x="4.0" y="0"
+            width="1.0" height="3.0"
+            fill="#8f4814"
+            clip-path="url(#rgbResistorBodyClip)"/>
+
+      <!-- Black -->
+      <rect x="6.0" y="0.294"
+            width="0.96" height="2.412"
+            fill="#000000"/>
+
+      <!-- Red -->
+      <rect x="7.8" y="0.294"
+            width="0.96" height="2.412"
+            fill="#d32f2f"/>
+
+      <!-- Gold -->
+      <rect x="10.69" y="0"
+            width="1.0" height="3.0"
+            fill="#f1d863"
+            clip-path="url(#rgbResistorBodyClip)"/>
+    </g>
+  </defs>
+
+  <!-- ===================== LED LEGS ===================== -->
+  <g fill="none" stroke="#9D9999"
+     stroke-linecap="round" stroke-width="1.5px">
+    <path d="m4.1 15.334 3.0611 9.971"/>
+
+    <path d="m8 14.4 5.9987 4.0518 1.1777 6.5679"
+          stroke-linejoin="round"/>
+
+    <path d="m-4.3 13.384-5.0755 5.6592-0.10206 6.1694"
+          stroke-linejoin="round"/>
+
+    <path d="m-1.1 15.607-0.33725 18.4"/>
+  </g>
+
+  <!-- ===================== LED BODY ===================== -->
+  <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+        opacity=".3"/>
+
+  <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+        fill="#e6e6e6" opacity=".5"/>
+
+  <path d="m8.3435 5.65v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
+        fill="#d1d1d1" opacity=".9"/>
+
+  <g transform="translate(-5.8295 -7.351)">
+    <path d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v4.6296c1.4738 1.6517 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586l-4e-5 -1.5235c-7e-4 -1.1419-0.4744-2.2032-1.283-3.1054z"
+          opacity=".7"/>
+
+    <path d="m14.173 13.001v3.1054c0 2.7389-3.1658 4.9651-7.0855 4.9651-3.9125 2e-5 -7.0877-2.219-7.0877-4.9651v3.1054c1.4738 1.6502 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8586-7.4e-4 -1.1412-0.47444-2.2025-1.283-3.1047z"
+          opacity=".25"/>
+
+    <ellipse cx="7.0877" cy="16.106"
+             rx="7.087" ry="4.9608"
+             opacity=".25"/>
+  </g>
+
+  <!-- Internal electrodes -->
+  <polygon transform="translate(-5.8295 -7.351)"
+           points="3.1961 13.095 6.0156 13.095 10.012 8.8049 3.407 8.8049 2.2032 9.648 2.2032 16.107 3.1961 16.107"
+           fill="#666"/>
+
+  <polygon transform="translate(-5.8295 -7.351)"
+           points="11.06 13.095 11.06 16.107 11.974 16.107 11.974 8.5241 10.778 8.5241 11.215 9.0338 7.4117 13.095"
+           fill="#666"/>
+
+  <!-- Translucent LED cover -->
+  <path d="m8.3435 5.65v-5.9126c0-3.9132-3.168-7.0884-7.0855-7.0884-3.9125 0-7.0877 3.1694-7.0877 7.0884v13.649c1.4738 1.651 4.0968 2.7526 7.0877 2.7526 4.6195 0 8.3686-2.6179 8.3686-5.8594v-1.5235c-7.4e-4 -1.1426-0.47444-2.2039-1.283-3.1061z"
+        fill="white" opacity=".65"/>
+
+  <!-- ===================== HIGHLIGHTS ===================== -->
+  <g transform="translate(-5.8295 -7.351)" fill="#fff">
+    <path d="m10.388 3.7541 1.4364-0.2736c-0.84168-1.1318-2.0822-1.9577-3.5417-2.2385l0.25416 1.0807c0.76388 0.27072 1.4068 0.78048 1.8511 1.4314z"
+          opacity=".5"/>
+
+    <path d="m0.76824 19.926v1.5199c0.64872 0.5292 1.4335 0.97632 2.3076 1.3169v-1.525c-0.8784-0.33624-1.6567-0.78194-2.3076-1.3118z"
+          opacity=".5"/>
+
+    <path d="m11.073 20.21c-0.2556 0.1224-0.52992 0.22968-0.80568 0.32976-0.05832 0.01944-0.11736 0.04032-0.17784 0.05832-0.56376 0.17928-1.1614 0.31896-1.795 0.39456-0.07488 0.0094-0.1512 0.01872-0.22464 0.01944-0.3204 0.03024-0.64368 0.05832-0.97056 0.05832-0.14832 0-0.30744-0.01512-0.4716-0.02376-1.2002-0.05688-2.3306-0.31464-3.2976-0.73944l-2e-5 -8.3895v-4.8254c0-1.471 0.84816-2.7295 2.0736-3.3494l-0.02232-0.05328-1.2478-1.512c-1.6697 1.003-2.79 2.8224-2.79 4.9118v11.905c-0.04968-0.04968-0.30816-0.30888-0.48024-0.52992l-0.30744 0.6876c1.4011 1.4818 3.8088 2.4617 6.5426 2.4617 1.6798 0 3.2371-0.37368 4.5115-1.0022l-0.52704-0.40896-0.01006 0.0072z"
+          opacity=".5"/>
+  </g>
+
+  <!-- ===================== RGB GLOW ===================== -->
+  <circle id="rgbRedCircle"
+          cx="1.7" cy="3" r="2"
+          fill="rgb(255, 0, 0)"
+          opacity="0"
+          filter="url(#ledFilterRed)"/>
+
+  <circle id="rgbGreenCircle"
+          cx="2.7" cy="5" r="2"
+          fill="rgb(0, 255, 0)"
+          opacity="0"
+          filter="url(#ledFilterGreen)"/>
+
+  <circle id="rgbBlueCircle"
+          cx="0.7" cy="5" r="2"
+          fill="rgb(1,85,253)"
+          opacity="0"
+          filter="url(#ledFilterBlue)"/>
+
+  <circle id="rgbMixedCircle"
+          cx="1.7" cy="4" r="10"
+          fill="rgb(0,0,0)"
+          filter="url(#ledFilter)"
+          opacity="0"/>
+
+  <circle id="rgbHollowCircle"
+          cx="1.7" cy="4" r="13"
+          stroke="#666"
+          stroke-width="1"
+          fill="none"
+          filter="url(#ledFilter)"
+          opacity="0"/>
+
+  <!-- ===================== THREE RESISTORS ===================== -->
+  <g id="rgb_resistors">
+        <!-- Red -->
+        <use href="#rgbResistorTemplate"
+             transform="matrix(0 -2.3 3 0 -13.9 87)"/>
+
+        <!-- Green -->
+        <use href="#rgbResistorTemplate"
+             transform="matrix(0 -2.3 3 0 2.7 87)"/>
+
+        <!-- Blue -->
+        <use href="#rgbResistorTemplate"
+             transform="matrix(0 -2.3 3 0 10.7 87)"/>
+  </g>
+
+  <!-- ===================== CONNECTION WIRES ===================== -->
+  <!-- Visible only when breadboard is OFF -->
+  <g style="display:var(--connection-display, none);"
+     fill="none"
+     stroke-width="1.3"
+     stroke-linecap="round">
+
+        <!-- Red -->
+        <path d="M -9.47756 25.2126 V 51.2166"
+              stroke="red" stroke-width="1.6"/>
+        <circle cx="-9.47756" cy="25.2126"
+                r="1.6" fill="red" stroke="none"/>
+        <circle cx="-9.47756" cy="51.2166"
+                r="1.6" fill="red" stroke="none"/>
+
+        <!-- Green -->
+        <path d="M 7.1611 25.305 V 51.2166"
+              stroke="lime" stroke-width="1.6"/>
+        <circle cx="7.1611" cy="25.305"
+                r="1.6" fill="lime" stroke="none"/>
+        <circle cx="7.1611" cy="51.2166"
+                r="1.6" fill="lime" stroke="none"/>
+
+        <!-- Blue -->
+        <path d="M 15.1764 25.0197 V 51.2166"
+              stroke="darkblue" stroke-width="1.6"/>
+        <circle cx="15.1764" cy="25.0197"
+                r="1.6" fill="darkblue" stroke="none"/>
+        <circle cx="15.1764" cy="51.2166"
+                r="1.6" fill="darkblue" stroke="none"/>
+  </g>
 </svg>

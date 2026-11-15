@@ -17,6 +17,7 @@ namespace ADArCWebApp.Shared
         public Dictionary<string, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
+        public double workbenchScaleFactor = 1.0;
         public double bottomOffset;
 		public Dictionary<string, int> pins;
 		public List<string> pinNames => pins.Keys.ToList();
@@ -42,6 +43,7 @@ namespace ADArCWebApp.Shared
 
 			rightOffset = builder.rightOffset;
 			cardScaleFactor = builder.cardScaleFactor;
+			workbenchScaleFactor = builder.workbenchScaleFactor;
 			bottomOffset = builder.bottomOffset;
 			compType = builder.compType;
 			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
@@ -69,6 +71,7 @@ namespace ADArCWebApp.Shared
 		public Dictionary<string, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
+		public double workbenchScaleFactor = 1.0;
 		public double bottomOffset;
 
 		public Type compType;
@@ -85,7 +88,7 @@ namespace ADArCWebApp.Shared
 
 		public List<(string, int, int)> BreadboardPins = new ();
 		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null)
+		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null, double workbenchScaleFactor = 1.0)
 		{
 			
 			this.name = name;
@@ -99,6 +102,7 @@ namespace ADArCWebApp.Shared
 			this.rightOffset = rightOff;
 			this.bottomOffset = bottomOff;
 			this.cardScaleFactor = cardScaleFactor;
+			this.workbenchScaleFactor = workbenchScaleFactor;
 			if (pins != null)//create pin ids
 			{
 				for (int i = 0; i < pins.Count; i++)

@@ -1,7 +1,7 @@
 ﻿@using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(individualData?.rotation * 90)deg">
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor * individualData.Data.workbenchScaleFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(individualData?.rotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>

@@ -406,7 +406,7 @@ namespace ADArCWebApp.Shared
             // },
             {
                 20,
-                new ComponentDataBuilder("RGB LED", true, "Output/LED", 1.5, 45, 80, typeof(RazorRGBLED),
+                new ComponentDataBuilder("RGB LED", true, "Output/LED", 1, 45, 80, typeof(RazorRGBLED),
                     codeForGen: new()
                     {
                         { "include", "" },
@@ -425,7 +425,7 @@ namespace ADArCWebApp.Shared
                         { "functions", "" },
                         { "delayLoop", "" },
                         { "delayTime", "" }
-                    }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed").Finish()
+                    }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed", workbenchScaleFactor: 1.66).Finish()
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
             {
                 21,
