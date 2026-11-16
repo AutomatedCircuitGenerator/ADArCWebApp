@@ -48,6 +48,7 @@
     <string>add_j305b.grxml</string>
     <string>add_dht11.grxml</string>
     <string>add_transceiver.grxml</string>
+    <string>add_nema23.grxml</string>
     <string>add_dht22module.grxml</string>
     <string>add_vl53l0x.grxml</string>
     <string>add_irdetector.grxml</string>
