@@ -96,6 +96,10 @@ export class ArduinoTWI implements TWI {
     registerController(addr: number, device: I2CController): void {
         this.twi.eventHandler.registerController(addr, device);
     }
+    
+    unregisterController(addr: number) {
+        this.twi.eventHandler.unregisterController(addr);
+    }
 }
 
 export class ArduinoUSART implements USART {

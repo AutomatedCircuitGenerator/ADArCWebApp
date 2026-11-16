@@ -1661,6 +1661,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d62</string>
           <string>a8</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1681,6 +1682,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d63</string>
           <string>a9</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1701,6 +1703,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d64</string>
           <string>a10</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1721,6 +1724,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d65</string>
           <string>a11</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1741,6 +1745,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d66</string>
           <string>a12</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1761,6 +1766,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d67</string>
           <string>a13</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1781,6 +1787,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d68</string>
           <string>a14</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -1801,6 +1808,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>analog</string>
           <string>d69</string>
           <string>a15</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>160</X>
@@ -2401,6 +2409,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d51</string>
           <string>copi</string>
+          
         </localLabels>
         <localVariables />
         <X>935.6741480509488</X>
@@ -2420,6 +2429,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d53</string>
           <string>ss</string>
+          
         </localLabels>
         <localVariables />
         <X>935.6741480509488</X>
@@ -2475,6 +2485,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d13</string>
           <string>pwm</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2512,6 +2523,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d12</string>
           <string>pwm</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2531,6 +2543,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d11</string>
           <string>pwm</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2550,6 +2563,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d10</string>
           <string>pwm</string>
+          <string>sw_rx</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2683,6 +2697,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d3</string>
           <string>pwm</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2702,6 +2717,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d2</string>
           <string>pwm</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2837,6 +2853,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d18</string>
           <string>tx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2856,6 +2873,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d19</string>
           <string>rx</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2875,6 +2893,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d20</string>
           <string>sda</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>
@@ -2894,6 +2913,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
           <string>digital</string>
           <string>d21</string>
           <string>scl</string>
+          <string>hdrw_int</string>
         </localLabels>
         <localVariables />
         <X>1280</X>

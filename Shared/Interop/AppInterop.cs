@@ -24,6 +24,8 @@ namespace ADArCWebApp.Shared.Interop
 			var r2 = ((double)screenHeight) / Pages.Index.DefaultScreenHeight;
 
 			Pages.Index.CurrentHeightRatio = r2;
+			
+			Pages.Index.App?.OnWindowResized(screenWidth, screenHeight);
 		}
 
 		/// <summary>

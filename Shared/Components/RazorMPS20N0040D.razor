@@ -1,0 +1,160 @@
+﻿@inherits RazorComponent
+
+@code {
+    
+    [Parameter]
+    [ValueSetting("kPa", 0, 0, 40)]
+    public double pressure { get; set; }
+
+    [Parameter]
+    [ValueSetting("ADC Scale", 500, 10, 10000)]
+    public double scale { get; set; }
+
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "Vcc", x: 66.6, y: 195.5, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 160.3, y: 195.5, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "sck", x: 96.8, y: 195.5, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "dout", x: 126.7, y: 195.5, signals: new PinSignalInfo[] { }, number: 2)
+            };
+        }
+    }
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.5 41.25" width="168.75px" height="185.625px">
+  <defs>
+    <!-- Filter for drop shadows on components -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0.25" dy="0.75" stdDeviation="0.75" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Red PCB Board Base -->
+  <path d="
+    M 3.75,3.75 
+    L 33.75,3.75 
+    L 33.75,20 
+    A 3.125,3.125 0 0,1 33.75,28.75 
+    L 33.75,41.25 
+    L 3.75,41.25 
+    L 3.75,28.75 
+    A 3.125,3.125 0 0,1 3.75,20 
+    Z" 
+    fill="#D02B1E" />
+
+  <!-- Side Mounting Holes -->
+  <!-- Left Mounting Hole -->
+  <circle cx="3.75" cy="24.375" r="3" fill="none" stroke="#FFFFFF" stroke-width="0.375" />
+  <circle cx="3.75" cy="24.375" r="2.625" fill="none" stroke="#D02B1E" stroke-width="0.25" />
+  <circle cx="3.75" cy="24.375" r="2" fill="#FFFFFF" stroke="#D02B1E" stroke-width="0.1875" />
+
+  <!-- Right Mounting Hole -->
+  <circle cx="33.75" cy="24.375" r="3" fill="none" stroke="#FFFFFF" stroke-width="0.375" />
+  <circle cx="33.75" cy="24.375" r="2.625" fill="none" stroke="#D02B1E" stroke-width="0.25" />
+  <circle cx="33.75" cy="24.375" r="2" fill="#FFFFFF" stroke="#D02B1E" stroke-width="0.1875" />
+
+  <!-- Metal Pins / Traces near top sensor -->
+  <g fill="#BCA988">
+    <rect x="6.875" y="6.5" width="23.75" height="1.5" rx="0.125" />
+    <rect x="6.875" y="11.25" width="23.75" height="1.5" rx="0.125" />
+    <rect x="6.875" y="16" width="23.75" height="1.5" rx="0.125" />
+  </g>
+
+  <!-- Top Sensor Assembly (Black Block) -->
+  <g filter="url(#shadow)">
+    <!-- Base Module -->
+    <rect x="11.75" y="5" width="14" height="13.75" rx="0.25" fill="#2B2B2B" />
+
+    <!-- 6 Corner/Edge Pins -->
+    <circle cx="13.25" cy="7.5" r="0.625" fill="#000000" />
+    <circle cx="13.25" cy="11.875" r="0.625" fill="#000000" />
+    <circle cx="13.25" cy="16.5" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="7.5" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="11.875" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="16.5" r="0.625" fill="#000000" />
+
+    <!-- Central Pressure Port/Nipple -->
+    <ellipse cx="18.75" cy="11.5" rx="2.75" ry="3.25" fill="#202020" />
+    <circle cx="19.125" cy="10" r="2.25" fill="#292929" />
+    <circle cx="19.375" cy="10" r="0.75" fill="#000000" />
+  </g>
+
+  <!-- SMD Components -->
+  <!-- Top Left SMD -->
+  <rect x="8.125" y="19" width="1.625" height="3.25" fill="#A89F91" rx="0.125" />
+  <rect x="8.125" y="19.75" width="1.625" height="1.75" fill="#0A0A0A" />
+
+  <!-- Top Right SMD -->
+  <rect x="28" y="19" width="1.625" height="3.25" fill="#A89F91" rx="0.125" />
+  <rect x="28" y="19.75" width="1.625" height="1.75" fill="#0A0A0A" />
+
+  <!-- Bottom Left SMD -->
+  <rect x="8.125" y="27.5" width="1.625" height="3.375" fill="#A89F91" rx="0.125" />
+  <rect x="8.125" y="30.5" width="1.625" height="0.375" fill="#FFFFFF" />
+
+  <!-- Bottom Right SMD -->
+  <rect x="28" y="28" width="1.625" height="3.375" fill="#A89F91" rx="0.125" />
+
+  <!-- IC Pins (HX710B IC) -->
+  <g fill="#C5C5C5">
+    <!-- Left Pins -->
+    <rect x="13.125" y="22.125" width="2.75" height="0.75" />
+    <rect x="13.125" y="25" width="2.75" height="0.75" />
+    <rect x="13.125" y="27.75" width="2.75" height="0.75" />
+    <rect x="13.125" y="30.5" width="2.75" height="0.75" />
+
+    <!-- Right Pins -->
+    <rect x="21.625" y="22.125" width="2.75" height="0.75" />
+    <rect x="21.625" y="25" width="2.75" height="0.75" />
+    <rect x="21.625" y="27.75" width="2.75" height="0.75" />
+    <rect x="21.625" y="30.5" width="2.75" height="0.75" />
+  </g>
+
+  <!-- IC Chip Body -->
+  <rect x="15.5" y="21.875" width="6.5" height="10" rx="0.25" fill="#222222" />
+  <!-- IC Pin 1 Marker (Dot) -->
+  <circle cx="16.5" cy="23" r="0.375" fill="#111111" />
+
+  <!-- IC Text Label -->
+  <text x="18.75" y="26.875" 
+        fill="#DCDCDC" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="1.375" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        transform="rotate(-90, 18.75, 26.875)">
+    <tspan x="18.75" dy="-0.5">HX710B</tspan>
+    <tspan x="18.75" dy="1.5">791104102</tspan>
+  </text>
+
+  <!-- Bottom Pin Labels -->
+  <g fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="2" font-weight="bold" text-anchor="middle">
+    <text x="9.25" y="35.375">VCC</text>
+    <text x="15.5" y="35.375">OUT</text>
+    <text x="22.25" y="35.375">SCK</text>
+    <text x="29.75" y="35.375">GND</text>
+  </g>
+
+  <!-- Bottom Connector Pads / Holes -->
+  <!-- VCC Pad (Square contour) -->
+  <rect x="7.125" y="36" width="4.25" height="4.25" fill="#B0B5B3" />
+  <circle cx="9.25" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- OUT Pad (Circular) -->
+  <circle cx="15.625" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="15.625" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- SCK Pad (Circular) -->
+  <circle cx="22.625" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="22.625" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- GND Pad (Circular) -->
+  <circle cx="29.5" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="29.5" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+</svg>

@@ -1,0 +1,305 @@
+﻿@inherits RazorComponent
+
+@code {
+    
+    [Parameter]
+    [ValueSetting("µg/m³", 15, 0, 500)]
+    public double dustDensity { get; set; }
+
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "Vcc", x: 148, y: 289, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 116.5, y: 289, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "led", x: 127, y: 289, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "vout", x: 137.5, y: 289, signals: new PinSignalInfo[] { }, number: 6)
+            };
+        }
+    }
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 800 1450" width="240" height="435" preserveAspectRatio="xMidYMid meet">
+  <!-- Definitions for Reusable Components and Gradients -->
+  <defs>
+    <!-- Drop Shadow for components -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="2" dy="2" stdDeviation="4" flood-color="#000" flood-opacity="0.25"/>
+    </filter>
+    
+    <!-- 3D Bevel Label Gradients -->
+    <linearGradient id="grad-vled" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#008eff"/>
+      <stop offset="100%" stop-color="#004c8f"/>
+    </linearGradient>
+    <linearGradient id="grad-ledgnd" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#00c853"/>
+      <stop offset="100%" stop-color="#006622"/>
+    </linearGradient>
+    <linearGradient id="grad-led" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffffff"/>
+      <stop offset="100%" stop-color="#d1d2d4"/>
+    </linearGradient>
+    <linearGradient id="grad-sgnd" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ffea00"/>
+      <stop offset="100%" stop-color="#b8a600"/>
+    </linearGradient>
+    <linearGradient id="grad-vo" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#333333"/>
+      <stop offset="100%" stop-color="#111111"/>
+    </linearGradient>
+    <linearGradient id="grad-vcc" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#ff2a2a"/>
+      <stop offset="100%" stop-color="#990000"/>
+    </linearGradient>
+
+    <!-- Metallic Screw template -->
+    <g id="screw">
+      <circle cx="0" cy="0" r="22" fill="#8e9093" stroke="#707275" stroke-width="2"/>
+      <path d="M -12 0 L 12 0 M 0 -12 L 0 12" stroke="#5a5c5e" stroke-width="5" stroke-linecap="round"/>
+      <path d="M -8 -8 L 8 8 M -8 8 L 8 -8" stroke="#5a5c5e" stroke-width="3" stroke-linecap="round"/>
+    </g>
+
+    <!-- Top Adjuster Screw -->
+    <g id="adjuster-screw">
+      <circle cx="0" cy="0" r="32" fill="#d1d3d4" stroke="#414042" stroke-width="4"/>
+      <circle cx="0" cy="0" r="24" fill="#a7a9ac"/>
+      <circle cx="0" cy="0" r="16" fill="#ffffff"/>
+      <path d="M -12 0 L 12 0 M 0 -12 L 0 12" stroke="#808285" stroke-width="6" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="4" fill="#d71920"/>
+    </g>
+    
+    <!-- Breadboard Tie-Point Hole -->
+    <g id="hole">
+      <circle cx="0" cy="0" r="7" fill="#c2c4c6"/>
+      <circle cx="0" cy="0" r="5" fill="#1c1d1f"/>
+      <circle cx="0" cy="0" r="3.5" fill="#404143"/>
+    </g>
+    
+    <!-- Highlighted/Connected Tie-Point Hole -->
+    <g id="hole-connected">
+      <circle cx="0" cy="0" r="11" fill="#7bc143" opacity="0.65"/>
+      <circle cx="0" cy="0" r="5" fill="#1c1d1f"/>
+      <circle cx="0" cy="0" r="3.5" fill="#404143"/>
+    </g>
+  </defs>
+
+  <!-- Background Base -->
+  <rect width="800" height="1450" fill="#ffffff"/>
+
+  <!-- ================= MODULE SECTION ================= -->
+  <g id="sensor-module">
+    <path d="M 20 10 L 780 10 L 780 540 L 430 540 C 430 565 410 585 385 585 L 20 585 Z" fill="#000000"/>
+    <rect x="25" y="15" width="750" height="515" rx="5" fill="#939598"/>
+    <polygon points="25,15 775,15 740,90 60,90" fill="#bcbec0" opacity="0.6"/>
+    <polygon points="25,15 60,90 60,460 25,530" fill="#808285" opacity="0.7"/>
+    <polygon points="775,15 740,90 740,460 775,530" fill="#d1d3d4" opacity="0.5"/>
+    <polygon points="25,530 775,530 740,460 60,460" fill="#58595b" opacity="0.6"/>
+    <polygon points="60,90 740,90 740,460 60,460" fill="#a7a9ac"/>
+    <path d="M 25 200 L 90 200 C 110 200 110 320 90 320 L 25 320 Z" fill="#b1b3b6"/>
+    <use href="#screw" x="55" y="260" opacity="0.65"/>
+    <path d="M 775 250 L 710 250 C 690 250 690 370 710 370 L 775 370 Z" fill="#b1b3b6"/>
+    <use href="#screw" x="740" y="310" opacity="0.8"/>
+    <rect x="400" y="435" width="315" height="40" fill="#808285"/>
+    <circle cx="480" cy="150" r="22" fill="#3a3a3a"/>
+    <circle cx="680" cy="245" r="22" fill="#3a3a3a"/>
+    <circle cx="505" cy="265" r="22" fill="#3a3a3a"/>
+    <circle cx="515" cy="330" r="22" fill="#3a3a3a"/>
+    <circle cx="540" cy="390" r="22" fill="#3a3a3a"/>
+    <circle cx="600" cy="425" r="22" fill="#3a3a3a"/>
+    <circle cx="385" cy="320" r="68" fill="#ffffff" filter="url(#shadow)"/>
+    <use href="#adjuster-screw" x="320" y="160"/>
+    <path d="M 40 400 L 305 400 L 410 500 L 410 550 L 40 550 Z" fill="#000000"/>
+    <rect x="85" y="275" width="220" height="125" rx="4" fill="#ffffff" filter="url(#shadow)"/>
+    
+    <g fill="#000000">
+      <rect x="119" y="275" width="12" height="25"/>
+      <rect x="146" y="275" width="12" height="25"/>
+      <rect x="173" y="275" width="12" height="25"/>
+      <rect x="200" y="275" width="12" height="25"/>
+      <rect x="227" y="275" width="12" height="25"/>
+      <rect x="254" y="275" width="12" height="25"/>
+    </g>
+    <rect x="95" y="340" width="10" height="15" fill="#f1f2f2"/>
+    <rect x="285" y="340" width="10" height="15" fill="#f1f2f2"/>
+  </g>
+
+  <!-- ================= BREADBOARD SECTION ================= -->
+  <rect x="10" y="655" width="780" height="605" rx="8" fill="#e2e3e5" stroke="#d1d2d4" stroke-width="3"/>
+  <!-- Center Divider Channel -->
+  <rect x="15" y="930" width="770" height="40" fill="#cecfd1"/>
+
+  <!-- ================= BREADBOARD HOLE GRID ================= -->
+  <g id="breadboard-grid">
+    <!-- TOP POWER RAILS -->
+   
+
+    <!-- ROW A (y=720) -->
+    <use href="#hole" x="60" y="720"/><use href="#hole" x="95" y="720"/><use href="#hole" x="130" y="720"/><use href="#hole" x="165" y="720"/><use href="#hole" x="200" y="720"/>
+    <use href="#hole-connected" x="235" y="720"/><use href="#hole-connected" x="270" y="720"/><use href="#hole-connected" x="305" y="720"/><use href="#hole-connected" x="340" y="720"/><use href="#hole-connected" x="375" y="720"/><use href="#hole-connected" x="410" y="720"/>
+    <use href="#hole" x="445" y="720"/><use href="#hole" x="480" y="720"/><use href="#hole" x="515" y="720"/><use href="#hole" x="550" y="720"/><use href="#hole" x="585" y="720"/><use href="#hole" x="620" y="720"/><use href="#hole" x="655" y="720"/><use href="#hole" x="690" y="720"/><use href="#hole" x="725" y="720"/><use href="#hole" x="760" y="720"/>
+
+    <!-- ROW B (y=760) -->
+    <use href="#hole" x="60" y="760"/><use href="#hole" x="95" y="760"/><use href="#hole" x="130" y="760"/><use href="#hole" x="165" y="760"/><use href="#hole" x="200" y="760"/>
+    <use href="#hole-connected" x="235" y="760"/><use href="#hole-connected" x="270" y="760"/><use href="#hole-connected" x="305" y="760"/><use href="#hole-connected" x="340" y="760"/><use href="#hole-connected" x="375" y="760"/><use href="#hole-connected" x="410" y="760"/>
+    <use href="#hole" x="445" y="760"/><use href="#hole" x="480" y="760"/><use href="#hole" x="515" y="760"/><use href="#hole" x="550" y="760"/><use href="#hole" x="585" y="760"/><use href="#hole" x="620" y="760"/><use href="#hole" x="655" y="760"/><use href="#hole" x="690" y="760"/><use href="#hole" x="725" y="760"/><use href="#hole" x="760" y="760"/>
+
+    <!-- ROW C (y=800) -->
+    <use href="#hole" x="60" y="800"/><use href="#hole" x="95" y="800"/><use href="#hole" x="130" y="800"/><use href="#hole" x="165" y="800"/><use href="#hole" x="200" y="800"/>
+    <use href="#hole-connected" x="235" y="800"/><use href="#hole-connected" x="270" y="800"/><use href="#hole-connected" x="305" y="800"/><use href="#hole-connected" x="340" y="800"/><use href="#hole-connected" x="375" y="800"/><use href="#hole-connected" x="410" y="800"/>
+    <use href="#hole" x="445" y="800"/><use href="#hole" x="480" y="800"/><use href="#hole" x="515" y="800"/><use href="#hole" x="550" y="800"/><use href="#hole" x="585" y="800"/><use href="#hole" x="620" y="800"/><use href="#hole" x="655" y="800"/><use href="#hole" x="690" y="800"/><use href="#hole" x="725" y="800"/><use href="#hole" x="760" y="800"/>
+
+    <!-- ROW D (y=840) -->
+    <use href="#hole" x="60" y="840"/><use href="#hole" x="95" y="840"/><use href="#hole" x="130" y="840"/><use href="#hole" x="165" y="840"/><use href="#hole" x="200" y="840"/>
+    <use href="#hole-connected" x="235" y="840"/><use href="#hole-connected" x="270" y="840"/><use href="#hole-connected" x="305" y="840"/><use href="#hole-connected" x="340" y="840"/><use href="#hole-connected" x="375" y="840"/><use href="#hole-connected" x="410" y="840"/>
+    <use href="#hole" x="445" y="840"/><use href="#hole" x="480" y="840"/><use href="#hole" x="515" y="840"/><use href="#hole" x="550" y="840"/><use href="#hole" x="585" y="840"/><use href="#hole" x="620" y="840"/><use href="#hole" x="655" y="840"/><use href="#hole" x="690" y="840"/><use href="#hole" x="725" y="840"/><use href="#hole" x="760" y="840"/>
+
+    <!-- ROW E (y=880) -->
+    <use href="#hole" x="60" y="880"/><use href="#hole" x="95" y="880"/><use href="#hole" x="130" y="880"/><use href="#hole" x="165" y="880"/><use href="#hole" x="200" y="880"/>
+    <use href="#hole" x="235" y="880"/><use href="#hole" x="270" y="880"/><use href="#hole" x="305" y="880"/><use href="#hole" x="340" y="880"/><use href="#hole" x="375" y="880"/><use href="#hole" x="410" y="880"/>
+    <use href="#hole" x="445" y="880"/><use href="#hole" x="480" y="880"/><use href="#hole" x="515" y="880"/><use href="#hole" x="550" y="880"/><use href="#hole" x="585" y="880"/><use href="#hole" x="620" y="880"/><use href="#hole" x="655" y="880"/><use href="#hole" x="690" y="880"/><use href="#hole" x="725" y="880"/><use href="#hole" x="760" y="880"/>
+
+    <!-- ROW F (y=990) -->
+    <use href="#hole" x="60" y="990"/><use href="#hole" x="95" y="990"/><use href="#hole" x="130" y="990"/><use href="#hole" x="165" y="990"/><use href="#hole" x="200" y="990"/>
+    <use href="#hole-connected" x="235" y="990"/><use href="#hole-connected" x="270" y="990"/><use href="#hole-connected" x="305" y="990"/><use href="#hole-connected" x="340" y="990"/><use href="#hole-connected" x="375" y="990"/><use href="#hole-connected" x="410" y="990"/>
+    <use href="#hole" x="445" y="990"/><use href="#hole" x="480" y="990"/><use href="#hole" x="515" y="990"/><use href="#hole" x="550" y="990"/><use href="#hole" x="585" y="990"/><use href="#hole" x="620" y="990"/><use href="#hole" x="655" y="990"/><use href="#hole" x="690" y="990"/><use href="#hole" x="725" y="990"/><use href="#hole" x="760" y="990"/>
+    
+    <!-- ROW G (y=1030) -->
+    <use href="#hole" x="60" y="1030"/><use href="#hole" x="95" y="1030"/><use href="#hole" x="130" y="1030"/><use href="#hole" x="165" y="1030"/><use href="#hole" x="200" y="1030"/>
+    <use href="#hole-connected" x="235" y="1030"/><use href="#hole-connected" x="270" y="1030"/><use href="#hole-connected" x="305" y="1030"/><use href="#hole-connected" x="340" y="1030"/><use href="#hole-connected" x="375" y="1030"/><use href="#hole-connected" x="410" y="1030"/>
+    <use href="#hole" x="445" y="1030"/><use href="#hole" x="480" y="1030"/><use href="#hole" x="515" y="1030"/><use href="#hole" x="550" y="1030"/><use href="#hole" x="585" y="1030"/><use href="#hole" x="620" y="1030"/><use href="#hole" x="655" y="1030"/><use href="#hole" x="690" y="1030"/><use href="#hole" x="725" y="1030"/><use href="#hole" x="760" y="1030"/>
+
+    <!-- ROW H (y=1070) -->
+    <use href="#hole" x="60" y="1070"/><use href="#hole" x="95" y="1070"/><use href="#hole" x="130" y="1070"/><use href="#hole" x="165" y="1070"/><use href="#hole" x="200" y="1070"/>
+    <use href="#hole" x="235" y="1070"/><use href="#hole" x="270" y="1070"/><use href="#hole" x="305" y="1070"/><use href="#hole" x="340" y="1070"/><use href="#hole" x="375" y="1070"/><use href="#hole" x="410" y="1070"/>
+    <use href="#hole" x="445" y="1070"/><use href="#hole" x="480" y="1070"/><use href="#hole" x="515" y="1070"/><use href="#hole" x="550" y="1070"/><use href="#hole" x="585" y="1070"/><use href="#hole" x="620" y="1070"/><use href="#hole" x="655" y="1070"/><use href="#hole" x="690" y="1070"/><use href="#hole" x="725" y="1070"/><use href="#hole" x="760" y="1070"/>
+
+    <!-- ROW I (y=1110) -->
+    <use href="#hole" x="60" y="1110"/><use href="#hole" x="95" y="1110"/><use href="#hole" x="130" y="1110"/><use href="#hole" x="165" y="1110"/><use href="#hole" x="200" y="1110"/>
+    <use href="#hole" x="235" y="1110"/><use href="#hole" x="270" y="1110"/><use href="#hole" x="305" y="1110"/><use href="#hole" x="340" y="1110"/><use href="#hole" x="375" y="1110"/><use href="#hole" x="410" y="1110"/>
+    <use href="#hole" x="445" y="1110"/><use href="#hole" x="480" y="1110"/><use href="#hole" x="515" y="1110"/><use href="#hole" x="550" y="1110"/><use href="#hole" x="585" y="1110"/><use href="#hole" x="620" y="1110"/><use href="#hole" x="655" y="1110"/><use href="#hole" x="690" y="1110"/><use href="#hole" x="725" y="1110"/><use href="#hole" x="760" y="1110"/>
+
+    <!-- ROW J (y=1150) -->
+    <use href="#hole" x="60" y="1150"/><use href="#hole" x="95" y="1150"/><use href="#hole" x="130" y="1150"/><use href="#hole" x="165" y="1150"/><use href="#hole" x="200" y="1150"/>
+    <use href="#hole" x="235" y="1150"/><use href="#hole" x="270" y="1150"/><use href="#hole" x="305" y="1150"/><use href="#hole" x="340" y="1150"/><use href="#hole" x="375" y="1150"/><use href="#hole" x="410" y="1150"/>
+    <use href="#hole" x="445" y="1150"/><use href="#hole" x="480" y="1150"/><use href="#hole" x="515" y="1150"/><use href="#hole" x="550" y="1150"/><use href="#hole" x="585" y="1150"/><use href="#hole" x="620" y="1150"/><use href="#hole" x="655" y="1150"/><use href="#hole" x="690" y="1150"/><use href="#hole" x="725" y="1150"/><use href="#hole" x="760" y="1150"/>
+
+    <!-- BOTTOM POWER RAILS -->
+   
+  </g>
+
+  <!-- ================= STRAIGHT CONNECTING WIRES ================= -->
+  <g stroke-width="12" stroke-linecap="round" fill="none">
+    <!-- Blue Wire -> Col 6 (x=235) -->
+    <path d="M 125 390 L 125 540 Q 125 600 180 600 L 210 600 Q 235 600 235 650 L 235 720" stroke="#0054a6"/>
+    <!-- Green Wire -> Col 7 (x=270) -->
+    <path d="M 152 390 L 152 530 Q 152 590 200 590 L 245 590 Q 270 590 270 645 L 270 720" stroke="#00a651"/>
+    <!-- White Wire -> Col 8 (x=305) -->
+    <path d="M 180 390 L 180 520 Q 180 580 230 580 L 280 580 Q 305 580 305 635 L 305 720" stroke="#e6e7e8" stroke-width="14"/>
+    <path d="M 180 390 L 180 520 Q 180 580 230 580 L 280 580 Q 305 580 305 635 L 305 720" stroke="#ffffff" stroke-width="9"/>
+    <!-- Yellow Wire -> Col 9 (x=340) -->
+    <path d="M 207 390 L 207 530 Q 207 585 260 585 L 315 585 Q 340 585 340 640 L 340 720" stroke="#fff200"/>
+    <!-- Black Wire -> Col 10 (x=375) -->
+    <path d="M 234 390 L 234 540 Q 234 590 290 590 L 350 590 Q 375 590 375 645 L 375 720" stroke="#231f20"/>
+    <!-- Red Wire -> Col 11 (x=410) -->
+    <path d="M 261 390 L 261 550 Q 261 600 320 600 L 385 600 Q 410 600 410 650 L 410 720" stroke="#ed1c24"/>
+  </g>
+
+  <circle cx="235" cy="720" r="4.5" fill="#002751"/>
+  <circle cx="270" cy="720" r="4.5" fill="#004d25"/>
+  <circle cx="305" cy="720" r="4.5" fill="#b1b2b5"/>
+  <circle cx="340" cy="720" r="4.5" fill="#938b00"/>
+  <circle cx="375" cy="720" r="4.5" fill="#000000"/>
+  <circle cx="410" cy="720" r="4.5" fill="#a01014"/>
+
+  <!-- ================= INLINE VERTICAL WIRE LABELS (OPTION 2) ================= -->
+  <g font-family="Arial, Helvetica, sans-serif" font-weight="bold" font-size="12" text-anchor="middle" filter="url(#shadow)">
+    <!-- V-LED (Blue) -->
+    <g transform="translate(235, 640) rotate(-90)">
+      <rect x="-32" y="-13" width="64" height="26" rx="3" fill="url(#grad-vled)" stroke="#003566" stroke-width="1"/>
+      <rect x="-30" y="-11" width="2" height="22" fill="#fff" opacity="0.4"/>
+      <text y="5" fill="#ffffff">V-LED</text>
+    </g>
+    <!-- LED-GND (Green) -->
+    <g transform="translate(270, 640) rotate(-90)">
+      <rect x="-36" y="-13" width="72" height="26" rx="3" fill="url(#grad-ledgnd)" stroke="#00441b" stroke-width="1"/>
+      <rect x="-34" y="-11" width="2" height="22" fill="#fff" opacity="0.4"/>
+      <text y="5" fill="#ffffff">LED-GND</text>
+    </g>
+    <!-- LED (White) -->
+    <g transform="translate(305, 640) rotate(-90)">
+      <rect x="-24" y="-13" width="48" height="26" rx="3" fill="url(#grad-led)" stroke="#bcbec0" stroke-width="1"/>
+      <rect x="-22" y="-11" width="2" height="22" fill="#fff" opacity="0.8"/>
+      <text y="5" fill="#1c1d1f">LED</text>
+    </g>
+    <!-- S-GND (Yellow) -->
+    <g transform="translate(340, 640) rotate(-90)">
+      <rect x="-30" y="-13" width="60" height="26" rx="3" fill="url(#grad-sgnd)" stroke="#8c7e00" stroke-width="1"/>
+      <rect x="-28" y="-11" width="2" height="22" fill="#fff" opacity="0.5"/>
+      <text y="5" fill="#000000">S-GND</text>
+    </g>
+    <!-- Vo (Black) -->
+    <g transform="translate(375, 640) rotate(-90)">
+      <rect x="-22" y="-13" width="44" height="26" rx="3" fill="url(#grad-vo)" stroke="#000000" stroke-width="1"/>
+      <rect x="-20" y="-11" width="2" height="22" fill="#fff" opacity="0.2"/>
+      <text y="5" fill="#ffffff">Vo</text>
+    </g>
+    <!-- Vcc (Red) -->
+    <g transform="translate(410, 640) rotate(-90)">
+      <rect x="-22" y="-13" width="44" height="26" rx="3" fill="url(#grad-vcc)" stroke="#660000" stroke-width="1"/>
+      <rect x="-20" y="-11" width="2" height="22" fill="#fff" opacity="0.4"/>
+      <text y="5" fill="#ffffff">Vcc</text>
+    </g>
+  </g>
+
+  <!-- ================= BREADBOARD COMPONENTS ================= -->
+  <!-- 1. Jumper Link (Row C) -->
+  <g id="jumper-wire">
+    <rect x="263" y="793" width="84" height="14" rx="7" fill="#1e2022" stroke="#37393b" stroke-width="1.5"/>
+    <rect x="268" y="797" width="74" height="4" rx="2" fill="#4b4e51"/>
+    <circle cx="270" cy="800" r="3.5" fill="#000000"/>
+    <circle cx="340" cy="800" r="3.5" fill="#000000"/>
+  </g>
+
+  <!-- 2. Resistor (Row B) -->
+  <g id="resistor">
+    <path d="M 235 760 L 410 760" stroke="#8a9597" stroke-width="3.5" stroke-linecap="round"/>
+    <rect x="287" y="747" width="94" height="26" rx="8" fill="#dcc595" stroke="#ba9e6c" stroke-width="1"/>
+    <rect x="287" y="749" width="94" height="4" fill="#ffffff" opacity="0.3"/>
+    <rect x="287" y="769" width="94" height="3" fill="#000000" opacity="0.12"/>
+    <rect x="300" y="747" width="7" height="26" fill="#6d4116"/>
+    <rect x="316" y="747" width="7" height="26" fill="#000000"/>
+    <rect x="332" y="747" width="7" height="26" fill="#00a651"/>
+    <rect x="360" y="747" width="9" height="26" fill="#c69c24"/>
+    <circle cx="235" cy="760" r="3.5" fill="#4d4f53"/>
+    <circle cx="410" cy="760" r="3.5" fill="#4d4f53"/>
+  </g>
+
+  <!-- 3. Electrolytic Capacitor (Row D to F crossing the channel) -->
+  <g id="electrolytic-capacitor">
+    <path d="M 235 840 L 235 990" stroke="#9da1a4" stroke-width="4.5" stroke-linecap="round"/>
+    <path d="M 270 840 L 270 990" stroke="#9da1a4" stroke-width="4.5" stroke-linecap="round"/>
+    <circle cx="235" cy="840" r="4" fill="#111214"/>
+    <circle cx="270" cy="840" r="4" fill="#111214"/>
+
+    <g filter="url(#shadow)">
+      <rect x="212" y="1030" width="80" height="18" rx="6" fill="#464749"/>
+      <ellipse cx="252" cy="1040" rx="40" ry="8" fill="#2d2e30"/>
+      <rect x="212" y="1038" width="80" height="175" rx="3" fill="#16194f"/>
+      <rect x="264" y="1038" width="24" height="175" fill="#a2c8ec"/>
+      <g fill="#16194f">
+        <rect x="270" y="1065" width="12" height="3" rx="1"/>
+        <rect x="270" y="1115" width="12" height="3" rx="1"/>
+        <rect x="270" y="1165" width="12" height="3" rx="1"/>
+      </g>
+      <ellipse cx="252" cy="1213" rx="40" ry="14" fill="#a2c8ec"/>
+      <ellipse cx="252" cy="1213" rx="34" ry="10" fill="#7ba5cb"/>
+      <rect x="212" y="1038" width="12" height="175" fill="#000000" opacity="0.35"/>
+      <rect x="230" y="1038" width="6" height="175" fill="#ffffff" opacity="0.25"/>
+      <rect x="284" y="1038" width="8" height="175" fill="#000000" opacity="0.4"/>
+    </g>
+  </g>
+
+</svg>
