@@ -133,7 +133,8 @@
     text-align: left;
 }
 
-.right-click-container button {
+.right-click-container button,
+.right-click-container a {
     background-color: transparent;
     border-color: transparent;
     justify-content: flex-start;
@@ -150,7 +151,19 @@
     white-space: nowrap;
     display: flex;
     text-align-all: start;
+    text-decoration: none;
+    cursor: pointer;
+    font-size: inherit;
+    font-family: inherit;
+    box-sizing: border-box;
 }
 
-.right-click-container button:not(:last-child) {
-    border-bottom: 1px solid rgba(145, 145, 145, 0.3); }
+.right-click-container button:not(:last-child),
+.right-click-container a:not(:last-child) {
+    border-bottom: 1px solid rgba(145, 145, 145, 0.3);
+}
+
+.right-click-container button:hover,
+.right-click-container a:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+}
