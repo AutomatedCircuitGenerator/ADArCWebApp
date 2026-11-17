@@ -1,5 +1,5 @@
 @inherits RazorComponent
-@attribute [Component("Time-of-Flight", "Input/Distance Sensors", "vl53l0x", true, 1, 10, 90, paneHoverText: "VL53L0X")]
+@attribute [Component("Time-Of-Flight", "Input/Distance Sensors", "vl53l0x", true, 1, 10, 90, paneHoverText: "VL53L0X")]
 @attribute [ComponentCode(CodeType.Global, 
     "VL53L0X sensor;")]
 @attribute [ComponentCode(CodeType.LoopMain, "  Serial.print(sensor.readRangeContinuousMillimeters());\n" +
@@ -22,12 +22,12 @@
                                           "  // ms (e.g. sensor.startContinuous(100)).\n" +
                                           "  sensor.startContinuous();")]
 
-@attribute [ComponentPin("Vcc","5V", 59, 96, number: 1)]
+@attribute [ComponentPin("5V","5V", 59, 96, number: 1)]
 @attribute [ComponentPin("gnd","gnd", 72.5, 96, number: 2)]
 @attribute [ComponentPin("scl","scl", 92.1, 96, number: 3)]
-@attribute [ComponentPin("sda","sda", 108.8, 96, number: 1)]
-@attribute [ComponentPin("xshut","xshut", 142.2, 96, number: 2)]
-@attribute [ComponentPin("gpio","gpio", 125.5, 96, number: 3)]
+@attribute [ComponentPin("sda","sda", 108.8, 96, number: 4)]
+@attribute [ComponentPin("xshut","xshut", 142.2, 96, number: 5)]
+@attribute [ComponentPin("gpio","gpio", 125.5, 96, number: 6)]
 
 @attribute [ComponentProperty("distance", 100.0, typeof(double))]
 

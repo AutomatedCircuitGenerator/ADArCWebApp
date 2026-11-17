@@ -10,8 +10,7 @@
                                              "unsigned long geigerPreviousMillis@ = 0;"+
                                              "const int GEIGER_SAMPLE_WINDOW@ = 10;"+
                                              "unsigned long geigerCountsBuffer@ \u005BGEIGER_SAMPLE_WINDOW@] = {0};"+
-                                             "int geigerBufferIndex@ = 0") 
-                                             ]
+                                             "int geigerBufferIndex@ = 0;")]
 
 @attribute [ComponentCode(CodeType.Setup,  "  pinMode(geigerPin@, INPUT_PULLUP);\n" +
                                            "  attachInterrupt(digitalPinToInterrupt(geigerPin@), geigerImpulse@, FALLING);\n" +

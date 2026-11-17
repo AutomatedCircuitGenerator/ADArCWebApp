@@ -3,9 +3,7 @@
 @attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>")]
 @attribute [ComponentCode(CodeType.Setup, "   \n  // Begin communication with ADXL at I2C address 0x@\n  // Change this address to your ADXL's real address!\n  if(!accel@.begin(0x@)) {\n    /* There was a problem detecting the ADXL345 ... check your connections */\n    Serial.println(\"Ooops, no ADXL345 detected ... Check your wiring!\");\n    while(1);\n  }\n\n  // Setting the range of the accelerometer\n  accel@.setRange(ADXL345_RANGE_4_G);")]
 @attribute [ComponentCode(CodeType.LoopMain, "  /* Get a new sensor event */ \n  sensors_event_t event@; \n  accel@.getEvent(&event@);\n \n  /* Display the results (acceleration is measured in m/s^2) */\n  Serial.print(\"X: \"); Serial.print(event@.acceleration.x); Serial.print(\"  \");\n  Serial.print(\"Y: \"); Serial.print(event@.acceleration.y); Serial.print(\"  \");\n  Serial.print(\"Z: \"); Serial.print(event@.acceleration.z); Serial.print(\"  \");Serial.println(\"m/s^2 \");\n  delay(500);")]
-@attribute [ComponentCode(CodeType.Functions, "")]
-@attribute [ComponentCode(CodeType.DelayLoop, "")]
-@attribute [ComponentCode(CodeType.DelayTime, "")]
+@attribute [ComponentCode(CodeType.Global, "Adafruit_ADXL345_Unified accel@ = Adafruit_ADXL345_Unified();")]
 
 @attribute [ComponentPin("5V","5V", 45.5, 95, number: 1)]
 @attribute [ComponentPin("gnd","gnd", 55, 95, number: 2)]

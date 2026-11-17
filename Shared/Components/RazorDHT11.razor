@@ -6,7 +6,7 @@
   "#define DHTTYPE DHT11\n" +
   "DHT dht@(DHTPIN@, DHTTYPE);")]
 @attribute [ComponentCode(CodeType.Setup,  "\tdht@.begin();")]
-@attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <Adafruit_GFX.h>\n#include <Adafruit_SSD1306.h>")]
+@attribute [ComponentCode(CodeType.Include, "#include <DHT.h>\n")]
 @attribute [ComponentCode(CodeType.LoopMain, "\tfloat humidity@ = dht@.readHumidity();\n" +
                                              "\tfloat temperature@ = dht@.readTemperature();\n" +
                                              "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +

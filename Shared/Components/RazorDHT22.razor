@@ -16,6 +16,7 @@
                                              "\t}\n" +
                                              "\tdelay(2000);")]
 @attribute [ComponentCode(CodeType.Include, "#include <DHT.h>\n")]
+@attribute [ComponentCode(CodeType.Setup, "\tdht@.begin();")]
 
 @attribute [ComponentPin("VCC","Vcc", 25, 127, number: 1)]
 @attribute [ComponentPin("SDA","signal", 50.9, 132, number: 2)]

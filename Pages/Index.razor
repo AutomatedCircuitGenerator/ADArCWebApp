@@ -996,6 +996,25 @@
                 Console.WriteLine(ha.Data.name + " is missing a pin definition!");
             }
 
+            if (bPinName == "**NF**")
+            {
+                Console.WriteLine("Component: " + comp.Data.name + ", pin: " + aPinName + " is missing its connector!");
+                Console.WriteLine("Component A: " + ha.Data.name + ", Component B: " + hb.Data.name);
+                Console.WriteLine("Component B Type: " + hb.Data.compType);
+                foreach (var bPinKey in hb.Data.pins.Keys)
+                {
+                    Console.WriteLine($"{bPinKey} is a key unmatched to a label");
+                }
+                foreach (var label in a.To.localLabels)
+                {
+                    Console.WriteLine($"{label} is a to lable unmatched to a key");
+                }
+                foreach (var label in a.From.localLabels)
+                {
+                    Console.WriteLine($"{label} is a from lable unmatched to a key");
+                }
+            }
+            
             int i1 = ha.Data.pins[aPinName];
             int i2 = hb.Data.pins[bPinName];
 
