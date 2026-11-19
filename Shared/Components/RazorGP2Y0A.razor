@@ -1,0 +1,67 @@
+@inherits RazorComponent
+
+@code {
+    [Parameter]
+    [DropdownSetting(["GP2Y0A21YK0F", "GP2Y0A02YK0F"])]
+    public string model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    [ValueSettingDouble("cm", 30.0, 10.0, 150.0)]
+    public double distance
+    {
+        get;
+        set;
+    }
+
+    // Pin order follows the Sharp datasheet: 1 = Vo, 2 = GND, 3 = Vcc.
+    // Coordinates are SVG pixels + 25px wrapper padding.
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "vo", x: 85, y: 85, signals: new PinSignalInfo[] { }, number: 1),
+                new ElementPin(name: "gnd", x: 100, y: 85, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 2),
+                new ElementPin(name: "5V", x: 115, y: 85, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 3)
+            };
+        }
+    }
+}
+
+<svg width="150" height="60" viewBox="0 0 150 60" xmlns="http://www.w3.org/2000/svg">
+    <!-- Mounting tabs -->
+    <rect x="0" y="10" width="150" height="22" rx="4" fill="#2b2b2b"/>
+    <circle cx="9" cy="21" r="4" fill="#ffffff" stroke="#888" stroke-width="1"/>
+    <circle cx="141" cy="21" r="4" fill="#ffffff" stroke="#888" stroke-width="1"/>
+
+    <!-- Main body -->
+    <rect x="22" y="2" width="106" height="38" rx="5" fill="#1a1a1a" stroke="#000" stroke-width="1"/>
+
+    <!-- Emitter lens (IR LED) -->
+    <circle cx="45" cy="21" r="12" fill="#3a3a3a"/>
+    <circle cx="45" cy="21" r="9" fill="#5a1a1a"/>
+    <circle cx="42" cy="18" r="2.5" fill="#ffffff" opacity="0.35"/>
+
+    <!-- Receiver lens (PSD) -->
+    <circle cx="105" cy="21" r="12" fill="#3a3a3a"/>
+    <circle cx="105" cy="21" r="9" fill="#101030"/>
+    <circle cx="102" cy="18" r="2.5" fill="#ffffff" opacity="0.35"/>
+
+    <!-- Model label -->
+    <text x="75" y="15" font-family="Consolas, monospace" font-size="6" fill="#dddddd" text-anchor="middle">SHARP</text>
+    <text x="75" y="31" font-family="Consolas, monospace" font-size="5" fill="#bbbbbb" text-anchor="middle">@(model ?? "GP2Y0A21YK0F")</text>
+
+    <!-- 3-pin JST connector -->
+    <rect x="52" y="40" width="46" height="12" rx="1.5" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+    <rect x="57" y="52" width="6" height="8" fill="#c8a24a"/>
+    <rect x="72" y="52" width="6" height="8" fill="#c8a24a"/>
+    <rect x="87" y="52" width="6" height="8" fill="#c8a24a"/>
+    <text x="60" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">Vo</text>
+    <text x="75" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">GND</text>
+    <text x="90" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">VCC</text>
+</svg>

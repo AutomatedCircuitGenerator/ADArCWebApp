@@ -30,6 +30,7 @@
     <string>tfLunaLidarI2C_arduino.grxml</string>
     <string>uln2003_arduino.grxml</string>
     <string>sgp40_arduino.grxml</string>
+    <string>gp2y0a_arduino.grxml</string>
     <string>relay_arduino.grxml</string>
     <string>sen0219_arduino.grxml</string>
     <string>tof_arduino.grxml</string>
