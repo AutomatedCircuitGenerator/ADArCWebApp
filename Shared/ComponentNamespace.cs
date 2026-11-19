@@ -1862,6 +1862,23 @@ namespace ADArCWebApp.Shared
                         warning: "Use an external motor supply and common GND. Do not power the motor directly from Arduino.")
                     .Finish()
             },
+            {
+                55,
+                new ComponentDataBuilder("Ambient Light Sensor", true, "Input/Light Sensors", .7, 50, 
+                    50, typeof(RazorBH1750), paneHoverText: "BH1750", codeForGen: new()
+                    {
+                        { "include", "#include <Arduino.h>\n#include <hp_BH1750.h>\t\t//  include the library" },
+                        { "global", "hp_BH1750 BH1750;       //  create the sensor" },
+                        { "setup",
+                            "  // put your setup code here, to run once:\n  Serial.begin(9600);\n  bool avail = BH1750.begin(BH1750_TO_GROUND);// init the sensor with address pin connetcted to ground\n                                              // result (bool) wil be be \"false\" if no sensor found\n  if (!avail) {\n    Serial.println(\"No BH1750 sensor found!\");\n    while (true) {};\n  }" },
+                        { "loopMain",
+                            "  // put your main code here, to run repeatedly:\n  BH1750.start();   //starts a measurement\n  float lux=BH1750.getLux();  //  waits until a conversion finished\n  Serial.println(lux);    " },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    }, pins: ["vin", "gnd", "scl", "sda"], gsNodeName: "bh1750").Property("illuminance", 10.0)
+                    .Finish()
+            }
         };
     }
 }
