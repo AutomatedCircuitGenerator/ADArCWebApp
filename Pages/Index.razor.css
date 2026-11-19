@@ -149,14 +149,14 @@
 }
 
 .toolbar-button-primary {
-    background-color: #6b8aa8;
+    background-color: #526f8a;
     color: #ffffff !important;
     border-radius: 8px;
     padding: 9px 14px;
 }
 
 .toolbar-button-primary:hover:not(:disabled) {
-    background-color: #5f7f9e;
+    background-color: #48627b;
 }
 
 .toolbar-text {
