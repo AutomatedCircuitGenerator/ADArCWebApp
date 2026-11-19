@@ -18,6 +18,7 @@ namespace ADArCWebApp.Shared
         public Dictionary<CodeType, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
+        public double workbenchScaleFactor = 1.0;
         public double bottomOffset;
 		public Dictionary<string, int> pins;
 		public List<string> pinNames => pins.Keys.ToList();
@@ -43,6 +44,7 @@ namespace ADArCWebApp.Shared
 
 			rightOffset = builder.rightOffset;
 			cardScaleFactor = builder.cardScaleFactor;
+			workbenchScaleFactor = builder.workbenchScaleFactor;
 			bottomOffset = builder.bottomOffset;
 			compType = builder.compType;
 			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
@@ -71,6 +73,7 @@ namespace ADArCWebApp.Shared
 		public Dictionary<CodeType, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
+		public double workbenchScaleFactor = 1.0;
 		public double bottomOffset;
 
 		public Type compType;
@@ -89,7 +92,6 @@ namespace ADArCWebApp.Shared
 		/* needs more later, good enough for now.*/
 		public ComponentDataBuilder(Type compType = null)
 		{
-			this.paneHoverText = paneHoverText;
 			this.compType = compType ?? typeof(InvalidComponent);
 
 			foreach (CodeType type in Enum.GetValues(typeof(CodeType)))
@@ -111,6 +113,7 @@ namespace ADArCWebApp.Shared
 						this.cardScaleFactor = cA.CardScaleFactor;
 						this.nodeName = cA.GsNodeName;
 						this.paneHoverText = cA.PaneHoverText;
+						this.workbenchScaleFactor = cA.WorkbenchScaleFactor;
 					}
 					else if (attribute is BreadboardOffset BBOA)//CANNOT BE SWITCH! sorry
 					{
@@ -170,7 +173,7 @@ namespace ADArCWebApp.Shared
 }
 
 
-public class ComponentAttribute(string name, string path, string gsNodeName, bool enabled = true, double cardScaleFactor = 1, double rightOff = 0, double bottomOff = 0, string paneHoverText = "") : Attribute
+public class ComponentAttribute(string name, string path, string gsNodeName, bool enabled = true, double cardScaleFactor = 1, double rightOff = 0, double bottomOff = 0, string paneHoverText = "", double workbenchScaleFactor = 1.0) : Attribute
 {
 	public bool Enabled = enabled;
 	public string Name = name;
@@ -180,6 +183,7 @@ public class ComponentAttribute(string name, string path, string gsNodeName, boo
 	public double RightOff = rightOff;
 	public double BottomOff = bottomOff;
 	public string PaneHoverText = paneHoverText;
+	public double WorkbenchScaleFactor = workbenchScaleFactor;
 }
 
 [AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]

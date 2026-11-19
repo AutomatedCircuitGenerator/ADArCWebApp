@@ -1,31 +1,9 @@
 @using System.Text
 @inject BoardService BoardService
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @if (ShowBreadboard)
     {
         <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
-        <div class="right-click-container" style="top: @(BreadboardZoomX)px; left: @(BreadboardZoomY)px">
-            <button id="component-help-button" >
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Component Information</span>
-            </button>
-        </div>
-        {
-            double CurrentOffset = 0;
-            foreach(var c in comps)
-            {
-                if (!c.Value.Data.LivesOnBreadBoard) continue; //Breadboard components rendered here
-                <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
-                                  CanvasClick="CanvasClick" CancelDrag="CancelDrag"
-                                  forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
-                                  handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
-                                  BreadBoard_X=@(BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX* zoomFactor) BreadBoard_Y=@(BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor) 
-                                  individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
-                                  DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
-
-                CurrentOffset += c.Value.Data.Width;
-            }
-        }
     }
     @if (BoardService.Board != Board.None)
     {
@@ -36,10 +14,28 @@
             <button class="reset-btn" @onclick="ResetZoom">Reset</button>
         </div>
     }
+    @{
+        double CurrentOffset = 0;
+    }
     @foreach (var c in comps)
     {
-        if(c.Value.Data.LivesOnBreadBoard)continue;//Breadboard components rendered below
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        if (c.Value.Data.LivesOnBreadBoard)
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+                              CanvasClick="CanvasClick" CancelDrag="CancelDrag"
+                              forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
+                              handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
+                              BreadBoard_X="@(ShowBreadboard ? BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX * zoomFactor : c.Value.zoomedX)"
+                              BreadBoard_Y="@(ShowBreadboard ? BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor : c.Value.zoomedY)" 
+                              individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
+                              DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+
+            CurrentOffset += c.Value.Data.Width;
+        }
+        else
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
     }
     <svg viewBox="0 0 @(Pages.Index.DefaultScreenWidth * Pages.Index.CurrentWidthRatio) @(Pages.Index.DefaultScreenHeight * Pages.Index.CurrentHeightRatio - 50)" xmlns="http://www.w3.org/2000/svg">
         @foreach (var line in GetAllGridLines(ConnLines))
@@ -218,7 +214,8 @@
             var toPin = connection.To.Data.pinInfo[connection.ToId];
             var fromPin = connection.From.Data.pinInfo[connection.FromId];
             var startRot = connection.From.rotation;
-            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y), connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y)));
+            double scale = connection.From.Data.workbenchScaleFactor;
+            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y) * scale, connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y) * scale));
             var endRot = connection.To.rotation;
             var end = ZoomCoord((connection.To.X + RotateX(endRot, toPin.x, toPin.y), connection.To.Y + RotateY(endRot, toPin.x, toPin.y)));
             var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +

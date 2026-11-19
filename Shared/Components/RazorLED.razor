@@ -9,8 +9,8 @@
 @attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"sig\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"sig\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]
 
 
-@attribute [ComponentPin("sig","sig", 50, 66, number: 1)]
-@attribute [ComponentPin("gnd","gnd", 39, 66, number: 2)]
+@attribute [ComponentPin("sig","sig", 86.9, 250, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 71.3, 135, number: 2)]
 
 @attribute [ComponentProperty("color", "red", typeof(string))]
 @code {
@@ -209,48 +209,58 @@
   <!-- ===================== RESISTOR ===================== -->
   <!-- A matrix transform uses: x' = ax + cy + e and y' = bx + dy + f -->
 <!-- When a = 0 and d = 0, the object is rotated 90°. The b and c values control the rotation/scale, while e and f control the x and y position. -->
-  <g id="resistor_1k" transform="matrix(0 -2.3 3 0 22.3 100)">
+    <g id="resistor_1k" transform="matrix(0 -2.3 3 0 22.3 100)">
 
-    <!-- Metal lead -->
-    <rect
-      x="0" y="1.1759"
-      width="15.558" height="0.63826"
-      fill="#aaaaaa" />
+      <!-- Metal lead -->
+      <rect
+        x="0" y="1.1759"
+        width="15.558" height="0.63826"
+        fill="#aaaaaa" />
 
-    <!-- Beige resistor body -->
-    <use
-      href="#lr_resistorBodyShape"
-      fill="#d5b597" />
+      <!-- Beige resistor body -->
+      <use
+        href="#lr_resistorBodyShape"
+        fill="#d5b597" />
 
-    <!-- Soft body highlight -->
-    <use
-      href="#lr_resistorBodyShape"
-      fill="url(#lr_resistorHighlight)"
-      opacity="0.45" />
+      <!-- Soft body highlight -->
+      <use
+        href="#lr_resistorBodyShape"
+        fill="url(#lr_resistorHighlight)"
+        opacity="0.45" />
 
-    <!-- 1 kΩ bands: brown, black, red, gold -->
-    <rect
-      x="4.0" y="0"
-      width="1.0" height="3.0"
-      fill="#8f4814"
-      clip-path="url(#lr_resistorBodyClip)" />
+      <!-- 1 kΩ bands: brown, black, red, gold -->
+      <rect
+        x="4.0" y="0"
+        width="1.0" height="3.0"
+        fill="#8f4814"
+        clip-path="url(#lr_resistorBodyClip)" />
 
-    <rect
-      x="6.0" y="0.294"
-      width="0.96" height="2.412"
-      fill="#000000" />
+      <rect
+        x="6.0" y="0.294"
+        width="0.96" height="2.412"
+        fill="#000000" />
 
-    <rect
-      x="7.8" y="0.294"
-      width="0.96" height="2.412"
-      fill="#d32f2f" />
+      <rect
+        x="7.8" y="0.294"
+        width="0.96" height="2.412"
+        fill="#d32f2f" />
 
-    <rect
-      x="10.69" y="0"
-      width="1.0" height="3.0"
-      fill="#f1d863"
-      clip-path="url(#lr_resistorBodyClip)" />
-  </g>
+      <rect
+        x="10.69" y="0"
+        width="1.0" height="3.0"
+        fill="#f1d863"
+        clip-path="url(#lr_resistorBodyClip)" />
+    </g>
+    <!-- Connection wire between LED and resistor -->
+    <g style="display:var(--connection-display, none);">
+      <path
+        d="M 26.8,39.5 L 26.8,64.2"
+        stroke="red"
+        stroke-width="1.7"
+        fill="none" />
+      <circle cx="26.8" cy="39.5" r="1.6" fill="red" />
+      <circle cx="26.8" cy="64.2" r="1.6" fill="red" />
+    </g>
   </g>
 </g>
 
