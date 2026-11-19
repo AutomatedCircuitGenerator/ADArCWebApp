@@ -1842,6 +1842,28 @@ namespace ADArCWebApp.Shared
             },
             {
                 54,
+                new ComponentDataBuilder("Brushed DC Motor Driver (TB6612FNG)", true, "Output/Motors/DC Motor", .8, 75, 75,
+                        typeof(RazorTB6612FNG), paneHoverText: "TB6612FNG",
+                        pins: ["pwma", "ain1", "ain2", "pwr_gnd"],
+                        codeForGen: new()
+                        {
+                            { "include", "" },
+                            { "global",
+                                "int pwma@ = ~\"pwma\";\nint ain1@ = ~\"ain1\";\nint ain2@ = ~\"ain2\";" },
+                            { "setup",
+                                "\tpinMode(pwma@, OUTPUT);\n\tpinMode(ain1@, OUTPUT);\n\tpinMode(ain2@, OUTPUT);" },
+                            { "loopMain",
+                                "\tdigitalWrite(ain1@, HIGH);\n\tdigitalWrite(ain2@, LOW);\n\tanalogWrite(pwma@, 200);\n\tdelay(2000);\n\tdigitalWrite(ain1@, LOW);\n\tdigitalWrite(ain2@, LOW);\n\tanalogWrite(pwma@, 0);\n\tdelay(1000);" },
+                            { "functions", "" },
+                            { "delayLoop", "" },
+                            { "delayTime", "" }
+                        },
+                        gsNodeName: "tb6612fng",
+                        warning: "Use an external motor supply and common GND. Do not power the motor directly from Arduino.")
+                    .Finish()
+            },
+            {
+                55,
                 new ComponentDataBuilder("IR Distance (Sharp)", true, "Input/Distance Sensors", 1, 75, 75, typeof(RazorGP2Y0A),
                     paneHoverText: "GP2Y0A21YK0F / GP2Y0A02YK0F",
                     codeForGen: new()
@@ -1885,7 +1907,7 @@ namespace ADArCWebApp.Shared
                 ).Property("model", "GP2Y0A21YK0F")
                 .Property("distance", 30.0)
                 .Finish()
-            }
+            },
         };
     }
 }
