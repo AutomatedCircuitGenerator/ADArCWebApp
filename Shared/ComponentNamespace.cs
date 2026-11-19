@@ -1862,6 +1862,73 @@ namespace ADArCWebApp.Shared
                         warning: "Use an external motor supply and common GND. Do not power the motor directly from Arduino.")
                     .Finish()
             },
+            {
+                56,
+                new ComponentDataBuilder("SD Card Reader", true, "Storage/Data Logging", 1, 75, 75, typeof(RazorSDCard),
+                    paneHoverText: "SPI Micro SD Card Module",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <SPI.h>\n#include <SD.h>" },
+                        {
+                            "global",
+                            "const int sdChipSelect@ = ~\"cs\";\n" +
+                            "unsigned long sdReading@ = 0;"
+                        },
+                        {
+                            "setup",
+                            "  Serial.print(\"Initializing SD card... \");\n" +
+                            "  if (!SD.begin(sdChipSelect@)) {\n" +
+                            "    Serial.println(\"failed! Is a card inserted?\");\n" +
+                            "  } else {\n" +
+                            "    Serial.println(\"done.\");\n\n" +
+                            "    // Read a file that is already on the card\n" +
+                            "    File readme@ = SD.open(\"README.TXT\");\n" +
+                            "    if (readme@) {\n" +
+                            "      Serial.println(\"README.TXT:\");\n" +
+                            "      while (readme@.available()) {\n" +
+                            "        Serial.write(readme@.read());\n" +
+                            "      }\n" +
+                            "      readme@.close();\n" +
+                            "    }\n" +
+                            "  }"
+                        },
+                        {
+                            "loopMain",
+                            "  // Append a new line to LOG.TXT (the file is created if it does not exist)\n" +
+                            "  File logFile@ = SD.open(\"LOG.TXT\", FILE_WRITE);\n" +
+                            "  if (logFile@) {\n" +
+                            "    logFile@.print(\"Reading #\");\n" +
+                            "    logFile@.print(sdReading@);\n" +
+                            "    logFile@.print(\" at \");\n" +
+                            "    logFile@.print(millis());\n" +
+                            "    logFile@.println(\" ms\");\n" +
+                            "    logFile@.close();\n" +
+                            "    sdReading@++;\n" +
+                            "  } else {\n" +
+                            "    Serial.println(\"Error opening LOG.TXT\");\n" +
+                            "  }\n\n" +
+                            "  // Read the whole file back\n" +
+                            "  logFile@ = SD.open(\"LOG.TXT\");\n" +
+                            "  if (logFile@) {\n" +
+                            "    Serial.print(\"LOG.TXT (\");\n" +
+                            "    Serial.print(logFile@.size());\n" +
+                            "    Serial.println(\" bytes):\");\n" +
+                            "    while (logFile@.available()) {\n" +
+                            "      Serial.write(logFile@.read());\n" +
+                            "    }\n" +
+                            "    logFile@.close();\n" +
+                            "  }\n\n" +
+                            "  delay(2000);"
+                        },
+                        { "functions", "" },
+                        { "delayLoop", "" },
+                        { "delayTime", "" }
+                    },
+                    pins: ["gnd", "Vcc", "miso", "mosi", "sck", "cs"],
+                    gsNodeName: "sdCard"
+                ).Property("card", "Inserted")
+                .Finish()
+            },
         };
     }
 }
