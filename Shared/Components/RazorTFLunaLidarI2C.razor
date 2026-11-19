@@ -2,7 +2,7 @@
 @attribute [Component("TF-Luna Time-of-Flight", "Input/Distance Sensors", "tfLunaLidarI2C", true, 1, 75, 75, paneHoverText: "TF-Luna")]
 @attribute [ComponentCode(CodeType.Include, 
     "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0")]
-@attribute [ComponentCode(CodeType.Setup,     "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0")]
+@attribute [ComponentCode(CodeType.Setup,     "  Wire.begin(); // initialize Wire library")]
 @attribute [ComponentCode(CodeType.LoopMain, "// Get data from TF Luna at I2C address 0x@\\n  // Change this address to your TF address in real life!\\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\\n  {\\n      Serial.print(\\\"Dist: \\\");\\n      Serial.println(tfDist@);          // print the data...\\n  }\\n  else tflI2C@.printStatus();           // else, print error.\\n\\n  delay(50);")]
 @attribute [ComponentCode(CodeType.Global, "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters")]
 
