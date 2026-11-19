@@ -587,75 +587,89 @@
 
     private async void AddToCanvasIfNecessary(MouseEventArgs e, bool trackHistory = false)
     {
-        if (targetCardComponentId == -1) return;
-        isVisible = "hidden";
-        if (allowDrop) //ie, cursor is over the workbench
+        try
         {
-            ++localIds;
-            var componentData = ComponentDeclarations.Components[targetCardComponentId];
-            var n = new node(); //label with localId (easy tracking)
-            n.localLabels.Add("user_" + componentData.nodeName);
-
-            GraphSynthInvoke.GetNodes().Add(n);
-            if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
-
-            GraphSynthInvoke.Add();
-            if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+            if (targetCardComponentId == -1) return;
+            isVisible = "hidden";
+            if (allowDrop) //ie, cursor is over the workbench
             {
-                moverOffsetLeft = 0;
-                moverOffsetTop = 0;
-                targetCardComponentId = -1;
-                GraphSynthInvoke.RemoveConnectedComponent(n);
-                return;
+                ++localIds;
+                var componentData = ComponentDeclarations.Components[targetCardComponentId];
+                Console.WriteLine($"Placing component: {componentData.name}, with id: {targetCardComponentId} and type: {componentData.compType}");
+                var n = new node(); //label with localId (easy tracking)
+                n.localLabels.Add("user_" + componentData.nodeName);
+                GraphSynthInvoke.GetNodes().Add(n);
+                if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
+
+                GraphSynthInvoke.Add();
+                if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+                {
+                    moverOffsetLeft = 0;
+                    moverOffsetTop = 0;
+                    targetCardComponentId = -1;
+                    GraphSynthInvoke.RemoveConnectedComponent(n);
+                    return;
+                }
+
+                //label all new nodes and connections with the localid of the component that added them.
+                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+
+
+                //create frontend instance
+                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
+                comp.localId = localIds;
+                Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
+
+
+                BuildCode.outputPins.Clear();
+                BuildCanvas!.ConnLines.Clear();
+                foreach (var c in Comps.Values)
+                {
+                    UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
+                }
+
+                if (showBreadboard) EnsureBreadboardConnections();
+                //reset the way that component pins are bound to the arduino.
+                //TODO: check for performance improvements here.
+
+                await comp.LinkController(JsRuntime);
+                _componentFrequencies.IncrementFrequency(targetCardComponentId);
+
+                //register the dht specifically to forced the arduino to pause while awaiting response from sensor
+                //TODO: improve and generalize.
+                if (Comps[localIds].GlobalId == 20)
+                {
+                    //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+                    AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+                }
+
+                AppInterop.UpdateCodeWrapper();
+                await JsRuntime.InvokeVoidAsync("onLoad");
+                await JsRuntime.InvokeVoidAsync("onAppend");
+                ToastService.AddToast("Code panel updated.", Variant.Info);
+                if (comp.Data.Warning != null)
+                {
+                    ToastService.AddToast(comp.Data.Warning, Variant.Warning);
+                }
+
+                CheckForDualSoftwareSerialWarning();
+                if (trackHistory)
+                {
+                    ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs { ClientX = e.ClientX, ClientY = e.ClientY }));
+                }
             }
 
-            //label all new nodes and connections with the localid of the component that added them.
-            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
-            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-            //create frontend instance
-            var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
-            comp.localId = localIds;
-            Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
-            BuildCode.outputPins.Clear();
-            BuildCanvas!.ConnLines.Clear();
-            foreach (var c in Comps.Values)
-            {
-                UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
-            }
-            if (showBreadboard) EnsureBreadboardConnections();
-            //reset the way that component pins are bound to the arduino.
-            //TODO: check for performance improvements here.
 
-            await comp.LinkController(JsRuntime);
-            _componentFrequencies.IncrementFrequency(targetCardComponentId);
-
-            //register the dht specifically to forced the arduino to pause while awaiting response from sensor
-            //TODO: improve and generalize.
-            if (Comps[localIds].GlobalId == 20)
-            {
-                //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
-            }
-
-            AppInterop.UpdateCodeWrapper();
-            await JsRuntime.InvokeVoidAsync("onLoad");
-            await JsRuntime.InvokeVoidAsync("onAppend");
-            ToastService.AddToast("Code panel updated.", Variant.Info);
-            if (comp.Data.Warning != null)
-            {
-                ToastService.AddToast(comp.Data.Warning, Variant.Warning);
-            }
-            CheckForDualSoftwareSerialWarning();
-            if (trackHistory)
-            {
-                ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
-            }
+            moverOffsetLeft = 0;
+            moverOffsetTop = 0;
+            targetCardComponentId = -1;
         }
-
-
-        moverOffsetLeft = 0;
-        moverOffsetTop = 0;
-        targetCardComponentId = -1;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            
+        }
     }
 
     // State for the Report Bug modal
@@ -936,12 +950,13 @@
         //buildCanvas!.connLines.Clear();
 
         var compPins = GetPins(comp.GsNode, comp.Data.nodeName);
-        if (compPins.Count == 0)
-        {
-            return;
-        }
-
         var connArcs = GraphSynthInvoke.GetArcs().Where(a => a.localLabels.Contains("connection")).ToList();
+
+
+        if (compPins.Count != connArcs.Count && !comp.IsArduino())
+        {
+            throw new Exception($"Connect rule and Razor file disagree on pin Count for component: {comp.Data.name}, Ensure all connections have the 'connection' label in the connect rule! Razor file reports {compPins.Count} pins, Connect rule reports {connArcs.Count}");
+        }
         //List<arc> connArcs = new();
 
         foreach (arc a in connArcs)
@@ -1017,7 +1032,6 @@
             
             int i1 = ha.Data.pins[aPinName];
             int i2 = hb.Data.pins[bPinName];
-
 
             comp.AddConnection(i1, hb, i2, a); //also sets up the drawn line
         }
