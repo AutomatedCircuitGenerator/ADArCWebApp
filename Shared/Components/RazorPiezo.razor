@@ -1,0 +1,101 @@
+﻿@inherits RazorComponent
+@attribute [BreadboardOffset(-14.5, 128, 77.5)]
+@attribute [BreadboardPinAttrubte(0, 4, "sig")]
+@attribute [BreadboardPinAttrubte(2, 4, "gnd")]
+
+@code {
+  public static ElementPin[] pinInfo 
+  { 
+    get 
+    { 
+      return new ElementPin[] 
+      { 
+        new ElementPin(name: "sig", x: 60.5, y: 109, signals: new PinSignalInfo[] { }, number: 1), 
+        new ElementPin(name: "gnd", x: 90.5, y: 109, signals: new PinSignalInfo[] { }, number: 2) 
+      }; 
+    } 
+  } 
+}
+
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg"
+     width="100" height="105" viewBox="0 0 100 105"
+     role="img" aria-labelledby="piezo_title piezo_description">
+  <title id="piezo_title">Two-pin piezo buzzer</title>
+  <defs>
+    <!-- Restrained surface shading; no filters, blur or glow -->
+    <linearGradient id="piezo_body" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#272b31"/>
+      <stop offset="0.20" stop-color="#3a3e46"/>
+      <stop offset="0.55" stop-color="#33373e"/>
+      <stop offset="0.85" stop-color="#2d3138"/>
+      <stop offset="1" stop-color="#24282e"/>
+    </linearGradient>
+    <linearGradient id="piezo_top" x1="0" y1="0" x2="0.8" y2="1">
+      <stop offset="0" stop-color="#51545b"/>
+      <stop offset="0.52" stop-color="#44484f"/>
+      <stop offset="1" stop-color="#353940"/>
+    </linearGradient>
+    <linearGradient id="piezo_rim" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#4b5058"/>
+      <stop offset="0.55" stop-color="#353940"/>
+      <stop offset="1" stop-color="#292d33"/>
+    </linearGradient>
+    <linearGradient id="piezo_metal" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#7a8288"/>
+      <stop offset="0.35" stop-color="#dadde0"/>
+      <stop offset="0.62" stop-color="#bcc2c7"/>
+      <stop offset="1" stop-color="#788087"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Metal leads appear behind the housing -->
+  <g id="piezo_leads" stroke-linejoin="round">
+    <path d="M32.8 63.5 H37.2 V82.8 Q37.2 85 35 85 Q32.8 85 32.8 82.8 Z"
+          fill="url(#piezo_metal)" stroke="#60676d" stroke-width="0.5"/>
+    <path d="M62.8 63.5 H67.2 V82.8 Q67.2 85 65 85 Q62.8 85 62.8 82.8 Z"
+          fill="url(#piezo_metal)" stroke="#60676d" stroke-width="0.5"/>
+    <path d="M34 67 V83 M64 67 V83" fill="none"
+          stroke="#f8fafb" stroke-opacity="0.4" stroke-width="0.5"/>
+  </g>
+
+  <!-- Solid black plastic housing -->
+  <g id="piezo_housing">
+    <path d="M12.8 30.1 C12.8 19.3 29.5 11.5 50 11.5
+             C70.5 11.5 87.2 19.3 87.2 30.1
+             V55.7 C87.2 67.1 70.5 73.9 50 73.9
+             C29.5 73.9 12.8 67.1 12.8 55.7 Z"
+          fill="url(#piezo_body)" stroke="#23262c" stroke-width="0.9"/>
+
+
+
+    <!-- Top ring and matte surface -->
+    <ellipse cx="50" cy="29.9" rx="37.1" ry="20.6"
+             fill="url(#piezo_top)" stroke="#353940" stroke-width="0.9"/>
+    =
+    
+  </g>
+
+  <!-- Molded sound port -->
+  <g id="piezo_sound_port">
+    
+    <ellipse cx="50" cy="29.1" rx="6.9" ry="3.8"
+             fill="#0b0e12"/>
+    
+
+  </g>
+
+  <!-- Subtle embossed polarity indication -->
+  <g id="piezo_positive_mark" transform="translate(30.5 31.0) rotate(-3)">
+    <ellipse rx="5.4" ry="3.8" fill="url(#piezo_top)"
+             stroke="#2c3036" stroke-width="0.65"/>
+    <path d="M-2.4 0 H2.4 M0 -2.35 V2.35" fill="none"
+          stroke="#25292f" stroke-width="1.05" stroke-linecap="round"/>
+  </g>
+
+  <!-- ADArC electrical connection anchors -->
+  <g id="piezo_pin_anchors" fill="none" stroke="none">
+    <circle id="pin-positive" data-pin="positive" cx="35" cy="85" r="0.01"/>
+    <circle id="pin-negative" data-pin="negative" cx="65" cy="85" r="0.01"/>
+  </g>
+</svg>

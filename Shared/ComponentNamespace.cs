@@ -427,23 +427,23 @@ namespace ADArCWebApp.Shared
                         { "delayTime", "" }
                     }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed", workbenchScaleFactor: 1.66).Finish()
             }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
-            {
-                21,
-                new ComponentDataBuilder("Laser Diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
-                        { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
-                        {
-                            "loopMain",
-                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating"
-                        },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
-            },
+            { 
+                21, 
+                new ComponentDataBuilder("Laser Diode", true, "Output/LED", 0.7, 75, 75, typeof(RazorKY008), 
+                    codeForGen: new() 
+                    { 
+                        { "include", "" }, 
+                        { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" }, 
+                        { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" }, 
+                        { 
+                            "loopMain", 
+                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating" 
+                        }, 
+                        { "functions", "" }, 
+                        { "delayLoop", "" }, 
+                        { "delayTime", "" } 
+                    }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008", workbenchScaleFactor: 1.69).Finish() 
+            }, 
             {
                 22,
                 new ComponentDataBuilder("16x2 Character LCD", true, "Output/Displays", 0.7, 310, 140,
@@ -1885,6 +1885,38 @@ namespace ADArCWebApp.Shared
                     gsNodeName: "thermistor"
                 ).Property("temperature", 70.0)
                 .Finish()
+            },
+            {
+                55,
+                new ComponentDataBuilder("Piezo Buzzer", true, "Output/Sound", 1, 18.5,
+                    19.154, typeof(RazorPiezo), paneHoverText: "Piezo",
+                    codeForGen: new()
+                    {
+                        { "include", "" },
+                        { "global", "const int buzzerPin@ = ~\"sig\"; // Signal pin for the buzzer" },
+                        { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
+                        {
+                            "loopMain",
+                            "  {\n" +
+                            "    int melody[] = {\n" +
+                            "      330, 330, 349, 392,\n" +
+                            "      392, 349, 330, 294,\n" +
+                            "      262, 262, 294, 330,\n" +
+                            "      330, 294, 294\n" +
+                            "    };\n" +
+                            "\n" +
+                            "    for (int i = 0; i < 15; i++) {\n" +
+                            "      tone(buzzerPin@, melody[i]);\n" +
+                            "      delay(250);\n" +
+                            "      noTone(buzzerPin@);\n" +
+                            "      delay(40);\n" +
+                            "    }\n" +
+                            "\n" +
+                            "    delay(1000);\n" +
+                            "  }\n"
+                        },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }, pins: ["sig", "gnd"], gsNodeName: "piezo", workbenchScaleFactor:1.01).Finish()
             }
         };
     }

@@ -50,6 +50,7 @@ import {IRDETECTOR} from "@controllers/irdetector";
 import {SSD1306} from "@controllers/ssd1306";
 import {PMS5003} from "@controllers/pms5003";
 import {Thermistor} from "@controllers/thermistor";
+import {Piezo} from "@controllers/piezo";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -106,3 +107,4 @@ import {Thermistor} from "@controllers/thermistor";
 (<any>window).IRDETECTOR = IRDETECTOR;
 (<any>window).PMS5003 = PMS5003;
 (<any>window).Thermistor = Thermistor;
+(<any>window).Piezo = Piezo;
