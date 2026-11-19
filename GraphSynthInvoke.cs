@@ -114,13 +114,58 @@ namespace ADArCWebApp
         {
             List<option> options = rulesets["ADD"].recognize(seed, true);
 
+            int i = 0;
             while (options.Count > 0)
             {
                 options[0].apply(seed, null);
                 options = rulesets["ADD"].recognize(seed, true);
+                
+                //Crash detection
+                i++;
+                if (i > 10)
+                {
+                    DebugAddRuleCrash(options);
+                }
             }
         }
 
+        void DebugAddRuleCrash(List<option> options)
+        {
+            DebugAddRuleClarity(options[0]);
+            Console.WriteLine("Failed to add component(s) to graphsynth!");
+
+            foreach (var option in options)
+            {
+                Console.WriteLine($"\tFailed to apply add rule: {option.rule.name}");
+                foreach (var node in option.nodes)
+                {
+                    Console.WriteLine($"\t\tAdd rule has node: {node.name}");
+                    foreach (var label in node.localLabels)
+                        Console.WriteLine($"\t\t\twith label: {label}");
+                            
+                }
+            }
+            foreach (var node in seed.nodes)
+            {
+                Console.WriteLine($"\tGraph rule has node: {node.name}");
+                foreach (var label in node.localLabels)
+                    Console.WriteLine($"\t\twith label: {label}");
+            }
+                    
+            throw new Exception("Error: Add rules failed to apply");
+        }
+        
+        void DebugAddRuleClarity(option rule)
+        {
+            var usernode = rule.nodes.Find(x => x.localLabels.Exists(y => y.Contains("user_")));
+            if (usernode == null) throw new Exception("No user_ node found in ADD RULE");
+            if (!rule.nodes.Exists(x =>
+                    x.localLabels.Exists(z => z.Contains(usernode.localLabels.Find(y => y.Contains("user_"))))))
+            {
+                if (usernode == null) throw new Exception("user_ and normal node do not match in Add Rule");
+            }
+        }
+        
         /// <summary>
         /// Sets up connections between the node of a newly added component, and the component it is connecting to
         /// </summary>

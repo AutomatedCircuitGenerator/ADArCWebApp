@@ -22,6 +22,7 @@ builder.RootComponents.Add<HeadOutlet>("head::after");
 // });
 
 
+ComponentDeclarations.GenComponentList();
 var provider = new FileExtensionContentTypeProvider();
 provider.Mappings.Add(".grxml", "application/grxml");
 provider.Mappings.Add(".rsxml", "application/rsxml");

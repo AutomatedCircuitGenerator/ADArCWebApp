@@ -1,7 +1,11 @@
 @using System.Security.AccessControl
 @using System.Text
 @inject BoardService BoardService
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+    @if (ShowBreadboard)
+    {
+        <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
+    }
     @if (BoardService.Board != Board.None)
     {
         <div class="zoom-control">
@@ -12,9 +16,28 @@
             <button class="reset-btn" @onclick="ResetZoom">↻</button>
         </div>
     }
+    @{
+        double CurrentOffset = 0;
+    }
     @foreach (var c in comps)
     {
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        if (c.Value.Data.LivesOnBreadBoard)
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+                              CanvasClick="CanvasClick" CancelDrag="CancelDrag"
+                              forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
+                              handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
+                              BreadBoard_X="@(ShowBreadboard ? BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX * zoomFactor : c.Value.zoomedX)"
+                              BreadBoard_Y="@(ShowBreadboard ? BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor : c.Value.zoomedY)" 
+                              individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
+                              DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+
+            CurrentOffset += c.Value.Data.Width;
+        }
+        else
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
     }
     
     
@@ -67,7 +90,11 @@
 </div>
 
 @code {
+    
+    [Parameter]
+    public bool ShowBreadboard { get; set; }
 
+    public int BreadboardRot;
     public MainCanvas()
     {
         Pages.Index.BuildCanvas = this;
@@ -96,23 +123,19 @@
 
     private bool _dragging = false;
     private bool _hasTarget = false; //refers to whether or not a drag process has a target, meaning that a component is dragged
+    private bool _breadboardDrag = false;
     private KeyValuePair<int, ComponentInstance> _target;
 
     private Transform transform = new();
 
     /// <summary>
     /// Transform refers to the combination of fullscreen drag and zoom.
-    /// Zoom is currently disabled.
     /// This function resets both.
     /// </summary>
     public void ResetTransform()
     {
         transform = new Transform();
-
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
 
     private void CancelDrag()
@@ -353,40 +376,18 @@
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
         // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
-        Dictionary<(int, int), bool> routes = new();
+        Dictionary<(int, int), (bool, bool)> routes = new();
         var lines = new List<GridLine>();
 
-        foreach (var connection in connections)
+        if (ShowBreadboard)
         {
-            var toPins = connection.To.Data.pinInfo;
-            var fromPins = connection.From.Data.pinInfo;
-            var toPin = toPins[connection.ToId];
-            var fromPin = fromPins[connection.FromId];
-            var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
-            var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
-            var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +
-                          $"{connection.To.Data.name} {toPin.name}";
-            lines.Add(new GridLine(connection.Color, 
-                start, 
-                end, 
-                connection.From.localId, 
-                connection.To.localId, 
-                tooltip,
-                []));
-            var startId = connection.From.localId;
-            var startX = (int)Math.Floor(start.x);
-
-            // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
-            if (!routes.ContainsKey((startId, startX)))
-            {
-                routes[(startId, startX)] = false;
-            }
-            else
-            {
-                routes[(startId, startX)] = true;
-            }
+            GetAllGridLines_BreadboardPresent(lines, connections, routes);
         }
-
+        else
+        {
+            GetAllGridLines_NoBreadboardPresent(lines, connections, routes);
+        }
+        
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
@@ -396,13 +397,197 @@
         return lines;
     }
 
+    private void GetAllGridLines_NoBreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    {
+        foreach (var connection in connections)
+        {
+            var toPin = connection.To.Data.pinInfo[connection.ToId];
+            var fromPin = connection.From.Data.pinInfo[connection.FromId];
+            var startRot = connection.From.rotation;
+            double scale = connection.From.Data.workbenchScaleFactor;
+            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y) * scale, connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y) * scale));
+            var endRot = connection.To.rotation;
+            var end = ZoomCoord((connection.To.X + RotateX(endRot, toPin.x, toPin.y), connection.To.Y + RotateY(endRot, toPin.x, toPin.y)));
+            var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +
+                          $"{connection.To.Data.name} {toPin.name}";
+            lines.Add(new GridLine(connection.Color, 
+                start, 
+                end, 
+                connection.From.localId, 
+                connection.To.localId, 
+                tooltip,
+                []));
+
+            // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
+            RouteWire(routes, start.x, connection.From.localId);
+        }
+    }
+
+    private void GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    {
+        // Holes already assigned to component wires
+        var usedHoles = comps.Values
+            .SelectMany(c => c.BreadboardConnections)
+            .Select(c => c.HoleId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Get all positive power rail holes
+        var positiveHoles = Enumerable.Range(1, 25)
+            .Select(i => $"LPLUS_{i}")
+        .ToList();
+
+        // Get all negative power rail holes
+        var negativeHoles = Enumerable.Range(1, 25)
+        .Select(i => $"LMINUS_{i}")
+        .ToList();        
+        
+        // All possible breadboard holes
+        var availableHoles = (
+                from row in Enumerable.Range(1, 30)
+                from column in "abcdefghij"
+                select $"{column}{row}"
+            )
+            .Concat(positiveHoles)
+            .Concat(negativeHoles)
+            .ToList();
+
+        // Prevent duplicate Arduino wires on the same net
+        var drawnArduinoWires = new HashSet<(int, int, string)>();
+        
+        foreach (var comp in comps.Values)
+        {
+            foreach (var connection in comp.BreadboardConnections)
+            {
+                var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId)); // Searching for original connection for this pin
+                var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
+
+                if(!comp.Data.LivesOnBreadBoard){
+                    //Add Wire from component to Breadboard
+                    var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
+                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId); // Find the breadboard hole center
+                    var compRot = comp.rotation;
+                    var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
+                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
+                    lines.Add(new GridLine(
+                        wireColor,
+                        start,
+                        end,
+                        comp.localId,
+                        -1,
+                        $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
+                        []
+                    ));
+                    RouteWire(routes, start.x, comp.localId);
+                }
+
+                if (originalWire == null) continue; //no connection to arduino i guess??? This causes a floating line
+                
+                var candidates = comp.Data.pinInfo[connection.FromPinId].name.Trim().ToUpperInvariant() switch
+                {
+                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
+                    _ => null
+                };
+                string? BreadboardPowerPin = null;
+                
+                if(comp.Data.LivesOnBreadBoard && candidates != null){
+                    //Wire from Lives on breadboard component to powerlines
+                    var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
+                    
+                    var BreadboardComponentPin = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId), null);
+                    if(BreadboardComponentPin == null)continue;
+                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(BreadboardComponentPin); // Find the breadboard hole center
+
+                    BreadboardPowerPin = candidates.FirstOrDefault
+                        (h => !usedHoles.Contains(h) && h != candidates[0], null);
+                    if(BreadboardPowerPin == null)continue;
+                    var (PholeX, PholeY) = BreadboardHoleCoordinates.GetCenter(BreadboardPowerPin); // Find the breadboard hole center
+                    
+                    Console.WriteLine("Orininal Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
+                    var start = ZoomCoord((BreadboardX + PholeX, BreadboardY + PholeY)); // Wire ending point at breadboard hole
+                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
+                    lines.Add(new GridLine(
+                        wireColor,
+                        start,
+                        end,
+                        comp.localId,
+                        -1,
+                        $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
+                        []
+                    ));
+                    usedHoles.Add(BreadboardComponentPin);
+                    usedHoles.Add(BreadboardPowerPin);
+                    RouteWire(routes, start.x, comp.localId);
+                    
+                }
+                
+                
+                {
+                    //Wire from arduino to breadboard!
+                    var holeId = BreadboardPowerPin == null ? connection.HoleId : BreadboardPowerPin;
+                    bool compIsFrom = originalWire.From.localId == comp.localId; // Check if first pin of the connection is the component
+                    var arduino = compIsFrom ? originalWire.To : originalWire.From; // Store Arduino
+                    var arduinoPinId = compIsFrom ? originalWire.ToId : originalWire.FromId; // Store pin ID of Arduino of the current connection
+                    var arduinoPin = arduino.Data.pinInfo[arduinoPinId]; // Store the Arduino pin of the current connection
+                    var arduinoStart = ZoomCoord((arduino.X + RotateX(arduino.rotation, arduinoPin.x, arduinoPin.y), arduino.Y + RotateY(arduino.rotation, arduinoPin.x, arduinoPin.y))); // Calculate Arduino pin's position on the workbench
+                    string netId = BreadboardNet.GetNetId(holeId); // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
+                    var wireKey = (arduino.localId, arduinoPinId, netId); // Store the Arduino pin and its destination net
+                    if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
+                    string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)); // Store the first free hole connected to the component hole
+                    if (arduinoHoleId == null) continue; // If a free hole is found
+                    var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId); // Find the relative position of available hole to breadboard
+                    var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY)); // Calculate the available hole position on workbench
+                    lines.Add(new GridLine(
+                        wireColor,
+                        arduinoStart,
+                        arduinoEnd,
+                        arduino.localId,
+                        -1,
+                        $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
+                        []
+                    ));
+                    RouteWire(routes, arduinoStart.x, arduino.localId, horizonalEnd: true);
+                    
+                    // Reserve the new hole and record the wire so it won't redraw later
+                    usedHoles.Add(arduinoHoleId);
+                    drawnArduinoWires.Add(wireKey);
+                }
+
+            }
+        }
+    }
+    
+    //Make wires route horizontally if they share an X position with another wire
+    private void RouteWire(Dictionary<(int, int), (bool, bool)> routes, double x, int id, bool horizonalEnd = false)
+    {
+        var startX = (int)Math.Floor(x);
+        if (routes.ContainsKey((id, startX)))
+        {
+            routes[(id, startX)] = (true, horizonalEnd);
+        }
+        else
+        {
+            routes[(id, startX)] = (false, horizonalEnd);
+        }
+    }
+    
+    public double RotateX(int rot, double X, double Y)
+    {
+        return (3 > rot && rot > 0 ? -1 : 1) * (rot % 2 == 0 ? X : Y);
+    }
+
+    public double RotateY(int rot, double X, double Y)
+    {
+        return (rot > 1 ? -1 : 1) * (rot % 2 == 0 ? Y : X);
+    }
+
     /// <summary>
     /// Populates the segments for a given gridline
     /// </summary>
     /// <param name="line">the line to populate segments of</param>
     /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
     /// <param name="moveHorizontallyFirst">whether to move horizontally or vertically first</param>
-    private void GetGridSegments(GridLine line, double offset, bool moveHorizontallyFirst)
+    private void GetGridSegments(GridLine line, double offset, (bool, bool) moveHorizontallyAtEndPoints)
     {
         var start = line.Start;
         var end = line.End;
@@ -410,17 +595,31 @@
         var currentX = start.x;
         var currentY = start.y;
 
-        var midY = (start.y + end.y) / 2 + offset;
-
-        if (!moveHorizontallyFirst)
+        if (moveHorizontallyAtEndPoints.Item1)
         {
-            line.Segments.Add(new Segment(currentX, currentY, currentX, midY));
-            currentY = midY;
-        }
+            var nextX = moveHorizontallyAtEndPoints.Item2 ? (start.x + end.x) / 2 + offset : end.x;
+            line.Segments.Add(new Segment(currentX, currentY, nextX, currentY));
+            currentX = nextX;
 
-        line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
-        currentX = end.x;
-        line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+            if (moveHorizontallyAtEndPoints.Item2)
+            {
+                line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+                currentY = end.y;
+            }
+        }
+        else
+        {
+            var nextY = moveHorizontallyAtEndPoints.Item2 ? end.y : (start.y + end.y) / 2 + offset;
+            line.Segments.Add(new Segment(currentX, currentY, currentX, nextY));
+            currentY = nextY;
+
+            if (!moveHorizontallyAtEndPoints.Item2)
+            {
+                line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
+                currentX = end.x;
+            }
+        }
+        line.Segments.Add(new Segment(currentX, currentY, end.x, end.y));
     }
 
     /// <summary>
@@ -465,10 +664,7 @@
         var scale = zoomFactor / oldZoom;
         transform.translate.x = centerX - scale * (centerX - transform.translate.x);
         transform.translate.y = centerY - scale * (centerY - transform.translate.y);
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
     
     /*
@@ -500,12 +696,21 @@
         SetZoom(1, 1920 / 2, 1080 / 2);
     }
 
+    public void AdjustZoom()
+    {
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);
+        }
+        AdjustBBToZoom();
+    }
+    
     /// <summary>
     /// Attempts to scale a component in place to account for zoom.
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
+    private void AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
@@ -513,9 +718,20 @@
 
         comp.zoomedX = z.x;
         comp.zoomedY = z.y;
-
-        return comp;
     }
+
+    public double BreadboardX = 0;
+    public double BreadboardY = 0;
+    public double BreadboardZoomX;
+    public double BreadboardZoomY; 
+    private void AdjustBBToZoom()
+    {
+        
+        var z = ZoomCoord((BreadboardX, BreadboardY));
+        BreadboardZoomX = z.x;
+        BreadboardZoomY = z.y;
+    }
+    
 
     /// <summary>
     /// Atteampts to calculate the total effect of zoom on a coordinate.
@@ -553,6 +769,15 @@
         this._target = target;
     }
 
+    
+    //Handle the start of dragging the breadboard
+    private void DragBreadboardStart(MouseEventArgs e)
+    {
+        if (e.Button != 0) return;
+        _dragging = true; //start drag, signal that there is a selected component, and remember it
+        _breadboardDrag = true;
+    }
+    
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
@@ -570,21 +795,22 @@
                 AdjustCompToZoom(_target.Value);
                 break;
             //dragging the canvas, all components
+            case true when _breadboardDrag:
+                BreadboardX += (e.MovementX / zoomFactor);
+                BreadboardY += (e.MovementY / zoomFactor);
+                AdjustBBToZoom();
+                break;
             case true:
             {
                 transform.translate.x += e.MovementX;
                 transform.translate.y += e.MovementY;
-                foreach (var t in comps)
-                {
-                    //t.Value.x += (e.MovementX / zoomFactor);
-                    //t.Value.y += (e.MovementY / zoomFactor);
-                    AdjustCompToZoom(t.Value);
-                }
+                AdjustZoom();
 
                 break;
             }
         }
     }
+
 
     bool dragEndFlag = false; //disable deselection at end of drag
 
@@ -594,6 +820,7 @@
         _dragging = false;
         _hasTarget = false;
         dragEndFlag = true;
+        _breadboardDrag = false;
     }
 
     //canvas drag start, signal that there is a drag.
@@ -640,6 +867,12 @@
         }
     }
 
+    public void BreadboardSelection()
+    {
+        targetFound = true;
+        Pages.Index.App.SelectedComponent = -3;
+    }
+    
     //click on the canvas handler.
     private void CanvasClick()
     {
@@ -654,10 +887,7 @@
     public void TriggerRefresh()
     {
         StateHasChanged();
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp); // Apply transform/zoom to each component
-        }
+        AdjustZoom();
 
         ConnLines.Clear(); // Remove all wires
         foreach (var comp in comps.Values)

@@ -449,3 +449,55 @@ div, span {
 .yes-button:hover {
     background-color: #45a049; /* Darker green */
 }
+
+.breadboard-switch {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    cursor: pointer;
+    padding: 0 10px;
+    color: inherit;
+}
+
+.breadboard-switch input {
+    position: absolute;
+    opacity: 0;
+    width: 1px;
+    height: 1px;
+}
+
+.breadboard-switch .slider {
+    position: relative;
+    display: inline-block;
+    width: 50px;
+    height: 28px;
+    border-radius: 28px;
+    background: #aaa;
+    transition: background-color 0.25s ease;
+    flex-shrink: 0;
+}
+
+.breadboard-switch .slider::before {
+    content: "";
+    position: absolute;
+    width: 22px;
+    height: 22px;
+    left: 3px;
+    top: 3px;
+    background: white;
+    border-radius: 50%;
+    transition: transform 0.25s ease;
+}
+
+.breadboard-switch input:checked + .slider {
+    background: #b0e4fb;
+}
+
+.breadboard-switch input:checked + .slider::before {
+    transform: translateX(22px);
+}
+
+.breadboard-switch input:focus-visible + .slider {
+    outline: 2px solid #60a5fa;
+    outline-offset: 3px;
+}
