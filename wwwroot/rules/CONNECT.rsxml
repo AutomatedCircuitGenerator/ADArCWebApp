@@ -52,6 +52,7 @@
     <string>ssd1306_arduino.grxml</string>
     <string>pms5003_arduino.grxml</string>
     <string>tb6612fng_arduino.grxml</string>
+    <string>sdCard_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>
