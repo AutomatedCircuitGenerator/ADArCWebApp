@@ -12,6 +12,10 @@ svg {
     pointer-events: none;
 }
 
+.wire {
+    pointer-events: auto;
+}
+
 line {
     z-index: 50;
 }
@@ -22,9 +26,7 @@ line {
 }
 
 .segment:hover {
-    filter: drop-shadow(0 0 1px var(--glow)) 
-    drop-shadow(0 0 2px var(--glow))
-    drop-shadow(0 0 4px var(--glow));
+
 }
 
 .segment.highlighted, .node.highlighted {
@@ -35,10 +37,11 @@ line {
 
 .zoom-control{
     position:fixed;
-    top:55px;
+    top:70px;
     left:50%;
     transform:translateX(-50%);
     display:flex;
+    gap: 8px;
     align-items:center;
     background:white;
     border:1px solid #d0d0d0;
@@ -47,8 +50,14 @@ line {
     z-index:100;
 }
 
+.zoom-sign{
+    font-size:16px;
+    width: 30px;
+    text-align: center;
+}
+
 .zoom-btn{
-    width:36px;
+    width:30px;
     height:32px;
     border:none;
     background:transparent;
@@ -62,17 +71,57 @@ line {
 
 .zoom-perc{
     font-size:12px;
+    width: 30px;
+    text-align: center;
 }
 
 .reset-btn{
-    width:44px;
+    width:30px;
     height:32px;
     border:none;
     background:transparent;
     cursor:pointer;
-    font-size:12px;
+    font-size:17px;
 }
 
 .reset-btn:hover{
     background:#eeeeee;
+}
+
+.hover-outline{
+    opacity: 0;
+    fill: none;
+    stroke: #8c8c8c;
+    stroke-linejoin: round;
+    stroke-linecap: butt;
+    pointer-events: none;
+}
+
+.wire:hover .hover-outline{
+    opacity: 1;
+    stroke-dasharray: var(--dash-size) var(--dash-size);
+}
+
+.wire:hover .hover-outline-a {
+    animation: marching-backward 1.2s linear infinite;
+}
+
+.wire:hover .hover-outline-b {
+    animation: marching-forward 1.2s linear infinite;
+}
+
+.wire:hover .node-outline {
+    animation: marching-forward 1.2s linear infinite;
+}
+
+@keyframes marching-forward {
+    to {
+        stroke-dashoffset: calc(-1 * var(--dash-offset));
+    }
+}
+
+@keyframes marching-backward {
+    to {
+        stroke-dashoffset: var(--dash-offset);
+    }
 }
