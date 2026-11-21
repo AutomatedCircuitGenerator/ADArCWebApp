@@ -5,12 +5,12 @@
 @attribute [BreadboardPin(0, 8, "sig")]
 @attribute [BreadboardPin(1, 4, "gnd")]
 
-@attribute [ComponentCode(CodeType.Setup, "\tpinMode(~\"sig\", OUTPUT); // Set the LED anode pin as an output")]
-@attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"sig\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"sig\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output")]
+@attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]
 
 
-@attribute [ComponentPin("sig","sig", 86.9, 250, number: 1)]
-@attribute [ComponentPin("gnd","gnd", 71.3, 135, number: 2)]
+@attribute [ComponentPin("anode","anode", 86.9, 250, number: 1)]
+@attribute [ComponentPin("cathode","cathode", 71.3, 135, number: 2)]
 
 @attribute [ComponentProperty("color", "red", typeof(string))]
 @code {
