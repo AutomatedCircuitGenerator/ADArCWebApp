@@ -557,11 +557,13 @@
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
-        //These "Random numbers" are calculated from experiments with zoomFactor
-        Console.WriteLine($"Mouse pos: {e.ClientX},{e.ClientY} Zoom: {zoomOrigin.x},{ zoomOrigin.y} Target: {_target.Value.X},{_target.Value.Y} {transform.scale} {transform.translate.x},{transform.translate.y} ");
-        Index.DebugXOffset = (e.ClientX + zoomFactor * ( - zoomOrigin.x + 950 / 2 - _target.Value.X ) - transform.translate.x) / zoomFactor;
-        Index.DebugYOffset = (e.ClientY + zoomFactor * ( - zoomOrigin.y +1080 / 2 - _target.Value.Y) - 50 - transform.translate.y) / zoomFactor; //50 is height of titlebar, dunno where its stored
-        
+
+        if (Index.App.SelectedComponent != null && Index.App.DebugMode)
+        {
+            Index.DebugXOffset = (e.ClientX + zoomFactor * (-zoomOrigin.x + 950 / 2 - _target.Value.X) - transform.translate.x) / zoomFactor;
+            Index.DebugYOffset = (e.ClientY + zoomFactor * (-zoomOrigin.y + 1080 / 2 - _target.Value.Y) - 50 - transform.translate.y) / zoomFactor; //50 is height of titlebar, dunno where its stored
+        }
+
         foreach (var component in _componentReferences.Values)
         {
             component.HandleCanvasMouseMove(e);
