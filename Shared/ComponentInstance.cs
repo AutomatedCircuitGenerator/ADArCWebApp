@@ -20,6 +20,8 @@ namespace ADArCWebApp.Shared
         public readonly int GlobalId;
         public double X;
         public double Y;
+        public double Width;
+        public int rotation;
         
         public Variant? Highlight {get; set;}
 
@@ -29,6 +31,9 @@ namespace ADArCWebApp.Shared
         [JsonIgnore]
         public readonly Dictionary<int, List<InstanceConnection>> ConnMap = new(); //this.pinId -> connection
 
+        [JsonIgnore]
+        public readonly List<BreadboardConnection> BreadboardConnections = new();
+        
         [JsonIgnore] public node GsNode;
         public int midSignal;
         public int counter;
@@ -206,4 +211,10 @@ namespace ADArCWebApp.Shared
             return From.Equals(other.From) && FromId == other.FromId && ToId == other.ToId && To.Equals(other.To);
         }
     }
+    
+    public record BreadboardConnection(
+        int FromPinId,
+        string HoleId,
+        string Color
+    );
 }
