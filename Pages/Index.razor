@@ -54,6 +54,11 @@
             <span class="toolbar-text">Tutorial</span>
         </button>
         <div class="center-toolbar">
+            <label class="breadboard-switch" title="Show or hide breadboard">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="3" fill="#F6E8CB" stroke="#000000" stroke-width="1"/><rect x="4" y="5" width="2" height="14" rx="1" fill="#F05A66"/><rect x="18" y="5" width="2" height="14" rx="1" fill="#438EE8"/><rect x="11.3" y="5" width="1.4" height="14" rx=".7" fill="#CEBFA7"/><g fill="#53535D"><circle cx="8.5" cy="7" r=".85"/><circle cx="15.5" cy="7" r=".85"/><circle cx="8.5" cy="10.3" r=".85"/><circle cx="15.5" cy="10.3" r=".85"/><circle cx="8.5" cy="13.6" r=".85"/><circle cx="15.5" cy="13.6" r=".85"/><circle cx="8.5" cy="17" r=".85"/><circle cx="15.5" cy="17" r=".85"/></g></svg></span>
+                <input type="checkbox" @bind="showBreadboard" @bind:after="EnsureBreadboardConnections"/>
+                <span class="slider"></span>
+            </label>
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
                 <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
@@ -129,7 +134,11 @@
     </div>
     <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true);}">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
-            <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
+            <MainCanvas comps="Comps"
+                        ShowBreadboard="showBreadboard"
+                        handleMouseEnter="() => allowDrop = true"
+                        handleMouseLeave="() => allowDrop = false">
+            </MainCanvas>
         </div>
         <div class="sidebar" style="left: @(leftPaneAlign)px" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
             <div class="expand-button expand-button-left @(shouldShowBoardSelect && windowWidth <= 1350 ? "disabled" : "")" @onclick="@(ToggleLeftSidebar)" style="left:100%;">
@@ -201,6 +210,112 @@
 @code{
     private Modal modal;
     private bool _exampleModalOpen;
+    
+    private bool showBreadboard = false;
+   
+    private void EnsureBreadboardConnections()
+    {
+        if (!showBreadboard) return;
+
+        // Get all holes that are already used
+        var usedHoles = Comps.Values
+            .SelectMany(c => c.BreadboardConnections)
+            .Select(c => c.HoleId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        var breadboardDistanceBetweenHoles = 16;
+        int holesUsedByOnBoardComponents = (int)System.Math.Ceiling(Comps.Values.Where(c => c.Data.LivesOnBreadBoard).Select(x => x.Data.Width).Sum() / breadboardDistanceBetweenHoles);
+        
+        Console.WriteLine(holesUsedByOnBoardComponents);
+        // Only use B and F since other holes on same row are connected
+        var signalHoles = (
+            from column in "bf"
+            from row in Enumerable.Range(holesUsedByOnBoardComponents + 1, 30)
+            select $"{column}{row}"
+        ).ToList();
+
+        var LivesOnBreadboardSignalHoles = new List<string>();//represents signal holes each breadboard hardwired component has access to, generated later
+        
+        // Get all positive power rail holes
+        var positiveHoles = Enumerable.Range(2, 25)
+            .Select(i => $"LPLUS_{i}")
+            .ToList();
+
+        // Get all negative power rail holes
+        var negativeHoles = Enumerable.Range(2, 25)
+            .Select(i => $"LMINUS_{i}")
+            .ToList();
+        
+        double LivesOnBreadBoardOffset = 0;
+        foreach (var comp in Comps.Values)
+        {
+            if (comp.IsArduino() || comp.localId == 0) continue; // Skip Arduino
+            
+            //DOESNT MATTER IF COMPONENT ISNT HARDWIRED ONTO THE BREADBOARD, this is which pins the glyth should have access to, depending on its horizontal index (we incement the width at the end lol)
+            int LBBoffset = (int)Math.Ceiling(LivesOnBreadBoardOffset / breadboardDistanceBetweenHoles);
+            int LBBwidth = (int)Math.Ceiling(comp.Data.Width / breadboardDistanceBetweenHoles);
+            LivesOnBreadboardSignalHoles = (
+                from row in Enumerable.Range(LBBoffset + 1, LBBoffset + LBBwidth + 1)//MUST BE ROW THEN COLLUM!!!!
+                from column in "abcdefghij"
+                select $"{column}{row}"
+            ).ToList();
+            
+
+            foreach (int pinId in comp.ConnMap.Keys.ToList())
+            {
+
+                
+                
+                if (pinId < 0 || pinId >= comp.Data.pinInfo.Length) continue;
+                // Get the pin name
+                string pinName = comp.Data.pinInfo[pinId].name;
+
+                string name = pinName.Trim().ToUpperInvariant();
+
+                // VCC go to + rail, GND go to - rail, other pins go to A or F
+                var candidates = name switch
+                {
+                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
+                    _ => comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles : signalHoles
+                };
+
+                // Check if this pin already have a breadboard connection
+                var existing = comp.BreadboardConnections
+                    .FirstOrDefault(c => c.FromPinId == pinId);
+                
+                // Check if connection is correct
+                if (existing != null)
+                {
+                    // If it already connect to correct hole type, skip it
+                    if (candidates.Contains(
+                        existing.HoleId,
+                        StringComparer.OrdinalIgnoreCase))
+                        continue;
+
+                    // Remove old connection if it connect to wrong hole type
+                    comp.BreadboardConnections.Remove(existing);
+                    usedHoles.Remove(existing.HoleId);
+                }
+
+                int LLBindexInCanidatesList = 0;
+                if(comp.Data.LivesOnBreadBoard) LLBindexInCanidatesList = comp.Data.BreadboardPinData[pinId].Item1 * 10 + comp.Data.BreadboardPinData[pinId].Item2;// Item2 = which allocated row we use, Item 3 = the pin in that row, from the bottom!
+                string? freeHole = comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles[LLBindexInCanidatesList] : candidates.FirstOrDefault(h => !usedHoles.Contains(h));  // Find a hole that is not used yet
+                
+                // Skip if no hole left
+                if (freeHole == null)
+                {
+                    Console.WriteLine(
+                        $"No available breadboard hole for {pinName}");
+                    continue;
+                }
+                comp.BreadboardConnections.Add(new BreadboardConnection(pinId, freeHole, "red"));   // Add wire from component pin to the hole
+                usedHoles.Add(freeHole);    // Mark this hole as used so other pins won't use it
+            }
+            if(comp.Data.LivesOnBreadBoard)LivesOnBreadBoardOffset += comp.Data.Width;
+        }
+    }
+
 
     private ElementReference _mainCanvasContainer;
 
@@ -472,74 +587,89 @@
 
     private async void AddToCanvasIfNecessary(MouseEventArgs e, bool trackHistory = false)
     {
-        if (targetCardComponentId == -1) return;
-        isVisible = "hidden";
-        if (allowDrop) //ie, cursor is over the workbench
+        try
         {
-            ++localIds;
-            var componentData = ComponentDeclarations.Components[targetCardComponentId];
-            var n = new node(); //label with localId (easy tracking)
-            n.localLabels.Add("user_" + componentData.nodeName);
-
-            GraphSynthInvoke.GetNodes().Add(n);
-            if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
-
-            GraphSynthInvoke.Add();
-            if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+            if (targetCardComponentId == -1) return;
+            isVisible = "hidden";
+            if (allowDrop) //ie, cursor is over the workbench
             {
-                moverOffsetLeft = 0;
-                moverOffsetTop = 0;
-                targetCardComponentId = -1;
-                GraphSynthInvoke.RemoveConnectedComponent(n);
-                return;
+                ++localIds;
+                var componentData = ComponentDeclarations.Components[targetCardComponentId];
+                Console.WriteLine($"Placing component: {componentData.name}, with id: {targetCardComponentId} and type: {componentData.compType}");
+                var n = new node(); //label with localId (easy tracking)
+                n.localLabels.Add("user_" + componentData.nodeName);
+                GraphSynthInvoke.GetNodes().Add(n);
+                if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
+
+                GraphSynthInvoke.Add();
+                if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+                {
+                    moverOffsetLeft = 0;
+                    moverOffsetTop = 0;
+                    targetCardComponentId = -1;
+                    GraphSynthInvoke.RemoveConnectedComponent(n);
+                    return;
+                }
+
+                //label all new nodes and connections with the localid of the component that added them.
+                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+
+
+                //create frontend instance
+                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
+                comp.localId = localIds;
+                Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
+
+
+                BuildCode.outputPins.Clear();
+                BuildCanvas!.ConnLines.Clear();
+                foreach (var c in Comps.Values)
+                {
+                    UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
+                }
+
+                if (showBreadboard) EnsureBreadboardConnections();
+                //reset the way that component pins are bound to the arduino.
+                //TODO: check for performance improvements here.
+
+                await comp.LinkController(JsRuntime);
+                _componentFrequencies.IncrementFrequency(targetCardComponentId);
+
+                //register the dht specifically to forced the arduino to pause while awaiting response from sensor
+                //TODO: improve and generalize.
+                if (Comps[localIds].GlobalId == 20)
+                {
+                    //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+                    AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+                }
+
+                AppInterop.UpdateCodeWrapper();
+                await JsRuntime.InvokeVoidAsync("onLoad");
+                await JsRuntime.InvokeVoidAsync("onAppend");
+                ToastService.AddToast("Code panel updated.", Variant.Info);
+                if (comp.Data.Warning != null)
+                {
+                    ToastService.AddToast(comp.Data.Warning, Variant.Warning);
+                }
+
+                CheckForDualSoftwareSerialWarning();
+                if (trackHistory)
+                {
+                    ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs { ClientX = e.ClientX, ClientY = e.ClientY }));
+                }
             }
 
-            //label all new nodes and connections with the localid of the component that added them.
-            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
-            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-            //create frontend instance
-            var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
-            comp.localId = localIds;
-            Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
-            BuildCode.outputPins.Clear();
-            BuildCanvas!.ConnLines.Clear();
-            //reset the way that component pins are bound to the arduino.
-            //TODO: check for performance improvements here.
-            foreach (var c in Comps.Values)
-            {
-                UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
-            }
 
-            await comp.LinkController(JsRuntime);
-            _componentFrequencies.IncrementFrequency(targetCardComponentId);
-
-            //register the dht specifically to forced the arduino to pause while awaiting response from sensor
-            //TODO: improve and generalize.
-            if (Comps[localIds].GlobalId == 20)
-            {
-                //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
-            }
-
-            AppInterop.UpdateCodeWrapper();
-            await JsRuntime.InvokeVoidAsync("onLoad");
-            await JsRuntime.InvokeVoidAsync("onAppend");
-            ToastService.AddToast("Code panel updated.", Variant.Info);
-            if (comp.Data.Warning != null)
-            {
-                ToastService.AddToast(comp.Data.Warning, Variant.Warning);
-            }
-            CheckForDualSoftwareSerialWarning();
-            if (trackHistory)
-            {
-                ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
-            }
+            moverOffsetLeft = 0;
+            moverOffsetTop = 0;
+            targetCardComponentId = -1;
         }
-
-
-        moverOffsetLeft = 0;
-        moverOffsetTop = 0;
-        targetCardComponentId = -1;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            
+        }
     }
 
     // State for the Report Bug modal
@@ -820,14 +950,9 @@
         //buildCanvas!.connLines.Clear();
 
         var compPins = GetPins(comp.GsNode, comp.Data.nodeName);
-        if (compPins.Count == 0)
-        {
-            return;
-        }
-
         var connArcs = GraphSynthInvoke.GetArcs().Where(a => a.localLabels.Contains("connection")).ToList();
-        //List<arc> connArcs = new();
 
+        
         foreach (arc a in connArcs)
         {
             ComponentInstance ha = Comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
@@ -850,6 +975,7 @@
             }
 
             var aPinName = "**NF**";
+            
 
             if ((ha.IsArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.IsArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
             {
@@ -857,7 +983,6 @@
             }
 
             string bPinName = "";
-
 
             if (aPinName == "**NF**")
             {
@@ -873,7 +998,6 @@
             if ((ha.IsArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
                 BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
-                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
             }
 
             if (aPinName == "**NF**")
@@ -883,12 +1007,25 @@
 
             if (bPinName == "**NF**")
             {
-                Console.WriteLine(hb.Data.name + " is missing a pin definition!");
+                Console.WriteLine("Component: " + comp.Data.name + ", pin: " + aPinName + " is missing its connector!");
+                Console.WriteLine("Component A: " + ha.Data.name + ", Component B: " + hb.Data.name);
+                Console.WriteLine("Component B Type: " + hb.Data.compType);
+                foreach (var bPinKey in hb.Data.pins.Keys)
+                {
+                    Console.WriteLine($"{bPinKey} is a key unmatched to a label");
+                }
+                foreach (var label in a.To.localLabels)
+                {
+                    Console.WriteLine($"{label} is a to lable unmatched to a key");
+                }
+                foreach (var label in a.From.localLabels)
+                {
+                    Console.WriteLine($"{label} is a from lable unmatched to a key");
+                }
             }
-
+            
             int i1 = ha.Data.pins[aPinName];
             int i2 = hb.Data.pins[bPinName];
-
 
             comp.AddConnection(i1, hb, i2, a); //also sets up the drawn line
         }
@@ -966,8 +1103,8 @@
         if (IsRunning) return;
         if (e.Key == "z" && e.CtrlKey) Undo();
         else if (e.Key == "y" && e.CtrlKey) Redo();
-        // 1 is the arduino, not sure what -2 or -1 is
-        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        // 1 is the arduino, -2 is the canvas or -1 is null (no component) -3 is breadboard
+        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -3 || SelectedComponent == -1 || SelectedComponent == 1) return;
         RemoveComp(false, true);
         SelectedComponent = -1;
     }
