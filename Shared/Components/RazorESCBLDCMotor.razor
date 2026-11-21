@@ -1,20 +1,24 @@
-﻿@code {
-	public static ElementPin[] pinInfo
-	{
-		get
-		{
-			return new ElementPin[]
-			{
+﻿@inherits RazorComponent
 
-				new ElementPin(name: "PWR", x: 8.834, y: 25.23, signals: new PinSignalInfo[]{ }, number: 1),
-				new ElementPin(name: "GND", x: 9.019, y: 7.772, signals: new PinSignalInfo[] { }, number: 2),
-				new ElementPin(name: "PWR_A",  x: 18.095, y: 19.939, signals: new PinSignalInfo[] { }, number: 3),
-				new ElementPin(name: "CTRL_B", x: 18.095, y: 16.499, signals: new PinSignalInfo[] { }, number: 4),
-				new ElementPin(name: "GND_C",  x: 18.359, y: 13.324, signals: new PinSignalInfo[] { }, number: 5)
-			};
+@attribute [Component("Brushless motor and ESC", "Output/Motors/DC Motor", "esc_pca9685", false, 0.25, 40, 55)]
+@attribute [ComponentCode(CodeType.Global, "// called this way, it uses the default address 0x40\nAdafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();\n// you can also call it with a different address you want\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);\n// you can also call it with a different address and I2C interface\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);\n\n// Depending on your servo make, the pulse width min and max may vary, you \n// want these to be as small/large as possible without hitting the hard stop\n// for max range. You'll have to tweak them as necessary to match the servos you\n// have!\n#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)\n#define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)\n#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150\n#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600\n#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates\n\n// our servo # counter\nuint8_t servonum = 0;")]
+@attribute [ComponentCode(CodeType.Setup, "  Serial.println(\"8 channel Servo test!\");\n\n  pwm.begin();\n  pwm.setOscillatorFrequency(27000000);\n  pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates\n\n  delay(10);")]
+@attribute [ComponentCode(CodeType.LoopMain, "  // Drive each servo one at a time using setPWM()\n  Serial.println(servonum);\n  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n\n  // Drive each servo one at a time using writeMicroseconds(), it's not precise due to calculation rounding!\n  // The writeMicroseconds() function is used to mimic the Arduino Servo library writeMicroseconds() behavior. \n  for (uint16_t microsec = USMIN; microsec < USMAX; microsec++) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n  for (uint16_t microsec = USMAX; microsec > USMIN; microsec--) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n\n  servonum++;\n  if (servonum > 7) servonum = 0; // Testing the first 8 servo channels")]
+@attribute [ComponentCode(CodeType.Include, "#include <wire.h>\n#include <Adafruit_PWMServoDriver.h>")]
+@attribute [ComponentCode(CodeType.Functions, "// You can use this function if you'd like to set the pulse length in seconds\n// e.g. setServoPulse(0, 0.001) is a ~1 millisecond pulse width. It's not precise!\nvoid setServoPulse(uint8_t n, double pulse) {\n  double pulselength;\n  \n  pulselength = 1000000;   // 1,000,000 us per second\n  pulselength /= SERVO_FREQ;   // Analog servos run at ~60 Hz updates\n  Serial.print(pulselength); Serial.println(\" us per period\"); \n  pulselength /= 4096;  // 12 bits of resolution\n  Serial.print(pulselength); Serial.println(\" us per bit\"); \n  pulse *= 1000000;  // convert input seconds to us\n  pulse /= pulselength;\n  Serial.println(pulse);\n  pwm.setPWM(n, 0, pulse);\n}")]
 
-		}
-	}
+@attribute [ComponentPin("ena","ena", 190, 112, number: 1)]
+@attribute [ComponentPin("in1","in1", 195, 112, number: 2)]
+@attribute [ComponentPin("in2", "in2", 201, 112, number: 3)]
+@attribute [ComponentPin("pwr_gnd", "pwr_gnd", 168, 119, number: 4)]
+
+@attribute [ComponentWarning("The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.")]
+
+<!-- This one was brocken to high hell before the commit -->
+<!-- gspins in order: "bat+", "bat-", "L3", "L2", "L1", "orange", "red", "brown", "pwm1", "V+", "gnd", "pca9685",
+"pwm0", "pwm2", "pwm3", "pwm4", "pwm5", "5V", "scl", "sda" -->
+
+@code {
 
 	public static async void translate(ComponentInstance comp, long pinChangeCycle)
 	{
