@@ -11,6 +11,7 @@ public abstract class RazorComponent : ComponentBase
 
     private bool _hasSentInitialState = false;
 
+
     /**
      * Updates controller state after the first render of the component. This is important
      * for environmental settings deserialization to apply the changes correctly.

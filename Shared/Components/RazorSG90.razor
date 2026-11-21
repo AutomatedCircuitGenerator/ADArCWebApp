@@ -1,4 +1,15 @@
 ﻿@inherits RazorComponent;
+@attribute [Component("Servo", "Output/Motors/Servo Motor", "servo", true, 0.65, 175, 120)]
+@attribute [ComponentCode(CodeType.Global, "Servo myservo@;  // create servo object to control a servo\nint pos@ = 0;    // variable to store the servo position")]
+@attribute [ComponentCode(CodeType.Setup, "  myservo@.attach(~\"orange\");")]
+@attribute [ComponentCode(CodeType.LoopMain, "  for (pos@ = 0; pos@ <= 180; pos@ += 1) { // goes from 0 degrees to 180 degrees\n    // in steps of 1 degree\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }\n  for (pos@ = 180; pos@ >= 0; pos@ -= 1) { // goes from 180 degrees to 0 degrees\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }")]
+@attribute [ComponentCode(CodeType.Include, "#include <Servo.h>")]
+
+@attribute [ComponentPin("brown","brown", 32, 74, number: 1)]
+@attribute [ComponentPin("red","red", 32, 83.5, number: 2)]
+@attribute [ComponentPin("orange", "orange", 32, 93, number: 3)]
+
+@attribute [ComponentProperty("angle", 0, typeof(int))]
 
 @code {
     /**
@@ -15,19 +26,6 @@
     [Parameter] public string hornColor { get; set; } = "black";
     // hornColor = "#ccc";
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            // Make information for PWM
-            return new ElementPin[]
-            {
-                new ElementPin( name: "brown", x: 32, y: 74, number: 1, signals: new PinSignalInfo[]{PinSignalInfo.GND() } ),
-                new ElementPin( name: "red", x: 32, y: 83.5, number: 2, signals: new PinSignalInfo[]{ PinSignalInfo.VCC()} ),
-                new ElementPin( name: "orange", x: 32, y: 93, number: 3, signals: new PinSignalInfo[]{ PinSignalInfo.PWM()} ),
-            };
-        }
-    }
 
 
     private string path
