@@ -1,5 +1,22 @@
 ﻿@using System.Text
 @inherits RazorComponent
+@attribute [Component("16x2 Character LCD", "Output/Displays", "lcd1602I2C", true, 0.7, 310, 140, paneHoverText: "LCD1602")]
+@attribute [ComponentCode(CodeType.Global, "// Add the lcd, change the first parameter to your LCD's I2C device in real life!\nLiquidCrystal_I2C lcd@(@, 16, 2);")]
+@attribute [ComponentCode(CodeType.Setup, "   // Initalise the LCD\n   lcd@.init();\n   // Turn on the LCD backlight\n   lcd@.backlight();\n   // Put text on the LCD\n   lcd@.print(\"Hello World!\");")]
+@attribute [ComponentCode(CodeType.Include, "#include <LiquidCrystal_I2C.h>")]
+
+
+@attribute [ComponentPin("GND","pin1", 30, 57, number: 1)]
+@attribute [ComponentPin("VCC", "pin2",30, 66.5, number: 2)]
+@attribute [ComponentPin("SDA","pin3", 30, 76, number: 1)]
+@attribute [ComponentPin("SCL", "pin4",30, 85.5, number: 2)]
+
+@attribute [ComponentProperty("text", "", typeof(string))]
+@attribute [ComponentProperty("backlight", false, typeof(bool))]
+@attribute [ComponentProperty("blink", false, typeof(bool))]
+@attribute [ComponentProperty("cursor", false, typeof(bool))]
+@attribute [ComponentProperty("cursorX", 0, typeof(int))]
+@attribute [ComponentProperty("cursorY", 0, typeof(int))]
 
 @code {
 
@@ -87,19 +104,7 @@
     double xOffset => 12.45 + cursorX * charXSpacing;
     double yOffset => 12.55 + cursorY * charYSpacing;
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new("GND", 30, 57, number: 1, signals: new[] { PinSignalInfo.GND() }),
-                new("VCC", 30, 66.5, number: 2, signals: new[] { PinSignalInfo.VCC() }),
-                new("SDA", 30, 76, number: 3, signals: new[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SDA) }),
-                new("SCL", 30, 85.5, number: 4, signals: new[] { PinSignalInfo.I2C(PinSignalInfo.PinSignal.SCL) })
-            };
-        }
-    }
+
 }
 
 <svg
