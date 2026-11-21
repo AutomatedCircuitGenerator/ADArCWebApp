@@ -53,6 +53,12 @@
             💡
             <span class="toolbar-text">Tutorial</span>
         </button>
+        
+        @if (DebugMode && SelectedComponent > 0)
+        {
+            <p> X: @DebugXOffset, Y: @DebugYOffset </p>
+        }
+        
         <div class="center-toolbar">
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
                 <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
@@ -244,6 +250,9 @@
         isRightExpanded = false;
         StateHasChanged();
     }
+
+    public static double DebugXOffset, DebugYOffset;
+    
     
     void ToggleRightSidebar()
     {
@@ -958,20 +967,29 @@
     }
 
     /// <summary>
-    /// Deletes a component when delete/backspace pressed.
+    /// Handles Key Presses
+    /// Delete deletes any component that is NOT the arduino
+    /// Control-Z = Undo
+    /// Control-Y = Redo
     /// </summary>
     /// <param name="e"></param>
     private void HandleKeyPress(KeyboardEventArgs e)
     {
+        Console.WriteLine(e.Key);
+        Console.WriteLine(DebugMode);
         if (IsRunning) return;
         if (e.Key == "z" && e.CtrlKey) Undo();
         else if (e.Key == "y" && e.CtrlKey) Redo();
+        else if (e.Key == "d")DebugMode = !DebugMode;
+        
         // 1 is the arduino, not sure what -2 or -1 is
         if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
         RemoveComp(false, true);
         SelectedComponent = -1;
     }
 
+    public bool DebugMode { get; set; }
+    
     //progress bar
     public double LoadingProgress;
 
