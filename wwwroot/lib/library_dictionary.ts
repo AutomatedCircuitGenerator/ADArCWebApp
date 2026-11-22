@@ -4875,7 +4875,7 @@
     "placeholder_4872": "SCL3400",
     "placeholder_4873": "SCPI_Parser",
     "placeholder_4874": "SCServo",
-    "SD.h": "SD",
+    "SD.h": "local/SD",
     "placeholder_4876": "SDConfig",
     "placeholder_4877": "SDConfigCommand",
     "placeholder_4878": "SDHT",
