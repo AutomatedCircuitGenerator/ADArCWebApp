@@ -1864,6 +1864,8 @@ namespace ADArCWebApp.Shared
             },
             {
                 56,
+                // Only one SD card per circuit: SD.h uses a single global "SD" object.
+                // SD.h is compiled from the bundled copy in wwwroot/libraries/SD (see library_dictionary.ts).
                 new ComponentDataBuilder("SD Card Reader", true, "Storage/Data Logging", 1, 75, 75, typeof(RazorSDCard),
                     paneHoverText: "SPI Micro SD Card Module",
                     codeForGen: new()
