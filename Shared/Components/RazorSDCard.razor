@@ -1,0 +1,74 @@
+@inherits RazorComponent
+
+@code {
+    [Parameter]
+    [DropdownSetting(["Inserted", "Removed"])]
+    public string card
+    {
+        get;
+        set;
+    }
+
+    // Order must match the "pins" list in ComponentNamespace.cs.
+    // Coordinates are SVG pixels + 25px wrapper padding.
+    public static ElementPin[] pinInfo
+    {
+        get
+        {
+            return new ElementPin[]
+            {
+                new ElementPin(name: "gnd", x: 40, y: 165, signals: new PinSignalInfo[] { PinSignalInfo.GND() }, number: 1),
+                new ElementPin(name: "Vcc", x: 52, y: 165, signals: new PinSignalInfo[] { PinSignalInfo.VCC() }, number: 2),
+                new ElementPin(name: "miso", x: 64, y: 165, signals: new PinSignalInfo[] { }, number: 3),
+                new ElementPin(name: "mosi", x: 76, y: 165, signals: new PinSignalInfo[] { }, number: 4),
+                new ElementPin(name: "sck", x: 88, y: 165, signals: new PinSignalInfo[] { }, number: 5),
+                new ElementPin(name: "cs", x: 100, y: 165, signals: new PinSignalInfo[] { }, number: 6)
+            };
+        }
+    }
+}
+
+<svg width="110" height="140" viewBox="0 0 110 140" xmlns="http://www.w3.org/2000/svg">
+    <!-- PCB -->
+    <rect x="0" y="0" width="110" height="130" rx="4" fill="#1f5fae" stroke="#163f73" stroke-width="1"/>
+    <circle cx="8" cy="8" r="4" fill="#ffffff" stroke="#b0b0b0" stroke-width="1"/>
+    <circle cx="102" cy="8" r="4" fill="#ffffff" stroke="#b0b0b0" stroke-width="1"/>
+
+    <!-- MicroSD socket -->
+    <rect x="22" y="6" width="66" height="58" rx="2" fill="#c9ccd1" stroke="#8a8f96" stroke-width="1"/>
+    <rect x="26" y="10" width="58" height="50" rx="1.5" fill="#dfe2e6"/>
+    @if (card != "Removed")
+    {
+        <g>
+            <!-- Inserted card -->
+            <path d="M 32 4 L 78 4 L 78 46 L 38 46 L 32 40 Z" fill="#2a2a2a"/>
+            <text x="55" y="27" font-family="Consolas, monospace" font-size="7" fill="#e0e0e0" text-anchor="middle">microSD</text>
+        </g>
+    }
+
+    <!-- Regulator and level shifter -->
+    <rect x="16" y="74" width="16" height="10" fill="#202020"/>
+    <rect x="44" y="72" width="30" height="14" fill="#202020"/>
+    <text x="59" y="81" font-family="Consolas, monospace" font-size="4" fill="#bbbbbb" text-anchor="middle">LVC125</text>
+    <rect x="82" y="74" width="10" height="6" fill="#c08040"/>
+
+    <!-- Header -->
+    <rect x="9" y="120" width="72" height="10" fill="#151515"/>
+    <g fill="#c8a24a">
+        <rect x="13" y="128" width="4" height="12"/>
+        <rect x="25" y="128" width="4" height="12"/>
+        <rect x="37" y="128" width="4" height="12"/>
+        <rect x="49" y="128" width="4" height="12"/>
+        <rect x="61" y="128" width="4" height="12"/>
+        <rect x="73" y="128" width="4" height="12"/>
+    </g>
+    <g font-family="Consolas, monospace" font-size="5" fill="#ffffff" text-anchor="middle">
+        <text x="15" y="116">GND</text>
+        <text x="27" y="116">VCC</text>
+        <text x="39" y="116">MISO</text>
+        <text x="51" y="116">MOSI</text>
+        <text x="63" y="116">SCK</text>
+        <text x="75" y="116">CS</text>
+    </g>
+    <text x="96" y="104" font-family="Consolas, monospace" font-size="6" fill="#ffffff" text-anchor="middle" transform="rotate(-90 96 104)">SD Card</text>
+</svg>

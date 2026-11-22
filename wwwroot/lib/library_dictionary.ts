@@ -4875,7 +4875,10 @@
     "placeholder_4872": "SCL3400",
     "placeholder_4873": "SCPI_Parser",
     "placeholder_4874": "SCServo",
-    "placeholder_4875": "SD",
+    // SD is bundled in wwwroot/libraries/SD (Arduino SD 1.2.4, unmodified) instead of being
+    // downloaded, because the hexi.wokwi.com compiler crashes (arduino-cli panic) when asked
+    // to install "SD". Note: those library files are GPL-3.0 licensed, unlike this project (MIT).
+    "SD.h": "local/SD",
     "placeholder_4876": "SDConfig",
     "placeholder_4877": "SDConfigCommand",
     "placeholder_4878": "SDHT",
