@@ -8,6 +8,7 @@ public enum Board
 {
     ArduinoUno,
     ArduinoMega,
+    ArduinoNano,
     None,
 }
 
@@ -40,6 +41,9 @@ public class BoardService(IJSRuntime js)
                 "{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"GlobalId\":1,\"X\":829,\"Y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{}}}}",
             Board.ArduinoMega =>
                 "{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"GlobalId\":2,\"x\":829,\"Y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{}}}}",
+            Board.ArduinoNano =>
+                "{\"LocalId\":1,\"Code\":\"\\n\\nchar outputPins[] = {};\\n\\n\\n\\n\\nvoid setup() {\\n  Serial.begin(9600);\\n  for (int i = 0; i \u003C 0; i\u002B\u002B) {\\n    pinMode(outputPins[i], OUTPUT);\\n  }\\n}\\n\\n\\nvoid loop() {\\n}\\n\",\"Comps\":{\"1\":{\"GlobalId\":3,\"x\":829,\"Y\":219,\"zoomedX\":829,\"zoomedY\":219,\"midSignal\":0,\"counter\":0,\"Wbuffer\":0,\"RegAddr\":0,\"byteIndex\":0,\"timer\":0,\"CompParams\":{}}}}",
+
             _ => ""
         };
     }
@@ -50,6 +54,7 @@ public class BoardService(IJSRuntime js)
         {
             Board.ArduinoUno => new ComponentInstance(1, null, 829, 219),
             Board.ArduinoMega => new ComponentInstance(2, null, 829, 219),
+            Board.ArduinoNano => new ComponentInstance(3, null, 829, 219),
             _ => null
         };
     }
