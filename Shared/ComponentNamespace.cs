@@ -16,7 +16,7 @@ namespace ADArCWebApp.Shared
             Components.Add(2, new ComponentDataBuilder(typeof(RazorArduinoMega)).Finish());
             Components.Add(3, new ComponentDataBuilder(typeof(RazorArduinoNano)).Finish());
 
-            int index = 3;
+            int index = Components.Count + 1;
 
             Type[] ComponentRazorClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetCustomAttribute(typeof(ComponentAttribute)) != null).ToArray();
 

@@ -193,7 +193,7 @@ namespace ADArCWebApp.Shared
 
         public bool IsArduino()
         {
-            return GlobalId is 1 or 2;
+            return Data.directoryPath == "Arduino";
         }
     }
 
