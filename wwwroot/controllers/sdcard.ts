@@ -12,6 +12,14 @@ import {PinState} from "@lib/avr8js";
  * The card holds a 64 MB FAT16 volume (no partition table) kept in memory, with only
  * the blocks that are non-zero stored. It is pre-loaded with README.TXT so sketches
  * have something to read. Files survive restarting the simulation, like a real card.
+ *
+ * Limitations:
+ *  - The card only lives in browser memory: reloading the page gives a fresh card.
+ *  - One SD card per circuit (the SD library uses a single global SD object, and the
+ *    connection rule takes the board's hardware SPI pins).
+ *  - Sharing the SPI bus with another SPI component (e.g. MAX31856) is untested. When CS
+ *    is high this controller still completes the SPI transfer with 0xFF, which could
+ *    clash with another device answering at the same time.
  */
 
 const BLOCK_SIZE = 512;
