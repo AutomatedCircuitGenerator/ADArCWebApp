@@ -14,6 +14,7 @@ namespace ADArCWebApp.Shared
             Components.Clear();
             Components.Add(1, new ComponentDataBuilder(typeof(RazorArduinoUno)).Finish());
             Components.Add(2, new ComponentDataBuilder(typeof(RazorArduinoMega)).Finish());
+            Components.Add(3, new ComponentDataBuilder(typeof(RazorArduinoNano)).Finish());
 
             int index = 3;
 

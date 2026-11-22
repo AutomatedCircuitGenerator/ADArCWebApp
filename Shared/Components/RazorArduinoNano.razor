@@ -31,12 +31,18 @@
 @attribute [ComponentPin("d0", "d0", 0, 0)]
 @attribute [ComponentPin("d1", "d1", 0, 0)]
 
-
+@code {
+   [Parameter]
+   public string Width { get; set; } = "44.508377mm"; // Default width
+    
+   [Parameter]
+   public string Height { get; set; } = "17.685499mm"; // Default height
+}
 
 <?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <!-- Created with Inkscape (http://www.inkscape.org/) -->
 
-<svg
+<svg 
    xmlns:dc="http://purl.org/dc/elements/1.1/"
    xmlns:cc="http://creativecommons.org/ns#"
    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -45,8 +51,8 @@
    xmlns:xlink="http://www.w3.org/1999/xlink"
    xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
    xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   width="44.508377mm"
-   height="17.685499mm"
+   width=@Width
+   height=@Height
    viewBox="0 0 44.508377 17.685499"
    version="1.1"
    id="svg142272"
