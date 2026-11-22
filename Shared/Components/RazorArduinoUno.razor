@@ -21,11 +21,11 @@
 @attribute [ComponentPin("A4", "d18", number: 13, x: 271, y: 218,  description: "Analog input 4 /GPIO" )]
 @attribute [ComponentPin("A5", "d19", number: 14, x: 280.5, y: 218, description: "Analog input 5 /GPIO" )]
 @attribute [ComponentPin("GND.1", "gnd", number: 18, x: 140, y: 35, description: "Ground 1" )]
+@attribute [ComponentPin("+5V", "5V", number: 5, x: 185, y: 218, description: "+5V Power Rail" )]
 
 
 <!--below this point are currently inaccessible. (I think.)
-// new ElementPin( name: "NC", number: 1, x: 361, y: 35, signals: new PinSignalInfo[]{}, description: "Not Connected" ),-->
-@attribute [ComponentPin("+5V", "5V", number: 5, x: 185, y: 218, description: "+5V Power Rail" )]
+// new ElementPin( name: "NC", number: 1, x: 361, y: 35, signals: new PinSignalInfo[]{}, description: "Not Connected" ),
 @attribute [ComponentPin("+3V3","3V3", number: 4, x: 175, y: 218, description: "+3V3 Power Rail" )]
 @attribute [ComponentPin("IOREF", "-", number: 2, x: 131, y: 218,description: "Reference for digital logic V - connected to 5V" )]
 @attribute [ComponentPin("RESET", "-", number: 3, x: 140.5, y: 218,description: "Reset" )]
@@ -36,7 +36,7 @@
 @attribute [ComponentPin("SCL", "-",number: 15, x: 87, y: 35,description: "Digital Input 21/I2C Dataline" )]
 @attribute [ComponentPin("SDA", "-",number: 16, x: 97, y: 35, description: "Digital Input 20/I2C Dataline" )]
 @attribute [ComponentPin("AREF", "-",number: 17, x: 106, y: 35, description: "Analog Reference Voltage" )]
-
+-->
 
 
 @code {
