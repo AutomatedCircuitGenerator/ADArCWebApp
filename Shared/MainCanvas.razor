@@ -489,8 +489,8 @@
                 
                 var candidates = comp.Data.pinInfo[connection.FromPinId].name.Trim().ToUpperInvariant() switch
                 {
-                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
-                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
+                    "VCC" or "VDD" or "5V" or "+5V" or "VIN" or "3V3" or "+3V3" or "3VO" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" or "GND.1" or "GND.2" or "GND.3" => negativeHoles,
                     _ => null
                 };
                 string? BreadboardPowerPin = null;

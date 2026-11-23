@@ -277,8 +277,8 @@
                 // VCC go to + rail, GND go to - rail, other pins go to A or F
                 var candidates = name switch
                 {
-                    "VCC" or "VDD" or "5V" or "VIN" => positiveHoles,
-                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" => negativeHoles,
+                    "VCC" or "VDD" or "5V" or "+5V" or "VIN" or "3V3" or "+3V3" or "3VO" => positiveHoles,
+                    "GND" or "VSS" or "GROUND" or "CATHODE" or "COM" or "PWR_GND" or "BROWN" or "GND.1" or "GND.2" or "GND.3" => negativeHoles,
                     _ => comp.Data.LivesOnBreadBoard ? LivesOnBreadboardSignalHoles : signalHoles
                 };
 
