@@ -27,16 +27,16 @@
         return enableBorder ? "b-border" : "";
     }
     
-    void RotateLeft()
-    {
-        BreadboardRot++;
-        if(BreadboardRot > 3) BreadboardRot = 0;
-    }
-
-    void RotateRight()
+    void RotateCounterClockwise()
     {
         BreadboardRot--;
         if(BreadboardRot < 0) BreadboardRot = 3;
+    }
+
+    void RotateClockwise()
+    {
+        BreadboardRot++;
+        if(BreadboardRot > 3) BreadboardRot = 0;
     }
     
     [Parameter] public Action CanvasClick { get; set; }
@@ -44,9 +44,8 @@
     private void RightClick()
     {
         handleClick.InvokeAsync();
-        CanvasClick.Invoke();
-        
         rightClickable = true;
+        StateHasChanged();
     }
 }
 
@@ -572,20 +571,30 @@
 
 @if (forceBorder)
 {
-    if (true)
+    if (rightClickable)
     {
-        <div class="right-click-container" style="top: @(zoomedX)px; left: @(zoomedY)px">
-            <button id="component-help-button" >
-                <span style="padding-left: 3px">𝗶</span>
+        <div class="right-click-container" style="top: @(zoomedY + 15)px; left: @(zoomedX + 280 * zoomFactor)px">
+            <button id="component-help-button">
+                <span class="menu-icon">ℹ</span>
                 <span style="padding-left: 7px">￨ Component Information</span>
             </button>
-            <button id="component-rotate-left" @onclick="RotateLeft">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Rotate Left</span>
+            <button id="component-rotate-ccw" @onclick="RotateCounterClockwise">
+                <span class="menu-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                        <path d="M3 3v5h5"/>
+                    </svg>
+                </span>
+                <span style="padding-left: 7px">￨ Rotate Counterclockwise</span>
             </button>
-            <button id="component-rotate-right" @onclick="RotateRight">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Rotate Right</span>
+            <button id="component-rotate-cw" @onclick="RotateClockwise">
+                <span class="menu-icon">
+                    <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                        <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.74 2.74L21 8"/>
+                        <path d="M21 3v5h-5"/>
+                    </svg>
+                </span>
+                <span style="padding-left: 7px">￨ Rotate Clockwise</span>
             </button>
         </div>
     }

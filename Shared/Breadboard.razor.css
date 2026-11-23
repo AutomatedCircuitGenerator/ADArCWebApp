@@ -1,0 +1,91 @@
+.comp-wrapper {
+    padding: 25px;
+    display: flex;
+    position: absolute;
+}
+
+.a-border {
+    background-image: linear-gradient(90deg, gray 50%, gray 50%), linear-gradient(90deg, gray 50%, gray 50%), linear-gradient(0deg, gray 50%, gray 50%), linear-gradient(0deg, gray 50%, gray 50%);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: 15px 2px, 15px 2px, 2px 15px, 2px 15px;
+    background-position: left top, right bottom, left bottom, right top;
+}
+
+.b-border {
+    background-image: linear-gradient(90deg, gray 50%, transparent 50%), linear-gradient(90deg, gray 50%, transparent 50%), linear-gradient(0deg, gray 50%, transparent 50%), linear-gradient(0deg, gray 50%, transparent 50%);
+    background-repeat: repeat-x, repeat-x, repeat-y, repeat-y;
+    background-size: 15px 2px, 15px 2px, 2px 15px, 2px 15px;
+    background-position: left top, right bottom, left bottom, right top;
+    animation: border-dance 1s infinite linear;
+}
+
+@keyframes border-dance {
+    0% {
+        background-position: left top, right bottom, left bottom, right top;
+    }
+
+    100% {
+        background-position: left 15px top, right 15px bottom, left bottom 15px, right top 15px;
+    }
+}
+
+.right-click-container {
+    z-index: 99999999999999999999;
+    display: flex;
+    flex-direction: column;
+    background-color: lightgray;
+    border-radius: 1rem;
+    position: absolute;
+    max-width: fit-content;
+    justify-content: left;
+    margin-left: 5px;
+    margin-right: 5px;
+    align-items: flex-start;
+    min-width: fit-content;
+    border: 1.5px solid gray;
+    text-align: left;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.right-click-container button {
+    background-color: transparent;
+    border-color: transparent;
+    justify-content: flex-start;
+    align-items: center;
+    max-width: 100%;
+    padding: 6px 10px;
+    color: black;
+    text-align: left;
+    min-width: fit-content;
+    white-space: nowrap;
+    display: flex;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.right-click-container button:hover {
+    background-color: rgba(0, 0, 0, 0.08);
+}
+
+.right-click-container button:first-child {
+    border-top-left-radius: 1rem;
+    border-top-right-radius: 1rem;
+}
+
+.right-click-container button:last-child {
+    border-bottom-left-radius: 1rem;
+    border-bottom-right-radius: 1rem;
+}
+
+.right-click-container button:not(:last-child) {
+    border-bottom: 1px solid rgba(145, 145, 145, 0.3);
+}
+
+.menu-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+}
