@@ -1,4 +1,83 @@
-﻿@code {
+﻿@attribute [Component("MEGA 2560", "Arduino", "arduinoMega", false, 0.3, 390, 195)]
+
+@attribute [ComponentPin("d0", "d0",  282.5, y: 34, description: "Digital Input 0/GPIO")]
+@attribute [ComponentPin("d1", "d1", 273, y: 34,  description: "Digital Input 1/GPIO")]
+@attribute [ComponentPin("d2", "d2", 263.5, y: 34,  description: "Digital Input 2/GPIO")]
+@attribute [ComponentPin("d3", "d3", 254, y: 34, description: "Digital Input 3/GPIO")]
+@attribute [ComponentPin("d4", "d4", 244.5, y: 34, description: "Digital Input 4/GPIO")]
+@attribute [ComponentPin("d5", "d5", 235, y: 34, description: "Digital Input 5/GPIO")]
+@attribute [ComponentPin("d6", "d6", 225.5, y: 34, description: "Digital Input 6/GPIO")]
+@attribute [ComponentPin("d7", "d7", 216, y: 34, description: "Digital Input 7/GPIO")]
+@attribute [ComponentPin("d8", "d8", 201.5, y: 34, description: "Digital Input 8/GPIO")]
+@attribute [ComponentPin("d9", "d9", 192, y: 34, description: "Digital Input 9/GPIO")]
+@attribute [ComponentPin("d10","d10", 182.5, y: 34, description: "Digital Input 10/GPIO")]
+@attribute [ComponentPin("d11","d11", 173, y: 34, description: "Digital Input 11/GPIO")]
+@attribute [ComponentPin("d12","d12", 163.5, y: 34, description: "Digital Input 12/GPIO")]
+@attribute [ComponentPin("d13","d13", 154, y: 34, description: "Digital Input 13/GPIO")]
+@attribute [ComponentPin("d14","d14", 295.5, y: 34, description: "Digital Input 14/GPIO")]
+@attribute [ComponentPin("d15","d15", 305, y: 34, description: "Digital Input 15/GPIO")]
+@attribute [ComponentPin("d16","d16", 314.5, y: 34, description: "Digital Input 16/GPIO")]
+@attribute [ComponentPin("d17","d17", 324, y: 34, description: "Digital Input 17/GPIO")]
+@attribute [ComponentPin("d18","d18", 333.5, y: 34, description: "Digital Input 18/GPIO")]
+@attribute [ComponentPin("d19","d19", 343, y: 34, description: "Digital Input 19/GPIO")]
+@attribute [ComponentPin("d20","d20", 352.5, y: 34, description: "Digital Input 20/GPIO")]
+@attribute [ComponentPin("d21","d21", 362, y: 34, description: "Digital Input 21/GPIO")]
+@attribute [ComponentPin("d22","d22", 386, y: 42.5, description: "Digital Input 22/GPIO")]
+@attribute [ComponentPin("d23","d23", 396, y: 42.5, description: "Digital Input 23/GPIO")]
+@attribute [ComponentPin("d24","d24", 386, y: 52, description: "Digital Input 24/GPIO")]
+@attribute [ComponentPin("d25","d25", 396, y: 52, description: "Digital Input 25/GPIO")]
+@attribute [ComponentPin("d26","d26", 386, y: 61.5, description: "Digital Input 26/GPIO")]
+@attribute [ComponentPin("d27","d27", 396, y: 61.5, description: "Digital Input 27/GPIO")]
+@attribute [ComponentPin("d28","d28", 386, y: 71, description: "Digital Input 28/GPIO")]
+@attribute [ComponentPin("d29","d29", 396, y: 71, description: "Digital Input 29/GPIO")]
+@attribute [ComponentPin("d30","d30", 386, y: 80.5, description: "Digital Input 30/GPIO")]
+@attribute [ComponentPin("d31","d31", 396, y: 80.5, description: "Digital Input 31/GPIO")]
+@attribute [ComponentPin("d32","d32", 386, y: 90, description: "Digital Input 32/GPIO")]
+@attribute [ComponentPin("d33","d33", 396, y: 90, description: "Digital Input 33/GPIO")]
+@attribute [ComponentPin("d34","d34", 386, y: 99.5, description: "Digital Input 34/GPIO")]
+@attribute [ComponentPin("d35","d35", 396, y: 99.5, description: "Digital Input 35/GPIO")]
+@attribute [ComponentPin("d36","d36", 386, y: 109, description: "Digital Input 36/GPIO")]
+@attribute [ComponentPin("d37","d37", 396, y: 109, description: "Digital Input 37/GPIO")]
+@attribute [ComponentPin("d38","d38", 386, y: 118.5, description: "Digital Input 38/GPIO")]
+@attribute [ComponentPin("d39","d39", 396, y: 118.5, description: "Digital Input 39/GPIO")]
+@attribute [ComponentPin("d40","d40", 386, y: 128, description: "Digital Input 40/GPIO")]
+@attribute [ComponentPin("d41","d41", 396, y: 128, description: "Digital Input 41/GPIO")]
+@attribute [ComponentPin("d42","d42", 386, y: 137.5, description: "Digital Input 42/GPIO")]
+@attribute [ComponentPin("d43","d43", 396, y: 137.5, description: "Digital Input 43/GPIO")]
+@attribute [ComponentPin("d44","d44", 386, y: 147, description: "Digital Input 44/GPIO")]
+@attribute [ComponentPin("d45","d45", 396, y: 147, description: "Digital Input 45/GPIO")]
+@attribute [ComponentPin("d46","d46", 386, y: 156.5, description: "Digital Input 46/GPIO")]
+@attribute [ComponentPin("d47","d47", 396, y: 156.5, description: "Digital Input 47/GPIO")]
+@attribute [ComponentPin("d48","d48", 386, y: 166, description: "Digital Input 48/GPIO")]
+@attribute [ComponentPin("d49","d49", 396, y: 166, description: "Digital Input 49/GPIO")]
+@attribute [ComponentPin("d50","d50", 386, y: 175.5, description: "Digital Input 50/GPIO")]
+@attribute [ComponentPin("d51","d51", 396, y: 175.5, description: "Digital Input 51/GPIO")]
+@attribute [ComponentPin("d52","d52", 386, y: 185, description: "Digital Input 52/GPIO")]
+@attribute [ComponentPin("d53","d53", 396, y: 185, description: "Digital Input 53/GPIO")]
+@attribute [ComponentPin("d54","d54", 233.5, y: 209.5, description: "Digital Input 54/GPIO")]
+@attribute [ComponentPin("d55","d55", 243, y: 209.5, description: "Digital Input 55/GPIO")]
+@attribute [ComponentPin("d56","d56", 252.5, y: 209.5, description: "Digital Input 56/GPIO")]
+@attribute [ComponentPin("d57","d57", 262, y: 209.5, description: "Digital Input 57/GPIO")]
+@attribute [ComponentPin("d58","d58", 271.5, y: 209.5, description: "Digital Input 58/GPIO")]
+@attribute [ComponentPin("d59","d59", 281, y: 209.5, description: "Digital Input 59/GPIO")]
+@attribute [ComponentPin("d60","d60", 290.5, y: 209.5, description: "Digital Input 60/GPIO")]
+@attribute [ComponentPin("d61","d61", 300, y: 209.5, description: "Digital Input 61/GPIO")]
+@attribute [ComponentPin("d62","d62", 309.5 + 6, y: 209.5, description: "Digital Input 62/GPIO")]
+@attribute [ComponentPin("d63","d63", 319 + 6, y: 209.5, description: "Digital Input 63/GPIO")]
+@attribute [ComponentPin("d64","d64", 328.5 + 6, y: 209.5, description: "Digital Input 64/GPIO")]
+@attribute [ComponentPin("d65","d65", 338 + 6, y: 209.5, description: "Digital Input 65/GPIO")]
+@attribute [ComponentPin("d66","d66", 347.5 + 6, y: 209.5, description: "Digital Input 66/GPIO")]
+@attribute [ComponentPin("d67","d67", 357 + 6, y: 209.5, description: "Digital Input 67/GPIO")]
+@attribute [ComponentPin("d68","d68", 366.5 + 6, y: 209.5, description: "Digital Input 68/GPIO")]
+@attribute [ComponentPin("d69","d69", 376 + 6, y: 209.5, description: "Digital Input 69/GPIO")]
+@attribute [ComponentPin("Vin","Vin",193.5, y: 209.5, description: "Power Supply Vin")]
+@attribute [ComponentPin("3V3","3V3",155, y: 209.5, description: "3.3V Power Supply")]
+@attribute [ComponentPin("5V", "5V", 189.5, y: 209.5, description: "5V Power Supply")]
+@attribute [ComponentPin("gnd","gnd",199.25, y: 209.5, description: "Ground")]
+
+
+
+@code {
     [Parameter] public bool led13 { get; set; } = false;
     [Parameter] public bool ledRX { get; set; } = false;
     [Parameter] public bool ledTX { get; set; } = false;
@@ -10,90 +89,6 @@
     [Parameter] public string Width { get; set; } = "102.66mm"; // Default width
 
     [Parameter] public string Height { get; set; } = "50.80mm"; // Default height
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "d0", number: 11, x: 282.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 0/GPIO"),
-                new ElementPin(name: "d1", number: 12, x: 273, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 1/GPIO"),
-                new ElementPin(name: "d2", number: 13, x: 263.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 2/GPIO"),
-                new ElementPin(name: "d3", number: 14, x: 254, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 3/GPIO"),
-                new ElementPin(name: "d4", number: 15, x: 244.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 4/GPIO"),
-                new ElementPin(name: "d5", number: 16, x: 235, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 5/GPIO"),
-                new ElementPin(name: "d6", number: 17, x: 225.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 6/GPIO"),
-                new ElementPin(name: "d7", number: 18, x: 216, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 7/GPIO"),
-                new ElementPin(name: "d8", number: 19, x: 201.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 8/GPIO"),
-                new ElementPin(name: "d9", number: 20, x: 192, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 9/GPIO"),
-                new ElementPin(name: "d10", number: 21, x: 182.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 10/GPIO"),
-                new ElementPin(name: "d11", number: 22, x: 173, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 11/GPIO"),
-                new ElementPin(name: "d12", number: 23, x: 163.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 12/GPIO"),
-                new ElementPin(name: "d13", number: 24, x: 154, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 13/GPIO"),
-                new ElementPin(name: "d14", number: 25, x: 295.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 14/GPIO"),
-                new ElementPin(name: "d15", number: 26, x: 305, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 15/GPIO"),
-                new ElementPin(name: "d16", number: 27, x: 314.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 16/GPIO"),
-                new ElementPin(name: "d17", number: 28, x: 324, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 17/GPIO"),
-                new ElementPin(name: "d18", number: 29, x: 333.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 18/GPIO"),
-                new ElementPin(name: "d19", number: 30, x: 343, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 19/GPIO"),
-                new ElementPin(name: "d20", number: 31, x: 352.5, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 20/GPIO"),
-                new ElementPin(name: "d21", number: 32, x: 362, y: 34, signals: new PinSignalInfo[] { }, description: "Digital Input 21/GPIO"),
-                new ElementPin(name: "d22", number: 33, x: 386, y: 42.5, signals: new PinSignalInfo[] { }, description: "Digital Input 22/GPIO"),
-                new ElementPin(name: "d23", number: 34, x: 396, y: 42.5, signals: new PinSignalInfo[] { }, description: "Digital Input 23/GPIO"),
-                new ElementPin(name: "d24", number: 35, x: 386, y: 52, signals: new PinSignalInfo[] { }, description: "Digital Input 24/GPIO"),
-                new ElementPin(name: "d25", number: 36, x: 396, y: 52, signals: new PinSignalInfo[] { }, description: "Digital Input 25/GPIO"),
-                new ElementPin(name: "d26", number: 37, x: 386, y: 61.5, signals: new PinSignalInfo[] { }, description: "Digital Input 26/GPIO"),
-                new ElementPin(name: "d27", number: 38, x: 396, y: 61.5, signals: new PinSignalInfo[] { }, description: "Digital Input 27/GPIO"),
-                new ElementPin(name: "d28", number: 39, x: 386, y: 71, signals: new PinSignalInfo[] { }, description: "Digital Input 28/GPIO"),
-                new ElementPin(name: "d29", number: 40, x: 396, y: 71, signals: new PinSignalInfo[] { }, description: "Digital Input 29/GPIO"),
-                new ElementPin(name: "d30", number: 41, x: 386, y: 80.5, signals: new PinSignalInfo[] { }, description: "Digital Input 30/GPIO"),
-                new ElementPin(name: "d31", number: 42, x: 396, y: 80.5, signals: new PinSignalInfo[] { }, description: "Digital Input 31/GPIO"),
-                new ElementPin(name: "d32", number: 43, x: 386, y: 90, signals: new PinSignalInfo[] { }, description: "Digital Input 32/GPIO"),
-                new ElementPin(name: "d33", number: 44, x: 396, y: 90, signals: new PinSignalInfo[] { }, description: "Digital Input 33/GPIO"),
-                new ElementPin(name: "d34", number: 45, x: 386, y: 99.5, signals: new PinSignalInfo[] { }, description: "Digital Input 34/GPIO"),
-                new ElementPin(name: "d35", number: 46, x: 396, y: 99.5, signals: new PinSignalInfo[] { }, description: "Digital Input 35/GPIO"),
-                new ElementPin(name: "d36", number: 47, x: 386, y: 109, signals: new PinSignalInfo[] { }, description: "Digital Input 36/GPIO"),
-                new ElementPin(name: "d37", number: 48, x: 396, y: 109, signals: new PinSignalInfo[] { }, description: "Digital Input 37/GPIO"),
-                new ElementPin(name: "d38", number: 49, x: 386, y: 118.5, signals: new PinSignalInfo[] { }, description: "Digital Input 38/GPIO"),
-                new ElementPin(name: "d39", number: 50, x: 396, y: 118.5, signals: new PinSignalInfo[] { }, description: "Digital Input 39/GPIO"),
-                new ElementPin(name: "d40", number: 51, x: 386, y: 128, signals: new PinSignalInfo[] { }, description: "Digital Input 40/GPIO"),
-                new ElementPin(name: "d41", number: 52, x: 396, y: 128, signals: new PinSignalInfo[] { }, description: "Digital Input 41/GPIO"),
-                new ElementPin(name: "d42", number: 53, x: 386, y: 137.5, signals: new PinSignalInfo[] { }, description: "Digital Input 42/GPIO"),
-                new ElementPin(name: "d43", number: 54, x: 396, y: 137.5, signals: new PinSignalInfo[] { }, description: "Digital Input 43/GPIO"),
-                new ElementPin(name: "d44", number: 55, x: 386, y: 147, signals: new PinSignalInfo[] { }, description: "Digital Input 44/GPIO"),
-                new ElementPin(name: "d45", number: 56, x: 396, y: 147, signals: new PinSignalInfo[] { }, description: "Digital Input 45/GPIO"),
-                new ElementPin(name: "d46", number: 57, x: 386, y: 156.5, signals: new PinSignalInfo[] { }, description: "Digital Input 46/GPIO"),
-                new ElementPin(name: "d47", number: 58, x: 396, y: 156.5, signals: new PinSignalInfo[] { }, description: "Digital Input 47/GPIO"),
-                new ElementPin(name: "d48", number: 59, x: 386, y: 166, signals: new PinSignalInfo[] { }, description: "Digital Input 48/GPIO"),
-                new ElementPin(name: "d49", number: 60, x: 396, y: 166, signals: new PinSignalInfo[] { }, description: "Digital Input 49/GPIO"),
-                new ElementPin(name: "d50", number: 61, x: 386, y: 175.5, signals: new PinSignalInfo[] { }, description: "Digital Input 50/GPIO"),
-                new ElementPin(name: "d51", number: 62, x: 396, y: 175.5, signals: new PinSignalInfo[] { }, description: "Digital Input 51/GPIO"),
-                new ElementPin(name: "d52", number: 63, x: 386, y: 185, signals: new PinSignalInfo[] { }, description: "Digital Input 52/GPIO"),
-                new ElementPin(name: "d53", number: 64, x: 396, y: 185, signals: new PinSignalInfo[] { }, description: "Digital Input 53/GPIO"),
-                new ElementPin(name: "d54", number: 65, x: 233.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 54/GPIO"),
-                new ElementPin(name: "d55", number: 66, x: 243, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 55/GPIO"),
-                new ElementPin(name: "d56", number: 67, x: 252.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 56/GPIO"),
-                new ElementPin(name: "d57", number: 68, x: 262, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 57/GPIO"),
-                new ElementPin(name: "d58", number: 69, x: 271.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 58/GPIO"),
-                new ElementPin(name: "d59", number: 70, x: 281, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 59/GPIO"),
-                new ElementPin(name: "d60", number: 71, x: 290.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 60/GPIO"),
-                new ElementPin(name: "d61", number: 72, x: 300, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 61/GPIO"),
-                new ElementPin(name: "d62", number: 73, x: 309.5 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 62/GPIO"),
-                new ElementPin(name: "d63", number: 74, x: 319 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 63/GPIO"),
-                new ElementPin(name: "d64", number: 75, x: 328.5 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 64/GPIO"),
-                new ElementPin(name: "d65", number: 76, x: 338 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 65/GPIO"),
-                new ElementPin(name: "d66", number: 77, x: 347.5 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 66/GPIO"),
-                new ElementPin(name: "d67", number: 78, x: 357 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 67/GPIO"),
-                new ElementPin(name: "d68", number: 79, x: 366.5 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 68/GPIO"),
-                new ElementPin(name: "d69", number: 80, x: 376 + 6, y: 209.5, signals: new PinSignalInfo[] { }, description: "Digital Input 69/GPIO"),
-                new ElementPin(name: "Vin", number: 1, x: 193.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "Power Supply Vin"),
-                new ElementPin(name: "3V3", number: 2, x: 155, y: 209.5, signals: new PinSignalInfo[] { }, description: "3.3V Power Supply"),
-                new ElementPin(name: "5V", number: 3, x: 189.5, y: 209.5, signals: new PinSignalInfo[] { }, description: "5V Power Supply"),
-                new ElementPin(name: "gnd", number: 6, x: 199.25, y: 209.5, signals: new PinSignalInfo[] { }, description: "Ground"),
-            };
-        }
-    }
 
     /* keystuff
           @mousedown=@(() => this.down())

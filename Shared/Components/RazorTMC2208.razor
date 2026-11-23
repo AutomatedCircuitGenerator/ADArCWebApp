@@ -1,14 +1,49 @@
 @inherits RazorComponent
 
+@attribute [Component("TMC2208 SilentStepStick", "Output/Motor Drivers", "tmc2208", true, .65, 380, 250, paneHoverText: "STEP/DIR driver with optional UART configuration")]
+@attribute [ComponentWarning("Use an external motor supply and common ground. Set the current limit for your motor. VM is never powered by the Arduino. Bridge the carrier UART jumper and use a 1 kΩ series resistor from TX to PDN_UART for UART configuration.")]
+@attribute [ComponentCode(CodeType.Include, "#include <AccelStepper.h>\n#include <TMCStepper.h>\n#include <SoftwareSerial.h>\n")]
+@attribute [ComponentCode(CodeType.Global, "// Set to 1 after enabling the carrier UART jumper. TX uses a 1 kΩ series resistor.\n" +
+                            "#define TMC2208_UART@ 0\n" +
+                            "const int stepPin@ = ~\"step\";\nconst int dirPin@ = ~\"dir\";\nconst int enablePin@ = ~\"en\";\n" +
+                            "AccelStepper stepper@(AccelStepper::DRIVER, stepPin@, dirPin@);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "// Write-only single-wire UART. 0.11 ohms is the Watterott carrier sense resistor.\n" +
+                            "SoftwareSerial tmcSerial@(-1, ~\"pdn_uart\");\n" +
+                            "TMC2208Stepper driver@(&tmcSerial@, 0.11f);\n#endif\n")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(enablePin@, OUTPUT);\n\tdigitalWrite(enablePin@, HIGH);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "\ttmcSerial@.begin(115200);\n\tdriver@.begin();\n" +
+                            "\tdriver@.pdn_disable(true);\n\tdriver@.I_scale_analog(false);\n" +
+                            "\tdriver@.rms_current(600);\n\tdriver@.mstep_reg_select(true);\n" +
+                            "\tdriver@.microsteps(8);\n\tdriver@.intpol(true);\n\tdriver@.en_spreadCycle(false);\n" +
+                            "#endif\n" +
+                            "// MS1 and MS2 low select 1/8 steps. 200 full steps/revolution.\n" +
+                            "\tstepper@.setMinPulseWidth(2);\n\tstepper@.setMaxSpeed(1600);\n" +
+                            "\tstepper@.setSpeed(800);\n\tdigitalWrite(enablePin@, LOW);\n")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tstepper@.runSpeed();\n")]
+@attribute [ComponentPin("en", "en", 47, 57, number: 1)]
+@attribute [ComponentPin("ms1", "ms1", 47, 82, number: 2)]
+@attribute [ComponentPin("ms2", "ms2", 47, 107, number: 3)]
+@attribute [ComponentPin("nc", "nc", 47, 132, number: 4)]
+@attribute [ComponentPin("pdn_uart", "pdn_uart", 47, 157, number: 5)]
+@attribute [ComponentPin("clk", "clk", 47, 182, number: 6)]
+@attribute [ComponentPin("step", "step", 47, 207, number: 7)]
+@attribute [ComponentPin("dir", "dir", 47, 232, number: 8)]
+@attribute [ComponentPin("vm", "vm", 183, 57, number: 16)]
+@attribute [ComponentPin("motor_gnd", "motor_gnd", 183, 82, number: 15)]
+@attribute [ComponentPin("m1b", "m1b", 183, 107, number: 14)]
+@attribute [ComponentPin("m1a", "m1a", 183, 132, number: 13)]
+@attribute [ComponentPin("m2a", "m2a", 183, 157, number: 12)]
+@attribute [ComponentPin("m2b", "m2b", 183, 182, number: 11)]
+@attribute [ComponentPin("vio", "vio", 183, 207, number: 10)]
+@attribute [ComponentPin("gnd", "gnd", 183, 232, number: 9)]
+
 @code {
     // Carrier viewed from above, with the potentiometer beside STEP/DIR.
     private static readonly string[] LeftPins = ["en", "ms1", "ms2", "nc", "pdn_uart", "clk", "step", "dir"];
     private static readonly string[] RightPins = ["vm", "motor_gnd", "m1b", "m1a", "m2a", "m2b", "vio", "gnd"];
-    // VaryingComponent adds 25px padding around the SVG. Wire coordinates include it.
-    public static ElementPin[] pinInfo => LeftPins.Select((name, i) =>
-        new ElementPin(name, 47, 57 + i * 25, [], i + 1))
-        .Concat(RightPins.Select((name, i) =>
-            new ElementPin(name, 183, 57 + i * 25, [], 16 - i))).ToArray();
+
 }
 
 <svg xmlns="http://www.w3.org/2000/svg" width="380" height="250" viewBox="0 0 380 250">
