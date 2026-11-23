@@ -4,7 +4,7 @@
 <div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @if (ShowBreadboard)
     {
-        <Breadboard BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
+        <Breadboard @ref="_breadboardRef" BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
     }
     @if (BoardService.Board != Board.None)
     {
@@ -875,12 +875,19 @@
         StateHasChanged();
     }
     
+    private Breadboard? _breadboardRef;
+
     //click on the canvas handler.
     private void CanvasClick()
     {
         if (!targetFound)
         {
             Pages.Index.App!.SelectedComponent = -2;
+            _breadboardRef?.CloseContextMenu();
+            foreach (var comp in _componentReferences.Values)
+            {
+                comp.CloseContextMenu();
+            }
         }
 
         targetFound = false;
