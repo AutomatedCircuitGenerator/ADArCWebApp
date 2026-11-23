@@ -5899,7 +5899,7 @@
     "placeholder_5896": "TMC429",
     "placeholder_5897": "TMC5072",
     "placeholder_5898": "TMC7300",
-    "placeholder_5899": "TMCStepper",
+    "TMCStepper.h": "TMCStepper",
     "placeholder_5900": "TMD3725",
     "placeholder_5901": "TMP117-Arduino",
     "placeholder_5902": "TMP36",

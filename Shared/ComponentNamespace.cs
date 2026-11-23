@@ -1862,6 +1862,42 @@ namespace ADArCWebApp.Shared
                         warning: "Use an external motor supply and common GND. Do not power the motor directly from Arduino.")
                     .Finish()
             },
+
+            {
+                55,
+                new ComponentDataBuilder("TMC2208 SilentStepStick", true, "Output/Motor Drivers", .65, 380, 250,
+                    typeof(RazorTMC2208), paneHoverText: "STEP/DIR driver with optional UART configuration",
+                    pins: ["en", "ms1", "ms2", "nc", "pdn_uart", "clk", "step", "dir",
+                        "vm", "motor_gnd", "m1b", "m1a", "m2a", "m2b", "vio", "gnd"],
+                    gsNodeName: "tmc2208",
+                    warning: "Use an external motor supply and common ground. Set the current limit for your motor. VM is never powered by the Arduino. Bridge the carrier UART jumper and use a 1 kΩ series resistor from TX to PDN_UART for UART configuration.",
+                    codeForGen: new()
+                    {
+                        { "include", "#include <AccelStepper.h>\n#include <TMCStepper.h>\n#include <SoftwareSerial.h>\n" },
+                        { "global",
+                            "// Set to 1 after enabling the carrier UART jumper. TX uses a 1 kΩ series resistor.\n" +
+                            "#define TMC2208_UART@ 0\n" +
+                            "const int stepPin@ = ~\"step\";\nconst int dirPin@ = ~\"dir\";\nconst int enablePin@ = ~\"en\";\n" +
+                            "AccelStepper stepper@(AccelStepper::DRIVER, stepPin@, dirPin@);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "// Write-only single-wire UART. 0.11 ohms is the Watterott carrier sense resistor.\n" +
+                            "SoftwareSerial tmcSerial@(-1, ~\"pdn_uart\");\n" +
+                            "TMC2208Stepper driver@(&tmcSerial@, 0.11f);\n#endif\n" },
+                        { "setup",
+                            "\tpinMode(enablePin@, OUTPUT);\n\tdigitalWrite(enablePin@, HIGH);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "\ttmcSerial@.begin(115200);\n\tdriver@.begin();\n" +
+                            "\tdriver@.pdn_disable(true);\n\tdriver@.I_scale_analog(false);\n" +
+                            "\tdriver@.rms_current(600);\n\tdriver@.mstep_reg_select(true);\n" +
+                            "\tdriver@.microsteps(8);\n\tdriver@.intpol(true);\n\tdriver@.en_spreadCycle(false);\n" +
+                            "#endif\n" +
+                            "// MS1 and MS2 low select 1/8 steps. 200 full steps/revolution.\n" +
+                            "\tstepper@.setMinPulseWidth(2);\n\tstepper@.setMaxSpeed(1600);\n" +
+                            "\tstepper@.setSpeed(800);\n\tdigitalWrite(enablePin@, LOW);\n" },
+                        { "loopMain", "\tstepper@.runSpeed();\n" },
+                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
+                    }).Finish()
+            },
         };
     }
 }

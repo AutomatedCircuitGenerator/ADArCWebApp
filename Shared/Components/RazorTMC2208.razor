@@ -1,0 +1,52 @@
+@inherits RazorComponent
+
+@code {
+    // Carrier viewed from above, with the potentiometer beside STEP/DIR.
+    private static readonly string[] LeftPins = ["en", "ms1", "ms2", "nc", "pdn_uart", "clk", "step", "dir"];
+    private static readonly string[] RightPins = ["vm", "motor_gnd", "m1b", "m1a", "m2a", "m2b", "vio", "gnd"];
+    // VaryingComponent adds 25px padding around the SVG. Wire coordinates include it.
+    public static ElementPin[] pinInfo => LeftPins.Select((name, i) =>
+        new ElementPin(name, 47, 57 + i * 25, [], i + 1))
+        .Concat(RightPins.Select((name, i) =>
+            new ElementPin(name, 183, 57 + i * 25, [], 16 - i))).ToArray();
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="380" height="250" viewBox="0 0 380 250">
+    <title>TMC2208 SilentStepStick with bipolar stepper motor</title>
+    <rect x="12" y="12" width="156" height="220" rx="7" fill="#305d91" stroke="#183852" stroke-width="3"/>
+    @for (var i = 0; i < LeftPins.Length; i++)
+    {
+        <g>
+        <rect x="16" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+        <circle cx="22" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+        <text x="33" y="@(36 + i * 25)" fill="white" font-size="9">@LeftPins[i].ToUpperInvariant()</text>
+        <rect x="152" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+        <circle cx="158" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+        <text x="147" y="@(36 + i * 25)" text-anchor="end" fill="white" font-size="9">@(RightPins[i] == "motor_gnd" ? "GND" : RightPins[i].ToUpperInvariant())</text>
+        </g>
+    }
+    <rect x="66" y="85" width="48" height="54" rx="3" fill="#20252a"/>
+    <text x="90" y="109" text-anchor="middle" fill="#ddd" font-size="9">TMC</text>
+    <text x="90" y="123" text-anchor="middle" fill="#ddd" font-size="9">2208</text>
+    <circle cx="90" cy="181" r="13" fill="#c6c9cd" stroke="#646b71" stroke-width="3"/>
+    <path d="M82 181H98 M90 173V189" stroke="#555" stroke-width="3"/>
+    <rect x="77" y="40" width="26" height="12" fill="#c6ae78"/>
+    <rect x="75" y="151" width="30" height="8" fill="#292b2e"/>
+    <text x="90" y="225" text-anchor="middle" fill="white" font-size="9">SilentStepStick</text>
+
+    <path d="M158 82 H200 V65 H231" fill="none" stroke="#2866b1" stroke-width="3"/>
+    <path d="M158 107 H207 V85 H231" fill="none" stroke="#c74545" stroke-width="3"/>
+    <path d="M158 132 H214 V105 H231" fill="none" stroke="#3f8156" stroke-width="3"/>
+    <path d="M158 157 H221 V125 H231" fill="none" stroke="#343434" stroke-width="3"/>
+    <rect x="231" y="42" width="128" height="128" rx="12" fill="#34373b" stroke="#1b1d20" stroke-width="3"/>
+    <rect x="241" y="52" width="108" height="108" rx="9" fill="#b5bac1"/>
+    @foreach (var corner in new[] { (249, 60), (341, 60), (249, 152), (341, 152) })
+    {
+        <circle cx="@corner.Item1" cy="@corner.Item2" r="4" fill="#474c51"/>
+    }
+    <circle cx="295" cy="106" r="35" fill="#626a73"/>
+    <g id="tmc2208-shaft">
+        <circle cx="295" cy="106" r="13" fill="#e2e4e7" stroke="#555" stroke-width="2"/>
+        <path d="M295 106 V78" stroke="#f2c357" stroke-width="5" stroke-linecap="round"/>
+    </g>
+</svg>

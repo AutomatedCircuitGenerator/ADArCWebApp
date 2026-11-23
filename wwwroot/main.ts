@@ -1,3 +1,4 @@
+import {TMC2208} from "@controllers/tmc2208";
 ﻿//imported by index.html
 "use strict";
 
@@ -106,3 +107,5 @@ import {PMS5003} from "@controllers/pms5003";
 (<any>window).VL53L0X = VL53L0X;
 (<any>window).IRDETECTOR = IRDETECTOR;
 (<any>window).PMS5003 = PMS5003;
+
+(<any>window).TMC2208 = TMC2208;
