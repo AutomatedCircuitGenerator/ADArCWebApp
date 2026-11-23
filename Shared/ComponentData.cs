@@ -1,4 +1,6 @@
-﻿using ADArCWebApp.Shared.Components;
+﻿using System.Diagnostics;
+using ADArCWebApp;
+using ADArCWebApp.Shared.Components;
 
 namespace ADArCWebApp.Shared
 {
@@ -13,14 +15,18 @@ namespace ADArCWebApp.Shared
         public bool enabled;
         public string directoryPath;
         public string paneHoverText = "";
-        public Dictionary<string, string> codeForGen = new();
+        public Dictionary<CodeType, string> codeForGen = new();
         public double rightOffset;
         public double cardScaleFactor;
+        public double workbenchScaleFactor = 1.0;
         public double bottomOffset;
 		public Dictionary<string, int> pins;
 		public List<string> pinNames => pins.Keys.ToList();
 		public string? nodeName;
 		public ElementPin[] pinInfo;
+		public readonly bool LivesOnBreadBoard;
+		public readonly double BreadboardOffsetX, BreadboardOffsetY, Width;
+		public List<(int, int)> BreadboardPinData;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -38,6 +44,7 @@ namespace ADArCWebApp.Shared
 
 			rightOffset = builder.rightOffset;
 			cardScaleFactor = builder.cardScaleFactor;
+			workbenchScaleFactor = builder.workbenchScaleFactor;
 			bottomOffset = builder.bottomOffset;
 			compType = builder.compType;
 			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
@@ -46,6 +53,12 @@ namespace ADArCWebApp.Shared
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
 			pinInfo = builder.pinInfo;
+			LivesOnBreadBoard = builder.LivesOnBreadBoard;
+			BreadboardOffsetX = builder.BreadboardOffsetX;
+			BreadboardOffsetY = builder.BreadboardOffsetY;
+			Width = builder.Width;
+			BreadboardPinData = builder.BreadboardPins;
+			
 		}
 
     }
@@ -57,9 +70,10 @@ namespace ADArCWebApp.Shared
 		public bool enabled;
 		public string directoryPath;
 		public string paneHoverText = "";
-		public Dictionary<string, string> codeForGen = new();
+		public Dictionary<CodeType, string> codeForGen = new();
 		public double rightOffset;
 		public double cardScaleFactor;
+		public double workbenchScaleFactor = 1.0;
 		public double bottomOffset;
 
 		public Type compType;
@@ -70,58 +84,174 @@ namespace ADArCWebApp.Shared
 		public string? nodeName;
 
 		public ElementPin[] pinInfo;
-		/* needs more later, good enough for now.*/
-		public ComponentDataBuilder(string name, bool enabled, string directoryPath, double cardScaleFactor, double rightOff, double bottomOff, Type compType = null, string paneHoverText = "", Dictionary<string, string> codeForGen = null, List<string>? pins = null, List<string>? listenOn = null, string gsNodeName = "", Type environmentalSettingsType = null, string warning = null) {
-			this.name = name;
-			this.enabled = enabled;
-			this.directoryPath = directoryPath;
-			this.paneHoverText = paneHoverText;
-			this.codeForGen = codeForGen;
-			this.compType = compType ?? typeof(InvalidComponent);
-			this.EnvironmentalSettingsType = environmentalSettingsType;
-			Warning = warning;
-			this.rightOffset = rightOff;
-			this.bottomOffset = bottomOff;
-			this.cardScaleFactor = cardScaleFactor;
-			if (pins != null)//create pin ids
-			{
-				for (int i = 0; i < pins.Count; i++)
-				{
-					this.pins.Add(pins[i], i);
-				}
-			}
-			if (listenOn != null) {
-				pinsToListen = listenOn;
-			}
-			this.nodeName = gsNodeName;
 
-			//quick hack to get the pinInfo from a component without having to setup a field in the namespace file.
-			//TODO: fix!
-			if (compType != typeof(InvalidComponent)) {
-				try {
-					var p_i = compType!.GetProperty("pinInfo");
-					if (p_i != null)
+		public bool LivesOnBreadBoard = false;
+		public double BreadboardOffsetX, BreadboardOffsetY, Width;
+
+		public List<(int, int)> BreadboardPins = new ();
+		/* needs more later, good enough for now.*/
+		public ComponentDataBuilder(Type compType = null)
+		{
+			this.compType = compType ?? typeof(InvalidComponent);
+
+			foreach (CodeType type in Enum.GetValues(typeof(CodeType)))
+			{
+				codeForGen[type] = "";
+			}
+			
+			if (compType != typeof(InvalidComponent) && compType != null) {
+				List<ElementPin> pinsAttrs = new List<ElementPin>();
+				foreach (var attribute in Attribute.GetCustomAttributes(compType))
+				{
+					if (attribute is ComponentAttribute cA)
 					{
-						this.pinInfo = (ElementPin[])p_i.GetValue(compType.GetConstructors()[0].Invoke(new object[] { }));
+						this.name = cA.Name;
+						this.enabled = cA.Enabled;
+						this.directoryPath = cA.Path;
+						this.bottomOffset = cA.BottomOff;
+						this.rightOffset = cA.RightOff;
+						this.cardScaleFactor = cA.CardScaleFactor;
+						this.nodeName = cA.GsNodeName;
+						this.paneHoverText = cA.PaneHoverText;
+						this.workbenchScaleFactor = cA.WorkbenchScaleFactor;
+					}
+					else if (attribute is BreadboardOffset BBOA)//CANNOT BE SWITCH! sorry
+					{
+						BreadboardOffsetX = BBOA.LeftOffset;
+						BreadboardOffsetY = BBOA.TopOffset;
+						Width = BBOA.Width;
+						LivesOnBreadBoard = true;
+					}
+					else if (attribute is BreadboardPin BPA)
+					{
+						BreadboardPins.Add((BPA.PinOffset, BPA.PinNumber));
+					}
+					else if (attribute is ComponentPin pin)
+					{
+						pinsAttrs.Add(new ElementPin(pin.Name, pin.X, pin.Y, description: pin.Description, number: pin.Number, noBreadboard: pin.NoBreadboard));
+						try
+						{
+							this.pins.Add(pin.gsName, this.pins.Count);
+						}
+						catch (ArgumentException e)
+						{
+							Console.WriteLine(e.Message);
+							Console.WriteLine(e.StackTrace);
+							Console.WriteLine($"Component {name} has duplicate gsPin: {pin.gsName}, This is an error.");
+						}
+					}
+					else if (attribute is ComponentCode cC)
+					{
+						codeForGen[cC.Type] = cC.Code;
+					}
+					else if (attribute is ComponentProperty CPA)
+					{
+						properties[CPA.Name.ToLower()] = new ComponentParameter(CPA.Type, CPA.Data);
+					}
+					else if (attribute is ComponentEnviormentSettingsType CEST)
+					{
+						this.EnvironmentalSettingsType = CEST.Type;
+					}
+					else if (attribute is ComponentPinsToListen CPTL)
+					{
+						pinsToListen = CPTL.pins;
+					}
+					else if (attribute is ComponentWarning CW)
+					{
+						Warning = CW.warn;
 					}
 				}
-				catch {
-					Console.WriteLine(name + " pinInfo setup failed!");
-				}
+				this.pinInfo = pinsAttrs.ToArray();
 			}
 		}
-
-
-		public ComponentDataBuilder Property<T>(string name, T data)
-		{
-			properties[name] = new ComponentParameter<T?>(data);
-			return this;
-		}
-
 
 		public ComponentData Finish()
 		{
 			return new ComponentData(this);
 		}
 	}
+}
+
+
+public class ComponentAttribute(string name, string path, string gsNodeName, bool enabled = true, double cardScaleFactor = 1, double rightOff = 0, double bottomOff = 0, string paneHoverText = "", double workbenchScaleFactor = 1.0) : Attribute
+{
+	public bool Enabled = enabled;
+	public string Name = name;
+	public string Path = path;
+	public string GsNodeName = gsNodeName;
+	public double CardScaleFactor = cardScaleFactor;
+	public double RightOff = rightOff;
+	public double BottomOff = bottomOff;
+	public string PaneHoverText = paneHoverText;
+	public double WorkbenchScaleFactor = workbenchScaleFactor;
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ComponentProperty(string name, object data, Type type) : Attribute
+{
+	public string Name = name;
+	public object Data = data;
+	public Type Type = type;
+}
+
+public class BreadboardOffset(double leftOffset, double topOffset, double width) : Attribute
+{
+	public double LeftOffset = leftOffset;
+	public double TopOffset = topOffset;
+	public double Width = width;
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class BreadboardPin(int offset, int number, string name)
+	: Attribute
+{
+	public int PinOffset = offset;
+	public int PinNumber = number;
+	public string Name = name;
+}
+
+public enum CodeType
+{
+	Include,
+	Global,
+	Setup,
+	LoopMain,
+	Functions,
+	DelayLoop,
+	DelayTime
+}
+
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ComponentCode(CodeType type, string code) : Attribute
+{
+	public CodeType Type = type;
+	public string Code = code;
+}
+
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class ComponentPin(string name, string gsName, double x, double y, int number = 0, string description = "", bool noBreadboard = false)
+	: Attribute
+{
+	public string Name = name;
+	public string gsName = gsName;
+	public string Description = description;
+	public double X = x, Y = y;
+	public int Number = number;
+	public bool NoBreadboard = noBreadboard;
+}
+
+public class ComponentEnviormentSettingsType(Type? type) : Attribute
+{
+	public Type? Type = type;
+}
+
+public class ComponentPinsToListen(string pins) : Attribute
+{
+	public List<string> pins = [pins];
+}
+
+public class ComponentWarning(string warning) : Attribute
+{
+	public string warn = warning;
 }
