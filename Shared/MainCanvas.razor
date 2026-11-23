@@ -388,10 +388,13 @@
             GetAllGridLines_NoBreadboardPresent(lines, connections, routes);
         }
         
+        List<(double minX, double maxX, double y)> hTracks = new();
+        List<(double minY, double maxY, double x)> vTracks = new();
+
         for (var i = 0; i < lines.Count; i++)
         {
             var line = lines[i];
-            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))]);
+            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))], hTracks, vTracks);
         }
 
         return lines;
@@ -434,11 +437,13 @@
         // Get all positive power rail holes
         var positiveHoles = Enumerable.Range(1, 25)
             .Select(i => $"LPLUS_{i}")
+            .Concat(Enumerable.Range(1, 25).Select(i => $"RPLUS_{i}"))
         .ToList();
 
         // Get all negative power rail holes
         var negativeHoles = Enumerable.Range(1, 25)
         .Select(i => $"LMINUS_{i}")
+        .Concat(Enumerable.Range(1, 25).Select(i => $"RMINUS_{i}"))
         .ToList();        
         
         // All possible breadboard holes
@@ -581,13 +586,73 @@
         return (rot > 1 ? -1 : 1) * (rot % 2 == 0 ? Y : X);
     }
 
+    private double AllocateHorizontalTrack(List<(double minX, double maxX, double y)> tracks, double minX, double maxX, double desiredY, double minSpacing = 16)
+    {
+        double y = desiredY;
+        int maxAttempts = 100;
+        int attempts = 0;
+
+        while (attempts < maxAttempts)
+        {
+            bool collision = false;
+            foreach (var track in tracks)
+            {
+                bool xOverlap = Math.Max(minX, track.minX) <= Math.Min(maxX, track.maxX) + 5;
+                if (xOverlap && Math.Abs(track.y - y) < minSpacing)
+                {
+                    collision = true;
+                    if (y >= track.y)
+                        y = track.y + minSpacing;
+                    else
+                        y = track.y - minSpacing;
+                    break;
+                }
+            }
+            if (!collision)
+                break;
+            attempts++;
+        }
+        tracks.Add((minX, maxX, y));
+        return y;
+    }
+
+    private double AllocateVerticalTrack(List<(double minY, double maxY, double x)> tracks, double minY, double maxY, double desiredX, double minSpacing = 16)
+    {
+        double x = desiredX;
+        int maxAttempts = 100;
+        int attempts = 0;
+
+        while (attempts < maxAttempts)
+        {
+            bool collision = false;
+            foreach (var track in tracks)
+            {
+                bool yOverlap = Math.Max(minY, track.minY) <= Math.Min(maxY, track.maxY) + 5;
+                if (yOverlap && Math.Abs(track.x - x) < minSpacing)
+                {
+                    collision = true;
+                    if (x >= track.x)
+                        x = track.x + minSpacing;
+                    else
+                        x = track.x - minSpacing;
+                    break;
+                }
+            }
+            if (!collision)
+                break;
+            attempts++;
+        }
+        tracks.Add((minY, maxY, x));
+        return x;
+    }
+
     /// <summary>
     /// Populates the segments for a given gridline
     /// </summary>
     /// <param name="line">the line to populate segments of</param>
     /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
-    /// <param name="moveHorizontallyFirst">whether to move horizontally or vertically first</param>
-    private void GetGridSegments(GridLine line, double offset, (bool, bool) moveHorizontallyAtEndPoints)
+    /// <param name="moveHorizontallyAtEndPoints">whether to move horizontally or vertically first</param>
+    private void GetGridSegments(GridLine line, double offset, (bool, bool) moveHorizontallyAtEndPoints, List<(double minX, double maxX, double y)> hTracks, List<(double minY, double maxY, double x)> vTracks)
     {
         var start = line.Start;
         var end = line.End;
@@ -597,7 +662,10 @@
 
         if (moveHorizontallyAtEndPoints.Item1)
         {
-            var nextX = moveHorizontallyAtEndPoints.Item2 ? (start.x + end.x) / 2 + offset : end.x;
+            var desiredX = moveHorizontallyAtEndPoints.Item2 ? (start.x + end.x) / 2 + offset : end.x;
+            var minY = Math.Min(start.y, end.y);
+            var maxY = Math.Max(start.y, end.y);
+            var nextX = moveHorizontallyAtEndPoints.Item2 ? AllocateVerticalTrack(vTracks, minY, maxY, desiredX, 16 * zoomFactor) : end.x;
             line.Segments.Add(new Segment(currentX, currentY, nextX, currentY));
             currentX = nextX;
 
@@ -609,7 +677,10 @@
         }
         else
         {
-            var nextY = moveHorizontallyAtEndPoints.Item2 ? end.y : (start.y + end.y) / 2 + offset;
+            var desiredY = moveHorizontallyAtEndPoints.Item2 ? end.y : (start.y + end.y) / 2 + offset;
+            var minX = Math.Min(start.x, end.x);
+            var maxX = Math.Max(start.x, end.x);
+            var nextY = moveHorizontallyAtEndPoints.Item2 ? end.y : AllocateHorizontalTrack(hTracks, minX, maxX, desiredY, 16 * zoomFactor);
             line.Segments.Add(new Segment(currentX, currentY, currentX, nextY));
             currentY = nextY;
 

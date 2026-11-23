@@ -26,9 +26,9 @@ public static class BreadboardNet
             return $"RIGHT_{row}";
         }
         
-        // Power rails: LPLUS_1, LMINUS_1,...
+        // Power rails: LPLUS_1, LMINUS_1, RPLUS_1, RMINUS_1,...
         var parts = hole.Split('_');
-        if (parts.Length == 2 && (parts[0] == "lplus" || parts[0] == "lminus") && int.TryParse(parts[1], out int railHole) && railHole >= 1 && railHole <= 25)
+        if (parts.Length == 2 && (parts[0] == "lplus" || parts[0] == "lminus" || parts[0] == "rplus" || parts[0] == "rminus") && int.TryParse(parts[1], out int railHole) && railHole >= 1 && railHole <= 25)
         {
             return $"RAIL_{parts[0]}";
         }

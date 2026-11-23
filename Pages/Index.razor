@@ -239,11 +239,13 @@
         // Get all positive power rail holes
         var positiveHoles = Enumerable.Range(2, 25)
             .Select(i => $"LPLUS_{i}")
+            .Concat(Enumerable.Range(2, 25).Select(i => $"RPLUS_{i}"))
             .ToList();
 
         // Get all negative power rail holes
         var negativeHoles = Enumerable.Range(2, 25)
             .Select(i => $"LMINUS_{i}")
+            .Concat(Enumerable.Range(2, 25).Select(i => $"RMINUS_{i}"))
             .ToList();
         
         double LivesOnBreadBoardOffset = 0;
