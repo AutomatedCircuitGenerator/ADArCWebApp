@@ -799,6 +799,7 @@
                 BreadboardX += (e.MovementX / zoomFactor);
                 BreadboardY += (e.MovementY / zoomFactor);
                 AdjustBBToZoom();
+                StateHasChanged();
                 break;
             case true:
             {
@@ -871,6 +872,7 @@
     {
         targetFound = true;
         Pages.Index.App.SelectedComponent = -3;
+        StateHasChanged();
     }
     
     //click on the canvas handler.

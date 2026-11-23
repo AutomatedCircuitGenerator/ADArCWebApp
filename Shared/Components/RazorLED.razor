@@ -1,4 +1,4 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 @attribute [Component("LED", "Output/LED", "led", true, 1.5, 40, 50)]
 
 @attribute [BreadboardOffset(-25.5, -26, 31)]
@@ -162,7 +162,7 @@
       fill="#666666" />
 
     <!-- LED red color layer, change fill to change color of LED -->
-    <path
+    <path id="ledColor"
       d="M 29.003,22.207
          L 29.003,16.294
          C 29.003,12.381 25.835,9.206 21.918,9.206
@@ -191,8 +191,8 @@
            L 3.076,21.238
            C 2.198,20.901 1.419,20.456 0.768,19.926 Z" />
     <!-- Glowing effect when turn on-->
-    <g id ="ledOn">
-    <circle
+    <g id="ledDisplay" class="light" style="display:none">
+    <circle id="ledColorBrightness"
       cx="7" cy="11" r="10"
       fill="#ff7777"
       opacity="0.95"
