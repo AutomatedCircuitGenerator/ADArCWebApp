@@ -1,5 +1,19 @@
 ﻿@inherits RazorComponent
+@attribute [Component("LED", "Output/LED", "led", true, 1.5, 40, 50)]
 
+<!-- Breadbaord pins for breadboard branch
+@attribute [BreadboardOffset(-25.5, -26, 31)]
+@attribute [BreadboardPin(0, 8, "anode")]
+@attribute [BreadboardPin(1, 4, "gnd")]
+-->
+
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output")]
+@attribute [ComponentCode(CodeType.LoopMain, "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating")]
+
+@attribute [ComponentPin("anode","anode", 50, 66, number: 1)]
+@attribute [ComponentPin("cathode","cathode", 39, 66, number: 2)]
+
+@attribute [ComponentProperty("color", "red", typeof(string))]
 @code {
     [Parameter]
     [DropdownSetting(["red", "blue", "green", "yellow", "purple", "orange", "white"])]
@@ -7,19 +21,6 @@
     {
         get;
         set;
-    }
-
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "anode", x: 50, y: 66, signals: new PinSignalInfo[] { }, description: "Anode"),
-                new ElementPin(name: "cathode", x: 39, y: 66, signals: new PinSignalInfo[] { }, description: "Cathode")
-            };
-        }
     }
 
 }
