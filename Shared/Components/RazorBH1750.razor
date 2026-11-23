@@ -1,29 +1,25 @@
 ﻿@inherits RazorComponent
 
+@attribute [Component("Ambient Light Sensor", "Input/Light Sensors", "bh1750", true, 0.7, 50, 50, "BH1750")]
+
+@attribute [ComponentCode(CodeType.Include, "#include <Arduino.h>\n#include <hp_BH1750.h>\t\t//  include the library")]
+@attribute [ComponentCode(CodeType.Global, "hp_BH1750 BH1750;       //  create the sensor")]
+@attribute [ComponentCode(CodeType.Setup, 
+    "  // put your setup code here, to run once:\n  Serial.begin(9600);\n  bool avail = BH1750.begin(BH1750_TO_GROUND);// init the sensor with address pin connetcted to ground\n                                              // result (bool) wil be be \"false\" if no sensor found\n  if (!avail) {\n    Serial.println(\"No BH1750 sensor found!\");\n    while (true) {};\n  }")]
+@attribute [ComponentCode(CodeType.LoopMain, 
+    "  // put your main code here, to run repeatedly:\n  BH1750.start();   //starts a measurement\n  float lux=BH1750.getLux();  //  waits until a conversion finished\n  Serial.println(lux);    ")]
+
+@attribute [ComponentPin("VIN", "vin", 0, 0, 1)]
+@attribute [ComponentPin("GND", "gnd", 0, 0, 3)]
+@attribute [ComponentPin("SCL", "scl", 0, 0, 4)]
+@attribute [ComponentPin("SDA", "sda", 0, 0, 5)]
+
+@attribute [ComponentProperty("illuminance", 10, typeof(double))
+
 @code {
-
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            // TODO change positions of pins
-            return new ElementPin[]
-            {
-                new ElementPin(name: "VIN", x: 0, y: 0, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "GND", x: 0, y: 0, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "SCL", x: 0, y: 0, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "SDA", x: 0, y: 0, signals: new PinSignalInfo[] { }, number: 5),
-            };
-        }
-    }
-
     [Parameter]
     [ValueSetting("lux", 10, 1, 65535)]
-    public double illuminance
-    {
-        get;
-        set;
-    }
+    public double illuminance { get; set; }
 }
 
 <?xml version='1.0' encoding='utf-8'?>
