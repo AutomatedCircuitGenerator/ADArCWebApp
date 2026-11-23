@@ -53,6 +53,7 @@
     <string>pms5003_arduino.grxml</string>
     <string>thermistor_arduino.grxml</string>
     <string>tb6612fng_arduino.grxml</string>
+    <string>pushButton_arduino.grxml</string>
   </ruleFileNames>
   <name>CONNECT</name>
   <TriggerRuleNum>0</TriggerRuleNum>

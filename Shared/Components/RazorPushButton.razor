@@ -1,0 +1,67 @@
+﻿@inherits RazorComponent
+@attribute [Component("Push Button", "Input/Buttons and Switches", "pushButton", true, 1.5, 40, 50, paneHoverText:"Push Button")]
+
+@attribute [BreadboardOffset(-25.5, -26, 31)]
+@attribute [BreadboardPin(0, 8, "sig")]
+@attribute [BreadboardPin(1, 4, "gnd")]
+
+@attribute [ComponentCode(CodeType.Global, "const int buttonPin@ = ~\"digital_out\";\nbool prevState@ = HIGH;")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(buttonPin@, INPUT_PULLUP);")]
+@attribute [ComponentCode(CodeType.LoopMain, "  int buttonState@ = digitalRead(buttonPin@);\n\n  if (buttonState@ == LOW && prevState@ == HIGH) {\n    Serial.println(\"Button is pressed!\");\n  }\n\n  prevState@ = buttonState@;")]
+
+
+@attribute [ComponentPin("digital_out","digital_out", 54.2, 30, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 54.2, 105, number: 2)]
+
+@code {
+    
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="24mm" height="22.4mm" viewBox="0 0 120 112">
+  <defs>
+    <linearGradient id="bodyGrad" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#f2f2f2"/>
+      <stop offset="1" stop-color="#c8c8c8"/>
+    </linearGradient>
+    <radialGradient id="buttonGrad" cx="35%" cy="30%" r="75%">
+      <stop offset="0" stop-color="#555"/>
+      <stop offset="1" stop-color="#111"/>
+    </radialGradient>
+  </defs>
+
+  <g id="terminal-a" aria-label="Top terminal (two connected legs)">
+    <g id="pin-top-left">
+      <rect x="34" y="6" width="8" height="21" rx="2" fill="#949494"/>
+    </g>
+    <g id="pin-top-right">
+      <rect x="78" y="6" width="8" height="21" rx="2" fill="#949494"/>
+    </g>
+  </g>
+
+  <g id="terminal-b" aria-label="Bottom terminal (two connected legs)">
+    <g id="pin-bottom-left">
+      <rect x="34" y="85" width="8" height="21" rx="2" fill="#949494"/>
+    </g>
+    <g id="pin-bottom-right">
+      <rect x="78" y="85" width="8" height="21" rx="2" fill="#949494"/>
+    </g>
+  </g>
+
+  <g id="metal-housing">
+    <rect x="25" y="18" width="70" height="76" rx="8" fill="url(#bodyGrad)" stroke="#333" stroke-width="3"/>
+    <rect x="28" y="21" width="64" height="70" rx="6" fill="#ddd" opacity="0.45"/>
+  </g>
+
+  <g id="corner-fasteners">
+    <circle cx="36" cy="30" r="7" fill="#222" stroke="#444" stroke-width="1"/>
+    <circle cx="84" cy="30" r="7" fill="#222" stroke="#444" stroke-width="1"/>
+    <circle cx="36" cy="82" r="7" fill="#222" stroke="#444" stroke-width="1"/>
+    <circle cx="84" cy="82" r="7" fill="#222" stroke="#444" stroke-width="1"/>
+  </g>
+
+  <g id="button-cap">
+    <circle cx="60" cy="56" r="24" fill="#2b2b2b" stroke="#111" stroke-width="1.5"/>
+    <circle cx="60" cy="56" r="20" fill="url(#buttonGrad)"/>
+    <ellipse cx="54" cy="48" rx="8" ry="5" fill="#fff" opacity="0.18"/>
+  </g>
+</svg>
