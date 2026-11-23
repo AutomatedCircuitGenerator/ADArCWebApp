@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using ADArCWebApp.Shared.Components;
 using ADArCWebApp.Shared.EnvironmentalSettings;
 
@@ -17,7 +17,12 @@ namespace ADArCWebApp.Shared
 
             int index = 3;
 
-            Type[] ComponentRazorClasses = Assembly.GetExecutingAssembly().GetTypes().Where(t => t.GetCustomAttribute(typeof(ComponentAttribute)) != null).ToArray();
+            Type[] ComponentRazorClasses = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.GetCustomAttribute(typeof(ComponentAttribute)) != null 
+                         && t != typeof(RazorArduinoUno) 
+                         && t != typeof(RazorArduinoMega))
+                .OrderBy(t => ((ComponentAttribute)t.GetCustomAttribute(typeof(ComponentAttribute))!).Name)
+                .ToArray();
 
             foreach (Type type in ComponentRazorClasses)
             {

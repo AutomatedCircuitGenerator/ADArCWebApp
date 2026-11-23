@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using GraphSynth.Representation
 @using System.IO
 @using System.IO.Compression
@@ -621,7 +621,6 @@
                 comp.localId = localIds;
                 Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
 
-
                 BuildCode.outputPins.Clear();
                 BuildCanvas!.ConnLines.Clear();
                 foreach (var c in Comps.Values)
@@ -636,12 +635,14 @@
                 await comp.LinkController(JsRuntime);
                 _componentFrequencies.IncrementFrequency(targetCardComponentId);
 
-                //register the dht specifically to forced the arduino to pause while awaiting response from sensor
-                //TODO: improve and generalize.
-                if (Comps[localIds].GlobalId == 20)
+                //register the dht specifically to force the arduino to pause while awaiting response from sensor
+                if (IsDhtComponent(Comps[localIds]))
                 {
                     //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                    AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+                    if (Comps[localIds].ConnMap.ContainsKey(1) && Comps[localIds].ConnMap[1].Count > 0)
+                    {
+                        AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+                    }
                 }
 
                 AppInterop.UpdateCodeWrapper();
@@ -1067,10 +1068,12 @@
         _componentFrequencies.DecrementFrequency(removedComponent.GlobalId);
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
-        //TODO: improve and generalize.
-        if (removedComponent.GlobalId == 20)
+        if (IsDhtComponent(removedComponent))
         {
-            AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
+            if (Comps[SelectedComponent].ConnMap.ContainsKey(1) && Comps[SelectedComponent].ConnMap[1].Count > 0)
+            {
+                AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
+            }
         }
 
         GraphSynthInvoke.RemoveComp(removedComponent.GsNode);
@@ -1393,7 +1396,7 @@
                 if (!comp.IsArduino()) await comp.LinkController(JsRuntime);
 
                 // Re-register DHT if present
-                if (comp.GlobalId == 20)
+                if (IsDhtComponent(comp))
                 {
                     if (comp.ConnMap.ContainsKey(1) && comp.ConnMap[1].Count > 0)
                     {
@@ -1416,6 +1419,14 @@
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
             throw;
         }
+    }
+
+    private static bool IsDhtComponent(ComponentInstance? comp)
+    {
+        if (comp?.Data?.compType == null) return false;
+        return comp.Data.compType == typeof(Shared.Components.RazorDHT11) 
+            || comp.Data.compType == typeof(Shared.Components.RazorDHT22) 
+            || comp.Data.compType == typeof(Shared.Components.RazorDHT22MODULE);
     }
 
     /// <summary>
