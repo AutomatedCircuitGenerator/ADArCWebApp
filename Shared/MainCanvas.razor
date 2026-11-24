@@ -533,7 +533,7 @@
                     string netId = BreadboardNet.GetNetId(holeId); // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
                     var wireKey = (arduino.localId, arduinoPinId, netId); // Store the Arduino pin and its destination net
                     if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
-                    string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)); // Store the first free hole connected to the component hole
+                    string? arduinoHoleId = comp.Data.LivesOnBreadBoard && BreadboardPowerPin == null ? holeId : availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)); // Store the first free hole connected to the component hole
                     if (arduinoHoleId == null) continue; // If a free hole is found
                     var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId); // Find the relative position of available hole to breadboard
                     var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY)); // Calculate the available hole position on workbench

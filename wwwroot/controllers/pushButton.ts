@@ -18,7 +18,8 @@ export class pushButton extends Controller {
         this.bindWhenReady();
 
         this.simulationStarted = true;
-        
+
+        if (this.buttonCap) this.buttonCap.style.cursor = "pointer";
     }
 
     override cleanup(): void {
@@ -26,8 +27,11 @@ export class pushButton extends Controller {
         this.activePointerId = null;
         this.isPushed = false;
 
-        if (this.buttonCap) this.buttonCap.style.transform = "scale(1)";
-
+        if (this.buttonCap) {
+            this.buttonCap.style.transform = "scale(1)";
+            this.buttonCap.style.cursor = "default";
+        }
+        
         super.cleanup();
     }
 

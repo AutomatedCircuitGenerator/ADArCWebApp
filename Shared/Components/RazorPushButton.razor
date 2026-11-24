@@ -1,9 +1,9 @@
 ﻿@inherits RazorComponent
-@attribute [Component("Push Button", "Input/Buttons and Switches", "pushButton", true, 1.5, 40, 50, paneHoverText:"Push Button")]
+@attribute [Component("Push Button", "Input/Buttons and Switches", "pushButton", true, 1.5, 40, 50, paneHoverText:"Push Button", 0.91)]
 
-@attribute [BreadboardOffset(-25.5, -26, 31)]
-@attribute [BreadboardPin(0, 8, "sig")]
-@attribute [BreadboardPin(1, 4, "gnd")]
+@attribute [BreadboardOffset(-2.5, 129, 62)]
+@attribute [BreadboardPin(0, 9, "sig")]
+@attribute [BreadboardPin(0, 1, "gnd")]
 
 @attribute [ComponentCode(CodeType.Global, "const int buttonPin@ = ~\"digital_out\";\nbool prevState@ = HIGH;")]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(buttonPin@, INPUT_PULLUP);")]
