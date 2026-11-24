@@ -14,6 +14,7 @@
     [Parameter] public double zoomedY { get; set; } = 0;
     [Parameter] public Transform? Transform { get; set; }
     [Parameter] public int BreadboardRot { get; set; } = 0;
+    [Parameter] public EventCallback<int> BreadboardRotChanged { get; set; }
     private bool enableBorder = false;
     private bool rightClickable = false;
     private double clickMenuX = 0;
@@ -29,16 +30,18 @@
         return enableBorder ? "b-border" : "";
     }
     
-    void RotateCounterClockwise()
+    async Task RotateCounterClockwise()
     {
         BreadboardRot--;
         if(BreadboardRot < 0) BreadboardRot = 3;
+        await BreadboardRotChanged.InvokeAsync(BreadboardRot);
     }
 
-    void RotateClockwise()
+    async Task RotateClockwise()
     {
         BreadboardRot++;
         if(BreadboardRot > 3) BreadboardRot = 0;
+        await BreadboardRotChanged.InvokeAsync(BreadboardRot);
     }
     
     [Parameter] public Action CanvasClick { get; set; }
@@ -67,7 +70,7 @@
     }
 }
 
-<div class="comp-wrapper @(BorderClasses())" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @oncontextmenu:preventDefault="true" @oncontextmenu="RightClick" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(BreadboardRot * 90)deg">
+<div class="comp-wrapper @(BorderClasses())" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @oncontextmenu:preventDefault="true" @oncontextmenu="RightClick" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin: 270px 190px; rotate: @(BreadboardRot * 90)deg">
     <div id="component-bb">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1080 760" width="540" height="380">
             <g transform="translate(0 760) rotate(270)"> 

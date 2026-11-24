@@ -1,7 +1,7 @@
 @using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(individualData?.rotation * 90)deg">
+<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(EffectiveRotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
@@ -173,6 +173,11 @@
     [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
 
     [Parameter] public ComponentInstance? individualData { get; set; }
+
+    [Parameter] public int BreadboardRot { get; set; } = 0;
+    private int EffectiveRotation => (individualData != null && individualData.Data.LivesOnBreadBoard)
+        ? ((individualData.rotation + BreadboardRot) % 4 + 4) % 4
+        : (individualData?.rotation ?? 0);
 
     [Parameter] public double BreadBoard_X { get; set; }
     [Parameter] public double BreadBoard_Y { get; set; }

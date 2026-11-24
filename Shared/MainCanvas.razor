@@ -4,7 +4,7 @@
 <div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
     @if (ShowBreadboard)
     {
-        <Breadboard @ref="_breadboardRef" BreadboardRot="BreadboardRot" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
+        <Breadboard @ref="_breadboardRef" BreadboardRot="BreadboardRot" BreadboardRotChanged="OnBreadboardRotChanged" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
     }
     @if (BoardService.Board != Board.None)
     {
@@ -23,12 +23,17 @@
     {
         if (c.Value.Data.LivesOnBreadBoard)
         {
+            double unrotX = CurrentOffset + c.Value.Data.BreadboardOffsetX;
+            double unrotY = c.Value.Data.BreadboardOffsetY;
+            var (rotCompX, rotCompY) = RotateAroundBreadboardCenter(BreadboardRot, unrotX, unrotY);
+
             <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
                               CanvasClick="CanvasClick" CancelDrag="CancelDrag"
                               forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
                               handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
-                              BreadBoard_X="@(ShowBreadboard ? BreadboardZoomX + CurrentOffset * zoomFactor + c.Value.Data.BreadboardOffsetX * zoomFactor : c.Value.zoomedX)"
-                              BreadBoard_Y="@(ShowBreadboard ? BreadboardZoomY + c.Value.Data.BreadboardOffsetY * zoomFactor : c.Value.zoomedY)" 
+                              BreadboardRot="@BreadboardRot"
+                              BreadBoard_X="@(ShowBreadboard ? BreadboardZoomX + rotCompX * zoomFactor : c.Value.zoomedX)"
+                              BreadBoard_Y="@(ShowBreadboard ? BreadboardZoomY + rotCompY * zoomFactor : c.Value.zoomedY)" 
                               individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
                               DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
 
@@ -469,10 +474,9 @@
                 if(!comp.Data.LivesOnBreadBoard){
                     //Add Wire from component to Breadboard
                     var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
-                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(connection.HoleId); // Find the breadboard hole center
                     var compRot = comp.rotation;
                     var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y), comp.Y + RotateY(compRot, pin.x, pin.y))); // Wire starting point at component pin
-                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
+                    var end = ZoomCoord(GetBreadboardHoleCanvasCoord(connection.HoleId)); // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
@@ -501,16 +505,14 @@
                     
                     var BreadboardComponentPin = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId), null);
                     if(BreadboardComponentPin == null)continue;
-                    var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(BreadboardComponentPin); // Find the breadboard hole center
 
                     BreadboardPowerPin = candidates.FirstOrDefault
                         (h => !usedHoles.Contains(h) && h != candidates[0], null);
                     if(BreadboardPowerPin == null)continue;
-                    var (PholeX, PholeY) = BreadboardHoleCoordinates.GetCenter(BreadboardPowerPin); // Find the breadboard hole center
                     
                     Console.WriteLine("Orininal Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
-                    var start = ZoomCoord((BreadboardX + PholeX, BreadboardY + PholeY)); // Wire ending point at breadboard hole
-                    var end = ZoomCoord((BreadboardX + holeX, BreadboardY + holeY)); // Wire ending point at breadboard hole
+                    var start = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardPowerPin)); // Wire ending point at breadboard hole
+                    var end = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardComponentPin)); // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
@@ -540,8 +542,7 @@
                     if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
                     string? arduinoHoleId = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)); // Store the first free hole connected to the component hole
                     if (arduinoHoleId == null) continue; // If a free hole is found
-                    var (arduinoHoleX, arduinoHoleY) = BreadboardHoleCoordinates.GetCenter(arduinoHoleId); // Find the relative position of available hole to breadboard
-                    var arduinoEnd = ZoomCoord((BreadboardX + arduinoHoleX, BreadboardY + arduinoHoleY)); // Calculate the available hole position on workbench
+                    var arduinoEnd = ZoomCoord(GetBreadboardHoleCanvasCoord(arduinoHoleId)); // Calculate the available hole position on workbench
                     lines.Add(new GridLine(
                         wireColor,
                         arduinoStart,
@@ -791,8 +792,8 @@
         comp.zoomedY = z.y;
     }
 
-    public double BreadboardX = 0;
-    public double BreadboardY = 0;
+    public double BreadboardX = 350;
+    public double BreadboardY = 120;
     public double BreadboardZoomX;
     public double BreadboardZoomY; 
     private void AdjustBBToZoom()
@@ -801,6 +802,22 @@
         var z = ZoomCoord((BreadboardX, BreadboardY));
         BreadboardZoomX = z.x;
         BreadboardZoomY = z.y;
+    }
+
+    public (double x, double y) RotateAroundBreadboardCenter(int rot, double x, double y)
+    {
+        double cx = 270.0;
+        double cy = 190.0;
+        double dx = x - cx;
+        double dy = y - cy;
+        return (cx + RotateX(rot, dx, dy), cy + RotateY(rot, dx, dy));
+    }
+
+    public (double x, double y) GetBreadboardHoleCanvasCoord(string holeId)
+    {
+        var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(holeId);
+        var (rotHoleX, rotHoleY) = RotateAroundBreadboardCenter(BreadboardRot, holeX, holeY);
+        return (BreadboardX + rotHoleX, BreadboardY + rotHoleY);
     }
     
 
@@ -980,6 +997,12 @@
                 }
             }
         }
+    }
+
+    private void OnBreadboardRotChanged(int rot)
+    {
+        BreadboardRot = rot;
+        StateHasChanged();
     }
 
 }
