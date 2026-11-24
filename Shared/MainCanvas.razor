@@ -184,16 +184,15 @@
             var dx2 = next.x2 - next.x1;
             var dy2 = next.y2 - next.y1;
 
-            var isStraight = (dx1 * dy2 == dx2 * dy1); 
+            var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+            var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+            var isStraight = (dx1 * dy2 == dx2 * dy1);
 
-            if (isStraight)
+            if (len1 < 0.001 || len2 < 0.001 || isStraight)
             {
                 path.Append($"L {current.x2} {current.y2} ");
                 continue;
             }
-
-            var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
-            var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
 
             var trim1 = Math.Min(cornerRadius, len1 / 2);
             var trim2 = Math.Min(cornerRadius, len2 / 2);
@@ -380,32 +379,23 @@
     /// <returns></returns>
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
-        // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
-        Dictionary<(int, int), (bool, bool)> routes = new();
         var lines = new List<GridLine>();
 
         if (ShowBreadboard)
         {
-            GetAllGridLines_BreadboardPresent(lines, connections, routes);
+            GetAllGridLines_BreadboardPresent(lines, connections);
         }
         else
         {
-            GetAllGridLines_NoBreadboardPresent(lines, connections, routes);
+            GetAllGridLines_NoBreadboardPresent(lines, connections);
         }
         
-        List<(double minX, double maxX, double y)> hTracks = new();
-        List<(double minY, double maxY, double x)> vTracks = new();
-
-        for (var i = 0; i < lines.Count; i++)
-        {
-            var line = lines[i];
-            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))], hTracks, vTracks);
-        }
+        RouteAllLines(lines);
 
         return lines;
     }
 
-    private void GetAllGridLines_NoBreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    private void GetAllGridLines_NoBreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
     {
         foreach (var connection in connections)
         {
@@ -425,13 +415,10 @@
                 connection.To.localId, 
                 tooltip,
                 []));
-
-            // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
-            RouteWire(routes, start.x, connection.From.localId);
         }
     }
 
-    private void GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections, Dictionary<(int, int), (bool, bool)> routes)
+    private void GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
     {
         // Holes already assigned to component wires
         var usedHoles = comps.Values
@@ -486,7 +473,6 @@
                         $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
                         []
                     ));
-                    RouteWire(routes, start.x, comp.localId);
                 }
 
                 if (originalWire == null) continue; //no connection to arduino i guess??? This causes a floating line
@@ -524,8 +510,6 @@
                     ));
                     usedHoles.Add(BreadboardComponentPin);
                     usedHoles.Add(BreadboardPowerPin);
-                    RouteWire(routes, start.x, comp.localId);
-                    
                 }
                 
                 
@@ -552,7 +536,6 @@
                         $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
                         []
                     ));
-                    RouteWire(routes, arduinoStart.x, arduino.localId, horizonalEnd: false);
                     
                     // Reserve the new hole and record the wire so it won't redraw later
                     usedHoles.Add(arduinoHoleId);
@@ -560,20 +543,6 @@
                 }
 
             }
-        }
-    }
-    
-    //Make wires route horizontally if they share an X position with another wire
-    private void RouteWire(Dictionary<(int, int), (bool, bool)> routes, double x, int id, bool horizonalEnd = false)
-    {
-        var startX = (int)Math.Floor(x);
-        if (routes.ContainsKey((id, startX)))
-        {
-            routes[(id, startX)] = (true, horizonalEnd);
-        }
-        else
-        {
-            routes[(id, startX)] = (false, horizonalEnd);
         }
     }
     
@@ -612,6 +581,10 @@
             if (!collision)
                 break;
             attempts++;
+            if (attempts > 30)
+            {
+                y += minSpacing;
+            }
         }
         tracks.Add((minX, maxX, y));
         return y;
@@ -642,56 +615,155 @@
             if (!collision)
                 break;
             attempts++;
+            if (attempts > 30)
+            {
+                x += minSpacing;
+            }
         }
         tracks.Add((minY, maxY, x));
         return x;
     }
 
     /// <summary>
-    /// Populates the segments for a given gridline
+    /// Routes all gridlines generically to prevent collinear overlap across any components, with or without breadboard.
     /// </summary>
-    /// <param name="line">the line to populate segments of</param>
-    /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
-    /// <param name="moveHorizontallyAtEndPoints">whether to move horizontally or vertically first</param>
-    private void GetGridSegments(GridLine line, double offset, (bool, bool) moveHorizontallyAtEndPoints, List<(double minX, double maxX, double y)> hTracks, List<(double minY, double maxY, double x)> vTracks)
+    private void RouteAllLines(List<GridLine> lines)
+    {
+        List<(double minX, double maxX, double y)> hTracks = new();
+        List<(double minY, double maxY, double x)> vTracks = new();
+
+        double tolerance = Math.Max(5.0, 6.0 * zoomFactor);
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            var start = line.Start;
+            var end = line.End;
+
+            int startXCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.Start.x - start.x) < tolerance);
+            int startYCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.Start.y - start.y) < tolerance);
+
+            int endXCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.End.x - end.x) < tolerance);
+            int endYCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.End.y - end.y) < tolerance);
+
+            bool leaveH;
+            if (startXCount > startYCount)
+                leaveH = true; // Pins aligned vertically: must leave horizontally
+            else if (startYCount > startXCount)
+                leaveH = false; // Pins aligned horizontally: must leave vertically
+            else
+                leaveH = Math.Abs(end.x - start.x) >= Math.Abs(end.y - start.y);
+
+            bool enterH;
+            if (endXCount > endYCount)
+                enterH = true; // Pins aligned vertically: must enter horizontally
+            else if (endYCount > endXCount)
+                enterH = false; // Pins aligned horizontally: must enter vertically
+            else
+                enterH = leaveH;
+
+            double offset = (i - (lines.Count - 1) / 2.0) * (14.0 * zoomFactor);
+
+            GetGridSegments(line, offset, leaveH, enterH, hTracks, vTracks);
+        }
+    }
+
+    /// <summary>
+    /// Populates the segments for a given gridline using allocated non-overlapping tracks.
+    /// </summary>
+    private void GetGridSegments(GridLine line, double offset, bool leaveH, bool enterH, List<(double minX, double maxX, double y)> hTracks, List<(double minY, double maxY, double x)> vTracks)
     {
         var start = line.Start;
         var end = line.End;
 
-        var currentX = start.x;
-        var currentY = start.y;
-
-        if (moveHorizontallyAtEndPoints.Item1)
+        // Straight horizontal line if Y is identical and horizontal routing is chosen
+        if (Math.Abs(start.y - end.y) < 1 && leaveH && enterH)
         {
-            var desiredX = moveHorizontallyAtEndPoints.Item2 ? (start.x + end.x) / 2 + offset : end.x;
-            var minY = Math.Min(start.y, end.y);
-            var maxY = Math.Max(start.y, end.y);
-            var nextX = moveHorizontallyAtEndPoints.Item2 ? AllocateVerticalTrack(vTracks, minY, maxY, desiredX, 16 * zoomFactor) : end.x;
-            line.Segments.Add(new Segment(currentX, currentY, nextX, currentY));
-            currentX = nextX;
-
-            if (moveHorizontallyAtEndPoints.Item2)
-            {
-                line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
-                currentY = end.y;
-            }
+            line.Segments.Add(new Segment(start.x, start.y, end.x, end.y));
+            hTracks.Add((Math.Min(start.x, end.x), Math.Max(start.x, end.x), start.y));
+            return;
         }
-        else
+
+        // Straight vertical line if X is identical and vertical routing is chosen
+        if (Math.Abs(start.x - end.x) < 1 && !leaveH && !enterH)
         {
-            var desiredY = moveHorizontallyAtEndPoints.Item2 ? end.y : (start.y + end.y) / 2 + offset;
-            var minX = Math.Min(start.x, end.x);
-            var maxX = Math.Max(start.x, end.x);
-            var nextY = moveHorizontallyAtEndPoints.Item2 ? end.y : AllocateHorizontalTrack(hTracks, minX, maxX, desiredY, 16 * zoomFactor);
-            line.Segments.Add(new Segment(currentX, currentY, currentX, nextY));
-            currentY = nextY;
-
-            if (!moveHorizontallyAtEndPoints.Item2)
-            {
-                line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
-                currentX = end.x;
-            }
+            line.Segments.Add(new Segment(start.x, start.y, end.x, end.y));
+            vTracks.Add((Math.Min(start.y, end.y), Math.Max(start.y, end.y), start.x));
+            return;
         }
-        line.Segments.Add(new Segment(currentX, currentY, end.x, end.y));
+
+        if (leaveH && enterH)
+        {
+            // Case H-V-H: Horizontal departure, vertical trunk, horizontal arrival
+            double desiredX = (start.x + end.x) / 2.0 + offset;
+            double minBound = Math.Min(start.x, end.x) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.x, end.x) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredX = Math.Clamp(desiredX, minBound, maxBound);
+            }
+            else if (Math.Abs(start.x - end.x) < 20 * zoomFactor)
+            {
+                desiredX = start.x + (offset >= 0 ? 30 * zoomFactor + offset : -30 * zoomFactor + offset);
+            }
+
+            double minY = Math.Min(start.y, end.y);
+            double maxY = Math.Max(start.y, end.y);
+            double trunkX = AllocateVerticalTrack(vTracks, minY, maxY, desiredX, 16 * zoomFactor);
+
+            line.Segments.Add(new Segment(start.x, start.y, trunkX, start.y));
+            hTracks.Add((Math.Min(start.x, trunkX), Math.Max(start.x, trunkX), start.y));
+
+            line.Segments.Add(new Segment(trunkX, start.y, trunkX, end.y));
+
+            line.Segments.Add(new Segment(trunkX, end.y, end.x, end.y));
+            hTracks.Add((Math.Min(trunkX, end.x), Math.Max(trunkX, end.x), end.y));
+        }
+        else if (!leaveH && !enterH)
+        {
+            // Case V-H-V: Vertical departure, horizontal trunk, vertical arrival
+            double desiredY = (start.y + end.y) / 2.0 + offset;
+            double minBound = Math.Min(start.y, end.y) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.y, end.y) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredY = Math.Clamp(desiredY, minBound, maxBound);
+            }
+            else if (Math.Abs(start.y - end.y) < 20 * zoomFactor)
+            {
+                desiredY = start.y + (offset >= 0 ? 30 * zoomFactor + offset : -30 * zoomFactor + offset);
+            }
+
+            double minX = Math.Min(start.x, end.x);
+            double maxX = Math.Max(start.x, end.x);
+            double trunkY = AllocateHorizontalTrack(hTracks, minX, maxX, desiredY, 16 * zoomFactor);
+
+            line.Segments.Add(new Segment(start.x, start.y, start.x, trunkY));
+            vTracks.Add((Math.Min(start.y, trunkY), Math.Max(start.y, trunkY), start.x));
+
+            line.Segments.Add(new Segment(start.x, trunkY, end.x, trunkY));
+
+            line.Segments.Add(new Segment(end.x, trunkY, end.x, end.y));
+            vTracks.Add((Math.Min(trunkY, end.y), Math.Max(trunkY, end.y), end.x));
+        }
+        else if (leaveH && !enterH)
+        {
+            // Case H-V: Horizontal departure, vertical arrival
+            line.Segments.Add(new Segment(start.x, start.y, end.x, start.y));
+            hTracks.Add((Math.Min(start.x, end.x), Math.Max(start.x, end.x), start.y));
+
+            line.Segments.Add(new Segment(end.x, start.y, end.x, end.y));
+            vTracks.Add((Math.Min(start.y, end.y), Math.Max(start.y, end.y), end.x));
+        }
+        else // (!leaveH && enterH)
+        {
+            // Case V-H: Vertical departure, horizontal arrival
+            line.Segments.Add(new Segment(start.x, start.y, start.x, end.y));
+            vTracks.Add((Math.Min(start.y, end.y), Math.Max(start.y, end.y), start.x));
+
+            line.Segments.Add(new Segment(start.x, end.y, end.x, end.y));
+            hTracks.Add((Math.Min(start.x, end.x), Math.Max(start.x, end.x), end.y));
+        }
     }
 
     /// <summary>
