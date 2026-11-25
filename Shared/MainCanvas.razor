@@ -496,11 +496,16 @@
                     var BreadboardComponentPin = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId), null);
                     if(BreadboardComponentPin == null)continue;
 
-                    BreadboardPowerPin = candidates
-                        .Where(h => !usedHoles.Contains(h) && h != candidates[0])
+                    // Choose power rail on the same side as BreadboardComponentPin (e.g. left rail 'L' if pin is in columns a-f)
+                    var sidePrefix = BreadboardComponentPin.Length > 0 && "abcdef".Contains(BreadboardComponentPin[0]) ? "L" : "R";
+                    var sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix)).ToList();
+                    if (sideCandidates.Count == 0) sideCandidates = candidates;
+
+                    BreadboardPowerPin = sideCandidates
+                        .Where(h => !usedHoles.Contains(h) && h != sideCandidates[0])
                         .OrderBy(h => {
                             var coord = ZoomCoord(GetBreadboardHoleCanvasCoord(h));
-                            var pinCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(connection.HoleId));
+                            var pinCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardComponentPin));
                             double dx = coord.x - pinCoord.x;
                             double dy = coord.y - pinCoord.y;
                             return dx * dx + dy * dy;
@@ -508,14 +513,14 @@
                         .FirstOrDefault();
                     if(BreadboardPowerPin == null)continue;
                     
-                    Console.WriteLine("Orininal Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
+                    Console.WriteLine("Original Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
                     var start = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardPowerPin)); // Wire ending point at breadboard hole
                     var end = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardComponentPin)); // Wire ending point at breadboard hole
                     lines.Add(new GridLine(
                         wireColor,
                         start,
                         end,
-                        comp.localId,
+                        -1,
                         -1,
                         $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
                         [],
@@ -895,7 +900,7 @@
             double offset = (i - (lines.Count - 1) / 2.0) * (14.0 * zoomFactor);
 
             // Exclude the component(s) this line specifically connects to so wires can reach their own pins
-            var obstacles = allBoxes.Where(b => b.LocalId != line.FromId && b.LocalId != line.ToId).ToList();
+            var obstacles = allBoxes.Where(b => (b.LocalId != line.FromId || line.FromId == -1) && (b.LocalId != line.ToId || line.ToId == -1)).ToList();
 
             GetGridSegments(line, offset, leaveH, enterH, hTracks, vTracks, obstacles);
         }
@@ -971,15 +976,49 @@
         }
         else if (leaveH && !enterH)
         {
-            // Case H-V: Horizontal departure, vertical arrival
-            AddSegmentWithAvoidance(line.Segments, start.x, start.y, end.x, start.y, boxes, hTracks, vTracks);
-            AddSegmentWithAvoidance(line.Segments, end.x, start.y, end.x, end.y, boxes, hTracks, vTracks);
+            // Case H-V: Horizontal departure, vertical arrival (with intermediate allocated feeder to prevent collinear overlap)
+            double desiredX = (start.x + end.x) / 2.0 + offset;
+            double minBound = Math.Min(start.x, end.x) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.x, end.x) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredX = Math.Clamp(desiredX, minBound, maxBound);
+            }
+            double minY = Math.Min(start.y, end.y);
+            double maxY = Math.Max(start.y, end.y);
+            double trunkX = AllocateVerticalTrack(vTracks, boxes, minY, maxY, desiredX, 16 * zoomFactor);
+
+            double feederOffset = (end.y < start.y) ? -20 * zoomFactor : 20 * zoomFactor;
+            double desiredFeederY = end.y + feederOffset + offset;
+            double feederY = AllocateHorizontalTrack(hTracks, boxes, Math.Min(trunkX, end.x), Math.Max(trunkX, end.x), desiredFeederY, 14 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, trunkX, start.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, start.y, trunkX, feederY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, feederY, end.x, feederY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, end.x, feederY, end.x, end.y, boxes, hTracks, vTracks);
         }
         else // (!leaveH && enterH)
         {
-            // Case V-H: Vertical departure, horizontal arrival
-            AddSegmentWithAvoidance(line.Segments, start.x, start.y, start.x, end.y, boxes, hTracks, vTracks);
-            AddSegmentWithAvoidance(line.Segments, start.x, end.y, end.x, end.y, boxes, hTracks, vTracks);
+            // Case V-H: Vertical departure, horizontal arrival (with intermediate allocated feeder to prevent collinear overlap)
+            double desiredY = (start.y + end.y) / 2.0 + offset;
+            double minBound = Math.Min(start.y, end.y) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.y, end.y) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredY = Math.Clamp(desiredY, minBound, maxBound);
+            }
+            double minX = Math.Min(start.x, end.x);
+            double maxX = Math.Max(start.x, end.x);
+            double trunkY = AllocateHorizontalTrack(hTracks, boxes, minX, maxX, desiredY, 16 * zoomFactor);
+
+            double feederOffset = (end.x < start.x) ? -20 * zoomFactor : 20 * zoomFactor;
+            double desiredFeederX = end.x + feederOffset + offset;
+            double feederX = AllocateVerticalTrack(vTracks, boxes, Math.Min(trunkY, end.y), Math.Max(trunkY, end.y), desiredFeederX, 14 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, start.x, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, start.x, trunkY, feederX, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, feederX, trunkY, feederX, end.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, feederX, end.y, end.x, end.y, boxes, hTracks, vTracks);
         }
     }
 
