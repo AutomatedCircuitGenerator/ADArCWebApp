@@ -561,7 +561,7 @@
                         arduinoStart,
                         arduinoEnd,
                         arduino.localId,
-                        -1,
+                        isRailDest ? -1 : comp.localId,
                         $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
                         [],
                         StartIsRail: false,
@@ -963,7 +963,24 @@
             }
             else if (Math.Abs(start.y - end.y) < 20 * zoomFactor)
             {
-                desiredY = start.y + (offset >= 0 ? 30 * zoomFactor + offset : -30 * zoomFactor + offset);
+                // When start and end are near each other vertically, route along the outer corridor (above or below breadboard)
+                bool routeAbove = (ShowBreadboard && BreadboardRot % 2 == 0)
+                    ? (end.y < BreadboardZoomY + 190.0 * zoomFactor)
+                    : (offset <= 0);
+                if (routeAbove)
+                {
+                    double topRef = (ShowBreadboard && BreadboardRot % 2 == 0)
+                        ? Math.Min(BreadboardZoomY, Math.Min(start.y, end.y))
+                        : Math.Min(start.y, end.y);
+                    desiredY = topRef - (30 * zoomFactor + Math.Abs(offset));
+                }
+                else
+                {
+                    double botRef = (ShowBreadboard && BreadboardRot % 2 == 0)
+                        ? Math.Max(BreadboardZoomY + 380.0 * zoomFactor, Math.Max(start.y, end.y))
+                        : Math.Max(start.y, end.y);
+                    desiredY = botRef + (30 * zoomFactor + Math.Abs(offset));
+                }
             }
 
             double minX = Math.Min(start.x, end.x);
