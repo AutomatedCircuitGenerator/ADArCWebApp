@@ -1,7 +1,7 @@
 @using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(EffectiveRotation * 90)deg">
+<div @ref="_wrapperRef" class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(EffectiveScale)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(EffectiveRotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
@@ -175,19 +175,52 @@
     [Parameter] public ComponentInstance? individualData { get; set; }
 
     [Parameter] public int BreadboardRot { get; set; } = 0;
-    private int EffectiveRotation => (individualData != null && individualData.Data.LivesOnBreadBoard)
-        ? ((individualData.rotation + BreadboardRot) % 4 + 4) % 4
+    [Parameter] public bool ShowBreadboard { get; set; } = false;
+    [Parameter] public double BreadboardPinScale { get; set; } = 1.0;
+    [Parameter] public EventCallback<(ComponentData data, double w, double h)> OnSvgMeasured { get; set; }
+
+    private ElementReference _wrapperRef;
+
+    private bool IsMountedOnBreadboard =>
+        ShowBreadboard && individualData != null && individualData.MountedOnBreadboard;
+
+    private double EffectiveScale =>
+        posAbsolute
+            ? zoomFactor * (IsMountedOnBreadboard && BreadboardPinScale > 0 ? BreadboardPinScale : 1.0)
+            : zoomFactor;
+
+    private int EffectiveRotation => IsMountedOnBreadboard
+        ? ((individualData!.rotation + individualData.BreadboardExtraRot + BreadboardRot) % 4 + 4) % 4
         : (individualData?.rotation ?? 0);
 
     [Parameter] public double BreadBoard_X { get; set; }
     [Parameter] public double BreadBoard_Y { get; set; }
     public double RenderX
     {
-        get => individualData.Data.LivesOnBreadBoard ? BreadBoard_X : individualData.zoomedX;
+        get => IsMountedOnBreadboard ? BreadBoard_X : individualData.zoomedX;
     }
     public double RenderY
     {
-        get => individualData.Data.LivesOnBreadBoard ? BreadBoard_Y : individualData.zoomedY;
+        get => IsMountedOnBreadboard ? BreadBoard_Y : individualData.zoomedY;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && posAbsolute && individualData?.Data.BreadboardMountAttr != null && individualData.Data.MeasuredSvgWidth <= 1)
+        {
+            try
+            {
+                var size = await JsRuntime.InvokeAsync<double[]>("getCompSvgSize", _wrapperRef);
+                if (size is { Length: >= 2 } && size[0] > 1 && size[1] > 1 && OnSvgMeasured.HasDelegate)
+                {
+                    await OnSvgMeasured.InvokeAsync((individualData.Data, size[0], size[1]));
+                }
+            }
+            catch
+            {
+                // Ignore if element disposed before interop completes
+            }
+        }
     }
 
     public double ContextMenuX

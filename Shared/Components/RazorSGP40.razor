@@ -1,6 +1,7 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 
 @attribute [Component("VoC Air Quality", "Input/Air Quality Sensors", "sgp40", cardScaleFactor: 1, rightOff: 75, bottomOff: 75)]
+@attribute [BreadboardMount('f')]
 @attribute [ComponentCode(CodeType.Include, "#include <DFRobot_SGP40.h>\n\n" +
                                             "// Compatibility macro to support both DFRobot typo and user function\n" +
                                             "#define getVocalIndex(rh, temp) getVoclndex()")]

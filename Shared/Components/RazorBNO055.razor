@@ -1,5 +1,6 @@
-﻿@inherits RazorComponent;
+@inherits RazorComponent;
 @attribute [Component("9-Dof IMU", "Input/Acceleration Sensors", "bno055", true, 1, 120, 90, paneHoverText: "BNO055")]
+@attribute [BreadboardMount('d', col2: 'g', allowOppositeStrip: false)]
 @attribute [ComponentCode(CodeType.Include, "// Include necessary libraries for the BNO055 sensor\n#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BNO055.h>\n#include <utility/imumaths.h>")]
 @attribute [ComponentCode(CodeType.Setup,                                 "  // Setup function: runs once at startup\n  while (!Serial) delay(10);  // Wait for serial port to open\n\n  Serial.println(\"Orientation Sensor Raw Data Test\");\n  Serial.println(\"\");\n\n  /* Initialize the sensor */\n  if(!bno@.begin())\n  {\n    // Error handling: if the sensor is not detected, print a message and halt\n    Serial.print(\"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!\");\n    while(1);\n  }\n\n  delay(1000); // Allow the sensor to stabilize\n\n  /* Display the current temperature from the sensor */\n  int8_t temp@ = bno@.getTemp();\n  Serial.print(\"Current Temperature: \");\n  Serial.print(temp@);\n  Serial.println(\" C\");\n  Serial.println(\"\");\n\n  // Use external crystal for better accuracy\n  bno@.setExtCrystalUse(true);\n\n  Serial.println(\"Calibration status values: 0=uncalibrated, 3=fully calibrated\");")]
 @attribute [ComponentCode(CodeType.Global,                                 "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n// id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);")]
@@ -14,7 +15,7 @@
 @attribute [ComponentPin("SCL", "scl",103.5, 109, number: 7)]
 @attribute [ComponentPin("PS0", "ps0",65.5, 31, number: 8)]
 @attribute [ComponentPin("PS1", "ps1",78, 31, number: 9)]
-@attribute [ComponentPin("3vo", "null i guess???",75.377, 109, number: 10)]
+@attribute [ComponentPin("3vo", "null i guess???",66.5, 109, number: 10)]
 
 @attribute [ComponentProperty("motion", "Static", typeof(string))]
 

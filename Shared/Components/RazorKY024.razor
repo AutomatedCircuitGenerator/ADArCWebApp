@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("Hall Effect", "Input/Other Sensors", "ky024", true, 0.8, 75, 75, paneHoverText: "KY-024")]
+@attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(digitalPin@, INPUT); // Set digital pin as input for magnetic field detection\n  pinMode(analogPin@, INPUT);   // Set analog pin as input for magnetic field strength")]
 @attribute [ComponentCode(CodeType.LoopMain, "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000);")]
 @attribute [ComponentCode(CodeType.Global, "int digitalPin@ = ~\"digital_out\"; // KY-024 Hall effect sensor digital output\nint analogPin@ = ~\"analog_out\"; // KY-024 Hall effect sensor analog output\nint digitalVal@; // variable for digital readings\nint analogVal@; // variable for analog readings")]

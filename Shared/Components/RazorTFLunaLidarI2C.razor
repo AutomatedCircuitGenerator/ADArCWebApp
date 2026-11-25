@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("TF-Luna Time-of-Flight", "Input/Distance Sensors", "tfLunaLidarI2C", true, 1, 75, 75, paneHoverText: "TF-Luna")]
+@attribute [BreadboardMount('j', maxScale: 3.1)]
 @attribute [ComponentCode(CodeType.Include, 
     "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0")]
 @attribute [ComponentCode(CodeType.Setup,     "  Wire.begin(); // initialize Wire library")]

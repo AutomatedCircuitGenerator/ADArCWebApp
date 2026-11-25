@@ -1,4 +1,4 @@
-﻿namespace ADArCWebApp
+namespace ADArCWebApp
 {
 
     /// <summary>
@@ -88,15 +88,19 @@
         int? number;
         string? description;
         bool? noBreadboard;
+        public string gsName;
+
+        public bool NoBreadboard => noBreadboard ?? false;
 
 
-        public ElementPin(string name, double x, double y, int? number = null, string? description = null, bool noBreadboard = false) { 
+        public ElementPin(string name, double x, double y, int? number = null, string? description = null, bool noBreadboard = false, string? gsName = null) { 
             this.name = name;
             this.x = x;
             this.y = y;
             this.number = number;
             this.description = description;
             this.noBreadboard = noBreadboard;
+            this.gsName = gsName ?? "";
         }
 
 

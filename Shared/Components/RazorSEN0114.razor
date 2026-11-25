@@ -1,5 +1,6 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 @attribute [Component("Soil Moisture", "Input/Soil Sensors", "sen0114", true, .5, 75, 75, paneHoverText: "SEN0114")]
+@attribute [BreadboardMount('j', 2)]
 @attribute [ComponentCode(CodeType.Global, 
     "/* Example code for the moisture sensor\n" +
     "Sensor value descriptions:\n" +

@@ -1,13 +1,13 @@
-﻿namespace ADArCWebApp.Shared;
+namespace ADArCWebApp.Shared;
 
 public static class BreadboardNet
 {
     
-    public static string GetNetId(string hole)
+    public static string GetNetId(string hole, int maxRows = 63)
     {
         hole = hole.ToLowerInvariant(); // hole will have format of a1, b1,..., i30, j30
 
-        // Main breadboard holes (A1–J30)
+        // Main breadboard holes (A1–J{maxRows})
         char column = hole[0];  // column store the first char of hole, which is a, b, ..., j
 
         if (column >= 'a' && column <= 'j')
@@ -15,7 +15,7 @@ public static class BreadboardNet
             int row = int.Parse(hole.Substring(1)); // get rid of first char and convert it to integer and save to row
             
             // Check invalid row
-            if (row < 1 || row > 30)
+            if (row < 1 || row > maxRows)
                 throw new ArgumentException("Invalid row");
             
             // Return left row
@@ -27,8 +27,9 @@ public static class BreadboardNet
         }
         
         // Power rails: LPLUS_1, LMINUS_1, RPLUS_1, RMINUS_1,...
+        int maxRail = BreadboardHoleCoordinates.GetRailHoleCount(maxRows);
         var parts = hole.Split('_');
-        if (parts.Length == 2 && (parts[0] == "lplus" || parts[0] == "lminus" || parts[0] == "rplus" || parts[0] == "rminus") && int.TryParse(parts[1], out int railHole) && railHole >= 1 && railHole <= 25)
+        if (parts.Length == 2 && (parts[0] == "lplus" || parts[0] == "lminus" || parts[0] == "rplus" || parts[0] == "rminus") && int.TryParse(parts[1], out int railHole) && railHole >= 1 && railHole <= maxRail)
         {
             return $"RAIL_{parts[0]}";
         }
@@ -37,8 +38,8 @@ public static class BreadboardNet
     }
     
     // Used to check whether two holes are connected
-    public static bool AreConnected(string a, string b)
+    public static bool AreConnected(string a, string b, int maxRows = 63)
     {
-        return GetNetId(a) == GetNetId(b);
+        return GetNetId(a, maxRows) == GetNetId(b, maxRows);
     }
 }

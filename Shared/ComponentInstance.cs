@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using GraphSynth.Representation;
 using System.Text.Json.Serialization;
 using ADArCWebApp.Shared.Components;
@@ -33,6 +33,33 @@ namespace ADArCWebApp.Shared
 
         [JsonIgnore]
         public readonly List<BreadboardConnection> BreadboardConnections = new();
+
+        [JsonIgnore]
+        public bool MountedOnBreadboard { get; set; }
+
+        [JsonIgnore]
+        public int BreadboardStartRow { get; set; }
+
+        [JsonIgnore]
+        public int BreadboardRowSpan { get; set; }
+
+        [JsonIgnore]
+        public char BreadboardCol { get; set; } = 'f';
+
+        [JsonIgnore]
+        public int BreadboardExtraRot { get; set; }
+
+        [JsonIgnore]
+        public double BreadboardPinScale { get; set; } = 1.0;
+
+        [JsonIgnore]
+        public double BreadboardAnchorX { get; set; }
+
+        [JsonIgnore]
+        public double BreadboardAnchorY { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<int, (int rowOffset, char col)> BreadboardPinMap { get; } = new();
         
         [JsonIgnore] public node GsNode;
         public int midSignal;

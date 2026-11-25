@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("OLED", "Output/Displays", "ssd1306", true, 1, 75, 75, paneHoverText: "SSD1306")]
+@attribute [BreadboardMount('f')]
 @attribute [ComponentCode(CodeType.Global, 
    "#define SCREEN_WIDTH 128\n" +
    "#define SCREEN_HEIGHT 64\n" +
