@@ -5,6 +5,8 @@
 @attribute [BreadboardPin(2, 9, "G")]
 @attribute [BreadboardPin(3, 9, "B")]
 @attribute [BreadboardPin(1, 9, "COM")]
+@attribute [BreadboardBody(50, 14, 88, 65)]
+@attribute [BreadboardBody(42, 65, 96, 97)]
 @attribute [ComponentCode(CodeType.Global, "const int blueLED@ = ~\"B\"; // Define pin for blue LED\nconst int greenLED@ = ~\"G\"; // Define pin for green LED\nconst int redLED@ = ~\"R\"; // Define pin for red LED")]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(blueLED@, OUTPUT); // Set blue LED pin as an output\n  pinMode(greenLED@, OUTPUT); // Set green LED pin as an output\n  pinMode(redLED@, OUTPUT); // Set red LED pin as an output")]
 @attribute [ComponentCode(CodeType.LoopMain, "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating")]

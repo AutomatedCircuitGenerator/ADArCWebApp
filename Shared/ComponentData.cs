@@ -1,4 +1,4 @@
-﻿using System.Diagnostics;
+using System.Diagnostics;
 using ADArCWebApp;
 using ADArCWebApp.Shared.Components;
 
@@ -27,6 +27,7 @@ namespace ADArCWebApp.Shared
 		public readonly bool LivesOnBreadBoard;
 		public readonly double BreadboardOffsetX, BreadboardOffsetY, Width;
 		public List<(int, int)> BreadboardPinData;
+		public List<(double minX, double minY, double maxX, double maxY)> BreadboardBodies;
         public Type compType;
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
@@ -58,6 +59,7 @@ namespace ADArCWebApp.Shared
 			BreadboardOffsetY = builder.BreadboardOffsetY;
 			Width = builder.Width;
 			BreadboardPinData = builder.BreadboardPins;
+			BreadboardBodies = builder.BreadboardBodies;
 			
 		}
 
@@ -89,6 +91,7 @@ namespace ADArCWebApp.Shared
 		public double BreadboardOffsetX, BreadboardOffsetY, Width;
 
 		public List<(int, int)> BreadboardPins = new ();
+		public List<(double minX, double minY, double maxX, double maxY)> BreadboardBodies = new ();
 		/* needs more later, good enough for now.*/
 		public ComponentDataBuilder(Type compType = null)
 		{
@@ -125,6 +128,10 @@ namespace ADArCWebApp.Shared
 					else if (attribute is BreadboardPin BPA)
 					{
 						BreadboardPins.Add((BPA.PinOffset, BPA.PinNumber));
+					}
+					else if (attribute is BreadboardBody BBA)
+					{
+						BreadboardBodies.Add((BBA.MinX, BBA.MinY, BBA.MaxX, BBA.MaxY));
 					}
 					else if (attribute is ComponentPin pin)
 					{
@@ -208,6 +215,19 @@ public class BreadboardPin(int offset, int number, string name)
 	public int PinOffset = offset;
 	public int PinNumber = number;
 	public string Name = name;
+}
+
+/// <summary>
+/// Declares a physical body bounding box (in unrotated breadboard coordinates relative to the component's row offset)
+/// so wire routing and breadboard hole selection treat the component body as an obstacle.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class, AllowMultiple = true)]
+public class BreadboardBody(double minX, double minY, double maxX, double maxY) : Attribute
+{
+	public double MinX = minX;
+	public double MinY = minY;
+	public double MaxX = maxX;
+	public double MaxY = maxY;
 }
 
 public enum CodeType

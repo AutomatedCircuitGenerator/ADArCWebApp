@@ -188,7 +188,7 @@
 
             var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
             var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
-            var isStraight = (dx1 * dy2 == dx2 * dy1);
+            var isStraight = Math.Abs(dx1 * dy2 - dx2 * dy1) < 1e-3 && (dx1 * dx2 + dy1 * dy2 >= 0);
 
             if (len1 < 0.001 || len2 < 0.001 || isStraight)
             {
@@ -382,17 +382,18 @@
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
         var lines = new List<GridLine>();
+        List<(double x, double y)>? occupiedHoleCoords = null;
 
         if (ShowBreadboard)
         {
-            GetAllGridLines_BreadboardPresent(lines, connections);
+            occupiedHoleCoords = GetAllGridLines_BreadboardPresent(lines, connections);
         }
         else
         {
             GetAllGridLines_NoBreadboardPresent(lines, connections);
         }
         
-        RouteAllLines(lines);
+        RouteAllLines(lines, occupiedHoleCoords);
 
         return lines;
     }
@@ -421,13 +422,39 @@
         }
     }
 
-    private void GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
+    private List<(double x, double y)> GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
     {
         // Holes already assigned to component wires
         var usedHoles = comps.Values
             .SelectMany(c => c.BreadboardConnections)
             .Select(c => c.HoleId)
             .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Compute true component body boxes on the breadboard so we never route or plug under component bodies
+        var bodyBoxes = new List<CompBox>();
+        double bodyOffset = 0;
+        foreach (var c in comps.Values)
+        {
+            if (c.Data.LivesOnBreadBoard)
+            {
+                bodyBoxes.AddRange(GetBreadboardBodyBoxes(c, bodyOffset, 3 * zoomFactor));
+                bodyOffset += c.Data.Width;
+            }
+        }
+
+        bool IsHoleBlockedByBody(string holeId)
+        {
+            var pt = ZoomCoord(GetBreadboardHoleCanvasCoord(holeId));
+            return bodyBoxes.Any(b => pt.x >= b.MinX && pt.x <= b.MaxX && pt.y >= b.MinY && pt.y <= b.MaxY);
+        }
+
+        bool IsExitRayBlocked((double x, double y) holeCoord, (double x, double y) targetCoord)
+        {
+            double probeDist = 45.0 * zoomFactor;
+            double dirY = targetCoord.y >= holeCoord.y ? 1.0 : -1.0;
+            double py = holeCoord.y + dirY * probeDist;
+            return bodyBoxes.Any(b => SegmentIntersectsBox(holeCoord.x, holeCoord.y, holeCoord.x, py, b));
+        }
 
         // Get all positive power rail holes
         var positiveHoles = Enumerable.Range(1, 25)
@@ -493,12 +520,19 @@
                     //Wire from Lives on breadboard component to powerlines
                     var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
                     
-                    var BreadboardComponentPin = availableHoles.FirstOrDefault(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId), null);
+                    var compPinCandidates = availableHoles
+                        .Where(h => !usedHoles.Contains(h) && !IsHoleBlockedByBody(h) && BreadboardNet.AreConnected(h, connection.HoleId))
+                        .ToList();
+                    if (compPinCandidates.Count == 0)
+                        compPinCandidates = availableHoles.Where(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId)).ToList();
+
+                    var BreadboardComponentPin = compPinCandidates.FirstOrDefault();
                     if(BreadboardComponentPin == null)continue;
 
-                    // Choose power rail on the same side as BreadboardComponentPin (e.g. left rail 'L' if pin is in columns a-f)
+                    // Choose power rail on the clear side of BreadboardComponentPin (e.g. left rail 'L' if pin is in columns a-f)
                     var sidePrefix = BreadboardComponentPin.Length > 0 && "abcdef".Contains(BreadboardComponentPin[0]) ? "L" : "R";
-                    var sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix)).ToList();
+                    var sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix) && !IsHoleBlockedByBody(h)).ToList();
+                    if (sideCandidates.Count == 0) sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix)).ToList();
                     if (sideCandidates.Count == 0) sideCandidates = candidates;
 
                     BreadboardPowerPin = sideCandidates
@@ -544,24 +578,36 @@
                     string netId = BreadboardNet.GetNetId(holeId); // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
                     var wireKey = (arduino.localId, arduinoPinId, netId); // Store the Arduino pin and its destination net
                     if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
-                    string? arduinoHoleId = availableHoles
-                        .Where(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId))
-                        .OrderBy(h => {
+
+                    bool isRailDest = BreadboardPowerPin != null;
+                    var basePinCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(connection.HoleId));
+                    var netCandidates = availableHoles
+                        .Where(h => !usedHoles.Contains(h) && !IsHoleBlockedByBody(h) && BreadboardNet.AreConnected(h, holeId))
+                        .ToList();
+                    if (netCandidates.Count == 0)
+                        netCandidates = availableHoles.Where(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId)).ToList();
+
+                    string? arduinoHoleId = netCandidates
+                        .OrderBy(h => !isRailDest && IsExitRayBlocked(ZoomCoord(GetBreadboardHoleCanvasCoord(h)), arduinoStart) ? 1 : 0)
+                        .ThenBy(h => {
                             var coord = ZoomCoord(GetBreadboardHoleCanvasCoord(h));
                             double dx = coord.x - arduinoStart.x;
                             double dy = coord.y - arduinoStart.y;
-                            return dx * dx + dy * dy;
+                            double distArd = Math.Sqrt(dx * dx + dy * dy);
+                            double pdx = coord.x - basePinCoord.x;
+                            double pdy = coord.y - basePinCoord.y;
+                            double distPin = isRailDest ? 0 : Math.Sqrt(pdx * pdx + pdy * pdy);
+                            return distArd + 0.15 * distPin;
                         })
-                        .FirstOrDefault(); // Store the closest free hole connected to the component hole
+                        .FirstOrDefault(); // Store the closest clear free hole connected to the component hole
                     if (arduinoHoleId == null) continue; // If a free hole is found
                     var arduinoEnd = ZoomCoord(GetBreadboardHoleCanvasCoord(arduinoHoleId)); // Calculate the available hole position on workbench
-                    bool isRailDest = BreadboardPowerPin != null;
                     lines.Add(new GridLine(
                         wireColor,
                         arduinoStart,
                         arduinoEnd,
                         arduino.localId,
-                        isRailDest ? -1 : comp.localId,
+                        -1,
                         $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
                         [],
                         StartIsRail: false,
@@ -575,6 +621,8 @@
 
             }
         }
+
+        return usedHoles.Select(h => ZoomCoord(GetBreadboardHoleCanvasCoord(h))).ToList();
     }
     
     public double RotateX(int rot, double X, double Y)
@@ -589,35 +637,66 @@
 
     private record CompBox(int LocalId, double MinX, double MaxX, double MinY, double MaxY);
 
+    private CompBox TransformBreadboardRect(int localId, double unrotMinX, double unrotMinY, double unrotMaxX, double unrotMaxY, double margin)
+    {
+        var (rx1, ry1) = RotateAroundBreadboardCenter(BreadboardRot, unrotMinX, unrotMinY);
+        var (rx2, ry2) = RotateAroundBreadboardCenter(BreadboardRot, unrotMaxX, unrotMaxY);
+        double cx1 = BreadboardZoomX + rx1 * zoomFactor;
+        double cy1 = BreadboardZoomY + ry1 * zoomFactor;
+        double cx2 = BreadboardZoomX + rx2 * zoomFactor;
+        double cy2 = BreadboardZoomY + ry2 * zoomFactor;
+        return new CompBox(
+            localId,
+            Math.Min(cx1, cx2) - margin,
+            Math.Max(cx1, cx2) + margin,
+            Math.Min(cy1, cy2) - margin,
+            Math.Max(cy1, cy2) + margin
+        );
+    }
+
+    private List<CompBox> GetBreadboardBodyBoxes(ComponentInstance c, double offset, double margin)
+    {
+        var list = new List<CompBox>();
+        if (c.Data.BreadboardBodies.Count > 0)
+        {
+            foreach (var (bMinX, bMinY, bMaxX, bMaxY) in c.Data.BreadboardBodies)
+            {
+                list.Add(TransformBreadboardRect(c.localId, offset + bMinX, bMinY, offset + bMaxX, bMaxY, margin));
+            }
+            return list;
+        }
+
+        // Generic fallback for any LivesOnBreadBoard component without explicit BreadboardBody attributes
+        if (c.BreadboardConnections.Count > 0)
+        {
+            var coords = c.BreadboardConnections
+                .Select(conn => BreadboardHoleCoordinates.GetCenter(conn.HoleId))
+                .ToList();
+            double minX = coords.Min(p => p.x) - 6;
+            double maxX = coords.Max(p => p.x) + 6;
+            double minY = coords.Min(p => p.y) - 6;
+            double maxY = coords.Max(p => p.y) + 6;
+            list.Add(TransformBreadboardRect(c.localId, minX, minY, maxX, maxY, margin));
+        }
+        return list;
+    }
+
     private List<CompBox> GetObstacleBoxes()
     {
         var boxes = new List<CompBox>();
+        double breadboardOffset = 0;
         foreach (var c in comps.Values)
         {
-            double x, y;
-            int rot;
             if (c.Data.LivesOnBreadBoard && ShowBreadboard)
             {
-                double offset = 0;
-                foreach (var other in comps.Values)
-                {
-                    if (other.localId == c.localId) break;
-                    if (other.Data.LivesOnBreadBoard)
-                        offset += other.Data.Width;
-                }
-                double unrotX = offset + c.Data.BreadboardOffsetX;
-                double unrotY = c.Data.BreadboardOffsetY;
-                var (rotCompX, rotCompY) = RotateAroundBreadboardCenter(BreadboardRot, unrotX, unrotY);
-                x = BreadboardZoomX + rotCompX * zoomFactor;
-                y = BreadboardZoomY + rotCompY * zoomFactor;
-                rot = ((c.rotation + BreadboardRot) % 4 + 4) % 4;
+                boxes.AddRange(GetBreadboardBodyBoxes(c, breadboardOffset, 3 * zoomFactor));
+                breadboardOffset += c.Data.Width;
+                continue;
             }
-            else
-            {
-                x = ZoomCoord((c.X, c.Y)).x;
-                y = ZoomCoord((c.X, c.Y)).y;
-                rot = (c.rotation % 4 + 4) % 4;
-            }
+
+            double x = ZoomCoord((c.X, c.Y)).x;
+            double y = ZoomCoord((c.X, c.Y)).y;
+            int rot = (c.rotation % 4 + 4) % 4;
 
             double maxPinX = c.Data.pinInfo.Length > 0 ? c.Data.pinInfo.Max(p => p.x) : 0;
             double maxPinY = c.Data.pinInfo.Length > 0 ? c.Data.pinInfo.Max(p => p.y) : 0;
@@ -857,13 +936,15 @@
     /// <summary>
     /// Routes all gridlines generically to prevent collinear overlap across any components, with or without breadboard.
     /// </summary>
-    private void RouteAllLines(List<GridLine> lines)
+    private void RouteAllLines(List<GridLine> lines, List<(double x, double y)>? occupiedHoleCoords = null)
     {
         List<(double minX, double maxX, double y)> hTracks = new();
         List<(double minY, double maxY, double x)> vTracks = new();
         var allBoxes = GetObstacleBoxes();
 
         double tolerance = Math.Max(5.0, 6.0 * zoomFactor);
+        double holeBoxRadius = 4.0 * zoomFactor;
+        double endpointMatchTol = 2.5 * zoomFactor;
 
         for (int i = 0; i < lines.Count; i++)
         {
@@ -902,7 +983,53 @@
             // Exclude the component(s) this line specifically connects to so wires can reach their own pins
             var obstacles = allBoxes.Where(b => (b.LocalId != line.FromId || line.FromId == -1) && (b.LocalId != line.ToId || line.ToId == -1)).ToList();
 
+            // Prevent wires from crossing over other occupied breadboard pin/wire dots
+            if (occupiedHoleCoords != null)
+            {
+                foreach (var hc in occupiedHoleCoords)
+                {
+                    bool isEndpoint = (Math.Abs(hc.x - start.x) < endpointMatchTol && Math.Abs(hc.y - start.y) < endpointMatchTol)
+                                   || (Math.Abs(hc.x - end.x) < endpointMatchTol && Math.Abs(hc.y - end.y) < endpointMatchTol);
+                    if (!isEndpoint)
+                    {
+                        obstacles.Add(new CompBox(-999, hc.x - holeBoxRadius, hc.x + holeBoxRadius, hc.y - holeBoxRadius, hc.y + holeBoxRadius));
+                    }
+                }
+            }
+
             GetGridSegments(line, offset, leaveH, enterH, hTracks, vTracks, obstacles);
+            SimplifySegments(line.Segments);
+        }
+    }
+
+    private void SimplifySegments(List<Segment> segments)
+    {
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            for (int i = segments.Count - 1; i >= 0; i--)
+            {
+                if (Math.Abs(segments[i].x1 - segments[i].x2) < 0.1 && Math.Abs(segments[i].y1 - segments[i].y2) < 0.1)
+                {
+                    segments.RemoveAt(i);
+                    changed = true;
+                }
+            }
+            for (int i = 0; i < segments.Count - 1; i++)
+            {
+                var a = segments[i];
+                var b = segments[i + 1];
+                bool bothH = Math.Abs(a.y1 - a.y2) < 0.5 && Math.Abs(b.y1 - b.y2) < 0.5 && Math.Abs(a.y2 - b.y1) < 0.5;
+                bool bothV = Math.Abs(a.x1 - a.x2) < 0.5 && Math.Abs(b.x1 - b.x2) < 0.5 && Math.Abs(a.x2 - b.x1) < 0.5;
+                if (bothH || bothV)
+                {
+                    segments[i] = new Segment(a.x1, a.y1, b.x2, b.y2);
+                    segments.RemoveAt(i + 1);
+                    changed = true;
+                    break;
+                }
+            }
         }
     }
 
@@ -938,7 +1065,7 @@
             {
                 desiredX = Math.Clamp(desiredX, minBound, maxBound);
             }
-            else if (Math.Abs(start.x - end.x) < 20 * zoomFactor)
+            else
             {
                 desiredX = start.x + (offset >= 0 ? 30 * zoomFactor + offset : -30 * zoomFactor + offset);
             }
@@ -961,9 +1088,9 @@
             {
                 desiredY = Math.Clamp(desiredY, minBound, maxBound);
             }
-            else if (Math.Abs(start.y - end.y) < 20 * zoomFactor)
+            else
             {
-                // When start and end are near each other vertically, route along the outer corridor (above or below breadboard)
+                // When start and end don't have enough vertical separation for an interior bus, route along the outer corridor
                 bool routeAbove = (ShowBreadboard && BreadboardRot % 2 == 0)
                     ? (end.y < BreadboardZoomY + 190.0 * zoomFactor)
                     : (offset <= 0);
