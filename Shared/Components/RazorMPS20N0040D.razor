@@ -1,5 +1,6 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 @attribute [Component("Pressure with ADC", "Input/Other Sensors", "mps20n0040d", true, 1, -20, -20, paneHoverText: "MPS20N0040D")]
+@attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Global, 
   "#define HX710B_DOUT@ ~\"dout\"\n" +
   "#define HX710B_SCK@ ~\"sck\"\n\n" +

@@ -22,7 +22,8 @@ export class LED extends Controller {
     }
 
     cleanup() {
-        this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "none";
+        const display = this.element?.querySelector<HTMLElement>("#ledDisplay") || this.element?.querySelector<HTMLElement>("#ledOn");
+        if (display) display.style.display = "none";
     }
 
     setColor(color: string) {
@@ -30,16 +31,21 @@ export class LED extends Controller {
             return;
         }
         const _color: string = this.lightColors[color] ? this.lightColors[color] : "red";
-        this.element.querySelector<HTMLElement>("#ledColor").style.fill = _color;
-        this.element.querySelector<HTMLElement>("#ledColorBrightness").style.fill = _color;
+        const ledColor = this.element.querySelector<HTMLElement>("#ledColor");
+        if (ledColor) ledColor.style.fill = _color;
+        const ledBrightness = this.element.querySelector<HTMLElement>("#ledColorBrightness");
+        if (ledBrightness) ledBrightness.style.fill = _color;
     }
 
 
     private toggleLed(state: PinState) {
-        if (state == PinState.Low) {
-            this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "none";
-        } else if (state == PinState.High) {
-            this.element.querySelector<HTMLElement>("#ledDisplay").style.display = "inherit";
+        const display = this.element?.querySelector<HTMLElement>("#ledDisplay") || this.element?.querySelector<HTMLElement>("#ledOn");
+        if (display) {
+            if (state == PinState.Low) {
+                display.style.display = "none";
+            } else if (state == PinState.High) {
+                display.style.display = "inherit";
+            }
         }
     }
 }

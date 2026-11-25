@@ -1,14 +1,21 @@
-﻿@inherits RazorComponent
-@attribute [Component("RGB LED", "Output/LED", "rgbLed", true, 1.5, 45, 80)]
+@inherits RazorComponent
+@attribute [Component("RGB LED", "Output/LED", "rgbLed", true, 1.5, 95, 95)]
+@attribute [BreadboardOffset(-25, -25, 62)]
+@attribute [BreadboardPin(0, 9, "R")]
+@attribute [BreadboardPin(2, 9, "G")]
+@attribute [BreadboardPin(3, 9, "B")]
+@attribute [BreadboardPin(1, 9, "COM")]
+@attribute [BreadboardBody(50, 14, 88, 65)]
+@attribute [BreadboardBody(42, 65, 96, 97)]
 @attribute [ComponentCode(CodeType.Global, "const int blueLED@ = ~\"B\"; // Define pin for blue LED\nconst int greenLED@ = ~\"G\"; // Define pin for green LED\nconst int redLED@ = ~\"R\"; // Define pin for red LED")]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(blueLED@, OUTPUT); // Set blue LED pin as an output\n  pinMode(greenLED@, OUTPUT); // Set green LED pin as an output\n  pinMode(redLED@, OUTPUT); // Set red LED pin as an output")]
 @attribute [ComponentCode(CodeType.LoopMain, "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating")]
 
 
-@attribute [ComponentPin("R","R", 34, 69, number: 1)]
-@attribute [ComponentPin("G","G", 52, 69, number: 2)]
-@attribute [ComponentPin("B", "B", 62, 69, number: 3)]
-@attribute [ComponentPin("COM", "cathode",43, 79, number: 4)]
+@attribute [ComponentPin("R","R", 71.0, 119.0, number: 1)]
+@attribute [ComponentPin("G","G", 103.0, 119.0, number: 2)]
+@attribute [ComponentPin("B", "B", 118.2, 119.0, number: 3)]
+@attribute [ComponentPin("COM", "cathode", 86.4, 119.0, number: 4)]
 
 @code {
     // [Parameter] public int ledRed { get; set; } = 0;
@@ -74,17 +81,17 @@
     @* private double opacity => brightness != 0 ? 0.2 + brightness * 0.6 : 0; *@
 }
 
-<svg width="42.129"
-     height="72.582"
-     version="1.2"
-     viewBox="-17 -10 37.3425 57.5115"
-     xmlns="http://www.w3.org/2000/svg">
+<svg xmlns="http://www.w3.org/2000/svg"
+     viewBox="0 0 200 760"
+     width="100"
+     height="380">
+    <g id="rgb_led_component" transform="translate(128.35 57.9) scale(3.827)">
     <!-- LED Legs -->
     <g fill="none" stroke="#9D9999" stroke-linecap="round" stroke-width="1.5px">
-        <path d="m4.1 15.334 3.0611 9.971"/>
-        <path d="m8 14.4 5.9987 4.0518 1.1777 6.5679" stroke-linejoin="round"/>
-        <path d="m-4.3 14.184-5.0755 5.6592-0.10206 6.1694" stroke-linejoin="round"/>
-        <path d="m-1.1 15.607-0.33725 18.4"/>
+        <path d="m-4.3 14.184 -5.0755 5.6592 -0.10206 6.1694 L -9.477 34.0" stroke-linejoin="round"/>
+        <path d="m-1.1 15.607 -0.33725 18.4"/>
+        <path d="m4.1 15.334 3.0611 9.971 L 7.161 34.0"/>
+        <path d="m8 14.4 5.9987 4.0518 1.1777 6.5679 L 15.176 34.0" stroke-linejoin="round"/>
     </g>
 
     <!-- LED Body -->
@@ -174,4 +181,5 @@
             fill="none"
             filter="url(#ledFilter)"
             opacity="0" />
+    </g>
 </svg>

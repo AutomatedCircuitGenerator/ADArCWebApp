@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("IR Obstacle Avoidance", "Input/Distance Sensors", "irdetector", true, 1, 150, 200, paneHoverText: "FC-51")]
+@attribute [BreadboardMount('j', 3)]
 @attribute [ComponentCode(CodeType.Global, 
   "// Define the pin numbers for the Infrared obstacle avoidance sensor\n" +
   "const int sensorPin = 2;")]

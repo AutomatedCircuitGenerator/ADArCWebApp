@@ -1,6 +1,7 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 
 @attribute [Component("T-Type Thermocouple", "Input/Temperature and Humidity Sensors", "max31856", true, .7, 100, 75, paneHoverText: "MAX31856")]
+@attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Global, 
     "#define CS_PIN@ ~\"cs\"\n" +
     "byte tempMSB@ = 0;\n" +

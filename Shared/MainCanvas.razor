@@ -1,7 +1,11 @@
 @using System.Security.AccessControl
 @using System.Text
 @inject BoardService BoardService
-<div class="canvas-container" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+<div class="canvas-container" style="--connection-display: @(ShowBreadboard ? "none" : "inline");" @onmousemove="DragMiddle" @onclick="CanvasClick" @onmousedown="DragStart" @onmouseup="DragEnd" @onwheel="UpdZoom" @onmouseenter="handleMouseEnter" @onmouseleave="() => { _dragging = false; handleMouseLeave.InvokeAsync(); foreach (var component in _componentReferences.Values) { component.EndEnvSettingsDrag(); } }">
+    @if (ShowBreadboard)
+    {
+        <Breadboard @ref="_breadboardRef" BreadboardRot="BreadboardRot" BreadboardRotChanged="OnBreadboardRotChanged" RowCount="BreadboardRowCount" Transform="transform" zoomFactor="@zoomFactor" zoomedX=@BreadboardZoomX CanvasClick="CanvasClick" zoomedY=@BreadboardZoomY DragStart="e => DragBreadboardStart(e)" DragEnd="DragComponentEnd" forceBorder="-3 == Pages.Index.App!.SelectedComponent" handleClick="BreadboardSelection"/>
+    }
     @if (BoardService.Board != Board.None)
     {
         <div class="zoom-control">
@@ -14,7 +18,46 @@
     }
     @foreach (var c in comps)
     {
-        <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        bool mounted = ShowBreadboard && c.Value.MountedOnBreadboard;
+        if (mounted)
+        {
+            double unrotX;
+            double unrotY;
+            if (c.Value.Data.BreadboardMountAttr != null)
+            {
+                var (hx0, hy0) = BreadboardHoleCoordinates.GetCenter($"{c.Value.BreadboardCol}{c.Value.BreadboardStartRow}", BreadboardRowCount);
+                var (rAx, rAy) = BreadboardMountLayout.RotateVec(
+                    c.Value.BreadboardExtraRot,
+                    c.Value.BreadboardAnchorX * c.Value.BreadboardPinScale,
+                    c.Value.BreadboardAnchorY * c.Value.BreadboardPinScale);
+                unrotX = hx0 - rAx;
+                unrotY = hy0 - rAy;
+            }
+            else
+            {
+                double baseOffset = Math.Max(0, c.Value.BreadboardStartRow - 1) * BreadboardHoleCoordinates.RowPitch;
+                unrotX = baseOffset + c.Value.Data.BreadboardOffsetX;
+                unrotY = c.Value.Data.BreadboardOffsetY;
+            }
+            var (rotCompX, rotCompY) = RotateAroundBreadboardCenter(BreadboardRot, unrotX, unrotY);
+
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+                              CanvasClick="CanvasClick" CancelDrag="CancelDrag"
+                              forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
+                              handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
+                              BreadboardRot="@BreadboardRot"
+                              ShowBreadboard="@ShowBreadboard"
+                              BreadboardPinScale="@c.Value.BreadboardPinScale"
+                              OnSvgMeasured="@OnComponentSvgMeasured"
+                              BreadBoard_X="@(BreadboardZoomX + rotCompX * zoomFactor)"
+                              BreadBoard_Y="@(BreadboardZoomY + rotCompY * zoomFactor)"
+                              individualData=@c.Value DragStart="e => DragComponentStart(e, c)"
+                              DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
+        else
+        {
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) ShowBreadboard="@ShowBreadboard" OnSvgMeasured="@OnComponentSvgMeasured" individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+        }
     }
     
     
@@ -67,7 +110,17 @@
 </div>
 
 @code {
+    
+    [Parameter]
+    public bool ShowBreadboard { get; set; }
 
+    [Parameter]
+    public int BreadboardRowCount { get; set; } = 30;
+
+    [Parameter]
+    public EventCallback<(ComponentData data, double w, double h)> OnComponentSvgMeasured { get; set; }
+
+    public int BreadboardRot;
     public MainCanvas()
     {
         Pages.Index.BuildCanvas = this;
@@ -96,23 +149,19 @@
 
     private bool _dragging = false;
     private bool _hasTarget = false; //refers to whether or not a drag process has a target, meaning that a component is dragged
+    private bool _breadboardDrag = false;
     private KeyValuePair<int, ComponentInstance> _target;
 
     private Transform transform = new();
 
     /// <summary>
     /// Transform refers to the combination of fullscreen drag and zoom.
-    /// Zoom is currently disabled.
     /// This function resets both.
     /// </summary>
     public void ResetTransform()
     {
         transform = new Transform();
-
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
 
     private void CancelDrag()
@@ -137,7 +186,9 @@
         int FromId, 
         int ToId, 
         string Tooltip,
-        List<Segment> Segments);
+        List<Segment> Segments,
+        bool StartIsRail = false,
+        bool EndIsRail = false);
     
     private string BuildPathData(List<Segment> segments, double cornerRadius = 10)
     {
@@ -156,16 +207,15 @@
             var dx2 = next.x2 - next.x1;
             var dy2 = next.y2 - next.y1;
 
-            var isStraight = (dx1 * dy2 == dx2 * dy1); 
+            var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
+            var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
+            var isStraight = Math.Abs(dx1 * dy2 - dx2 * dy1) < 1e-3 && (dx1 * dx2 + dy1 * dy2 >= 0);
 
-            if (isStraight)
+            if (len1 < 0.001 || len2 < 0.001 || isStraight)
             {
                 path.Append($"L {current.x2} {current.y2} ");
                 continue;
             }
-
-            var len1 = Math.Sqrt(dx1 * dx1 + dy1 * dy1);
-            var len2 = Math.Sqrt(dx2 * dx2 + dy2 * dy2);
 
             var trim1 = Math.Min(cornerRadius, len1 / 2);
             var trim2 = Math.Min(cornerRadius, len2 / 2);
@@ -352,18 +402,35 @@
     /// <returns></returns>
     private List<GridLine> GetAllGridLines(List<InstanceConnection> connections)
     {
-        // Maps a given gridline's (From ID, Starting X) to whether to route horizontally first
-        Dictionary<(int, int), bool> routes = new();
         var lines = new List<GridLine>();
+        List<(double x, double y)>? occupiedHoleCoords = null;
 
+        if (ShowBreadboard)
+        {
+            occupiedHoleCoords = GetAllGridLines_BreadboardPresent(lines, connections);
+        }
+        else
+        {
+            GetAllGridLines_NoBreadboardPresent(lines, connections);
+        }
+        
+        RouteAllLines(lines, occupiedHoleCoords);
+
+        return lines;
+    }
+
+    private void GetAllGridLines_NoBreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
+    {
         foreach (var connection in connections)
         {
-            var toPins = connection.To.Data.pinInfo;
-            var fromPins = connection.From.Data.pinInfo;
-            var toPin = toPins[connection.ToId];
-            var fromPin = fromPins[connection.FromId];
-            var start = ZoomCoord((connection.From.X + fromPin.x, connection.From.Y + fromPin.y));
-            var end = ZoomCoord((connection.To.X + toPin.x, connection.To.Y + toPin.y));
+            var toPin = connection.To.Data.pinInfo[connection.ToId];
+            var fromPin = connection.From.Data.pinInfo[connection.FromId];
+            var startRot = connection.From.rotation;
+            double fromScale = connection.From.Data.workbenchScaleFactor;
+            var start = ZoomCoord((connection.From.X + RotateX(startRot, fromPin.x, fromPin.y) * fromScale, connection.From.Y + RotateY(startRot, fromPin.x, fromPin.y) * fromScale));
+            var endRot = connection.To.rotation;
+            double toScale = connection.To.Data.workbenchScaleFactor;
+            var end = ZoomCoord((connection.To.X + RotateX(endRot, toPin.x, toPin.y) * toScale, connection.To.Y + RotateY(endRot, toPin.x, toPin.y) * toScale));
             var tooltip = $"{connection.From.Data.name} {fromPin.name} → " +
                           $"{connection.To.Data.name} {toPin.name}";
             lines.Add(new GridLine(connection.Color, 
@@ -373,54 +440,785 @@
                 connection.To.localId, 
                 tooltip,
                 []));
-            var startId = connection.From.localId;
-            var startX = (int)Math.Floor(start.x);
-
-            // If there exists another gridline on the same X axis, we must route horizontally first to prevent overlap
-            if (!routes.ContainsKey((startId, startX)))
-            {
-                routes[(startId, startX)] = false;
-            }
-            else
-            {
-                routes[(startId, startX)] = true;
-            }
         }
+    }
 
-        for (var i = 0; i < lines.Count; i++)
+    private List<(double x, double y)> GetAllGridLines_BreadboardPresent(List<GridLine> lines, List<InstanceConnection> connections)
+    {
+        // Holes already assigned to component wires
+        var usedHoles = comps.Values
+            .SelectMany(c => c.BreadboardConnections)
+            .Select(c => c.HoleId)
+            .ToHashSet(StringComparer.OrdinalIgnoreCase);
+
+        // Compute true component body boxes on the breadboard so we never route or plug under component bodies
+        var bodyBoxes = new List<CompBox>();
+        foreach (var c in comps.Values)
         {
-            var line = lines[i];
-            GetGridSegments(line, 4 + i * 8, routes[(line.FromId, (int)Math.Floor(line.Start.x))]);
+            if (c.MountedOnBreadboard && ShowBreadboard)
+            {
+                bodyBoxes.AddRange(GetBreadboardBodyBoxes(c, 3 * zoomFactor));
+            }
         }
 
-        return lines;
+        bool IsHoleBlockedByBody(string holeId)
+        {
+            var pt = ZoomCoord(GetBreadboardHoleCanvasCoord(holeId));
+            return bodyBoxes.Any(b => pt.x >= b.MinX && pt.x <= b.MaxX && pt.y >= b.MinY && pt.y <= b.MaxY);
+        }
+
+        bool IsExitRayBlocked((double x, double y) holeCoord, (double x, double y) targetCoord)
+        {
+            double probeDist = 45.0 * zoomFactor;
+            bool isHorizontalExit = BreadboardRot % 2 == 1;
+            double ex = holeCoord.x + (isHorizontalExit ? (targetCoord.x >= holeCoord.x ? 1.0 : -1.0) * probeDist : 0.0);
+            double ey = holeCoord.y + (!isHorizontalExit ? (targetCoord.y >= holeCoord.y ? 1.0 : -1.0) * probeDist : 0.0);
+            return bodyBoxes.Any(b => SegmentIntersectsBox(holeCoord.x, holeCoord.y, ex, ey, b));
+        }
+
+        int railCount = BreadboardHoleCoordinates.GetRailHoleCount(BreadboardRowCount);
+
+        // Get all positive power rail holes
+        var positiveHoles = Enumerable.Range(1, railCount)
+            .Select(i => $"LPLUS_{i}")
+            .Concat(Enumerable.Range(1, railCount).Select(i => $"RPLUS_{i}"))
+        .ToList();
+
+        // Get all negative power rail holes
+        var negativeHoles = Enumerable.Range(1, railCount)
+        .Select(i => $"LMINUS_{i}")
+        .Concat(Enumerable.Range(1, railCount).Select(i => $"RMINUS_{i}"))
+        .ToList();        
+        
+        // All possible breadboard holes
+        var availableHoles = (
+                from row in Enumerable.Range(1, BreadboardRowCount)
+                from column in "abcdefghij"
+                select $"{column}{row}"
+            )
+            .Concat(positiveHoles)
+            .Concat(negativeHoles)
+            .ToList();
+
+        // Prevent duplicate Arduino wires on the same net
+        var drawnArduinoWires = new HashSet<(int, int, string)>();
+        
+        foreach (var comp in comps.Values)
+        {
+            foreach (var connection in comp.BreadboardConnections)
+            {
+                var originalWire = connections.FirstOrDefault(c => (c.From.localId == comp.localId && c.FromId == connection.FromPinId) || (c.To.localId == comp.localId && c.ToId == connection.FromPinId)); // Searching for original connection for this pin
+                var wireColor = originalWire?.Color ?? connection.Color; // Find original wire color to make connections more consistent
+
+                if(!comp.MountedOnBreadboard){
+                    //Add Wire from component to Breadboard
+                    var pin = comp.Data.pinInfo[connection.FromPinId]; // Find the component pin position
+                    var compRot = comp.rotation;
+                    double compScale = comp.Data.workbenchScaleFactor;
+                    var start = ZoomCoord((comp.X + RotateX(compRot, pin.x, pin.y) * compScale, comp.Y + RotateY(compRot, pin.x, pin.y) * compScale)); // Wire starting point at component pin
+                    var end = ZoomCoord(GetBreadboardHoleCanvasCoord(connection.HoleId)); // Wire ending point at breadboard hole
+                    lines.Add(new GridLine(
+                        wireColor,
+                        start,
+                        end,
+                        comp.localId,
+                        -1,
+                        $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
+                        []
+                    ));
+                }
+
+                if (originalWire == null) continue; //no connection to arduino i guess??? This causes a floating line
+                
+                var pinInfo = comp.Data.pinInfo[connection.FromPinId];
+                var pinRole = ComponentData.GetPinPowerRole(pinInfo.name);
+                if (pinRole == BreadboardPinRole.Signal)
+                    pinRole = ComponentData.GetPinPowerRole(pinInfo.gsName);
+
+                var candidates = pinRole switch
+                {
+                    BreadboardPinRole.Power => positiveHoles,
+                    BreadboardPinRole.Ground => negativeHoles,
+                    _ => null
+                };
+                string? BreadboardPowerPin = null;
+                
+                if(comp.MountedOnBreadboard && candidates != null){
+                    //Wire from mounted breadboard component to nearest matching power/ground rail
+                    var pin = pinInfo;
+                    var holeSidePrefix = connection.HoleId.Length > 0 && "abcde".Contains(char.ToLowerInvariant(connection.HoleId[0])) ? "L" : "R";
+                    var railPool = candidates.Where(h => h.StartsWith(holeSidePrefix) && !IsHoleBlockedByBody(h)).ToList();
+                    if (railPool.Count == 0) railPool = candidates.Where(h => h.StartsWith(holeSidePrefix)).ToList();
+                    if (railPool.Count == 0) railPool = candidates;
+                    var railRefCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(railPool[0]));
+
+                    var compPinCandidates = availableHoles
+                        .Where(h => !usedHoles.Contains(h) && !IsHoleBlockedByBody(h) && BreadboardNet.AreConnected(h, connection.HoleId, BreadboardRowCount))
+                        .OrderBy(h =>
+                        {
+                            var hc = ZoomCoord(GetBreadboardHoleCanvasCoord(h));
+                            double dx = hc.x - railRefCoord.x;
+                            double dy = hc.y - railRefCoord.y;
+                            return dx * dx + dy * dy;
+                        })
+                        .ToList();
+                    if (compPinCandidates.Count == 0)
+                        compPinCandidates = availableHoles.Where(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, connection.HoleId, BreadboardRowCount)).ToList();
+
+                    var BreadboardComponentPin = compPinCandidates.FirstOrDefault();
+                    if(BreadboardComponentPin == null)continue;
+
+                    // Choose power rail on the clear side of BreadboardComponentPin ('L' for columns a-e, 'R' for columns f-j)
+                    var sidePrefix = BreadboardComponentPin.Length > 0 && "abcde".Contains(char.ToLowerInvariant(BreadboardComponentPin[0])) ? "L" : "R";
+                    var sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix) && !IsHoleBlockedByBody(h)).ToList();
+                    if (sideCandidates.Count == 0) sideCandidates = candidates.Where(h => h.StartsWith(sidePrefix)).ToList();
+                    if (sideCandidates.Count == 0) sideCandidates = candidates;
+
+                    BreadboardPowerPin = sideCandidates
+                        .Where(h => !usedHoles.Contains(h) && h != sideCandidates[0])
+                        .OrderBy(h => {
+                            var coord = ZoomCoord(GetBreadboardHoleCanvasCoord(h));
+                            var pinCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardComponentPin));
+                            double dx = coord.x - pinCoord.x;
+                            double dy = coord.y - pinCoord.y;
+                            return dx * dx + dy * dy;
+                        })
+                        .FirstOrDefault();
+                    if(BreadboardPowerPin == null)continue;
+                    
+                    Console.WriteLine("Original Pin: {0}, New Pin: {1}, PowerPin: {2}", connection.HoleId, BreadboardComponentPin, BreadboardPowerPin);
+                    var start = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardPowerPin)); // Wire ending point at breadboard hole
+                    var end = ZoomCoord(GetBreadboardHoleCanvasCoord(BreadboardComponentPin)); // Wire ending point at breadboard hole
+                    lines.Add(new GridLine(
+                        wireColor,
+                        start,
+                        end,
+                        -1,
+                        -1,
+                        $"{comp.Data.name} {pin.name} → Breadboard {connection.HoleId}",
+                        [],
+                        StartIsRail: true,
+                        EndIsRail: false
+                    ));
+                    usedHoles.Add(BreadboardComponentPin);
+                    usedHoles.Add(BreadboardPowerPin);
+                }
+                
+                
+                {
+                    //Wire from arduino to breadboard!
+                    var holeId = BreadboardPowerPin == null ? connection.HoleId : BreadboardPowerPin;
+                    bool compIsFrom = originalWire.From.localId == comp.localId; // Check if first pin of the connection is the component
+                    var arduino = compIsFrom ? originalWire.To : originalWire.From; // Store Arduino
+                    var arduinoPinId = compIsFrom ? originalWire.ToId : originalWire.FromId; // Store pin ID of Arduino of the current connection
+                    var arduinoPin = arduino.Data.pinInfo[arduinoPinId]; // Store the Arduino pin of the current connection
+                    double ardScale = arduino.Data.workbenchScaleFactor;
+                    var arduinoStart = ZoomCoord((arduino.X + RotateX(arduino.rotation, arduinoPin.x, arduinoPin.y) * ardScale, arduino.Y + RotateY(arduino.rotation, arduinoPin.x, arduinoPin.y) * ardScale)); // Calculate Arduino pin's position on the workbench
+                    string netId = BreadboardNet.GetNetId(holeId, BreadboardRowCount); // Get the breadboard hole group of the current connection, i.e. a1, b1, c1, d1, e1 are in the same group,...
+                    var wireKey = (arduino.localId, arduinoPinId, netId); // Store the Arduino pin and its destination net
+                    if (drawnArduinoWires.Contains(wireKey)) continue; //Wire already exists! No need to redraw
+
+                    bool isRailDest = BreadboardPowerPin != null;
+                    var basePinCoord = ZoomCoord(GetBreadboardHoleCanvasCoord(connection.HoleId));
+                    var netCandidates = availableHoles
+                        .Where(h => !usedHoles.Contains(h) && !IsHoleBlockedByBody(h) && BreadboardNet.AreConnected(h, holeId, BreadboardRowCount))
+                        .ToList();
+                    if (netCandidates.Count == 0)
+                        netCandidates = availableHoles.Where(h => !usedHoles.Contains(h) && BreadboardNet.AreConnected(h, holeId, BreadboardRowCount)).ToList();
+
+                    string? arduinoHoleId = netCandidates
+                        .OrderBy(h => !isRailDest && IsExitRayBlocked(ZoomCoord(GetBreadboardHoleCanvasCoord(h)), arduinoStart) ? 1 : 0)
+                        .ThenBy(h => {
+                            var coord = ZoomCoord(GetBreadboardHoleCanvasCoord(h));
+                            double dx = coord.x - arduinoStart.x;
+                            double dy = coord.y - arduinoStart.y;
+                            double distArd = Math.Sqrt(dx * dx + dy * dy);
+                            double pdx = coord.x - basePinCoord.x;
+                            double pdy = coord.y - basePinCoord.y;
+                            double distPin = isRailDest ? 0 : Math.Sqrt(pdx * pdx + pdy * pdy);
+                            return distArd + 0.15 * distPin;
+                        })
+                        .FirstOrDefault(); // Store the closest clear free hole connected to the component hole
+                    if (arduinoHoleId == null) continue; // If a free hole is found
+                    var arduinoEnd = ZoomCoord(GetBreadboardHoleCanvasCoord(arduinoHoleId)); // Calculate the available hole position on workbench
+                    lines.Add(new GridLine(
+                        wireColor,
+                        arduinoStart,
+                        arduinoEnd,
+                        arduino.localId,
+                        -1,
+                        $"{arduino.Data.name} {arduinoPin.name} → Breadboard {arduinoHoleId}",
+                        [],
+                        StartIsRail: false,
+                        EndIsRail: isRailDest
+                    ));
+                    
+                    // Reserve the new hole and record the wire so it won't redraw later
+                    usedHoles.Add(arduinoHoleId);
+                    drawnArduinoWires.Add(wireKey);
+                }
+
+            }
+        }
+
+        return usedHoles.Select(h => ZoomCoord(GetBreadboardHoleCanvasCoord(h))).ToList();
+    }
+    
+    public double RotateX(int rot, double X, double Y)
+    {
+        return (3 > rot && rot > 0 ? -1 : 1) * (rot % 2 == 0 ? X : Y);
+    }
+
+    public double RotateY(int rot, double X, double Y)
+    {
+        return (rot > 1 ? -1 : 1) * (rot % 2 == 0 ? Y : X);
+    }
+
+    private record CompBox(int LocalId, double MinX, double MaxX, double MinY, double MaxY);
+
+    private CompBox TransformBreadboardRect(int localId, double unrotMinX, double unrotMinY, double unrotMaxX, double unrotMaxY, double margin)
+    {
+        var (rx1, ry1) = RotateAroundBreadboardCenter(BreadboardRot, unrotMinX, unrotMinY);
+        var (rx2, ry2) = RotateAroundBreadboardCenter(BreadboardRot, unrotMaxX, unrotMaxY);
+        double cx1 = BreadboardZoomX + rx1 * zoomFactor;
+        double cy1 = BreadboardZoomY + ry1 * zoomFactor;
+        double cx2 = BreadboardZoomX + rx2 * zoomFactor;
+        double cy2 = BreadboardZoomY + ry2 * zoomFactor;
+        return new CompBox(
+            localId,
+            Math.Min(cx1, cx2) - margin,
+            Math.Max(cx1, cx2) + margin,
+            Math.Min(cy1, cy2) - margin,
+            Math.Max(cy1, cy2) + margin
+        );
+    }
+
+    private List<CompBox> GetBreadboardBodyBoxes(ComponentInstance c, double margin)
+    {
+        var list = new List<CompBox>();
+        if (c.Data.BreadboardMountAttr != null && c.MountedOnBreadboard)
+        {
+            var layout = BreadboardMountLayout.Compute(
+                c.Data.BreadboardMountAttr,
+                c.Data.pinInfo,
+                c.Data.MeasuredSvgWidth,
+                c.Data.MeasuredSvgHeight,
+                c.BreadboardExtraRot,
+                c.BreadboardCol);
+            if (layout != null)
+            {
+                var (hx0, hy0) = BreadboardHoleCoordinates.GetCenter($"{c.BreadboardCol}{c.BreadboardStartRow}", BreadboardRowCount);
+                list.Add(TransformBreadboardRect(c.localId, hx0 + layout.RelMinX, hy0 + layout.RelMinY, hx0 + layout.RelMaxX, hy0 + layout.RelMaxY, margin));
+                return list;
+            }
+        }
+
+        if (c.Data.BreadboardBodies.Count > 0)
+        {
+            double offset = Math.Max(0, c.BreadboardStartRow - 1) * BreadboardHoleCoordinates.RowPitch;
+            foreach (var (bMinX, bMinY, bMaxX, bMaxY) in c.Data.BreadboardBodies)
+            {
+                list.Add(TransformBreadboardRect(c.localId, offset + bMinX, bMinY, offset + bMaxX, bMaxY, margin));
+            }
+            return list;
+        }
+
+        // Generic fallback for any LivesOnBreadBoard component without explicit BreadboardBody attributes
+        if (c.BreadboardConnections.Count > 0)
+        {
+            var coords = c.BreadboardConnections
+                .Select(conn => BreadboardHoleCoordinates.GetCenter(conn.HoleId, BreadboardRowCount))
+                .ToList();
+            double minX = coords.Min(p => p.x) - 6;
+            double maxX = coords.Max(p => p.x) + 6;
+            double minY = coords.Min(p => p.y) - 6;
+            double maxY = coords.Max(p => p.y) + 6;
+            list.Add(TransformBreadboardRect(c.localId, minX, minY, maxX, maxY, margin));
+        }
+        return list;
+    }
+
+    private List<CompBox> GetObstacleBoxes()
+    {
+        var boxes = new List<CompBox>();
+        foreach (var c in comps.Values)
+        {
+            if (c.MountedOnBreadboard && ShowBreadboard)
+            {
+                boxes.AddRange(GetBreadboardBodyBoxes(c, 3 * zoomFactor));
+                continue;
+            }
+
+            double x = ZoomCoord((c.X, c.Y)).x;
+            double y = ZoomCoord((c.X, c.Y)).y;
+            int rot = (c.rotation % 4 + 4) % 4;
+
+            double maxPinX = c.Data.pinInfo.Length > 0 ? c.Data.pinInfo.Max(p => p.x) : 0;
+            double maxPinY = c.Data.pinInfo.Length > 0 ? c.Data.pinInfo.Max(p => p.y) : 0;
+            double rawW = Math.Max(c.Data.rightOffset, Math.Max(c.Data.Width, maxPinX + 10));
+            double rawH = Math.Max(c.Data.bottomOffset, maxPinY + 10);
+            if (rawW < 50) rawW = 50;
+            if (rawH < 50) rawH = 50;
+
+            double w = rawW * zoomFactor;
+            double h = rawH * zoomFactor;
+
+            double minX, maxX, minY, maxY;
+            switch (rot)
+            {
+                case 1:
+                    minX = x - h;
+                    maxX = x;
+                    minY = y;
+                    maxY = y + w;
+                    break;
+                case 2:
+                    minX = x - w;
+                    maxX = x;
+                    minY = y - h;
+                    maxY = y;
+                    break;
+                case 3:
+                    minX = x;
+                    maxX = x + h;
+                    minY = y - w;
+                    maxY = y;
+                    break;
+                default:
+                    minX = x;
+                    maxX = x + w;
+                    minY = y;
+                    maxY = y + h;
+                    break;
+            }
+
+            double margin = 6 * zoomFactor;
+            boxes.Add(new CompBox(c.localId, minX - margin, maxX + margin, minY - margin, maxY + margin));
+        }
+        return boxes;
+    }
+
+    private bool SegmentIntersectsBox(double x1, double y1, double x2, double y2, CompBox box)
+    {
+        double minX = Math.Min(x1, x2);
+        double maxX = Math.Max(x1, x2);
+        double minY = Math.Min(y1, y2);
+        double maxY = Math.Max(y1, y2);
+
+        if (Math.Abs(y1 - y2) < 0.5) // Horizontal segment
+        {
+            if (y1 > box.MinY + 1 && y1 < box.MaxY - 1)
+            {
+                double overlapMin = Math.Max(minX, box.MinX);
+                double overlapMax = Math.Min(maxX, box.MaxX);
+                if (overlapMax - overlapMin > 2)
+                    return true;
+            }
+        }
+        else if (Math.Abs(x1 - x2) < 0.5) // Vertical segment
+        {
+            if (x1 > box.MinX + 1 && x1 < box.MaxX - 1)
+            {
+                double overlapMin = Math.Max(minY, box.MinY);
+                double overlapMax = Math.Min(maxY, box.MaxY);
+                if (overlapMax - overlapMin > 2)
+                    return true;
+            }
+        }
+        return false;
+    }
+
+    private void AddSegmentWithAvoidance(
+        List<Segment> segments,
+        double x1, double y1, double x2, double y2,
+        List<CompBox>? boxes,
+        List<(double minX, double maxX, double y)> hTracks,
+        List<(double minY, double maxY, double x)> vTracks,
+        int depth = 0)
+    {
+        if (Math.Abs(x1 - x2) < 0.1 && Math.Abs(y1 - y2) < 0.1) return;
+
+        bool isH = Math.Abs(y1 - y2) < 0.5;
+        bool isV = Math.Abs(x1 - x2) < 0.5;
+
+        if (depth < 3 && boxes != null && boxes.Count > 0)
+        {
+            foreach (var box in boxes)
+            {
+                if (SegmentIntersectsBox(x1, y1, x2, y2, box))
+                {
+                    if (isH)
+                    {
+                        double y = y1;
+                        double targetBypassY = (y < (box.MinY + box.MaxY) / 2.0)
+                            ? box.MinY - 14 * zoomFactor
+                            : box.MaxY + 14 * zoomFactor;
+                        double minX = Math.Min(x1, x2);
+                        double maxX = Math.Max(x1, x2);
+                        double bypassY = AllocateHorizontalTrack(hTracks, boxes, minX, maxX, targetBypassY, 14 * zoomFactor);
+
+                        AddSegmentWithAvoidance(segments, x1, y, x1, bypassY, boxes, hTracks, vTracks, depth + 1);
+                        AddSegmentWithAvoidance(segments, x1, bypassY, x2, bypassY, boxes, hTracks, vTracks, depth + 1);
+                        AddSegmentWithAvoidance(segments, x2, bypassY, x2, y, boxes, hTracks, vTracks, depth + 1);
+                        return;
+                    }
+                    else if (isV)
+                    {
+                        double x = x1;
+                        double targetBypassX = (x < (box.MinX + box.MaxX) / 2.0)
+                            ? box.MinX - 14 * zoomFactor
+                            : box.MaxX + 14 * zoomFactor;
+                        double minY = Math.Min(y1, y2);
+                        double maxY = Math.Max(y1, y2);
+                        double bypassX = AllocateVerticalTrack(vTracks, boxes, minY, maxY, targetBypassX, 14 * zoomFactor);
+
+                        AddSegmentWithAvoidance(segments, x, y1, bypassX, y1, boxes, hTracks, vTracks, depth + 1);
+                        AddSegmentWithAvoidance(segments, bypassX, y1, bypassX, y2, boxes, hTracks, vTracks, depth + 1);
+                        AddSegmentWithAvoidance(segments, bypassX, y2, x, y2, boxes, hTracks, vTracks, depth + 1);
+                        return;
+                    }
+                }
+            }
+        }
+
+        segments.Add(new Segment(x1, y1, x2, y2));
+        if (isH)
+            hTracks.Add((Math.Min(x1, x2), Math.Max(x1, x2), y1));
+        else if (isV)
+            vTracks.Add((Math.Min(y1, y2), Math.Max(y1, y2), x1));
+    }
+
+    private double AllocateHorizontalTrack(List<(double minX, double maxX, double y)> tracks, List<CompBox>? boxes, double minX, double maxX, double desiredY, double minSpacing = 16)
+    {
+        double y = desiredY;
+        int maxAttempts = 100;
+        int attempts = 0;
+
+        while (attempts < maxAttempts)
+        {
+            bool collision = false;
+            foreach (var track in tracks)
+            {
+                bool xOverlap = Math.Max(minX, track.minX) <= Math.Min(maxX, track.maxX) + 5;
+                if (xOverlap && Math.Abs(track.y - y) < minSpacing)
+                {
+                    collision = true;
+                    if (y >= track.y)
+                        y = track.y + minSpacing;
+                    else
+                        y = track.y - minSpacing;
+                    break;
+                }
+            }
+            if (!collision && boxes != null)
+            {
+                foreach (var box in boxes)
+                {
+                    bool xOverlap = Math.Max(minX, box.MinX) <= Math.Min(maxX, box.MaxX);
+                    if (xOverlap && y >= box.MinY && y <= box.MaxY)
+                    {
+                        collision = true;
+                        if (Math.Abs(y - box.MinY) < Math.Abs(y - box.MaxY))
+                            y = box.MinY - minSpacing;
+                        else
+                            y = box.MaxY + minSpacing;
+                        break;
+                    }
+                }
+            }
+            if (!collision)
+                break;
+            attempts++;
+            if (attempts > 30)
+            {
+                y += minSpacing;
+            }
+        }
+        tracks.Add((minX, maxX, y));
+        return y;
+    }
+
+    private double AllocateVerticalTrack(List<(double minY, double maxY, double x)> tracks, List<CompBox>? boxes, double minY, double maxY, double desiredX, double minSpacing = 16)
+    {
+        double x = desiredX;
+        int maxAttempts = 100;
+        int attempts = 0;
+
+        while (attempts < maxAttempts)
+        {
+            bool collision = false;
+            foreach (var track in tracks)
+            {
+                bool yOverlap = Math.Max(minY, track.minY) <= Math.Min(maxY, track.maxY) + 5;
+                if (yOverlap && Math.Abs(track.x - x) < minSpacing)
+                {
+                    collision = true;
+                    if (x >= track.x)
+                        x = track.x + minSpacing;
+                    else
+                        x = track.x - minSpacing;
+                    break;
+                }
+            }
+            if (!collision && boxes != null)
+            {
+                foreach (var box in boxes)
+                {
+                    bool yOverlap = Math.Max(minY, box.MinY) <= Math.Min(maxY, box.MaxY);
+                    if (yOverlap && x >= box.MinX && x <= box.MaxX)
+                    {
+                        collision = true;
+                        if (Math.Abs(x - box.MinX) < Math.Abs(x - box.MaxX))
+                            x = box.MinX - minSpacing;
+                        else
+                            x = box.MaxX + minSpacing;
+                        break;
+                    }
+                }
+            }
+            if (!collision)
+                break;
+            attempts++;
+            if (attempts > 30)
+            {
+                x += minSpacing;
+            }
+        }
+        tracks.Add((minY, maxY, x));
+        return x;
     }
 
     /// <summary>
-    /// Populates the segments for a given gridline
+    /// Routes all gridlines generically to prevent collinear overlap across any components, with or without breadboard.
     /// </summary>
-    /// <param name="line">the line to populate segments of</param>
-    /// <param name="offset">the offset of the midpoint line if moving vertically first</param>
-    /// <param name="moveHorizontallyFirst">whether to move horizontally or vertically first</param>
-    private void GetGridSegments(GridLine line, double offset, bool moveHorizontallyFirst)
+    private void RouteAllLines(List<GridLine> lines, List<(double x, double y)>? occupiedHoleCoords = null)
+    {
+        List<(double minX, double maxX, double y)> hTracks = new();
+        List<(double minY, double maxY, double x)> vTracks = new();
+        var allBoxes = GetObstacleBoxes();
+
+        double tolerance = Math.Max(5.0, 6.0 * zoomFactor);
+        double holeBoxRadius = 4.0 * zoomFactor;
+        double endpointMatchTol = 2.5 * zoomFactor;
+
+        for (int i = 0; i < lines.Count; i++)
+        {
+            var line = lines[i];
+            var start = line.Start;
+            var end = line.End;
+
+            int startXCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.Start.x - start.x) < tolerance);
+            int startYCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.Start.y - start.y) < tolerance);
+
+            int endXCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.End.x - end.x) < tolerance);
+            int endYCount = lines.Count(o => !ReferenceEquals(o, line) && Math.Abs(o.End.y - end.y) < tolerance);
+
+            bool leaveH;
+            if (line.StartIsRail)
+                leaveH = (BreadboardRot % 2 == 1); // Perpendicular to power rail (rail is horizontal when Rot is even, vertical when Rot is odd)
+            else if (startXCount > startYCount)
+                leaveH = true; // Pins aligned vertically: must leave horizontally
+            else if (startYCount > startXCount)
+                leaveH = false; // Pins aligned horizontally: must leave vertically
+            else
+                leaveH = Math.Abs(end.x - start.x) >= Math.Abs(end.y - start.y);
+
+            bool enterH;
+            if (line.EndIsRail)
+                enterH = (BreadboardRot % 2 == 1); // Perpendicular to power rail (rail is horizontal when Rot is even, vertical when Rot is odd)
+            else if (endXCount > endYCount)
+                enterH = true; // Pins aligned vertically: must enter horizontally
+            else if (endYCount > endXCount)
+                enterH = false; // Pins aligned horizontally: must enter vertically
+            else
+                enterH = leaveH;
+
+            double offset = (i - (lines.Count - 1) / 2.0) * (14.0 * zoomFactor);
+
+            // Exclude the component(s) this line specifically connects to so wires can reach their own pins
+            var obstacles = allBoxes.Where(b => (b.LocalId != line.FromId || line.FromId == -1) && (b.LocalId != line.ToId || line.ToId == -1)).ToList();
+
+            // Prevent wires from crossing over other occupied breadboard pin/wire dots
+            if (occupiedHoleCoords != null)
+            {
+                foreach (var hc in occupiedHoleCoords)
+                {
+                    bool isEndpoint = (Math.Abs(hc.x - start.x) < endpointMatchTol && Math.Abs(hc.y - start.y) < endpointMatchTol)
+                                   || (Math.Abs(hc.x - end.x) < endpointMatchTol && Math.Abs(hc.y - end.y) < endpointMatchTol);
+                    if (!isEndpoint)
+                    {
+                        obstacles.Add(new CompBox(-999, hc.x - holeBoxRadius, hc.x + holeBoxRadius, hc.y - holeBoxRadius, hc.y + holeBoxRadius));
+                    }
+                }
+            }
+
+            GetGridSegments(line, offset, leaveH, enterH, hTracks, vTracks, obstacles);
+            SimplifySegments(line.Segments);
+        }
+    }
+
+    private void SimplifySegments(List<Segment> segments)
+    {
+        bool changed = true;
+        while (changed)
+        {
+            changed = false;
+            for (int i = segments.Count - 1; i >= 0; i--)
+            {
+                if (Math.Abs(segments[i].x1 - segments[i].x2) < 0.1 && Math.Abs(segments[i].y1 - segments[i].y2) < 0.1)
+                {
+                    segments.RemoveAt(i);
+                    changed = true;
+                }
+            }
+            for (int i = 0; i < segments.Count - 1; i++)
+            {
+                var a = segments[i];
+                var b = segments[i + 1];
+                bool bothH = Math.Abs(a.y1 - a.y2) < 0.5 && Math.Abs(b.y1 - b.y2) < 0.5 && Math.Abs(a.y2 - b.y1) < 0.5;
+                bool bothV = Math.Abs(a.x1 - a.x2) < 0.5 && Math.Abs(b.x1 - b.x2) < 0.5 && Math.Abs(a.x2 - b.x1) < 0.5;
+                if (bothH || bothV)
+                {
+                    segments[i] = new Segment(a.x1, a.y1, b.x2, b.y2);
+                    segments.RemoveAt(i + 1);
+                    changed = true;
+                    break;
+                }
+            }
+        }
+    }
+
+    /// <summary>
+    /// Populates the segments for a given gridline using allocated non-overlapping tracks.
+    /// </summary>
+    private void GetGridSegments(GridLine line, double offset, bool leaveH, bool enterH, List<(double minX, double maxX, double y)> hTracks, List<(double minY, double maxY, double x)> vTracks, List<CompBox> boxes)
     {
         var start = line.Start;
         var end = line.End;
 
-        var currentX = start.x;
-        var currentY = start.y;
-
-        var midY = (start.y + end.y) / 2 + offset;
-
-        if (!moveHorizontallyFirst)
+        // Straight horizontal line if Y is identical, horizontal routing is chosen, and no collision
+        if (Math.Abs(start.y - end.y) < 1 && leaveH && enterH)
         {
-            line.Segments.Add(new Segment(currentX, currentY, currentX, midY));
-            currentY = midY;
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, end.x, end.y, boxes, hTracks, vTracks);
+            return;
         }
 
-        line.Segments.Add(new Segment(currentX, currentY, end.x, currentY));
-        currentX = end.x;
-        line.Segments.Add(new Segment(currentX, currentY, currentX, end.y));
+        // Straight vertical line if X is identical, vertical routing is chosen, and no collision
+        if (Math.Abs(start.x - end.x) < 1 && !leaveH && !enterH)
+        {
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, end.x, end.y, boxes, hTracks, vTracks);
+            return;
+        }
+
+        if (leaveH && enterH)
+        {
+            // Case H-V-H: Horizontal departure, vertical trunk, horizontal arrival
+            double desiredX = (start.x + end.x) / 2.0 + offset;
+            double minBound = Math.Min(start.x, end.x) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.x, end.x) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredX = Math.Clamp(desiredX, minBound, maxBound);
+            }
+            else
+            {
+                desiredX = start.x + (offset >= 0 ? 30 * zoomFactor + offset : -30 * zoomFactor + offset);
+            }
+
+            double minY = Math.Min(start.y, end.y);
+            double maxY = Math.Max(start.y, end.y);
+            double trunkX = AllocateVerticalTrack(vTracks, boxes, minY, maxY, desiredX, 16 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, trunkX, start.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, start.y, trunkX, end.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, end.y, end.x, end.y, boxes, hTracks, vTracks);
+        }
+        else if (!leaveH && !enterH)
+        {
+            // Case V-H-V: Vertical departure, horizontal trunk, vertical arrival
+            double desiredY = (start.y + end.y) / 2.0 + offset;
+            double minBound = Math.Min(start.y, end.y) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.y, end.y) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredY = Math.Clamp(desiredY, minBound, maxBound);
+            }
+            else
+            {
+                // When start and end don't have enough vertical separation for an interior bus, route along the outer corridor
+                bool routeAbove = (ShowBreadboard && BreadboardRot % 2 == 0)
+                    ? (end.y < BreadboardZoomY + 190.0 * zoomFactor)
+                    : (offset <= 0);
+                if (routeAbove)
+                {
+                    double topRef = (ShowBreadboard && BreadboardRot % 2 == 0)
+                        ? Math.Min(BreadboardZoomY, Math.Min(start.y, end.y))
+                        : Math.Min(start.y, end.y);
+                    desiredY = topRef - (30 * zoomFactor + Math.Abs(offset));
+                }
+                else
+                {
+                    double botRef = (ShowBreadboard && BreadboardRot % 2 == 0)
+                        ? Math.Max(BreadboardZoomY + 380.0 * zoomFactor, Math.Max(start.y, end.y))
+                        : Math.Max(start.y, end.y);
+                    desiredY = botRef + (30 * zoomFactor + Math.Abs(offset));
+                }
+            }
+
+            double minX = Math.Min(start.x, end.x);
+            double maxX = Math.Max(start.x, end.x);
+            double trunkY = AllocateHorizontalTrack(hTracks, boxes, minX, maxX, desiredY, 16 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, start.x, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, start.x, trunkY, end.x, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, end.x, trunkY, end.x, end.y, boxes, hTracks, vTracks);
+        }
+        else if (leaveH && !enterH)
+        {
+            // Case H-V: Horizontal departure, vertical arrival (with intermediate allocated feeder to prevent collinear overlap)
+            double desiredX = (start.x + end.x) / 2.0 + offset;
+            double minBound = Math.Min(start.x, end.x) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.x, end.x) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredX = Math.Clamp(desiredX, minBound, maxBound);
+            }
+            double minY = Math.Min(start.y, end.y);
+            double maxY = Math.Max(start.y, end.y);
+            double trunkX = AllocateVerticalTrack(vTracks, boxes, minY, maxY, desiredX, 16 * zoomFactor);
+
+            double feederOffset = (end.y < start.y) ? -20 * zoomFactor : 20 * zoomFactor;
+            double desiredFeederY = end.y + feederOffset + offset;
+            double feederY = AllocateHorizontalTrack(hTracks, boxes, Math.Min(trunkX, end.x), Math.Max(trunkX, end.x), desiredFeederY, 14 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, trunkX, start.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, start.y, trunkX, feederY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, trunkX, feederY, end.x, feederY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, end.x, feederY, end.x, end.y, boxes, hTracks, vTracks);
+        }
+        else // (!leaveH && enterH)
+        {
+            // Case V-H: Vertical departure, horizontal arrival (with intermediate allocated feeder to prevent collinear overlap)
+            double desiredY = (start.y + end.y) / 2.0 + offset;
+            double minBound = Math.Min(start.y, end.y) + 20 * zoomFactor;
+            double maxBound = Math.Max(start.y, end.y) - 20 * zoomFactor;
+            if (minBound < maxBound)
+            {
+                desiredY = Math.Clamp(desiredY, minBound, maxBound);
+            }
+            double minX = Math.Min(start.x, end.x);
+            double maxX = Math.Max(start.x, end.x);
+            double trunkY = AllocateHorizontalTrack(hTracks, boxes, minX, maxX, desiredY, 16 * zoomFactor);
+
+            double feederOffset = (end.x < start.x) ? -20 * zoomFactor : 20 * zoomFactor;
+            double desiredFeederX = end.x + feederOffset + offset;
+            double feederX = AllocateVerticalTrack(vTracks, boxes, Math.Min(trunkY, end.y), Math.Max(trunkY, end.y), desiredFeederX, 14 * zoomFactor);
+
+            AddSegmentWithAvoidance(line.Segments, start.x, start.y, start.x, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, start.x, trunkY, feederX, trunkY, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, feederX, trunkY, feederX, end.y, boxes, hTracks, vTracks);
+            AddSegmentWithAvoidance(line.Segments, feederX, end.y, end.x, end.y, boxes, hTracks, vTracks);
+        }
     }
 
     /// <summary>
@@ -465,10 +1263,7 @@
         var scale = zoomFactor / oldZoom;
         transform.translate.x = centerX - scale * (centerX - transform.translate.x);
         transform.translate.y = centerY - scale * (centerY - transform.translate.y);
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp);
-        }
+        AdjustZoom();
     }
     
     /*
@@ -500,12 +1295,21 @@
         SetZoom(1, 1920 / 2, 1080 / 2);
     }
 
+    public void AdjustZoom()
+    {
+        foreach (var comp in comps.Values)
+        {
+            AdjustCompToZoom(comp);
+        }
+        AdjustBBToZoom();
+    }
+    
     /// <summary>
     /// Attempts to scale a component in place to account for zoom.
     /// </summary>
     /// <param name="comp">Component to adjust.</param>
     /// <returns>the component, now adjusted.</returns>
-    private ComponentInstance AdjustCompToZoom(ComponentInstance comp)
+    private void AdjustCompToZoom(ComponentInstance comp)
     {
         var coord = (x: comp.X, y: comp.Y);
 
@@ -513,9 +1317,36 @@
 
         comp.zoomedX = z.x;
         comp.zoomedY = z.y;
-
-        return comp;
     }
+
+    public double BreadboardX = 350;
+    public double BreadboardY = 120;
+    public double BreadboardZoomX;
+    public double BreadboardZoomY; 
+    private void AdjustBBToZoom()
+    {
+        
+        var z = ZoomCoord((BreadboardX, BreadboardY));
+        BreadboardZoomX = z.x;
+        BreadboardZoomY = z.y;
+    }
+
+    public (double x, double y) RotateAroundBreadboardCenter(int rot, double x, double y)
+    {
+        double cx = BreadboardHoleCoordinates.GetBoardWidth(BreadboardRowCount) / 2.0;
+        double cy = BreadboardHoleCoordinates.BoardHeight / 2.0;
+        double dx = x - cx;
+        double dy = y - cy;
+        return (cx + RotateX(rot, dx, dy), cy + RotateY(rot, dx, dy));
+    }
+
+    public (double x, double y) GetBreadboardHoleCanvasCoord(string holeId)
+    {
+        var (holeX, holeY) = BreadboardHoleCoordinates.GetCenter(holeId, BreadboardRowCount);
+        var (rotHoleX, rotHoleY) = RotateAroundBreadboardCenter(BreadboardRot, holeX, holeY);
+        return (BreadboardX + rotHoleX, BreadboardY + rotHoleY);
+    }
+    
 
     /// <summary>
     /// Atteampts to calculate the total effect of zoom on a coordinate.
@@ -553,6 +1384,15 @@
         this._target = target;
     }
 
+    
+    //Handle the start of dragging the breadboard
+    private void DragBreadboardStart(MouseEventArgs e)
+    {
+        if (e.Button != 0) return;
+        _dragging = true; //start drag, signal that there is a selected component, and remember it
+        _breadboardDrag = true;
+    }
+    
     //generic continuous drag, whether or not there is a component.
     private void DragMiddle(MouseEventArgs e)
     {
@@ -570,21 +1410,23 @@
                 AdjustCompToZoom(_target.Value);
                 break;
             //dragging the canvas, all components
+            case true when _breadboardDrag:
+                BreadboardX += (e.MovementX / zoomFactor);
+                BreadboardY += (e.MovementY / zoomFactor);
+                AdjustBBToZoom();
+                StateHasChanged();
+                break;
             case true:
             {
                 transform.translate.x += e.MovementX;
                 transform.translate.y += e.MovementY;
-                foreach (var t in comps)
-                {
-                    //t.Value.x += (e.MovementX / zoomFactor);
-                    //t.Value.y += (e.MovementY / zoomFactor);
-                    AdjustCompToZoom(t.Value);
-                }
+                AdjustZoom();
 
                 break;
             }
         }
     }
+
 
     bool dragEndFlag = false; //disable deselection at end of drag
 
@@ -594,6 +1436,7 @@
         _dragging = false;
         _hasTarget = false;
         dragEndFlag = true;
+        _breadboardDrag = false;
     }
 
     //canvas drag start, signal that there is a drag.
@@ -640,12 +1483,26 @@
         }
     }
 
+    public void BreadboardSelection()
+    {
+        targetFound = true;
+        Pages.Index.App.SelectedComponent = -3;
+        StateHasChanged();
+    }
+    
+    private Breadboard? _breadboardRef;
+
     //click on the canvas handler.
     private void CanvasClick()
     {
         if (!targetFound)
         {
             Pages.Index.App!.SelectedComponent = -2;
+            _breadboardRef?.CloseContextMenu();
+            foreach (var comp in _componentReferences.Values)
+            {
+                comp.CloseContextMenu();
+            }
         }
 
         targetFound = false;
@@ -654,10 +1511,7 @@
     public void TriggerRefresh()
     {
         StateHasChanged();
-        foreach (var comp in comps.Values)
-        {
-            AdjustCompToZoom(comp); // Apply transform/zoom to each component
-        }
+        AdjustZoom();
 
         ConnLines.Clear(); // Remove all wires
         foreach (var comp in comps.Values)
@@ -670,6 +1524,12 @@
                 }
             }
         }
+    }
+
+    private void OnBreadboardRotChanged(int rot)
+    {
+        BreadboardRot = rot;
+        StateHasChanged();
     }
 
 }
