@@ -1,5 +1,5 @@
 @inherits RazorComponent
-@attribute [Component("RGB LED", "Output/LED", "rgbLed", true, 1.5, 45, 80)]
+@attribute [Component("RGB LED", "Output/LED", "rgbLed", true, 1.5, 95, 95)]
 @attribute [BreadboardOffset(-25, -25, 62)]
 @attribute [BreadboardPin(0, 9, "R")]
 @attribute [BreadboardPin(2, 9, "G")]
@@ -10,10 +10,10 @@
 @attribute [ComponentCode(CodeType.LoopMain, "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating")]
 
 
-@attribute [ComponentPin("R","R", 34, 69, number: 1)]
-@attribute [ComponentPin("G","G", 52, 69, number: 2)]
-@attribute [ComponentPin("B", "B", 62, 69, number: 3)]
-@attribute [ComponentPin("COM", "cathode",43, 79, number: 4)]
+@attribute [ComponentPin("R","R", 46, 94, number: 1)]
+@attribute [ComponentPin("G","G", 78, 94, number: 2)]
+@attribute [ComponentPin("B", "B", 93, 94, number: 3)]
+@attribute [ComponentPin("COM", "cathode", 61.4, 94, number: 4)]
 
 @code {
     // [Parameter] public int ledRed { get; set; } = 0;
