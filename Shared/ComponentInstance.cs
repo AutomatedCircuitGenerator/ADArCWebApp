@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using GraphSynth.Representation;
 using System.Text.Json.Serialization;
 using ADArCWebApp.Shared.Components;
@@ -20,6 +20,8 @@ namespace ADArCWebApp.Shared
         public readonly int GlobalId;
         public double X;
         public double Y;
+        public double Width;
+        public int rotation;
         
         public Variant? Highlight {get; set;}
 
@@ -29,6 +31,36 @@ namespace ADArCWebApp.Shared
         [JsonIgnore]
         public readonly Dictionary<int, List<InstanceConnection>> ConnMap = new(); //this.pinId -> connection
 
+        [JsonIgnore]
+        public readonly List<BreadboardConnection> BreadboardConnections = new();
+
+        [JsonIgnore]
+        public bool MountedOnBreadboard { get; set; }
+
+        [JsonIgnore]
+        public int BreadboardStartRow { get; set; }
+
+        [JsonIgnore]
+        public int BreadboardRowSpan { get; set; }
+
+        [JsonIgnore]
+        public char BreadboardCol { get; set; } = 'f';
+
+        [JsonIgnore]
+        public int BreadboardExtraRot { get; set; }
+
+        [JsonIgnore]
+        public double BreadboardPinScale { get; set; } = 1.0;
+
+        [JsonIgnore]
+        public double BreadboardAnchorX { get; set; }
+
+        [JsonIgnore]
+        public double BreadboardAnchorY { get; set; }
+
+        [JsonIgnore]
+        public Dictionary<int, (int rowOffset, char col)> BreadboardPinMap { get; } = new();
+        
         [JsonIgnore] public node GsNode;
         public int midSignal;
         public int counter;
@@ -206,4 +238,10 @@ namespace ADArCWebApp.Shared
             return From.Equals(other.From) && FromId == other.FromId && ToId == other.ToId && To.Equals(other.To);
         }
     }
+    
+    public record BreadboardConnection(
+        int FromPinId,
+        string HoleId,
+        string Color
+    );
 }

@@ -1,46 +1,58 @@
 @using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
+<div @ref="_wrapperRef" class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(EffectiveScale)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(EffectiveRotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
-@if (!forceBorder)
+@if (rightClickable)
 {
-    rightClickable = false;
-}
-@if (forceBorder)
-{
-    @if (rightClickable)
-    {
-        <div class="right-click-container" style="top: @(individualData?.zoomedY ?? 0)px; left: @(individualData?.zoomedX ?? 0)px" @onclick:stopPropagation="true" @onmousedown:stopPropagation="true">
-            @if (individualData?.Data.templateParams.Count > 0 || individualData?.Data.EnvironmentalSettingsType != null)
-            {
-                <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
-                    <span>⚙</span>
-                    <span style="padding-left: 5px">￨ Environmental Settings</span>
-                </button>
-            }
-            <a id="component-help-button"
-               href="@DocumentationMap.ResolveUrl(individualData)"
-               target="_blank"
-               rel="noopener noreferrer"
-               @onclick="@(() => Console.WriteLine($"[VaryingComponent] Navigating to: {DocumentationMap.ResolveUrl(individualData)}"))"
-               @onclick:stopPropagation="true"
-               @onmousedown:stopPropagation="true">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Component Information</span>
-            </a>
-            @if (!Pages.Index.App!.IsRunning && !(individualData?.IsArduino() ?? false))
-            {
-                <button id="deletebutton" @onclick="Remove">
-                    <span>x</span>
-                    <span style="padding-left: 6px">￨ Delete Component</span>
-                </button>
-            }
-        </div>
-    }
+    <div class="right-click-container" style="top: @(clickMenuY)px; left: @(clickMenuX)px" @onclick:stopPropagation="true" @onmousedown:stopPropagation="true">
+        @if (individualData?.Data.templateParams.Count > 0 || individualData?.Data.EnvironmentalSettingsType != null)
+        {
+            <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
+                <span class="menu-icon">⚙</span>
+                <span style="padding-left: 5px">￨ Environmental Settings</span>
+            </button>
+        }
+        <!-- Direct anchor link to documentation; closes context menu upon click and bypasses popup blockers -->
+        <a id="component-help-button"
+           href="@DocumentationMap.ResolveUrl(individualData)"
+           target="_blank"
+           rel="noopener noreferrer"
+           @onclick="CloseContextMenu"
+           @onclick:stopPropagation="true"
+           @onmousedown:stopPropagation="true">
+            <span class="menu-icon">ℹ</span>
+            <span style="padding-left: 5px">￨ Component Information</span>
+        </a>
+        <button id="component-rotate-ccw" @onclick="RotateCounterClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 5px">￨ Rotate Counterclockwise</span>
+        </button>
+        <button id="component-rotate-cw" @onclick="RotateClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 5px">￨ Rotate Clockwise</span>
+        </button>
+        @if (!Pages.Index.App!.IsRunning && !(individualData?.IsArduino() ?? false))
+        {
+            <button id="deletebutton" @onclick="Remove">
+                <span class="menu-icon">✕</span>
+                <span style="padding-left: 5px">￨ Delete Component</span>
+            </button>
+        }
+    </div>
 }
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY + Transform?.translate.y)px; left: @(_envSettingsX + Transform?.translate.x)px;">
@@ -169,6 +181,68 @@
 
     [Parameter] public ComponentInstance? individualData { get; set; }
 
+    [Parameter] public int BreadboardRot { get; set; } = 0;
+    [Parameter] public bool ShowBreadboard { get; set; } = false;
+    [Parameter] public double BreadboardPinScale { get; set; } = 1.0;
+    [Parameter] public EventCallback<(ComponentData data, double w, double h)> OnSvgMeasured { get; set; }
+
+    private ElementReference _wrapperRef;
+
+    private bool IsMountedOnBreadboard =>
+        ShowBreadboard && individualData != null && individualData.MountedOnBreadboard;
+
+    private double EffectiveScale =>
+        posAbsolute
+            ? zoomFactor * (IsMountedOnBreadboard && BreadboardPinScale > 0 ? BreadboardPinScale : 1.0)
+            : zoomFactor;
+
+    private int EffectiveRotation => IsMountedOnBreadboard
+        ? ((individualData!.rotation + individualData.BreadboardExtraRot + BreadboardRot) % 4 + 4) % 4
+        : (individualData?.rotation ?? 0);
+
+    [Parameter] public double BreadBoard_X { get; set; }
+    [Parameter] public double BreadBoard_Y { get; set; }
+    public double RenderX
+    {
+        get => IsMountedOnBreadboard ? BreadBoard_X : individualData.zoomedX;
+    }
+    public double RenderY
+    {
+        get => IsMountedOnBreadboard ? BreadBoard_Y : individualData.zoomedY;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && posAbsolute && individualData?.Data.BreadboardMountAttr != null && individualData.Data.MeasuredSvgWidth <= 1)
+        {
+            try
+            {
+                var size = await JsRuntime.InvokeAsync<double[]>("getCompSvgSize", _wrapperRef);
+                if (size is { Length: >= 2 } && size[0] > 1 && size[1] > 1 && OnSvgMeasured.HasDelegate)
+                {
+                    await OnSvgMeasured.InvokeAsync((individualData.Data, size[0], size[1]));
+                }
+            }
+            catch
+            {
+                // Ignore if element disposed before interop completes
+            }
+        }
+    }
+
+    public double ContextMenuX
+    {
+        get
+        {
+            double compWidth = individualData?.Data?.Width > 0 ? individualData.Data.Width : 60;
+            return RenderX + (compWidth + 50) * zoomFactor + 10;
+        }
+    }
+
+    public double ContextMenuY
+    {
+        get => RenderY;
+    }
     [Parameter] public double zoomFactor { get; set; } = 1;
 
     [Parameter] public EventCallback CancelDrag { get; set; }
@@ -263,24 +337,39 @@
     }
 
     private bool rightClickable = false;
-    private bool rightClick2 = false;
+    private double clickMenuX = 0;
+    private double clickMenuY = 0;
 
     [Parameter] public Action CanvasClick { get; set; }
 
-    private void RightClick()
+    /// <summary>
+    /// Closes the component context menu and requests a UI state update.
+    /// </summary>
+    public void CloseContextMenu()
     {
-        handleClick.InvokeAsync();
-        CanvasClick.Invoke();
-        
+        rightClickable = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Handles context menu right-click on the component wrapper.
+    /// Closes any previously opened context menus before opening this component's menu.
+    /// </summary>
+    private void RightClick(MouseEventArgs e)
+    {
+        CanvasClick?.Invoke();
         rightClickable = true;
-        if (rightClickable && forceBorder)
+        if (Transform != null)
         {
-            rightClick2 = true;
+            clickMenuX = e.ClientX - Transform.translate.x;
+            clickMenuY = e.ClientY - 55 - Transform.translate.y;
         }
         else
         {
-            rightClick2 = false;
+            clickMenuX = e.OffsetX + RenderX;
+            clickMenuY = e.OffsetY + RenderY;
         }
+        StateHasChanged();
     }
 
     public void EndEnvSettingsDrag()
@@ -304,17 +393,16 @@
         _envSettingsY += e.MovementY;
     }
 
-    private async Task OpenLink(string url)
+    void RotateCounterClockwise()
     {
-        try
-        {
-            Console.WriteLine($"[VaryingComponent] Opening documentation URL via JS interop: {url}");
-            await JsRuntime.InvokeVoidAsync("open", url, "_blank");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[VaryingComponent] Error opening link via JS interop: {ex.Message}");
-        }
+        individualData.rotation--;
+        if(individualData.rotation < 0) individualData.rotation = 3;
+    }
+
+    void RotateClockwise()
+    {
+        individualData.rotation++;
+        if(individualData.rotation > 3) individualData.rotation = 0;
     }
 
 }

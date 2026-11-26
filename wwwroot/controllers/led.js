@@ -23,22 +23,28 @@ class LED extends controller_1.Controller {
         this.pins.anode[0].digital.addListener((state) => this.toggleLed(state));
     }
     cleanup() {
-        this.element.querySelector("#ledDisplay").style.display = "none";
+        const display = this.element?.querySelector("#ledDisplay") || this.element?.querySelector("#ledOn");
+        if (display) display.style.display = "none";
     }
     setColor(color) {
         if (!this.element) {
             return;
         }
         const _color = this.lightColors[color] ? this.lightColors[color] : "red";
-        this.element.querySelector("#ledColor").style.fill = _color;
-        this.element.querySelector("#ledColorBrightness").style.fill = _color;
+        const ledColor = this.element.querySelector("#ledColor");
+        if (ledColor) ledColor.style.fill = _color;
+        const ledBrightness = this.element.querySelector("#ledColorBrightness");
+        if (ledBrightness) ledBrightness.style.fill = _color;
     }
     toggleLed(state) {
-        if (state == avr8js_1.PinState.Low) {
-            this.element.querySelector("#ledDisplay").style.display = "none";
-        }
-        else if (state == avr8js_1.PinState.High) {
-            this.element.querySelector("#ledDisplay").style.display = "inherit";
+        const display = this.element?.querySelector("#ledDisplay") || this.element?.querySelector("#ledOn");
+        if (display) {
+            if (state == avr8js_1.PinState.Low) {
+                display.style.display = "none";
+            }
+            else if (state == avr8js_1.PinState.High) {
+                display.style.display = "inherit";
+            }
         }
     }
 }

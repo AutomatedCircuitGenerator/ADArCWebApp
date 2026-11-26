@@ -1,16 +1,16 @@
 @inject IJSRuntime JsRuntime
 
 <div class="card-container" @onmouseenter="HandleMouseEnterCardContainer" @onmouseleave="HandleMouseLeaveCardContainer" @onmousedown="handleClick" style="pointer-events:@(Disabled ? "none" : "auto"); background-color:@(Disabled ? "gray" : "white")">
-    @if (_showPaletteRightClick) //palette right click
+    @if (_showPaletteRightClick) //palette right click context menu
     {
         <div class="palette-right-click-container" style="z-index: 9999; position: absolute; top: 0; left: 0; font-size: 80%" @onmouseenter="ShowPaletteRightClickFunc" @onmouseleave="StartHidingPaletteRightClick">
             <div @onmousedown:stopPropagation style="width: 100%">
+                <!-- Direct anchor link to prevent browser popup blockers while using centralized DocumentationMap routing -->
                 <a id="palette-component-help-button"
                    href="@DocumentationMap.ResolveUrl(GlobalId)"
                    target="_blank"
                    rel="noopener noreferrer"
                    style="font-size: 100%; width: 100%; display: flex; align-items: center; text-decoration: none; color: inherit;"
-                   @onclick="@(() => Console.WriteLine($"[ComponentCard] Navigating to: {DocumentationMap.ResolveUrl(GlobalId)}"))"
                    @onclick:stopPropagation="true"
                    @onmousedown:stopPropagation="true">
                     <span style="padding-left: 4px; font-size: 85%;">𝗶￨Component Info</span>
@@ -84,19 +84,6 @@
     {
         isCardContainerHovered = false;
         StartHidingPaletteRightClick();
-    }
-
-    private async Task OpenLink(string url)
-    {
-        try
-        {
-            Console.WriteLine($"[ComponentCard] Opening documentation URL via JS interop: {url}");
-            await JsRuntime.InvokeVoidAsync("open", url, "_blank");
-        }
-        catch (Exception ex)
-        {
-            Console.WriteLine($"[ComponentCard] Error opening link via JS interop: {ex.Message}");
-        }
     }
 
 }

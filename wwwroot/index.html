@@ -20,7 +20,6 @@
     <script src="_content/BlazorMonaco/lib/monaco-editor/min/vs/editor/editor.main.js"></script>
 
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/introjs.min.css">
-    <script>var exports = exports || {};</script>
     <script data-main="main" src="require.js"></script>
     <script src="build/build.js"></script>
     <link rel="icon" type="image/x-icon" href="favicon.ico">
@@ -48,6 +47,15 @@
     <!-- this isn't really necessary, but is left in anyway-->
     <script>
         window.triggerClick = (elt) => elt.click();
+        window.getCompSvgSize = (wrapper) => {
+            if (!wrapper) return [0, 0];
+            const svg = wrapper.querySelector('svg');
+            if (!svg) return [0, 0];
+            const cs = getComputedStyle(svg);
+            const w = parseFloat(cs.width);
+            const h = parseFloat(cs.height);
+            return [Number.isFinite(w) ? w : 0, Number.isFinite(h) ? h : 0];
+        };
     </script>
 
 <!--    <div id="blazor-error-ui">
