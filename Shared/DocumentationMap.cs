@@ -46,7 +46,8 @@ namespace ADArCWebApp.Shared
             // Gas & Air Quality
             ["MQ-3"] = "mq3.html#styler-id1.1.1.2.8.11.7.1",
             ["SEN0219"] = "gasSensors.html#styler-id1.1.1.2.8.11.1",
-            ["PMS5003"] = "sgp41.html#styler-id1.1.1.2.8.11.8.1",
+            ["PMS5003"] = "sensors_modules.html#styler-id1.1.1.2.8.1",
+            ["pms5003"] = "sensors_modules.html#styler-id1.1.1.2.8.1",
             ["J305B"] = "sensors_modules.html#styler-id1.1.1.2.8.1",
             ["GP2Y1014AU0F"] = "sensors_modules.html#styler-id1.1.1.2.8.1",
             ["SGP40"] = "sgp41.html#styler-id1.1.1.2.8.11.8.1",
