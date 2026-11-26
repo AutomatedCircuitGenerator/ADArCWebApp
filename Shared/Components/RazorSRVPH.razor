@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Analog pH Meter", "Input/Other Sensors", "srv-ph", true, .8, -20, -20, paneHoverText: "SRV-PH")]
+@attribute [ComponentDocumentation("sensors_modules.html#styler-id1.1.1.2.8.1")]
 @attribute [ComponentCode(CodeType.Global, "#define SRVPH_PIN@ ~\"ADC\"")]
 @attribute [ComponentCode(CodeType.LoopMain, "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
                                              "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +

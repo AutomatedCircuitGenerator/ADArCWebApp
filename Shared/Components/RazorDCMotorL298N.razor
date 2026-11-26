@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Brushed DC Motor with Driver", "Output/Motors/DC Motor", "l298n", true, 0.8, 75, 75, paneHoverText: "L298N")]
+@attribute [ComponentDocumentation("L298driver_1.html#styler-id1.1.1.2.9.12.11.1")]
 @attribute [ComponentCode(CodeType.Global, "int ena@ = ~\"ena\"; // Enable pin for motor speed control\nint in1@ = ~\"in1\"; // Control pin 1 for motor direction\nint in2@ = ~\"in2\"; // Control pin 2 for motor direction")]
 @attribute [ComponentCode(CodeType.Setup, "\tpinMode(ena@, OUTPUT); // Set enable pin as an output\n\tpinMode(in1@, OUTPUT); // Set control pin 1 as an output\n\tpinMode(in2@, OUTPUT); // Set control pin 2 as an output")]
 @attribute [ComponentCode(CodeType.LoopMain, "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating")]

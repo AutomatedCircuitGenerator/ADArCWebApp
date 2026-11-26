@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Stepper Motor with Driver", "Output/Motors/Stepper Motor", "uln2003", true, 0.8, 75, 75, paneHoverText: "28BYJ-48/ULN2003")]
+@attribute [ComponentDocumentation("uln2003.html#styler-id1.1.1.2.9.12.16.1")]
 @attribute [ComponentCode(CodeType.Global, "int motorPin1_@ = ~\"in1\"; // Define control pin 1 for stepper motor\nint motorPin2_@ = ~\"in2\"; // Define control pin 2 for stepper motor\nint motorPin3_@ = ~\"in3\"; // Define control pin 3 for stepper motor\nint motorPin4_@ = ~\"in4\"; // Define control pin 4 for stepper motor\nint MotorInterfaceType@ = 8; // Define motor driver interface type\n\nAccelStepper stepper@ = AccelStepper(MotorInterfaceType@, motorPin1_@, motorPin3_@, motorPin2_@, motorPin4_@); // Initialize stepper motor with pin configuration\n")]
 @attribute [ComponentCode(CodeType.Setup, "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor")]
 @attribute [ComponentCode(CodeType.LoopMain, "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed")]

@@ -41,7 +41,7 @@
             }
             var (rotCompX, rotCompY) = RotateAroundBreadboardCenter(BreadboardRot, unrotX, unrotY);
 
-            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]"
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Key]"
                               CanvasClick="CanvasClick" CancelDrag="CancelDrag"
                               forceBorder="c.Key == Pages.Index.App!.SelectedComponent"
                               handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId)
@@ -56,7 +56,7 @@
         }
         else
         {
-            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Value.localId]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) ShowBreadboard="@ShowBreadboard" OnSvgMeasured="@OnComponentSvgMeasured" individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
+            <VaryingComponent Transform="transform" @ref="_componentReferences[c.Key]" CanvasClick="CanvasClick" CancelDrag="CancelDrag" forceBorder="c.Key == Pages.Index.App!.SelectedComponent" handleClick="e => ComponentSelection(e, c)" objId=@(c.Value.GlobalId) ShowBreadboard="@ShowBreadboard" OnSvgMeasured="@OnComponentSvgMeasured" individualData=@c.Value DragStart="e => DragComponentStart(e, c)" DragEnd="DragComponentEnd" zoomFactor="@zoomFactor"></VaryingComponent>
         }
     }
     
@@ -1461,8 +1461,9 @@
     bool targetFound = false;
 
     //click on a component handler. 
-    public void ComponentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
+    private void ComponentSelection(MouseEventArgs e, KeyValuePair<int, ComponentInstance> c)
     {
+        CloseAllContextMenus(c.Value.localId);
         targetFound = true;
         if (Pages.Index.App!.SelectedComponent < 0) //no previous selection
         {
@@ -1485,6 +1486,7 @@
 
     public void BreadboardSelection()
     {
+        CloseAllContextMenus(-3);
         targetFound = true;
         Pages.Index.App.SelectedComponent = -3;
         StateHasChanged();
@@ -1492,19 +1494,34 @@
     
     private Breadboard? _breadboardRef;
 
-    //click on the canvas handler.
-    private void CanvasClick()
+    /// <summary>
+    /// Closes all active context menus on the workbench canvas, including the breadboard and any component.
+    /// </summary>
+    /// <param name="exceptLocalId">Optional localId of a component to exclude from closing (e.g. when opening that component's menu).</param>
+    public void CloseAllContextMenus(int? exceptLocalId = null)
     {
-        if (!targetFound)
+        // -3 represents the breadboard's selection ID
+        if (exceptLocalId != -3)
         {
-            Pages.Index.App!.SelectedComponent = -2;
             _breadboardRef?.CloseContextMenu();
-            foreach (var comp in _componentReferences.Values)
+        }
+
+        foreach (var (id, comp) in _componentReferences)
+        {
+            if (exceptLocalId == null || id != exceptLocalId)
             {
                 comp.CloseContextMenu();
             }
         }
+    }
 
+    /// <summary>
+    /// Click handler on the canvas container background. Deselects components and closes all open context menus.
+    /// </summary>
+    private void CanvasClick()
+    {
+        Pages.Index.App!.SelectedComponent = -2;
+        CloseAllContextMenus();
         targetFound = false;
     }
 

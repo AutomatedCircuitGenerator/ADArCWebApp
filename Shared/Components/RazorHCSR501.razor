@@ -2,6 +2,7 @@
 @inherits RazorComponent
 
 @attribute [Component("PIR Motion", "Input/Other Sensors", "hcsr501", true, 1, 75, 75, paneHoverText: "HC-SR501")]
+@attribute [ComponentDocumentation("pir.html#styler-id1.1.1.2.8.14.8.1")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.LoopMain, "  val@ = digitalRead(inputPin@); // read input value\n  if (val@ == HIGH) { // check if the input is HIGH\n    if (pirState@ == LOW) {\n      // we have just turned on\n      Serial.println(\"Motion detected!\");\n      // We only want to print on the output change, not state\n      pirState@ = HIGH;\n    }\n  } else {\n    if (pirState@ == HIGH) {\n      // we have just turned of\n      Serial.println(\"Motion ended!\");\n      // We only want to print on the output change, not state\n      pirState@ = LOW;\n    }\n  }")]
 @attribute [ComponentCode(CodeType.Global, "int inputPin@ = ~\"digital_out\"; // choose the input pin (for PIR sensor)\nint pirState@ = LOW; // we start, assuming no motion detected\nint val@ = 0; // variable for reading the pin status")]
