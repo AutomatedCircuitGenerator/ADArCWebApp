@@ -253,10 +253,12 @@
         double prevW = info.data.MeasuredSvgWidth;
         double prevH = info.data.MeasuredSvgHeight;
         info.data.UpdateMeasuredSvgSize(info.w, info.h);
-        if (showBreadboard && info.data.LivesOnBreadBoard &&
-            (Math.Abs(prevW - info.data.MeasuredSvgWidth) > 1.0 || Math.Abs(prevH - info.data.MeasuredSvgHeight) > 1.0))
+        if (Math.Abs(prevW - info.data.MeasuredSvgWidth) > 1.0 || Math.Abs(prevH - info.data.MeasuredSvgHeight) > 1.0)
         {
-            EnsureBreadboardConnections();
+            if (showBreadboard && info.data.LivesOnBreadBoard)
+            {
+                EnsureBreadboardConnections();
+            }
             StateHasChanged();
         }
     }
@@ -1361,7 +1363,17 @@
 
                 if (data?.Comps != null && data.Comps.ContainsKey(1))
                 {
-                    var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                    var boardComp = data.Comps[1];
+                    int boardGid = boardComp.GlobalId;
+                    if (!string.IsNullOrEmpty(boardComp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(boardComp.ComponentKey, out var bId))
+                    {
+                        boardGid = bId;
+                    }
+                    else if (data.Version < 2)
+                    {
+                        boardGid = ComponentDeclarations.MigrateLegacyGlobalId(boardGid);
+                    }
+                    var boardType = boardGid == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                     Console.WriteLine($"Detected board type from file: {boardType}");
 
                     Console.WriteLine("Setting board type");
@@ -1479,6 +1491,30 @@
                 return;
             }
 
+            // Component identity resolution: Handle ComponentKey and Legacy migration
+            if (data.Comps != null)
+            {
+                foreach (var kv in data.Comps)
+                {
+                    var comp = kv.Value;
+                    if (!string.IsNullOrEmpty(comp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(comp.ComponentKey, out var idFromKey))
+                    {
+                        comp.GlobalId = idFromKey;
+                        comp.Data = ComponentDeclarations.Components[idFromKey];
+                    }
+                    else if (data.Version < 2)
+                    {
+                        int newGid = ComponentDeclarations.MigrateLegacyGlobalId(comp.GlobalId);
+                        comp.GlobalId = newGid;
+                        comp.Data = ComponentDeclarations.Components[newGid];
+                    }
+                    else if (comp.Data == null && ComponentDeclarations.Components.TryGetValue(comp.GlobalId, out var compData))
+                    {
+                        comp.Data = compData;
+                    }
+                }
+            }
+
             Console.WriteLine($"Deserialization successful. Component count: {data.Comps?.Count ?? 0}");
         }
         catch (Exception ex)
@@ -1505,6 +1541,16 @@
             GraphSynthInvoke.DestroyGraph();
             BuildCode.outputPins.Clear();
             localIds = data.LocalId;
+
+            // Restore breadboard configuration
+            showBreadboard = data.ShowBreadboard;
+            BreadboardRowCount = data.BreadboardRowCount > 0 ? data.BreadboardRowCount : 30;
+            if (BuildCanvas != null)
+            {
+                BuildCanvas.BreadboardRot = data.BreadboardRot;
+                BuildCanvas.BreadboardX = data.BreadboardX;
+                BuildCanvas.BreadboardY = data.BreadboardY;
+            }
 
             // First pass: Create all component nodes
             foreach (var kv in data.Comps.OrderBy(kv => kv.Key))
@@ -1567,6 +1613,8 @@
                 }
             }
             
+            EnsureBreadboardConnections();
+
             BuildCanvas.ResetTransform();
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
@@ -1609,10 +1657,16 @@
 
     class Data
     {
+        public int Version { get; set; } = 2;
         // public List<InstanceConnection> ConnLines { get; set; }
         public int LocalId { get; set; }
         public string Code { get; set; }
         public Dictionary<int, ComponentInstance> Comps { get; set; }
+        public bool ShowBreadboard { get; set; }
+        public int BreadboardRowCount { get; set; } = 30;
+        public int BreadboardRot { get; set; } = 0;
+        public double BreadboardX { get; set; } = 350;
+        public double BreadboardY { get; set; } = 120;
     }
 
     /// <summary>
@@ -1629,14 +1683,21 @@
             foreach (var kvp in Comps)
             {
                 var comp = kvp.Value;
+                comp.ComponentKey = comp.Data?.compType?.Name;
                 cleanComps.Add(kvp.Key, comp);
             }
 
             Data parentObject = new Data
             {
+                Version = 2,
                 Comps = cleanComps,
                 LocalId = localIds,
-                Code = await AppInterop.GetCodeWrapper()
+                Code = await AppInterop.GetCodeWrapper(),
+                ShowBreadboard = showBreadboard,
+                BreadboardRowCount = BreadboardRowCount,
+                BreadboardRot = BuildCanvas?.BreadboardRot ?? 0,
+                BreadboardX = BuildCanvas?.BreadboardX ?? 350,
+                BreadboardY = BuildCanvas?.BreadboardY ?? 120
             };
 
             var options = new JsonSerializerOptions
@@ -1827,35 +1888,8 @@
 
             try
             {
-                // Handle Base64 padding
-                compressedData = compressedData.Replace('-', '+').Replace('_', '/');
-                switch (compressedData.Length % 4)
-                {
-                    case 2:
-                        compressedData += "==";
-                        break;
-                    case 3:
-                        compressedData += "=";
-                        break;
-                }
-
-                // Decompress
-                byte[] compressedBytes = Convert.FromBase64String(compressedData);
-                using var msi = new MemoryStream(compressedBytes);
-                using var mso = new MemoryStream();
-                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
-                {
-                    await gs.CopyToAsync(mso);
-                }
-
-                var json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+                var json = DecompressCircuitData(compressedData);
                 Console.WriteLine($"Successfully decompressed JSON data, length: {json.Length}");
-
-                // Replace compressed patterns with original values
-                foreach (var kvp in CompressionMap.OrderByDescending(x => x.Value.Length))
-                {
-                    json = json.Replace(kvp.Value, kvp.Key);
-                }
 
                 try
                 {
@@ -1873,7 +1907,17 @@
 
                     if (data?.Comps != null && data.Comps.ContainsKey(1))
                     {
-                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                        var boardComp = data.Comps[1];
+                        int boardGid = boardComp.GlobalId;
+                        if (!string.IsNullOrEmpty(boardComp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(boardComp.ComponentKey, out var bId))
+                        {
+                            boardGid = bId;
+                        }
+                        else if (data.Version < 2)
+                        {
+                            boardGid = ComponentDeclarations.MigrateLegacyGlobalId(boardGid);
+                        }
+                        var boardType = boardGid == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                         Console.WriteLine($"Detected board type from URL data: {boardType}");
 
                         await App.InvokeAsync(async () =>
@@ -2008,6 +2052,13 @@
         { "\"System.String\"", "\"#05\"" },
         { "\"System.Boolean\"", "\"#06\"" },
         { "\"System.Int32\"", "\"#07\"" },
+        { "\"Version\":", "\"#08:" },
+        { "\"ComponentKey\":", "\"#09:" },
+        { "\"ShowBreadboard\":", "\"#51:" },
+        { "\"BreadboardRowCount\":", "\"#52:" },
+        { "\"BreadboardRot\":", "\"#53:" },
+        { "\"BreadboardX\":", "\"#54:" },
+        { "\"BreadboardY\":", "\"#55:" },
 
         // Component Properties
         { "\"localId\":", "\"#11:" },

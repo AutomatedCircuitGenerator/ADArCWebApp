@@ -269,7 +269,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>192</X>
         <Y>312</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -415,7 +417,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>96</X>
         <Y>216</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -431,7 +435,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>168</X>
         <Y>240</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -935,6 +941,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n11</name>
         <localLabels>
           <string>d12</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>96</X>
@@ -951,6 +958,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n12</name>
         <localLabels>
           <string>d11</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>168</X>
@@ -967,6 +975,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n13</name>
         <localLabels>
           <string>d10</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>192</X>

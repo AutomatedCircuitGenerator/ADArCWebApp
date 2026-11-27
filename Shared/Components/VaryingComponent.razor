@@ -213,7 +213,7 @@
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (firstRender && posAbsolute && individualData?.Data.BreadboardMountAttr != null && individualData.Data.MeasuredSvgWidth <= 1)
+        if (firstRender && posAbsolute && individualData != null && individualData.Data.MeasuredSvgWidth <= 1)
         {
             try
             {
