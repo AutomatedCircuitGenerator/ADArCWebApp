@@ -437,13 +437,14 @@
             .Concat(Enumerable.Range(2, Math.Max(0, railCount - 1)).Select(i => $"RMINUS_{i}"))
             .ToList();
 
-        // Second pass: wire off-board components onto unused breadboard holes
+        // Second pass: wire off-board components (and NoBreadboard pins on mounted components) onto unused breadboard holes
         foreach (var comp in Comps.Values.OrderBy(c => c.localId))
         {
-            if (comp.IsArduino() || comp.localId == 0 || comp.MountedOnBreadboard) continue;
+            if (comp.IsArduino() || comp.localId == 0) continue;
 
             foreach (int pinId in comp.ConnMap.Keys.ToList())
             {
+                if (comp.MountedOnBreadboard && comp.BreadboardPinMap.ContainsKey(pinId)) continue;
                 if (pinId < 0 || pinId >= comp.Data.pinInfo.Length) continue;
                 var pin = comp.Data.pinInfo[pinId];
                 var role = ComponentData.GetPinPowerRole(pin.name);

@@ -513,18 +513,48 @@
                     (c.To.localId == comp.localId && c.ToId == connection.FromPinId));
                 var wireColor = originalWire?.Color ?? connection.Color;
 
-                if (!comp.MountedOnBreadboard)
+                bool pinMountedInHole = comp.MountedOnBreadboard && comp.BreadboardPinMap.ContainsKey(connection.FromPinId);
+                if (!pinMountedInHole)
                 {
                     var pin = comp.Data.pinInfo[connection.FromPinId];
-                    double compScale = comp.Data.workbenchScaleFactor;
-                    var start = new WirePoint(
-                        comp.X + RotateX(comp.rotation, pin.x, pin.y) * compScale,
-                        comp.Y + RotateY(comp.rotation, pin.x, pin.y) * compScale);
+                    WirePoint start;
+                    if (comp.MountedOnBreadboard)
+                    {
+                        double unrotX;
+                        double unrotY;
+                        if (comp.Data.BreadboardMountAttr != null)
+                        {
+                            var (hx0, hy0) = BreadboardHoleCoordinates.GetCenter($"{comp.BreadboardCol}{comp.BreadboardStartRow}", BreadboardRowCount);
+                            var (rAx, rAy) = BreadboardMountLayout.RotateVec(
+                                comp.BreadboardExtraRot,
+                                comp.BreadboardAnchorX * comp.BreadboardPinScale,
+                                comp.BreadboardAnchorY * comp.BreadboardPinScale);
+                            unrotX = hx0 - rAx;
+                            unrotY = hy0 - rAy;
+                        }
+                        else
+                        {
+                            double baseOffset = Math.Max(0, comp.BreadboardStartRow - 1) * BreadboardHoleCoordinates.RowPitch;
+                            unrotX = baseOffset + comp.Data.BreadboardOffsetX;
+                            unrotY = comp.Data.BreadboardOffsetY;
+                        }
+                        int effRot = ((comp.rotation + comp.BreadboardExtraRot) % 4 + 4) % 4;
+                        var (pxOff, pyOff) = BreadboardMountLayout.RotateVec(effRot, pin.x * comp.BreadboardPinScale, pin.y * comp.BreadboardPinScale);
+                        var (wx, wy) = RotateAroundBreadboardCenter(BreadboardRot, unrotX + pxOff, unrotY + pyOff);
+                        start = new WirePoint(BreadboardX + wx, BreadboardY + wy);
+                    }
+                    else
+                    {
+                        double compScale = comp.Data.workbenchScaleFactor;
+                        start = new WirePoint(
+                            comp.X + RotateX(comp.rotation, pin.x, pin.y) * compScale,
+                            comp.Y + RotateY(comp.rotation, pin.x, pin.y) * compScale);
+                    }
                     var end = HolePt(connection.HoleId);
                     boxMap.TryGetValue(comp.localId, out var fromBox);
                     bool endIsRailHole = connection.HoleId.Contains('_', StringComparison.Ordinal);
                     var compExitDir = ComputeComponentPinExitDir(comp, start, fromBox, end);
-                    double compInnerOffset = ComputeInnerRowStaggerOffset(comp, start, compExitDir);
+                    double compInnerOffset = comp.MountedOnBreadboard ? 0.0 : ComputeInnerRowStaggerOffset(comp, start, compExitDir);
 
                     requests.Add(new WireRouteRequest(
                         wireColor,
