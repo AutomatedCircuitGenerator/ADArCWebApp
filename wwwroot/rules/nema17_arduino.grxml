@@ -173,7 +173,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>192</X>
         <Y>96</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -199,13 +201,17 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n9</name>
         <localLabels>
-          <string>d5</string>
+          <string>digital</string>
         </localLabels>
         <localVariables />
         <X>192</X>
         <Y>384</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+          <string>rx</string>
+          <string>tx</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -271,7 +277,9 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>144</X>
         <Y>168</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -297,13 +305,17 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n8</name>
         <localLabels>
-          <string>d2</string>
+          <string>digital</string>
         </localLabels>
         <localVariables />
         <X>144</X>
         <Y>360</Y>
         <Z>0</Z>
-        <negateLabels />
+        <negateLabels>
+          <string>connected</string>
+          <string>rx</string>
+          <string>tx</string>
+        </negateLabels>
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -593,6 +605,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n4</name>
         <localLabels>
           <string>STEP</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>144</X>
@@ -609,6 +622,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n5</name>
         <localLabels>
           <string>DIR</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>192</X>
@@ -656,7 +670,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n8</name>
         <localLabels>
-          <string>d2</string>
+          <string>digital</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>144</X>
@@ -672,7 +687,8 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         xsi:type="ruleNode">
         <name>n9</name>
         <localLabels>
-          <string>d5</string>
+          <string>digital</string>
+          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>192</X>

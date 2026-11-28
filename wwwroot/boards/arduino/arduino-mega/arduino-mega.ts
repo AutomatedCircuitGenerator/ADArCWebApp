@@ -60,15 +60,56 @@ export class ArduinoMega implements Board {
         const avrCPU = new AVRCPU(program, 0x2200);
         const adc = new AVRADC(avrCPU, adcConfig);
         const portA = new AVRIOPort(avrCPU, portAConfig);
-        const portB = new AVRIOPort(avrCPU, portBConfig);
+        
+        const megaPortBConfig = {
+            ...portBConfig,
+            pinChange: {
+                PCIE: 0,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6b,
+                pinChangeInterrupt: 18, // PCINT0 is vector 18 on ATmega2560
+                mask: 0xff,
+                offset: 0,
+            }
+        };
+        const portB = new AVRIOPort(avrCPU, megaPortBConfig);
+        
         const portC = new AVRIOPort(avrCPU, portCConfig);
         const portD = new AVRIOPort(avrCPU, portDConfig);
         const portE = new AVRIOPort(avrCPU, portEConfig);
         const portF = new AVRIOPort(avrCPU, portFConfig);
         const portG = new AVRIOPort(avrCPU, portGConfig);
         const portH = new AVRIOPort(avrCPU, portHConfig);
-        const portJ = new AVRIOPort(avrCPU, portJConfig);
-        const portK = new AVRIOPort(avrCPU, portKConfig);
+        
+        const megaPortJConfig = {
+            ...portJConfig,
+            pinChange: {
+                PCIE: 1,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6c,
+                pinChangeInterrupt: 20, // PCINT1 is vector 20 on ATmega2560
+                mask: 0xff,
+                offset: 8,
+            }
+        };
+        const portJ = new AVRIOPort(avrCPU, megaPortJConfig);
+        
+        const megaPortKConfig = {
+            ...portKConfig,
+            pinChange: {
+                PCIE: 2,
+                PCICR: 0x68,
+                PCIFR: 0x3b,
+                PCMSK: 0x6d,
+                pinChangeInterrupt: 22, // PCINT2 is vector 22 on ATmega2560
+                mask: 0xff,
+                offset: 16,
+            }
+        };
+        const portK = new AVRIOPort(avrCPU, megaPortKConfig);
+        
         const portL = new AVRIOPort(avrCPU, portLConfig);
 
         this.cpu = new ArduinoCPU(avrCPU);

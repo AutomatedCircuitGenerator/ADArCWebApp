@@ -1,4 +1,4 @@
-﻿@page "/"
+@page "/"
 @using GraphSynth.Representation
 @using System.IO
 @using System.IO.Compression
@@ -10,10 +10,10 @@
 @inject BoardService BoardService
 @inject ToastService ToastService
 @inject GraphSynthInvoke GraphSynthInvoke
+@inject NavigationManager Navigation
 
 <PageTitle>Home | ADArC</PageTitle>
 <body>
-<script suppress-error="BL9992" type="module" src="build/build.js"></script>
 <button @ref="refresh" hidden="hidden" @onclick="StateChanged">refresh</button>
 @if (_isMobileUser)
 {
@@ -44,52 +44,66 @@
 <div class="page" data-title="Welcome to ADArC" data-intro="ADArC stands for Automated Design tool for Arduino Circuits! This is a circuit design tool for building projects with Arduino Microcontrollers.">
     <div class="toolbar" data-title="Toolbar" data-intro="The Toolbar contains tools to research, create, modify, and run your project.">
         <div class="logo-and-adarc">
-            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo">
-            <span class="adarc-text">ADArC</span>
+            <img class="logo" src="images/adarc-logo.001.png" alt="adarc-logo" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">
+            <span class="adarc-text" style="cursor:pointer; transition:filter .2s;" onmouseover="this.style.filter='drop-shadow(0 0 8px white)'" onmouseout="this.style.filter='none'"@onclick="OpenNewTab">ADArC</span>
         </div>
         
-        <button class="tutorial-button toolbar-button" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
-            💡 Tutorial
+        <button class="tutorial-button toolbar-button" title="Tutorial" style="font-size: 18px" @onclick="RunTutorial" data-title="Tutorial" data-intro="Click here to run this tutorial.">
+            💡
+            <span class="toolbar-text">Tutorial</span>
         </button>
         <div class="center-toolbar">
+            <label class="breadboard-switch" title="Show or hide breadboard">
+                <span><svg xmlns="http://www.w3.org/2000/svg" width="35" height="35" viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="18" rx="3" fill="#F6E8CB" stroke="#000000" stroke-width="1"/><rect x="4" y="5" width="2" height="14" rx="1" fill="#F05A66"/><rect x="18" y="5" width="2" height="14" rx="1" fill="#438EE8"/><rect x="11.3" y="5" width="1.4" height="14" rx=".7" fill="#CEBFA7"/><g fill="#53535D"><circle cx="8.5" cy="7" r=".85"/><circle cx="15.5" cy="7" r=".85"/><circle cx="8.5" cy="10.3" r=".85"/><circle cx="15.5" cy="10.3" r=".85"/><circle cx="8.5" cy="13.6" r=".85"/><circle cx="15.5" cy="13.6" r=".85"/><circle cx="8.5" cy="17" r=".85"/><circle cx="15.5" cy="17" r=".85"/></g></svg></span>
+                <input type="checkbox" @bind="showBreadboard" @bind:after="EnsureBreadboardConnections"/>
+                <span class="slider"></span>
+            </label>
             <div style="display: flex" data-title="Undo and Redo" data-intro="These buttons allow you to undo the last action or redo a previously undone action. You can use them to revert or restore changes such as adding or removing components.">
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button" title="Undo" @onclick="() => { allowDrop = true; Undo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastExecutedAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg>Undo</span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-undo"><path d="M3 7v6h6"/><path d="M21 17a9 9 0 0 0-9-9 9 9 0 0 0-6 2.3L3 13"/></svg></span>
+                    <span class="toolbar-text">Undo</span>
                 </button>
-                <button class="toolbar-button" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
+                <button class="toolbar-button" title="Redo" @onclick="() => { allowDrop = true; Redo(); SelectedComponent = -1; allowDrop = false; }"
                         disabled="@(_lastUndoneAction == null)">
-                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg>Redo</span>
+                    <span><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-redo"><path d="M21 7v6h-6"/><path d="M3 17a9 9 0 0 1 9-9 9 9 0 0 1 6 2.3l3 2.7"/></svg></span>
+                    <span class="toolbar-text">Redo</span>
                 </button>
             </div>
             <div class="Import-Export" data-title="Import & Export Buttons" data-intro="Click the Import button on an empty workbench to load in a previous project. Click the Export button to save your current project to a file.">
                 <InputFile id="import-button" accept=".adarc" style="display:none;" OnChange="@(IsRunning || selLockedOut ? null : LoadFromFile)" disabled="@(IsRunning || selLockedOut)"/>
-                <label for="import-button" class="toolbar-button" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
-                    <span>⬇️️ Import</span>
+                <label for="import-button" class="toolbar-button" title="Import" style="pointer-events:@(IsRunning || selLockedOut ? "none" : "auto"); opacity: @(IsRunning || selLockedOut ? "0.25" : "1.0")">
+                    <span>⬇️️</span>
+                    <span class="toolbar-text">Import</span>
                 </label>
-                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" disabled="@(IsRunning || selLockedOut)">
-                    <span>⬆️ Export</span>
+                <button @onclick="@(IsRunning || selLockedOut ? null : DownloadFile)" class="toolbar-button" title="Export" disabled="@(IsRunning || selLockedOut)">
+                    <span>⬆️</span>
+                    <span class="toolbar-text">Export</span>
                 </button>
             </div>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
+            <button class="toolbar-button" title="Generate URL" @onclick="@(selLockedOut ? null : ToggleUrlDisplay)" data-title="Generate a URL" data-intro="Click here to generate a copyable URL with your current circuit and code."
                     disabled="@selLockedOut">
-                <span>🔗 Generate URL</span>
+                <span>🔗</span>
+                <span class="toolbar-text">Generate URL</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
+            <button class="toolbar-button" title="Examples" @onclick="@(selLockedOut ? null : (() => _exampleModalOpen = true))" data-title="Examples" data-intro="Click here to load example circuits."
                     disabled="@selLockedOut">
-                📖 Examples
+                📖
+                <span class="toolbar-text">Examples</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
+            <button class="toolbar-button" title="Report Bug" @onclick="@(selLockedOut ? null : ReportBug)" data-title="Report Bug" data-intro="Click here to report any bugs or issues you encounter."
                     disabled="@selLockedOut">
-                <span>🐛 Report Bug</span>
+                <span>🐛</span>
+                <span class="toolbar-text">Report Bug</span>
             </button>
 
-            <button class="toolbar-button" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
+            <button class="toolbar-button" title="Help" @onclick="@(selLockedOut ? null : OpenExternalHelp)" data-title="Help Button" data-intro="Click the Help button to go to the dedicated help website. This website contains useful information for each component in our library."
                     disabled="@selLockedOut">
-                <span>ℹ Help</span>
+                <span>ℹ</span>
+                <span class="toolbar-text">Help</span>
             </button>
 
             <Modal Open="@isUrlBoxVisible" OnClose="() => isUrlBoxVisible = false">
@@ -112,16 +126,23 @@
             </Modal>
 
             <button disabled="@selLockedOut" class="toolbar-button" @onclick="ToggleRunStop" data-title="Run/Compile" data-intro="Click to run the code in the Code Panel. This will also simulate the components on the Workbench.">
-                <span>@runStopText</span>
+                <span>@runStopButton</span>
+                <span class="toolbar-text">@runStopText</span>
             </button>
         </div>
     </div>
     <div class="page-content" @onmousedown="CheckForCardDrag" @onmousemove="DragCardIfPossible" @onmouseup="async (e) => { AddToCanvasIfNecessary(e, true);}">
         <div class="main-canvas" tabindex="0" @onkeydown="HandleKeyPress" @ref="_mainCanvasContainer">
-            <MainCanvas comps=@(Comps) handleMouseEnter="() => allowDrop = true" handleMouseLeave="() => allowDrop = false"></MainCanvas>
+            <MainCanvas comps="Comps"
+                        ShowBreadboard="showBreadboard"
+                        BreadboardRowCount="BreadboardRowCount"
+                        OnComponentSvgMeasured="HandleSvgMeasured"
+                        handleMouseEnter="() => allowDrop = true"
+                        handleMouseLeave="() => allowDrop = false">
+            </MainCanvas>
         </div>
-        <div class="sidebar" style="width: 25%; left: @(leftPaneAlign + "%")" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
-            <div class="expand-button expand-button-left" @onclick="ToggleLeftSidebar" style="left:100%;">
+        <div class="sidebar" style="left: @(leftPaneAlign)px" data-title="Component Palette" data-intro="You can choose from the library of components to create your project. All wires are automatically connected to the Arduino once you drag a component to the workbench.">
+            <div class="expand-button expand-button-left @(shouldShowBoardSelect && windowWidth <= 1350 ? "disabled" : "")" @onclick="@(ToggleLeftSidebar)" style="left:100%;">
                 @if (isLeftExpanded)
                 {
                     <span>▶</span>
@@ -131,12 +152,12 @@
                     <span>◀</span>
                 }
             </div>
-            <ComponentPane host="@this"></ComponentPane>
+        <ComponentPane host="@this"></ComponentPane>
         </div>
         <div id="mover" style="pointer-events:none; position:absolute; top:@(moverOffsetTop)px; left:@(moverOffsetLeft)px; transform:translate(-50%, -50%); visibility:@isVisible; width:@(ComponentDeclarations.Components[moverId].rightOffset)px; height:@(ComponentDeclarations.Components[moverId].bottomOffset)px;">
             <VaryingComponent disableBorder=true posAbsolute="false" individualData="new(moverId, new(), 0, 0)" objId="@moverId" zoomFactor="1" DragStart="() => { }" DragProgress="() => { }" DragEnd="() => { }"></VaryingComponent>
         </div>
-        <div class="sidebar-right" style="width: 40%; right: @(rightPaneAlign + "%")" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
+        <div class="sidebar-right" style="right: @(rightPaneAlign)px" data-title="Code Pane" data-intro="Click the blue arrow button below to open the Code Panel. This is where you can program the digital Arduino. It follows the same design as the Arduino IDE. Sample code is loaded for each component on the Workbench.">
             <div class="expand-button expand-button-right" @onclick="ToggleRightSidebar" style="right:100%;">
                 @if (isRightExpanded)
                 {
@@ -147,7 +168,7 @@
                     <span>◀</span>
                 }
             </div>
-            <CodePane></CodePane>
+        <CodePane></CodePane>
         </div>
         <Modal Open="@_exampleModalOpen" OnClose="() => _exampleModalOpen = false">
             <ExampleSelect ComponentFrequencies="_componentFrequencies" OnClose="() => _exampleModalOpen = false"></ExampleSelect>
@@ -176,7 +197,6 @@
             <button @onclick="HideRightClickTooltip">Got it!</button>
         </div>
     }
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/intro.js/7.2.0/intro.min.js"></script>
 
 
 </div>
@@ -190,13 +210,275 @@
 @code{
     private Modal modal;
     private bool _exampleModalOpen;
+    
+    private bool showBreadboard = false;
+    private int BreadboardRowCount = 30;
+    private double? _savedArduinoPreExpandX;
+    private double? _savedBreadboardPreExpandX;
+
+    private void AdjustWorkspaceForBreadboardSize()
+    {
+        if (BuildCanvas == null) return;
+        var arduino = Comps.Values.FirstOrDefault(c => c.IsArduino());
+        if (showBreadboard && BreadboardRowCount > 30)
+        {
+            _savedBreadboardPreExpandX ??= BuildCanvas.BreadboardX;
+            double targetBbX = Math.Min(BuildCanvas.BreadboardX, 180.0);
+            BuildCanvas.BreadboardX = targetBbX;
+            if (arduino != null)
+            {
+                _savedArduinoPreExpandX ??= arduino.X;
+                double minArdX = targetBbX + BreadboardHoleCoordinates.GetBoardWidth(BreadboardRowCount) + 45.0;
+                if (arduino.X < minArdX) arduino.X = minArdX;
+            }
+        }
+        else
+        {
+            if (_savedBreadboardPreExpandX.HasValue)
+            {
+                BuildCanvas.BreadboardX = _savedBreadboardPreExpandX.Value;
+                _savedBreadboardPreExpandX = null;
+            }
+            if (_savedArduinoPreExpandX.HasValue && arduino != null)
+            {
+                arduino.X = _savedArduinoPreExpandX.Value;
+                _savedArduinoPreExpandX = null;
+            }
+        }
+        BuildCanvas.AdjustZoom();
+    }
+
+    private void HandleSvgMeasured((ComponentData data, double w, double h) info)
+    {
+        double prevW = info.data.MeasuredSvgWidth;
+        double prevH = info.data.MeasuredSvgHeight;
+        info.data.UpdateMeasuredSvgSize(info.w, info.h);
+        if (Math.Abs(prevW - info.data.MeasuredSvgWidth) > 1.0 || Math.Abs(prevH - info.data.MeasuredSvgHeight) > 1.0)
+        {
+            if (showBreadboard && info.data.LivesOnBreadBoard)
+            {
+                EnsureBreadboardConnections();
+            }
+            StateHasChanged();
+        }
+    }
+
+    private void EnsureBreadboardConnections()
+    {
+        if (!showBreadboard)
+        {
+            BreadboardRowCount = 30;
+            foreach (var c in Comps.Values)
+            {
+                c.MountedOnBreadboard = false;
+                c.BreadboardConnections.Clear();
+                c.BreadboardPinMap.Clear();
+            }
+            AdjustWorkspaceForBreadboardSize();
+            return;
+        }
+
+        var usedHoles = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+        int topNextRow = 1;
+        int botNextRow = 1;
+        int requiredRows = 1;
+
+        // First pass: deterministic row-slot allocation for all breadboard-mountable components
+        foreach (var comp in Comps.Values.OrderBy(c => c.localId))
+        {
+            if (comp.IsArduino() || comp.localId == 0) continue;
+
+            comp.BreadboardConnections.Clear();
+            comp.BreadboardPinMap.Clear();
+            comp.MountedOnBreadboard = false;
+
+            if (!comp.Data.LivesOnBreadBoard) continue;
+
+            if (comp.Data.BreadboardMountAttr != null)
+            {
+                var attr = comp.Data.BreadboardMountAttr;
+                var layout = comp.Data.MountLayout
+                             ?? BreadboardMountLayout.Compute(attr, comp.Data.pinInfo, comp.Data.MeasuredSvgWidth, comp.Data.MeasuredSvgHeight);
+                if (layout == null) continue;
+
+                char mountCol = layout.Col;
+                int mountRot = layout.ExtraRotation;
+                bool isTopStrip = mountCol is >= 'f' and <= 'j';
+                int stripNext = isTopStrip ? topNextRow : botNextRow;
+                int startRow = stripNext + (stripNext == 1 ? Math.Max(0, layout.LeftOverhangRows - 2) : layout.LeftOverhangRows);
+                int endReach = startRow + layout.RightReachRows;
+
+                if (endReach > 63 && layout.AllowOppositeStrip)
+                {
+                    char oppCol = BreadboardMountLayout.FlipColAcrossTrough(layout.Col);
+                    int oppRot = (layout.ExtraRotation + 2) % 4;
+                    var oppLayout = BreadboardMountLayout.Compute(attr, comp.Data.pinInfo, comp.Data.MeasuredSvgWidth, comp.Data.MeasuredSvgHeight, oppRot, oppCol);
+                    if (oppLayout != null)
+                    {
+                        bool oppTop = oppCol is >= 'f' and <= 'j';
+                        int oppNext = oppTop ? topNextRow : botNextRow;
+                        int oppStart = oppNext + (oppNext == 1 ? Math.Max(0, oppLayout.LeftOverhangRows - 2) : oppLayout.LeftOverhangRows);
+                        int oppEnd = oppStart + oppLayout.RightReachRows;
+                        if (oppEnd <= 63)
+                        {
+                            layout = oppLayout;
+                            mountCol = oppCol;
+                            mountRot = oppRot;
+                            isTopStrip = oppTop;
+                            startRow = oppStart;
+                            endReach = oppEnd;
+                        }
+                    }
+                }
+
+                if (endReach > 63)
+                {
+                    Console.WriteLine($"Breadboard full (63 rows); leaving {comp.Data.name} unmounted beside breadboard.");
+                    continue;
+                }
+
+                comp.MountedOnBreadboard = true;
+                comp.BreadboardStartRow = startRow;
+                comp.BreadboardRowSpan = layout.PinRowSpan;
+                comp.BreadboardCol = mountCol;
+                comp.BreadboardExtraRot = mountRot;
+                comp.BreadboardPinScale = layout.Scale;
+                comp.BreadboardAnchorX = layout.AnchorLocalX;
+                comp.BreadboardAnchorY = layout.AnchorLocalY;
+
+                foreach (var kv in layout.PinRowOffsets)
+                {
+                    int pinId = kv.Key;
+                    int offset = kv.Value;
+                    int row = startRow + offset;
+                    char pinCol = layout.PinCols.TryGetValue(pinId, out var c2) ? c2 : mountCol;
+                    string holeId = $"{pinCol}{row}";
+                    comp.BreadboardPinMap[pinId] = (offset, pinCol);
+                    comp.BreadboardConnections.Add(new BreadboardConnection(pinId, holeId, "red"));
+                    usedHoles.Add(holeId);
+                }
+
+                var (_, colY) = BreadboardHoleCoordinates.GetCenter($"{mountCol}1");
+                double bodyMinY = colY + layout.RelMinY;
+                double bodyMaxY = colY + layout.RelMaxY;
+                bool touchesTop = bodyMinY < 185.0;
+                bool touchesBot = bodyMaxY > 195.0;
+
+                if (isTopStrip || touchesTop) topNextRow = Math.Max(topNextRow, endReach + 2);
+                if (!isTopStrip || touchesBot) botNextRow = Math.Max(botNextRow, endReach + 2);
+                requiredRows = Math.Max(requiredRows, endReach);
+            }
+            else
+            {
+                // Legacy BreadboardOffset components (e.g. LED, RGB LED)
+                int rowSpan = Math.Max(1, (int)Math.Ceiling(comp.Data.Width / BreadboardHoleCoordinates.RowPitch));
+                int startRow = topNextRow;
+                int endReach = startRow + rowSpan - 1;
+                if (endReach > 63)
+                {
+                    Console.WriteLine($"Breadboard full (63 rows); leaving {comp.Data.name} unmounted beside breadboard.");
+                    continue;
+                }
+
+                comp.MountedOnBreadboard = true;
+                comp.BreadboardStartRow = startRow;
+                comp.BreadboardRowSpan = rowSpan;
+                comp.BreadboardCol = 'i';
+                comp.BreadboardExtraRot = 0;
+                comp.BreadboardPinScale = 1.0;
+
+                bool usesBotStrip = false;
+                for (int pinId = 0; pinId < comp.Data.pinInfo.Length; pinId++)
+                {
+                    var pin = comp.Data.pinInfo[pinId];
+                    if (pin.NoBreadboard) continue;
+
+                    var matched = comp.Data.BreadboardPinInfos.FirstOrDefault(bp =>
+                        string.Equals(bp.name, pin.name, StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(bp.name, pin.gsName, StringComparison.OrdinalIgnoreCase));
+
+                    if (matched == default && pinId < comp.Data.BreadboardPinInfos.Count)
+                        matched = comp.Data.BreadboardPinInfos[pinId];
+
+                    int colIdx = Math.Clamp(matched.number, 0, 9);
+                    char col = "abcdefghij"[colIdx];
+                    if (colIdx < 5) usesBotStrip = true;
+                    int row = startRow + matched.offset;
+                    string holeId = $"{col}{row}";
+                    comp.BreadboardPinMap[pinId] = (matched.offset, col);
+                    comp.BreadboardConnections.Add(new BreadboardConnection(pinId, holeId, "red"));
+                    usedHoles.Add(holeId);
+                }
+
+                topNextRow = Math.Max(topNextRow, endReach + 2);
+                if (usesBotStrip) botNextRow = Math.Max(botNextRow, endReach + 2);
+                requiredRows = Math.Max(requiredRows, endReach);
+            }
+        }
+
+        BreadboardRowCount = requiredRows > 30 ? 63 : 30;
+        int railCount = BreadboardHoleCoordinates.GetRailHoleCount(BreadboardRowCount);
+        int nonMountedStart = Math.Min(BreadboardRowCount, Math.Max(topNextRow, botNextRow));
+
+        var signalHoles = (
+            from row in Enumerable.Range(nonMountedStart, Math.Max(0, BreadboardRowCount - nonMountedStart + 1))
+                .Concat(Enumerable.Range(1, nonMountedStart - 1))
+            from column in "bf"
+            select $"{column}{row}"
+        ).ToList();
+
+        var positiveHoles = Enumerable.Range(2, Math.Max(0, railCount - 1))
+            .Select(i => $"LPLUS_{i}")
+            .Concat(Enumerable.Range(2, Math.Max(0, railCount - 1)).Select(i => $"RPLUS_{i}"))
+            .ToList();
+
+        var negativeHoles = Enumerable.Range(2, Math.Max(0, railCount - 1))
+            .Select(i => $"LMINUS_{i}")
+            .Concat(Enumerable.Range(2, Math.Max(0, railCount - 1)).Select(i => $"RMINUS_{i}"))
+            .ToList();
+
+        // Second pass: wire off-board components (and NoBreadboard pins on mounted components) onto unused breadboard holes
+        foreach (var comp in Comps.Values.OrderBy(c => c.localId))
+        {
+            if (comp.IsArduino() || comp.localId == 0) continue;
+
+            foreach (int pinId in comp.ConnMap.Keys.ToList())
+            {
+                if (comp.MountedOnBreadboard && comp.BreadboardPinMap.ContainsKey(pinId)) continue;
+                if (pinId < 0 || pinId >= comp.Data.pinInfo.Length) continue;
+                var pin = comp.Data.pinInfo[pinId];
+                var role = ComponentData.GetPinPowerRole(pin.name);
+                if (role == BreadboardPinRole.Signal)
+                    role = ComponentData.GetPinPowerRole(pin.gsName);
+
+                var candidates = role switch
+                {
+                    BreadboardPinRole.Power => positiveHoles,
+                    BreadboardPinRole.Ground => negativeHoles,
+                    _ => signalHoles
+                };
+
+                string? freeHole = candidates.FirstOrDefault(h => !usedHoles.Contains(h));
+                if (freeHole == null)
+                {
+                    Console.WriteLine($"No available breadboard hole for {pin.name}");
+                    continue;
+                }
+                comp.BreadboardConnections.Add(new BreadboardConnection(pinId, freeHole, "red"));
+                usedHoles.Add(freeHole);
+            }
+        }
+
+        AdjustWorkspaceForBreadboardSize();
+    }
+
 
     private ElementReference _mainCanvasContainer;
 
     private BoardSelect boardSelect;
     private bool shouldShowBoardSelect;
 
-    bool isLeftExpanded = true;
+    bool isLeftExpanded = false;  
     private string generatedUrl = string.Empty;
     bool isRightExpanded;
 
@@ -208,27 +490,39 @@
     /// Percentage of screen that the left pane is pushed to the left.
     /// Default position (0) is fully on screen.
     /// </summary>
-    int leftPaneAlign => isLeftExpanded ? 0 : -24;
+    int leftPaneAlign => isLeftExpanded ? 0 : -390;
 
     /// <summary>
     /// Percentage of screen that the right pane is pushed to the right.
     /// Default position (0) is fully on screen.
     /// </summary>
-    int rightPaneAlign => isRightExpanded ? 0 : -39;
+    int rightPaneAlign => isRightExpanded ? 0 : -590;
 
-    string runStopText = "▶️ Run";
+    string runStopButton = "▶️";
+    string runStopText = "Run";
     public bool IsRunning;
+    private int windowWidth;
 
-    void ToggleLeftSidebar()
+    private async Task ToggleLeftSidebar()
     {
+        windowWidth = await AppInterop.GetWindowWidth();
+        if (shouldShowBoardSelect && windowWidth <= 1350)
+        {
+            ToastService.AddToast("Please enlarge the window before opening the code panel.", Variant.Warning);
+            return;
+        }
         isLeftExpanded = !isLeftExpanded;
         isRightExpanded = false;
         StateHasChanged();
     }
-
-
+    
     void ToggleRightSidebar()
     {
+        if (shouldShowBoardSelect)
+        {
+            ToastService.AddToast("Please select an Arduino board before opening the code panel.", Variant.Warning);
+            return;
+        }
         isRightExpanded = !isRightExpanded;
         isLeftExpanded = false;
         StateHasChanged();
@@ -242,8 +536,9 @@
         BoardService.Board = board;
         Comps[0] = BoardService.GetComponentInstance();
         Console.WriteLine($"Board set to {board}, component instance created");
+        CheckForDualSoftwareSerialWarning();
 
-        if (LoadingProgress == -1)
+        if (_rulesLoaded)
         {
             Console.WriteLine("Loading progress complete, setting up bench from JSON");
             SetupBenchFromJsonString(BoardService.GetJson());
@@ -256,8 +551,10 @@
             Console.WriteLine("Loading in progress, scheduling bench setup");
             _scheduleBenchSetup = true;
         }
+        shouldShowBoardSelect = false;
+        isLeftExpanded = true;     // reset palette position to original (left palette expanded)
+        StateHasChanged();    
     }
-
 
     /// <summary>
     /// Attempts to compile and run the code.
@@ -267,6 +564,7 @@
     {
         if (!IsRunning)
         {
+            runStopButton = "";
             runStopText = "Compiling...";
             var response = await AppInterop.CompileWrapper();
 
@@ -274,7 +572,8 @@
             if (response.stderr != "")
             {
                 CodePane?.UpdateConsoleOutput(response.stderr, false);
-                runStopText = "▶️ Run";
+                runStopButton = "▶️";
+                runStopText = "Run";
                 //look for available error messages (format roughly error:linenum:columnnum:message)
                 var caps = Regex.Match(response.stderr, ":([0-9]*?:[0-9]*?):").Captures;
                 if (caps.Count > 0)
@@ -298,7 +597,8 @@
                 CodePane?.UpdateConsoleOutput(response.stdout, false);
                 AppInterop.ClearMonacoErrorsWrapper();
                 AppInterop.StartSimWrapper();
-                runStopText = "🟥 Stop";
+                runStopButton = "🟥";
+                runStopText = "Stop";
                 IsRunning = true;
             }
         }
@@ -307,15 +607,23 @@
             AppInterop.StopWrapper();
             CodePane!.CommitBuffer();
             CodePane!.UpdateConsoleOutput("Stopped.\n", false);
-            runStopText = "▶️ Run";
+            runStopButton = "▶️";
+            runStopText = "Run";
             IsRunning = false;
         }
     }
 
-    void OpenExternalHelp()
+    private async Task OpenExternalHelp()
     {
-        const string url = "https://adarc-help.mech.website/";
-        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+        try
+        {
+            Console.WriteLine($"[Index] Opening documentation URL via JS interop: {DocumentationMap.BaseUrl}");
+            await JsRuntime.InvokeVoidAsync("open", DocumentationMap.BaseUrl, "_blank");
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"[Index] Error opening help: {ex.Message}");
+        }
     }
 
 
@@ -384,11 +692,20 @@
 
             AppInterop.Runtime = JsRuntime;
             AppInterop.JsModule = await AppInterop.GetModuleWrapper();
-
             AppInterop.UpdateScreenRatios(await AppInterop.GetWindowWidth(), await AppInterop.GetWindowHeight());
             //AppInterop.startSimWrapper();
             //AppInterop.updateCodeWrapper();
         }
+    }
+    
+    public void OnWindowResized(int width, int height)
+    {
+        windowWidth = width;
+        if (windowWidth < 1350)
+        {
+            isLeftExpanded = false;
+        }
+        InvokeAsync(StateHasChanged);
     }
 
 
@@ -433,70 +750,90 @@
 
     private async void AddToCanvasIfNecessary(MouseEventArgs e, bool trackHistory = false)
     {
-        if (targetCardComponentId == -1) return;
-        isVisible = "hidden";
-        if (allowDrop) //ie, cursor is over the workbench
+        try
         {
-            ++localIds;
-            var componentData = ComponentDeclarations.Components[targetCardComponentId];
-            var n = new node(); //label with localId (easy tracking)
-            n.localLabels.Add("user_" + componentData.nodeName);
-
-            GraphSynthInvoke.GetNodes().Add(n);
-            if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
-
-            GraphSynthInvoke.Add();
-            if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+            if (targetCardComponentId == -1) return;
+            isVisible = "hidden";
+            if (allowDrop) //ie, cursor is over the workbench
             {
-                moverOffsetLeft = 0;
-                moverOffsetTop = 0;
-                targetCardComponentId = -1;
-                GraphSynthInvoke.RemoveConnectedComponent(n);
-                return;
+                ++localIds;
+                var componentData = ComponentDeclarations.Components[targetCardComponentId];
+                Console.WriteLine($"Placing component: {componentData.name}, with id: {targetCardComponentId} and type: {componentData.compType}");
+                var n = new node(); //label with localId (easy tracking)
+                n.localLabels.Add("user_" + componentData.nodeName);
+                GraphSynthInvoke.GetNodes().Add(n);
+                if (componentData.nodeName != null) GraphSynthInvoke.Inputs.Add(componentData.nodeName);
+
+                GraphSynthInvoke.Add();
+                if (!GraphSynthInvoke.Connect(componentData.nodeName, "arduino", SelectArduinoNode))
+                {
+                    moverOffsetLeft = 0;
+                    moverOffsetTop = 0;
+                    targetCardComponentId = -1;
+                    GraphSynthInvoke.RemoveConnectedComponent(n);
+                    return;
+                }
+
+                //label all new nodes and connections with the localid of the component that added them.
+                GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
+                GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
+
+
+                //create frontend instance
+                var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
+                comp.localId = localIds;
+                Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
+
+                BuildCode.outputPins.Clear();
+                BuildCanvas!.ConnLines.Clear();
+                foreach (var c in Comps.Values)
+                {
+                    UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
+                }
+
+                if (showBreadboard) EnsureBreadboardConnections();
+                //reset the way that component pins are bound to the arduino.
+                //TODO: check for performance improvements here.
+
+                await comp.LinkController(JsRuntime);
+                _componentFrequencies.IncrementFrequency(targetCardComponentId);
+
+                //register the dht specifically to force the arduino to pause while awaiting response from sensor
+                if (IsDhtComponent(Comps[localIds]))
+                {
+                    //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
+                    if (Comps[localIds].ConnMap.ContainsKey(1) && Comps[localIds].ConnMap[1].Count > 0)
+                    {
+                        AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
+                    }
+                }
+
+                AppInterop.UpdateCodeWrapper();
+                await JsRuntime.InvokeVoidAsync("onLoad");
+                await JsRuntime.InvokeVoidAsync("onAppend");
+                ToastService.AddToast("Code panel updated.", Variant.Info);
+                if (comp.Data.Warning != null)
+                {
+                    ToastService.AddToast(comp.Data.Warning, Variant.Warning);
+                }
+
+                CheckForDualSoftwareSerialWarning();
+                if (trackHistory)
+                {
+                    ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs { ClientX = e.ClientX, ClientY = e.ClientY }));
+                }
             }
 
-            //label all new nodes and connections with the localid of the component that added them.
-            GraphSynthInvoke.GetNodes().FindAll(node => node.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(node => node.localLabels.Add("localId:" + localIds));
-            GraphSynthInvoke.GetArcs().FindAll(a => a.localLabels.Find(s => s.StartsWith("localId:")) == null).ToList().ForEach(a => a.localLabels.Add("localId:" + localIds));
-            //create frontend instance
-            var comp = new ComponentInstance(targetCardComponentId, n, e.ClientX - (.5 * componentData.rightOffset), e.ClientY - (.5 * componentData.bottomOffset) - 50);
-            comp.localId = localIds;
-            Comps.Add(localIds, BuildCanvas?.UnZoom(comp)); //50 is height of toolbar
-            BuildCode.outputPins.Clear();
-            BuildCanvas!.ConnLines.Clear();
-            //reset the way that component pins are bound to the arduino.
-            //TODO: check for performance improvements here.
-            foreach (var c in Comps.Values)
-            {
-                UpdatePinBindings(c); //keep an eye on this. could be not good for performance.
-            }
 
-            await comp.LinkController(JsRuntime);
-            _componentFrequencies.IncrementFrequency(targetCardComponentId);
-
-            //register the dht specifically to forced the arduino to pause while awaiting response from sensor
-            //TODO: improve and generalize.
-            if (Comps[localIds].GlobalId == 20)
-            {
-                //Console.WriteLine("wait for:" + comps[localIds].connMap[1][0].toId);
-                AppInterop.RegisterResponseRequired(Comps[localIds].ConnMap[1][0].ToId);
-            }
-
-            AppInterop.UpdateCodeWrapper();
-            await JsRuntime.InvokeVoidAsync("onLoad");
-            await JsRuntime.InvokeVoidAsync("onAppend");
-            ToastService.AddToast("Code panel updated.", Variant.Info);
-            if (comp.Data.Warning != null) ToastService.AddToast(comp.Data.Warning, Variant.Warning);
-            if (trackHistory)
-            {
-                ExecuteAction(new UserAction(comp.localId, comp.GlobalId, UserActionType.Add, new MouseEventArgs{ClientX = e.ClientX, ClientY = e.ClientY}));
-            }
+            moverOffsetLeft = 0;
+            moverOffsetTop = 0;
+            targetCardComponentId = -1;
         }
-
-
-        moverOffsetLeft = 0;
-        moverOffsetTop = 0;
-        targetCardComponentId = -1;
+        catch (Exception ex)
+        {
+            Console.WriteLine(ex);
+            
+        }
     }
 
     // State for the Report Bug modal
@@ -678,6 +1015,12 @@
     /// </summary>
     private bool selLockedOut = true;
 
+    /// <summary>
+    /// True once rule loading has finished. Distinct from LoadingProgress reaching -1, which
+    /// only controls how long the visual progress bar stays on screen.
+    /// </summary>
+    private bool _rulesLoaded;
+
     private bool _isMobileUser;
 
     /// <summary>
@@ -712,11 +1055,15 @@
         // selLockedOut = !hasUrlParam;
 
         Console.WriteLine("Loading rulesets...");
-        var x = await RuleSetMap.GetInstance().LoadRuleSet("ADD", navMan, this, 0, 73);
-        await RuleSetMap.GetInstance().LoadRuleSet("CONNECT", navMan, this, x, 73);
+        var ruleSetMap = RuleSetMap.GetInstance();
+        await ruleSetMap.RegisterRuleSet("ADD", navMan);
+        await ruleSetMap.RegisterRuleSet("CONNECT", navMan);
+        await ruleSetMap.LoadRuleSet("ADD", navMan, this);
+        await ruleSetMap.LoadRuleSet("CONNECT", navMan, this);
 
         GraphSynthInvoke.rulesets = RuleSetMap.Rulesets;
-        
+        _rulesLoaded = true;
+
         if (hasUrlParam)
         {
             await LoadFromUrl(queryParams["c"], isExample);
@@ -732,10 +1079,28 @@
             StateHasChanged();
         }
 
-        LoadingProgress = -1;
         Console.WriteLine("OnInitializedAsync completed");
 
         StateHasChanged();
+        _ = HideLoadingBarAfterDelay();
+    }
+
+    /// <summary>
+    /// Keeps the loading bar visible at 100% for a moment after rule loading finishes, so its
+    /// completion is perceptible before it disappears, instead of vanishing the instant it fills.
+    /// Runs unawaited so it doesn't block app usability, which is already unlocked by this point.
+    /// </summary>
+    private async Task HideLoadingBarAfterDelay()
+    {
+        try
+        {
+            await Task.Delay(1000);
+            LoadingProgress = -1;
+            await StateChanged();
+        }
+        catch (ObjectDisposedException)
+        {
+        }
     }
 
     /// <summary>
@@ -749,14 +1114,9 @@
         //buildCanvas!.connLines.Clear();
 
         var compPins = GetPins(comp.GsNode, comp.Data.nodeName);
-        if (compPins.Count == 0)
-        {
-            return;
-        }
-
         var connArcs = GraphSynthInvoke.GetArcs().Where(a => a.localLabels.Contains("connection")).ToList();
-        //List<arc> connArcs = new();
 
+        
         foreach (arc a in connArcs)
         {
             ComponentInstance ha = Comps[Convert.ToInt32(a.To.localLabels.Find(s => s.StartsWith("localId:")).Substring(8))];
@@ -779,6 +1139,7 @@
             }
 
             var aPinName = "**NF**";
+            
 
             if ((ha.IsArduino() && (a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))) || (!ha.IsArduino() && !(a.To.localLabels.Contains("localId:1") || a.To.localLabels.Contains("localId:2"))))
             {
@@ -786,7 +1147,6 @@
             }
 
             string bPinName = "";
-
 
             if (aPinName == "**NF**")
             {
@@ -802,7 +1162,6 @@
             if ((ha.IsArduino()) && System.Text.RegularExpressions.Regex.Match(aPinName, "d[0-9]{1,2}").Success)
             {
                 BuildCode.outputPins.Add(Convert.ToInt32(aPinName.Substring(1)));
-                //Console.WriteLine("1: " + BuildCode.outputPins.Count);
             }
 
             if (aPinName == "**NF**")
@@ -812,12 +1171,25 @@
 
             if (bPinName == "**NF**")
             {
-                Console.WriteLine(hb.Data.name + " is missing a pin definition!");
+                Console.WriteLine("Component: " + comp.Data.name + ", pin: " + aPinName + " is missing its connector!");
+                Console.WriteLine("Component A: " + ha.Data.name + ", Component B: " + hb.Data.name);
+                Console.WriteLine("Component B Type: " + hb.Data.compType);
+                foreach (var bPinKey in hb.Data.pins.Keys)
+                {
+                    Console.WriteLine($"{bPinKey} is a key unmatched to a label");
+                }
+                foreach (var label in a.To.localLabels)
+                {
+                    Console.WriteLine($"{label} is a to lable unmatched to a key");
+                }
+                foreach (var label in a.From.localLabels)
+                {
+                    Console.WriteLine($"{label} is a from lable unmatched to a key");
+                }
             }
-
+            
             int i1 = ha.Data.pins[aPinName];
             int i2 = hb.Data.pins[bPinName];
-
 
             comp.AddConnection(i1, hb, i2, a); //also sets up the drawn line
         }
@@ -859,10 +1231,12 @@
         _componentFrequencies.DecrementFrequency(removedComponent.GlobalId);
 
         //specifically deregisters the dht pins from requiring a pause on the arduino.
-        //TODO: improve and generalize.
-        if (removedComponent.GlobalId == 20)
+        if (IsDhtComponent(removedComponent))
         {
-            AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
+            if (Comps[SelectedComponent].ConnMap.ContainsKey(1) && Comps[SelectedComponent].ConnMap[1].Count > 0)
+            {
+                AppInterop.UnregisterResponseRequired(Comps[SelectedComponent].ConnMap[1][0].ToId);
+            }
         }
 
         GraphSynthInvoke.RemoveComp(removedComponent.GsNode);
@@ -877,6 +1251,7 @@
         {
             UpdatePinBindings(comp); //keep an eye on this. could be not good for performance.
         }
+        EnsureBreadboardConnections();
 
         StateHasChanged();
         if (!suppressToast) ToastService.AddToast("Code panel updated.", Variant.Info);
@@ -895,8 +1270,8 @@
         if (IsRunning) return;
         if (e.Key == "z" && e.CtrlKey) Undo();
         else if (e.Key == "y" && e.CtrlKey) Redo();
-        // 1 is the arduino, not sure what -2 or -1 is
-        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -1 || SelectedComponent == 1) return;
+        // 1 is the arduino, -2 is the canvas or -1 is null (no component) -3 is breadboard
+        if ((e.Key is not ("Backspace" or "Delete")) || SelectedComponent == -2 || SelectedComponent == -3 || SelectedComponent == -1 || SelectedComponent == 1) return;
         RemoveComp(false, true);
         SelectedComponent = -1;
     }
@@ -989,7 +1364,17 @@
 
                 if (data?.Comps != null && data.Comps.ContainsKey(1))
                 {
-                    var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                    var boardComp = data.Comps[1];
+                    int boardGid = boardComp.GlobalId;
+                    if (!string.IsNullOrEmpty(boardComp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(boardComp.ComponentKey, out var bId))
+                    {
+                        boardGid = bId;
+                    }
+                    else if (data.Version < 2)
+                    {
+                        boardGid = ComponentDeclarations.MigrateLegacyGlobalId(boardGid);
+                    }
+                    var boardType = boardGid == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                     Console.WriteLine($"Detected board type from file: {boardType}");
 
                     Console.WriteLine("Setting board type");
@@ -1066,6 +1451,27 @@
         }
     }
 
+    private void CheckForDualSoftwareSerialWarning()
+    {
+        int swSerialCount = Comps.Values.Count(c => 
+            c.Data != null && 
+            c.Data.codeForGen != null && 
+            c.Data.codeForGen.Values.Any(v => v != null && v.Contains("SoftwareSerial"))
+        );
+        
+        if (swSerialCount >= 2)
+        {
+            if (BoardService.Board == Board.ArduinoUno)
+            {
+                ToastService.AddToast("Arduino Uno cannot handle if multiple devices require software serial. It takes a lot of memory and Arduino Uno is not designed to handle it. It may work better on Arduino Mega", Variant.Warning);
+            }
+            else if (BoardService.Board == Board.ArduinoMega)
+            {
+                ToastService.AddToast("Multiple Software Serial connections are not supported on Arduino Mega. Instead, recommend using hardware serial.", Variant.Warning);
+            }
+        }
+    }
+
     private async Task SetupBenchFromJsonString(string json)
     {
         Console.WriteLine("Starting bench setup from JSON");
@@ -1084,6 +1490,30 @@
             {
                 Console.WriteLine("Deserialization returned null");
                 return;
+            }
+
+            // Component identity resolution: Handle ComponentKey and Legacy migration
+            if (data.Comps != null)
+            {
+                foreach (var kv in data.Comps)
+                {
+                    var comp = kv.Value;
+                    if (!string.IsNullOrEmpty(comp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(comp.ComponentKey, out var idFromKey))
+                    {
+                        comp.GlobalId = idFromKey;
+                        comp.Data = ComponentDeclarations.Components[idFromKey];
+                    }
+                    else if (data.Version < 2)
+                    {
+                        int newGid = ComponentDeclarations.MigrateLegacyGlobalId(comp.GlobalId);
+                        comp.GlobalId = newGid;
+                        comp.Data = ComponentDeclarations.Components[newGid];
+                    }
+                    else if (comp.Data == null && ComponentDeclarations.Components.TryGetValue(comp.GlobalId, out var compData))
+                    {
+                        comp.Data = compData;
+                    }
+                }
             }
 
             Console.WriteLine($"Deserialization successful. Component count: {data.Comps?.Count ?? 0}");
@@ -1112,6 +1542,16 @@
             GraphSynthInvoke.DestroyGraph();
             BuildCode.outputPins.Clear();
             localIds = data.LocalId;
+
+            // Restore breadboard configuration
+            showBreadboard = data.ShowBreadboard;
+            BreadboardRowCount = data.BreadboardRowCount > 0 ? data.BreadboardRowCount : 30;
+            if (BuildCanvas != null)
+            {
+                BuildCanvas.BreadboardRot = data.BreadboardRot;
+                BuildCanvas.BreadboardX = data.BreadboardX;
+                BuildCanvas.BreadboardY = data.BreadboardY;
+            }
 
             // First pass: Create all component nodes
             foreach (var kv in data.Comps.OrderBy(kv => kv.Key))
@@ -1164,7 +1604,7 @@
                 if (!comp.IsArduino()) await comp.LinkController(JsRuntime);
 
                 // Re-register DHT if present
-                if (comp.GlobalId == 20)
+                if (IsDhtComponent(comp))
                 {
                     if (comp.ConnMap.ContainsKey(1) && comp.ConnMap[1].Count > 0)
                     {
@@ -1174,9 +1614,12 @@
                 }
             }
             
+            EnsureBreadboardConnections();
+
             BuildCanvas.ResetTransform();
             Console.WriteLine("Setting code");
             AppInterop.SetCodeWrapper(data.Code);
+            CheckForDualSoftwareSerialWarning();
             StateHasChanged();
             Console.WriteLine("Bench setup complete");
         }
@@ -1186,6 +1629,14 @@
             Console.WriteLine($"Stack trace: {ex.StackTrace}");
             throw;
         }
+    }
+
+    private static bool IsDhtComponent(ComponentInstance? comp)
+    {
+        if (comp?.Data?.compType == null) return false;
+        return comp.Data.compType == typeof(Shared.Components.RazorDHT11) 
+            || comp.Data.compType == typeof(Shared.Components.RazorDHT22) 
+            || comp.Data.compType == typeof(Shared.Components.RazorDHT22MODULE);
     }
 
     /// <summary>
@@ -1207,10 +1658,16 @@
 
     class Data
     {
+        public int Version { get; set; } = 2;
         // public List<InstanceConnection> ConnLines { get; set; }
         public int LocalId { get; set; }
         public string Code { get; set; }
         public Dictionary<int, ComponentInstance> Comps { get; set; }
+        public bool ShowBreadboard { get; set; }
+        public int BreadboardRowCount { get; set; } = 30;
+        public int BreadboardRot { get; set; } = 0;
+        public double BreadboardX { get; set; } = 350;
+        public double BreadboardY { get; set; } = 120;
     }
 
     /// <summary>
@@ -1227,14 +1684,21 @@
             foreach (var kvp in Comps)
             {
                 var comp = kvp.Value;
+                comp.ComponentKey = comp.Data?.compType?.Name;
                 cleanComps.Add(kvp.Key, comp);
             }
 
             Data parentObject = new Data
             {
+                Version = 2,
                 Comps = cleanComps,
                 LocalId = localIds,
-                Code = await AppInterop.GetCodeWrapper()
+                Code = await AppInterop.GetCodeWrapper(),
+                ShowBreadboard = showBreadboard,
+                BreadboardRowCount = BreadboardRowCount,
+                BreadboardRot = BuildCanvas?.BreadboardRot ?? 0,
+                BreadboardX = BuildCanvas?.BreadboardX ?? 350,
+                BreadboardY = BuildCanvas?.BreadboardY ?? 120
             };
 
             var options = new JsonSerializerOptions
@@ -1425,35 +1889,8 @@
 
             try
             {
-                // Handle Base64 padding
-                compressedData = compressedData.Replace('-', '+').Replace('_', '/');
-                switch (compressedData.Length % 4)
-                {
-                    case 2:
-                        compressedData += "==";
-                        break;
-                    case 3:
-                        compressedData += "=";
-                        break;
-                }
-
-                // Decompress
-                byte[] compressedBytes = Convert.FromBase64String(compressedData);
-                using var msi = new MemoryStream(compressedBytes);
-                using var mso = new MemoryStream();
-                using (var gs = new GZipStream(msi, CompressionMode.Decompress))
-                {
-                    await gs.CopyToAsync(mso);
-                }
-
-                var json = System.Text.Encoding.UTF8.GetString(mso.ToArray());
+                var json = DecompressCircuitData(compressedData);
                 Console.WriteLine($"Successfully decompressed JSON data, length: {json.Length}");
-
-                // Replace compressed patterns with original values
-                foreach (var kvp in CompressionMap.OrderByDescending(x => x.Value.Length))
-                {
-                    json = json.Replace(kvp.Value, kvp.Key);
-                }
 
                 try
                 {
@@ -1471,7 +1908,17 @@
 
                     if (data?.Comps != null && data.Comps.ContainsKey(1))
                     {
-                        var boardType = data.Comps[1].GlobalId == 1 ? Board.ArduinoUno : Board.ArduinoMega;
+                        var boardComp = data.Comps[1];
+                        int boardGid = boardComp.GlobalId;
+                        if (!string.IsNullOrEmpty(boardComp.ComponentKey) && ComponentDeclarations.NameToId.TryGetValue(boardComp.ComponentKey, out var bId))
+                        {
+                            boardGid = bId;
+                        }
+                        else if (data.Version < 2)
+                        {
+                            boardGid = ComponentDeclarations.MigrateLegacyGlobalId(boardGid);
+                        }
+                        var boardType = boardGid == 1 ? Board.ArduinoUno : Board.ArduinoMega;
                         Console.WriteLine($"Detected board type from URL data: {boardType}");
 
                         await App.InvokeAsync(async () =>
@@ -1589,6 +2036,11 @@
         _lastExecutedAction = action;
         _lastUndoneAction = null; // Clear redo history whenever a new action is executed
     }
+    
+    private async Task OpenNewTab()
+    {
+        await JsRuntime.InvokeVoidAsync("open", Navigation.BaseUri, "_blank");
+    }
 
 
     private static readonly Dictionary<string, string> CompressionMap = new()
@@ -1601,6 +2053,13 @@
         { "\"System.String\"", "\"#05\"" },
         { "\"System.Boolean\"", "\"#06\"" },
         { "\"System.Int32\"", "\"#07\"" },
+        { "\"Version\":", "\"#08:" },
+        { "\"ComponentKey\":", "\"#09:" },
+        { "\"ShowBreadboard\":", "\"#51:" },
+        { "\"BreadboardRowCount\":", "\"#52:" },
+        { "\"BreadboardRot\":", "\"#53:" },
+        { "\"BreadboardX\":", "\"#54:" },
+        { "\"BreadboardY\":", "\"#55:" },
 
         // Component Properties
         { "\"localId\":", "\"#11:" },

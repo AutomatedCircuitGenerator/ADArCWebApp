@@ -1,1132 +1,170 @@
-﻿using ADArCWebApp.Shared.Components;
+using System.Reflection;
+using ADArCWebApp.Shared.Components;
 using ADArCWebApp.Shared.EnvironmentalSettings;
 
 namespace ADArCWebApp.Shared
 {
-    /// <summary>
-    /// Primary data repository. Figure out a way to do this dynamically or something later.
-    /// 
-    /// TODO: figure out how to improve this.
-    /// TODO: DO NOT END CODE GEN LINES WITH COMMENTS!! Ensure there is a trailing newline
-    /// </summary>
     public static class ComponentDeclarations
     {
-        public static readonly Dictionary<int, ComponentData> Components = new()
+        public static Dictionary<int, ComponentData> Components = new();
+        public static Dictionary<Type, int> TypeToId = new();
+        public static Dictionary<string, int> NameToId = new();
+
+        /// <summary>
+        /// Pinned permanent IDs for standard built-in components to ensure stability across builds.
+        /// Any new component added in the future will automatically receive an ID starting from 51 onwards.
+        /// </summary>
+        private static readonly Dictionary<string, int> PinnedComponentIds = new()
         {
-            {
-                1,
-                new ComponentDataBuilder("Uno Rev3", false, "Arduino", 0.33, 280, 210, typeof(RazorArduinoUno),
-                    codeForGen: new()
-                    {
-                        { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    },
-                    pins:
-                    [
-                        "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "d13", "d14",
-                        "d15", "d16", "d17", "d18", "d19", "gnd", "5V", "3V3"
-                    ], gsNodeName: "arduinoUnoRev3").Finish()
-            },
-            {
-                2,
-                new ComponentDataBuilder("MEGA 2560", false, "Arduino", 0.3, 390, 195, typeof(RazorArduinoMega),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "" },
-                        { "setup", ""},
-                        { "loopMain", ""},
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    },
-                    pins:
-                    [
-                        "d0", "d1", "d2", "d3", "d4", "d5", "d6", "d7", "d8", "d9", "d10", "d11", "d12", "d13", "d14",
-                        "d15", "d16", "d17", "d18", "d19", "d20", "d21", "d22", "d23", "d24", "d25", "d26", "d27",
-                        "d28", "d29", "d30", "d31", "d32", "d33", "d34", "d35", "d36", "d37", "d38", "d39", "d40",
-                        "d41", "d42", "d43", "d44", "d45", "d46", "d47", "d48", "d49", "d50", "d51", "d52", "d53",
-                        "d54", "d55", "d56", "d57", "d58", "d59", "d60", "d61", "d62", "d63", "d64", "d65", "d66",
-                        "d67", "d68", "d69", "Vin", "3V3", "5V", "gnd"
-                    ], gsNodeName: "arduinoMega").Finish()
-            },
-            {
-                3,
-                new ComponentDataBuilder("ADXL345", true, "Input/Acceleration Sensors", 1, 75, 75,
-                    typeof(RazorADXL345I2C),
-                    codeForGen: new()
-                    {
-                        {
-                            "include",
-                            "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>"
-                        },
-                        { "global", "Adafruit_ADXL345_Unified accel@ = Adafruit_ADXL345_Unified();" },
-                        {
-                            "setup",
-                            "   \n  // Begin communication with ADXL at I2C address 0x@\n  // Change this address to your ADXL's real address!\n  if(!accel@.begin(0x@)) {\n    /* There was a problem detecting the ADXL345 ... check your connections */\n    Serial.println(\"Ooops, no ADXL345 detected ... Check your wiring!\");\n    while(1);\n  }\n\n  // Setting the range of the accelerometer\n  accel@.setRange(ADXL345_RANGE_4_G);"
-                        },
-                        {
-                            "loopMain",
-                            "  /* Get a new sensor event */ \n  sensors_event_t event@; \n  accel@.getEvent(&event@);\n \n  /* Display the results (acceleration is measured in m/s^2) */\n  Serial.print(\"X: \"); Serial.print(event@.acceleration.x); Serial.print(\"  \");\n  Serial.print(\"Y: \"); Serial.print(event@.acceleration.y); Serial.print(\"  \");\n  Serial.print(\"Z: \"); Serial.print(event@.acceleration.z); Serial.print(\"  \");Serial.println(\"m/s^2 \");\n  delay(500);"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "gnd", "sda", "scl"], gsNodeName: "adxl345").Property("motion", "Static").Finish()
-            },
-            {
-                4,
-                new ComponentDataBuilder("MPU6050", true, "Input/Acceleration Sensors", 1.3, 85, 65,
-                        typeof(RazorMPU6050),
-                        codeForGen: new()
-                        {
-                            {
-                                "include",
-                                "#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n#include <Wire.h>"
-                            },
-                            {
-                                "global",
-                                "Adafruit_MPU6050 mpu@;"
-                            },
-                            {
-                                "setup",
-                                "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");"
-                            },
-                            {
-                                "loopMain",
-                                "  /* Get new sensor events with the readings */\n  sensors_event_t a@, g@, temp@;\n  mpu@.getEvent(&a@, &g@, &temp@);\n\n  /* Print out the values */\n  Serial.print(\"Acceleration X: \");\n  Serial.print(a@.acceleration.x);\n  Serial.print(\", Y: \");\n  Serial.print(a@.acceleration.y);\n  Serial.print(\", Z: \");\n  Serial.print(a@.acceleration.z);\n  Serial.println(\" m/s^2\");\n\n  Serial.print(\"Rotation X: \");\n  Serial.print(g@.gyro.x);\n  Serial.print(\", Y: \");\n  Serial.print(g@.gyro.y);\n  Serial.print(\", Z: \");\n  Serial.print(g@.gyro.z);\n  Serial.println(\" rad/s\");\n\n  Serial.print(\"Temperature: \");\n  Serial.print(temp@.temperature);\n  Serial.println(\" degC\");\n  delay(500);"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        }, pins: ["5V", "gnd", "scl", "sda", "xda", "xcl", "add", "int"], gsNodeName: "mpu6050")
-                    .Property("motion", "Static").Finish()
-            },
-            {
-                5,
-                new ComponentDataBuilder("BNO055", true, "Input/Acceleration Sensors", 1, 120, 90, typeof(RazorBNO055),
-                        codeForGen: new()
-                        {
-                            {
-                                "include",
-                                "// Include necessary libraries for the BNO055 sensor\n#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_BNO055.h>\n#include <utility/imumaths.h>"
-                            },
-                            {
-                                "global",
-                                "/* Set the delay between fresh samples in milliseconds */\n#define BNO055_SAMPLERATE_DELAY_MS@ (100)\n\n// Initialize the BNO055 sensor\n// Check I2C device address and correct the line below if necessary\n// Default addresses: 0x29 or 0x28\n// id, address\nAdafruit_BNO055 bno@ = Adafruit_BNO055(-1, @);"
-                            },
-                            {
-                                "setup",
-                                "  // Setup function: runs once at startup\n  while (!Serial) delay(10);  // Wait for serial port to open\n\n  Serial.println(\"Orientation Sensor Raw Data Test\");\n  Serial.println(\"\");\n\n  /* Initialize the sensor */\n  if(!bno@.begin())\n  {\n    // Error handling: if the sensor is not detected, print a message and halt\n    Serial.print(\"Ooops, no BNO055 detected ... Check your wiring or I2C ADDR!\");\n    while(1);\n  }\n\n  delay(1000); // Allow the sensor to stabilize\n\n  /* Display the current temperature from the sensor */\n  int8_t temp@ = bno@.getTemp();\n  Serial.print(\"Current Temperature: \");\n  Serial.print(temp@);\n  Serial.println(\" C\");\n  Serial.println(\"\");\n\n  // Use external crystal for better accuracy\n  bno@.setExtCrystalUse(true);\n\n  Serial.println(\"Calibration status values: 0=uncalibrated, 3=fully calibrated\");"
-                            },
-                            {
-                                "loopMain",
-                                "  // Main loop: Continuously read sensor data\n\n  // Possible vector values can be:\n  // - VECTOR_ACCELEROMETER - m/s^2\n  // - VECTOR_MAGNETOMETER  - uT\n  // - VECTOR_GYROSCOPE     - rad/s\n  // - VECTOR_EULER         - degrees\n  // - VECTOR_LINEARACCEL   - m/s^2\n  // - VECTOR_GRAVITY       - m/s^2\n  \n  // Read Euler angles (heading, roll, pitch)\n  imu::Vector<3> euler@ = bno@.getVector(Adafruit_BNO055::VECTOR_EULER);\n\n  /* Display the floating point data */\n  Serial.print(\"X: \");\n  Serial.print(euler@.x());\n  Serial.print(\" Y: \");\n  Serial.print(euler@.y());\n  Serial.print(\" Z: \");\n  Serial.print(euler@.z());\n  Serial.print(\"\t\t\");\n\n  /* Uncomment the following block to display quaternion data */\n  /*\n  imu::Quaternion quat@ = bno@.getQuat();\n  Serial.print(\"qW: \");\n  Serial.print(quat@.w(), 4);\n  Serial.print(\" qX: \");\n  Serial.print(quat@.x(), 4);\n  Serial.print(\" qY: \");\n  Serial.print(quat@.y(), 4);\n  Serial.print(\" qZ: \");\n  Serial.print(quat@.z(), 4);\n  Serial.print(\"\t\t\");\n  */\n\n  /* Display calibration status for each sensor */\n  uint8_t system@, gyro@, accel@, mag@ = 0;\n  bno@.getCalibration(&system@, &gyro@, &accel@, &mag@);\n  Serial.print(\"CALIBRATION: Sys=\");\n  Serial.print(system@, DEC);\n  Serial.print(\" Gyro=\");\n  Serial.print(gyro@, DEC);\n  Serial.print(\" Accel=\");\n  Serial.print(accel@, DEC);\n  Serial.print(\" Mag=\");\n  Serial.println(mag@, DEC);\n\n  // Delay between readings to allow sensor data to refresh\n  delay(BNO055_SAMPLERATE_DELAY_MS@);"
-                            },
-                            {
-                                "functions", ""
-                            },
-                            {
-                                "delayLoop", ""
-                            },
-                            {
-                                "delayTime", ""
-                            }
-                        }, pins: ["int", "adr", "5V", "gnd", "rst", "sda", "scl", "ps0", "ps1"], gsNodeName: "bno055")
-                    .Property("motion", "Static").Finish()
-            },
-            {
-                6,
-                new ComponentDataBuilder("TF-Luna LiDAR - I2C", true, "Input/Distance Sensors", 1, 75, 75,
-                        typeof(RazorTFLunaLidarI2C),
-                        codeForGen: new()
-                        {
-                            {
-                                "include",
-                                "#include <Arduino.h>\n#include <Wire.h>\n#include <TFLI2C.h>                // TFLuna-I2C Library v.0.2.0"
-                            },
-                            {
-                                "global",
-                                "TFLI2C tflI2C@;\nint16_t  tfDist@; // distance in centimeters"
-                            },
-                            { "setup", "  Wire.begin(); // initialize Wire library" },
-                            {
-                                "loopMain",
-                                "  // Get data from TF Luna at I2C address 0x@\n  // Change this address to your TF address in real life!\n  if( tflI2C@.getData(tfDist@, 0x@)) // If read okay...\n  {\n      Serial.print(\"Dist: \");\n      Serial.println(tfDist@);          // print the data...\n  }\n  else tflI2C@.printStatus();           // else, print error.\n\n  delay(50);"
-                            },
-                            {
-                                "functions",
-                                ""
-                            },
-                            { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["gnd", "5V", "rxd", "txd"], gsNodeName: "tfLunaLidarI2C").Property("distance", 50.0)
-                    .Finish()
-            },
-            {
-                8,
-                new ComponentDataBuilder("Ultrasonic", true, "Input/Distance Sensors", 0.65, 170, 95,
-                        typeof(RazorHCSR04), paneHoverText: "HC-SR04",
-                        codeForGen: new()
-                        {
-                            {
-                                "include", ""
-                            },
-                            {
-                                "global",
-                                "// Global variables and pin definitions\n// Define the pins for the HC-SR04 sensor\nconst int trigPin@ = ~\"trigger\"; // Pin that triggers the ultrasonic pulse\nconst int echoPin@ = ~\"echo\"; // Pin that receives the echo signal\n\n// Variables to store the pulse duration and calculated distance\nfloat duration@, distance@;"
-                            },
-                            {
-                                "setup",
-                                "  // Setup function: runs once at startup\n  // Configure the trigger pin as an OUTPUT and the echo pin as an INPUT\n  pinMode(trigPin@, OUTPUT); // Set trigger pin as output\n  pinMode(echoPin@, INPUT);  // Set echo pin as input"
-                            },
-                            {
-                                "loopMain",
-                                "  // Main loop: continuously measures distance\n\n  // Ensure the trigger pin is LOW to start\n  digitalWrite(trigPin@, LOW);\n  delayMicroseconds(2); // Short delay to allow sensor stabilization\n\n  // Trigger the sensor by sending a HIGH pulse for 10 microseconds\n  digitalWrite(trigPin@, HIGH);\n  delayMicroseconds(10); // Pulse duration\n  digitalWrite(trigPin@, LOW);\n\n  // Read the duration of the echo pulse (in microseconds)\n  duration@ = pulseIn(echoPin@, HIGH);\n\n  // Calculate the distance (cm) using the speed of sound (0.0343 cm/us)\n  // Dividing by 2 accounts for the round-trip distance\n  distance@ = (duration@ * 0.0343) / 2;\n\n  // Output the measured distance to the Serial Monitor\n  Serial.print(\"Distance: \");\n  Serial.println(distance@);\n\n  // Short delay before the next measurement\n  delay(100);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["vcc", "trigger", "echo", "gnd"], gsNodeName: "hcsr04").Property("distance", 20.0)
-                    .Finish()
-            },
-            {
-                9,
-                new ComponentDataBuilder("Alcohol Sensor", true, "Input/Gas Sensors", .66, 75, 75, typeof(RazorMQ3),
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "/* Replace these values with your own readings */\n#define Sober@ 120   // Define max value that we consider sober\n#define Drunk@ 400   // Define min value that we consider drunk\n#define MQ3pin@ ~\"analog_out\"\nfloat sensorValue@;  //variable to store sensor value"
-                            },
-                            {
-                                "setup",
-                                "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
-                            },
-                            {
-                                "loopMain",
-                                "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, paneHoverText: "MQ-3", pins: ["gnd", "5V", "analog_out"], gsNodeName: "mq3")
-                    .Property("alcohol", 0.0).Finish()
-            },
-            {
-                10,
-                new ComponentDataBuilder("Photoresistor", true, "Input/Light Sensors", 1, 75, 75, typeof(RazorKY018),
-                    paneHoverText: "KY-018",
-                    codeForGen: new()
-                    {
-                        {
-                            "include", ""
-                        },
-                        {
-                            "global",
-                            "// Global variables and constants\n// Define the analog pin for the photoresistor (LDR)\nconst int photoresistorPin@ = ~\"analog_out\"; // Analog input pin for the light sensor\n\n// LDR (Light Dependent Resistor) characteristics\nconst float GAMMA@ = 0.7; // Gamma value for LDR calculations\nconst float RL10@ = 50; // Resistance of the LDR at 10 lux"
-                        },
-                        {
-                            "setup",
-                            "    // Setup function: runs once at startup\n  // Configure the photoresistor pin as an INPUT\n  pinMode(photoresistorPin@, INPUT);"
-                        },
-                        {
-                            "loopMain",
-                            "  // Main loop: continuously reads light intensity\n\n  // Read the analog value from the photoresistor\n  int analogValue@ = analogRead(photoresistorPin@);\n\n  // Convert the analog value to voltage (assuming a 5V reference)\n  float voltage@ = analogValue@ / 1024. * 5;\n\n  // Calculate the resistance of the LDR using a voltage divider formula\n  float resistance@ = 2000 * voltage@ / (1 - voltage@ / 5);\n\n  // Compute the light intensity in lux using the LDR characteristics\n  float lux@ = pow(RL10@ * 1e3 * pow(10, GAMMA@) / resistance@, (1 / GAMMA@));\n\n  // Output the measured light intensity to the Serial Monitor\n  Serial.print(\"Lux value: \");\n  Serial.println(lux@);\n\n  // Delay before the next reading to allow stable measurements\n  delay(1000);"
-                        },
-                        {
-                            "functions", ""
-                        },
-                        {
-                            "delayLoop", ""
-                        },
-                        {
-                            "delayTime", ""
-                        }
-                    }, pins: ["analog_out", "5V", "gnd"], gsNodeName: "ky018").Property("lux", 100.0).Finish()
-            },
-            {
-                12,
-                new ComponentDataBuilder("Hall effect sensor", true, "Input/Other Sensors", .8, 75, 75,
-                        typeof(RazorKY024), paneHoverText: "KY-024",
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "int digitalPin@ = ~\"digital_out\"; // KY-024 Hall effect sensor digital output\nint analogPin@ = ~\"analog_out\"; // KY-024 Hall effect sensor analog output\nint digitalVal@; // variable for digital readings\nint analogVal@; // variable for analog readings"
-                            },
-                            {
-                                "setup",
-                                "  pinMode(digitalPin@, INPUT); // Set digital pin as input for magnetic field detection\n  pinMode(analogPin@, INPUT);   // Set analog pin as input for magnetic field strength"
-                            },
-                            {
-                                "loopMain",
-                                "  // Read the digital output to detect magnetic field presence\n  digitalVal@ = digitalRead(digitalPin@);\n  Serial.print(\"KY-024 digital value: \");\n  Serial.println(digitalVal@); // print digital detection status\n\n  // Read the analog output to get magnetic field strength in gauss\n  analogVal@ = analogRead(analogPin@);\n  float voltage@ = analogVal@ * (5.0 / 1023.0); // Convert analog reading to voltage\n  Serial.print(\"KY-024 analog voltage: \");\n  Serial.println(voltage@); \n  delay(1000);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["digital_out", "5V", "gnd", "analog_out"], gsNodeName: "ky024").Property("gauss", 0.0)
-                    .Finish()
-            },
-            {
-                13,
-                new ComponentDataBuilder("Hall effect sensor", true, "Input/Other Sensors", 1.15, 60, 115,
-                        typeof(RazorKY003), paneHoverText: "KY-003",
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "int sensor@ = ~\"digital_out\"; // sensor pin\nint val@; // 1: Magnetic field detected, 0: No magnetic field detected"
-                            },
-                            { "setup", "  pinMode(sensor@, INPUT); // set sensor pin as input" },
-                            {
-                                "loopMain",
-                                "  val@ = digitalRead(sensor@); // Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky003").Property("magfield", "Not detected")
-                    .Finish()
-            },
-            {
-                14,
-                new ComponentDataBuilder("K-type thermocouple", true, "Input/Temperature and Humidity Sensors", .7, 100,
-                        75, typeof(RazorMAX6675), paneHoverText: "MAX6675",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <MAX6675.h> // Include library for MAX6675 K-type thermocouple" },
-                            {
-                                "global",
-                                "#define CS_PIN@ ~\"cs\" // Define chip select pin for thermocouple module\nMAX6675 tcouple@(CS_PIN@); // Initialize thermocouple sensor"
-                            },
-                            { "setup", "" },
-                            {
-                                "loopMain",
-                                "\tfloat celsius@ = tcouple@.readTempC(); // Read temperature in Celsius\n  float fahrenheit@ = tcouple@.readTempF(); // Read temperature in Fahrenheit\n  Serial.print(\"T in C = \"); // Print Celsius temperature label\n  Serial.print(celsius@); // Print Celsius temperature value\n  Serial.print(\". T in Fahrenheit = \"); // Print Fahrenheit temperature label\n  Serial.println(fahrenheit@); // Print Fahrenheit temperature value\n  delay(500); // Wait 500ms before next reading"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["5V", "gnd", "so", "cs", "sck"], gsNodeName: "max6675").Property("temperature", 20.0)
-                    .Finish()
-            },
-            {
-                15,
-                new ComponentDataBuilder("PIR motion sensor", true, "Input/Other Sensors", 1, 75, 75,
-                        typeof(RazorHCSR501), paneHoverText: "HC-SR501",
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "int inputPin@ = ~\"digital_out\"; // choose the input pin (for PIR sensor)\nint pirState@ = LOW; // we start, assuming no motion detected\nint val@ = 0; // variable for reading the pin status"
-                            },
-                            { "setup", "  pinMode(inputPin@, INPUT); // declare sensor as input" },
-                            {
-                                "loopMain",
-                                "  val@ = digitalRead(inputPin@); // read input value\n  if (val@ == HIGH) { // check if the input is HIGH\n    if (pirState@ == LOW) {\n      // we have just turned on\n      Serial.println(\"Motion detected!\");\n      // We only want to print on the output change, not state\n      pirState@ = HIGH;\n    }\n  } else {\n    if (pirState@ == HIGH) {\n      // we have just turned of\n      Serial.println(\"Motion ended!\");\n      // We only want to print on the output change, not state\n      pirState@ = LOW;\n    }\n  }"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["gnd", "digital_out", "5V"], gsNodeName: "hcsr501",
-                        environmentalSettingsType: typeof(PIRButton))
-                    .Property("triggermode", 0.0).Property("timedelayseconds", 1.0).Property("ismotiondetected", 1.0)
-                    .Finish()
-            },
-            {
-                16,
-                new ComponentDataBuilder("IR receiver", true, "Input/Other Sensors", 1.3, 65, 90, typeof(RazorKY022),
-                    paneHoverText: "KY-022",
-                    codeForGen: new()
-                    {
-                        {
-                            "include",
-                            "#include <IRremote.hpp> // Include the IRremote library for handling IR communication"
-                        },
-                        {
-                            "global",
-                            "// Global variable\n// Define the pin connected to the IR receiver\nint IRPIN@ = ~\"digital_out\"; // Pin for receiving IR signals"
-                        },
-                        {
-                            "setup",
-                            "// Setup function: runs once at startup\n\n  // Print a message to indicate IR receiver setup\n  Serial.println(\"Enabling IRin\");\n\n  // Initialize the IR receiver with feedback on LED activity\n  IrReceiver.begin(IRPIN@, ENABLE_LED_FEEDBACK);\n  // Confirm that the IR receiver has been initialized\n  Serial.println(\"Enabled IRin\");"
-                        },
-                        {
-                            "loopMain",
-                            "// Main loop: continuously checks for incoming IR signals\n\n  // If an IR signal is received and decoded\n  if (IrReceiver.decode())\n\n  {\n\n    // Print the decoded IR command in hexadecimal format\n    Serial.println(IrReceiver.decodedIRData.command, HEX);\n\n    // Prepare the receiver for the next incoming signal\n    IrReceiver.resume();\n  }\n\n  // Delay to avoid flooding the serial output\n  delay(500);"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["gnd", "5V", "digital_out"], gsNodeName: "ky022",
-                    environmentalSettingsType: typeof(KY022Settings)).Finish()
-            },
-            {
-                17,
-                new ComponentDataBuilder("Load Cell(HX711)", true, "Input/Other Sensors", .6, 200, 100,
-                        typeof(RazorHX711), paneHoverText: "TAL221",
-                        codeForGen: new()
-                        {
-                            {
-                                "include", "#include <HX711.h>"
-                            },
-                            {
-                                "global",
-                                "// Global variables and HX711 setup\n// Define the data and clock pins for the HX711 load cell\nconst int LOADCELL_DOUT_PIN@ = ~\"dat\"; // Data pin for the HX711\nconst int LOADCELL_SCK_PIN@ = ~\"clk\";  // Clock pin for the HX711\n\n// Initialize the HX711 scale object\nHX711 scale@;"
-                            },
-                            {
-                                "setup",
-                                "  // Setup function: runs once at startup\n  // Initialize the HX711 scale with the data and clock pins\n  scale@.begin(LOADCELL_DOUT_PIN@, LOADCELL_SCK_PIN@);"
-                            },
-                            {
-                                "loopMain",
-                                "  // Main loop: continuously reads data from the HX711\n\n  // Check if the HX711 scale is ready for reading\n  if (scale@.is_ready()) {\n    // Read the data from the HX711\n    long reading@ = scale@.read();\n    // Output the reading to the Serial Monitor\n    Serial.print(\"HX711 reading: \");\n    Serial.println(reading@);\n  } else {\n    // If the HX711 is not ready, print an error message\n    Serial.println(\"HX711 not found.\");\n  }\n\n  // Delay before the next reading to allow stabilization\n  delay(1000);"
-                            },
-                            {
-                                "functions", ""
-                            },
-                            {
-                                "delayLoop", ""
-                            },
-                            {
-                                "delayTime", ""
-                            }
-                        }, pins: ["5V", "dat", "clk", "gnd"], listenOn: ["dat"], gsNodeName: "hx711")
-                    .Property("weight", 100.0).Finish()
-            },
-            {
-                18,
-                new ComponentDataBuilder("LED", true, "Output/LED", 1.5, 40, 50, typeof(RazorLED),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "" },
-                        { "setup", "\tpinMode(~\"anode\", OUTPUT); // Set the LED anode pin as an output" },
-                        {
-                            "loopMain",
-                            "  digitalWrite(~\"anode\", HIGH); // Turn the LED on\n  delay(1000); // Wait for 1 second\n  digitalWrite(~\"anode\", LOW); // Turn the LED off\n  delay(1000); // Wait for 1 second before repeating"
-                        },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    }, pins: ["anode", "cathode"], gsNodeName: "led").Property("color", "red").Finish()
-            },
-            // {
-            //     19,
-            //     new ComponentDataBuilder("7 segment display", true, "Output/LED", 1, 50, 85, typeof(RazorSevenSeg),
-            //             paneHoverText: "Adafruit 0.56''", pins: ["com1", "a", "b", "c", "d", "e", "f", "g", "dp"],
-            //             listenOn: ["a", "b", "c", "d", "e", "f", "g", "dp"], gsNodeName: "7segment")
-            //         .Property("values", new int[] { 0, 0, 0, 0, 0, 0, 0, 0 }).Finish()
-            // },
-            {
-                20,
-                new ComponentDataBuilder("RGB LED", true, "Output/LED", 1.5, 45, 80, typeof(RazorRGBLED),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        {
-                            "global",
-                            "const int blueLED@ = ~\"B\"; // Define pin for blue LED\nconst int greenLED@ = ~\"G\"; // Define pin for green LED\nconst int redLED@ = ~\"R\"; // Define pin for red LED"
-                        },
-                        {
-                            "setup",
-                            "  pinMode(blueLED@, OUTPUT); // Set blue LED pin as an output\n  pinMode(greenLED@, OUTPUT); // Set green LED pin as an output\n  pinMode(redLED@, OUTPUT); // Set red LED pin as an output"
-                        },
-                        {
-                            "loopMain",
-                            "  analogWrite(redLED@,255); // Set red LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(redLED@,0); // Turn off red LED\n  analogWrite(greenLED@,255); // Set green LED to full brightness\n  delay(1000); // Wait for 1 second\n  analogWrite(greenLED@,0); // Turn off green LED\n  delay(1000); // Wait for 1 second before repeating"
-                        },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    }, pins: ["R", "G", "B", "cathode"], gsNodeName: "rgbLed").Finish()
-            }, //.Property("ledRed", 0).Property("ledGreen", 0).Property("ledBlue", 0)
-            {
-                21,
-                new ComponentDataBuilder("Laser diode", true, "Output/LED", 1, 75, 75, typeof(RazorKY008),
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "int laserPin@ = ~\"digital_in\"; // Define pin for the laser diode" },
-                        { "setup", "\tpinMode(laserPin@, OUTPUT); // Set the laser diode pin as an output" },
-                        {
-                            "loopMain",
-                            "\tdigitalWrite(laserPin@, HIGH); // Turn the laser diode on\n\tdelay(1000); // Wait for 1 second\n\tdigitalWrite(laserPin@, LOW); // Turn the laser diode off\n\tdelay(1000); // Wait for 1 second before repeating"
-                        },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    }, paneHoverText: "KY-008", pins: ["digital_in", "gnd"], gsNodeName: "ky008").Finish()
-            },
-            {
-                22,
-                new ComponentDataBuilder("LCD1602 - I2C", true, "Output/Displays/LCD", 0.35, 310, 140,
-                        typeof(RazorLCD1602I2C),
-                        codeForGen: new()
-                        {
-                            { "include", "#include <LiquidCrystal_I2C.h>" },
-                            {
-                                "global",
-                                "// Add the lcd, change the first parameter to your LCD's I2C device in real life!\nLiquidCrystal_I2C lcd@(@, 16, 2);"
-                            },
-                            {
-                                "setup",
-                                "   // Initalise the LCD\n   lcd@.init();\n   // Turn on the LCD backlight\n   lcd@.backlight();\n   // Put text on the LCD\n   lcd@.print(\"Hello World!\");"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }, { "loopMain", "" }
-                        }, pins: ["pin1", "pin2", "pin3", "pin4"], gsNodeName: "lcd1602I2C").Property("text", "")
-                    .Property("backlight", false).Property("blink", false).Property("cursor", false)
-                    .Property("cursorX", 0)
-                    .Property("cursorY", 0).Finish()
-            },
-            {
-                23,
-                new ComponentDataBuilder("Servo", true, "Output/Motors/Servo Motor", 0.65, 175, 120, typeof(RazorSG90),
-                    paneHoverText: "SG90",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <Servo.h>" },
-                        {
-                            "global",
-                            "Servo myservo@;  // create servo object to control a servo\nint pos@ = 0;    // variable to store the servo position"
-                        },
-                        { "setup", "  myservo@.attach(~\"orange\");" },
-                        {
-                            "loopMain",
-                            "  for (pos@ = 0; pos@ <= 180; pos@ += 1) { // goes from 0 degrees to 180 degrees\n    // in steps of 1 degree\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }\n  for (pos@ = 180; pos@ >= 0; pos@ -= 1) { // goes from 180 degrees to 0 degrees\n    myservo@.write(pos@); // tell servo to go to position in variable 'pos'\n    delay(15); // waits 15 ms for the servo to reach the position\n  }"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["brown", "red", "orange"], gsNodeName: "servo").Property("angle", 0).Finish()
-            }, //change node and rule to sg90?
-            {
-                24,
-                new ComponentDataBuilder("Servo with driver", true, "Output/Motors/Servo Motor", .48, 75, 75,
-                    typeof(RazorSG90PCA9685), paneHoverText: "SG90/PCA9685",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <Adafruit_PWMServoDriver.h>\n" },
-                        {
-                            "global",
-                            "Adafruit_PWMServoDriver board@ = Adafruit_PWMServoDriver(0x@); // Use the I2C address of your board\n\n#define SERVOMIN  125 // Minimum pulse length\n#define SERVOMAX  625 // Maximum pulse length\n\nint servoChannel@ = 0; // The servo channel you are using (0-15 for 16 channels on the board)\n"
-                        },
-                        {
-                            "setup",
-                            "\tboard@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)"
-                        },
-                        {
-                            "loopMain",
-                            "  // Move servo from 0 to 180 degrees\n  for (int angle = 0; angle <= 180; angle++) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move (depends on your servo's speed)\n  }\n\n  // Move servo back from 180 to 0 degrees\n  for (int angle = 180; angle >= 0; angle--) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move\n  }"
-                        },
-                        {
-                            "functions",
-                            "int angleToPulse@(int ang) {\n  // Maps angle (0-180 degrees) to pulse width (SERVOMIN - SERVOMAX)\n  int pulse = map(ang, 0, 180, SERVOMIN, SERVOMAX);  \n  Serial.print(\"Angle: \");\n  Serial.print(ang);\n  Serial.print(\" pulse: \");\n  Serial.println(pulse);\n  return pulse;\n\n}"
-                        },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["gnd", "pwr_gnd", "5V", "scl", "sda"], gsNodeName: "pca9685").Finish()
-            },
-            {
-                25,
-                new ComponentDataBuilder("DC motor with driver", true, "Output/Motors/DC Motor", .55, 75, 75,
-                        typeof(RazorDCMotorL298N), paneHoverText: "L298N", pins: ["ena", "in1", "in2", "pwr_gnd"],
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "int ena@ = ~\"ena\"; // Enable pin for motor speed control\nint in1@ = ~\"in1\"; // Control pin 1 for motor direction\nint in2@ = ~\"in2\"; // Control pin 2 for motor direction"
-                            },
-                            {
-                                "setup",
-                                "\tpinMode(ena@, OUTPUT); // Set enable pin as an output\n\tpinMode(in1@, OUTPUT); // Set control pin 1 as an output\n\tpinMode(in2@, OUTPUT); // Set control pin 2 as an output"
-                            },
-                            {
-                                "loopMain",
-                                "\tdigitalWrite(in1@, HIGH); // Set motor direction forward\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 255); // Set motor speed to maximum\n\tdelay(2000); // Run motor for 2 seconds\n\tdigitalWrite(in1@, LOW); // Stop motor\n\tdigitalWrite(in2@, LOW);\n\tanalogWrite(ena@, 0);\n\tdelay(2000); // Wait for 2 seconds before repeating"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        gsNodeName: "l298n",
-                        warning:
-                        "The L298N driver and connected motors can overheat, causing burns or damage. Ensure proper cooling, and never power the motor directly from a microcontroller—use an external power source.")
-                    .Finish()
-            },
-            {
-                26,
-                new ComponentDataBuilder("Brushless motor and ESC", false, "Output/Motors/DC Motor", .25, 40, 55,
-                    typeof(RazorESCBLDCMotor),
-                    codeForGen: new()
-                    {
-                        { "include", "#include <wire.h>\n#include <Adafruit_PWMServoDriver.h>" },
-                        {
-                            "global",
-                            "// called this way, it uses the default address 0x40\nAdafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver();\n// you can also call it with a different address you want\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x41);\n// you can also call it with a different address and I2C interface\n//Adafruit_PWMServoDriver pwm = Adafruit_PWMServoDriver(0x40, Wire);\n\n// Depending on your servo make, the pulse width min and max may vary, you \n// want these to be as small/large as possible without hitting the hard stop\n// for max range. You'll have to tweak them as necessary to match the servos you\n// have!\n#define SERVOMIN  150 // This is the 'minimum' pulse length count (out of 4096)\n#define SERVOMAX  600 // This is the 'maximum' pulse length count (out of 4096)\n#define USMIN  600 // This is the rounded 'minimum' microsecond length based on the minimum pulse of 150\n#define USMAX  2400 // This is the rounded 'maximum' microsecond length based on the maximum pulse of 600\n#define SERVO_FREQ 50 // Analog servos run at ~50 Hz updates\n\n// our servo # counter\nuint8_t servonum = 0;"
-                        },
-                        {
-                            "setup",
-                            "  Serial.println(\"8 channel Servo test!\");\n\n  pwm.begin();\n  pwm.setOscillatorFrequency(27000000);\n  pwm.setPWMFreq(SERVO_FREQ);  // Analog servos run at ~50 Hz updates\n\n  delay(10);"
-                        },
-                        {
-                            "loopMain",
-                            "  // Drive each servo one at a time using setPWM()\n  Serial.println(servonum);\n  for (uint16_t pulselen = SERVOMIN; pulselen < SERVOMAX; pulselen++) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n  for (uint16_t pulselen = SERVOMAX; pulselen > SERVOMIN; pulselen--) {\n    pwm.setPWM(servonum, 0, pulselen);\n  }\n\n  delay(500);\n\n  // Drive each servo one at a time using writeMicroseconds(), it's not precise due to calculation rounding!\n  // The writeMicroseconds() function is used to mimic the Arduino Servo library writeMicroseconds() behavior. \n  for (uint16_t microsec = USMIN; microsec < USMAX; microsec++) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n  for (uint16_t microsec = USMAX; microsec > USMIN; microsec--) {\n    pwm.writeMicroseconds(servonum, microsec);\n  }\n\n  delay(500);\n\n  servonum++;\n  if (servonum > 7) servonum = 0; // Testing the first 8 servo channels"
-                        },
-                        {
-                            "functions",
-                            "// You can use this function if you'd like to set the pulse length in seconds\n// e.g. setServoPulse(0, 0.001) is a ~1 millisecond pulse width. It's not precise!\nvoid setServoPulse(uint8_t n, double pulse) {\n  double pulselength;\n  \n  pulselength = 1000000;   // 1,000,000 us per second\n  pulselength /= SERVO_FREQ;   // Analog servos run at ~60 Hz updates\n  Serial.print(pulselength); Serial.println(\" us per period\"); \n  pulselength /= 4096;  // 12 bits of resolution\n  Serial.print(pulselength); Serial.println(\" us per bit\"); \n  pulse *= 1000000;  // convert input seconds to us\n  pulse /= pulselength;\n  Serial.println(pulse);\n  pwm.setPWM(n, 0, pulse);\n}"
-                        },
-                        { "delayLoop", "" }, { "delayTime", "" }
-                    },
-                    pins:
-                    [
-                        "bat+", "bat-", "L3", "L2", "L1", "orange", "red", "brown", "pwm1", "V+", "gnd", "pca9685",
-                        "pwm0", "pwm2", "pwm3", "pwm4", "pwm5", "5V", "scl", "sda"
-                    ], gsNodeName: "esc_pca9685").Finish()
-            }, //TODO this connection doesnt make sense. out until looked at
-            {
-                27,
-                new ComponentDataBuilder("Stepper motor with driver", true, "Output/Motors/Stepper Motor", .4, 75, 75,
-                        typeof(Razor_28BYJ48ULN2003), paneHoverText: "28BYJ-48/ULN2003",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <AccelStepper.h>\n" },
-                            {
-                                "global",
-                                "int motorPin1_@ = ~\"in1\"; // Define control pin 1 for stepper motor\nint motorPin2_@ = ~\"in2\"; // Define control pin 2 for stepper motor\nint motorPin3_@ = ~\"in3\"; // Define control pin 3 for stepper motor\nint motorPin4_@ = ~\"in4\"; // Define control pin 4 for stepper motor\nint MotorInterfaceType@ = 8; // Define motor driver interface type\n\nAccelStepper stepper@ = AccelStepper(MotorInterfaceType@, motorPin1_@, motorPin3_@, motorPin2_@, motorPin4_@); // Initialize stepper motor with pin configuration\n"
-                            },
-                            {
-                                "setup",
-                                "\tstepper@.setMaxSpeed(1000); // Set maximum speed for stepper motor"
-                            },
-                            {
-                                "loopMain",
-                                "\tstepper@.setSpeed(500); // Set speed of stepper motor\n\tstepper@.runSpeed(); // Run stepper motor at the set speed"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        pins: ["in1", "in2", "in3", "in4", "pwr_gnd"], gsNodeName: "uln2003",
-                        warning:
-                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")
-                    .Finish()
-            },
-            {
-                29,
-                new ComponentDataBuilder("Arcade push button", true, "Input/Buttons and Switches", 1, 75, 75,
-                        typeof(RazorArcadePushButton), "Push Button",
-                        codeForGen: new()
-                        {
-                            { "include", "" }, { "global", "const int buttonPin@ = ~\"digital_out\";" },
-                            {
-                                "setup",
-                                "  pinMode(buttonPin@, INPUT); // Set the button pin as an input\n"
-                            },
-                            {
-                                "loopMain",
-                                "  int buttonState@ = digitalRead(buttonPin@); // Read the button state\n\n  if (buttonState@ == HIGH) { // If button is pressed\n    Serial.println(\"Button is pressed!\");\n  }\n\n  delay(100); // Optional: Small delay to avoid spamming the serial monitor"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["digital_out", "gnd"], gsNodeName: "arcadePushButton").Property("pushed", "Released")
-                    .Finish()
-            },
-            {
-                30,
-                new ComponentDataBuilder("Active buzzer", true, "Output/Sound", 1, 18.5, 19.154, typeof(RazorKY012),
-                    paneHoverText: "KY-012",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        { "global", "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer" },
-                        { "setup", "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output" },
-                        {
-                            "loopMain",
-                            "\tdigitalWrite(buzzerPin@, HIGH); // Turn buzzer on\n  delay(4000); // Wait 4 seconds\n  digitalWrite(buzzerPin@, LOW); // Turn buzzer off\n  delay(2000); // Wait 2 seconds"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["digital_out", "gnd"], gsNodeName: "ky012").Finish()
-            },
-            {
-                31,
-                new ComponentDataBuilder("Turbidity sensor", true, "Input/Light Sensors", 0.35, -100,
-                    -200, typeof(RazorSEN0189), paneHoverText: "SEN0189",
-                    codeForGen: new()
-                    {
-                        { "include", "" }, 
-                        { "global", "#define TURB_PIN@ ~\"analog_out\" // Turbidity sensor pin (DFRobot SEN0189)" }, 
-                        { "setup", "" }, 
-                        { "loopMain", "\tint raw@ = analogRead(TURB_PIN@); // Read raw ADC value\n" 
-                                      + "  float voltage@ = raw@ * (5.0 / 1023.0); // Convert raw value to voltage\n"
-                                      + "  float turbNTU@ = -1120.4*voltage@*voltage@ + 5742.3*voltage@ - 4352.9; //Convert voltage to turbidity in NTU (Nephelometric Turbidity Units)\n"
-                                      + "  Serial.print(\"Turbidity in NTU = \"); // Print label\n"
-                                      + "  Serial.println(turbNTU@, 3); // Print turbidity with 3 decimals\n"
-                                      + "  delay(500); // Wait 500ms" }, 
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["5V", "gnd", "analog_out"], gsNodeName: "sen0189", warning:"The SEN0189 turbidity sensor uses a nonlinear calibration curve.\nDue to 10-bit ADC resolution limits, small NTU changes at low turbidity may not produce measurable differences in output.\nThis behavior reflects real-world sensor characteristics.").Property("turbidity", 0.0).Finish()
-            },
-            
-            // {
-            //     31,
-            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
-            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
-            //         codeForGen: new()
-            //         {
-            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-            //             { "delayLoop", "" }, { "delayTime", "" }
-            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
-            // }
-            {
-                32,
-                new ComponentDataBuilder("pH Sensor", true, "Input/Other Sensors", .5, -20, -20, typeof(RazorSRVPH),
-                    paneHoverText: "SRV-PH",
-                    codeForGen: new()
-                    {
-                        { "include", "" },
-                        {
-                            "global",
-                            "#define SRVPH_PIN@ ~\"ADC\""
-                        },
-                        {
-                            "setup",
-                            ""
-                        },
-                        {
-                            "loopMain",
-                            "\tfloat sensorValue@ = analogRead(SRVPH_PIN@); // read analog input pin\n" +
-                            "\tfloat voltage@ = sensorValue@ * (5.0 / 1023.0); // convert to voltage\n" +
-                            "\tfloat pH = (-5.6548 * voltage@) + 15.509; // convert voltage to pH\n\n" +
-                            "\tSerial.print(\"Sensor Value: \");\n" +
-                            "\tSerial.print(sensorValue@);\n\n" + 
-                            "\tSerial.print(\"\tVoltage: \");\n" +
-                            "\tSerial.print(voltage@);\n\n" +
-                            "\tSerial.print(\"\tpH: \");\n" + 
-                            "\tSerial.println(pH);\n" +
-                            "\tdelay(2000); // wait 2s for next reading"
-                        },
-                        { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                    }, pins: ["Vcc", "gnd", "ADC"], gsNodeName: "srv-ph").Property("ph", 7.0).Finish()
-            },
-            {
-                33,
-                new ComponentDataBuilder("Soil Moisture Sensor", true, "Input/Temperature and Humidity Sensors", .5, 75, 75, typeof(RazorSEN0114),
-                        codeForGen: new()
-                        {
-                            { "include", "" },
-                            {
-                                "global",
-                                "/* Example code for the moisture sensor\n" +
-                                "Sensor value descriptions:\n" +
-                                "\t 0 - 300: Dry soil\n" +
-                                "\t 300 - 700: Humid soil\n" +
-                                "\t 700 - 950: In water\n*/\n" +
-                                "#define moisturePin@ ~\"analog_out\"\n" +
-                                "int moistureValue@ = 0;"
-                            },
-                            {
-                                "setup",
-                                ""
-                            },
-                            {
-                                "loopMain",
-                                "\tmoistureValue@ = analogRead(moisturePin@);\n" +
-                                "\tSerial.print(\"Moisture Sensor Value: \");\n" +
-                                "\tSerial.println(moistureValue@);\n\n" +
-                                "\t// Interpret the sensor value\n" +
-                                "\tSerial.print(\"Status: \");\n" +
-                                "\tif (moistureValue@ < 300) {\n" +
-                                "\t\tSerial.println(\"Dry soil\");\n" +
-                                "\t} else if (moistureValue@ < 700) {\n" +
-                                "\t\tSerial.println(\"Humid soil\");\n" +
-                                "\t} else {\n" +
-                                "\t\tSerial.println(\"In water\");\n" +
-                                "\t}\n" +
-                                "\tdelay(1000);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, paneHoverText: "SEN0114", pins: ["gnd", "5V", "analog_out"], gsNodeName: "sen0114")
-                    .Property("humidity", 512.0).Finish()
-            },
-            {
-                34,
-                new ComponentDataBuilder("Humidity and Temperature Sensor", true, "Input/Temperature and Humidity Sensors", 0.5, -20, -20, typeof(RazorSHT30),
-                    paneHoverText: "SHT30",
-                    codeForGen: new()
-                    {
-                        { "include", "#include <SHT3x.h>" },
-                        { "global",
-                            "#define SHT30_ADDR 0x44\n\n" +
-                            "SHT3x sht30(SHT30_ADDR, SHT3x::PrevValue, 255, SHT3x::SHT30, SHT3x::Single_HighRep_ClockStretch);"
-                        },
-                        { "setup",
-                            "\t// Initialize SHT3x library\n" +
-                            "\tsht30.Begin();"
-                        },
-                        { "loopMain",
-                            "\t// Set mode (optional, here High Repeatability, Clock Stretch)\n" +
-                            "\tsht30.SetMode(SHT3x::Single_HighRep_ClockStretch);\n\n" +
-                            "\t// Trigger measurement\n" +
-                            "\tsht30.UpdateData();\n\n" +
-                            "\t// Check errors\n" +
-                            "\tif (sht30.GetError() != 0) {\n" +
-                            "\t\tSerial.print(\"Library Error: \");\n" +
-                            "\t\tSerial.println(sht30.GetError());\n" +
-                            "\t} else {\n" +
-                            "\t\tfloat temp = sht30.GetTemperature(); // Celsius\n" +
-                            "\t\tfloat humidity  = sht30.GetRelHumidity(); // %\n" +
-                            "\t\tSerial.print(\"Temperature: \");" +
-                            " Serial.print(temp, 2);\n" +
-                            "\t\tSerial.print(\" °C  Humidity: \");" +
-                            " Serial.print(humidity, 2);" +
-                            " Serial.println(\" %\");\n" +
-                            "\t}\n\n" +
-                            "\tSerial.println(\"-----------------------------\\n\");\n" +
-                            "\tdelay(1000); // Wait before next read"
-                        },
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    } , pins: ["Vcc", "gnd", "scl", "sda", "int"], gsNodeName: "sht30").Property("humidity", 40.0).Property("temperature", 20.0).Finish()
-            }, 
-            {
-                35,
-                new ComponentDataBuilder("Temperature and Humidity Sensor", true,
-                        "Input/Temperature and Humidity Sensors", 1, 18.5, 19.154, typeof(RazorDHT22),
-                        paneHoverText: "DHT22",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <DHT.h>\n" },
-                            { 
-                                "global", 
-                                "#define DHTPIN@ ~\"signal\"\n" + 
-                                "#define DHTTYPE DHT22\n" +
-                                "DHT dht@(DHTPIN@, DHTTYPE);" 
-                            },
-                            { "setup", "\tdht@.begin();" },
-                            {
-                                "loopMain",
-                                "\tfloat humidity@ = dht@.readHumidity();\n" +
-                                "\tfloat temperature@ = dht@.readTemperature();\n" +
-                                "\tif (isnan(humidity@) || isnan(temperature@)) {\n" +
-                                "\t\tSerial.println(\"Failed to read from DHT22 sensor!\");\n" +
-                                "\t} else {\n" +
-                                "\t\tSerial.print(\"Humidity: \");\n" +
-                                "\t\tSerial.print(humidity@);\n" +
-                                "\t\tSerial.print(\"% | Temperature: \");\n" +
-                                "\t\tSerial.print(temperature@);\n" +
-                                "\t\tSerial.println(\"°C\");\n" +
-                                "\t}\n" +
-                                "\tdelay(2000);"
-                            },
-                            { "functions", "" }, { "delayLoop", "" }, { "delayTime", "" }
-                        }, pins: ["Vcc", "signal", "gnd"], gsNodeName: "dht22").Property("humidity", 40.0)
-                    .Property("temperature", 20.0).Property("humidity", 40.0).Finish()
-            },
-            {
-                36,
-                new ComponentDataBuilder(
-                        "T-type thermocouple",
-                        true,
-                        "Input/Temperature and Humidity Sensors",
-                        0.7,
-                        100,
-                        75,
-                        typeof(RazorMAX31856),
-                        paneHoverText: "MAX31856",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <SPI.h>" },
-                            { 
-                                "global", 
-                                "#define CS_PIN@ ~\"cs\"\n" +
-                                "byte tempMSB@ = 0;\n" +
-                                "byte tempLSB@ = 0;\n" +
-                                "float temperature@ = 0.0;"
-                            },
-                            { 
-                                "setup", 
-                                "  SPI.begin();\n" +
-                                "  pinMode(CS_PIN@, OUTPUT);\n" +
-                                "  digitalWrite(CS_PIN@, HIGH);"
-                            },
-                            {
-                                "loopMain",
-                                "  digitalWrite(CS_PIN@, LOW);\n" +
-                                "  delayMicroseconds(10);\n\n" +
-                                "  byte config@ = SPI.transfer(0x00); // Config read\n" +
-                                "  tempMSB@ = SPI.transfer(0x00); // Read MSB (don't re-declare)\n" +
-                                "  tempLSB@ = SPI.transfer(0x00); // Read LSB (don't re-declare)\n\n" +
-                                "  digitalWrite(CS_PIN@, HIGH);\n" +
-                                "  delayMicroseconds(10);\n\n" +
-                                "  int raw@ = ((int)tempMSB@ << 8) | tempLSB@;\n" +
-                                "  temperature@ = raw@ * 0.25;\n\n" +
-                                "  Serial.print(\"Temperature = \");\n" +
-                                "  Serial.println(temperature@);\n" +
-                                "  delay(500);"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        pins: ["Vcc", "gnd", "sck", "sdo", "sdi", "cs"],
-                        gsNodeName: "max31856"
-                    )
-                    .Property("temperature", -20.0)
-                    .Finish()
-            },
-            // {
-            //     37,
-            //     new ComponentDataBuilder("Temperature sensor", true, "Input/Temperature and Humidity Sensors", 1, 18.5,
-            //         19.154, typeof(RazorKY001), paneHoverText: "DS18B20",
-            //         codeForGen: new()
-            //         {
-            //             { "include", "" }, { "global", "" }, { "setup", "" }, { "loopMain", "" }, { "functions", "" },
-            //             { "delayLoop", "" }, { "delayTime", "" }
-            //         }, pins: ["gnd", "5V", "DQ"], gsNodeName: "ds18b20").Finish()
-            // }
-            {
-                38,
-                new ComponentDataBuilder(
-                        "Time of Flight (VL53L4CD)",
-                        true,
-                        "Input/Distance Sensors",
-                        1,
-                        75,
-                        75,
-                        typeof(RazorTOF),
-                        paneHoverText: "VL53L4CD",
-                        codeForGen: new()
-                        {
-                            {
-                                "include",
-                                "#include <Arduino.h>\n#include <Wire.h>"
-                            },
-                            {
-                                "global",
-                                "int16_t tfDist@; // distance in centimeters"
-                            },
-                            { "setup", "  Wire.begin(); // initialize Wire library" },
-                            {
-                                "loopMain",
-                                "  Wire.beginTransmission(0x29);\n  Wire.write(0x00);  // DIST register\n  Wire.endTransmission();\n  \n  uint8_t bytesRead = Wire.requestFrom((uint8_t)0x29, (uint8_t)2);\n  if (bytesRead == 2) {\n    uint8_t low = Wire.read();\n    uint8_t high = Wire.read();\n    tfDist@ = (high << 8) | low;\n    Serial.print(\"Distance: \");\n    Serial.println(tfDist@);\n  }\n  else {\n    Serial.println(\"I2C Read Failed\");\n  }\n\n  delay(50);"
-                            },
-                            {
-                                "functions",
-                                ""
-                            },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        pins: [ "Vin", "xshut", "gnd", "gpio", "scl", "sda" ],
-                        gsNodeName: "tof"
-                    )
-                    .Property("distance", 0.0)
-                    .Finish()
-            },
-
-            {
-                41,
-                new ComponentDataBuilder(
-                    "RS485 Transceiver",
-                    true,
-                    "Input/Other Sensors",
-                    1,
-                    75,
-                    75,
-                    typeof(RazorTRANSCEIVER),
-                    codeForGen: new()
-                    {
-                        {
-                            "include",
-                            "#include <Arduino.h>"
-                        },
-
-                        {
-                            "global",
-                            "int ce_pin@ = ~\"ce\";\n" +
-                            "int csn_pin@ = ~\"csn\";\n" +
-                            "int sck_pin@ = ~\"sck\";\n" +
-                            "int mosi_pin@ = ~\"mosi\";\n" +
-                            "int miso_pin@ = ~\"miso\";\n" +
-                            "\n" +
-                            "int lastMode = -1; // track previous mode"
-                        },
-
-                        {
-                            "setup",
-                            "pinMode(ce_pin@, OUTPUT);\n" +
-                            "pinMode(csn_pin@, INPUT); // controller drives this\n" +
-                            "pinMode(sck_pin@, OUTPUT);\n" +
-                            "pinMode(mosi_pin@, OUTPUT);\n" +
-                            "pinMode(miso_pin@, INPUT);\n" +
-                            "\n" +
-                            "Serial.println(\"[Transceiver] Setup complete\");"
-                        },
-
-                        {
-                            "loopMain",
-                            "int mode = digitalRead(csn_pin@);\n" +
-                            "\n" +
-                            "// Only act when mode changes\n" +
-                            "if (mode != lastMode) {\n" +
-                            "\n" +
-                            "    if(mode == LOW) {\n" +
-                            "        digitalWrite(ce_pin@, LOW);\n" +
-                            "        Serial.println(\"[Transceiver] Receive mode enabled\");\n" +
-                            "    } else {\n" +
-                            "        digitalWrite(ce_pin@, HIGH);\n" +
-                            "        Serial.println(\"[Transceiver] Transmit mode enabled\");\n" +
-                            "    }\n" +
-                            "\n" +
-                            "    lastMode = mode;\n" +
-                            "}"
-                        },
-
-                        { "functions", "" },
-                        { "delayLoop", "" },
-                        { "delayTime", "" }
-                    },
-
-                    pins: ["gnd", "Vcc", "csn", "ce", "sck", "mosi", "miso"],
-                    gsNodeName: "transceiver",
-                    environmentalSettingsType: typeof(TRANSCEIVERSettings)
-                )
-                .Property("mode", 0)
-                .Finish()
-            },
-            {
-                39,
-                new ComponentDataBuilder("NPK Soil Sensor (RS485)", true, "Input/Soil Sensors", 1, 75, 75,
-                        typeof(RazorNPK),
-                        codeForGen: new()
-                        {
-                            {
-                                "include",
-                                "#include <Arduino.h>"
-                            },
-                            {
-                                "global",
-                                ""
-                            },
-                            {
-                                "setup",
-                                "  pinMode(~\"DE\", OUTPUT);\n" +
-                                "  pinMode(~\"RE\", OUTPUT);\n" +
-                                "  digitalWrite(~\"DE\", LOW);\n" +
-                                "  digitalWrite(~\"RE\", HIGH);"
-                            },
-                            {
-                                "loopMain",
-                                "  static unsigned long lastRead@ = 0;\n" +
-                                "  \n" +
-                                "  if (millis() - lastRead@ >= 2000) {\n" +
-                                "    lastRead@ = millis();\n" +
-                                "    \n" +
-                                "    while (Serial.available()) Serial.read();\n" +
-                                "    delay(50);\n" +
-                                "    \n" +
-                                "    digitalWrite(~\"DE\", HIGH);\n" +
-                                "    digitalWrite(~\"RE\", LOW);\n" +
-                                "    delay(50);\n" +
-                                "    \n" +
-                                "    uint8_t request[] = {0x01, 0x03, 0x00, 0x1E, 0x00, 0x03, 0xE4, 0x0C};\n" +
-                                "    delay(500);\n" +
-                                "    \n" +
-                                "    digitalWrite(~\"DE\", LOW);\n" +
-                                "    digitalWrite(~\"RE\", HIGH);\n" +
-                                "    delay(500);\n" +
-                                "    \n" +
-                                "    uint8_t response[10] = {0};\n" +
-                                "    int bytesRead = 0;\n" +
-                                "    while (Serial.available() && bytesRead < 10) {\n" +
-                                "      response[bytesRead++] = Serial.read();\n" +
-                                "      delay(10);\n" +
-                                "    }\n" +
-                                "    \n" +
-                                "    if (bytesRead >= 9) {\n" +
-                                "      uint16_t nitrogen = (response[3] << 8) | response[4];\n" +
-                                "      uint16_t phosphorus = (response[5] << 8) | response[6];\n" +
-                                "      uint16_t potassium = (response[7] << 8) | response[8];\n" +
-                                "      \n" +
-                                "      Serial.print(\"nitrogen = \");\n" +
-                                "      Serial.print(nitrogen);\n" +
-                                "      Serial.print(\" | phosphorus = \");\n" +
-                                "      Serial.print(phosphorus);\n" +
-                                "      Serial.print(\" | potassium = \");\n" +
-                                "      Serial.println(potassium);\n" +
-                                "    }\n" +
-                                "  }"
-                            },
-                            { "functions", "" },
-                            { "delayLoop", "" },
-                            { "delayTime", "" }
-                        },
-                        pins: ["Vcc", "gnd", "RO", "DI", "DE", "RE"],
-                        gsNodeName: "npk")
-                    .Property("nitrogen", 0.0)
-                    .Property("phosphorus", 0.0)
-                    .Property("potassium", 0.0)
-                    .Finish()
-            },
-            {
-                42,
-                new ComponentDataBuilder("NEMA 17 Stepper Motor", true, "Output/Motors/Stepper Motor", .25, 75, 75,
-                        typeof(RazorNEMA17), paneHoverText: "NEMA17",
-                        codeForGen: new()
-                        {
-                            { "include", "#include <AccelStepper.h>\n" },
-                            
-                            { 
-                                "global", 
-                                "// Pin configuration for NEMA17 stepper motor\n" +
-                                "int dirPin@ = ~\"DIR\";  // Direction pin\n" +
-                                "int stepPin@ = ~\"STEP\"; // Step pin\n\n" +
-                                "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
-                                "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor\n" +
-                                "\n// Variables for stepper state (optional)\n" +
-                                "long currentPos@ = 0;\n" +
-                                "long targetPos@ = 0;\n" +
-                                "float speed@ = 0;\n"
-                            },
-                            
-                            {
-                                "setup",
-                                "\t// Stepper basic motion parameters\n" +
-                                "\tstepper@.setMaxSpeed(1000);      // Maximum speed (steps/sec)\n" +
-                                "\tstepper@.setAcceleration(500);   // Maximum acceleration (steps/sec^2)\n\n" +
-                                "\t// Optional: reset current position\n" +
-                                "\tstepper@.setCurrentPosition(0);\n\n" +
-                                "\t// Move to an absolute target position\n" +
-                                "\tstepper@.moveTo(400); // Example: move to step 400\n"
-                            },
-                            
-                            {
-                                "loopMain",
-                                "\t// Non-blocking run toward target position\n" +
-                                "\tif(stepper@.distanceToGo() != 0) {\n" +
-                                "\t\tstepper@.run(); // Moves motor toward target with acceleration\n" +
-                                "\t}\n\n" +
-                                "\t// --- Constant speed movement (without acceleration) ---\n" +
-                                "\t// stepper@.setSpeed(200); // Set speed in steps/sec\n" +
-                                "\t// stepper@.runSpeed();    // Call repeatedly to move at constant speed\n\n" +
-                                "\t// --- Relative movement ---\n" +
-                                "\t// stepper@.move(100); // Move 100 steps relative to current position\n\n" +
-                                "\t// --- Blocking movement to absolute position ---\n" +
-                                "\t// stepper@.runToPosition(); // Blocks until target is reached\n" +
-                                "\t// stepper@.runToNewPosition(800); // Blocks until new target is reached\n\n" +
-                                "\t// --- Query motor state ---\n" +
-                                "\t// currentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
-                                "\t// targetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
-                                "\t// long remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
-                                "\t// speed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
-                                "\t// Print motor info to Serial for debugging\n" +
-                                "\t//Serial.print(\"Current: \"); \n" +
-                                "\t// Serial.print(currentPos@);\n" +
-                                "\t// Serial.print(\" Target: \");\n" +
-                                "\t// Serial.print(targetPos@);\n" +
-                                "\t// Serial.print(\" Remaining: \");" +
-                                "\t// Serial.print(remaining@);\n" +
-                                "\t// Serial.print(\" Speed: \"); " +
-                                "\t// Serial.println(speed@);\n\n" +
-                                "\t// delay(100); // Small delay to reduce Serial flooding"
-                            },
-                            { "functions", "" }, 
-                            { "delayLoop", "" }, 
-                            { "delayTime", "" }
-                        },
-                        pins: ["Vcc", "gnd", "STEP", "DIR"], gsNodeName: "nema17",
-                        warning:
-                        "Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.").Property("stepsperrev", 200.0)
-                    .Finish()
-            }
+            { nameof(RazorArduinoUno), 1 },
+            { nameof(RazorArduinoMega), 2 },
+            { nameof(RazorRELAY), 3 },
+            { nameof(RazorLCD1602I2C), 4 },
+            { nameof(RazorTRANSCEIVER), 5 },
+            { nameof(RazorADXL345I2C), 6 },
+            { nameof(RazorMPU6050), 7 },
+            { nameof(RazorBNO055), 8 },
+            { nameof(RazorKY012), 9 },
+            { nameof(RazorPMS5003), 10 },
+            { nameof(RazorMQ3), 11 },
+            { nameof(RazorSRVPH), 12 },
+            { nameof(RazorArcadePushButton), 13 },
+            { nameof(RazorDHT11), 14 },
+            { nameof(RazorTB6612FNG), 15 },
+            { nameof(RazorDCMotorL298N), 16 },
+            { nameof(RazorESCBLDCMotor), 17 },
+            { nameof(RazorSEN0219), 18 },
+            { nameof(RazorSHT30), 19 },
+            { nameof(RazorGP2Y1014AU0F), 20 },
+            { nameof(RazorJ305B), 21 },
+            { nameof(RazorKY003), 22 },
+            { nameof(RazorKY024), 23 },
+            { nameof(RazorIRDETECTOR), 24 },
+            { nameof(RazorKY022), 25 },
+            { nameof(RazorAMG8833), 26 },
+            { nameof(RazorMAX6675), 27 },
+            { nameof(RazorLED), 28 },
+            { nameof(RazorKY008), 29 },
+            { nameof(RazorHX711), 30 },
+            { nameof(RazorSSD1306), 31 },
+            { nameof(RazorHCSR501), 32 },
+            { nameof(RazorKY018), 33 },
+            { nameof(RazorMPS20N0040D), 34 },
+            { nameof(RazorRGBLED), 35 },
+            { nameof(RazorSG90), 36 },
+            { nameof(RazorSG90PCA9685), 37 },
+            { nameof(RazorSEN0114), 38 },
+            { nameof(RazorNPK), 39 },
+            { nameof(Razor_28BYJ48ULN2003), 40 },
+            { nameof(RazorMAX31856), 41 },
+            { nameof(RazorTFLunaLidarI2C), 42 },
+            { nameof(RazorDHT22), 43 },
+            { nameof(RazorDHT22MODULE), 44 },
+            { nameof(RazorVL53L0X), 45 },
+            { nameof(RazorTOF), 46 },
+            { nameof(RazorSEN0189), 47 },
+            { nameof(RazorGPS), 48 },
+            { nameof(RazorHCSR04), 49 },
+            { nameof(RazorSGP40), 50 },
+            { nameof(RazorTMC2208), 51 },
+            { nameof(RazorGP2Y0A), 52 },
+            { nameof(RazorSDCard), 53 },
+            { nameof(RazorThermistor), 54 },
+            { nameof(RazorA4988), 55 },
+            { nameof(RazorNEMA17), 56 }
         };
+
+        /// <summary>
+        /// Migration map translating pre-attribute legacy GlobalIds to the current attribute-system GlobalIds.
+        /// </summary>
+        public static readonly Dictionary<int, int> LegacyGlobalIdMap = new()
+        {
+            { 1, 1 },   // Uno
+            { 2, 2 },   // Mega
+            { 3, 6 },   // ADXL345I2C
+            { 4, 7 },   // MPU6050
+            { 5, 8 },   // BNO055
+            { 6, 42 },  // TFLunaLidarI2C
+            { 8, 49 },  // HCSR04
+            { 9, 11 },  // MQ3
+            { 10, 33 }, // KY018 Photoresistor
+            { 12, 23 }, // KY024 Hall Effect
+            { 13, 22 }, // KY003 Hall Effect
+            { 14, 27 }, // MAX6675 Thermocouple
+            { 15, 32 }, // HCSR501 PIR
+            { 16, 25 }, // KY022 IR Receiver
+            { 17, 30 }, // HX711 Load Cell
+            { 18, 28 }, // LED
+            { 20, 35 }, // RGB LED
+            { 21, 29 }, // KY008 Laser Diode
+            { 22, 4 },  // LCD1602I2C
+            { 23, 36 }, // SG90 Servo
+            { 24, 37 }, // SG90PCA9685
+            { 25, 16 }, // DCMotorL298N
+            { 26, 17 }, // ESCBLDCMotor
+            { 27, 40 }, // 28BYJ48 Stepper
+            { 29, 13 }, // Arcade Push Button
+            { 30, 9 },  // KY012 Active Buzzer
+            { 31, 47 }, // SEN0189 Turbidity
+            { 32, 12 }, // SRVPH Analog pH
+            { 33, 38 }, // SEN0114 Soil Moisture
+            { 34, 19 }, // SHT30
+            { 35, 43 }, // DHT22
+            { 36, 41 }, // MAX31856
+            { 37, 48 }, // GPS
+            { 38, 46 }, // TOF (VL53L4CD)
+            { 39, 39 }, // NPK
+            { 40, 45 }, // VL53L0X
+            { 41, 5 },  // TRANSCEIVER
+            { 42, 24 }, // IRDETECTOR
+            { 43, 31 }, // SSD1306 OLED
+            { 44, 44 }, // DHT22MODULE
+            { 45, 14 }, // DHT11
+            { 46, 18 }, // SEN0219 CO2
+            { 47, 10 }, // PMS5003 Air Quality
+            { 48, 21 }, // J305B Geiger Counter
+            { 49, 20 }, // GP2Y1014AU0F Dust
+            { 50, 26 }, // AMG8833 Thermal Camera
+            { 51, 34 }, // MPS20N0040D Pressure
+            { 52, 3 },  // RELAY
+            { 53, 50 }, // SGP40 VoC
+            { 54, 15 }  // TB6612FNG
+        };
+
+        public static int MigrateLegacyGlobalId(int id)
+        {
+            return LegacyGlobalIdMap.TryGetValue(id, out var newId) ? newId : id;
+        }
+
+        public static void GenComponentList()
+        {
+            Components.Clear();
+            TypeToId.Clear();
+            NameToId.Clear();
+
+            Components.Add(1, new ComponentDataBuilder(typeof(RazorArduinoUno)).Finish());
+            Components.Add(2, new ComponentDataBuilder(typeof(RazorArduinoMega)).Finish());
+            TypeToId[typeof(RazorArduinoUno)] = 1;
+            TypeToId[typeof(RazorArduinoMega)] = 2;
+            NameToId[nameof(RazorArduinoUno)] = 1;
+            NameToId[nameof(RazorArduinoMega)] = 2;
+
+            Type[] componentRazorClasses = Assembly.GetExecutingAssembly().GetTypes()
+                .Where(t => t.GetCustomAttribute(typeof(ComponentAttribute)) != null 
+                         && t != typeof(RazorArduinoUno) 
+                         && t != typeof(RazorArduinoMega))
+                .OrderBy(t => ((ComponentAttribute)t.GetCustomAttribute(typeof(ComponentAttribute))!).Name)
+                .ToArray();
+
+            int nextUnpinnedId = 51;
+
+            foreach (Type type in componentRazorClasses)
+            {
+                int id = PinnedComponentIds.TryGetValue(type.Name, out var pinned) ? pinned : nextUnpinnedId++;
+                Components[id] = new ComponentDataBuilder(type).Finish();
+                TypeToId[type] = id;
+                NameToId[type.Name] = id;
+            }
+        }
     }
 }

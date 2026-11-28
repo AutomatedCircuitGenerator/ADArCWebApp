@@ -1,0 +1,87 @@
+@inherits RazorComponent
+
+@attribute [Component("IR Distance (Sharp)", "Input/Distance Sensors", "gp2y0a", true, 1, 75, 75, paneHoverText: "GP2Y0A21YK0F / GP2Y0A02YK0F")]
+@attribute [ComponentDocumentation("infraredDistance.html")]
+@attribute [BreadboardMount('j')]
+@attribute [ComponentCode(CodeType.Global,
+    "// Sharp analog IR distance sensor.\n" +
+    "// Set to 1 for GP2Y0A21YK0F (10-80 cm) or 0 for GP2Y0A02YK0F (20-150 cm).\n" +
+    "// Keep this in sync with the model chosen in Environmental Settings.\n" +
+    "#define SHARP_GP2Y0A21_@ 1\n" +
+    "const int irPin@ = ~\"vo\";")]
+@attribute [ComponentCode(CodeType.LoopMain,
+    "  int irRaw@ = analogRead(irPin@);\n" +
+    "  float irVoltage@ = irRaw@ * (5.0 / 1023.0);\n" +
+    "  float irDistance@ = 0;\n\n" +
+    "  // Output voltage is roughly inversely proportional to distance (power-law fit of the datasheet curve)\n" +
+    "  if (irVoltage@ > 0.1) {\n" +
+    "#if SHARP_GP2Y0A21_@\n" +
+    "    irDistance@ = 27.728 * pow(irVoltage@, -1.2045);\n" +
+    "#else\n" +
+    "    irDistance@ = 61.573 * pow(irVoltage@, -1.1068);\n" +
+    "#endif\n" +
+    "  }\n\n" +
+    "  Serial.print(\"Voltage: \");\n" +
+    "  Serial.print(irVoltage@);\n" +
+    "  Serial.print(\" V | Distance: \");\n" +
+    "  Serial.print(irDistance@);\n" +
+    "  Serial.println(\" cm\");\n\n" +
+    "  delay(500);")]
+
+@attribute [ComponentPin("vo", "vo", 85, 85, number: 1)]
+@attribute [ComponentPin("gnd", "gnd", 100, 85, number: 2)]
+@attribute [ComponentPin("5V", "5V", 115, 85, number: 3)]
+
+@attribute [ComponentProperty("model", "GP2Y0A21YK0F", typeof(string))]
+@attribute [ComponentProperty("distance", 30.0, typeof(double))]
+
+@code {
+    [Parameter]
+    [DropdownSetting(["GP2Y0A21YK0F", "GP2Y0A02YK0F"])]
+    public string model
+    {
+        get;
+        set;
+    }
+
+    [Parameter]
+    [ValueSettingDouble("cm", 30.0, 10.0, 150.0)]
+    public double distance
+    {
+        get;
+        set;
+    }
+}
+
+<svg width="150" height="60" viewBox="0 0 150 60" xmlns="http://www.w3.org/2000/svg">
+    <!-- Mounting tabs -->
+    <rect x="0" y="10" width="150" height="22" rx="4" fill="#2b2b2b"/>
+    <circle cx="9" cy="21" r="4" fill="#ffffff" stroke="#888" stroke-width="1"/>
+    <circle cx="141" cy="21" r="4" fill="#ffffff" stroke="#888" stroke-width="1"/>
+
+    <!-- Main body -->
+    <rect x="22" y="2" width="106" height="38" rx="5" fill="#1a1a1a" stroke="#000" stroke-width="1"/>
+
+    <!-- Emitter lens (IR LED) -->
+    <circle cx="45" cy="21" r="12" fill="#3a3a3a"/>
+    <circle cx="45" cy="21" r="9" fill="#5a1a1a"/>
+    <circle cx="42" cy="18" r="2.5" fill="#ffffff" opacity="0.35"/>
+
+    <!-- Receiver lens (PSD) -->
+    <circle cx="105" cy="21" r="12" fill="#3a3a3a"/>
+    <circle cx="105" cy="21" r="9" fill="#101030"/>
+    <circle cx="102" cy="18" r="2.5" fill="#ffffff" opacity="0.35"/>
+
+    <!-- Model label -->
+    <text x="75" y="15" font-family="Consolas, monospace" font-size="6" fill="#dddddd" text-anchor="middle">SHARP</text>
+    <text x="75" y="31" font-family="Consolas, monospace" font-size="5" fill="#bbbbbb" text-anchor="middle">@(model ?? "GP2Y0A21YK0F")</text>
+
+    <!-- 3-pin JST connector -->
+    <rect x="52" y="40" width="46" height="12" rx="1.5" fill="#f2f2f2" stroke="#999" stroke-width="1"/>
+    <rect x="57" y="52" width="6" height="8" fill="#c8a24a"/>
+    <rect x="72" y="52" width="6" height="8" fill="#c8a24a"/>
+    <rect x="87" y="52" width="6" height="8" fill="#c8a24a"/>
+    <text x="60" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">Vo</text>
+    <text x="75" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">GND</text>
+    <text x="90" y="49" font-family="Consolas, monospace" font-size="4.5" fill="#333" text-anchor="middle">VCC</text>
+</svg>

@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -9,16 +9,29 @@ public abstract class RazorComponent : ComponentBase
     [Parameter] public IJSObjectReference? Controller { get; set; }
     [Parameter] public ComponentInstance? Component { get; set; }
 
+    private bool _hasSentInitialState = false;
+
+
     /**
      * Updates controller state after the first render of the component. This is important
      * for environmental settings deserialization to apply the changes correctly.
      */
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        if (Controller == null || Component == null || !firstRender) return;
-        var options = new JsonSerializerOptions{IncludeFields = true};
-        options.Converters.Add(new ParamToStateSerializer());
-        var json = JsonSerializer.Serialize(Component.CompParams, options);
-        await Controller.InvokeVoidAsync("send", json);
+        if (Controller != null && Component != null && !_hasSentInitialState)
+        {
+            _hasSentInitialState = true;
+            try
+            {
+                var options = new JsonSerializerOptions{IncludeFields = true};
+                options.Converters.Add(new ParamToStateSerializer());
+                var json = JsonSerializer.Serialize(Component.CompParams, options);
+                await Controller.InvokeVoidAsync("send", json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warn: failed to send initial state to controller: {ex.Message}");
+            }
+        }
     }
 }

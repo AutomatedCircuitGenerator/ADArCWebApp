@@ -1,0 +1,216 @@
+@inherits RazorComponent
+@attribute [Component("Pressure with ADC", "Input/Other Sensors", "mps20n0040d", true, 1, -20, -20, paneHoverText: "MPS20N0040D")]
+@attribute [ComponentDocumentation("sensors_modules.html#styler-id1.1.1.2.8.1")]
+@attribute [BreadboardMount('j')]
+@attribute [ComponentCode(CodeType.Global, 
+  "#define HX710B_DOUT@ ~\"dout\"\n" +
+  "#define HX710B_SCK@ ~\"sck\"\n\n" +
+  "long offset@ = 0; // Tare / zero calibration value")]
+@attribute [ComponentCode(CodeType.Setup, "  pinMode(HX710B_DOUT@, INPUT);\n" +
+                                          "  pinMode(HX710B_SCK@, OUTPUT);\n" +
+                                          "  digitalWrite(HX710B_SCK@, LOW);\n\n" +
+                                          "  delay(500);\n\n" +
+                                          "  // Zero calibration routine (tare at ambient room pressure)\n" +
+                                          "  Serial.println(\"Zeroing pressure sensor... ensure zero pressure is applied.\");\n" +
+                                          "  long sum@ = 0;\n" +
+                                          "  for (int i = 0; i < 10; i++) {\n" +
+                                          "    sum@ += readHX710B@();\n" +
+                                          "    delay(50);\n" +
+                                          "  }\n" +
+                                          "  offset@ = sum@ / 10;\n" +
+                                          "  Serial.print(\"Offset value: \");\n" +
+                                          "  Serial.println(offset@);")]
+@attribute [ComponentCode(CodeType.LoopMain, "  long rawValue@ = readHX710B@();\n" +
+                                             "  long delta@ = rawValue@ - offset@;\n\n" +
+                                             "  // Approximate conversion factor (scale factor varies by board/excitation; calibrate for accuracy)\n" +
+                                             "  // Scale factor roughly ~ 200 counts per kPa for standard 40kPa sensors on HX710B\n" +
+                                             "  float scaleFactor@ = 200.0;\n" +
+                                             "  float pressure_kPa@ = (float)delta@ / scaleFactor@;\n" +
+                                             "  float pressure_psi@ = pressure_kPa@ * 0.145038;\n\n" +
+                                             "  Serial.print(\"Raw: \");\n" +
+                                             "  Serial.print(rawValue@);\n" +
+                                             "  Serial.print(\" | Pressure: \");\n" +
+                                             "  Serial.print(pressure_kPa@, 2);\n" +
+                                             "  Serial.print(\" kPa (\");\n" +
+                                             "  Serial.print(pressure_psi@, 2);\n" +
+                                             "  Serial.println(\" PSI)\");\n\n" +
+                                             "  delay(200);")]
+@attribute [ComponentCode(CodeType.Include, "#include <Arduino.h>")]
+@attribute [ComponentCode(CodeType.Functions,  "// Function to read raw 24-bit signed integer from HX710B\n" +
+                                               "long readHX710B@() {\n" +
+                                               "  while (digitalRead(HX710B_DOUT@) == HIGH); // Wait until conversion is ready (DOUT goes LOW)\n\n" +
+                                               "  unsigned long count = 0;\n" +
+                                               "  for (int i = 0; i < 24; i++) {\n" +
+                                               "    digitalWrite(HX710B_SCK@, HIGH);\n" +
+                                               "    delayMicroseconds(1);\n" +
+                                               "    count = (count << 1) | digitalRead(HX710B_DOUT@);\n" +
+                                               "    digitalWrite(HX710B_SCK@, LOW);\n" +
+                                               "    delayMicroseconds(1);\n" +
+                                               "  }\n\n" +
+                                               "  // 25th pulse sets gain to 128 (default) and powers board for next conversion\n" +
+                                               "  digitalWrite(HX710B_SCK@, HIGH);\n" +
+                                               "  delayMicroseconds(1);\n" +
+                                               "  digitalWrite(HX710B_SCK@, LOW);\n" +
+                                               "  delayMicroseconds(1);\n\n" +
+                                               "  // Convert 24-bit two's complement integer to 32-bit signed long\n" +
+                                               "  if (count & 0x800000) {\n" +
+                                               "    count |= 0xFF000000;\n" +
+                                               "  }\n\n" +
+                                               "  return (long)count;\n" +
+                                               "}")]
+@attribute [ComponentCode(CodeType.DelayLoop, "delay(200);")]
+
+@attribute [ComponentPin("Vcc","Vcc", 66.6, 195.5, number: 1)]
+@attribute [ComponentPin("gnd","gnd", 160.3, 195.5, number: 2)]
+@attribute [ComponentPin("sck","sck", 96.8, 195.5, number: 3)]
+@attribute [ComponentPin("dout","dout", 126.7, 195.5, number: 3)]
+
+@attribute [ComponentProperty("pressure", 0.0, typeof(double))]
+@attribute [ComponentProperty("scale", 500.0, typeof(double))]
+
+@attribute [ComponentWarning( "Calibration is required to determine the scale factor.")]
+
+@code {
+    
+    [Parameter]
+    [ValueSetting("kPa", 0, 0, 40)]
+    public double pressure { get; set; }
+
+    [Parameter]
+    [ValueSetting("ADC Scale", 500, 10, 10000)]
+    public double scale { get; set; }
+    
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 37.5 41.25" width="168.75px" height="185.625px">
+  <defs>
+    <!-- Filter for drop shadows on components -->
+    <filter id="shadow" x="-10%" y="-10%" width="120%" height="120%">
+      <feDropShadow dx="0.25" dy="0.75" stdDeviation="0.75" flood-color="#000000" flood-opacity="0.5"/>
+    </filter>
+  </defs>
+
+  <!-- Red PCB Board Base -->
+  <path d="
+    M 3.75,3.75 
+    L 33.75,3.75 
+    L 33.75,20 
+    A 3.125,3.125 0 0,1 33.75,28.75 
+    L 33.75,41.25 
+    L 3.75,41.25 
+    L 3.75,28.75 
+    A 3.125,3.125 0 0,1 3.75,20 
+    Z" 
+    fill="#D02B1E" />
+
+  <!-- Side Mounting Holes -->
+  <!-- Left Mounting Hole -->
+  <circle cx="3.75" cy="24.375" r="3" fill="none" stroke="#FFFFFF" stroke-width="0.375" />
+  <circle cx="3.75" cy="24.375" r="2.625" fill="none" stroke="#D02B1E" stroke-width="0.25" />
+  <circle cx="3.75" cy="24.375" r="2" fill="#FFFFFF" stroke="#D02B1E" stroke-width="0.1875" />
+
+  <!-- Right Mounting Hole -->
+  <circle cx="33.75" cy="24.375" r="3" fill="none" stroke="#FFFFFF" stroke-width="0.375" />
+  <circle cx="33.75" cy="24.375" r="2.625" fill="none" stroke="#D02B1E" stroke-width="0.25" />
+  <circle cx="33.75" cy="24.375" r="2" fill="#FFFFFF" stroke="#D02B1E" stroke-width="0.1875" />
+
+  <!-- Metal Pins / Traces near top sensor -->
+  <g fill="#BCA988">
+    <rect x="6.875" y="6.5" width="23.75" height="1.5" rx="0.125" />
+    <rect x="6.875" y="11.25" width="23.75" height="1.5" rx="0.125" />
+    <rect x="6.875" y="16" width="23.75" height="1.5" rx="0.125" />
+  </g>
+
+  <!-- Top Sensor Assembly (Black Block) -->
+  <g filter="url(#shadow)">
+    <!-- Base Module -->
+    <rect x="11.75" y="5" width="14" height="13.75" rx="0.25" fill="#2B2B2B" />
+
+    <!-- 6 Corner/Edge Pins -->
+    <circle cx="13.25" cy="7.5" r="0.625" fill="#000000" />
+    <circle cx="13.25" cy="11.875" r="0.625" fill="#000000" />
+    <circle cx="13.25" cy="16.5" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="7.5" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="11.875" r="0.625" fill="#000000" />
+    <circle cx="24.25" cy="16.5" r="0.625" fill="#000000" />
+
+    <!-- Central Pressure Port/Nipple -->
+    <ellipse cx="18.75" cy="11.5" rx="2.75" ry="3.25" fill="#202020" />
+    <circle cx="19.125" cy="10" r="2.25" fill="#292929" />
+    <circle cx="19.375" cy="10" r="0.75" fill="#000000" />
+  </g>
+
+  <!-- SMD Components -->
+  <!-- Top Left SMD -->
+  <rect x="8.125" y="19" width="1.625" height="3.25" fill="#A89F91" rx="0.125" />
+  <rect x="8.125" y="19.75" width="1.625" height="1.75" fill="#0A0A0A" />
+
+  <!-- Top Right SMD -->
+  <rect x="28" y="19" width="1.625" height="3.25" fill="#A89F91" rx="0.125" />
+  <rect x="28" y="19.75" width="1.625" height="1.75" fill="#0A0A0A" />
+
+  <!-- Bottom Left SMD -->
+  <rect x="8.125" y="27.5" width="1.625" height="3.375" fill="#A89F91" rx="0.125" />
+  <rect x="8.125" y="30.5" width="1.625" height="0.375" fill="#FFFFFF" />
+
+  <!-- Bottom Right SMD -->
+  <rect x="28" y="28" width="1.625" height="3.375" fill="#A89F91" rx="0.125" />
+
+  <!-- IC Pins (HX710B IC) -->
+  <g fill="#C5C5C5">
+    <!-- Left Pins -->
+    <rect x="13.125" y="22.125" width="2.75" height="0.75" />
+    <rect x="13.125" y="25" width="2.75" height="0.75" />
+    <rect x="13.125" y="27.75" width="2.75" height="0.75" />
+    <rect x="13.125" y="30.5" width="2.75" height="0.75" />
+
+    <!-- Right Pins -->
+    <rect x="21.625" y="22.125" width="2.75" height="0.75" />
+    <rect x="21.625" y="25" width="2.75" height="0.75" />
+    <rect x="21.625" y="27.75" width="2.75" height="0.75" />
+    <rect x="21.625" y="30.5" width="2.75" height="0.75" />
+  </g>
+
+  <!-- IC Chip Body -->
+  <rect x="15.5" y="21.875" width="6.5" height="10" rx="0.25" fill="#222222" />
+  <!-- IC Pin 1 Marker (Dot) -->
+  <circle cx="16.5" cy="23" r="0.375" fill="#111111" />
+
+  <!-- IC Text Label -->
+  <text x="18.75" y="26.875" 
+        fill="#DCDCDC" 
+        font-family="Arial, Helvetica, sans-serif" 
+        font-size="1.375" 
+        font-weight="bold" 
+        text-anchor="middle" 
+        transform="rotate(-90, 18.75, 26.875)">
+    <tspan x="18.75" dy="-0.5">HX710B</tspan>
+    <tspan x="18.75" dy="1.5">791104102</tspan>
+  </text>
+
+  <!-- Bottom Pin Labels -->
+  <g fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="2" font-weight="bold" text-anchor="middle">
+    <text x="9.25" y="35.375">VCC</text>
+    <text x="15.5" y="35.375">OUT</text>
+    <text x="22.25" y="35.375">SCK</text>
+    <text x="29.75" y="35.375">GND</text>
+  </g>
+
+  <!-- Bottom Connector Pads / Holes -->
+  <!-- VCC Pad (Square contour) -->
+  <rect x="7.125" y="36" width="4.25" height="4.25" fill="#B0B5B3" />
+  <circle cx="9.25" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- OUT Pad (Circular) -->
+  <circle cx="15.625" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="15.625" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- SCK Pad (Circular) -->
+  <circle cx="22.625" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="22.625" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+  <!-- GND Pad (Circular) -->
+  <circle cx="29.5" cy="38.125" r="2.125" fill="#B0B5B3" />
+  <circle cx="29.5" cy="38.125" r="1.625" fill="#FFFFFF" />
+
+</svg>
