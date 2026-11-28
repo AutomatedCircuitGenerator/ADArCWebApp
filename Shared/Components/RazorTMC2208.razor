@@ -1,0 +1,89 @@
+@inherits RazorComponent
+
+@attribute [Component("TMC2208 SilentStepStick", "Output/Motor Drivers", "tmc2208", true, .65, 400, 250, paneHoverText: "STEP/DIR driver with optional UART configuration")]
+@attribute [ComponentDocumentation("tmc2208.html")]
+@attribute [BreadboardMount('d', col2: 'g', extraRotation: 3, allowOppositeStrip: false)]
+@attribute [ComponentWarning("Use an external motor supply and common ground. Set the current limit for your motor. VM is never powered by the Arduino. Bridge the carrier UART jumper and use a 1 kΩ series resistor from TX to PDN_UART for UART configuration.")]
+@attribute [ComponentCode(CodeType.Include, "#include <AccelStepper.h>\n#include <TMCStepper.h>\n#include <SoftwareSerial.h>\n")]
+@attribute [ComponentCode(CodeType.Global, "// Set to 1 after enabling the carrier UART jumper. TX uses a 1 kΩ series resistor.\n" +
+                            "#define TMC2208_UART@ 0\n" +
+                            "const int stepPin@ = ~\"step\";\nconst int dirPin@ = ~\"dir\";\nconst int enablePin@ = ~\"en\";\n" +
+                            "AccelStepper stepper@(AccelStepper::DRIVER, stepPin@, dirPin@);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "// Write-only single-wire UART. 0.11 ohms is the Watterott carrier sense resistor.\n" +
+                            "SoftwareSerial tmcSerial@(-1, ~\"pdn_uart\");\n" +
+                            "TMC2208Stepper driver@(&tmcSerial@, 0.11f);\n#endif\n")]
+@attribute [ComponentCode(CodeType.Setup, "\tpinMode(enablePin@, OUTPUT);\n\tdigitalWrite(enablePin@, HIGH);\n" +
+                            "#if TMC2208_UART@\n" +
+                            "\ttmcSerial@.begin(115200);\n\tdriver@.begin();\n" +
+                            "\tdriver@.pdn_disable(true);\n\tdriver@.I_scale_analog(false);\n" +
+                            "\tdriver@.rms_current(600);\n\tdriver@.mstep_reg_select(true);\n" +
+                            "\tdriver@.microsteps(8);\n\tdriver@.intpol(true);\n\tdriver@.en_spreadCycle(false);\n" +
+                            "#endif\n" +
+                            "// MS1 and MS2 low select 1/8 steps. 200 full steps/revolution.\n" +
+                            "\tstepper@.setMinPulseWidth(2);\n\tstepper@.setMaxSpeed(1600);\n" +
+                            "\tstepper@.setSpeed(800);\n\tdigitalWrite(enablePin@, LOW);\n")]
+@attribute [ComponentCode(CodeType.LoopMain, "\tstepper@.runSpeed();\n")]
+@attribute [ComponentPin("en", "en", 47, 57, number: 1)]
+@attribute [ComponentPin("ms1", "ms1", 47, 82, number: 2)]
+@attribute [ComponentPin("ms2", "ms2", 47, 107, number: 3)]
+@attribute [ComponentPin("nc", "nc", 47, 132, number: 4)]
+@attribute [ComponentPin("pdn_uart", "pdn_uart", 47, 157, number: 5)]
+@attribute [ComponentPin("clk", "clk", 47, 182, number: 6)]
+@attribute [ComponentPin("step", "step", 47, 207, number: 7)]
+@attribute [ComponentPin("dir", "dir", 47, 232, number: 8)]
+@attribute [ComponentPin("vm", "vm", 202, 57, number: 16)]
+@attribute [ComponentPin("motor_gnd", "motor_gnd", 202, 82, number: 15)]
+@attribute [ComponentPin("m1b", "m1b", 202, 107, number: 14)]
+@attribute [ComponentPin("m1a", "m1a", 202, 132, number: 13)]
+@attribute [ComponentPin("m2a", "m2a", 202, 157, number: 12)]
+@attribute [ComponentPin("m2b", "m2b", 202, 182, number: 11)]
+@attribute [ComponentPin("vio", "vio", 202, 207, number: 10)]
+@attribute [ComponentPin("gnd", "gnd", 202, 232, number: 9)]
+
+@code {
+    // Carrier viewed from above, with the potentiometer beside STEP/DIR.
+    private static readonly string[] LeftPins = ["en", "ms1", "ms2", "nc", "pdn_uart", "clk", "step", "dir"];
+    private static readonly string[] RightPins = ["vm", "motor_gnd", "m1b", "m1a", "m2a", "m2b", "vio", "gnd"];
+
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+    <title>TMC2208 SilentStepStick with bipolar stepper motor</title>
+    <rect x="12" y="12" width="175" height="220" rx="7" fill="#305d91" stroke="#183852" stroke-width="3"/>
+    @for (var i = 0; i < LeftPins.Length; i++)
+    {
+        <g>
+        <rect x="16" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+        <circle cx="22" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+        <text x="33" y="@(36 + i * 25)" fill="white" font-size="9">@LeftPins[i].ToUpperInvariant()</text>
+        <rect x="171" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+        <circle cx="177" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+        <text x="166" y="@(36 + i * 25)" text-anchor="end" fill="white" font-size="9">@(RightPins[i] == "motor_gnd" ? "GND" : RightPins[i].ToUpperInvariant())</text>
+        </g>
+    }
+    <rect x="75.5" y="85" width="48" height="54" rx="3" fill="#20252a"/>
+    <text x="99.5" y="109" text-anchor="middle" fill="#ddd" font-size="9">TMC</text>
+    <text x="99.5" y="123" text-anchor="middle" fill="#ddd" font-size="9">2208</text>
+    <circle cx="99.5" cy="181" r="13" fill="#c6c9cd" stroke="#646b71" stroke-width="3"/>
+    <path d="M91.5 181H107.5 M99.5 173V189" stroke="#555" stroke-width="3"/>
+    <rect x="86.5" y="40" width="26" height="12" fill="#c6ae78"/>
+    <rect x="84.5" y="151" width="30" height="8" fill="#292b2e"/>
+    <text x="99.5" y="225" text-anchor="middle" fill="white" font-size="9">SilentStepStick</text>
+
+    <path d="M177 82 H219 V65 H250" fill="none" stroke="#2866b1" stroke-width="3"/>
+    <path d="M177 107 H226 V85 H250" fill="none" stroke="#c74545" stroke-width="3"/>
+    <path d="M177 132 H233 V105 H250" fill="none" stroke="#3f8156" stroke-width="3"/>
+    <path d="M177 157 H240 V125 H250" fill="none" stroke="#343434" stroke-width="3"/>
+    <rect x="250" y="42" width="128" height="128" rx="12" fill="#34373b" stroke="#1b1d20" stroke-width="3"/>
+    <rect x="260" y="52" width="108" height="108" rx="9" fill="#b5bac1"/>
+    @foreach (var corner in new[] { (268, 60), (360, 60), (268, 152), (360, 152) })
+    {
+        <circle cx="@corner.Item1" cy="@corner.Item2" r="4" fill="#474c51"/>
+    }
+    <circle cx="314" cy="106" r="35" fill="#626a73"/>
+    <g id="tmc2208-shaft">
+        <circle cx="314" cy="106" r="13" fill="#e2e4e7" stroke="#555" stroke-width="2"/>
+        <path d="M314 106 V78" stroke="#f2c357" stroke-width="5" stroke-linecap="round"/>
+    </g>
+</svg>

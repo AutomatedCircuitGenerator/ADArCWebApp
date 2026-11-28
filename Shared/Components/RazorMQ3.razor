@@ -1,6 +1,8 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 
 @attribute [Component("Alcohol", "Input/Gas Sensors", "mq3", true, 0.9, 75, 75, paneHoverText: "MQ-3")]
+@attribute [ComponentDocumentation("mq3.html#styler-id1.1.1.2.8.11.7.1")]
+@attribute [BreadboardMount('j', 1)]
 @attribute [ComponentCode(CodeType.Setup,   "  Serial.println(\"MQ3 warming up!\"); //this should be 20 seconds in real life\n  delay(200); // allow the MQ3 to warm up"
 )]
 @attribute [ComponentCode(CodeType.LoopMain,                                 "  sensorValue@ = analogRead(MQ3pin@); // read analog input pin 0\n\n  Serial.print(\"Sensor Value: \");\n  Serial.print(sensorValue@);\n  \n  // Determine the status\n  if (sensorValue@ < Sober@) {\n    Serial.println(\"  |  Status: Stone Cold Sober\");\n  } else if (sensorValue@ >= Sober@ && sensorValue@ < Drunk@) {\n    Serial.println(\"  |  Status: Drinking but within legal limits\");\n  } else {\n    Serial.println(\"  |  Status: DRUNK\");\n  }\n  \n  delay(2000); // wait 2s for next reading")]

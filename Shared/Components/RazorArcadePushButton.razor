@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Arcade Push Button", "Input/Buttons and Switches", "arcadePushButton", true, 1, 75, 75, paneHoverText: "Push Button")]
+@attribute [ComponentDocumentation("inputs.html")]
 @attribute [ComponentCode(CodeType.Global, "const int buttonPin@ = ~\"digital_out\";")]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(buttonPin@, INPUT); // Set the button pin as an input\n")]
 @attribute [ComponentCode(CodeType.LoopMain, "  int buttonState@ = digitalRead(buttonPin@); // Read the button state\n\n  if (buttonState@ == HIGH) { // If button is pressed\n    Serial.println(\"Button is pressed!\");\n  }\n\n  delay(100); // Optional: Small delay to avoid spamming the serial monitor")]

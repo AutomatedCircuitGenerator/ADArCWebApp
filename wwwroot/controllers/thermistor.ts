@@ -2,7 +2,7 @@ import {Controller} from "./controller";
 
 export class Thermistor extends Controller {
     
-    private Temperature: number = 35;
+    private Temperature: number = 70;
     private referenceResistance = 10000.0;
     private nominalTemperature = 25.0;
     private betaCoefficient = 3950.0;
@@ -11,20 +11,16 @@ export class Thermistor extends Controller {
     private isInSimulation: boolean = false;
 
     override update(state: Record<string, any>) {
-        this.setTemperature(state.temperature);
+        if (state.temperature !== undefined) {
+            this.setTemperature(Number(state.temperature));
+        }
     }
 
     setTemperature(temperature: number) {
-        //this should be done somewhere else, but done here as last defence to not bork things
-        if (temperature < 30) {
-            this.Temperature = 30;
-        } else if (temperature > 120) {
-            this.Temperature = 120;
-        } else {
-            this.Temperature = temperature;
-        }
+        if (Number.isNaN(temperature)) return;
+        this.Temperature = Math.min(150, Math.max(-50, temperature));
         if (this.isInSimulation) {
-            this.temperatureToVoltage(temperature);
+            this.temperatureToVoltage(this.Temperature);
         }
     }
 
@@ -33,16 +29,17 @@ export class Thermistor extends Controller {
         this.temperatureToVoltage(this.Temperature);
     }
 
-    // See: https://docs.wokwi.com/parts/wokwi-photoresistor-sensor/
     temperatureToVoltage(temperature: number) {
         this.Temperature = temperature;
         let tempK = this.Temperature + 273.15;
         
-        let thermistorResistance = this.referenceResistance * Math.pow(10, ( (this.betaCoefficient / tempK) 
-        - (this.betaCoefficient / (this.nominalTemperature + 273.15))));
+        let thermistorResistance = this.referenceResistance * Math.exp((this.betaCoefficient / tempK) 
+        - (this.betaCoefficient / (this.nominalTemperature + 273.15)));
         
         let voltage = this.seriesResistor * 5.0 / (thermistorResistance + this.seriesResistor);
         
-        this.pins.sig[0].analog.voltage = voltage;
+        if (this.pins.sig?.[0]?.analog) {
+            this.pins.sig[0].analog.voltage = voltage;
+        }
     }
 }

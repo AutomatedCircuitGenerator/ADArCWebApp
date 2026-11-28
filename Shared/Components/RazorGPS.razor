@@ -1,6 +1,8 @@
 @inherits RazorComponent
 
 @attribute [Component("Ultimate GPS", "Input/Other Sensors", "gps", true, .8, 135, 180, paneHoverText: "PA1616S")]
+@attribute [ComponentDocumentation("sensors_modules.html#styler-id1.1.1.2.8.1")]
+@attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Global, 
   "SoftwareSerial mySerial(~\"txd\", ~\"rxd\");\n" +
   "Adafruit_GPS GPS(&mySerial);")]

@@ -1,6 +1,8 @@
 @inherits RazorComponent
 
 @attribute [Component("CO2", "Input/Gas Sensors", "sen0219", true, 0.9, 100, 75, paneHoverText: "SEN0219")]
+@attribute [ComponentDocumentation("gasSensors.html#styler-id1.1.1.2.8.11.1")]
+@attribute [BreadboardMount('j', 3, maxScale: 2.82)]
 @attribute [ComponentCode(CodeType.Global, 
     "const int co2_pin@ = ~\"analog_out\";\n")]
 @attribute [ComponentCode(CodeType.Setup, "pinMode(co2_pin@, INPUT);\n" +

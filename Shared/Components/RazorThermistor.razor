@@ -1,5 +1,7 @@
 @inherits RazorComponent
 @attribute [Component("Thermistor", "Input/Temperature and Humidity Sensors", "thermistor", true, 1, 75, 75, paneHoverText: "Thermistor")]
+@attribute [ComponentDocumentation("temperatureAndHumidity.html#styler-id1.1.1.2.8.13.1")]
+@attribute [BreadboardMount('j', maxScale: 2.9)]
 @attribute [ComponentCode(CodeType.Global,  "const int sensorPin@ = ~\"sig\";"+
                                             "// Define the analog pin connected to the OUT pin of the module\n"+
                                             "// Define the reference resistance and temperature constants\n"+
@@ -26,13 +28,13 @@
 
 @attribute [ComponentPin("vcc","vcc", 88, 134, number: 1)]
 @attribute [ComponentPin("gnd","gnd", 82, 134, number: 2)]
-@attribute [ComponentPin("sig","sig", 93, 134, number: 2)]
+@attribute [ComponentPin("sig","sig", 93, 134, number: 3)]
 
 @attribute [ComponentProperty("Temperature", 70.0, typeof(double))]
 @code {
 
     [Parameter]
-    [ValueSettingDouble("Temperature", 70.0, -300.0, 300.0)]
+    [ValueSettingDouble("Temperature", 70.0, -50.0, 150.0)]
     public double Temperature
     {
         get;

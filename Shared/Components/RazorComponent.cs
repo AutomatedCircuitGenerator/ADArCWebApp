@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 
@@ -21,10 +21,17 @@ public abstract class RazorComponent : ComponentBase
         if (Controller != null && Component != null && !_hasSentInitialState)
         {
             _hasSentInitialState = true;
-            var options = new JsonSerializerOptions{IncludeFields = true};
-            options.Converters.Add(new ParamToStateSerializer());
-            var json = JsonSerializer.Serialize(Component.CompParams, options);
-            await Controller.InvokeVoidAsync("send", json);
+            try
+            {
+                var options = new JsonSerializerOptions{IncludeFields = true};
+                options.Converters.Add(new ParamToStateSerializer());
+                var json = JsonSerializer.Serialize(Component.CompParams, options);
+                await Controller.InvokeVoidAsync("send", json);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Warn: failed to send initial state to controller: {ex.Message}");
+            }
         }
     }
 }

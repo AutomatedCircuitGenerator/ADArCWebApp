@@ -1,4 +1,4 @@
-﻿using GraphSynth.Representation;
+using GraphSynth.Representation;
 using Microsoft.AspNetCore.Components;
 using ADArCWebApp.Shared.Exceptions;
 using ADArCWebApp.Shared;
@@ -183,7 +183,9 @@ namespace ADArCWebApp
                 var ruleToNodeLabels = new HashSet<string>(ruleToNode.localLabels);
                 var ruleFromNodeLabels = new HashSet<string>(ruleFromNode.localLabels);
                 // remove the connected labels, remembering whether it was present in the arduino node (unique connection)
-                var uniqueConnection = ruleToNodeLabels.Contains("connected");
+                var ruleLToNode = rule.L.nodes.Find(n => n.name == ruleToNode.name) as ruleNode;
+                var uniqueConnection = ruleToNodeLabels.Contains("connected") ||
+                                       (ruleLToNode?.negateLabels.Contains("connected") == true);
                 ruleToNodeLabels.Remove("connected");
                 ruleFromNodeLabels.Remove("connected");
 
