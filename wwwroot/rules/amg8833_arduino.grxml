@@ -191,9 +191,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>0</X>
         <Y>240</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -209,9 +207,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>144</X>
         <Y>168</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -277,9 +273,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>48</X>
         <Y>216</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -295,9 +289,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>96</X>
         <Y>192</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -672,7 +664,6 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n18</name>
         <localLabels>
           <string>sda</string>
-          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>96</X>
@@ -689,7 +680,6 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <name>n14</name>
         <localLabels>
           <string>scl</string>
-          <string>connected</string>
         </localLabels>
         <localVariables />
         <X>144</X>

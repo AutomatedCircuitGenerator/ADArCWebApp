@@ -1,40 +1,58 @@
-﻿@using System.Reflection
+@using System.Reflection
 @inject IJSRuntime JsRuntime
 
-<div class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(individualData.zoomedY)px; left:@(individualData.zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(zoomFactor)); transform-origin:@(posAbsolute ? "top left" : "center center");">
+<div @ref="_wrapperRef" class="comp-wrapper @(BorderClasses())" @oncontextmenu:preventDefault="true" @onclick="handleClick" @oncontextmenu="RightClick" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(RenderY)px; left:@(RenderX)px; position:@(posAbsolute ? "absolute" : "relative"); transform: scale(@(EffectiveScale)); transform-origin:@(posAbsolute ? "top left" : "center center"); rotate: @(EffectiveRotation * 90)deg">
     <div id="component-@individualData.localId">
         <DynamicComponent @ref="_componentRef" Type="individualData.Data.compType" Parameters="individualData.GetPropsAsParams()"></DynamicComponent>
     </div>
 </div>
-@if (!forceBorder)
+@if (rightClickable)
 {
-    rightClickable = false;
-}
-@if (forceBorder)
-{
-    @if (rightClickable)
-    {
-        <div class="right-click-container" style="top: @(individualData.zoomedY)px; left: @(individualData.zoomedX)px">
-            @if (individualData.Data.templateParams.Count > 0 || individualData.Data.EnvironmentalSettingsType != null)
-            {
-                <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
-                    <span>⚙</span>
-                    <span style="padding-left: 5px">￨ Environmental Settings</span>
-                </button>
-            }
-            <button id="component-help-button" @onclick="@(() => OpenLink(GenerateLink(individualData.Data.name)))">
-                <span style="padding-left: 3px">𝗶</span>
-                <span style="padding-left: 7px">￨ Component Information</span>
+    <div class="right-click-container" style="top: @(clickMenuY)px; left: @(clickMenuX)px" @onclick:stopPropagation="true" @onmousedown:stopPropagation="true">
+        @if (individualData?.Data.templateParams.Count > 0 || individualData?.Data.EnvironmentalSettingsType != null)
+        {
+            <button id="environmental-settings-button" @onclick="HandleEnvironmentalSettingsMenu">
+                <span class="menu-icon">⚙</span>
+                <span style="padding-left: 5px">￨ Environmental Settings</span>
             </button>
-            @if (!Pages.Index.App!.IsRunning && !individualData.IsArduino())
-            {
-                <button id="deletebutton" @onclick="Remove">
-                    <span>x</span>
-                    <span style="padding-left: 6px">￨ Delete Component</span>
-                </button>
-            }
-        </div>
-    }
+        }
+        <!-- Direct anchor link to documentation; closes context menu upon click and bypasses popup blockers -->
+        <a id="component-help-button"
+           href="@DocumentationMap.ResolveUrl(individualData)"
+           target="_blank"
+           rel="noopener noreferrer"
+           @onclick="CloseContextMenu"
+           @onclick:stopPropagation="true"
+           @onmousedown:stopPropagation="true">
+            <span class="menu-icon">ℹ</span>
+            <span style="padding-left: 5px">￨ Component Information</span>
+        </a>
+        <button id="component-rotate-ccw" @onclick="RotateCounterClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 5px">￨ Rotate Counterclockwise</span>
+        </button>
+        <button id="component-rotate-cw" @onclick="RotateClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 5px">￨ Rotate Clockwise</span>
+        </button>
+        @if (!Pages.Index.App!.IsRunning && !(individualData?.IsArduino() ?? false))
+        {
+            <button id="deletebutton" @onclick="Remove">
+                <span class="menu-icon">✕</span>
+                <span style="padding-left: 5px">￨ Delete Component</span>
+            </button>
+        }
+    </div>
 }
 <!-- ignore scaling -->
 <div class="EnvironmentalSettingsClass" style="display: @(showMenu ? "block" : "none"); top: @(_envSettingsY + Transform?.translate.y)px; left: @(_envSettingsX + Transform?.translate.x)px;">
@@ -163,6 +181,68 @@
 
     [Parameter] public ComponentInstance? individualData { get; set; }
 
+    [Parameter] public int BreadboardRot { get; set; } = 0;
+    [Parameter] public bool ShowBreadboard { get; set; } = false;
+    [Parameter] public double BreadboardPinScale { get; set; } = 1.0;
+    [Parameter] public EventCallback<(ComponentData data, double w, double h)> OnSvgMeasured { get; set; }
+
+    private ElementReference _wrapperRef;
+
+    private bool IsMountedOnBreadboard =>
+        ShowBreadboard && individualData != null && individualData.MountedOnBreadboard;
+
+    private double EffectiveScale =>
+        posAbsolute
+            ? zoomFactor * (IsMountedOnBreadboard && BreadboardPinScale > 0 ? BreadboardPinScale : 1.0)
+            : zoomFactor;
+
+    private int EffectiveRotation => IsMountedOnBreadboard
+        ? ((individualData!.rotation + individualData.BreadboardExtraRot + BreadboardRot) % 4 + 4) % 4
+        : (individualData?.rotation ?? 0);
+
+    [Parameter] public double BreadBoard_X { get; set; }
+    [Parameter] public double BreadBoard_Y { get; set; }
+    public double RenderX
+    {
+        get => IsMountedOnBreadboard ? BreadBoard_X : individualData.zoomedX;
+    }
+    public double RenderY
+    {
+        get => IsMountedOnBreadboard ? BreadBoard_Y : individualData.zoomedY;
+    }
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && posAbsolute && individualData != null && individualData.Data.MeasuredSvgWidth <= 1)
+        {
+            try
+            {
+                var size = await JsRuntime.InvokeAsync<double[]>("getCompSvgSize", _wrapperRef);
+                if (size is { Length: >= 2 } && size[0] > 1 && size[1] > 1 && OnSvgMeasured.HasDelegate)
+                {
+                    await OnSvgMeasured.InvokeAsync((individualData.Data, size[0], size[1]));
+                }
+            }
+            catch
+            {
+                // Ignore if element disposed before interop completes
+            }
+        }
+    }
+
+    public double ContextMenuX
+    {
+        get
+        {
+            double compWidth = individualData?.Data?.Width > 0 ? individualData.Data.Width : 60;
+            return RenderX + (compWidth + 50) * zoomFactor + 10;
+        }
+    }
+
+    public double ContextMenuY
+    {
+        get => RenderY;
+    }
     [Parameter] public double zoomFactor { get; set; } = 1;
 
     [Parameter] public EventCallback CancelDrag { get; set; }
@@ -257,24 +337,39 @@
     }
 
     private bool rightClickable = false;
-    private bool rightClick2 = false;
+    private double clickMenuX = 0;
+    private double clickMenuY = 0;
 
     [Parameter] public Action CanvasClick { get; set; }
 
-    private void RightClick()
+    /// <summary>
+    /// Closes the component context menu and requests a UI state update.
+    /// </summary>
+    public void CloseContextMenu()
     {
-        handleClick.InvokeAsync();
-        CanvasClick.Invoke();
-        
+        rightClickable = false;
+        StateHasChanged();
+    }
+
+    /// <summary>
+    /// Handles context menu right-click on the component wrapper.
+    /// Closes any previously opened context menus before opening this component's menu.
+    /// </summary>
+    private void RightClick(MouseEventArgs e)
+    {
+        CanvasClick?.Invoke();
         rightClickable = true;
-        if (rightClickable && forceBorder)
+        if (Transform != null)
         {
-            rightClick2 = true;
+            clickMenuX = e.ClientX - Transform.translate.x;
+            clickMenuY = e.ClientY - 55 - Transform.translate.y;
         }
         else
         {
-            rightClick2 = false;
+            clickMenuX = e.OffsetX + RenderX;
+            clickMenuY = e.OffsetY + RenderY;
         }
+        StateHasChanged();
     }
 
     public void EndEnvSettingsDrag()
@@ -298,132 +393,16 @@
         _envSettingsY += e.MovementY;
     }
 
-    string GenerateLink(string nodeName)
+    void RotateCounterClockwise()
     {
-        Console.WriteLine($"nodeName: {nodeName}");
-        switch (nodeName) //no breaks needed as return ends.
-        {
-            case "Rev 3":
-                return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
-            case "MEGA 2560":
-                return "https://adarc-help.mech.website/default.htm?startat=/arduino_concept.html&hash=styler-id1.1.1.2.7.7.1";
-            case "Uno WIFI Rev2":
-                return "https://adarc-help.mech.website/unoWifi_pinout.html#d38361e767";
-            case "Pushbutton":
-                return ""; // Add link for Pushbutton here
-            case "Switch":
-                return ""; // Add link for Switch here
-            case "ADXL345":
-                return "https://adarc-help.mech.website/adxl345_topic.html#d38361e7520";
-            case "MPU6050":
-                return "https://adarc-help.mech.website/mpu6050_topic.html#d38361e8239";
-            case "BNO-055":
-                return "https://adarc-help.mech.website/bno055_code.html#d38361e8125";
-            case "TF-Luna Lidar - I2C":
-                return ""; // Add link for TF-Luna Lidar - I2C here
-            case "TF-Luna Lidar - UART":
-                return ""; // Add link for TF-Luna Lidar - UART here
-            case "Ultrasonic":
-                return ""; // Add link for Ultrasonic here
-            case "IR Distance":
-                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
-            case "MQ-3":
-                return "https://adarc-help.mech.website/mq3.html#styler-id1.1.1.2.8.11.7.1";
-            case "SGP41":
-                return "https://adarc-help.mech.website/sgp41.html#styler-id1.1.1.2.8.11.8.1";
-            case "KY-018 LDR":
-                return ""; // Add link for KY-018 LDR here
-            case "Ambient Light":
-                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
-            case "Luminosity":
-                return "https://adarc-help.mech.website/lightSensors.html#styler-id1.1.1.2.8.12.1";
-            case "Alt - Ambient Light":
-                return "https://adarc-help.mech.website/ambientLight.html#styler-id1.1.1.2.8.12.9.1";
-            case "DHT11 / DHT22":
-                return "https://adarc-help.mech.website/dht11.html#styler-id1.1.1.2.8.13.7.1";
-            case "SHT31":
-                return "https://adarc-help.mech.website/sht31.html#styler-id1.1.1.2.8.13.9.1";
-            case "DS18B20":
-                return "https://adarc-help.mech.website/ds18b20.html#styler-id1.1.1.2.8.13.8.1";
-            case "Hall effect":
-                return "https://adarc-help.mech.website/hallEffect.html#styler-id1.1.1.2.8.14.7.1";
-            case "K-Thermocouple":
-                return "https://adarc-help.mech.website/ThermoMax6675.html#styler-id1.1.1.2.8.14.9.1";
-            case "PIR motion sensor":
-                return "https://adarc-help.mech.website/pir.html#styler-id1.1.1.2.8.14.8.1";
-            case "IR receiver":
-                return "https://adarc-help.mech.website/remoteControl.html#styler-id1.1.1.2.8.14.10.1";
-            case "SD Card Reader":
-                return "https://adarc-help.mech.website/SD_CardReader.html#styler-id1.1.1.2.8.14.11.1";
-            case "Load Cell(HX711)":
-                return "https://adarc-help.mech.website/strainGaugeLoadCell.html#styler-id1.1.1.2.8.14.12.1";
-            case "LED":
-                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
-            case "7 - segment":
-                return "https://adarc-help.mech.website/OLED.html#styler-id1.1.1.2.8.7.8.1";
-            case "Bar":
-                return "https://adarc-help.mech.website/ledBar.html#LEDBarGraphModules-4ABFAB6B";
-            case "Matrix":
-                return "https://adarc-help.mech.website/ledMatrix.html#LEDMatrix-4A2C438B";
-            case "RGB":
-                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
-            case "RGB module":
-                return "https://adarc-help.mech.website/rgdLed.html#RGBLEDModules-4A304018";
-            case "Laser LED":
-                return "https://adarc-help.mech.website/LED.html#styler-id1.1.1.2.8.7.9.1";
-            case "LCD2004":
-                return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
-            case "LCD2004 - I2C":
-                return "https://adarc-help.mech.website/lcd2004.html#LCD2004Modules-49BD4324";
-            case "LCD1602":
-                return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
-            case "LCD1602 - I2C":
-                return "https://adarc-help.mech.website/lcd1602.html#LCDModule-493015CA";
-            case "SH1106 OLED - SPI":
-                return "https://adarc-help.mech.website";
-            case "SH1106 OLED - I2C":
-                return "https://adarc-help.mech.website";
-            case "Direct - SG90":
-                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
-            case "Direct - DS-7001HV":
-                return "https://adarc-help.mech.website/ServoMotors.html#styler-id1.1.1.2.9.7.1";
-            case "Driver - SG90":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
-            case "Driver - DS-7001HV":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
-            case "Direct - Motor":
-                return "https://adarc-help.mech.website/motors.html#styler-id1.1.1.2.9.1";
-            case "Driver - Motor":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1";
-            case "Brushless ESC - Motor":
-                return "https://adarc-help.mech.website/brushlessDcMotor_datasheet.html#styler-id1.1.1.2.9.10.8.1";
-            case "28BYJ-48":
-                return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
-            case "Nema-17":
-                return "https://adarc-help.mech.website/steppers_concept.html#styler-id1.1.1.2.9.9.1";
-            case "Speaker":
-                return ""; // Add link for Speaker here
-            case "Buzzer":
-                return ""; // Add link for Buzzer here
-            case "Encoder":
-                return ""; // Add link for Encoder here
-            case "Voltage regulator":
-                return ""; // Add link for Voltage regulator here
-            case "Bluetooth Module":
-                return "https://adarc-help.mech.website"; // Add link for Bluetooth Module here
-            case "resistor":
-                return ""; // Add link for resistor here
-            case "stepper driver":
-                return "https://adarc-help.mech.website/motorDrivers.html#styler-id1.1.1.2.9.12.1"; // Add link for stepper driver here
-            default:
-                return "https://adarc-help.mech.website"; // Default just in case it returns null
-        }
+        individualData.rotation--;
+        if(individualData.rotation < 0) individualData.rotation = 3;
     }
 
-
-    void OpenLink(string url)
+    void RotateClockwise()
     {
-        JsRuntime.InvokeVoidAsync("window.open", url, "_blank");
+        individualData.rotation++;
+        if(individualData.rotation > 3) individualData.rotation = 0;
     }
 
 }

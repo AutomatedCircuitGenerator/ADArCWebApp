@@ -1,0 +1,189 @@
+@using System.Reflection
+@inject IJSRuntime JsRuntime
+
+
+@code {
+
+    [Parameter] public double zoomFactor { get; set; } = 1;
+    [Parameter] public bool posAbsolute { get; set; } = true;
+    [Parameter] public EventCallback<MouseEventArgs> DragStart { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DragProgress { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> DragEnd { get; set; }
+    [Parameter] public EventCallback<MouseEventArgs> handleClick { get; set; }
+    [Parameter] public double zoomedX { get; set; } = 0;
+    [Parameter] public double zoomedY { get; set; } = 0;
+    [Parameter] public Transform? Transform { get; set; }
+    [Parameter] public int BreadboardRot { get; set; } = 0;
+    [Parameter] public EventCallback<int> BreadboardRotChanged { get; set; }
+    private bool enableBorder = false;
+    private bool rightClickable = false;
+    private double clickMenuX = 0;
+    private double clickMenuY = 0;
+    [Parameter] public bool forceBorder { get; set; } = false;
+    [Parameter] public int RowCount { get; set; } = 30;
+
+    private double BoardLengthSvg => BreadboardHoleCoordinates.GetBoardLengthSvg(RowCount);
+    private double ViewBoxWidth => BreadboardHoleCoordinates.GetViewBoxWidth(RowCount);
+    private double SvgWidth => BreadboardHoleCoordinates.GetBoardWidth(RowCount);
+    private int RailHoles => BreadboardHoleCoordinates.GetRailHoleCount(RowCount);
+
+    private static readonly (char Col, int X)[] Columns =
+    [
+        ('a', 188), ('b', 220), ('c', 252), ('d', 284), ('e', 316),
+        ('f', 444), ('g', 476), ('h', 508), ('i', 540), ('j', 572)
+    ];
+
+    private static readonly (string Prefix, int X)[] Rails =
+    [
+        ("LPLUS", 66), ("LMINUS", 96), ("RPLUS", 664), ("RMINUS", 694)
+    ];
+    private string BorderClasses()
+    {
+        if (forceBorder)
+        {
+            return "a-border";
+        }
+
+        return enableBorder ? "b-border" : "";
+    }
+    
+    async Task RotateCounterClockwise()
+    {
+        BreadboardRot--;
+        if(BreadboardRot < 0) BreadboardRot = 3;
+        await BreadboardRotChanged.InvokeAsync(BreadboardRot);
+    }
+
+    async Task RotateClockwise()
+    {
+        BreadboardRot++;
+        if(BreadboardRot > 3) BreadboardRot = 0;
+        await BreadboardRotChanged.InvokeAsync(BreadboardRot);
+    }
+    
+    /// <summary>
+    /// Callback from parent canvas to dismiss active context menus across the workbench.
+    /// </summary>
+    [Parameter] public Action CanvasClick { get; set; }
+
+    /// <summary>
+    /// Closes the breadboard's context menu and triggers a state refresh.
+    /// </summary>
+    public void CloseContextMenu()
+    {
+        rightClickable = false;
+        StateHasChanged();
+    }
+    
+    /// <summary>
+    /// Handles right-click events on the breadboard.
+    /// Invokes CanvasClick to dismiss any previously open context menus before opening this menu.
+    /// </summary>
+    private void RightClick(MouseEventArgs e)
+    {
+        CanvasClick?.Invoke();
+        rightClickable = true;
+        if (Transform != null)
+        {
+            clickMenuX = e.ClientX - Transform.translate.x;
+            clickMenuY = e.ClientY - 55 - Transform.translate.y;
+        }
+        else
+        {
+            clickMenuX = e.OffsetX + zoomedX;
+            clickMenuY = e.OffsetY + zoomedY;
+        }
+        StateHasChanged();
+    }
+}
+
+<div class="comp-wrapper" @onmouseenter="() => enableBorder = true" @onmouseleave="() => enableBorder = false" @oncontextmenu:preventDefault="true" @oncontextmenu="RightClick" @onclick="handleClick"  @onmousedown="DragStart" @onmouseup="DragEnd" @onmousemove="DragProgress" style="top:@(zoomedY)px; left:@(zoomedX)px; position:@(posAbsolute ? "absolute" : "relative"); width:@(SvgWidth)px; height:380px; transform: scale(@(zoomFactor)); transform-origin: top left;">
+    <div id="component-bb" class="@(BorderClasses())" style="width:@(SvgWidth)px; height:380px; rotate: @(BreadboardRot * 90)deg; transform-origin: @(SvgWidth / 2)px 190px;">
+        <svg style="display: block;" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 @ViewBoxWidth 760" width="@SvgWidth" height="380">
+            <g transform="translate(0 760) rotate(270)">
+                <style>
+                    .txt { font-family: Arial, Helvetica, sans-serif; fill:#222; }
+                    .col { font-size:18px; }
+                    .row { font-size:15px; }
+                </style>
+
+                <rect x="12" y="12" width="736" height="@BoardLengthSvg" rx="10"
+                      fill="#f4f1e8" stroke="#d8d4c8" stroke-width="2"/>
+
+                <!-- center trench -->
+                <rect x="349" y="55" width="62" height="@(BoardLengthSvg - 81)" rx="3" fill="#ebe8df"/>
+
+                <!-- power rail guide lines -->
+                <line x1="42" y1="60" x2="42" y2="@(BoardLengthSvg - 38)" stroke="#d74b58" stroke-width="3"/>
+                <line x1="122" y1="60" x2="122" y2="@(BoardLengthSvg - 38)" stroke="#2786b8" stroke-width="3"/>
+                <line x1="638" y1="60" x2="638" y2="@(BoardLengthSvg - 38)" stroke="#d74b58" stroke-width="3"/>
+                <line x1="718" y1="60" x2="718" y2="@(BoardLengthSvg - 38)" stroke="#2786b8" stroke-width="3"/>
+
+                <text x="42" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+                <text x="42" y="@(BoardLengthSvg - 4)" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+                <text x="122" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+                <text x="122" y="@(BoardLengthSvg - 4)" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+                <text x="638" y="43" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+                <text x="638" y="@(BoardLengthSvg - 4)" text-anchor="middle" font-size="32" fill="#d74b58">+</text>
+                <text x="718" y="43" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+                <text x="718" y="@(BoardLengthSvg - 4)" text-anchor="middle" font-size="32" fill="#2786b8">−</text>
+
+                @for (int r = 1; r <= RowCount; r++)
+                {
+                    int hy = 87 + (r - 1) * 31;
+                    double holeY = hy + 0.5;
+                    int labelY = 97 + (r - 1) * 31;
+                    @foreach (var col in Columns)
+                    {
+                        <rect id="@($"{col.Col}{r}")" x="@(col.X - 4.5)" y="@holeY" width="9" height="9" rx="1.2" fill="#202020"/>
+                    }
+                    @((MarkupString)$"<text class=\"txt row\" x=\"162\" y=\"{labelY}\" text-anchor=\"end\">{r}</text>")
+                    @((MarkupString)$"<text class=\"txt row\" x=\"598\" y=\"{labelY}\" text-anchor=\"start\">{r}</text>")
+                }
+
+                @foreach (var rail in Rails)
+                {
+                    @for (int i = 1; i <= RailHoles; i++)
+                    {
+                        double railY = 87.5 + (i - 1) * 31 + ((i - 1) / 5) * 31;
+                        <rect id="@($"{rail.Prefix}_{i}")" x="@(rail.X - 4.5)" y="@railY" width="9" height="9" rx="1.2" fill="#202020"/>
+                    }
+                }
+
+                @foreach (var col in Columns)
+                {
+                    @((MarkupString)$"<text class=\"txt col\" x=\"{col.X}\" y=\"56\" text-anchor=\"middle\">{col.Col}</text>")
+                    @((MarkupString)$"<text class=\"txt col\" x=\"{col.X}\" y=\"{BoardLengthSvg - 6}\" text-anchor=\"middle\">{col.Col}</text>")
+                }
+            </g>
+        </svg>
+    </div>
+</div>
+
+@if (rightClickable)
+{
+    <div class="right-click-container" style="top: @(clickMenuY)px; left: @(clickMenuX)px">
+        <button id="component-help-button">
+            <span class="menu-icon">ℹ</span>
+            <span style="padding-left: 7px">￨ Component Information</span>
+        </button>
+        <button id="component-rotate-ccw" @onclick="RotateCounterClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/>
+                    <path d="M3 3v5h5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 7px">￨ Rotate Counterclockwise</span>
+        </button>
+        <button id="component-rotate-cw" @onclick="RotateClockwise">
+            <span class="menu-icon">
+                <svg viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M21 12a9 9 0 1 1-9-9c2.52 0 4.85.99 6.74 2.74L21 8"/>
+                    <path d="M21 3v5h-5"/>
+                </svg>
+            </span>
+            <span style="padding-left: 7px">￨ Rotate Clockwise</span>
+        </button>
+    </div>
+}
