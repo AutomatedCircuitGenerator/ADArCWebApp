@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("Servo with driver", "Output/Motors/Servo Motor", "pca9685", true, 0.48, 75, 75, paneHoverText: "SG90/PCA9685")]
+@attribute [ComponentDocumentation("motorDrivers.html#styler-id1.1.1.2.9.12.1")]
 @attribute [ComponentCode(CodeType.Global, "Adafruit_PWMServoDriver board@ = Adafruit_PWMServoDriver(0x@); // Use the I2C address of your board\n\n#define SERVOMIN  125 // Minimum pulse length\n#define SERVOMAX  625 // Maximum pulse length\n\nint servoChannel@ = 0; // The servo channel you are using (0-15 for 16 channels on the board)\n")]
 @attribute [ComponentCode(CodeType.Setup, "\tboard@.begin();\n  board@.setPWMFreq(60); // Set PWM frequency to 60 Hz (common for servos)")]
 @attribute [ComponentCode(CodeType.LoopMain, "  // Move servo from 0 to 180 degrees\n  for (int angle = 0; angle <= 180; angle++) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move (depends on your servo's speed)\n  }\n\n  // Move servo back from 180 to 0 degrees\n  for (int angle = 180; angle >= 0; angle--) {\n    int pulse@ = angleToPulse@(angle);\n    board@.setPWM(servoChannel@, 0, pulse@); // Send pulse to the servo on the chosen channel\n    delay(15); // Wait for the servo to move\n  }")]

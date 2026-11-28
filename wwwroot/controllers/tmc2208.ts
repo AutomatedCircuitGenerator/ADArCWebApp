@@ -53,6 +53,6 @@ export class TMC2208 extends Controller {
 
     private render() {
         this.element?.querySelector("#tmc2208-shaft")
-            ?.setAttribute("transform", `rotate(${this.angle} 295 106)`);
+            ?.setAttribute("transform", `rotate(${this.angle} 314 106)`);
     }
 }
