@@ -26,6 +26,7 @@ export class A4988 extends Controller {
     cleanup() {
         this.angle = 0;
         this.prevStepState = PinState.Low;
+        this.element?.querySelector("#shaft")?.setAttribute("transform", "rotate(0 180 172)");
     }
     
     stepListener(state: PinState) {
@@ -83,7 +84,7 @@ export class A4988 extends Controller {
     rotateShaft() {
         if (this.dirState === PinState.Low) this.angle += this.stepAngle();
         else this.angle -= this.stepAngle();
-        const shaft = document.querySelector("#shaft");
-        shaft.setAttribute("transform", `rotate(${this.angle} 180 172)`);
+        const shaft = this.element?.querySelector("#shaft");
+        shaft?.setAttribute("transform", `rotate(${this.angle} 180 172)`);
     }
 }

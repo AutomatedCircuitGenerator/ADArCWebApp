@@ -1,30 +1,71 @@
 ﻿@inherits RazorComponent
 
-@code {
+@attribute [Component("A4988 Stepper Motor Driver", "Output/Motors/Stepper Motor", "a4988", true, 0.5, 18.5, 19.154, paneHoverText: "A4988")]
+@attribute [ComponentDocumentation("motorDrivers.html#styler-id1.1.1.2.9.12.1")]
+@attribute [BreadboardMount('d', col2: 'g', extraRotation: 3, allowOppositeStrip: false)]
+@attribute [ComponentWarning("Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods. Note: This component can be configured in multiple ways depending on the desired stepping mode and control setup. Check the 'Examples' code for a typical configuration.")]
+@attribute [ComponentCode(CodeType.Global,
+    "const int stepPin@ = ~\"step\";\n" +
+    "const int dirPin@ = ~\"dir\";\n" +
+    "const int enPin@ = ~\"en\";\n" +
+    "const int slpPin@ = ~\"slp\";\n" +
+    "const int rstPin@ = ~\"rst\";\n" +
+    "const int ms1Pin@ = ~\"ms1\";\n" +
+    "const int ms2Pin@ = ~\"ms2\";\n" +
+    "const int ms3Pin@ = ~\"ms3\";")]
+@attribute [ComponentCode(CodeType.Setup,
+    "\tpinMode(stepPin@, OUTPUT);\n" +
+    "\tpinMode(dirPin@, OUTPUT);\n" +
+    "\tpinMode(enPin@, OUTPUT);\n" +
+    "\tpinMode(slpPin@, OUTPUT);\n" +
+    "\tpinMode(rstPin@, OUTPUT);\n" +
+    "\tpinMode(ms1Pin@, OUTPUT);\n" +
+    "\tpinMode(ms2Pin@, OUTPUT);\n" +
+    "\tpinMode(ms3Pin@, OUTPUT);\n\n" +
+    "\tdigitalWrite(enPin@, LOW);\n" +
+    "\tdigitalWrite(slpPin@, HIGH);\n" +
+    "\tdigitalWrite(rstPin@, HIGH);\n\n" +
+    "\t// Change MS1, MS2, and MS3 outputs to select the step angle\n" +
+    "\tdigitalWrite(ms1Pin@, LOW);\n" +
+    "\tdigitalWrite(ms2Pin@, LOW);\n" +
+    "\tdigitalWrite(ms3Pin@, LOW);\n\n" +
+    "\tSerial.println(\"A4988 initialized\");")]
+@attribute [ComponentCode(CodeType.LoopMain,
+    "\tSerial.println(\"Rotating clockwise\");\n" +
+    "\tdigitalWrite(dirPin@, LOW);\n\n" +
+    "\tfor (int i = 0; i < 100; i++) {\n" +
+    "\t\tdigitalWrite(stepPin@, HIGH);\n" +
+    "\t\tdelay(10);\n" +
+    "\t\tdigitalWrite(stepPin@, LOW);\n" +
+    "\t\tdelay(10);\n" +
+    "\t}\n\n" +
+    "\tdelay(1000);\n\n" +
+    "\tSerial.println(\"Rotating counter-clockwise\");\n" +
+    "\tdigitalWrite(dirPin@, HIGH);\n\n" +
+    "\tfor (int i = 0; i < 100; i++) {\n" +
+    "\t\tdigitalWrite(stepPin@, HIGH);\n" +
+    "\t\tdelay(10);\n" +
+    "\t\tdigitalWrite(stepPin@, LOW);\n" +
+    "\t\tdelay(10);\n" +
+    "\t}\n\n" +
+    "\tdelay(1000);")]
 
-    public static ElementPin[] pinInfo
-    {
-        get
-        {
-            return new ElementPin[]
-            {
-                new ElementPin(name: "vdd", x: 118.9, y: 237.1, signals: new PinSignalInfo[] { }, number: 1),
-                new ElementPin(name: "gnd", x: 118.9, y: 252.1, signals: new PinSignalInfo[] { }, number: 2),
-                new ElementPin(name: "step", x: 44, y: 237.1, signals: new PinSignalInfo[] { }, number: 3),
-                new ElementPin(name: "dir", x: 44, y: 252.1, signals: new PinSignalInfo[] { }, number: 4),
-                new ElementPin(name: "en", x: 44, y: 147.1, signals: new PinSignalInfo[] { }, number: 5),
-                new ElementPin(name: "slp", x: 44, y: 222.1, signals: new PinSignalInfo[] { }, number: 6),
-                new ElementPin(name: "rst", x: 44, y: 207.1, signals: new PinSignalInfo[] { }, number: 7),
-                new ElementPin(name: "ms1", x: 44, y: 162.1, signals: new PinSignalInfo[] { }, number: 8),
-                new ElementPin(name: "ms2", x: 44, y: 177.1, signals: new PinSignalInfo[] { }, number: 9),
-                new ElementPin(name: "ms3", x: 44, y: 192.1, signals: new PinSignalInfo[] { }, number: 10),
-            };
-        }
-    }
+@attribute [ComponentPin("vdd", "vdd", 136.5, 237.1, number: 1)]
+@attribute [ComponentPin("gnd", "gnd", 136.5, 252.1, number: 2)]
+@attribute [ComponentPin("step", "step", 43.5, 237.1, number: 3)]
+@attribute [ComponentPin("dir", "dir", 43.5, 252.1, number: 4)]
+@attribute [ComponentPin("en", "en", 43.5, 147.1, number: 5)]
+@attribute [ComponentPin("slp", "slp", 43.5, 222.1, number: 6)]
+@attribute [ComponentPin("rst", "rst", 43.5, 207.1, number: 7)]
+@attribute [ComponentPin("ms1", "ms1", 43.5, 162.1, number: 8)]
+@attribute [ComponentPin("ms2", "ms2", 43.5, 177.1, number: 9)]
+@attribute [ComponentPin("ms3", "ms3", 43.5, 192.1, number: 10)]
+
+@code {
     
 }
 
-<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="350" height="290" viewBox="0 0 350 290" version="1.1">
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="368" height="290" viewBox="0 0 368 290" version="1.1">
   <defs>
     <!-- Main dark gray gradient -->
     <linearGradient id="dark-body-gradient">
@@ -128,10 +169,10 @@
     </style>
   </defs>
   <!-- ==================== A4988 + NEMA23 Assembly ==================== -->
-  <g id="scaled-component" transform="translate(8,70) scale(0.4) translate(-20,-320)">
+  <g id="scaled-component" transform="translate(26,70) scale(0.4) translate(-20,-320)">
     <!-- A4988 board -->
     <!-- ==================== A4988 Driver Board ==================== -->
-    <g id="a4988" transform="translate(30,430) scale(0.25)">
+    <g id="a4988" transform="translate(-18.9,430) scale(0.31,0.25)">
       <rect width="884" height="1200" fill="#fafafa"/>
       <rect x="5" y="4" width="874" height="1192" rx="8" fill="#c6deb5" stroke="#9db887" stroke-width="2"/>
       <rect x="11" y="10" width="862" height="1178" rx="5" fill="url(#board)" stroke="#0b7a43" stroke-width="2.5"/>
@@ -357,6 +398,7 @@
   </g>
   <!-- Positive red wire -->
   <!-- ==================== External Source Wires ==================== -->
+  <g transform="translate(18,0)">
   <g id="source-power-wires">
     <path d="M105.9 108.75      C106.5 117, 100 122, 93.49 121.57" style="     stroke:#DB1625;     stroke-width:3px;     stroke-linecap:round;     fill:transparent;   " id="vmot-positive-wire">
 </path>
@@ -422,5 +464,6 @@
     <!-- Invisible helper / connection areas -->
     <path d="M18.9 101.25h4.05v4.05H18.9z" transform="translate(0 337.5)" style="             fill:none;             stroke:none;         "/>
     <path d="M31.5 438.75h4.05v4.05H31.5z" style="             fill:none;             stroke:none;         "/>
+  </g>
   </g>
 </svg>
