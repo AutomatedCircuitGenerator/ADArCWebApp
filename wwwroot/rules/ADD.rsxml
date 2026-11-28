@@ -53,6 +53,15 @@
     <string>add_irdetector.grxml</string>
     <string>add_ssd1306.grxml</string>
     <string>add_pms5003.grxml</string>
+    <string>add_tb6612fng.grxml</string>
+    <string>add_tmc2208.grxml</string>
+    <string>add_gp2y0a.grxml</string>
+    <string>add_sdCard.grxml</string>
+    <string>add_thermistor.grxml</string>
+    <string>add_a4988.grxml</string>
+    <string>add_nema17.grxml</string>
+    <string>add_nema23.grxml</string>
+    <string>add_de2120.grxml</string>
   </ruleFileNames>
   <name>ADD</name>
   <TriggerRuleNum>0</TriggerRuleNum>

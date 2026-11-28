@@ -1,4 +1,4 @@
-﻿using System.Text.Json;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace ADArCWebApp
@@ -49,8 +49,7 @@ namespace ADArCWebApp
                 throw new JsonException();
             }
 
-            Type componentParameterType = typeof(ComponentParameter<>).MakeGenericType(valueType);
-            return (IComponentParameter)Activator.CreateInstance(componentParameterType, value);
+            return new ComponentParameter(valueType, value);
         }
 
         public override void Write(Utf8JsonWriter writer, IComponentParameter value, JsonSerializerOptions options)

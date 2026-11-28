@@ -4875,7 +4875,10 @@
     "placeholder_4872": "SCL3400",
     "placeholder_4873": "SCPI_Parser",
     "placeholder_4874": "SCServo",
-    "placeholder_4875": "SD",
+    // SD is bundled in wwwroot/libraries/SD (Arduino SD 1.2.4, unmodified) instead of being
+    // downloaded, because the hexi.wokwi.com compiler crashes (arduino-cli panic) when asked
+    // to install "SD". Note: those library files are GPL-3.0 licensed, unlike this project (MIT).
+    "SD.h": "local/SD",
     "placeholder_4876": "SDConfig",
     "placeholder_4877": "SDConfigCommand",
     "placeholder_4878": "SDHT",
@@ -5557,7 +5560,7 @@
     "placeholder_5554": "SparkFun Clock 5P49V60 Arduino Library",
     "placeholder_5555": "SparkFun Color LCD Shield",
     "placeholder_5556": "SparkFun Color Sensor OPT4048",
-    "placeholder_5557": "SparkFun DE2120 2D Barcode Reader",
+    "SparkFun_DE2120_Arduino_Library.h": "SparkFun DE2120 2D Barcode Reader",
     "placeholder_5558": "SparkFun DMX Shield Library",
     "placeholder_5559": "SparkFun Extensible Message Parser",
     "placeholder_5560": "SparkFun External EEPROM Arduino Library",
@@ -5899,7 +5902,7 @@
     "placeholder_5896": "TMC429",
     "placeholder_5897": "TMC5072",
     "placeholder_5898": "TMC7300",
-    "placeholder_5899": "TMCStepper",
+    "TMCStepper.h": "TMCStepper",
     "placeholder_5900": "TMD3725",
     "placeholder_5901": "TMP117-Arduino",
     "placeholder_5902": "TMP36",

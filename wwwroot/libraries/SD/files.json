@@ -1,0 +1,14 @@
+[
+  "SD.h",
+  "SD.cpp",
+  "File.cpp",
+  "utility/FatStructs.h",
+  "utility/Sd2Card.cpp",
+  "utility/Sd2Card.h",
+  "utility/Sd2PinMap.h",
+  "utility/SdFat.h",
+  "utility/SdFatUtil.h",
+  "utility/SdFile.cpp",
+  "utility/SdInfo.h",
+  "utility/SdVolume.cpp"
+]
