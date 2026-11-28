@@ -169,9 +169,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>672</X>
         <Y>792</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />
@@ -205,9 +203,7 @@ mc:Ignorable="GraphSynth" xmlns:GraphSynth="ignorableUri" Tag="Rule" ><Border Bo
         <X>600</X>
         <Y>792</Y>
         <Z>0</Z>
-        <negateLabels>
-          <string>connected</string>
-        </negateLabels>
+        <negateLabels />
         <NotExist>false</NotExist>
         <containsAllLocalLabels>false</containsAllLocalLabels>
         <TargetType />

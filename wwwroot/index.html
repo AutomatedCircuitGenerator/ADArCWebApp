@@ -47,6 +47,15 @@
     <!-- this isn't really necessary, but is left in anyway-->
     <script>
         window.triggerClick = (elt) => elt.click();
+        window.getCompSvgSize = (wrapper) => {
+            if (!wrapper) return [0, 0];
+            const svg = wrapper.querySelector('svg');
+            if (!svg) return [0, 0];
+            const cs = getComputedStyle(svg);
+            const w = parseFloat(cs.width);
+            const h = parseFloat(cs.height);
+            return [Number.isFinite(w) ? w : 0, Number.isFinite(h) ? h : 0];
+        };
     </script>
 
 <!--    <div id="blazor-error-ui">
