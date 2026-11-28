@@ -50,6 +50,7 @@ import {VL53L0X} from "@controllers/vl53l0x";
 import {IRDETECTOR} from "@controllers/irdetector";
 import {SSD1306} from "@controllers/ssd1306";
 import {PMS5003} from "@controllers/pms5003";
+import {TMC2208} from "@controllers/tmc2208";
 
 //setup the interop module for use by the C# side (Interop/AppInterop.cs)
 (<any>window).interopManager = interopManager;
@@ -106,3 +107,4 @@ import {PMS5003} from "@controllers/pms5003";
 (<any>window).VL53L0X = VL53L0X;
 (<any>window).IRDETECTOR = IRDETECTOR;
 (<any>window).PMS5003 = PMS5003;
+(<any>window).TMC2208 = TMC2208;

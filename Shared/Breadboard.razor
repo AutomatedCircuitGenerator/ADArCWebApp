@@ -61,17 +61,27 @@
         await BreadboardRotChanged.InvokeAsync(BreadboardRot);
     }
     
+    /// <summary>
+    /// Callback from parent canvas to dismiss active context menus across the workbench.
+    /// </summary>
     [Parameter] public Action CanvasClick { get; set; }
 
+    /// <summary>
+    /// Closes the breadboard's context menu and triggers a state refresh.
+    /// </summary>
     public void CloseContextMenu()
     {
         rightClickable = false;
         StateHasChanged();
     }
     
+    /// <summary>
+    /// Handles right-click events on the breadboard.
+    /// Invokes CanvasClick to dismiss any previously open context menus before opening this menu.
+    /// </summary>
     private void RightClick(MouseEventArgs e)
     {
-        handleClick.InvokeAsync();
+        CanvasClick?.Invoke();
         rightClickable = true;
         if (Transform != null)
         {

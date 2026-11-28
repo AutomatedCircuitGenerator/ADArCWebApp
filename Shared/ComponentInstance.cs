@@ -13,11 +13,12 @@ namespace ADArCWebApp.Shared
     public class ComponentInstance : IAsyncDisposable
     {
         // Note: any changes here need to be reflected in unserialized strings, like in BoardService
-        [JsonIgnore] public readonly ComponentData Data;
+        [JsonIgnore] public ComponentData Data { get; set; }
 
         public int localId { get; set; }
 
-        public readonly int GlobalId;
+        public int GlobalId { get; set; }
+        public string? ComponentKey { get; set; }
         public double X;
         public double Y;
         public double Width;
@@ -108,10 +109,14 @@ namespace ADArCWebApp.Shared
         public ComponentInstance(int globalId, node gsNode, double x = 829.0, double y = 219.0)
         {
             GlobalId = globalId;
-            Data = ComponentDeclarations.Components[globalId];
-            foreach (var kv in Data.templateParams)
+            if (ComponentDeclarations.Components.TryGetValue(globalId, out var compData))
             {
-                CompParams.Add(kv.Key, kv.Value.Copy());
+                Data = compData;
+                ComponentKey = compData.compType?.Name;
+                foreach (var kv in Data.templateParams)
+                {
+                    CompParams.Add(kv.Key, kv.Value.Copy());
+                }
             }
 
             X = x;

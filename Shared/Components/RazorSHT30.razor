@@ -1,6 +1,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Digital Temp & Humidity", "Input/Temperature and Humidity Sensors", "sht30", true, .9, -20, -20, paneHoverText: "SHT30")]
+@attribute [ComponentDocumentation("sht31.html#styler-id1.1.1.2.8.13.9.1")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Include, "#include <SHT3x.h>")]
 @attribute [ComponentCode(CodeType.Global, "#define SHT30_ADDR 0x44\n\n" +

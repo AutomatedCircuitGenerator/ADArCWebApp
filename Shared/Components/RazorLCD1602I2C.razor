@@ -1,6 +1,7 @@
-﻿@using System.Text
+@using System.Text
 @inherits RazorComponent
 @attribute [Component("16x2 Character LCD", "Output/Displays", "lcd1602I2C", true, 0.7, 310, 140, paneHoverText: "LCD1602")]
+@attribute [ComponentDocumentation("lcd1602.html#LCDModule-493015CA")]
 @attribute [ComponentCode(CodeType.Global, "// Add the lcd, change the first parameter to your LCD's I2C device in real life!\nLiquidCrystal_I2C lcd@(@, 16, 2);")]
 @attribute [ComponentCode(CodeType.Setup, "   // Initalise the LCD\n   lcd@.init();\n   // Turn on the LCD backlight\n   lcd@.backlight();\n   // Put text on the LCD\n   lcd@.print(\"Hello World!\");")]
 @attribute [ComponentCode(CodeType.Include, "#include <LiquidCrystal_I2C.h>")]

@@ -65,6 +65,12 @@ namespace ADArCWebApp.Shared
         public readonly Type? EnvironmentalSettingsType;
         public string? Warning;
 
+        /// <summary>
+        /// Relative path or absolute URL pointing to this component's documentation page.
+        /// Extracted from <see cref="ComponentDocumentation"/> on the component's Razor class.
+        /// </summary>
+        public string? DocumentationPath;
+
         public Dictionary<string,IComponentParameter> templateParams = new Dictionary<string,IComponentParameter>();
 		public List<string> pinsToListen = new();
 
@@ -83,6 +89,7 @@ namespace ADArCWebApp.Shared
 			compType = builder.compType;
 			EnvironmentalSettingsType = builder.EnvironmentalSettingsType;
 			Warning = builder.Warning;
+			DocumentationPath = builder.DocumentationPath;
 			pins = builder.pins;
 			nodeName = builder.nodeName;
 			pinsToListen = builder.pinsToListen;
@@ -122,6 +129,11 @@ namespace ADArCWebApp.Shared
 		public Type compType;
 		public Type? EnvironmentalSettingsType;
 		public string? Warning;
+
+		/// <summary>
+		/// Relative path or absolute URL pointing to this component's documentation page.
+		/// </summary>
+		public string? DocumentationPath;
 		public Dictionary<string, int> pins = new();
 		public List<string> pinsToListen = new();
 		public string? nodeName;
@@ -215,6 +227,10 @@ namespace ADArCWebApp.Shared
 					else if (attribute is ComponentWarning CW)
 					{
 						Warning = CW.warn;
+					}
+					else if (attribute is ComponentDocumentation CD)
+					{
+						DocumentationPath = CD.Path;
 					}
 				}
 				this.pinInfo = pinsAttrs.ToArray();
@@ -640,4 +656,13 @@ public class ComponentPinsToListen(string pins) : Attribute
 public class ComponentWarning(string warning) : Attribute
 {
 	public string warn = warning;
+}
+
+/// <summary>
+/// Associates a relative or absolute documentation URL with a component class.
+/// </summary>
+[AttributeUsage(AttributeTargets.Class)]
+public class ComponentDocumentation(string path) : Attribute
+{
+	public string Path = path;
 }

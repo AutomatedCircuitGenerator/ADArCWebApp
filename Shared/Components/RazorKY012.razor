@@ -2,6 +2,7 @@
 @inherits RazorComponent
 
 @attribute [Component("Active Buzzer", "Output/Sound", "ky012", true, 1, 18.5, 19.154, paneHoverText: "KY-012")]
+@attribute [ComponentDocumentation("inputs.html")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Global, "const int buzzerPin@ = ~\"digital_out\"; // Signal pin for the buzzer")]
 @attribute [ComponentCode(CodeType.Setup, "\tpinMode(buzzerPin@, OUTPUT); // Set buzzer pin as output")]
