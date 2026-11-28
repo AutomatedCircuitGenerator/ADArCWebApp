@@ -1,6 +1,7 @@
-﻿@inherits RazorComponent
+@inherits RazorComponent
 
 @attribute [Component("Brushed DC Motor Driver (TB6612FNG)", "Output/Motors/DC Motor", "tb6612fng", true, .8, 75, 75, paneHoverText: "TB6612FNG")]
+@attribute [ComponentDocumentation("motorDrivers.html#styler-id1.1.1.2.9.12.1")]
 
 @attribute [ComponentCode(CodeType.Setup,      "\tpinMode(pwma@, OUTPUT);\n\tpinMode(ain1@, OUTPUT);\n\tpinMode(ain2@, OUTPUT);")]
 @attribute [ComponentCode(CodeType.LoopMain, "\tdigitalWrite(ain1@, HIGH);\n\tdigitalWrite(ain2@, LOW);\n\tanalogWrite(pwma@, 200);\n\tdelay(2000);\n\tdigitalWrite(ain1@, LOW);\n\tdigitalWrite(ain2@, LOW);\n\tanalogWrite(pwma@, 0);\n\tdelay(1000);")]

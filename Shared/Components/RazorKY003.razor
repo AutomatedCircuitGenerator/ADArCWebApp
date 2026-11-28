@@ -1,5 +1,6 @@
 @inherits RazorComponent;
 @attribute [Component("Hall Effect", "Input/Other Sensors", "ky003", true, 1.15, 60, 115, paneHoverText: "KY-003")]
+@attribute [ComponentDocumentation("ky003_task.html")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Setup, "  pinMode(sensor@, INPUT); // set sensor pin as input")]
 @attribute [ComponentCode(CodeType.LoopMain, "  val@ = digitalRead(sensor@); // Read the sensor\n  Serial.print(\"ky003 value: \");\n  Serial.println(val@);\n  delay(1000);")]

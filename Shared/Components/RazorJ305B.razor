@@ -1,7 +1,8 @@
-﻿@using ADArCWebApp.Shared.EnvironmentalSettings
+@using ADArCWebApp.Shared.EnvironmentalSettings
 @inherits RazorComponent
 
 @attribute [Component("Geiger Counter", "Input/Air Quality Sensors", "j305b", true, 0.9, 250, 150, paneHoverText: "J305B")]
+@attribute [ComponentDocumentation("sensors_modules.html#styler-id1.1.1.2.8.1")]
 
 @attribute [ComponentCode(CodeType.Global, 
                                              "const int geigerPin@ = ~\"vin\";"+

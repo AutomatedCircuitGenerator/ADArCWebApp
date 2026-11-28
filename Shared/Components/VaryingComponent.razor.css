@@ -1,4 +1,4 @@
-﻿.comp-wrapper {
+.comp-wrapper {
     padding: 25px;
     display: flex;
     position: absolute;
@@ -134,7 +134,8 @@
     box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.right-click-container button {
+.right-click-container button,
+.right-click-container a {
     background-color: transparent;
     border-color: transparent;
     justify-content: flex-start;
@@ -146,25 +147,33 @@
     min-width: fit-content;
     white-space: nowrap;
     display: flex;
+    text-decoration: none;
     cursor: pointer;
     font-size: 14px;
+    font-family: inherit;
+    box-sizing: border-box;
+    width: 100%;
 }
 
-.right-click-container button:hover {
+.right-click-container button:hover,
+.right-click-container a:hover {
     background-color: rgba(0, 0, 0, 0.08);
 }
 
-.right-click-container button:first-child {
+.right-click-container button:first-child,
+.right-click-container a:first-child {
     border-top-left-radius: 1rem;
     border-top-right-radius: 1rem;
 }
 
-.right-click-container button:last-child {
+.right-click-container button:last-child,
+.right-click-container a:last-child {
     border-bottom-left-radius: 1rem;
     border-bottom-right-radius: 1rem;
 }
 
-.right-click-container button:not(:last-child) {
+.right-click-container button:not(:last-child),
+.right-click-container a:not(:last-child) {
     border-bottom: 1px solid rgba(145, 145, 145, 0.3);
 }
 

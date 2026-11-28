@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("3-Axix", "Input/Acceleration Sensors", "adxl345", true, 1, 75, 75, paneHoverText: "ADXL345")]
+@attribute [ComponentDocumentation("adxl345_topic.html#d38361e7520")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Include, "#include <Wire.h>\n#include <Adafruit_Sensor.h>\n#include <Adafruit_ADXL345_U.h>")]
 @attribute [ComponentCode(CodeType.Setup, "   \n  // Begin communication with ADXL at I2C address 0x@\n  // Change this address to your ADXL's real address!\n  if(!accel@.begin(0x@)) {\n    /* There was a problem detecting the ADXL345 ... check your connections */\n    Serial.println(\"Ooops, no ADXL345 detected ... Check your wiring!\");\n    while(1);\n  }\n\n  // Setting the range of the accelerometer\n  accel@.setRange(ADXL345_RANGE_4_G);")]

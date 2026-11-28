@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("Photoresistor", "Input/Light Sensors", "ky018", true, 0.9, 75, 75, paneHoverText: "KY-018")]
+@attribute [ComponentDocumentation("ldr.html#styler-id1.1.1.2.8.12.7.1")]
 @attribute [BreadboardMount('j')]
 @attribute [ComponentCode(CodeType.Setup, "    // Setup function: runs once at startup\n  // Configure the photoresistor pin as an INPUT\n  pinMode(photoresistorPin@, INPUT);")]
 @attribute [ComponentCode(CodeType.LoopMain, "  // Main loop: continuously reads light intensity\n\n  // Read the analog value from the photoresistor\n  int analogValue@ = analogRead(photoresistorPin@);\n\n  // Convert the analog value to voltage (assuming a 5V reference)\n  float voltage@ = analogValue@ / 1024. * 5;\n\n  // Calculate the resistance of the LDR using a voltage divider formula\n  float resistance@ = 2000 * voltage@ / (1 - voltage@ / 5);\n\n  // Compute the light intensity in lux using the LDR characteristics\n  float lux@ = pow(RL10@ * 1e3 * pow(10, GAMMA@) / resistance@, (1 / GAMMA@));\n\n  // Output the measured light intensity to the Serial Monitor\n  Serial.print(\"Lux value: \");\n  Serial.println(lux@);\n\n  // Delay before the next reading to allow stable measurements\n  delay(1000);")]

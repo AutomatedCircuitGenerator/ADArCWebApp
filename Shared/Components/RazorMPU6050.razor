@@ -1,5 +1,6 @@
 @inherits RazorComponent
 @attribute [Component("6-DoF with Gyro", "Input/Acceleration Sensors", "mpu6050", true, 1.3, 85, 65, paneHoverText: "MPU6050")]
+@attribute [ComponentDocumentation("mpu6050_topic.html#d38361e8239")]
 @attribute [BreadboardMount('f')]
 @attribute [ComponentCode(CodeType.Include, "#include <Adafruit_MPU6050.h>\n#include <Adafruit_Sensor.h>\n#include <Wire.h>")]
 @attribute [ComponentCode(CodeType.Setup, "  while (!Serial)\n    delay(10); // will pause Zero, Leonardo, etc until serial console opens\n\n  Serial.println(\"Adafruit MPU6050 test!\");\n\n  // Try to initialize MPU at I2C address @ (change this to your MPU's actual address)!\n  if (!mpu@.begin(@)) {\n    Serial.println(\"Failed to find MPU6050 chip\");\n    while (1) {\n      delay(10);\n    }\n  }\n  Serial.println(\"MPU6050 Found!\");")]

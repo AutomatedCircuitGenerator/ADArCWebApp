@@ -1,8 +1,9 @@
-﻿@using System.Text
+@using System.Text
 @using ADArCWebApp.Shared.EnvironmentalSettings
 @inherits RazorComponent
 
 @attribute [Component("2.4 GHz Transceiver Module", "Input/Other Sensors", "transceiver", true, 1, 75, 75, paneHoverText: "nRF24L01")]
+@attribute [ComponentDocumentation("bluetoothAndWifi.html#styler-id1.1.1.2.8.9.1")]
 @attribute [ComponentCode(CodeType.Global, 
    "int ce_pin@ = ~\"ce\";\n" +
                                            "int csn_pin@ = ~\"csn\";\n" +
