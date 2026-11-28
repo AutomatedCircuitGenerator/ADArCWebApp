@@ -54,6 +54,18 @@ export async function buildHex(source: string) {
             const libName = lib.replace("local/", "");
             const basePath = `/libraries/${libName}`;
 
+            // Multi-file libraries (e.g. with a utility/ folder) list their files in files.json
+            const manifest = await fetch(`${basePath}/files.json`)
+                .then(r => r.ok ? r.json() : null)
+                .catch(() => null);
+            if (Array.isArray(manifest)) {
+                for (const file of manifest) {
+                    const content = await fetch(`${basePath}/${file}`).then(r => r.text());
+                    files.push({ name: `libraries/${libName}/${file}`, content });
+                }
+                continue;
+            }
+
             // always include header
             const header = await fetch(`${basePath}/${libName}.h`).then(r => r.text());
             files.push({ name: `libraries/${libName}/${libName}.h`, content: header });

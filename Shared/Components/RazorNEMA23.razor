@@ -1,18 +1,63 @@
 ﻿@inherits RazorComponent
 
-@code {
-    public static ElementPin[] pinInfo {
-        get
-        {
-            return new ElementPin[]{ 
+@attribute [Component("NEMA 23", "Output/Motors/Stepper Motor", "nema23", true, .4, 75, 75, paneHoverText: "NEMA23")]
+@attribute [ComponentDocumentation("steppers_concept.html#styler-id1.1.1.2.9.9.1")]
+@attribute [ComponentWarning("Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")]
+@attribute [ComponentCode(CodeType.Include, "#include <AccelStepper.h>\n")]
+@attribute [ComponentCode(CodeType.Global,
+    "// Pin configuration for NEMA23 stepper motor\n" +
+    "int dirPin@ = ~\"dir_minus\";  // Direction pin\n" +
+    "int stepPin@ = ~\"pul_minus\"; // Step pin\n\n" +
+    "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
+    "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor\n\n" +
+    "// Variables for stepper state (optional)\n" +
+    "long currentPos@ = 0;\n" +
+    "long targetPos@ = 0;\n" +
+    "float speed@ = 0;\n")]
+@attribute [ComponentCode(CodeType.Setup,
+    "\t// Stepper basic motion parameters\n" +
+    "\tstepper@.setMaxSpeed(1000);      // Maximum speed (steps/sec)\n" +
+    "\tstepper@.setAcceleration(500);   // Maximum acceleration (steps/sec^2)\n\n" +
+    "\t// Optional: reset current position\n" +
+    "\tstepper@.setCurrentPosition(0);\n\n" +
+    "\t// Move to an absolute target position\n" +
+    "\tstepper@.moveTo(400); // Example: move to step 400\n")]
+@attribute [ComponentCode(CodeType.LoopMain,
+    "\t// Non-blocking run toward target position\n" +
+    "\tif(stepper@.distanceToGo() != 0) {\n" +
+    "\t\tstepper@.run(); // Moves motor toward target with acceleration\n" +
+    "\t}\n\n" +
+    "\t// --- Constant speed movement (without acceleration) ---\n" +
+    "\t// stepper@.setSpeed(200); // Set speed in steps/sec\n" +
+    "\t// stepper@.runSpeed();    // Call repeatedly to move at constant speed\n\n" +
+    "\t// --- Relative movement ---\n" +
+    "\t// stepper@.move(100); // Move 100 steps relative to current position\n\n" +
+    "\t// --- Blocking movement to absolute position ---\n" +
+    "\t// stepper@.runToPosition(); // Blocks until target is reached\n" +
+    "\t// stepper@.runToNewPosition(800); // Blocks until new target is reached\n\n" +
+    "\t// --- Query motor state ---\n" +
+    "\t// currentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
+    "\t// targetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
+    "\t// long remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
+    "\t// speed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
+    "\t// Print motor info to Serial for debugging\n" +
+    "\t//Serial.print(\"Current: \"); \n" +
+    "\t// Serial.print(currentPos@);\n" +
+    "\t// Serial.print(\" Target: \");\n" +
+    "\t// Serial.print(targetPos@);\n" +
+    "\t// Serial.print(\" Remaining: \");\n" +
+    "\t// Serial.print(remaining@);\n" +
+    "\t// Serial.print(\" Speed: \"); \n" +
+    "\t// Serial.println(speed@);\n\n" +
+    "\t// delay(100); // Small delay to reduce Serial flooding")]
 
-              new ElementPin(name: "Vcc", x: 465, y: 251, signals: new PinSignalInfo[] { }, number: 1),
-              new ElementPin(name: "dir_minus", x: 380, y: 176, signals: new PinSignalInfo[] { }, number: 2),
-              new ElementPin(name: "pul_minus", x: 380, y: 227, signals: new PinSignalInfo[] { }, number: 3),
-            };
-        }
-    }
-    
+@attribute [ComponentPin("Vcc", "Vcc", 186, 100, number: 1)]
+@attribute [ComponentPin("dir_minus", "dir_minus", 152, 70, number: 2)]
+@attribute [ComponentPin("pul_minus", "pul_minus", 152, 91, number: 3)]
+
+@attribute [ComponentProperty("stepsperrev", 400.0, typeof(double))]
+
+@code {
     [Parameter]
     [ValueSetting("Steps/Revolution", 400, 0, 99999999)]
     public double stepsperrev
@@ -22,11 +67,10 @@
     }
 }
 
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
 <svg
-   width="1128.1003"
+   width="451.24"
    viewBox="0 0 4073.3454 2866.7259"
-   height="793.83203"
+   height="317.53"
    preserveAspectRatio="xMidYMid"
    version="1.0"
    id="svg6"

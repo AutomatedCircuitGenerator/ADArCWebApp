@@ -1,0 +1,131 @@
+﻿@inherits RazorComponent
+
+@attribute [Component("NEMA 17 Stepper Motor", "Output/Motors/Stepper Motor", "nema17", true, .45, 400, 250, paneHoverText: "NEMA17")]
+@attribute [ComponentDocumentation("steppers_concept.html#styler-id1.1.1.2.9.9.1")]
+@attribute [BreadboardMount('d', col2: 'g', extraRotation: 3, allowOppositeStrip: false, svgWidth: 400, svgHeight: 250)]
+@attribute [ComponentWarning("Stepper motors can draw excessive current, overheating the driver and causing permanent damage. Always use a separate power supply and avoid stalling the motor for long periods.")]
+@attribute [ComponentCode(CodeType.Include, "#include <AccelStepper.h>\n")]
+@attribute [ComponentCode(CodeType.Global,
+    "// Pin configuration for NEMA17 stepper motor\n" +
+    "int dirPin@ = ~\"DIR\";  // Direction pin\n" +
+    "int stepPin@ = ~\"STEP\"; // Step pin\n\n" +
+    "#define motorInterfaceType@ 1  // Step + Direction driver\n" +
+    "AccelStepper stepper@ = AccelStepper(motorInterfaceType@, stepPin@, dirPin@); // Initialize stepper motor\n" +
+    "\n// Variables for stepper state (optional)\n" +
+    "long currentPos@ = 0;\n" +
+    "long targetPos@ = 0;\n" +
+    "float speed@ = 0;\n")]
+@attribute [ComponentCode(CodeType.Setup,
+    "\t// Stepper basic motion parameters\n" +
+    "\tstepper@.setMaxSpeed(1000);      // Maximum speed (steps/sec)\n" +
+    "\tstepper@.setAcceleration(500);   // Maximum acceleration (steps/sec^2)\n\n" +
+    "\t// Optional: reset current position\n" +
+    "\tstepper@.setCurrentPosition(0);\n\n" +
+    "\t// Move to an absolute target position\n" +
+    "\tstepper@.moveTo(400); // Example: move to step 400\n")]
+@attribute [ComponentCode(CodeType.LoopMain,
+    "\t// Non-blocking run toward target position\n" +
+    "\tif(stepper@.distanceToGo() != 0) {\n" +
+    "\t\tstepper@.run(); // Moves motor toward target with acceleration\n" +
+    "\t}\n\n" +
+    "\t// --- Constant speed movement (without acceleration) ---\n" +
+    "\t// stepper@.setSpeed(200); // Set speed in steps/sec\n" +
+    "\t// stepper@.runSpeed();    // Call repeatedly to move at constant speed\n\n" +
+    "\t// --- Relative movement ---\n" +
+    "\t// stepper@.move(100); // Move 100 steps relative to current position\n\n" +
+    "\t// --- Blocking movement to absolute position ---\n" +
+    "\t// stepper@.runToPosition(); // Blocks until target is reached\n" +
+    "\t// stepper@.runToNewPosition(800); // Blocks until new target is reached\n\n" +
+    "\t// --- Query motor state ---\n" +
+    "\t// currentPos@ = stepper@.currentPosition(); // Current position in steps\n" +
+    "\t// targetPos@ = stepper@.targetPosition();   // Target position in steps\n" +
+    "\t// long remaining@ = stepper@.distanceToGo();  // Steps left to target\n" +
+    "\t// speed@ = stepper@.speed();                // Current speed in steps/sec\n\n" +
+    "\t// Print motor info to Serial for debugging\n" +
+    "\t//Serial.print(\"Current: \"); \n" +
+    "\t// Serial.print(currentPos@);\n" +
+    "\t// Serial.print(\" Target: \");\n" +
+    "\t// Serial.print(targetPos@);\n" +
+    "\t// Serial.print(\" Remaining: \");\n" +
+    "\t// Serial.print(remaining@);\n" +
+    "\t// Serial.print(\" Speed: \"); \n" +
+    "\t// Serial.println(speed@);\n\n" +
+    "\t// delay(100); // Small delay to reduce Serial flooding")]
+
+@attribute [ComponentPin("VCC", "Vcc", 202, 82, number: 1)]
+@attribute [ComponentPin("GND", "gnd", 202, 57, number: 4)]
+@attribute [ComponentPin("STEP", "STEP", 47, 82, number: 5)]
+@attribute [ComponentPin("DIR", "DIR", 47, 57, number: 6)]
+
+@attribute [ComponentProperty("stepsperrev", 200.0, typeof(double))]
+
+@code {
+    private static readonly string[] LeftPins = ["DIR", "STEP", "SLP", "RST", "M2", "M1", "M0", "EN"];
+    private static readonly string[] RightPins = ["GND", "VCC", "A2", "A1", "B1", "B2", "GND", "VMOT"];
+
+    [Parameter]
+    [ValueSetting("Steps/Revolution", 200, 0, 99999999)]
+    public double stepsperrev
+    {
+        get;
+        set;
+    }
+}
+
+<svg xmlns="http://www.w3.org/2000/svg" width="400" height="250" viewBox="0 0 400 250">
+    <title>DRV8825 Stepper Motor Driver with NEMA 17 Stepper Motor</title>
+    <!-- Purple DRV8825 carrier PCB -->
+    <rect x="12" y="12" width="175" height="220" rx="7" fill="#522c73" stroke="#2c1642" stroke-width="3"/>
+    @for (var i = 0; i < LeftPins.Length; i++)
+    {
+        <g>
+            <rect x="16" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+            <circle cx="22" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+            <text x="33" y="@(36 + i * 25)" fill="white" font-size="9" font-family="sans-serif">@LeftPins[i]</text>
+            <rect x="171" y="@(26 + i * 25)" width="12" height="12" fill="#d1b264"/>
+            <circle cx="177" cy="@(32 + i * 25)" r="3" fill="#20242a"/>
+            <text x="166" y="@(36 + i * 25)" text-anchor="end" fill="white" font-size="9" font-family="sans-serif">@RightPins[i]</text>
+        </g>
+    }
+
+    <!-- DRV8825 IC + Heatsink & Current-Limit Trimpot -->
+    <rect x="75.5" y="72" width="48" height="58" rx="3" fill="#1e2228"/>
+    <rect x="81" y="78" width="37" height="46" rx="2" fill="#8b929c"/>
+    <line x1="86" y1="78" x2="86" y2="124" stroke="#5b616a" stroke-width="2"/>
+    <line x1="94" y1="78" x2="94" y2="124" stroke="#5b616a" stroke-width="2"/>
+    <line x1="102" y1="78" x2="102" y2="124" stroke="#5b616a" stroke-width="2"/>
+    <line x1="110" y1="78" x2="110" y2="124" stroke="#5b616a" stroke-width="2"/>
+    <circle cx="99.5" cy="176" r="12" fill="#c6c9cd" stroke="#646b71" stroke-width="2.5"/>
+    <path d="M92.5 176H106.5 M99.5 169V183" stroke="#555" stroke-width="2.5"/>
+    <rect x="86.5" y="34" width="26" height="10" fill="#c6ae78"/>
+    <text x="99.5" y="218" text-anchor="middle" fill="#e9d8fd" font-size="9" font-family="sans-serif">DRV8825</text>
+
+    <!-- Motor coil wires (A2, A1, B1, B2) to NEMA 17 -->
+    <path d="M177 82 H219 V65 H250" fill="none" stroke="#26282c" stroke-width="3"/>
+    <path d="M177 107 H226 V85 H250" fill="none" stroke="#c74545" stroke-width="3"/>
+    <path d="M177 132 H233 V105 H250" fill="none" stroke="#3f8156" stroke-width="3"/>
+    <path d="M177 157 H240 V125 H250" fill="none" stroke="#2866b1" stroke-width="3"/>
+
+    <!-- Decoupling capacitor & external motor power supply (GND, VMOT) -->
+    <path d="M177 182 H268" fill="none" stroke="#1e2228" stroke-width="2.5"/>
+    <path d="M177 207 H268" fill="none" stroke="#d62828" stroke-width="2.5"/>
+    <rect x="218" y="176" width="14" height="37" rx="4" fill="#20252a" stroke="#474c51" stroke-width="1.5"/>
+    <rect x="218" y="176" width="14" height="9" rx="2" fill="#9ca3af"/>
+    <rect x="266" y="178" width="52" height="36" rx="4" fill="#2d3136" stroke="#141619" stroke-width="2"/>
+    <circle cx="322" cy="196" r="10" fill="#181a1d" stroke="#525860" stroke-width="2"/>
+    <circle cx="322" cy="196" r="4" fill="#c8cdd4"/>
+    <text x="292" y="199" text-anchor="middle" fill="#e5e7eb" font-size="8" font-family="sans-serif">VMOT 12V</text>
+
+    <!-- NEMA 17 Stepper Motor body -->
+    <rect x="250" y="32" width="128" height="128" rx="12" fill="#34373b" stroke="#1b1d20" stroke-width="3"/>
+    <rect x="260" y="42" width="108" height="108" rx="9" fill="#d4d7dc"/>
+    @foreach (var corner in new[] { (268, 50), (360, 50), (268, 142), (360, 142) })
+    {
+        <circle cx="@corner.Item1" cy="@corner.Item2" r="4" fill="#474c51"/>
+    }
+    <circle cx="314" cy="96" r="35" fill="#626a73"/>
+    <g id="g22" transform="rotate(0 314 96)">
+        <circle cx="314" cy="96" r="13" fill="#e2e4e7" stroke="#555" stroke-width="2"/>
+        <path d="M314 96 V68" stroke="#f2c357" stroke-width="5" stroke-linecap="round"/>
+    </g>
+</svg>

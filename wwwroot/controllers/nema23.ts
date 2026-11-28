@@ -6,11 +6,11 @@ export class NEMA23 extends Controller {
     private stepPin: Digital;
     private dirPin: Digital;
 
-    private currentPos: number;
-    private stepsPerRev: number;
+    private currentPos: number = 0;
+    private stepsPerRev: number = 400;
 
-    private motorShaft: SVGGElement | null;
-    private originalTransform: string;
+    private motorShaft: SVGGElement | null = null;
+    private originalTransform: string = "";
 
     override update(state: Record<string, any>) {
         const steps = Number(state.stepsperrev ?? 400);
@@ -22,14 +22,19 @@ export class NEMA23 extends Controller {
         this.dirPin = this.pins.dir_minus[0].digital;
 
         this.currentPos = 0;
-        this.stepsPerRev = 400;
-        this.motorShaft = this.element.querySelector("#image1") as SVGGElement | null;
+        this.motorShaft = this.element?.querySelector("#image1") as SVGGElement | null;
         this.originalTransform = this.motorShaft?.getAttribute("transform") || "";
         if (!this.motorShaft)
             console.error("Motor shaft not found in SVG. Animation will be disabled. Check your SVG file. ");
 
         // Every falling edge on STEP triggers a step
         this.stepPin.addListener(this.onStep.bind(this));
+    }
+
+    override cleanup() {
+        if (this.motorShaft) {
+            this.motorShaft.setAttribute("transform", this.originalTransform);
+        }
     }
 
     private onStep(state: PinState) {

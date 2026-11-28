@@ -1,4 +1,4 @@
-﻿using GraphSynth.Representation;
+using GraphSynth.Representation;
 using Microsoft.AspNetCore.Components;
 using System.Collections.Immutable;
 using System.Xml.Linq;
@@ -125,7 +125,9 @@ namespace ADArCWebApp
 
         private async Task LoadRuleFile(HttpClient client, string rulePath, List<grammarRule> rules, Pages.Index main)
         {
-            HttpResponseMessage ruleResponse = await client.GetAsync(rulePath);
+            var ruleRequest = new HttpRequestMessage(HttpMethod.Get, rulePath);
+            ruleRequest.Headers.CacheControl = new System.Net.Http.Headers.CacheControlHeaderValue { NoCache = true };
+            HttpResponseMessage ruleResponse = await client.SendAsync(ruleRequest);
             Console.WriteLine(rulePath + " Fetched");
             string ruleText = await ruleResponse.Content.ReadAsStringAsync();
 
